@@ -16,7 +16,10 @@
     "clarinet:console": "clarinet console",
     "validate:docs": "node ./scripts/validate-docs.js",
     "ci": "node ./scripts/ensure-deps.js && node ./scripts/validate-docs.js && npx vitest run",
-    "coverage": "vitest run --coverage"
+    "coverage": "vitest run --coverage",
+    "update-autonomics": "tsx scripts/sdk_update_autonomics.ts",
+    "test:system": "echo \"System tests not configured (stub)\"",
+    "test:performance": "echo \"Performance benchmarks not configured (stub)\""
   },
   "dependencies": {
     "@scure/base": "2.0.0",
@@ -26,11 +29,13 @@
     "@stacks/stacking": "7.2.0",
     "@stacks/transactions": "7.2.0",
     "@hirosystems/clarinet-sdk": "3.5.0",
+    "dotenv": "^16.4.5",
     "bignumber.js": "^9.1.2",
     "node-fetch": "^3.3.2"
   },
   "devDependencies": {
     "@vitest/coverage-v8": "3.2.4",
+    "tsx": "^4.7.1",
     "typescript": "^5.4.5",
     "vitest": "3.2.4"
   },
