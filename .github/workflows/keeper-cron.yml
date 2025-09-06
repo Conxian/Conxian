@@ -99,7 +99,7 @@ jobs:
         with:
           name: health-reports-${{ github.run_number }}
           path: |
-            stacks/health.log
+            health.log
             treasury.log
           retention-days: 7
 
@@ -110,6 +110,10 @@ jobs:
     timeout-minutes: 20
     permissions:
       contents: read
+    env:
+      STACKS_PRIVKEY: ${{ secrets.STACKS_PRIVKEY }}
+      VAULT_CONTRACT_ADDRESS: ${{ secrets.VAULT_CONTRACT_ADDRESS }}
+      VAULT_CONTRACT: ${{ secrets.VAULT_CONTRACT_ADDRESS }}
     needs: [health-check]
     if: needs.health-check.outputs.network-status == 'healthy'
     strategy:
@@ -156,9 +160,7 @@ jobs:
           echo "TIMESTAMP=$(date -u +%Y%m%d_%H%M%S)" >> $GITHUB_ENV
 
       - name: Validate secrets
-        env:
-          STACKS_PRIVKEY: ${{ secrets.STACKS_PRIVKEY }}
-          VAULT_CONTRACT_ADDRESS: ${{ secrets.VAULT_CONTRACT_ADDRESS }}
+        if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork == false }}
         run: |
           MISSING_SECRETS=""
           if [ -z "$STACKS_PRIVKEY" ]; then
@@ -176,10 +178,8 @@ jobs:
           echo "✅ Required secrets validated"
 
       - name: Execute ${{ matrix.operation.name }}
+        if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork == false }}
         timeout-minutes: ${{ matrix.operation.timeout }}
-        env:
-          STACKS_PRIVKEY: ${{ secrets.STACKS_PRIVKEY }}
-          VAULT_CONTRACT: ${{ secrets.VAULT_CONTRACT_ADDRESS }}
         run: |
           echo "🤖 Executing ${{ matrix.operation.name }}..."
           

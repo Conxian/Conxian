@@ -98,13 +98,15 @@ jobs:
           if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
             echo "Dry run: generating deployment registry and performing validation"
             bash scripts/deploy-testnet.sh | head -n 80
-            echo "(Add TESTNET_DEPLOYER_PRIVKEY secret & replace placeholder to enable live deploy)"
+            echo "(Add TESTNET_DEPLOYER_KEY secret & replace placeholder to enable live deploy)"
           else
             echo "Live deployment placeholder - secret integration pending."
             exit 1
           fi
       - name: Post Verification (Read-Only)
-        run: NETWORK=testnet npm run verify-post || echo "Post verification issues (non-blocking)"
+        env:
+          NETWORK: testnet
+        run: npm run verify-post || echo "Post verification issues (non-blocking)"
 
   summary:
     name: Deployment Summary

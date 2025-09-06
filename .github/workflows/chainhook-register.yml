@@ -20,11 +20,12 @@ jobs:
     timeout-minutes: 10
     permissions:
       contents: read
+    env:
+      HIRO_API_KEY: ${{ secrets.HIRO_API_KEY }}
     steps:
       - uses: actions/checkout@v4
       - name: Validate secrets
-        env:
-          HIRO_API_KEY: ${{ secrets.HIRO_API_KEY }}
+        if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork == false }}
         run: |
           if [ -z "$HIRO_API_KEY" ]; then
             echo "⚠️ HIRO_API_KEY secret not configured"
@@ -38,9 +39,9 @@ jobs:
           sed -i "s|https://example.com/autonomics-hook|${{ github.event.inputs.webhook_url }}|" chainhooks/vault_autonomics_chainhook.json
           sed -i "s|{VAULT_CONTRACT}|${{ github.event.inputs.vault_contract }}|" chainhooks/vault_autonomics_chainhook.json
       - name: Register Chainhook
+        if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork == false }}
         timeout-minutes: 5
         env:
-          HIRO_API_KEY: ${{ secrets.HIRO_API_KEY }}
           VAULT_CONTRACT: ${{ github.event.inputs.vault_contract }}
         run: |
           bash scripts/register_chainhook.sh

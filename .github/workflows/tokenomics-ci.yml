@@ -262,6 +262,8 @@ jobs:
     name: Testnet Deployment
     needs: [system-validation, deployment-validation]
     if: github.ref == 'refs/heads/main'
+    env:
+      TESTNET_DEPLOYER_KEY: ${{ secrets.TESTNET_DEPLOYER_KEY }}
     
     steps:
     - name: Checkout code
@@ -272,8 +274,7 @@ jobs:
         echo "Using project-pinned Clarinet via npx"
         
     - name: Validate secrets
-      env:
-        TESTNET_DEPLOYER_KEY: ${{ secrets.TESTNET_DEPLOYER_KEY }}
+      if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork == false }}
       run: |
         if [ -z "$TESTNET_DEPLOYER_KEY" ]; then
           echo "⚠️ TESTNET_DEPLOYER_KEY secret not configured"
@@ -283,20 +284,19 @@ jobs:
         echo "✅ Required secrets validated"
         
     - name: Configure testnet environment
-      env:
-        TESTNET_DEPLOYER_KEY: ${{ secrets.TESTNET_DEPLOYER_KEY }}
+      if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork == false }}
       run: |
         echo "Configuring testnet deployment..."
         # Configure deployment keys and settings
         
     - name: Deploy to testnet
-      env:
-        TESTNET_DEPLOYER_KEY: ${{ secrets.TESTNET_DEPLOYER_KEY }}
+      if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork == false }}
       run: |
         echo "Deploying to Stacks testnet..."
         ./scripts/deploy-tokenomics.sh testnet staging false
         
     - name: Verify testnet deployment
+      if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork == false }}
       run: |
         echo "Verifying testnet deployment..."
         # Add deployment verification steps
