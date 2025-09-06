@@ -1,8 +1,5 @@
 name: Protected Testnet Deployment
 
-env:
-  NODE_VERSION: '20'
-
 on:
   workflow_dispatch:
     inputs:
@@ -16,6 +13,14 @@ on:
         type: boolean
         default: true
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: '20'
+  CLARINET_VERSION: '3.5.0'
+
 permissions:
   contents: read
   deployments: write
@@ -24,6 +29,9 @@ jobs:
   guardrails:
     name: Pre-Deployment Guardrails
     runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
     steps:
       - name: Validate Confirmation
         run: |
@@ -41,7 +49,10 @@ jobs:
   prepare:
     name: Prepare Environment
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     needs: guardrails
+    permissions:
+      contents: read
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -51,9 +62,12 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
           cache-dependency-path: package-lock.json
-      - name: Install Deps
+      - name: Install Dependencies
         run: npm ci --no-audit --no-fund
+      - name: Verify Clarinet Installation
+        run: npx clarinet --version
       - name: Compile Contracts
+        timeout-minutes: 5
         run: npx clarinet check
       - name: Artifact Summary
         run: |
@@ -62,7 +76,11 @@ jobs:
   deploy:
     name: Deploy to Testnet
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     needs: prepare
+    permissions:
+      contents: read
+      deployments: write
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -70,27 +88,34 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
           cache-dependency-path: package-lock.json
-      - name: Install Deps
+      - name: Install Dependencies
         run: npm ci --no-audit --no-fund
+      - name: Verify Clarinet Installation
+        run: npx clarinet --version
       - name: Deployment (Dry / Placeholder)
         run: |
           set -e
           if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
             echo "Dry run: generating deployment registry and performing validation"
             bash scripts/deploy-testnet.sh | head -n 80
-            echo "(Add TESTNET_DEPLOYER_PRIVKEY secret & replace placeholder to enable live deploy)"
+            echo "(Add TESTNET_DEPLOYER_KEY secret & replace placeholder to enable live deploy)"
           else
             echo "Live deployment placeholder - secret integration pending."
             exit 1
           fi
       - name: Post Verification (Read-Only)
-        run: NETWORK=testnet npm run verify-post || echo "Post verification issues (non-blocking)"
+        env:
+          NETWORK: testnet
+        run: npm run verify-post || echo "Post verification issues (non-blocking)"
 
   summary:
     name: Deployment Summary
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     needs: deploy
     if: always()
+    permissions:
+      contents: read
     steps:
       - name: Summarize
         run: |

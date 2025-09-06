@@ -10,18 +10,38 @@ on:
         description: "Webhook URL to receive events"
         required: true
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   register:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    env:
+      HIRO_API_KEY: ${{ secrets.HIRO_API_KEY }}
     steps:
       - uses: actions/checkout@v4
+      - name: Validate secrets
+        if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork == false }}
+        run: |
+          if [ -z "$HIRO_API_KEY" ]; then
+            echo "⚠️ HIRO_API_KEY secret not configured"
+            echo "Please add this secret in repository Settings → Secrets and variables → Actions"
+            exit 1
+          fi
+          echo "✅ Required secrets validated"
+          
       - name: Patch chainhook template
         run: |
           sed -i "s|https://example.com/autonomics-hook|${{ github.event.inputs.webhook_url }}|" chainhooks/vault_autonomics_chainhook.json
           sed -i "s|{VAULT_CONTRACT}|${{ github.event.inputs.vault_contract }}|" chainhooks/vault_autonomics_chainhook.json
       - name: Register Chainhook
+        if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork == false }}
+        timeout-minutes: 5
         env:
-          HIRO_API_KEY: ${{ secrets.HIRO_API_KEY }}
           VAULT_CONTRACT: ${{ github.event.inputs.vault_contract }}
         run: |
           bash scripts/register_chainhook.sh

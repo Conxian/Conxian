@@ -5,6 +5,8 @@
 (impl-trait .sip-010-trait.sip-010-trait)
 (impl-trait .ft-mintable-trait.ft-mintable-trait)
 
+ (use-trait monitor-ref .monitor-trait.monitor-trait)
+
 ;; --- Errors ---
 (define-constant ERR_UNAUTHORIZED u100)
 (define-constant ERR_NOT_ENOUGH_BALANCE u101)

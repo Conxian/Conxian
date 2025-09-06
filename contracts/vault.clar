@@ -184,10 +184,10 @@
     ;;                                  (as-contract tx-sender) user none)))
     
     ;; Notify monitoring system
-    (notify-protocol-monitor "withdraw" (tuple (asset asset-principal) (amount net-amount)))
+    (notify-protocol-monitor "withdraw" (tuple (asset asset) (amount net-amount)))
     
     ;; Emit event
-    (print (tuple (event "vault-withdraw") (user user) (asset asset-principal) 
+    (print (tuple (event "vault-withdraw") (user user) (asset asset) 
                   (amount net-amount) (shares shares) (fee fee)))
     
     (ok (tuple (amount net-amount) (fee fee)))))

@@ -3,6 +3,7 @@
 ;; Routes protocol fees: 80% to xCXD stakers, 20% to treasury/reserves
 
 (use-trait ft-trait .sip-010-trait.sip-010-trait)
+ (use-trait staking-ref .staking-trait.staking-trait)
 
 ;; --- Constants ---
 (define-constant CONTRACT_OWNER tx-sender)

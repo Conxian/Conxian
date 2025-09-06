@@ -55,7 +55,9 @@
   (ok (var-get risk-level)))
 
 (define-read-only (get-underlying-asset)
-  (ok (var-get underlying-asset)))
+  (match (var-get underlying-asset)
+    some-asset (ok some-asset)
+    ERR_INVALID_ASSET))
 
 (define-read-only (get-performance-fee)
   (ok (var-get performance-fee-bps)))
@@ -87,31 +89,18 @@
 ;; Deploy funds to yield-generating positions
 (define-public (deploy-funds (amount uint))
   (begin
-    (asserts! (not (var-get paused)) (err ERR_PAUSED))
-    (asserts! (not (var-get emergency-mode)) (err ERR_EMERGENCY_ONLY))
-    (asserts! (> amount u0) (err ERR_INSUFFICIENT_FUNDS))
-    
-    ;; Simulate deployment to various DeFi positions
-    ;; In production, would interact with actual protocols
-    (let ((position-id (+ (var-get total-deployed) u1)))
-      (begin
-        ;; Record position - simplified without string conversion
-        (map-set strategy-positions tx-sender amount)
-        
-        ;; Update total deployed
-        (var-set total-deployed (+ (var-get total-deployed) amount))
-        
-        ;; Update performance tracking - simplified for enhanced deployment
-                ;; Update performance tracking - simplified for enhanced deployment
-        (update-performance-history)
-        
-        ;; Notify dimensional system - simplified for enhanced deployment  
-        (try! (update-dimensional-weights))
-        
-        ;; Emit event
-        (print { event: "funds-deployed", user: tx-sender, amount: amount, position-id: position-id })
-        
-        (ok { position-id: position-id, amount: amount })))))
+    (asserts! (not (var-get paused)) ERR_PAUSED)
+    (asserts! (not (var-get emergency-mode)) ERR_EMERGENCY_ONLY)
+    (asserts! (> amount u0) ERR_INSUFFICIENT_FUNDS)
+
+    ;; Record position amount and update totals (simplified)
+    (map-set strategy-positions tx-sender amount)
+    (var-set total-deployed (+ (var-get total-deployed) amount))
+
+    ;; Update performance tracking; ignore dimensional weights for simplicity
+    (update-performance-history)
+
+    (ok amount)))
 
 ;; Withdraw funds from strategy positions
 (define-public (withdraw-funds (amount uint))
@@ -134,45 +123,42 @@
     (ok amount)))
 
 (define-public (harvest-rewards)
-  ;; Harvest and compound strategy rewards
-  (let ((current-value (unwrap! (get-current-value) ERR_STRATEGY_FAILED))
-        (deployed (var-get total-deployed))
-        (profit (if (> current-value deployed) (- current-value deployed) u0))
-        (performance-fee (calculate-performance-fee profit))
-        (net-profit (- profit performance-fee)))
-    
+  (begin
     (asserts! (not (var-get paused)) ERR_PAUSED)
-    
-    ;; Update harvested rewards tracking
-    (map-set harvested-rewards (var-get underlying-asset)
-             (+ (default-to u0 (map-get? harvested-rewards (var-get underlying-asset)))
-                net-profit))
-    
-    ;; Distribute performance fee to protocol
-    (begin
-      (if (> performance-fee u0)
-          ;; Skip revenue distributor for enhanced deployment
-          true
-          true)
-      
+    (let ((current-value (unwrap-panic (get-current-value)))
+          (deployed (var-get total-deployed))
+          (profit (if (> current-value deployed) (- current-value deployed) u0))
+          (performance-fee (calculate-performance-fee profit))
+          (net-profit (- profit performance-fee)))
+
+      ;; Update harvested rewards tracking
+      (match (var-get underlying-asset)
+        asset (map-set harvested-rewards asset
+                       (+ (default-to u0 (map-get? harvested-rewards asset))
+                          net-profit))
+        true)
+
+      ;; Distribute performance fee to protocol (skipped for enhanced deployment)
+      (if (> performance-fee u0) true true)
+
       ;; Auto-compound remaining profit
       (if (> net-profit u0)
           (var-set total-deployed (+ deployed net-profit))
-          true))
-    
-    ;; Update dimensional weights based on performance
-    (update-dimensional-weights)
-    
-    ;; Update performance tracking
-    (update-performance-history)
-    
-    ;; Emit event
-    (print (tuple (event "rewards-harvested") 
-                  (profit profit) 
-                  (performance-fee performance-fee)
-                  (compounded net-profit)))
-    
-    (ok profit)))
+          true)
+
+      ;; Handle response from update-dimensional-weights and ignore result
+      (match (update-dimensional-weights) okd true errd true)
+
+      ;; Update performance tracking
+      (update-performance-history)
+
+      ;; Emit event
+      (print (tuple (event "rewards-harvested")
+                    (profit profit)
+                    (performance-fee performance-fee)
+                    (compounded net-profit)))
+
+      (ok profit))))
 
 (define-public (emergency-exit)
   (let ((total (var-get total-deployed)))
@@ -197,40 +183,43 @@
 
 ;; Enhanced tokenomics integration
 (define-public (distribute-rewards)
-  (let ((total-harvested (default-to u0 (map-get? harvested-rewards (var-get underlying-asset)))))
-    
-    (asserts! (> total-harvested u0) ERR_INSUFFICIENT_FUNDS)
-    
-    ;; Notify token system coordinator - simplified for enhanced deployment
-    ;; (try! (contract-call? .token-system-coordinator 
-    ;;                      distribute-strategy-rewards 
-    ;;                      (as-contract tx-sender)
-    ;;                      (var-get underlying-asset)
-    ;;                      total-harvested))
-    
-    ;; Reset harvested rewards
-    (map-set harvested-rewards (var-get underlying-asset) u0)
-    
-    (ok total-harvested)))
+  (match (var-get underlying-asset)
+    asset
+      (let ((total-harvested (default-to u0 (map-get? harvested-rewards asset))))
+        (asserts! (> total-harvested u0) ERR_INSUFFICIENT_FUNDS)
+        
+        ;; Notify token system coordinator - simplified for enhanced deployment
+        ;; (try! (contract-call? .token-system-coordinator 
+        ;;                      distribute-strategy-rewards 
+        ;;                      (as-contract tx-sender)
+        ;;                      asset
+        ;;                      total-harvested))
+        
+        ;; Reset harvested rewards
+        (map-set harvested-rewards asset u0)
+        
+        (ok total-harvested))
+    ERR_INVALID_ASSET))
 
 ;; Update dimensional weights based on strategy performance
 (define-public (update-dimensional-weights)
   (let ((current-value-result (get-current-value)))
-    (match current-value-result
-      success (let ((current-value success)
-                    (deployed (var-get total-deployed))
-                    (performance-ratio (if (> deployed u0) (/ (* current-value PRECISION) deployed) PRECISION))
-                    (time-since-update (- block-height (var-get last-dimensional-update))))
-                
-                ;; Update weights based on performance - simplified for enhanced deployment
-                (map-set dimensional-weights (as-contract tx-sender) performance-ratio)
-                (map-set dimensional-weights tx-sender
-                         (/ performance-ratio (var-get risk-level)))
-                (map-set dimensional-weights (var-get strategy-admin) time-since-update)
-                
-                (var-set last-dimensional-update block-height)
-                (ok true))
-      error (err error))))
+    (if (is-ok current-value-result)
+        (let ((current-value (unwrap-panic current-value-result))
+              (deployed (var-get total-deployed))
+              (performance-ratio (if (> deployed u0) (/ (* current-value PRECISION) deployed) PRECISION))
+              (time-since-update (- block-height (var-get last-dimensional-update))))
+          
+          ;; Update weights based on performance - simplified for enhanced deployment
+          (map-set dimensional-weights (as-contract tx-sender) performance-ratio)
+          (map-set dimensional-weights tx-sender
+                   (/ performance-ratio (var-get risk-level)))
+          (map-set dimensional-weights (var-get strategy-admin) time-since-update)
+          
+          (var-set last-dimensional-update block-height)
+          (ok true))
+        (err u999)))
+)
 
 ;; Administrative functions
 (define-public (set-performance-fee (new-fee-bps uint))
@@ -264,7 +253,7 @@
 (define-public (set-underlying-asset (asset principal))
   (begin
     (asserts! (is-admin tx-sender) ERR_UNAUTHORIZED)
-    (var-set underlying-asset asset)
+    (var-set underlying-asset (some asset))
     (ok true)))
 
 (define-public (transfer-admin (new-admin principal))
@@ -275,4 +264,4 @@
     (ok true)))
 
 ;; Initialize strategy
-(map-set dimensional-weights "initial-weight" PRECISION)
+;; Note: Removed invalid top-level map-set initializer. The map will be populated during runtime calls.

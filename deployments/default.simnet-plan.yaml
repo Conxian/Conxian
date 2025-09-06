@@ -54,6 +54,11 @@ plan:
             path: contracts/traits/ft-mintable-trait.clar
             clarity-version: 2
         - emulated-contract-publish:
+            contract-name: monitor-trait
+            emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            path: contracts/traits/monitor-trait.clar
+            clarity-version: 2
+        - emulated-contract-publish:
             contract-name: cxd-token
             emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
             path: contracts/cxd-token.clar
@@ -82,11 +87,6 @@ plan:
             contract-name: cxtr-token
             emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
             path: contracts/cxtr-token.clar
-            clarity-version: 2
-        - emulated-contract-publish:
-            contract-name: monitor-trait
-            emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            path: contracts/traits/monitor-trait.clar
             clarity-version: 2
         - emulated-contract-publish:
             contract-name: cxvg-token
@@ -139,6 +139,11 @@ plan:
             path: contracts/mocks/mock-token.clar
             clarity-version: 2
         - emulated-contract-publish:
+            contract-name: staking-trait
+            emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            path: contracts/traits/staking-trait.clar
+            clarity-version: 2
+        - emulated-contract-publish:
             contract-name: protocol-invariant-monitor
             emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
             path: contracts/protocol-invariant-monitor.clar
@@ -158,6 +163,9 @@ plan:
             emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
             path: contracts/token-system-coordinator.clar
             clarity-version: 2
+      epoch: "2.4"
+    - id: 1
+      transactions:
         - emulated-contract-publish:
             contract-name: tokenized-bond
             emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM

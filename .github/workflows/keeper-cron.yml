@@ -22,7 +22,13 @@ on:
         - mainnet
         - testnet
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
 env:
+  NODE_VERSION: '20'
+  CLARINET_VERSION: '3.5.0'
   NETWORK: ${{ github.event.inputs.target_network != '' && github.event.inputs.target_network || 'mainnet' }}
   FORCE_EXECUTION: ${{ github.event.inputs.force_execution != '' && github.event.inputs.force_execution || 'false' }}
 
@@ -31,6 +37,7 @@ jobs:
   health-check:
     name: System Health Check
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: read
     outputs:
@@ -92,7 +99,7 @@ jobs:
         with:
           name: health-reports-${{ github.run_number }}
           path: |
-            stacks/health.log
+            health.log
             treasury.log
           retention-days: 7
 
@@ -100,8 +107,13 @@ jobs:
   autonomics:
     name: Autonomics & Rebalancing
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     permissions:
       contents: read
+    env:
+      STACKS_PRIVKEY: ${{ secrets.STACKS_PRIVKEY }}
+      VAULT_CONTRACT_ADDRESS: ${{ secrets.VAULT_CONTRACT_ADDRESS }}
+      VAULT_CONTRACT: ${{ secrets.VAULT_CONTRACT_ADDRESS }}
     needs: [health-check]
     if: needs.health-check.outputs.network-status == 'healthy'
     strategy:
@@ -147,11 +159,27 @@ jobs:
           echo "OPERATION_MODE=automated" >> $GITHUB_ENV
           echo "TIMESTAMP=$(date -u +%Y%m%d_%H%M%S)" >> $GITHUB_ENV
 
+      - name: Validate secrets
+        if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork == false }}
+        run: |
+          MISSING_SECRETS=""
+          if [ -z "$STACKS_PRIVKEY" ]; then
+            MISSING_SECRETS="$MISSING_SECRETS STACKS_PRIVKEY"
+          fi
+          if [ -z "$VAULT_CONTRACT_ADDRESS" ]; then
+            MISSING_SECRETS="$MISSING_SECRETS VAULT_CONTRACT_ADDRESS"
+          fi
+          
+          if [ -n "$MISSING_SECRETS" ]; then
+            echo "⚠️ Missing required secrets:$MISSING_SECRETS"
+            echo "Please add these secrets in repository Settings → Secrets and variables → Actions"
+            exit 1
+          fi
+          echo "✅ Required secrets validated"
+
       - name: Execute ${{ matrix.operation.name }}
+        if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork == false }}
         timeout-minutes: ${{ matrix.operation.timeout }}
-        env:
-          STACKS_PRIVKEY: ${{ secrets.STACKS_PRIVKEY || 'unset' }}
-          VAULT_CONTRACT: ${{ secrets.VAULT_CONTRACT_ADDRESS || 'unset' }}
         run: |
           echo "🤖 Executing ${{ matrix.operation.name }}..."
           
@@ -180,6 +208,7 @@ jobs:
   watchdog:
     name: Keeper Watchdog
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: read
     needs: [health-check, autonomics]
@@ -252,6 +281,7 @@ jobs:
   emergency-response:
     name: Emergency Response
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     permissions:
       contents: read
     needs: [health-check, autonomics, watchdog]
@@ -288,6 +318,7 @@ jobs:
   summary:
     name: Keeper Summary
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     permissions:
       contents: read
     needs: [health-check, autonomics, watchdog]

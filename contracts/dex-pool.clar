@@ -1,6 +1,4 @@
-;; Conxian DEX Pool - Constant product AMM pool with enhanced tokenomics (define-read-only (get-pool-performance)
-  (let ((today (/ block-height u144))) ;; Approximate daily blocks
-    (ok { volume-24h: u0, fees-24h: u0 })))  ;; Simplified for enhanced deploymentgration
+;; Conxian DEX Pool - Constant product AMM pool with enhanced tokenomics integration
 ;; Implements pool-trait with full system integration
 
 (impl-trait .pool-trait.pool-trait)
@@ -20,6 +18,7 @@
 (define-constant ERR_DEADLINE_PASSED (err u3004))
 (define-constant ERR_INSUFFICIENT_SHARES (err u3005))
 (define-constant ERR_ZERO_LIQUIDITY (err u3006))
+ (define-constant ERR_NOT_INITIALIZED (err u3007))
 
 (define-constant PRECISION u100000000) ;; 8 decimals
 (define-constant MIN_LIQUIDITY u1000)
@@ -64,19 +63,22 @@
 (define-read-only (get-total-supply)
   (ok (var-get total-supply)))
 
-(define-read-only (get-token-a)
-  (ok (var-get token-a)))
+ (define-read-only (get-token-a)
+  (match (var-get token-a)
+    token (ok token)
+    ERR_NOT_INITIALIZED))
 
-(define-read-only (get-token-b)
-  (ok (var-get token-b)))
+ (define-read-only (get-token-b)
+  (match (var-get token-b)
+    token (ok token)
+    ERR_NOT_INITIALIZED))
 
 (define-read-only (get-lp-balance (user principal))
   (default-to u0 (map-get? lp-balances user)))
 
 (define-read-only (get-pool-performance)
   (let ((today (/ block-height u144))) ;; Approximate daily blocks
-    (ok (default-to (tuple (volume u0) (fees u0) (trades u0))
-                    (map-get? daily-stats "current")))))  ;; Simplified key for enhanced deployment
+    (ok (tuple (volume-24h u0) (fees-24h u0)))))  ;; Simplified for enhanced deployment
 
 ;; Private functions
 ;; Simplified square root using Newton's method
@@ -299,19 +301,7 @@
     (var-set protocol-fee-bps protocol-fee)
     (ok true)))
 
-;; Helper function for ASCII conversion (simplified)
-(define-private (int-to-ascii (value uint))
-  (if (<= value u9)
-      (if (is-eq value u0) "0"
-      (if (is-eq value u1) "1"
-      (if (is-eq value u2) "2"
-      (if (is-eq value u3) "3"
-      (if (is-eq value u4) "4"
-      (if (is-eq value u5) "5"
-      (if (is-eq value u6) "6"
-      (if (is-eq value u7) "7"
-      (if (is-eq value u8) "8" "9")))))))))
-      "10+"))
+;; (int-to-ascii) helper removed; not used and caused parsing issues
 
 ;; Initialize cumulative price tracking
 (map-set last-update-time "price-a" block-height)

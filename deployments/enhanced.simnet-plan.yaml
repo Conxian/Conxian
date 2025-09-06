@@ -38,6 +38,11 @@ plan:
             path: contracts/traits/sip-010-trait.clar
             clarity-version: 2
         - emulated-contract-publish:
+            contract-name: staking-trait
+            emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            path: contracts/traits/staking-trait.clar
+            clarity-version: 2
+        - emulated-contract-publish:
             contract-name: ft-mintable-trait
             emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
             path: contracts/traits/ft-mintable-trait.clar

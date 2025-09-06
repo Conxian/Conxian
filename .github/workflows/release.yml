@@ -23,14 +23,22 @@ on:
         default: false
         type: boolean
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
 env:
   NODE_VERSION: '20'
+  CLARINET_VERSION: '3.5.0'
   PYTHON_VERSION: '3.11'
 
 jobs:
   security-gate:
     name: Security Gate
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
     outputs:
       security-status: ${{ steps.security.outputs.status }}
     steps:
@@ -52,8 +60,11 @@ jobs:
   pre-release-testing:
     name: Pre-Release Testing
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     needs: [security-gate]
     if: needs.security-gate.outputs.security-status == 'passed'
+    permissions:
+      contents: read
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -81,7 +92,10 @@ jobs:
   version-management:
     name: Version Management
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     needs: [pre-release-testing]
+    permissions:
+      contents: write
     outputs:
       new-version: ${{ steps.version.outputs.new-version }}
       changelog: ${{ steps.changelog.outputs.content }}
@@ -130,7 +144,10 @@ jobs:
   build-artifacts:
     name: Build Release Artifacts
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     needs: [version-management]
+    permissions:
+      contents: read
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -168,6 +185,7 @@ jobs:
   github-release:
     name: GitHub Release
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     needs: [security-gate, pre-release-testing, version-management, build-artifacts]
     permissions:
       contents: write
@@ -216,8 +234,11 @@ jobs:
   summary:
     name: Pipeline Summary
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     needs: [security-gate, pre-release-testing, version-management, build-artifacts, github-release]
     if: always()
+    permissions:
+      contents: read
     steps:
       - name: Summarize
         run: |
