@@ -1,14 +1,14 @@
 # Conxian
 
-[![Tests](https://img.shields.io/badge/Tests-0%2F131%20Passing-red)](https://github.com/Anya-org/Conxian)
-[![Contracts](https://img.shields.io/badge/Contracts-75%20Compiled-blue)](https://github.com/Anya-org/Conxian)
+[![Tests](https://img.shields.io/badge/Tests-50%20Passing-yellow)](https://github.com/Anya-org/Conxian)
+[![Contracts](https://img.shields.io/badge/Contracts-44%20Compiled-blue)](https://github.com/Anya-org/Conxian)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 A production-ready DeFi platform on Stacks with enhanced tokenomics, automated DAO governance, DEX subsystem groundwork, circuit breaker & enterprise monitoring, and Bitcoin-aligned principles.
 
 ## Status
 
-✅ **Production Ready** – 75 contracts compile successfully with 130/131 tests passing (unit, integration, security, SDK suites; 20 TypeScript test files and 1 Clarity test file).
+⚠️ **Partial System Health** – 44 contracts compile successfully with 50 TypeScript tests passing. Clarity tests are currently unable to run due to a test environment issue.
 
 [View Complete Status](./documentation/STATUS.md)
 
@@ -56,8 +56,9 @@ This will:
 3.  Run all TypeScript tests (`npx vitest run`).
 
 Expected output:
-- ✅ 75 contracts checked
-- ✅ 130 tests passed, 1 skipped
+- ✅ 44 contracts checked
+- ✅ 50 tests passed (TypeScript)
+- ⚠️ Clarity tests currently failing to run
 
 #### Deploy
 
@@ -73,7 +74,7 @@ Expected output:
 
 📚 **[Complete Architecture Documentation](./documentation/)**
 
-## Documentation (Updated Aug 26, 2025)
+## Documentation (Updated Sep 06, 2025)
 
 ### For Users
 | Guide | Description |

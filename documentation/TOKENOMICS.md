@@ -22,16 +22,17 @@ The Conxian tokenomics system has been **successfully implemented** with enhance
 
 ## **Status: Implemented vs Planned (Current Repo)**
 
-- **Standards**: SIP-010 (FT), SIP-009 (NFT) — used across tokens (Planned where not present)
+- **Standards**: SIP-010 (FT), SIP-009 (NFT) — used across tokens.
 - **Tokens**:
-  - CXVG (Governance): Planned — not in `Clarinet.toml` yet
-  - CXD (Revenue/Main): Planned — not in `Clarinet.toml` yet
-  - CXLP (Liquidity Mining): Planned — not in `Clarinet.toml` yet
-  - CXTR (Creator/Contributor): Planned — not in `Clarinet.toml` yet
-  - CXS (Soulbound Reputation, SIP-009): Planned — not in `Clarinet.toml` yet
+  - `cxd-token.clar`: Implemented
+  - `cxlp-token.clar`: Implemented
+  - `cxs-token.clar`: Implemented
+  - `cxtr-token.clar`: Implemented
+  - `cxvg-token.clar`: Implemented
 - **Modules**:
-  - `revenue-router.clar`, `treasury.clar`, `governance-metrics.clar`, `automated-bounty-system.clar`: Planned
-- **Reference**: See `Clarinet.toml` — currently registers dimensional modules only.
+  - `revenue-distributor.clar`: Implemented
+  - `token-emission-controller.clar`: Implemented
+  - `token-system-coordinator.clar`: Implemented
 
 ## **📊 ACTUAL SMART CONTRACT IMPLEMENTATION**
 
@@ -274,10 +275,11 @@ Long-term Viability:
 4. **Liquidity Mining**: Epoch-based rewards with loyalty bonuses
 5. **DAO Integration**: Full governance control over parameters
 
-### **📈 CURRENT PRODUCTION STATE (Aug 17, 2025)**
+### **📈 CURRENT PRODUCTION STATE (Sep 06, 2025)**
 
-- **Contract Status**: 30 contracts compiling (core + extensions) ✅
-- **Test Coverage**: 65/65 tests passing ✅  
+- **Contract Status**: 44 contracts compiling ✅
+- **Test Coverage**: 50/50 TypeScript tests passing ✅
+- **Clarity Tests**: Blocked due to test environment issues ⚠️
 - **Migration System**: Automated epoch progression ready ✅
 - **Revenue Claims**: On-demand claiming mechanism active ✅
 - **Emergency Controls**: Pause and migration safeguards deployed ✅

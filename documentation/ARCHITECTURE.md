@@ -14,16 +14,22 @@ For detailed product-level requirements, see `documentation/prd/` (e.g., `VAULT.
 ## Core Contracts (Implemented)
 
 - `vault.clar` – Share-based accounting, caps, dynamic fees, precision math integration
-- `treasury.clar` – Buybacks, reserve management, DAO-controlled disbursements
-- `dao-governance.clar` / `dao.clar` – Proposals, time‑weighted voting (AIP-2), execution
-- `timelock.clar` – Queued admin actions & enforced delays
-- `analytics.clar` – Event indexing hook surface
-- `registry.clar` – Contract discovery & coordination
-- `creator-token.clar`, `cxvg-token.clar`, `cxlp-token.clar`, `CXVG.clar` – Token layer & migration logic
-- `bounty-system*.clar` – Manual + automated bounty flows
-- `dao-automation.clar` – Parameter tuning (bounds-enforced)
-- `circuit-breaker.clar` – Volatility / volume / liquidity triggers with numeric event codes
-- `enterprise-monitoring.clar` – Structured telemetry tuples for indexers
+- `cxd-staking.clar` – Staking contract for CXD tokens.
+- `cxd-token.clar` – The main token contract for CXD.
+- `cxlp-migration-queue.clar` – Manages the migration of CXLP tokens.
+- `cxlp-token.clar` – The liquidity pool token.
+- `cxs-token.clar` – A secondary token in the system.
+- `cxtr-token.clar` – A tertiary token in the system.
+- `cxvg-token.clar` – The governance token.
+- `cxvg-utility.clar` – Utility contract for the governance token.
+- `dex-factory.clar` – Factory for creating DEX pools.
+- `dex-pool.clar` – A standard DEX pool.
+- `dex-router.clar` – Router for the DEX.
+- `automated-circuit-breaker.clar` – Automated circuit breaker for the system.
+- `protocol-invariant-monitor.clar` – Monitors the protocol for invariants.
+- `revenue-distributor.clar` – Distributes revenue to stakeholders.
+- `token-emission-controller.clar` – Controls the emission of new tokens.
+- `token-system-coordinator.clar` – Coordinates the token system.
   
 Traits & Interfaces: `vault-trait`, `vault-admin-trait`, `strategy-trait`, `pool-trait`, `sip-010-trait`.
 
@@ -52,27 +58,24 @@ Traits & Interfaces: `vault-trait`, `vault-admin-trait`, `strategy-trait`, `pool
 - Prefer on-chain TWAPs or signed-oracle updates with minimal cadence
 - Price-dependent logic behind caps/limits rather than per-tx dynamic heavy math
 
-## Roadmap (Delta vs Original Plan)
+## Roadmap
 
-Completed (v1.1):
+Completed:
 
 1. SIP-010 token integration (governance & auxiliary tokens)
 2. Comprehensive test suites (unit, integration, production validation, circuit breaker)
-3. Governance + time-weighted voting + timelock + automation
-4. Treasury reserve & buyback logic
-5. Circuit breaker & enterprise monitoring layer
+3. DEX Subsystem (AMM core, router, variants, math library)
+4. Circuit breaker & enterprise monitoring layer
 
-In Progress / Experimental:
+In Progress:
 
-1. DEX Subsystem (AMM core, router, variants, math library)
+1. Enhanced Tokenomics Refactor (addressing circular dependencies)
 2. Multi-hop routing & advanced pool types (stable, weighted)
 
 Upcoming:
 
 1. Concentrated liquidity & oracle standardization
-2. Strategy adapter + oracle trait finalization
-3. sBTC integration & BTC-native strategies
-4. Vault v2 trait-conformant wrapper or implementation
+2. sBTC integration & BTC-native strategies
 
 ## DEX Subsystem (Foundational State)
 
@@ -91,4 +94,4 @@ Next Steps:
 
 Deferred: Concentrated liquidity, compliance hooks, external oracle aggregator, batch auction / MEV protections.
 
-Updated: Aug 17, 2025
+Updated: Sep 06, 2025

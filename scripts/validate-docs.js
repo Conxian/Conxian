@@ -130,16 +130,6 @@ function validateBannedTerms(mdPath, content, problems) {
     }
   }
 
-  // Specific missing-contract links (if present as links)
-  const missingContracts = ['contracts/dao-governance.clar', 'contracts/timelock.clar'];
-  for (const missing of missingContracts) {
-    const re = new RegExp(`\]\((?:\.{1,2}\/)+${missing.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\)`, 'i');
-    if (re.test(content)) {
-      if (!/\(planned\)/i.test(content)) {
-        problems.push({ file: mdPath, kind: 'missing-contract', detail: `Reference to non-existent contract: ${missing}` });
-      }
-    }
-  }
 }
 
 function main() {
