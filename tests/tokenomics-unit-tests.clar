@@ -309,7 +309,7 @@
     ;; 5. Test authorization (call from non-owner)
     (let ((unauth-result (as-contract (contract-call? .revenue-distributor set-revenue-splits u8000 u1500 u500))))
       (asserts! (is-err unauth-result) (err u214))
-      (asserts! (is-eq (err-get unauth-result) (some u800)) (err u215)))
+      (asserts! (is-eq (err-get unauth-result) u800) (err u215)))
 
     ;; Reset to default for other tests
     (try! (contract-call? .revenue-distributor set-revenue-splits u8000 u1500 u500))
