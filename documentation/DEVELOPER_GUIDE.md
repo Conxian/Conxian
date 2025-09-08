@@ -7,7 +7,7 @@ Conxian smart contracts.
 
 ### Prerequisites
 
-- Clarinet SDK (pinned via npm to v3.5.0 in `stacks/package.json`)
+- Clarinet SDK v3.5.0 (via root `package.json`) and Clarinet CLI v3.5.0 on PATH
 - Node.js (v18+)
 - Git for version control
 
@@ -16,30 +16,28 @@ Conxian smart contracts.
 ```bash
 # Clone repository
 git clone https://github.com/Anya-org/Conxian.git
-cd Conxian/stacks
+cd Conxian
 
 # Install dependencies
-npm install
+npm ci
 
 # Verify setup
-npx clarinet check   # ✅ 30 contracts
-npm test             # ✅ 65/65 tests
+clarinet check   # ✅ 42 contracts
+npx vitest run --config ./vitest.config.enhanced.ts   # ✅ 50 tests
 ```
 
 ## Project Structure
 
 ```text
 Conxian/
-├── stacks/                     # Smart contract development
-│   ├── contracts/              # Smart contract source files
-│   ├── sdk-tests/              # TypeScript test files
-│   ├── governance/             # DAO governance proposals
-│   ├── Clarinet.toml           # Project configuration
-│   ├── package.json            # Node.js dependencies
-│   └── vitest.config.ts        # Test configuration
+├── contracts/                  # Smart contract source files
+├── stacks/sdk-tests/           # TypeScript test files
 ├── documentation/              # Project documentation
-├── scripts/                    # Deployment and utility scripts
-├── chainhooks/                 # Blockchain event monitoring
+├── settings/                   # Network configs (Testnet.toml)
+├── .github/workflows/          # CI/CD workflows
+├── Clarinet.toml               # Project configuration (root)
+├── package.json                # Node.js scripts and dependencies
+├── vitest.config.enhanced.ts   # Test configuration
 └── bin/                        # Binary tools
 ```
 
