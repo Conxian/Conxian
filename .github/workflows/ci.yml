@@ -24,18 +24,8 @@ jobs:
           cache-dependency-path: package-lock.json
       - name: Install deps
         run: npm ci --no-audit --no-fund
-      - name: Verify Clarinet Installation
-        run: npx clarinet --version
-      - name: Enforce Clarinet SDK version
-        run: |
-          set -e
-          VER=$(npx --yes clarinet --version | awk '{print $2}')
-          if [ "$VER" != "${{ env.CLARINET_VERSION }}" ]; then
-            echo "Expected Clarinet ${{ env.CLARINET_VERSION }} but got $VER"
-            exit 1
-          fi
       - name: Contract Compilation
-        run: npx clarinet check
+        run: npm run clarinet:check
       - name: Docs and Naming Guard
         run: npm run validate:docs
       - name: Run Tests
@@ -54,8 +44,8 @@ jobs:
           cache-dependency-path: package-lock.json
       - name: Install deps
         run: npm ci --no-audit --no-fund
-      - name: Verify Clarinet Installation
-        run: npx clarinet --version
+      - name: Verify Clarinet Binary
+        run: npm run clarinet:check
       - name: Package
         run: tar -czf conxian-deployment.tar.gz contracts/ Clarinet.toml deployments/ scripts/deploy-*.sh || true
       - uses: actions/upload-artifact@v4
