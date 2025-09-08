@@ -10,9 +10,9 @@
 (define-constant PRECISION u100000000)
 
 ;; Revenue split configuration (basis points)
-(define-constant XCXD_SPLIT_BPS u8000) ;; 80% to xCXD stakers
-(define-constant TREASURY_SPLIT_BPS u1500) ;; 15% to treasury
-(define-constant RESERVE_SPLIT_BPS u500) ;; 5% to insurance reserve
+(define-data-var xcxd-split-bps uint u8000) ;; 80% to xCXD stakers
+(define-data-var treasury-split-bps uint u1500) ;; 15% to treasury
+(define-data-var reserve-split-bps uint u500) ;; 5% to insurance reserve
 
 ;; Fee types for tracking
 (define-constant FEE_TYPE_VAULT_PERFORMANCE u1)
@@ -28,6 +28,7 @@
 (define-constant ERR_INSUFFICIENT_BALANCE u804)
 (define-constant ERR_INVALID_TOKEN u805)
 (define-constant ERR_BUYBACK_FAILED u806)
+(define-constant ERR_INVALID_SPLIT_BPS u807)
 
 ;; --- Storage ---
 (define-data-var contract-owner principal CONTRACT_OWNER)
@@ -87,6 +88,20 @@
   (begin
     (asserts! (is-eq tx-sender (var-get contract-owner)) (err ERR_UNAUTHORIZED))
     (var-set contract-owner new-owner)
+    (ok true)))
+
+(define-public (set-revenue-splits (new-xcxd-split-bps uint) (new-treasury-split-bps uint) (new-reserve-split-bps uint))
+  (begin
+    (asserts! (is-eq tx-sender (var-get contract-owner)) (err ERR_UNAUTHORIZED))
+    ;; Ensure the splits add up to 100%
+    (asserts! (is-eq (+ new-xcxd-split-bps new-treasury-split-bps new-reserve-split-bps) u10000) (err ERR_INVALID_SPLIT_BPS))
+    ;; Enforce documented guardrails: 60-90% for xCXD stakers
+    (asserts! (>= new-xcxd-split-bps u6000) (err ERR_INVALID_SPLIT_BPS))
+    (asserts! (<= new-xcxd-split-bps u9000) (err ERR_INVALID_SPLIT_BPS))
+
+    (var-set xcxd-split-bps new-xcxd-split-bps)
+    (var-set treasury-split-bps new-treasury-split-bps)
+    (var-set reserve-split-bps new-reserve-split-bps)
     (ok true)))
 
 ;; --- Contract Configuration Functions (Dependency Injection) ---
@@ -263,9 +278,9 @@
       (asserts! (> total-amount u0) (err ERR_INSUFFICIENT_BALANCE))
       
       ;; Calculate splits
-      (let ((xcxd-amount (/ (* total-amount XCXD_SPLIT_BPS) u10000))
-            (treasury-amount (/ (* total-amount TREASURY_SPLIT_BPS) u10000))
-            (reserve-amount (/ (* total-amount RESERVE_SPLIT_BPS) u10000)))
+      (let ((xcxd-amount (/ (* total-amount (var-get xcxd-split-bps)) u10000))
+            (treasury-amount (/ (* total-amount (var-get treasury-split-bps)) u10000))
+            (reserve-amount (/ (* total-amount (var-get reserve-split-bps)) u10000)))
         
         ;; Simplified distribution for enhanced deployment
         (try! (as-contract (contract-call? revenue-token transfer treasury-amount (as-contract tx-sender) (var-get treasury-address) none)))
@@ -349,9 +364,9 @@
 
 (define-read-only (get-revenue-splits)
   {
-    xcxd-split-bps: XCXD_SPLIT_BPS,
-    treasury-split-bps: TREASURY_SPLIT_BPS,
-    reserve-split-bps: RESERVE_SPLIT_BPS
+    xcxd-split-bps: (var-get xcxd-split-bps),
+    treasury-split-bps: (var-get treasury-split-bps),
+    reserve-split-bps: (var-get reserve-split-bps)
   })
 
 (define-read-only (get-protocol-revenue-stats)

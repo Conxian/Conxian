@@ -264,18 +264,57 @@
   (begin
     (print "Testing revenue distributor setup...")
     
-    ;; Configure revenue splits
-    (let ((split-result (contract-call? .revenue-distributor configure-revenue-split
+    ;; Configure revenue splits using the new function
+    (let ((split-result (contract-call? .revenue-distributor set-revenue-splits
                                        u7000  ;; 70% to stakers
                                        u2000  ;; 20% to treasury  
                                        u1000))) ;; 10% to reserves
       (asserts! (is-ok split-result) (err u70)))
     
-    ;; Register fee collectors
-    (let ((register-result (contract-call? .revenue-distributor register-fee-collector .cxd-token)))
+    ;; Authorize a fee collector (updated function name)
+    (let ((register-result (contract-call? .revenue-distributor authorize-collector .cxd-token true)))
       (asserts! (is-ok register-result) (err u71)))
+
+    ;; Reset to default for other tests
+    (try! (contract-call? .revenue-distributor set-revenue-splits u8000 u1500 u500))
     
     (print {test: "revenue-distributor-setup", status: "PASS"})
+    (ok true)))
+
+(define-public (test-revenue-distributor-split-adjustment)
+  "Test revenue distributor split adjustment functionality"
+  (begin
+    (print "Testing revenue distributor split adjustment...")
+
+    ;; 1. Check default splits
+    (let ((default-splits (unwrap! (contract-call? .revenue-distributor get-revenue-splits) (err u200))))
+      (asserts! (is-eq (get xcxd-split-bps default-splits) u8000) (err u201))
+      (asserts! (is-eq (get treasury-split-bps default-splits) u1500) (err u202))
+      (asserts! (is-eq (get reserve-split-bps default-splits) u500) (err u203)))
+
+    ;; 2. Test successful update by owner
+    (try! (contract-call? .revenue-distributor set-revenue-splits u7000 u2000 u1000))
+
+    ;; 3. Verify the update
+    (let ((new-splits (unwrap! (contract-call? .revenue-distributor get-revenue-splits) (err u204))))
+      (asserts! (is-eq (get xcxd-split-bps new-splits) u7000) (err u205))
+      (asserts! (is-eq (get treasury-split-bps new-splits) u2000) (err u206))
+      (asserts! (is-eq (get reserve-split-bps new-splits) u1000) (err u207)))
+
+    ;; 4. Test invalid updates
+    (asserts! (is-err (contract-call? .revenue-distributor set-revenue-splits u7000 u2000 u1001)) (err u208)) ;; Sum != 10000
+    (asserts! (is-err (contract-call? .revenue-distributor set-revenue-splits u5999 u3001 u1000)) (err u210)) ;; Too low
+    (asserts! (is-err (contract-call? .revenue-distributor set-revenue-splits u9001 u999 u0)) (err u212))     ;; Too high
+
+    ;; 5. Test authorization (call from non-owner)
+    (let ((unauth-result (as-contract (contract-call? .revenue-distributor set-revenue-splits u8000 u1500 u500))))
+      (asserts! (is-err unauth-result) (err u214))
+      (asserts! (is-eq (err-get unauth-result) (some u800)) (err u215)))
+
+    ;; Reset to default for other tests
+    (try! (contract-call? .revenue-distributor set-revenue-splits u8000 u1500 u500))
+
+    (print {test: "revenue-distributor-split-adjustment", status: "PASS"})
     (ok true)))
 
 ;; =============================================================================
@@ -388,6 +427,7 @@
     ;; System Component Tests
     (print "--- System Component Tests ---")
     (try! (test-revenue-distributor-setup))
+    (try! (test-revenue-distributor-split-adjustment))
     (try! (test-emission-controller-setup))
     (try! (test-protocol-monitor-setup))
     (try! (test-token-coordinator-setup))
