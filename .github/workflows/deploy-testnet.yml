@@ -111,6 +111,9 @@ jobs:
         env:
           TESTNET_DEPLOYER_KEY: ${{ secrets.TESTNET_DEPLOYER_KEY }}
           HIRO_API_KEY: ${{ secrets.HIRO_API_KEY }}
+          TESTNET_DEPLOYER_MNEMONIC: ${{ secrets.TESTNET_DEPLOYER_MNEMONIC }}
+          TESTNET_WALLET1_MNEMONIC: ${{ secrets.TESTNET_WALLET1_MNEMONIC }}
+          TESTNET_WALLET2_MNEMONIC: ${{ secrets.TESTNET_WALLET2_MNEMONIC }}
         run: |
           set -e
           
@@ -122,6 +125,18 @@ jobs:
             fi
             if [ -z "$HIRO_API_KEY" ]; then
               echo "❌ Error: HIRO_API_KEY secret not found"
+              exit 1
+            fi
+            if [ -z "$TESTNET_DEPLOYER_MNEMONIC" ]; then
+              echo "❌ Error: TESTNET_DEPLOYER_MNEMONIC secret not found"
+              exit 1
+            fi
+            if [ -z "$TESTNET_WALLET1_MNEMONIC" ]; then
+              echo "❌ Error: TESTNET_WALLET1_MNEMONIC secret not found"
+              exit 1
+            fi
+            if [ -z "$TESTNET_WALLET2_MNEMONIC" ]; then
+              echo "❌ Error: TESTNET_WALLET2_MNEMONIC secret not found"
               exit 1
             fi
             echo "✅ Required secrets validated"
