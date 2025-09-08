@@ -64,11 +64,16 @@ jobs:
           cache-dependency-path: package-lock.json
       - name: Install Dependencies
         run: npm ci --no-audit --no-fund
+      - name: Install Clarinet
+        run: |
+          curl -L https://github.com/hirosystems/clarinet/releases/download/v2.9.0/clarinet-linux-x64.tar.gz | tar xz
+          sudo mv clarinet /usr/local/bin/clarinet
+          chmod +x /usr/local/bin/clarinet
       - name: Verify Clarinet Installation
-        run: npx clarinet --version
+        run: clarinet --version
       - name: Compile Contracts
         timeout-minutes: 5
-        run: npx clarinet check
+        run: clarinet check
       - name: Artifact Summary
         run: |
           echo "Contracts:"; ls -1 contracts | wc -l
@@ -90,8 +95,13 @@ jobs:
           cache-dependency-path: package-lock.json
       - name: Install Dependencies
         run: npm ci --no-audit --no-fund
+      - name: Install Clarinet
+        run: |
+          curl -L https://github.com/hirosystems/clarinet/releases/download/v2.9.0/clarinet-linux-x64.tar.gz | tar xz
+          sudo mv clarinet /usr/local/bin/clarinet
+          chmod +x /usr/local/bin/clarinet
       - name: Verify Clarinet Installation
-        run: npx clarinet --version
+        run: clarinet --version
       - name: Deployment (Dry / Placeholder)
         run: |
           set -e
