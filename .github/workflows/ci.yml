@@ -24,6 +24,13 @@ jobs:
           cache-dependency-path: package-lock.json
       - name: Install deps
         run: npm ci --no-audit --no-fund
+      - name: Install Clarinet
+        run: |
+          curl -L https://github.com/hirosystems/clarinet/releases/download/v3.5.0/clarinet-linux-x64-glibc.tar.gz | tar xz
+          sudo mv clarinet /usr/local/bin/clarinet
+          chmod +x /usr/local/bin/clarinet
+      - name: Verify Clarinet Installation
+        run: clarinet --version
       - name: Contract Compilation
         run: npm run clarinet:check
       - name: Docs and Naming Guard
@@ -44,6 +51,13 @@ jobs:
           cache-dependency-path: package-lock.json
       - name: Install deps
         run: npm ci --no-audit --no-fund
+      - name: Install Clarinet
+        run: |
+          curl -L https://github.com/hirosystems/clarinet/releases/download/v3.5.0/clarinet-linux-x64-glibc.tar.gz | tar xz
+          sudo mv clarinet /usr/local/bin/clarinet
+          chmod +x /usr/local/bin/clarinet
+      - name: Verify Clarinet Installation
+        run: clarinet --version
       - name: Verify Clarinet Binary
         run: npm run clarinet:check
       - name: Package
