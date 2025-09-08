@@ -8,10 +8,12 @@ The following secrets must be configured in your GitHub repository for the workf
 
 | Secret Name | Purpose | Used In | Required |
 |-------------|---------|---------|----------|
-| `TESTNET_DEPLOYER_KEY` | Stacks testnet private key for contract deployment | `tokenomics-ci.yml` | Yes |
-| `HIRO_API_KEY` | API key for Hiro Platform services | `chainhook-register.yml` | Yes |
-| `STACKS_PRIVKEY` | Private key for automated keeper operations | `keeper-cron.yml` | Yes |
-| `VAULT_CONTRACT_ADDRESS` | Deployed vault contract address | `keeper-cron.yml` | Yes |
+| `TESTNET_DEPLOYER_KEY` | Stacks testnet private key for contract deployment | `.github/workflows/deploy-testnet.yml` | Yes |
+| `HIRO_API_KEY` | API key for Hiro Platform services | `.github/workflows/deploy-testnet.yml`, `chainhook-register.yml` | Yes |
+| `TESTNET_DEPLOYER_MNEMONIC` | Deployer wallet mnemonic (testnet) | `.github/workflows/deploy-testnet.yml` | Yes |
+| `TESTNET_WALLET1_MNEMONIC` | Secondary wallet mnemonic (testnet) | `.github/workflows/deploy-testnet.yml` | Yes |
+| `TESTNET_WALLET2_MNEMONIC` | Secondary wallet mnemonic (testnet) | `.github/workflows/deploy-testnet.yml` | Yes |
+| `MAINNET_DEPLOYER_KEY` | Stacks mainnet private key for contract deployment | Mainnet workflows (future) | Optional |
 
 ## Setup Instructions
 
@@ -88,11 +90,16 @@ Once all secrets are configured, the workflows will automatically validate them 
 
 ## Workflow-Specific Requirements
 
-### Testnet Deployment (`tokenomics-ci.yml`)
+### Conxian CI/CD Pipeline (`ci.yml`)
 
-- Requires: `TESTNET_DEPLOYER_KEY`
-- Triggers: On pushes to `main` branch
-- Purpose: Deploy contracts to Stacks testnet
+- Purpose: Compile contracts (`clarinet check`) and run tests (`vitest`)
+- Requires: none (no secrets)
+
+### Testnet Deployment (`deploy-testnet.yml`)
+
+- Requires: `TESTNET_DEPLOYER_KEY`, `HIRO_API_KEY`, `TESTNET_DEPLOYER_MNEMONIC`, `TESTNET_WALLET1_MNEMONIC`, `TESTNET_WALLET2_MNEMONIC`
+- Triggers: Manual workflow dispatch (with `dry_run` field)
+- Purpose: Generate plan (dry run) and optionally broadcast live deployment
 
 ### Chainhook Registration (`chainhook-register.yml`)  
 
@@ -156,5 +163,5 @@ Please add this secret in repository Settings → Secrets and variables → Acti
 
 ---
 
-**Last Updated**: $(date)
+**Last Updated**: September 08, 2025
 **Maintainer**: Conxian Development Team

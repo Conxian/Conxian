@@ -41,29 +41,32 @@ A production-ready DeFi platform on Stacks with enhanced tokenomics, automated D
 #### Requirements
 
 - Node.js (v18+)
-- Clarinet 3.5.0 (automatically installed via CI/CD)
-  
-Note: This repo uses Clarinet SDK v3.5.0. Local development uses `npx clarinet`, deployment uses direct binary.
+- Clarinet CLI v3.5.0 (install locally or use `bin/clarinet`); CI installs on runners
+
+Note: This repo uses Clarinet SDK v3.5.0. Local development can use `npx clarinet` or the Clarinet CLI; deployment uses the Clarinet binary in CI.
 
 #### Setup
 
 ```bash
 git clone https://github.com/Anya-org/Conxian.git
 cd Conxian
-npm run ci
+# Install deps and validate docs
+npm ci
+npm run validate:docs
+# Run tests
+npx vitest run
 ```
 
 This will:
 
 1. Install all dependencies.
-2. Run the Clarity contract checker (`npx clarinet check`).
+2. Validate docs and naming (`scripts/validate-docs.js`).
 3. Run all TypeScript tests (`npx vitest run`).
 
 Expected output:
 
 - ✅ 42 contracts checked
 - ✅ 50 tests passed (TypeScript)
-- ✅ Deployment workflow validated
 
 #### Deploy
 
