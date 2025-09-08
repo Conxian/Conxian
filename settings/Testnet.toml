@@ -1,0 +1,16 @@
+[network]
+name = "testnet"
+node_rpc_address = "https://api.testnet.hiro.so"
+
+[accounts.deployer]
+# SECURE TESTNET DEPLOYER - Uses environment variable for mnemonic
+mnemonic = "${TESTNET_DEPLOYER_MNEMONIC}"
+balance = 500000000  # FUNDED - Ready for deployment 
+
+[accounts.wallet_1]  
+mnemonic = "${TESTNET_WALLET1_MNEMONIC}"
+balance = 50000000000
+
+[accounts.wallet_2]
+mnemonic = "${TESTNET_WALLET2_MNEMONIC}" 
+balance = 50000000000
