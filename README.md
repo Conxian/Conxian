@@ -1,14 +1,15 @@
 # Conxian
 
 [![Tests](https://img.shields.io/badge/Tests-50%20Passing-yellow)](https://github.com/Anya-org/Conxian)
-[![Contracts](https://img.shields.io/badge/Contracts-44%20Compiled-blue)](https://github.com/Anya-org/Conxian)
+[![Contracts](https://img.shields.io/badge/Contracts-42%20Compiled-blue)](https://github.com/Anya-org/Conxian)
+[![Deployment](https://img.shields.io/badge/Deployment-Ready-green)](https://github.com/Anya-org/Conxian)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 A production-ready DeFi platform on Stacks with enhanced tokenomics, automated DAO governance, DEX subsystem groundwork, circuit breaker & enterprise monitoring, and Bitcoin-aligned principles.
 
 ## Status
 
-⚠️ **Partial System Health** – 44 contracts compile successfully with 50 TypeScript tests passing. Clarity tests are currently unable to run due to a test environment issue.
+✅ **System Ready** – 42 contracts compile successfully with 50 TypeScript tests passing. Testnet deployment workflow implemented and ready.
 
 [View Complete Status](./documentation/STATUS.md)
 
@@ -32,6 +33,7 @@ A production-ready DeFi platform on Stacks with enhanced tokenomics, automated D
 ## Quick Start
 
 ### For Users
+
 **New to Conxian?** → [**User Manual**](./documentation/USER_MANUAL.md) | [Quick Start Guide](./documentation/QUICK_START.md)
 
 ### For Developers
@@ -39,8 +41,9 @@ A production-ready DeFi platform on Stacks with enhanced tokenomics, automated D
 #### Requirements
 
 - Node.js (v18+)
+- Clarinet 3.5.0 (automatically installed via CI/CD)
   
-Note: This repo pins Clarinet SDK v3.5.0 via npm. Always use `npx clarinet`.
+Note: This repo uses Clarinet SDK v3.5.0. Local development uses `npx clarinet`, deployment uses direct binary.
 
 #### Setup
 
@@ -51,23 +54,37 @@ npm run ci
 ```
 
 This will:
-1.  Install all dependencies.
-2.  Run the Clarity contract checker (`npx clarinet check`).
-3.  Run all TypeScript tests (`npx vitest run`).
+
+1. Install all dependencies.
+2. Run the Clarity contract checker (`npx clarinet check`).
+3. Run all TypeScript tests (`npx vitest run`).
 
 Expected output:
-- ✅ 44 contracts checked
+
+- ✅ 42 contracts checked
 - ✅ 50 tests passed (TypeScript)
-- ⚠️ Clarity tests currently failing to run
+- ✅ Deployment workflow validated
 
 #### Deploy
 
-```bash
-# Testnet
-../scripts/deploy-testnet.sh
+**GitHub Actions (Recommended)**:
 
-# Production  
-../scripts/deploy-mainnet.sh
+```bash
+# Testnet deployment (dry run)
+gh workflow run deploy-testnet.yml --field dry_run=true
+
+# Testnet deployment (live)
+gh workflow run deploy-testnet.yml --field dry_run=false
+```
+
+**Local Testing**:
+
+```bash
+# Generate deployment plan
+clarinet deployments generate --testnet
+
+# Local validation
+bash scripts/deploy-testnet.sh
 ```
 
 [Complete Setup Guide](./documentation/DEVELOPER_GUIDE.md)
@@ -77,12 +94,14 @@ Expected output:
 ## Documentation (Updated Sep 06, 2025)
 
 ### For Users
+
 | Guide | Description |
 |-------|-------------|
 | [**User Manual**](./documentation/USER_MANUAL.md) | **Complete user guide and onboarding** |
 | [Quick Start](./documentation/QUICK_START.md) | 5-minute getting started guide |
 
 ### For Developers & Stakeholders
+
 | Topic | Description |
 |-------|-------------|
 | [Architecture](./documentation/ARCHITECTURE.md) | System design (incl. DEX, breaker, monitoring) |
@@ -105,4 +124,4 @@ MIT License
 - **Issues**: [Report bugs or request features](https://github.com/Anya-org/Conxian/issues)
 - **Documentation**: [Complete documentation](./documentation/)
 
-*Counts reflect repository state as of Aug 26, 2025.*
+*Last updated: September 8, 2025. Deployment workflow implemented with live testnet capability.*

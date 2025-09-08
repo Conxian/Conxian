@@ -118,6 +118,7 @@ distinct purposes and utility mechanisms.
 ### Initial Setup
 
 1. **Acquire Tokens:**
+
    ```
    - Participate in protocol activities to earn CXD
    - Provide liquidity to earn CXVG rewards
@@ -146,6 +147,7 @@ Staking CXD tokens creates xCXD positions that earn revenue from protocol fees.
 #### How to Stake
 
 1. **Initiate Staking:**
+
    ```
    Minimum: 1 CXD
    Maximum: 10,000,000 CXD per user
@@ -202,6 +204,7 @@ Lock CXVG tokens to participate in governance and earn utilities.
 #### Locking Process
 
 1. **Choose Lock Duration:**
+
    ```
    Minimum: 6 months (mainnet) / 1 week (testnet)
    Maximum: 2 years
@@ -239,6 +242,7 @@ Time Multiplier = 1.0 + (Lock Duration / Max Duration)
    - Community discussion period
 
 2. **Proposal Process:**
+
    ```
    1. Bond CXVG tokens
    2. Submit proposal with rationale
@@ -326,6 +330,7 @@ Existing liquidity providers can migrate CXLP tokens to CXD with time-based bonu
    - Band 4 (Months 25+): 100% conversion rate
 
 2. **Migration Limits:**
+
    ```
    Epoch Cap: 1M CXD per week
    User Base: 10K CXD per user per epoch
@@ -333,6 +338,7 @@ Existing liquidity providers can migrate CXLP tokens to CXD with time-based bonu
    ```
 
 3. **Migration Process:**
+
    ```
    1. Check current migration band
    2. Calculate expected CXD output
