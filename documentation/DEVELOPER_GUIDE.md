@@ -23,7 +23,7 @@ npm ci
 
 # Verify setup
 clarinet check   # ✅ 42 contracts
-npx vitest run --config vitest.config.enhanced.ts   # ✅ 50 tests
+npx vitest run --config ./vitest.config.enhanced.ts   # ✅ 50 tests
 ```
 
 ## Project Structure
