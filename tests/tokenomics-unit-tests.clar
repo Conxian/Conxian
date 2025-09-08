@@ -272,7 +272,7 @@
       (asserts! (is-ok split-result) (err u70)))
     
     ;; Authorize a fee collector (updated function name)
-    (let ((register-result (contract-call? .revenue-distributor authorize-collector .cxd-token true)))
+    (let ((register-result (contract-call? .revenue-distributor register-fee-collector .cxd-token true)))
       (asserts! (is-ok register-result) (err u71)))
 
     ;; Reset to default for other tests
