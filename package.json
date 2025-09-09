@@ -10,7 +10,10 @@
     "test:load": "vitest run stacks/tests/enhanced-100m-transaction-validation.ts --config vitest.config.enhanced.ts",
     "test:integration": "vitest run stacks/tests/comprehensive-integration.test.ts --config vitest.config.enhanced.ts",
     "test:contracts": "vitest run 'stacks/tests/**/*.test.ts' --config vitest.config.enhanced.ts",
-    "test:all": "npm run test:contracts && npm run test:integration && npm run test:load",
+    "test:enterprise": "vitest run stacks/tests/enterprise-system-integration.test.ts --config vitest.config.enhanced.ts",
+    "test:flash-loans": "vitest run tests/comprehensive-lending-system.test.ts --config vitest.config.enhanced.ts",
+    "test:all": "npm run test:contracts && npm run test:integration && npm run test:enterprise && npm run test:load",
+    "test:production": "npm run test:enterprise && npm run test:flash-loans && npm run test:integration",
     "clarinet:test": "clarinet test",
     "clarinet:check": "clarinet check",
     "clarinet:console": "clarinet console",
@@ -24,13 +27,13 @@
   "dependencies": {
     "@hirosystems/clarinet-sdk": "3.5.0",
     "@scure/base": "2.0.0",
-    "@scure/btc-signer": "2.0.0",
+    "@scure/btc-signer": "2.0.1",
     "@stacks/blockchain-api-client": "8.12.1",
     "@stacks/network": "7.2.0",
     "@stacks/stacking": "7.2.0",
     "@stacks/transactions": "7.2.0",
     "bignumber.js": "^9.1.2",
-    "dotenv": "^16.4.5",
+    "dotenv": "17.2.2",
     "node-fetch": "^3.3.2"
   },
   "devDependencies": {

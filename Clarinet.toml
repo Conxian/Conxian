@@ -281,3 +281,96 @@ path = "contracts/dex-router.clar"
 clarity_version = 2
 epoch = "2.4"
 depends_on = ["sip-010-trait", "pool-trait", "dex-factory", "token-system-coordinator"]
+
+# ===========================================
+# MATHEMATICAL FOUNDATION LIBRARIES
+# ===========================================
+
+[contracts.math-lib-advanced]
+path = "contracts/math-lib-advanced.clar"
+clarity_version = 2
+epoch = "2.4"
+
+[contracts.fixed-point-math]
+path = "contracts/fixed-point-math.clar"
+clarity_version = 2
+epoch = "2.4"
+
+[contracts.precision-calculator]
+path = "contracts/precision-calculator.clar"
+clarity_version = 2
+epoch = "2.4"
+depends_on = ["math-lib-advanced", "fixed-point-math"]
+
+# ===========================================
+# LENDING SYSTEM & FLASH LOANS
+# ===========================================
+
+[contracts.flash-loan-receiver-trait]
+path = "contracts/traits/flash-loan-receiver-trait.clar"
+clarity_version = 2
+epoch = "2.4"
+
+[contracts.lending-system-trait]
+path = "contracts/traits/lending-system-trait.clar"
+clarity_version = 2
+epoch = "2.4"
+depends_on = ["sip-010-trait", "flash-loan-receiver-trait"]
+
+[contracts.interest-rate-model]
+path = "contracts/interest-rate-model.clar"
+clarity_version = 2
+epoch = "2.4"
+depends_on = ["sip-010-trait", "math-lib-advanced"]
+
+[contracts.enhanced-flash-loan-vault]
+path = "contracts/enhanced-flash-loan-vault.clar"
+clarity_version = 2
+epoch = "2.4"
+depends_on = ["vault-trait", "vault-admin-trait", "flash-loan-receiver-trait", "sip-010-trait", "precision-calculator"]
+
+[contracts.comprehensive-lending-system]
+path = "contracts/comprehensive-lending-system.clar"
+clarity_version = 2
+epoch = "2.4"
+depends_on = ["lending-system-trait", "flash-loan-receiver-trait", "sip-010-trait", "interest-rate-model", "math-lib-advanced"]
+
+[contracts.loan-liquidation-manager]
+path = "contracts/loan-liquidation-manager.clar"
+clarity_version = 2
+epoch = "2.4"
+depends_on = ["lending-system-trait", "precision-calculator"]
+
+[contracts.lending-protocol-governance]
+path = "contracts/lending-protocol-governance.clar"
+clarity_version = 2
+epoch = "2.4"
+depends_on = ["lending-system-trait"]
+
+# ===========================================
+# ENTERPRISE LOAN SYSTEM
+# ===========================================
+
+[contracts.enterprise-loan-manager]
+path = "contracts/enterprise-loan-manager.clar"
+clarity_version = 2
+epoch = "2.4"
+depends_on = ["sip-010-trait", "lending-system-trait", "precision-calculator"]
+
+[contracts.bond-issuance-system]
+path = "contracts/bond-issuance-system.clar"
+clarity_version = 2
+epoch = "2.4"
+depends_on = ["sip-010-trait", "enterprise-loan-manager"]
+
+[contracts.yield-distribution-engine]
+path = "contracts/yield-distribution-engine.clar"
+clarity_version = 2
+epoch = "2.4"
+depends_on = ["sip-010-trait", "bond-issuance-system", "enterprise-loan-manager"]
+
+[contracts.liquidity-optimization-engine]
+path = "contracts/liquidity-optimization-engine.clar"
+clarity_version = 2
+epoch = "2.4"
+depends_on = ["sip-010-trait"]
