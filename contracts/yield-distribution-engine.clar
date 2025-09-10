@@ -175,28 +175,29 @@
 
 ;; === PARTICIPANT MANAGEMENT ===
 (define-public (join-yield-pool (pool-id uint) (stake-amount uint))
-  (let ((pool (unwrap! (map-get? yield-pools pool-id) ERR_POOL_NOT_FOUND))
-        (participant tx-sender))
-    
-    (asserts! (get active pool) ERR_UNAUTHORIZED)
-    (asserts! (> stake-amount u0) ERR_INVALID_AMOUNT)
-    
-    ;; Update or create participant record
-    (let ((current-stake (default-to 
-                           {stake-amount: u0, total-claimed: u0, last-claim-block: block-height,
-                            weight-multiplier: u10000, tier-level: u1, vesting-start: u0, vesting-duration: u0}
-                           (map-get? pool-participants {pool-id: pool-id, participant: participant}))))
+  (begin
+    (let ((pool (unwrap! (map-get? yield-pools pool-id) ERR_POOL_NOT_FOUND))
+          (participant tx-sender))
       
-      (map-set pool-participants {pool-id: pool-id, participant: participant}
-        (merge current-stake {stake-amount: (+ (get stake-amount current-stake) stake-amount)}))
+      (asserts! (get active pool) ERR_UNAUTHORIZED)
+      (asserts! (> stake-amount u0) ERR_INVALID_AMOUNT)
       
-      ;; Update pool totals
-      (map-set yield-pools pool-id
-        (merge pool {total-deposited: (+ (get total-deposited pool) stake-amount)}))
-      
-      (print (tuple (event "joined-yield-pool") (participant participant) (pool-id pool-id) (amount stake-amount)))
-      
-      (ok true)))
+      ;; Update or create participant record
+      (let ((current-stake (default-to 
+                             {stake-amount: u0, total-claimed: u0, last-claim-block: block-height,
+                              weight-multiplier: u10000, tier-level: u1, vesting-start: u0, vesting-duration: u0}
+                             (map-get? pool-participants {pool-id: pool-id, participant: participant}))))
+        
+        (map-set pool-participants {pool-id: pool-id, participant: participant}
+          (merge current-stake {stake-amount: (+ (get stake-amount current-stake) stake-amount)}))
+        
+        ;; Update pool totals
+        (map-set yield-pools pool-id
+          (merge pool {total-deposited: (+ (get total-deposited pool) stake-amount)}))
+        
+        (print (tuple (event "joined-yield-pool") (participant participant) (pool-id pool-id) (amount stake-amount)))
+        
+        (ok true)))))
 
 ;; === YIELD DISTRIBUTION ===
 (define-public (add-yield-to-pool (pool-id uint) (yield-amount uint))
@@ -268,28 +269,29 @@
 
 ;; === CLAIM FUNCTIONS ===
 (define-public (claim-yield (pool-id uint))
-  (let ((pool (unwrap! (map-get? yield-pools pool-id) ERR_POOL_NOT_FOUND))
-        (participant tx-sender)
-        (stake-info (unwrap! (map-get? pool-participants {pool-id: pool-id, participant: participant}) ERR_UNAUTHORIZED)))
-    
-    (asserts! (get active pool) ERR_UNAUTHORIZED)
-    
-    ;; Calculate claimable amount
-    (let ((claimable (calculate-claimable-yield pool-id participant)))
-      (asserts! (> claimable u0) ERR_INVALID_AMOUNT)
+  (begin
+    (let ((pool (unwrap! (map-get? yield-pools pool-id) ERR_POOL_NOT_FOUND))
+          (participant tx-sender)
+          (stake-info (unwrap! (map-get? pool-participants {pool-id: pool-id, participant: participant}) ERR_UNAUTHORIZED)))
       
-      ;; Update participant claim record
-      (map-set pool-participants {pool-id: pool-id, participant: participant}
-        (merge stake-info 
-               {total-claimed: (+ (get total-claimed stake-info) claimable),
-                last-claim-block: block-height}))
+      (asserts! (get active pool) ERR_UNAUTHORIZED)
       
-      ;; TODO: Transfer yield tokens to participant
-      ;; (try! (as-contract (contract-call? (get reward-token pool) transfer claimable tx-sender participant none)))
-      
-      (print (tuple (event "yield-claimed") (participant participant) (pool-id pool-id) (amount claimable)))
-      
-      (ok claimable)))
+      ;; Calculate claimable amount
+      (let ((claimable (calculate-claimable-yield pool-id participant)))
+        (asserts! (> claimable u0) ERR_INVALID_AMOUNT)
+        
+        ;; Update participant claim record
+        (map-set pool-participants {pool-id: pool-id, participant: participant}
+          (merge stake-info 
+                 {total-claimed: (+ (get total-claimed stake-info) claimable),
+                  last-claim-block: block-height}))
+        
+        ;; TODO: Transfer yield tokens to participant
+        ;; (try! (as-contract (contract-call? (get reward-token pool) transfer claimable tx-sender participant none)))
+        
+        (print (tuple (event "yield-claimed") (participant participant) (pool-id pool-id) (amount claimable)))
+        
+        (ok claimable)))))
 
 ;; === AUTOMATED DISTRIBUTION SCHEDULES ===
 (define-public (create-distribution-schedule
@@ -356,33 +358,33 @@
   (loan-id uint) 
   (total-interest uint)
   (bond-holder-share-bps uint))
-  
-  (let ((caller tx-sender))
-    (asserts! (is-eq (some caller) (var-get enterprise-loan-manager)) ERR_UNAUTHORIZED)
-    
-    ;; Calculate yield allocations
-    (let ((bond-share (/ (* total-interest bond-holder-share-bps) BASIS_POINTS))
-          (protocol-share (/ (* total-interest (var-get protocol-share-bps)) BASIS_POINTS))
-          (treasury-share (/ (* total-interest (var-get treasury-share-bps)) BASIS_POINTS))
-          (remaining (- total-interest (+ bond-share protocol-share treasury-share))))
+  (begin
+    (let ((caller tx-sender))
+      (asserts! (is-eq (some caller) (var-get enterprise-loan-manager)) ERR_UNAUTHORIZED)
       
-      ;; Record allocation
-      (map-set enterprise-yield-allocation loan-id
-        {
-          total-interest-generated: total-interest,
-          bond-holder-share: bond-share,
-          protocol-share: protocol-share,
-          treasury-share: treasury-share,
-          distributed-to-bonds: u0,
-          last-allocation-block: block-height
-        })
-      
-      ;; TODO: Distribute to appropriate pools
-      ;; (try! (add-yield-to-pool BOND_POOL_ID bond-share))
-      
-      (print (tuple (event "enterprise-yield-allocated") (loan-id loan-id) (total-interest total-interest)))
-      
-      (ok true)))
+      ;; Calculate yield allocations
+      (let ((bond-share (/ (* total-interest bond-holder-share-bps) BASIS_POINTS))
+            (protocol-share (/ (* total-interest (var-get protocol-share-bps)) BASIS_POINTS))
+            (treasury-share (/ (* total-interest (var-get treasury-share-bps)) BASIS_POINTS))
+            (remaining (- total-interest (+ bond-share protocol-share treasury-share))))
+        
+        ;; Record allocation
+        (map-set enterprise-yield-allocation loan-id
+          {
+            total-interest-generated: total-interest,
+            bond-holder-share: bond-share,
+            protocol-share: protocol-share,
+            treasury-share: treasury-share,
+            distributed-to-bonds: u0,
+            last-allocation-block: block-height
+          })
+        
+        ;; TODO: Distribute to appropriate pools
+        ;; (try! (add-yield-to-pool BOND_POOL_ID bond-share))
+        
+        (print (tuple (event "enterprise-yield-allocated") (loan-id loan-id) (total-interest total-interest)))
+        
+        (ok true)))))
 
 ;; === BOND YIELD INTEGRATION ===
 (define-public (track-bond-yield (bond-series uint) (loan-id uint) (yield-amount uint) (yield-rate uint))
@@ -481,10 +483,10 @@
 (define-read-only (calculate-apy (pool-id uint))
   ;; Calculate annualized percentage yield
   (match (map-get? yield-pools pool-id)
-    pool
+    (some pool)
       (let ((total-yield-year (get total-yield-distributed pool)) ;; Simplified
             (total-deposited (get total-deposited pool)))
         (if (> total-deposited u0)
           (ok (/ (* total-yield-year BASIS_POINTS) total-deposited))
           (ok u0)))
-    ERR_POOL_NOT_FOUND))
+    none ERR_POOL_NOT_FOUND))

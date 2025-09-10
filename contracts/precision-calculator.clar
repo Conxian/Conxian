@@ -62,7 +62,7 @@
     ERR_INVALID_OPERATION))
 
 ;; === MATHEMATICAL CONSTANT VALIDATION ===
-(define-public (validate-mathematical-constants)
+(define-public (validate-mathematical-constants) ()
   (let ((e-check (try! (contract-call? .math-lib-advanced exp-fixed u1000000000000000000)))
         (pi-check PI_EXPECTED) ;; Would need geometric calculation for Pi
         (ln2-check (try! (contract-call? .math-lib-advanced ln-fixed u2000000000000000000)))
@@ -199,4 +199,4 @@
                         (is-ok sqrt-test)
                         (is-ok pow-test)
                         (is-ok ln-test)
-                        (is-ok exp-test))))))
+                        (is-ok exp-test)))))))

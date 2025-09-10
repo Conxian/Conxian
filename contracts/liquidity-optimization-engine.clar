@@ -312,29 +312,30 @@
     (ok rule-id)))
 
 (define-private (internal-check-rebalance-triggers (pool-id uint) (asset principal))
-  ;; Check if any rebalancing rules should be triggered
-  (let ((pool (unwrap! (map-get? liquidity-pools {pool-id: pool-id, asset: asset}) ERR_POOL_NOT_FOUND)))
-    
-    ;; Calculate current utilization rate
-    (let ((utilization-rate (if (> (get total-liquidity pool) u0)
-                              (/ (* (get utilized-liquidity pool) BASIS_POINTS) (get total-liquidity pool))
-                              u0)))
+  (begin
+    ;; Check if any rebalancing rules should be triggered
+    (let ((pool (unwrap! (map-get? liquidity-pools {pool-id: pool-id, asset: asset}) ERR_POOL_NOT_FOUND)))
       
-      ;; Check emergency threshold
-      (if (<= utilization-rate EMERGENCY_THRESHOLD)
-        (begin
-          (try! (trigger-emergency-mode pool-id asset))
-          (print (tuple (event "emergency-triggered") (pool-id pool-id) (utilization utilization-rate))))
+      ;; Calculate current utilization rate
+      (let ((utilization-rate (if (> (get total-liquidity pool) u0)
+                                (/ (* (get utilized-liquidity pool) BASIS_POINTS) (get total-liquidity pool))
+                                u0)))
         
-        ;; Check rebalancing threshold
-        (if (or (>= utilization-rate (+ (get target-utilization pool) REBALANCE_THRESHOLD))
-                (<= utilization-rate (- (get target-utilization pool) REBALANCE_THRESHOLD)))
+        ;; Check emergency threshold
+        (if (<= utilization-rate EMERGENCY_THRESHOLD)
           (begin
-            (try! (execute-pool-rebalance pool-id asset))
-            (print (tuple (event "rebalance-triggered") (pool-id pool-id) (utilization utilization-rate))))
-          (ok true)))))
-  
-  (ok true))
+            (try! (trigger-emergency-mode pool-id asset))
+            (print (tuple (event "emergency-triggered") (pool-id pool-id) (utilization utilization-rate))))
+          
+          ;; Check rebalancing threshold
+          (if (or (>= utilization-rate (+ (get target-utilization pool) REBALANCE_THRESHOLD))
+                  (<= utilization-rate (- (get target-utilization pool) REBALANCE_THRESHOLD)))
+            (begin
+              (try! (execute-pool-rebalance pool-id asset))
+              (print (tuple (event "rebalance-triggered") (pool-id pool-id) (utilization utilization-rate))))
+            (ok true)))))
+    
+    (ok true)))
 
 ;; Public wrapper to align expected two-argument usage across contracts
 (define-public (check-rebalance-triggers (pool-id uint) (asset principal))

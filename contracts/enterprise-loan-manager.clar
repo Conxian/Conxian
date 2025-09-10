@@ -295,8 +295,8 @@
       
       ;; Distribute yield to bond holders if bond exists
       (match (get bond-token-id loan)
-        bond-id (try! (distribute-bond-yield bond-id payment-amount))
-        true)
+        (some bond-id) (try! (distribute-bond-yield bond-id payment-amount))
+        (none (ok true)))
       
       ;; Transfer payment from borrower
       ;; (try! (contract-call? (get loan-asset loan) transfer payment-amount tx-sender (as-contract tx-sender) none))
@@ -354,10 +354,11 @@
   ;; This would integrate with the yield distribution engine
   ;; For now, just record the distribution
   (match (var-get yield-distribution-contract)
-    yield-contract
-      ;; (contract-call? yield-contract distribute-yield bond-id yield-amount)
+    (some yield-contract)
+      ;; This would be the actual call in a real implementation
+      ;; (contract-call? yield-contract add-yield-to-pool bond-id yield-amount)
       (ok true)
-    (ok true)))
+    none (err ERR_BOND_CREATION_FAILED)))
 
 (define-private (mature-bond (bond-id uint))
   ;; Handle bond maturation - return principal to bond holders

@@ -218,30 +218,30 @@
     (asserts! (is-keeper tx-sender) ERR_UNAUTHORIZED)
     
     ;; Get maximum safe liquidation amount
-    (let ((max-debt (calculate-max-liquidation-amount borrower debt-asset)))
+    (let ((max-debt (calculate-max-liquidation-amount borrower debt-asset-principal)))
       (liquidate-position borrower debt-asset collateral-asset max-debt u0))))
 
 ;; === LIQUIDATION VERIFICATION ===
 (define-private (verify-liquidatable-position (borrower principal) (debt-asset principal) (collateral-asset principal))
   ;; Check health factor from lending system
-  (match (contract-call? .comprehensive-lending-system get-health-factor borrower)
-    health-factor
+  (match (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.comprehensive-lending-system get-health-factor borrower)
+    (ok health-factor)
       (if (< health-factor PRECISION) ;; Health factor < 1.0
         (ok true)
         ERR_POSITION_HEALTHY)
-    error ERR_POSITION_HEALTHY))
+    (err error) ERR_POSITION_HEALTHY))
 
-(define-private (calculate-max-liquidation-amount (borrower principal) (debt-asset <sip10>))
-  (match (contract-call? .comprehensive-lending-system get-borrow-balance borrower debt-asset)
-    debt-balance
-      (let ((debt-asset-principal (contract-of debt-asset)))
+(define-private (calculate-max-liquidation-amount (borrower principal) (debt-asset-principal principal))
+  (match (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.comprehensive-lending-system get-borrow-balance-by-principal borrower debt-asset-principal)
+    (ok debt-balance)
+      (let ()
         (match (map-get? liquidation-params { asset: debt-asset-principal })
-          params
+          (some params)
             (min 
               (/ (* debt-balance (get close-factor params)) PRECISION)
               (get max-liquidation-amount params))
-          u0))
-    u0))
+          none u0))
+    (err err-val) u0))
 
 ;; === PRICE FEED HELPERS ===
 (define-private (get-asset-price-safe (asset principal))
@@ -316,9 +316,9 @@
     (liquidation-paused (var-get liquidation-paused)))))
 
 (define-read-only (is-position-liquidatable (borrower principal))
-  (match (contract-call? .comprehensive-lending-system get-health-factor borrower)
-    health-factor (ok (< health-factor PRECISION))
-    error (ok false)))
+  (match (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.comprehensive-lending-system get-health-factor borrower)
+    (ok health-factor) (ok (< health-factor PRECISION))
+    (err error) (ok false)))
 
 (define-read-only (calculate-liquidation-amounts 
   (borrower principal)
