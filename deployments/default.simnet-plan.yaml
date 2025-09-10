@@ -194,6 +194,11 @@ plan:
             path: "contracts\\distributed-cache-manager.clar"
             clarity-version: 2
         - emulated-contract-publish:
+            contract-name: mock-token
+            emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            path: "contracts\\mocks\\mock-token.clar"
+            clarity-version: 2
+        - emulated-contract-publish:
             contract-name: vault-admin-trait
             emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
             path: "contracts\\traits\\vault-admin-trait.clar"
@@ -252,11 +257,6 @@ plan:
             contract-name: memory-pool-management
             emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
             path: "contracts\\memory-pool-management.clar"
-            clarity-version: 2
-        - emulated-contract-publish:
-            contract-name: mock-token
-            emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            path: "contracts\\mocks\\mock-token.clar"
             clarity-version: 2
         - emulated-contract-publish:
             contract-name: precision-calculator

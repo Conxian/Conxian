@@ -286,33 +286,21 @@
           (interest-due (calculate-interest-due (get principal-amount loan) 
                                                 (get interest-rate loan) 
                                                 blocks-since-payment)))
-      
-      ;; Update loan with payment
-      (map-set enterprise-loans loan-id
-        (merge loan 
-               {total-interest-paid: (+ (get total-interest-paid loan) payment-amount),
-                last-payment-block: block-height}))
-      
-      ;; Distribute yield to bond holders if bond exists
-      (match (get bond-token-id loan)
-        (some bond-id) (try! (distribute-bond-yield bond-id payment-amount))
-        (none (ok true)))
-      
-      ;; Transfer payment from borrower
-      ;; (try! (contract-call? (get loan-asset loan) transfer payment-amount tx-sender (as-contract tx-sender) none))
-      
-      ;; Update liquidity pool
-      (var-set liquidity-pool-balance (+ (var-get liquidity-pool-balance) payment-amount))
-      
-      (print (tuple (event "loan-payment") (loan-id loan-id) (payment payment-amount) (interest-due interest-due)))
-      
-      (ok true))))
-
-;; === LOAN REPAYMENT IN FULL ===
-(define-public (repay-loan-full (loan-id uint))
-  (let ((loan (unwrap! (map-get? enterprise-loans loan-id) ERR_LOAN_NOT_FOUND)))
-    
-    ;; Validations
+      (begin
+        ;; Update loan with payment
+        (map-set enterprise-loans loan-id
+          (merge loan 
+                 {total-interest-paid: (+ (get total-interest-paid loan) payment-amount),
+                  last-payment-block: block-height}))
+        
+        ;; Distribute yield to bond holders if bond exists
+        (match (get bond-token-id loan)
+          (some bond-id) (try! (distribute-bond-yield bond-id payment-amount))
+          (none (ok true)))
+        
+        ;; Transfer payment from borrower
+        ;; (try! (contract-call? (get loan-asset loan) transfer payment-amount tx-sender (as-contract tx-sender) none))
+        
     (asserts! (is-eq (get borrower loan) tx-sender) ERR_UNAUTHORIZED)
     (asserts! (is-eq (get status loan) "active") ERR_LOAN_NOT_FOUND)
     
@@ -335,8 +323,8 @@
       
       ;; Handle bond maturation if exists
       (match (get bond-token-id loan)
-        bond-id (try! (mature-bond bond-id))
-        true)
+        (some bond-id) (try! (mature-bond bond-id))
+        (none (ok true)))
       
       ;; Update system counters
       (var-set total-active-loans (- (var-get total-active-loans) u1))

@@ -220,29 +220,29 @@
 
 (define-public (distribute-yield (pool-id uint))
   (let ((pool (unwrap! (map-get? yield-pools pool-id) ERR_POOL_NOT_FOUND)))
-    
-    (asserts! (get active pool) ERR_UNAUTHORIZED)
-    (asserts! (> (get total-yield-available pool) u0) ERR_INVALID_AMOUNT)
-    
-    ;; Execute distribution based on strategy; convert strategy into a deterministic branch
-    (let ((strategy (get distribution-strategy pool)))
-      (let ((exec-result
-              (if (is-eq strategy "PROPORTIONAL")
-                (distribute-proportional pool-id)
-                (if (is-eq strategy "WEIGHTED")
-                  (distribute-weighted pool-id)
-                  (if (is-eq strategy "TIERED")
-                    (distribute-tiered pool-id)
-                    (if (is-eq strategy "VESTING")
-                      (distribute-vesting pool-id)
-                      (ok false)))))))
-        (match exec-result success (ok true) err-val ERR_DISTRIBUTION_FAILED)))
-    
-    ;; Update pool last distribution
-    (map-set yield-pools pool-id
-      (merge pool {last-distribution: block-height}))
-    
-    (ok true)))
+    (begin
+      (asserts! (get active pool) ERR_UNAUTHORIZED)
+      (asserts! (> (get total-yield-available pool) u0) ERR_INVALID_AMOUNT)
+      
+      ;; Execute distribution based on strategy; convert strategy into a deterministic branch
+      (let ((strategy (get distribution-strategy pool)))
+        (let ((exec-result
+                (if (is-eq strategy "PROPORTIONAL")
+                  (distribute-proportional pool-id)
+                  (if (is-eq strategy "WEIGHTED")
+                    (distribute-weighted pool-id)
+                    (if (is-eq strategy "TIERED")
+                      (distribute-tiered pool-id)
+                      (if (is-eq strategy "VESTING")
+                        (distribute-vesting pool-id)
+                        (ok false))))))))
+          (try! exec-result)))
+      
+      ;; Update pool last distribution
+      (map-set yield-pools pool-id
+        (merge pool {last-distribution: block-height}))
+      
+      (ok true))))
 
 ;; === DISTRIBUTION STRATEGIES ===
 (define-private (distribute-proportional (pool-id uint))

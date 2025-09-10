@@ -40,6 +40,8 @@
     flash-loan-fee-bps: uint    ;; Flash loan fee in basis points
   })
 
+(define-data-var supported-assets-list (list 50 principal) (list))
+
 ;; === USER BALANCES ===
 ;; User supply balances (principal amounts)
 (define-map user-supply-balances
@@ -107,7 +109,11 @@
         })
       
       ;; Initialize market in interest rate model
-      (try! (contract-call? .interest-rate-model initialize-market asset-principal u0))
+      (try! (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.interest-rate-model initialize-market asset-principal u0))
+
+      ;; Add to the list of supported assets
+      (var-set supported-assets-list (unwrap-panic (as-max-len? (append (var-get supported-assets-list) asset-principal) u50)))
+
       (ok true))))
 
 (define-public (set-asset-price (asset <sip10>) (price uint))
@@ -430,22 +436,38 @@
 
 ;; Check if user would remain sufficiently collateralized after a change
 (define-private (check-account-liquidity (user principal) (asset-principal principal) (amount-change int))
-  ;; Simplified version - in production would check all user's positions
   (let ((collateral-value (unwrap! (get-collateral-value user) ERR_INSUFFICIENT_COLLATERAL))
-        (borrow-value (get-total-borrow-value user))
-        (abs-delta (if (>= amount-change 0)
-                     (unwrap-panic (to-uint amount-change))
-                     (unwrap-panic (to-uint (- amount-change)))))
-        (adjusted-borrow-value (if (>= amount-change 0)
-                                 (+ borrow-value abs-delta)
-                                 (- borrow-value abs-delta))))
-    (if (> (* adjusted-borrow-value PRECISION) collateral-value)
-      ERR_INSUFFICIENT_COLLATERAL
-      (ok true))))
+        (current-borrow-value (get-total-borrow-value user))
+        (asset-price (get-asset-price asset-principal)))
+    (let ((value-change (if (>= amount-change 0)
+                          (/ (* (unwrap-panic (to-uint amount-change)) asset-price) PRECISION)
+                          (/ (* (unwrap-panic (to-uint (- amount-change))) asset-price) PRECISION)))
+          (adjusted-borrow-value (if (>= amount-change 0)
+                                   (+ current-borrow-value value-change)
+                                   (- current-borrow-value value-change))))
+      (let ((collateral-factor (default-to u800000000000000000 ;; 80% default
+                                           (get collateral-factor (map-get? supported-assets { asset: asset-principal }))))
+            (max-borrow-value (/ (* collateral-value collateral-factor) PRECISION)))
+        (asserts! (<= adjusted-borrow-value max-borrow-value) ERR_INSUFFICIENT_COLLATERAL)
+        (ok true)))))
 
 (define-private (get-total-borrow-value (user principal))
-  ;; Simplified - would iterate through all user's borrow positions
-  u0)
+  (get total-value (fold calculate-user-borrow-value 
+        (var-get supported-assets-list)
+        { user: user, total-value: u0 })))
+
+(define-private (calculate-user-borrow-value (asset-principal principal) (acc { user: principal, total-value: uint }))
+  (let ((user (get user acc))
+        (balance (get-user-borrow-balance user asset-principal)))
+    (if (> (get principal-balance balance) u0)
+      (let ((current-balance (unwrap-panic (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.interest-rate-model calculate-current-borrow-balance 
+                                                         asset-principal 
+                                                         (get principal-balance balance)
+                                                         (get borrow-index balance)))))
+            (asset-price (get-asset-price asset-principal))
+            (value (/ (* current-balance asset-price) PRECISION)))
+        { user: user, total-value: (+ (get total-value acc) value) })
+      acc)))
 
 ;; === VIEW FUNCTIONS ===
 (define-read-only (get-supply-balance (user principal) (asset <sip10>))
@@ -465,21 +487,38 @@
                        (get borrow-index balance)) u5006))))
 
 (define-read-only (get-collateral-value (user principal))
-  ;; Simplified implementation - sum all collateral positions
-  (ok u0))
+  (ok (get total-value (fold calculate-user-collateral-value
+        (var-get supported-assets-list)
+        { user: user, total-value: u0 }))))
+
+(define-private (calculate-user-collateral-value (asset-principal principal) (acc { user: principal, total-value: uint }))
+  (let ((user (get user acc))
+        (is-collateral (default-to false (get is-collateral (map-get? user-collateral-status { user: user, asset: asset-principal })))))
+    (if is-collateral
+      (let ((balance (get-user-supply-balance user asset-principal)))
+        (if (> (get principal-balance balance) u0)
+          (let ((current-balance (unwrap-panic (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.interest-rate-model calculate-current-supply-balance 
+                                                             asset-principal 
+                                                             (get principal-balance balance)
+                                                             (get supply-index balance)))))
+                (asset-price (get-asset-price asset-principal))
+                (value (/ (* current-balance asset-price) PRECISION)))
+            { user: user, total-value: (+ (get total-value acc) value) })
+          acc))
+      acc)))
 
 (define-read-only (get-health-factor (user principal))
-  (let ((collateral-value (match (get-collateral-value user) cv cv err u0))
+  (let ((collateral-value (try! (get-collateral-value user)))
         (borrow-value (get-total-borrow-value user)))
     (if (is-eq borrow-value u0)
       (ok (* u1000 PRECISION)) ;; Very high health factor if no debt
       (ok (/ (* collateral-value PRECISION) borrow-value)))))
 
 (define-read-only (get-supply-apy (asset <sip10>))
-  (contract-call? .interest-rate-model get-supply-apy (contract-of asset)))
+  (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.interest-rate-model get-supply-apy (contract-of asset)))
 
 (define-read-only (get-borrow-apy (asset <sip10>))
-  (contract-call? .interest-rate-model get-borrow-apy (contract-of asset)))
+  (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.interest-rate-model get-borrow-apy (contract-of asset)))
 
 (define-read-only (get-max-flash-loan (asset <sip10>))
   (let ((asset-principal (contract-of asset)))
@@ -493,15 +532,15 @@
   (ok (calculate-flash-loan-fee (contract-of asset) amount)))
 
 ;; === ADMIN INTERFACE IMPLEMENTATION ===
-(define-public (set-interest-rate-model (asset <sip10>) (base-rate uint) (multiplier uint) (jump-multiplier uint))
+(define-public (set-interest-rate-model (asset <sip10>) (base-rate uint) (multiplier uint) (jump-multiplier uint) (kink uint))
   (begin
     (asserts! (is-eq tx-sender (var-get admin)) ERR_UNAUTHORIZED)
-    (contract-call? .interest-rate-model set-interest-rate-model 
+    (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.interest-rate-model set-interest-rate-model 
                     (contract-of asset) 
                     base-rate 
                     multiplier 
                     jump-multiplier 
-                    (/ PRECISION u2)))) ;; 50% kink
+                    kink)))
 
 (define-public (set-collateral-factor (asset <sip10>) (factor uint))
   (begin

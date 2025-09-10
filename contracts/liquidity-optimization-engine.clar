@@ -379,14 +379,16 @@
       (ok true))))
 
 (define-private (add-liquidity-to-pool (pool-id uint) (asset principal))
-  ;; Find liquidity from other pools or external sources
-  (print (tuple (rebalance "add-liquidity") (pool-id pool-id)))
-  (ok true)) ;; Simplified
+  (begin
+    ;; Find liquidity from other pools or external sources
+    (print (tuple (rebalance "add-liquidity") (pool-id pool-id)))
+    (ok true))) ;; Simplified
 
 (define-private (remove-excess-liquidity (pool-id uint) (asset principal))
-  ;; Move excess liquidity to better opportunities
-  (print (tuple (rebalance "remove-excess") (pool-id pool-id)))
-  (ok true)) ;; Simplified
+  (begin
+    ;; Move excess liquidity to better opportunities
+    (print (tuple (rebalance "remove-excess") (pool-id pool-id)))
+    (ok true))) ;; Simplified
 
 ;; === ARBITRAGE DETECTION ===
 (define-public (scan-arbitrage-opportunities)

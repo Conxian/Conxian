@@ -62,16 +62,17 @@
     ERR_INVALID_OPERATION))
 
 ;; === MATHEMATICAL CONSTANT VALIDATION ===
-(define-public (validate-mathematical-constants) ()
-  (let ((e-check (try! (contract-call? .math-lib-advanced exp-fixed u1000000000000000000)))
-        (pi-check PI_EXPECTED) ;; Would need geometric calculation for Pi
-        (ln2-check (try! (contract-call? .math-lib-advanced ln-fixed u2000000000000000000)))
-        (sqrt2-check (try! (contract-call? .math-lib-advanced sqrt-fixed u2000000000000000000))))
-    (ok (tuple
-      (e-valid (< (abs-diff e-check E_EXPECTED) (/ E_EXPECTED u1000)))
-      (pi-valid true) ;; Placeholder
-      (ln2-valid (< (abs-diff ln2-check LN2_EXPECTED) (/ LN2_EXPECTED u1000)))
-      (sqrt2-valid (< (abs-diff sqrt2-check SQRT2_EXPECTED) (/ SQRT2_EXPECTED u1000))))))
+(define-public (validate-mathematical-constants)
+  (begin
+    (let ((e-check (try! (contract-call? .math-lib-advanced exp-fixed u1000000000000000000)))
+          (pi-check PI_EXPECTED) ;; Would need geometric calculation for Pi
+          (ln2-check (try! (contract-call? .math-lib-advanced ln-fixed u2000000000000000000)))
+          (sqrt2-check (try! (contract-call? .math-lib-advanced sqrt-fixed u2000000000000000000))))
+      (ok (tuple
+        (e-valid (< (abs-diff e-check E_EXPECTED) (/ E_EXPECTED u1000)))
+        (pi-valid true) ;; Placeholder
+        (ln2-valid (< (abs-diff ln2-check LN2_EXPECTED) (/ LN2_EXPECTED u1000)))
+        (sqrt2-valid (< (abs-diff sqrt2-check SQRT2_EXPECTED) (/ SQRT2_EXPECTED u1000)))))))
 
 ;; === BENCHMARKING FUNCTIONS ===
 ;; Run sqrt benchmark test
@@ -199,4 +200,4 @@
                         (is-ok sqrt-test)
                         (is-ok pow-test)
                         (is-ok ln-test)
-                        (is-ok exp-test)))))))
+                        (is-ok exp-test)))))

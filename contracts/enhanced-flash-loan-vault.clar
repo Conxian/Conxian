@@ -354,25 +354,25 @@
 
 ;; === ENHANCED ANALYTICS ===
 (define-read-only (get-utilization (asset principal))
-  (match (get-total-balance asset)
-    ok-total-balance
-      (let ((fls (default-to 
-                   {total-flash-loans: u0, total-volume: u0, total-fees-collected: u0, last-flash-loan-block: u0}
-                   (map-get? flash-loan-stats asset))))
-        (ok (tuple 
-          (total-balance ok-total-balance)
-          (flash-loans-count (get total-flash-loans fls))
-          (flash-loan-volume (get total-volume fls))
-          (fees-collected (get total-fees-collected fls))
-          (utilization-rate (if (is-eq ok-total-balance u0) 
-                              u0 
-                              (/ (* (get total-volume fls) PRECISION) ok-total-balance))))))
-    err-val (ok (tuple 
-      (total-balance u0)
-      (flash-loans-count u0)
-      (flash-loan-volume u0)
-      (fees-collected u0)
-      (utilization-rate u0)))))
+  (let ((total-balance (unwrap! (get-total-balance asset) 
+                                (err (tuple 
+                                  (total-balance u0)
+                                  (flash-loans-count u0)
+                                  (flash-loan-volume u0)
+                                  (fees-collected u0)
+                                  (utilization-rate u0)))))
+        (stats (default-to 
+                 {total-flash-loans: u0, total-volume: u0, total-fees-collected: u0, last-flash-loan-block: u0}
+                 (map-get? flash-loan-stats asset)))
+        (utilization-rate (if (is-eq total-balance u0) 
+                            u0 
+                            (/ (* (get total-volume stats) PRECISION) total-balance))))
+    (ok (tuple 
+      (total-balance total-balance)
+      (flash-loans-count (get total-flash-loans stats))
+      (flash-loan-volume (get total-volume stats))
+      (fees-collected (get total-fees-collected stats))
+      (utilization-rate utilization-rate)))))
 
 (define-read-only (get-revenue-stats)
   (ok (tuple 
@@ -397,4 +397,4 @@
 ;; === LEGACY VAULT TRAIT COMPLIANCE ===
 ;; Basic flash-loan function for trait compatibility
 (define-public (flash-loan-basic (amount uint) (recipient principal))
-  (flash-loan-simple 'SP000000000000000000002Q6VF78 amount recipient)) ;; Default to STX
+  (flash-loan-simple .mock-token amount recipient)) ;; Default to a mock SIP-010 token
