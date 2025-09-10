@@ -218,7 +218,7 @@
     (asserts! (is-keeper tx-sender) ERR_UNAUTHORIZED)
     
     ;; Get maximum safe liquidation amount
-    (let ((max-debt (calculate-max-liquidation-amount borrower (contract-of debt-asset))))
+    (let ((max-debt (calculate-max-liquidation-amount borrower debt-asset)))
       (liquidate-position borrower debt-asset collateral-asset max-debt u0))))
 
 ;; === LIQUIDATION VERIFICATION ===
@@ -231,15 +231,16 @@
         ERR_POSITION_HEALTHY)
     error ERR_POSITION_HEALTHY))
 
-(define-private (calculate-max-liquidation-amount (borrower principal) (debt-asset principal))
+(define-private (calculate-max-liquidation-amount (borrower principal) (debt-asset <sip10>))
   (match (contract-call? .comprehensive-lending-system get-borrow-balance borrower debt-asset)
     debt-balance
-      (match (map-get? liquidation-params { asset: debt-asset })
-        params
-          (min 
-            (/ (* debt-balance (get close-factor params)) PRECISION)
-            (get max-liquidation-amount params))
-        u0)
+      (let ((debt-asset-principal (contract-of debt-asset)))
+        (match (map-get? liquidation-params { asset: debt-asset-principal })
+          params
+            (min 
+              (/ (* debt-balance (get close-factor params)) PRECISION)
+              (get max-liquidation-amount params))
+          u0))
     u0))
 
 ;; === PRICE FEED HELPERS ===

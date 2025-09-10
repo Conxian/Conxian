@@ -339,7 +339,7 @@ depends_on = ["lending-system-trait", "flash-loan-receiver-trait", "sip-010-trai
 path = "contracts/loan-liquidation-manager.clar"
 clarity_version = 2
 epoch = "2.4"
-depends_on = ["lending-system-trait", "precision-calculator"]
+depends_on = ["lending-system-trait", "precision-calculator", "comprehensive-lending-system"]
 
 [contracts.lending-protocol-governance]
 path = "contracts/lending-protocol-governance.clar"

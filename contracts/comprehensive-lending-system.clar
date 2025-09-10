@@ -431,11 +431,14 @@
 ;; Check if user would remain sufficiently collateralized after a change
 (define-private (check-account-liquidity (user principal) (asset-principal principal) (amount-change int))
   ;; Simplified version - in production would check all user's positions
-  (let ((collateral-value (unwrap! (get-collateral-value user) u5004))
+  (let ((collateral-value (unwrap! (get-collateral-value user) ERR_INSUFFICIENT_COLLATERAL))
         (borrow-value (get-total-borrow-value user))
+        (abs-delta (if (>= amount-change 0)
+                     (default-to u0 (to-uint amount-change))
+                     (default-to u0 (to-uint (- amount-change)))))
         (adjusted-borrow-value (if (>= amount-change 0)
-                                 (+ borrow-value (to-uint amount-change))
-                                 (- borrow-value (to-uint (- amount-change))))))
+                                 (+ borrow-value abs-delta)
+                                 (- borrow-value abs-delta))))
     (if (> (* adjusted-borrow-value PRECISION) collateral-value)
       ERR_INSUFFICIENT_COLLATERAL
       (ok true))))

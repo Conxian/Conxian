@@ -354,18 +354,25 @@
 
 ;; === ENHANCED ANALYTICS ===
 (define-read-only (get-utilization (asset principal))
-  (let ((total-balance (unwrap! (get-total-balance asset) (ok u0)))
-        (flash-loan-stats (default-to 
-                            {total-flash-loans: u0, total-volume: u0, total-fees-collected: u0, last-flash-loan-block: u0}
-                            (map-get? flash-loan-stats asset))))
-    (ok (tuple 
-      (total-balance total-balance)
-      (flash-loans-count (get total-flash-loans flash-loan-stats))
-      (flash-loan-volume (get total-volume flash-loan-stats))
-      (fees-collected (get total-fees-collected flash-loan-stats))
-      (utilization-rate (if (is-eq total-balance u0) 
-                          u0 
-                          (/ (* (get total-volume flash-loan-stats) PRECISION) total-balance)))))))
+  (match (get-total-balance asset)
+    total-balance
+      (let ((fls (default-to 
+                   {total-flash-loans: u0, total-volume: u0, total-fees-collected: u0, last-flash-loan-block: u0}
+                   (map-get? flash-loan-stats asset))))
+        (ok (tuple 
+          (total-balance total-balance)
+          (flash-loans-count (get total-flash-loans fls))
+          (flash-loan-volume (get total-volume fls))
+          (fees-collected (get total-fees-collected fls))
+          (utilization-rate (if (is-eq total-balance u0) 
+                              u0 
+                              (/ (* (get total-volume fls) PRECISION) total-balance))))))
+    error (ok (tuple 
+      (total-balance u0)
+      (flash-loans-count u0)
+      (flash-loan-volume u0)
+      (fees-collected u0)
+      (utilization-rate u0)))))
 
 (define-read-only (get-revenue-stats)
   (ok (tuple 

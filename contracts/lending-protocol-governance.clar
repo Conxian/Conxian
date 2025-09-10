@@ -370,15 +370,15 @@
 (define-read-only (get-voting-power (user principal))
   (get-voting-power-at user block-height))
 
-(define-read-only (get-voting-power-at (user principal) (block-height uint))
+(define-read-only (get-voting-power-at (user principal) (at-height uint))
   ;; This would integrate with the governance token to get balance
   ;; For now, return a default value
-  (default-to u0 (map-get? voting-power-snapshots { user: user, block-height: block-height })))
+  (default-to u0 (map-get? voting-power-snapshots { user: user, block-height: at-height })))
 
-(define-private (snapshot-voting-power (user principal) (block-height uint))
+(define-private (snapshot-voting-power (user principal) (at-height uint))
   (let ((voting-power (get-voting-power user)))
     (map-set voting-power-snapshots
-      { user: user, block-height: block-height }
+      { user: user, block-height: at-height }
       voting-power)))
 
 ;; === ADMIN FUNCTIONS ===

@@ -218,9 +218,7 @@
     ;; Issue bond if loan qualifies
     (let ((bond-result 
             (if (>= principal-amount BOND_ISSUANCE_THRESHOLD)
-              (match (create-backing-bond loan-id principal-amount interest-rate maturity-block)
-                ok-val ok-val
-                err-val none)
+              (unwrap-panic (create-backing-bond loan-id principal-amount interest-rate maturity-block))
               none)))
       
       ;; Transfer collateral from borrower
