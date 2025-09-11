@@ -276,7 +276,7 @@
   (begin
     (try! (only-owner-guard))
     (let (
-      (alert (unwrap! (map-get? active-alerts { alert-id: alert-id }) (err ERR_METRIC_NOT_FOUND)))
+      (alert (unwrap! (map-get? active-alerts { alert-id: alert-id }) ERR_METRIC_NOT_FOUND))
     )
       (map-set active-alerts
         { alert-id: alert-id }

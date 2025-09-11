@@ -319,8 +319,8 @@
     (asserts! (is-eq (get status loan) "active") ERR_LOAN_NOT_FOUND)
     
     ;; Calculate total amount due
-    (distribute-bond-yield loan-id u0)
-    (let ((principal (get principal-amount loan))
+    (let ((yield-result (distribute-bond-yield loan-id u0))
+          (principal (get principal-amount loan))
           (blocks-outstanding (- block-height (get creation-block loan)))
           (total-interest (calculate-total-interest principal (get interest-rate loan) blocks-outstanding))
           (total-due (+ principal total-interest))

@@ -120,8 +120,7 @@
         failure-threshold: failure-thresh,
         success-threshold: success-thresh,
         timeout-duration: timeout
-      }
-    )
+      })
     (ok true)
   )
 )

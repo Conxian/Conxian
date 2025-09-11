@@ -41,7 +41,7 @@
 (define-map performance-metrics principal (tuple (total-volume uint) (total-fees uint)))
 
 ;; Read-only functions
-(define-read-only (get-admin)
+(define-public (get-admin)
   (ok (var-get admin)))
 
 (define-read-only (is-paused)

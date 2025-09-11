@@ -26,28 +26,28 @@
 (define-data-var admin principal tx-sender)
 (define-data-var paused bool false)
 (define-data-var deposit-fee-bps uint u30)  ;; 0.30%
-(define-data-var withdrawal-fee-bps uint u10) ;; 0.10%
-(define-data-var flash-loan-fee-bps uint u30) ;; 0.30%
-(define-data-var revenue-share-bps uint u2000) ;; 20%
+(define-data-var withdrawal-fee-bps uint u20) ;; 0.20%
+(define-data-var flash-loan-fee-bps uint u40) ;; 0.40%
+(define-data-var revenue-share-bps uint u2500) ;; 25%
 
 ;; Multi-asset support
 (define-map vault-balances principal uint)       ;; Total balance per asset
-(define-map vault-shares principal uint)         ;; Total shares per asset
-(define-map user-shares {user: principal, asset: principal} uint)
+(define-map vault-shares (tuple (user principal) (asset principal)) uint)
 (define-map supported-assets principal bool)
 (define-map vault-caps principal uint)           ;; Max deposit per asset
 
-;; Flash loan specific
-(define-map flash-loan-stats
-  principal ;; asset
+;; Enhanced flash-loan vault maps
+(define-map flash-loan-stats principal 
   {
-    total-flash-loans: uint,
+    total-loans: uint,
     total-volume: uint,
-    total-fees-collected: uint,
-    last-flash-loan-block: uint
+    total-fees: uint,
+    average-loan-size: uint
   })
 
-;; Flash loan reentrancy protection
+(define-map asset-caps principal uint) ;; asset -> max deposit cap
+
+;; Flash loan specific
 (define-data-var flash-loan-in-progress bool false)
 
 ;; Revenue tracking
@@ -73,6 +73,20 @@
     (asserts! (is-admin tx-sender) ERR_UNAUTHORIZED)
     (var-set paused pause)
     (print (tuple (event "vault-pause-changed") (paused pause)))
+    (ok true)))
+
+(define-public (set-deposit-fee (deposit-bps uint))
+  (begin
+    (asserts! (is-admin tx-sender) ERR_UNAUTHORIZED)
+    (asserts! (<= deposit-bps u1000) ERR_INVALID_AMOUNT)     ;; Max 10%
+    (var-set deposit-fee-bps deposit-bps)
+    (ok true)))
+
+(define-public (set-withdrawal-fee (withdrawal-bps uint))
+  (begin
+    (asserts! (is-admin tx-sender) ERR_UNAUTHORIZED)
+    (asserts! (<= withdrawal-bps u1000) ERR_INVALID_AMOUNT)  ;; Max 10%
+    (var-set withdrawal-fee-bps withdrawal-bps)
     (ok true)))
 
 (define-public (set-fees (deposit-bps uint) (withdrawal-bps uint) (flash-loan-bps uint))
@@ -393,6 +407,46 @@
     (asserts! (is-admin tx-sender) ERR_UNAUTHORIZED)
     (var-set system-integration-enabled true)
     (ok true)))
+
+;; === VAULT ADMIN TRAIT COMPLIANCE ===
+(define-public (emergency-withdraw (asset principal) (amount uint) (recipient principal))
+  (begin
+    (asserts! (is-admin tx-sender) ERR_UNAUTHORIZED)
+    ;; Emergency withdrawal implementation - placeholder
+    (ok amount)))
+
+(define-public (set-vault-cap (asset principal) (cap uint))
+  (begin
+    (asserts! (is-admin tx-sender) ERR_UNAUTHORIZED)
+    (map-set vault-caps asset cap)
+    (ok true)))
+
+(define-public (rebalance-vault (asset principal))
+  (begin
+    (asserts! (is-admin tx-sender) ERR_UNAUTHORIZED)
+    ;; Rebalancing logic placeholder
+    (ok true)))
+
+(define-public (set-revenue-share (share-bps uint))
+  (begin
+    (asserts! (is-admin tx-sender) ERR_UNAUTHORIZED)
+    (var-set revenue-share-bps share-bps)
+    (ok true)))
+
+(define-public (update-integration-settings (settings (tuple (monitor-enabled bool) (emission-enabled bool))))
+  (begin
+    (asserts! (is-admin tx-sender) ERR_UNAUTHORIZED)
+    (var-set system-integration-enabled (get monitor-enabled settings))
+    (ok true)))
+
+(define-public (transfer-admin (new-admin principal))
+  (begin
+    (asserts! (is-admin tx-sender) ERR_UNAUTHORIZED)
+    (var-set admin new-admin)
+    (ok true)))
+
+(define-public (get-admin)
+  (ok (var-get admin)))
 
 ;; === LEGACY VAULT TRAIT COMPLIANCE ===
 ;; Basic flash-loan function for trait compatibility
