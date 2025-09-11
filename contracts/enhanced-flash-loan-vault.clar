@@ -24,6 +24,7 @@
 
 ;; Admin and state
 (define-data-var admin principal tx-sender)
+(define-data-var default-loan-asset (optional principal) none)
 (define-data-var paused bool false)
 (define-data-var deposit-fee-bps uint u30)  ;; 0.30%
 (define-data-var withdrawal-fee-bps uint u20) ;; 0.20%
@@ -403,17 +404,23 @@
       (fees-collected (get total-fees stats))
       (utilization-rate utilization-rate)))))
 
-(define-public (collect-protocol-fees (asset principal))
-  (begin
-    (asserts! (is-eq tx-sender (var-get admin)) ERR_UNAUTHORIZED)
-    (let ((fees (default-to u0 (map-get? collected-fees asset))))
+(use-trait sip010 .sip-010-trait.sip-010-trait)
+
+(define-public (collect-protocol-fees (asset <sip10>))
+  (let ((fees (default-to u0 (map-get? collected-fees (contract-of asset))))
+        (admin-address (var-get admin)))
+    (begin
+      (asserts! (is-eq tx-sender admin-address) ERR_UNAUTHORIZED)
       (asserts! (> fees u0) ERR_INVALID_AMOUNT)
-      (map-set collected-fees asset u0)
-      (match (contract-of? asset)
-        (some token)
-          (try! (as-contract (contract-call? token transfer fees tx-sender (var-get admin) none)))
-          (ok fees)
-        none (err u1)))))
+      
+      (match (as-contract (contract-call? asset transfer fees tx-sender admin-address none))
+        result (begin 
+                (map-set collected-fees (contract-of asset) u0)
+                (ok (tuple (fees-collected fees))))
+        error (err error))
+    )
+  )
+)
 
 (define-read-only (get-revenue-stats)
   (ok (tuple 
@@ -475,7 +482,20 @@
 (define-public (get-admin)
   (ok (var-get admin)))
 
+(define-public (set-default-loan-asset (asset principal))
+  (begin
+    (asserts! (is-eq tx-sender (var-get admin)) ERR_UNAUTHORIZED)
+    (var-set default-loan-asset (some asset))
+    (ok true)))
+
 ;; === LEGACY VAULT TRAIT COMPLIANCE ===
 ;; Basic flash-loan function for trait compatibility
 (define-public (flash-loan-basic (amount uint) (recipient principal))
-  (flash-loan-simple .mock-token amount recipient)) ;; Default to a mock SIP-010 token
+  (let ((token-principal (unwrap-panic (var-get default-loan-asset))))
+    (match (as-contract (contract-call? token-principal transfer amount tx-sender recipient none))
+      (ok true) (ok true)
+      (err e) (err e))))
+
+;; Define the flash-loan-simple function that will be called by other contracts
+(define-public (flash-loan-simple (token principal) (amount uint) (recipient principal))
+  (flash-loan token amount recipient))

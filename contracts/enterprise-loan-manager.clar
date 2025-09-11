@@ -19,14 +19,75 @@
 (define-constant ERR_LIQUIDITY_SHORTAGE (err u7008))
 (define-constant ERR_LOAN_ALREADY_EXISTS (err u7009))
 (define-constant ERR_INVALID_TERMS (err u7010))
+(define-constant ERR_BOND_NOT_FOUND (err u7011))
+(define-constant ERR_BOND_MATURATION_FAILED (err u7012))
 
 ;; Loan size thresholds for enterprise features
 (define-constant ENTERPRISE_LOAN_THRESHOLD u50000000000000000000000) ;; 50,000 tokens
 (define-constant BOND_ISSUANCE_THRESHOLD u100000000000000000000000) ;; 100,000 tokens
 (define-constant MAX_LOAN_AMOUNT u10000000000000000000000000) ;; 10M tokens
 
+;; === CONFIGURATION ===
+(define-constant CONTRACT_OWNER tx-sender)
+(define-constant MAX_LOAN_TERM u2102400)  ;; ~4 years in blocks (assuming ~15s/block)
+(define-constant MIN_LOAN_AMOUNT u1000000)  ;; 1.0 STX (6 decimals)
+
+;; Contract references
+(define-constant BOND_ISSUANCE_CONTRACT 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.bond-issuance-system)
+(define-constant LENDING_SYSTEM 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.comprehensive-lending-system)
+
+;; Dynamic contract reference for bond issuance
+(define-data-var bond-issuance-system (optional principal) (some BOND_ISSUANCE_CONTRACT))
+
+;; Set the bond issuance system contract (admin only)
+(define-public (set-bond-issuance-contract (contract principal))
+  (begin
+    (asserts! (is-admin) ERR_UNAUTHORIZED)
+    (var-set bond-issuance-system (some contract))
+    (ok true)))
+
 ;; Risk and pricing constants
 (define-constant MAX_LTV_RATIO u8000) ;; 80% max loan-to-value
+
+;; Error constants
+(define-constant ERR_LENDING_SYSTEM_NOT_CONFIGURED (err u7013))
+(define-constant ERR_COLLATERAL_RELEASE_FAILED (err u7014))
+
+;; Data variables
+(define-data-var lending-system-principal (optional principal) (some LENDING_SYSTEM))
+(define-data-var bond-issuer-principal (optional principal) (some BOND_ISSUANCE_CONTRACT))
+(define-data-var total-active-loans uint u0)
+(define-data-var liquidity-pool-balance uint u0)
+(define-data-var system-paused bool false)
+(define-data-var admin principal tx-sender)
+
+;; Data maps
+(define-map enterprise-loans
+  {loan-id: uint}
+  {
+    borrower: principal,
+    principal-amount: uint,
+    collateral-amount: uint,
+    collateral-asset: principal,
+    loan-asset: principal,
+    interest-rate: uint,
+    creation-block: uint,
+    status: (string-ascii 20),
+    total-interest-paid: uint,
+    bond-token-id: (optional uint)
+  })
+
+(define-map borrower-credit-profiles
+  {borrower: principal}
+  {
+    credit-score: uint,
+    total-borrowed: uint,
+    successful-repayments: uint,
+    defaults: uint,
+    last-updated: uint
+  })
+
+(define-constant ERR_ADMIN_ONLY (err u7015))
 (define-constant MIN_CREDIT_SCORE u600) ;; Minimum credit rating
 (define-constant BASE_INTEREST_RATE u500) ;; 5% base rate
 (define-constant BOND_YIELD_PREMIUM u200) ;; 2% additional yield for bond holders
@@ -279,40 +340,55 @@
     
     (ok (some bond-id))))
 
+;; === INTEREST CALCULATION ===
+(define-private (calculate-total-interest (principal uint) (rate uint) (blocks uint))
+  (if (or (is-eq principal u0) (is-eq rate u0) (is-eq blocks u0))
+    u0  ;; No interest if any parameter is zero
+    (let ((blocks-per-year u2102400)  ;; 2102400 blocks per year (10 min/block)
+          (interest-numerator (* principal rate blocks))
+          (interest-denominator (* u100 blocks-per-year)))
+      (if (<= interest-denominator interest-numerator)
+        (/ interest-numerator interest-denominator)  ;; Safe division
+        u0))))  ;; Return 0 if calculation would underflow
+
 ;; === LOAN REPAYMENT ===
-(define-public (make-loan-payment (loan-id uint) (payment-amount uint))
+(define-public (repay-loan (loan-id uint) (payment-amount uint))
   (let ((loan (unwrap! (map-get? enterprise-loans loan-id) ERR_LOAN_NOT_FOUND)))
-    
-    ;; Validations
-    (asserts! (is-eq (get borrower loan) tx-sender) ERR_UNAUTHORIZED)
-    (asserts! (is-eq (get status loan) "active") ERR_LOAN_NOT_FOUND)
-    (asserts! (> payment-amount u0) ERR_INVALID_AMOUNT)
-    
-    ;; Calculate interest due
-    (let ((blocks-since-payment (- block-height (get last-payment-block loan)))
-          (interest-due (calculate-interest-due (get principal-amount loan) 
-                                                (get interest-rate loan) 
-                                                blocks-since-payment)))
-      (begin
-        ;; Update loan with payment
-        (map-set enterprise-loans loan-id
-          (merge loan 
-                 {total-interest-paid: (+ (get total-interest-paid loan) payment-amount),
-                  last-payment-block: block-height}))
-        
-        ;; Distribute yield to bond holders if bond exists  
-        (match (get bond-token-id loan)
-          bond-id (unwrap-panic (distribute-bond-yield bond-id payment-amount))
-          true)
-        
-        ;; Transfer payment from borrower
-        ;; (try! (contract-call? (get loan-asset loan) transfer payment-amount tx-sender (as-contract tx-sender) none))
-        
-        (print (tuple (event "loan-payment") (loan-id loan-id) (payment payment-amount)))
-        (ok true)))))
+    (begin
+      ;; Validations
+      (asserts! (is-eq (get borrower loan) tx-sender) ERR_UNAUTHORIZED)
+      (asserts! (is-eq (get status loan) "active") ERR_LOAN_NOT_FOUND)
+      (asserts! (> payment-amount u0) ERR_INVALID_AMOUNT)
+      
+      ;; Calculate interest due
+      (let ((blocks-since-payment (- block-height (get last-payment-block loan)))
+            (interest-due (calculate-total-interest (get principal-amount loan) 
+                                                  (get interest-rate loan) 
+                                                  blocks-since-payment)))
+        (begin
+          ;; Update loan with payment
+          (map-set enterprise-loans loan-id
+            (merge loan 
+                   {total-interest-paid: (+ (get total-interest-paid loan) payment-amount),
+                    last-payment-block: block-height}))
+          
+          ;; Distribute yield to bond holders if bond exists  
+          (match (get bond-token-id loan)
+            bond-id (unwrap-panic (distribute-bond-yield bond-id payment-amount))
+            true)
+          
+          ;; Transfer payment from borrower
+          ;; (try! (contract-call? (get loan-asset loan) transfer payment-amount tx-sender (as-contract tx-sender) none))
+          
+          (print (tuple (event "loan-payment") (loan-id loan-id) (payment payment-amount)))
+          (ok true))))))
 
 (define-public (repay-loan-full (loan-id uint))
-  (let ((loan (unwrap! (map-get? enterprise-loans loan-id) ERR_LOAN_NOT_FOUND)))
+  (let ((loan (unwrap! (map-get? enterprise-loans loan-id) ERR_LOAN_NOT_FOUND))
+        (lending-system (unwrap! (var-get lending-system-principal) ERR_LENDING_SYSTEM_NOT_CONFIGURED))
+        (bond-issuer (unwrap! (var-get bond-issuance-system-principal) ERR_BOND_ISSUER_NOT_CONFIGURED))
+        (enterprise-loan-manager (as-contract tx-sender))
+        (bond-issuance-system (var-get bond-issuance-system-principal)))
     
     ;; Validations
     (asserts! (is-eq (get borrower loan) tx-sender) ERR_UNAUTHORIZED)
@@ -324,43 +400,52 @@
           (total-interest (calculate-total-interest principal (get interest-rate loan) blocks-outstanding))
           (total-due (+ principal total-interest))
           (interest-already-paid (get total-interest-paid loan))
-          (remaining-due (- total-due interest-already-paid)))
+          (remaining-due (- total-due interest-already-paid))
+          (bond-token (get bond-token-id loan))
+          (loan-asset-principal (get loan-asset loan))
+          (collateral-asset (get collateral-asset loan))
+          (collateral-amount (get collateral-amount loan))
+          (borrower (get borrower loan)))
       
-      ;; Distribute any remaining yield to bond holders if bond exists
-      (let ((bond-token (get bond-token-id loan)))
+      (begin
+        ;; Distribute yield to bond holders if this is a bond-backed loan
         (if (is-some bond-token)
-          (match (contract-call? .bond-issuance-system distribute-yield (unwrap-panic bond-token) u0) result
-            (ok (ok true))
-            (error code 
-              (begin 
-                (print (tuple (event "yield-distribution-failed") (error-code code) (message "Failed to distribute yield to bond holders")))
-                (ok true))))  ;; Continue with loan repayment even if yield distribution fails
-          (ok true))))
-      
-      ;; Update loan status
-      (map-set enterprise-loans loan-id
-        (merge loan {status: "repaid", total-interest-paid: total-interest}))
-      
-      ;; Release collateral back to borrower
-      ;; (try! (as-contract (contract-call? (get collateral-asset loan) 
-      ;;                                   transfer (get collateral-amount loan) 
-      ;;                                   tx-sender (get borrower loan) none)))
-      
-      ;; Handle bond maturation if exists
-      (match (get bond-token-id loan) bond-id
-        (unwrap! (mature-bond bond-id) false)
-        true)
-      
-      ;; Update system counters
-      (var-set total-active-loans (- (var-get total-active-loans) u1))
-      (var-set liquidity-pool-balance (+ (var-get liquidity-pool-balance) remaining-due))
-      
-      ;; Update borrower credit profile positively
-      (update-borrower-repayment-history (get borrower loan) true)
-      
-      (print (tuple (event "loan-repaid") (loan-id loan-id) (total-paid total-due)))
-      
-      (ok total-due))))
+          (match (contract-call? bond-issuance-system distribute-yield (unwrap-panic bond-token) u0)
+            (ok result) true
+            (err error) (begin 
+              (print (tuple (event "yield-distribution-failed") (error error) (message (some "Failed to distribute yield to bond holders"))))
+              true)  ;; Continue with loan repayment even if yield distribution fails
+          )
+          true)
+        
+        ;; Update loan status
+        (map-set enterprise-loans loan-id
+          (merge loan {status: "repaid", total-interest-paid: total-interest}))
+        
+        ;; Release collateral back to borrower
+        (match (as-contract (contract-call? collateral-asset transfer collateral-amount tx-sender borrower none))
+          (ok true) true
+          (err error) (begin
+            (print (tuple (event "collateral-release-failed") (error error)))
+            (err ERR_COLLATERAL_RELEASE_FAILED)))
+        
+        ;; If this was a bond-backed loan, mark the bond as matured
+        (if (is-some bond-token)
+          (match (contract-call? (unwrap-panic (var-get bond-issuance-system)) mature-bond (unwrap-panic bond-token)) response
+            (ok result) true
+            (err error) (err ERR_BOND_MATURATION_FAILED))
+          true)
+        
+        ;; Update system counters
+        (var-set total-active-loans (- (var-get total-active-loans) u1))
+        (var-set liquidity-pool-balance (+ (var-get liquidity-pool-balance) remaining-due))
+        
+        ;; Update borrower credit profile positively
+        (update-borrower-repayment-history borrower true)
+        
+        (print (tuple (event "loan-repaid") (loan-id loan-id) (total-paid total-due)))
+        
+        (ok total-due)))))
 
 ;; === BOND YIELD DISTRIBUTION ===
 (define-private (distribute-bond-yield (bond-id uint) (yield-amount uint))
@@ -375,25 +460,15 @@
 
 (define-private (mature-bond (bond-id uint))
   ;; Handle bond maturation - return principal to bond holders
-  (match (map-get? bond-backing-loans bond-id)
-    bond-data
-      (begin
-        ;; Mark bond as matured
-        ;; Bond maturation handled through bond issuance system
-        (print (tuple (event "bond-matured") (bond-id bond-id) 
-                      (principal (get total-principal bond-data))))
-        (ok true))
-    (ok false)))
+  (let ((bond-data (unwrap! (map-get? bond-backing-loans bond-id) (err ERR_BOND_NOT_FOUND))))
+    (begin
+      ;; Mark bond as matured
+      ;; Bond maturation handled through bond issuance system
+      (print (tuple (event "bond-matured") (bond-id bond-id) 
+                    (principal (get total-principal bond-data))))
+      (ok true))))
 
 ;; === UTILITY FUNCTIONS ===
-(define-private (calculate-interest-due (principal uint) (rate uint) (blocks uint))
-  (let ((annual-interest (/ (* principal rate) BASIS_POINTS))
-        (block-interest (/ annual-interest BLOCKS_PER_YEAR)))
-    (* block-interest blocks)))
-
-(define-private (calculate-total-interest (principal uint) (rate uint) (blocks uint))
-  ;; Simple interest calculation for now
-  (calculate-interest-due principal rate blocks))
 
 (define-private (update-borrower-profile (borrower principal) (loan-amount uint))
   (let ((current-profile (default-to 
@@ -477,7 +552,7 @@
   (match (map-get? enterprise-loans loan-id)
     loan
       (let ((blocks-since-payment (- block-height (get last-payment-block loan)))
-            (interest-due (calculate-interest-due (get principal-amount loan) 
+            (interest-due (calculate-total-interest (get principal-amount loan) 
                                                   (get interest-rate loan) 
                                                   blocks-since-payment)))
         (ok interest-due))

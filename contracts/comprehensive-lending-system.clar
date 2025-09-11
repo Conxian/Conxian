@@ -27,7 +27,21 @@
 
 ;; === ADMIN ===
 (define-data-var admin principal tx-sender)
+(define-data-var total-borrows uint u0)
 (define-data-var paused bool false)
+
+(define-map total-supply { asset: principal } { amount: uint })
+
+(define-private (decrease-total-supply (asset principal) (amount uint))
+  (let ((current (default-to { amount: u0 } (map-get? total-supply { asset: asset }))))
+    (asserts! (>= (get amount current) amount) ERR_INSUFFICIENT_LIQUIDITY)
+    (map-set total-supply { asset: asset } { amount: (- (get amount current) amount) })
+    (ok amount)))
+
+(define-private (increase-total-supply (asset principal) (amount uint))
+  (let ((current (default-to { amount: u0 } (map-get? total-supply { asset: asset }))))
+    (map-set total-supply { asset: asset } { amount: (+ (get amount current) amount) })
+    (ok amount)))
 
 ;; === SUPPORTED ASSETS ===
 (define-map supported-assets
@@ -42,6 +56,14 @@
   })
 
 (define-data-var supported-assets-list (list 50 principal) (list))
+
+(define-read-only (is-asset-supported (asset principal))
+  (is-some (map-get? supported-assets { asset: asset })))
+
+(define-read-only (get-user-supply-balance (user principal) (asset principal))
+  (default-to 
+    { principal-balance: u0, supply-index: u1000000000000000 } 
+    (map-get? user-supply-balances { user: user, asset: asset })))
 
 ;; === USER BALANCES ===
 ;; User supply balances (principal amounts)
@@ -170,6 +192,8 @@
         
         (ok amount)))))
 
+(use-trait sip010 .sip-010-trait.sip-010-trait)
+
 (define-public (withdraw (asset <sip10>) (amount uint))
   (let ((user tx-sender)
         (asset-principal (contract-of asset)))
@@ -178,7 +202,7 @@
       (asserts! (> amount u0) ERR_ZERO_AMOUNT)
       (asserts! (is-asset-supported asset-principal) ERR_INVALID_ASSET)
       
-      ;; Update interest before withdrawal
+      ;; Accrue interest to ensure up-to-date calculations
       (unwrap-panic (contract-call? .interest-rate-model accrue-interest asset-principal))
       
       (let ((current-balance (get-user-supply-balance user asset-principal))
@@ -189,31 +213,36 @@
         ;; Check if withdrawal would make user undercollateralized
         (try! (check-account-liquidity user asset-principal (- (to-int amount))))
         
-        ;; Calculate new principal balance
         (let ((market-info (unwrap! (contract-call? .interest-rate-model get-market-info asset-principal) ERR_INVALID_ASSET))
               (current-supply-index (get supply-index market-info))
-              (principal-to-remove (/ (* amount PRECISION) current-supply-index))
+              (principal-to-remove (/ (* amount PRECISION) (get supply-index market-info)))
               (new-principal-balance (- (get principal-balance current-balance) principal-to-remove)))
           
-          ;; Update user balance
-          (map-set user-supply-balances
-            { user: user, asset: asset-principal }
-            {
-              principal-balance: new-principal-balance,
-              supply-index: current-supply-index
-            })
-          
-          ;; Update market state
-          (try! (contract-call? .interest-rate-model update-market-state 
-                               asset-principal 
-                               (- (to-int amount))
-                               0 
-                               (- (to-int amount))))
-          
-          ;; Transfer tokens to user
-          (try! (as-contract (contract-call? asset transfer amount tx-sender user none)))
-          
-          (ok amount))))))
+          (match (as-contract (contract-call? asset transfer amount tx-sender user none)) transfer-result
+            (ok true) 
+            (begin
+              (match (contract-call? .interest-rate-model update-market-state 
+                      asset-principal 
+                      (- (to-int amount))
+                      0 
+                      (- (to-int amount))) update-result
+                (ok update-ok) 
+                (begin
+                  (map-set user-supply-balances
+                    { user: user, asset: asset-principal }
+                    (merge 
+                      { principal-balance: new-principal-balance }
+                      { supply-index: current-supply-index }))
+                  (decrease-total-supply asset-principal principal-to-remove)
+                  (ok amount))
+                (err update-error) (err update-error)))
+            (err transfer-error) (err transfer-error))
+          )
+        )
+      )
+    )
+  )
+)
 
 ;; === BORROW FUNCTIONS ===
 (define-public (borrow (asset <sip10>) (amount uint))
@@ -269,16 +298,14 @@
       (asserts! (is-asset-supported asset-principal) ERR_INVALID_ASSET)
       
       ;; Update interest before repay
-      (match (contract-call? .interest-rate-model accrue-interest asset-principal) result
-        (ok (unwrap! result (err u1000)))
-        (error code (err code)))
-      
-      (let ((current-balance (get-user-borrow-balance user asset-principal)))
-        (match (contract-call? .interest-rate-model calculate-current-borrow-balance 
-                             asset-principal 
-                             (get principal-balance current-balance)
-                             (get borrow-index current-balance))
-          (ok current-borrow-balance)
+      (match (contract-call? .interest-rate-model accrue-interest asset-principal)
+        (ok result) 
+        (let ((current-balance (get-user-borrow-balance user asset-principal)))
+          (match (contract-call? .interest-rate-model calculate-current-borrow-balance 
+                               asset-principal 
+                               (get principal-balance current-balance)
+                               (get borrow-index current-balance))
+            (ok current-borrow-balance)
             (let ((actual-repay-amount (min amount current-borrow-balance)))
               ;; Transfer tokens from user
               (try! (contract-call? asset transfer actual-repay-amount user (as-contract tx-sender) none))
@@ -286,28 +313,29 @@
               ;; Calculate new principal balance
               (match (contract-call? .interest-rate-model get-market-info asset-principal)
                 (ok market-info)
-                  (let ((current-borrow-index (get borrow-index market-info))
-                        (principal-to-remove (/ (* actual-repay-amount PRECISION) current-borrow-index))
-                        (new-principal-balance (- (get principal-balance current-balance) principal-to-remove)))
-                    (if (<= new-principal-balance u0)
-                        (map-delete user-borrow-balances { user: user, asset: asset-principal })
-                        (map-set user-borrow-balances 
-                                { user: user, asset: asset-principal }
-                                { 
-                                  principal-balance: new-principal-balance,
-                                  borrow-index: current-borrow-index
-                                }))
-                    
-                    ;; Update market state
-                    (match (contract-call? .interest-rate-model update-market-state 
-                                         asset-principal 
-                                         0 
-                                         (- (to-int actual-repay-amount)) 
-                                         0)
-                      (ok result) (ok actual-repay-amount)
-                      (err code) (err code)))
-                (err code) (err code)))
-          (err code) (err code))))))
+                (let ((current-borrow-index (get borrow-index market-info))
+                      (principal-to-remove (/ (* actual-repay-amount PRECISION) current-borrow-index))
+                      (new-principal-balance (- (get principal-balance current-balance) principal-to-remove)))
+                  (if (<= new-principal-balance u0)
+                      (map-delete user-borrow-balances { user: user, asset: asset-principal })
+                      (map-set user-borrow-balances 
+                              { user: user, asset: asset-principal }
+                              { 
+                                principal-balance: new-principal-balance,
+                                borrow-index: current-borrow-index
+                              }))
+                  
+                  ;; Update market state
+                  (match (contract-call? .interest-rate-model update-market-state 
+                                      asset-principal 
+                                      (to-int actual-repay-amount)
+                                      0 
+                                      (- (to-int actual-repay-amount)))
+                    (ok result) (ok actual-repay-amount)
+                    error (err error)))
+                error (err error)))
+            error (err error)))
+        error (err error)))))
 
 ;; === LIQUIDATION ===
 (define-public (liquidate (borrower principal) (asset <sip10>) (repay-amount uint))
@@ -319,18 +347,21 @@
       (asserts! (is-asset-supported asset-principal) ERR_INVALID_ASSET)
       
       ;; Update interest before liquidation
-      (try! (contract-call? .interest-rate-model accrue-interest asset-principal))
+      (let ((interest-result (unwrap! (contract-call? .interest-rate-model accrue-interest asset-principal) (err u1003))))
+        (asserts! (is-ok interest-result) (err (unwrap-err! interest-result u1003))))
       
       ;; Check if borrower is liquidatable
-      (let ((health-factor (unwrap! (get-health-factor borrower) u5009)))
-        (asserts! (< health-factor MIN_HEALTH_FACTOR) ERR_POSITION_HEALTHY)
+      (let ((health-factor (unwrap! (get-health-factor borrower) (err u5009))))
+        (asserts! (< health-factor MIN_HEALTH_FACTOR) (err u5009))
         
         ;; Calculate max liquidatable amount
         (let ((borrow-balance (get-user-borrow-balance borrower asset-principal))
-              (current-debt (unwrap! (contract-call? .interest-rate-model calculate-current-borrow-balance 
-                                           asset-principal 
-                                           (get principal-balance borrow-balance)
-                                           (get borrow-index borrow-balance)) u5006))
+              (current-debt (unwrap! 
+                (contract-call? .interest-rate-model calculate-current-borrow-balance 
+                  asset-principal 
+                  (get principal-balance borrow-balance)
+                  (get borrow-index borrow-balance))
+                (err u1004)))
               (max-liquidatable (/ (* current-debt CLOSE_FACTOR) PRECISION))
               (actual-repay-amount (min repay-amount max-liquidatable)))
           
@@ -358,9 +389,36 @@
                   (liquidation-bonus (get-liquidation-bonus asset-principal))
                   (seize-value (/ (* collateral-value (+ PRECISION liquidation-bonus)) PRECISION)))
               
-              ;; TODO: Seize collateral from borrower's supply positions
-              ;; This would involve finding the best collateral to seize
-              ;; and transferring it to the liquidator
+              ;; Convert seize-value to amount of collateral asset
+              (let ((collateral-asset (unwrap! (get-collateral-asset borrower) (err u1005)))
+                    (collateral-price (get-asset-price collateral-asset))
+                    (amount-to-seize (/ (* seize-value PRECISION) collateral-price))
+                    (borrower-balance (get-user-supply-balance borrower collateral-asset))
+                    (borrower-amount (get principal-balance borrower-balance)))
+                
+                ;; Verify borrower has sufficient collateral
+                (asserts! (>= borrower-amount amount-to-seize) ERR_INSUFFICIENT_COLLATERAL)
+                
+                ;; Update borrower's balance
+                (map-set user-supply-balances
+                         { user: borrower, asset: collateral-asset }
+                         { principal-balance: (- borrower-amount amount-to-seize)
+                           supply-index: (get supply-index borrower-balance) })
+                
+                ;; Update liquidator's balance
+                (let ((liquidator-balance (get-user-supply-balance tx-sender collateral-asset)))
+                  (map-set user-supply-balances
+                           { user: tx-sender, asset: collateral-asset }
+                           { principal-balance: (+ (get principal-balance liquidator-balance) amount-to-seize)
+                             supply-index: (get supply-index liquidator-balance) }))
+                
+                ;; Emit collateral seized event
+                (print (tuple 
+                         (event "collateral-seized")
+                         (borrower borrower)
+                         (liquidator tx-sender)
+                         (asset collateral-asset)
+                         (amount amount-to-seize))))
               
               ;; Update market state
               (try! (contract-call? .interest-rate-model update-market-state 
@@ -374,6 +432,30 @@
 ;; === HELPER FUNCTIONS ===
 (define-private (is-asset-supported (asset-principal principal))
   (default-to false (get is-supported (map-get? supported-assets { asset: asset-principal }))))
+
+(define-private (check-account-liquidity (user principal) (asset-principal principal) (amount-change int))
+  (let ((collateral-value (unwrap! (get-collateral-value user) ERR_INSUFFICIENT_COLLATERAL))
+        (current-borrow-value (get-total-borrow-value user))
+        (asset-price (get-asset-price asset-principal)))
+    
+    (let ((value-change (if (>= amount-change 0)
+                          (/ (* (to-uint amount-change) asset-price) PRECISION)
+                          (/ (* (to-uint (if (> amount-change 0) amount-change (- 0 amount-change))) asset-price) PRECISION)))
+          (adjusted-borrow-value (if (>= amount-change 0)
+                                   (+ current-borrow-value value-change)
+                                   (if (> current-borrow-value value-change)
+                                     (- current-borrow-value value-change)
+                                     u0))))
+      
+      (let ((collateral-factor (default-to u800000000000000000 ;; 80% default
+                                           (get collateral-factor (map-get? supported-assets { asset: asset-principal }))))
+            (max-borrow-value (/ (* collateral-value collateral-factor) PRECISION)))
+        
+        (asserts! (<= adjusted-borrow-value max-borrow-value) ERR_INSUFFICIENT_COLLATERAL)
+        (ok true))
+    )
+  )
+)
 
 (define-private (is-flash-loan-supported (asset-principal principal))
   (default-to false (get flash-loan-enabled (map-get? supported-assets { asset: asset-principal }))))
@@ -414,11 +496,13 @@
         (current-borrow-value (get-total-borrow-value user))
         (asset-price (get-asset-price asset-principal)))
     (let ((value-change (if (>= amount-change 0)
-                          (/ (* u1000000 asset-price) PRECISION)
-                          (/ (* u1000000 asset-price) PRECISION)))
+                          (/ (* (to-uint amount-change) asset-price) PRECISION)
+                          (/ (* (to-uint (if (> amount-change 0) amount-change (- 0 amount-change))) asset-price) PRECISION)))
           (adjusted-borrow-value (if (>= amount-change 0)
                                    (+ current-borrow-value value-change)
-                                   (- current-borrow-value value-change))))
+                                   (if (> current-borrow-value value-change)
+                                     (- current-borrow-value value-change)
+                                     u0))))
       (let ((collateral-factor (default-to u800000000000000000 ;; 80% default
                                            (get collateral-factor (map-get? supported-assets { asset: asset-principal }))))
             (max-borrow-value (/ (* collateral-value collateral-factor) PRECISION)))
@@ -532,4 +616,23 @@
             { asset: (contract-of asset) }
             (merge asset-config { liquidation-threshold: threshold }))
           (ok true))
-      ERR_INVALID_ASSET)))
+      error (err error))))
+
+(define-private (get-collateral-asset (user principal))
+  (let ((collateral-assets (filter is-collateral (map-keys user-collateral-status))))
+    (if (is-none collateral-assets)
+      (err u1005) ;; No collateral assets
+      (unwrap! (get-asset-with-highest-value user (unwrap-panic collateral-assets)) u1005))))
+
+(define-private (get-asset-with-highest-value (user principal) (assets (list principal)))
+  (let ((asset-values (map get-asset-value assets)))
+    (let ((max-value (fold max u0 asset-values))
+          (max-asset (find max-value asset-values)))
+      (if (is-none max-asset)
+        (err u1005) ;; No assets with value
+        (unwrap! max-asset u1005)))))
+
+(define-private (get-asset-value (asset principal))
+  (let ((balance (get-user-supply-balance tx-sender asset))
+        (price (get-asset-price asset)))
+    (/ (* (get principal-balance balance) price) PRECISION)))
