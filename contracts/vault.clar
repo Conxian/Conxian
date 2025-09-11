@@ -275,7 +275,7 @@
 
 (define-public (emergency-withdraw (asset principal) (amount uint) (recipient principal))
   (begin
-    (asserts! (is-admin tx-sender) ERR_UNAUTHORIZED)
+    (asserts! (is-admin tx-sender) (err u401))
     ;; Emergency withdrawal implementation
     (ok amount)))
 

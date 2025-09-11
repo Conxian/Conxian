@@ -1,6 +1,6 @@
 # Conxian Stacks DeFi — Design
 
-This document outlines the live Conxian on-chain DeFi architecture (current implementation + in-progress subsystems) on Stacks, leveraging Bitcoin anchoring and future BTC bridges (e.g., sBTC) for differentiation.  
+This document outlines the Conxian on-chain DeFi framework architecture (current framework implementation + development roadmap) on Stacks, leveraging Bitcoin anchoring and future BTC bridges (e.g., sBTC) for differentiation.  
 For detailed product-level requirements, see `documentation/prd/` (e.g., `VAULT.md`, `DAO_GOVERNANCE.md`, `DEX.md`).
 
 ## Principles
@@ -11,7 +11,7 @@ For detailed product-level requirements, see `documentation/prd/` (e.g., `VAULT.
 - Sustainable economics: fee capture to protocol reserve, transparent emissions (if any)
 - BTC-native differentiation: accept BTC-derivatives (e.g., sBTC) and anchor state to Bitcoin
 
-## Core Contracts (Implemented)
+## Core Contracts (Framework Level)
 
 ### Foundation Layer
 - `vault.clar` – Share-based accounting, caps, dynamic fees, precision math integration
@@ -19,12 +19,12 @@ For detailed product-level requirements, see `documentation/prd/` (e.g., `VAULT.
 - `fixed-point-math.clar` – Precise arithmetic operations with proper rounding modes for 18-decimal precision
 - `precision-calculator.clar` – Validation and benchmarking tools for mathematical operations
 
-### Lending & Flash Loan System
-- `comprehensive-lending-system.clar` – Complete lending protocol with supply, borrow, liquidation, and flash loans
-- `enhanced-flash-loan-vault.clar` – ERC-3156 compatible flash loans with reentrancy protection
-- `interest-rate-model.clar` – Dynamic interest rates based on utilization curves with kink models
-- `loan-liquidation-manager.clar` – Automated liquidation system with keeper incentives
-- `lending-protocol-governance.clar` – Community governance for protocol parameters
+### Lending & Flash Loan Framework
+- `comprehensive-lending-system.clar` – Framework lending protocol with supply, borrow, liquidation, and flash loans
+- `enhanced-flash-loan-vault.clar` – Basic ERC-3156 compatible flash loan framework with reentrancy protection
+- `interest-rate-model.clar` – Dynamic interest rate calculation framework based on utilization curves
+- `loan-liquidation-manager.clar` – Basic liquidation framework with keeper incentive structure
+- `lending-protocol-governance.clar` – Community governance framework for protocol parameters
 - `flash-loan-receiver-trait.clar` – Interface for flash loan callback implementations
 - `lending-system-trait.clar` – Comprehensive lending protocol interface definitions
 
@@ -50,12 +50,12 @@ For detailed product-level requirements, see `documentation/prd/` (e.g., `VAULT.
 - `token-emission-controller.clar` – Controls the emission of new tokens
 - `token-system-coordinator.clar` – Coordinates the token system
 
-### Additional Infrastructure
-- `distributed-cache-manager.clar` – Manages distributed caching for performance
-- `memory-pool-management.clar` – Optimizes memory pool usage
-- `predictive-scaling-system.clar` – Handles system scaling predictions
-- `real-time-monitoring-dashboard.clar` – Real-time system monitoring
-- `transaction-batch-processor.clar` – Processes transaction batches efficiently
+### Additional Infrastructure Framework
+- `distributed-cache-manager.clar` – Basic distributed caching framework structure
+- `memory-pool-management.clar` – Memory pool optimization framework
+- `predictive-scaling-system.clar` – System scaling prediction framework
+- `real-time-monitoring-dashboard.clar` – Monitoring framework structure
+- `transaction-batch-processor.clar` – Transaction batch processing framework
   
 Traits & Interfaces: `vault-trait`, `vault-admin-trait`, `strategy-trait`, `pool-trait`, `sip-010-trait`.
 
@@ -86,23 +86,23 @@ Traits & Interfaces: `vault-trait`, `vault-admin-trait`, `strategy-trait`, `pool
 
 ## Roadmap
 
-Completed:
+Framework Implemented:
 
-1. **Mathematical Foundation**: Advanced functions (sqrt, pow, ln, exp) with Newton-Raphson and Taylor series algorithms
-2. **Comprehensive Lending System**: Supply, borrow, liquidation with ERC-3156 compatible flash loans
-3. **Dynamic Interest Rates**: Utilization-based rates with kink models and real-time adjustments  
-4. **Automated Risk Management**: Health factor monitoring, automated liquidations, keeper incentives
-5. **Protocol Governance**: Community-driven parameter management and upgrade mechanisms
-6. **SIP-010 Integration**: Token integration (governance & auxiliary tokens)
-7. **Comprehensive Test Suites**: Unit, integration, production validation, circuit breaker
-8. **DEX Subsystem**: AMM core, router, variants, advanced mathematical library
-9. **Circuit Breaker & Monitoring**: Enterprise monitoring layer with structured event codes
+1. **Mathematical Foundation**: Advanced mathematical function framework (sqrt, pow, ln, exp) with Newton-Raphson and Taylor series algorithms
+2. **Lending System Framework**: Supply, borrow, liquidation framework with basic ERC-3156 compatible flash loans
+3. **Interest Rate Framework**: Utilization-based rate calculation framework with kink models
+4. **Risk Management Framework**: Health factor monitoring framework, basic liquidation structure, keeper incentive framework
+5. **Governance Framework**: Community-driven parameter management framework and upgrade structure
+6. **Token Integration**: Basic SIP-010 token framework (governance & auxiliary tokens)
+7. **Test Framework**: Unit, integration, and basic validation framework, circuit breaker testing
+8. **DEX Framework**: AMM core framework, router structure, mathematical library foundation
+9. **Monitoring Framework**: Basic monitoring structure with event framework
 
-Current:
+Current Development:
 
-1. **Enhanced Integration**: Connecting new lending system with existing vault infrastructure
-2. **Advanced Pool Support**: Leveraging mathematical foundation for concentrated liquidity
-3. **Cross-Protocol Optimization**: Flash loan arbitrage and yield optimization strategies
+1. **Framework Integration**: Connecting lending framework with existing vault infrastructure
+2. **Pool Support Framework**: Leveraging mathematical foundation for concentrated liquidity structure
+3. **Protocol Optimization Framework**: Flash loan arbitrage framework and yield optimization structure
 
 Upcoming:
 
@@ -121,11 +121,11 @@ Upcoming:
 - Taylor series ln/exp for compound interest and advanced pricing models
 - 18-decimal precision arithmetic with proper rounding modes
 
-**Advanced Features Ready**:
-- Concentrated liquidity pool mathematics implemented
-- Weighted pool invariant calculations supported
-- TWAP oracle integration framework prepared
-- Multi-hop routing with precise slippage calculations
+**Framework Features Available**:
+- Concentrated liquidity pool mathematics framework implemented
+- Weighted pool invariant calculation framework supported
+- TWAP oracle integration framework structure prepared
+- Multi-hop routing framework with slippage calculation structure
 
 **Prototypes / Experimental**: `stable-pool`, `weighted-pool`, `multi-hop-router`, `mock-dex`
 
@@ -137,6 +137,6 @@ Upcoming:
 - Add MEV protection using circuit-breaker hooks
 - Implement cross-protocol yield optimization strategies
 
-**Completed**: Mathematical library gap resolved, precision validation, invariant calculations ready
+**Framework Status**: Mathematical library framework implemented, precision validation framework, invariant calculation framework ready
 
 Updated: Sep 09, 2025

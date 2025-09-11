@@ -1,6 +1,6 @@
 # Conxian Contract Guides
 
-Welcome to the comprehensive contract guides for the Conxian ecosystem. This documentation covers all 44 production contracts including the new comprehensive lending system with advanced mathematical libraries.
+Welcome to the contract guides for the Conxian ecosystem. This documentation covers 65+ smart contracts including mathematical libraries, lending system framework, sBTC integration structure, and system components.
 
 These guides provide in-depth explanations of the core contracts, their functions, key concepts, and how they interact with each other.
 
@@ -14,15 +14,15 @@ Advanced mathematical functions providing enterprise-grade precision for DeFi ca
 - [Fixed-Point Mathematics](#fixed-point-math) - 18-decimal precision arithmetic
 - [Precision Validation](#precision-calculator) - Mathematical validation tools
 
-### 💰 Comprehensive Lending System  
-Complete lending protocol with supply, borrow, liquidation, and flash loans.
+### 💰 Lending System Framework  
+Lending protocol framework with basic supply, borrow, liquidation structures and flash loan implementation.
 
-- [**Lending System Overview**](#lending-system) - Complete lending protocol guide
-- [Core Lending Protocol](#comprehensive-lending-system) - Supply, borrow, liquidation
-- [Flash Loan System](#enhanced-flash-loan-vault) - ERC-3156 compatible flash loans
-- [Interest Rate Models](#interest-rate-model) - Dynamic rate calculations
-- [Liquidation Management](#loan-liquidation-manager) - Automated liquidations
-- [Lending Governance](#lending-protocol-governance) - Community parameter control
+- [**Lending System Overview**](#lending-system) - Lending framework guide
+- [Core Lending Protocol](#comprehensive-lending-system) - Basic supply, borrow, liquidation framework
+- [Flash Loan System](#enhanced-flash-loan-vault) - ERC-3156 compatible flash loan implementation
+- [Interest Rate Models](#interest-rate-model) - Rate calculation framework
+- [Liquidation Management](#loan-liquidation-manager) - Basic liquidation structure
+- [Lending Governance](#lending-protocol-governance) - Governance framework for parameters
 
 ### 🏦 Core Infrastructure
 Foundational contracts and token systems.
@@ -32,13 +32,13 @@ Foundational contracts and token systems.
 - [Revenue Distribution](#revenue-distributor) - Stakeholder rewards
 - [System Coordination](#coordination) - Token and system coordination
 
-### 🔀 DEX Infrastructure
-Decentralized exchange with advanced mathematical integration.
+### 🔀 DEX Components
+DEX infrastructure with basic pool and routing functionality.
 
-- [DEX Overview](#dex-system) - Complete trading infrastructure
-- [Pool Factory](#dex-factory) - Pool creation and management
-- [Trading Pools](#dex-pool) - Liquidity pool implementation
-- [Routing System](#dex-router) - Multi-hop trading routes
+- [DEX Overview](#dex-system) - Basic trading infrastructure
+- [Pool Factory](#dex-factory) - Pool creation framework
+- [Trading Pools](#dex-pool) - Basic liquidity pool structure
+- [Routing System](#dex-router) - Multi-hop routing framework
 
 ### 🛡️ Security & Monitoring
 System protection and performance optimization.
@@ -206,7 +206,7 @@ All contracts implement comprehensive security measures:
 - Access control and permission management
 - Emergency pause mechanisms where appropriate
 
-For detailed implementation guides and advanced usage patterns, see the [Comprehensive Lending Implementation](../../COMPREHENSIVE_LENDING_IMPLEMENTATION.md) document.
+For detailed implementation guides and advanced usage patterns, see the [System Specification](../../system_spec.md) document.
 
 1.  **[Vault Guide (`01-vault.md`)](./01-vault.md)**
     -   A detailed guide to the core `vault.clar` contract, including its asset management, fee structures, and autonomous economics features.

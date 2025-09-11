@@ -103,8 +103,9 @@
 ;; === OWNER FUNCTIONS ===
 
 (define-public (only-owner-guard)
-  (ok (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED))
-)
+  (if (is-eq tx-sender (var-get contract-owner))
+    (ok true)
+    (err u401)))
 
 (define-public (set-contract-owner (new-owner principal))
   (begin
@@ -120,9 +121,7 @@
     (var-set monitoring-enabled enabled)
     (var-set alert-threshold-multiplier threshold-mult)
     (var-set retention-period retention)
-    (ok true)
-  )
-)
+    (ok true)))
 
 ;; === METRICS COLLECTION ===
 
@@ -277,7 +276,7 @@
   (begin
     (try! (only-owner-guard))
     (let (
-      (alert (unwrap! (map-get? active-alerts { alert-id: alert-id }) ERR_METRIC_NOT_FOUND))
+      (alert (unwrap! (map-get? active-alerts { alert-id: alert-id }) (err ERR_METRIC_NOT_FOUND)))
     )
       (map-set active-alerts
         { alert-id: alert-id }

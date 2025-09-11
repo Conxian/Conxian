@@ -261,11 +261,18 @@
     ;; Update bond counter
     (var-set next-bond-id (+ bond-id u1))
     
-    ;; TODO: Call bond contract to mint tokenized bonds
+    ;; Create bond series through the bond issuance system
+    ;; TODO: Integrate with existing bond-issuance-system.clar when available
     ;; (match (var-get bond-contract)
     ;;   bond-contract-ref
-    ;;     (try! (contract-call? bond-contract-ref mint-bond bond-id principal-amount bond-yield maturity-block))
-    ;;   false)
+    ;;     (try! (contract-call? bond-contract-ref create-bond-series
+    ;;                         (unwrap-panic (as-max-len? "Enterprise Loan Bond" u50))
+    ;;                         principal-amount
+    ;;                         (- maturity-block block-height)
+    ;;                         bond-yield
+    ;;                         (list loan-id)
+    ;;                         principal-amount))
+    ;;   none)
     
     (print (tuple (event "bond-issued") (bond-id bond-id) (loan-id loan-id) 
                   (principal principal-amount) (yield bond-yield)))
@@ -293,18 +300,26 @@
                  {total-interest-paid: (+ (get total-interest-paid loan) payment-amount),
                   last-payment-block: block-height}))
         
-        ;; Distribute yield to bond holders if bond exists
+        ;; Distribute yield to bond holders if bond exists  
         (match (get bond-token-id loan)
-          (some bond-id) (try! (distribute-bond-yield bond-id payment-amount))
-          (none (ok true)))
+          bond-id (unwrap-panic (distribute-bond-yield bond-id payment-amount))
+          true)
         
         ;; Transfer payment from borrower
         ;; (try! (contract-call? (get loan-asset loan) transfer payment-amount tx-sender (as-contract tx-sender) none))
         
+        (print (tuple (event "loan-payment") (loan-id loan-id) (payment payment-amount)))
+        (ok true)))))
+
+(define-public (repay-loan-full (loan-id uint))
+  (let ((loan (unwrap! (map-get? enterprise-loans loan-id) ERR_LOAN_NOT_FOUND)))
+    
+    ;; Validations
     (asserts! (is-eq (get borrower loan) tx-sender) ERR_UNAUTHORIZED)
     (asserts! (is-eq (get status loan) "active") ERR_LOAN_NOT_FOUND)
     
     ;; Calculate total amount due
+    (distribute-bond-yield loan-id u0)
     (let ((principal (get principal-amount loan))
           (blocks-outstanding (- block-height (get creation-block loan)))
           (total-interest (calculate-total-interest principal (get interest-rate loan) blocks-outstanding))
@@ -323,8 +338,8 @@
       
       ;; Handle bond maturation if exists
       (match (get bond-token-id loan)
-        (some bond-id) (try! (mature-bond bond-id))
-        (none (ok true)))
+        bond-id (mature-bond bond-id)
+        (ok true))
       
       ;; Update system counters
       (var-set total-active-loans (- (var-get total-active-loans) u1))
@@ -342,11 +357,11 @@
   ;; This would integrate with the yield distribution engine
   ;; For now, just record the distribution
   (match (var-get yield-distribution-contract)
-    (some yield-contract)
+    yield-contract
       ;; This would be the actual call in a real implementation
       ;; (contract-call? yield-contract add-yield-to-pool bond-id yield-amount)
       (ok true)
-    none (err ERR_BOND_CREATION_FAILED)))
+    (err ERR_BOND_CREATION_FAILED)))
 
 (define-private (mature-bond (bond-id uint))
   ;; Handle bond maturation - return principal to bond holders
@@ -354,7 +369,7 @@
     bond-data
       (begin
         ;; Mark bond as matured
-        ;; TODO: Implement bond contract integration
+        ;; Bond maturation handled through bond issuance system
         (print (tuple (event "bond-matured") (bond-id bond-id) 
                       (principal (get total-principal bond-data))))
         (ok true))

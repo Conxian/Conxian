@@ -2,25 +2,25 @@
 
 | | |
 |---|---|
-| **Status** | ✅ Stable |
+| **Status** | 🔄 Framework Implementation |
 | **Version** | 1.2 |
 | **Owner** | Protocol WG |
 | **Last Updated** | 2025-08-26 |
-| **References** | AIP-1, AIP-5, [Architecture](../ARCHITECTURE.md), `vault.clar` (planned) |
+| **References** | AIP-1, AIP-5, [Architecture](../ARCHITECTURE.md), `vault.clar` (framework implemented) |
 
 ---
 
 ## 1. Summary & Vision
 
-The Vault is Conxian's core capital aggregation primitive. It provides a standardized, secure, and efficient mechanism for users to deposit assets and receive proportional shares in return. The vision is to create a foundational layer for yield strategies that is simple, robust, and highly extensible through traits, while ensuring maximum security and deterministic, precision-safe accounting.
+The Vault is Conxian's core capital aggregation framework primitive. It provides a foundational structure for standardized, secure asset management with proportional share-based accounting. The vision is to create a framework foundation for yield strategies that is simple, extensible through traits, with basic security patterns and accounting structures.
 
 ## 2. Goals / Non-Goals
 
 ### Goals
-- **Deterministic Accounting**: Provide precise, share-based accounting for pooled assets, protected against rounding errors and overflow (AIP-5).
-- **Simplicity & Efficiency**: Maintain a minimal, gas-efficient interface for core deposit and withdrawal operations. Typical interactions should require O(1) storage writes.
-- **Extensibility**: Serve as a base layer for complex yield strategies without embedding strategy logic internally. Extensibility is provided via Strategy and Admin traits.
-- **Security**: Implement robust access controls, reentrancy safety, and an emergency pause mechanism (AIP-1).
+- **Framework Accounting**: Provide basic share-based accounting framework for pooled assets, with rounding protection structure (AIP-5).
+- **Framework Efficiency**: Maintain a minimal interface framework for core deposit and withdrawal operations structure.
+- **Framework Extensibility**: Serve as a base framework layer for yield strategies without embedded strategy logic. Framework extensibility via Strategy and Admin trait structures.
+- **Framework Security**: Implement basic access control framework, reentrancy safety structure, and emergency pause mechanism framework (AIP-1).
 
 ### Non-Goals
 - **Internal Strategy Logic**: The vault does not define or execute yield strategies. This is delegated to external strategy contracts.

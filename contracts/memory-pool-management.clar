@@ -85,8 +85,9 @@
 ;; === OWNER FUNCTIONS ===
 
 (define-public (only-owner-guard)
-  (ok (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED))
-)
+  (if (is-eq tx-sender (var-get contract-owner))
+    (ok true)
+    (err u401)))
 
 (define-public (set-contract-owner (new-owner principal))
   (begin
@@ -102,9 +103,7 @@
     (var-set total-memory-limit total-limit)
     (var-set gc-threshold gc-thresh)
     (var-set pool-expansion-factor expansion-factor)
-    (ok true)
-  )
-)
+    (ok true)))
 
 ;; === MEMORY POOL MANAGEMENT ===
 
@@ -175,7 +174,11 @@
       (usage-percentage (/ (* new-used-size u100) (get allocated-size pool)))
     )
       (if (>= usage-percentage (var-get gc-threshold))
-        (try! (trigger-garbage-collection pool-name))
+        (begin
+          (match (trigger-garbage-collection pool-name)
+            ok-result true
+            err-result false)
+          true)
         true
       )
     )

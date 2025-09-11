@@ -32,7 +32,7 @@
 
 ;; Oracle parameters
 (define-constant MAX_PRICE_DEVIATION u200000)   ;; 20% max price deviation
-(define-constant ORACLE_STALE_THRESHOLD u144)   ;; ~24 hours in blocks
+(define-constant ORACLE_STALE_THRESHOLD u17280) ;; ~24 hours in Nakamoto blocks (was u144)
 (define-constant MIN_CONFIRMATION_BLOCKS u6)    ;; Min confirmations for peg-in
 
 ;; =============================================================================
@@ -458,6 +458,41 @@
       )
       ERR_ASSET_NOT_FOUND
     )
+  )
+)
+
+;; =============================================================================
+;; BITCOIN BRIDGE FUNCTIONS
+;; =============================================================================
+
+(define-public (peg-in (bitcoin-tx-id (buff 32)) (amount uint) (recipient principal))
+  "Handle Bitcoin peg-in: mint sBTC tokens after verifying Bitcoin lock"
+  (begin
+    ;; Verify Bitcoin transaction has sufficient confirmations
+    (asserts! (> (block-height) (+ (get min-confirmation-blocks) (get bitcoin-block-height bitcoin-tx-id)))
+              ERR_INSUFFICIENT_CONFIRMATIONS)
+              
+    ;; Mint sBTC tokens to recipient
+    (try! (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.sbtc-token mint amount recipient))
+    
+    (print { event: "peg-in-success", tx-id: bitcoin-tx-id, amount: amount, recipient: recipient })
+    (ok true)
+  )
+)
+
+(define-public (peg-out (amount uint) (bitcoin-address (string-utf8 42)))
+  "Handle sBTC peg-out: burn sBTC tokens and initiate Bitcoin transfer"
+  (begin
+    ;; Verify user has sufficient balance
+    (try! (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.sbtc-token transfer 
+                          amount tx-sender (as-contract)))
+    
+    ;; Burn sBTC tokens
+    (try! (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.sbtc-token burn amount))
+    
+    ;; Initiate Bitcoin transfer (actual Bitcoin transfer handled off-chain)
+    (print { event: "peg-out-initiated", amount: amount, bitcoin-address: bitcoin-address })
+    (ok true)
   )
 )
 

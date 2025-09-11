@@ -198,7 +198,7 @@
               utilized-liquidity: (- new-total new-available)}))
     
     ;; Check if rebalancing is needed
-    (try! (check-rebalance-triggers pool-id asset))
+    (try! (internal-check-rebalance-triggers pool-id asset))
     
     (print (tuple (event "pool-liquidity-updated") (pool-id pool-id) (total new-total)))
     
@@ -239,13 +239,15 @@
     (asserts! (get active strategy) ERR_OPTIMIZATION_FAILED)
     (asserts! (>= (- block-height (get last-execution strategy)) (get rebalance-frequency strategy)) ERR_OPTIMIZATION_FAILED)
     
-    ;; Execute optimization based on goal
+    ;; Execute optimization based on goal  
     (let ((optimization-result 
-            (match (get optimization-goal strategy)
-              "YIELD_MAX" (try! (optimize-for-yield (get target-pools strategy)))
-              "RISK_MIN" (try! (optimize-for-risk (get target-pools strategy)))
-              "BALANCED" (try! (optimize-balanced (get target-pools strategy)))
-              (err ERR_OPTIMIZATION_FAILED))))
+            (if (is-eq (get optimization-goal strategy) "YIELD_MAX")
+              (optimize-for-yield (get target-pools strategy))
+              (if (is-eq (get optimization-goal strategy) "RISK_MIN")
+                (optimize-for-risk (get target-pools strategy))
+                (if (is-eq (get optimization-goal strategy) "BALANCED")
+                  (optimize-balanced (get target-pools strategy))
+                  (err ERR_OPTIMIZATION_FAILED))))))
       
       ;; Update strategy execution record
       (map-set optimization-strategies strategy-id
@@ -312,30 +314,30 @@
     (ok rule-id)))
 
 (define-private (internal-check-rebalance-triggers (pool-id uint) (asset principal))
-  (begin
-    ;; Check if any rebalancing rules should be triggered
-    (let ((pool (unwrap! (map-get? liquidity-pools {pool-id: pool-id, asset: asset}) ERR_POOL_NOT_FOUND)))
-      
-      ;; Calculate current utilization rate
-      (let ((utilization-rate (if (> (get total-liquidity pool) u0)
-                                (/ (* (get utilized-liquidity pool) BASIS_POINTS) (get total-liquidity pool))
-                                u0)))
-        
-        ;; Check emergency threshold
-        (if (<= utilization-rate EMERGENCY_THRESHOLD)
-          (begin
-            (try! (trigger-emergency-mode pool-id asset))
-            (print (tuple (event "emergency-triggered") (pool-id pool-id) (utilization utilization-rate))))
-          
-          ;; Check rebalancing threshold
-          (if (or (>= utilization-rate (+ (get target-utilization pool) REBALANCE_THRESHOLD))
-                  (<= utilization-rate (- (get target-utilization pool) REBALANCE_THRESHOLD)))
-            (begin
-              (try! (execute-pool-rebalance pool-id asset))
-              (print (tuple (event "rebalance-triggered") (pool-id pool-id) (utilization utilization-rate))))
-            (ok true)))))
+  ;; Check if any rebalancing rules should be triggered
+  (let ((pool (unwrap! (map-get? liquidity-pools {pool-id: pool-id, asset: asset}) ERR_POOL_NOT_FOUND)))
     
-    (ok true)))
+    ;; Calculate current utilization rate
+    (let ((utilization-rate (if (> (get total-liquidity pool) u0)
+                              (/ (* (get utilized-liquidity pool) BASIS_POINTS) (get total-liquidity pool))
+                              u0)))
+      
+      ;; Check emergency threshold
+      (if (<= utilization-rate EMERGENCY_THRESHOLD)
+        (begin
+          (try! (trigger-emergency-mode pool-id asset))
+          (print (tuple (event "emergency-triggered") (pool-id pool-id) (utilization utilization-rate)))
+          (ok true))
+        
+        ;; Check rebalancing threshold
+        (if (or (>= utilization-rate (+ (get target-utilization pool) REBALANCE_THRESHOLD))
+                (<= utilization-rate (- (get target-utilization pool) REBALANCE_THRESHOLD)))
+          (begin
+            (print (tuple (event "rebalance-needed") (pool-id pool-id) (utilization utilization-rate)))
+            (execute-pool-rebalance pool-id asset))
+          (begin
+            (print (tuple (event "rebalance-skipped") (pool-id pool-id) (utilization utilization-rate)))
+            (ok true)))))))
 
 ;; Public wrapper to align expected two-argument usage across contracts
 (define-public (check-rebalance-triggers (pool-id uint) (asset principal))
@@ -368,15 +370,16 @@
                              false)))
       
       ;; Execute rebalancing
-      (try! (if rebalance-needed
-              (add-liquidity-to-pool pool-id asset)
-              (remove-excess-liquidity pool-id asset)))
-      
-      ;; Update last rebalance time
-      (map-set liquidity-pools {pool-id: pool-id, asset: asset}
-        (merge pool {last-rebalance: block-height}))
-      
-      (ok true))))
+      (begin
+        (unwrap-panic (if rebalance-needed
+                        (add-liquidity-to-pool pool-id asset)
+                        (remove-excess-liquidity pool-id asset)))
+        
+        ;; Update last rebalance time
+        (map-set liquidity-pools {pool-id: pool-id, asset: asset}
+          (merge pool {last-rebalance: block-height}))
+        
+        (ok true)))))
 
 (define-private (add-liquidity-to-pool (pool-id uint) (asset principal))
   (begin
@@ -455,7 +458,7 @@
                            u0))
             (target (get target-utilization pool))
             (efficiency (if (> target u0)
-                          (/ (* (min utilization target) BASIS_POINTS) target)
+                          (/ (* (if (< utilization target) utilization target) BASIS_POINTS) target)
                           u0)))
         (ok (tuple (utilization utilization) (efficiency efficiency))))
     ERR_POOL_NOT_FOUND))
@@ -522,4 +525,5 @@
       (total-operations total-operations)
       (yield-efficiency (if (> (var-get total-liquidity-managed) u0)
                           (/ (* (var-get total-yield-generated) BASIS_POINTS) (var-get total-liquidity-managed))
-                          u0))))))
+                          u0))
+      (failure-rate (if (> total-operations u0) (/ (* total-failure BASIS_POINTS) total-operations) u0))))))

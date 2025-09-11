@@ -3,7 +3,7 @@
 ## 🎯 Current Status: Production-Ready Testnet Deployment Workflow
 
 **Last Updated**: September 08, 2025  
-**Status**: Deployment workflow implemented in GitHub Actions with dry-run and live modes. Contracts compile (42) and deployment plan generation/verification pass.  
+**Status**: Deployment workflow implemented in GitHub Actions with dry-run and live modes. Contracts compile (65) and deployment plan generation/verification pass.  
 **Next Phase**: Execute live testnet deployment and system validation
 
 ### ✅ What’s Implemented
@@ -11,7 +11,9 @@
 Testnet deployment orchestration using Clarinet and CI/CD:
 
 - **Workflow**: `.github/workflows/deploy-testnet.yml`
-- **Commands**: `clarinet deployments generate --testnet`, `clarinet deployments apply --testnet`, `clarinet deployments check --testnet`
+- **Commands**: `clarinet deployments generate --testnet`;
+                `clarinet deployments apply --testnet`;
+                `clarinet deployments check --testnet`
 - **Secrets Validation**: Ensures required secrets exist before live deployment
 - **Config**: `settings/Testnet.toml`
 - **Compilation**: `clarinet check` in CI

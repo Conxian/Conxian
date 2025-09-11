@@ -7,7 +7,7 @@ This deployment guide covers the complete Conxian system including the newly imp
 
 ## System Overview
 
-The Conxian platform now consists of **44 production contracts** organized into several key subsystems:
+The Conxian platform now consists of **65 production contracts** organized into several key subsystems:
 
 - **Mathematical Foundation (3 contracts)**: Advanced math functions resolving critical gaps
 - **Comprehensive Lending System (7 contracts)**: Complete DeFi lending with flash loans
@@ -229,7 +229,7 @@ clarinet console --network testnet
 
 ### Pre-Deployment Checklist
 
-- [ ] All 44 contracts compile successfully
+- [ ] All 65 contracts compile successfully
 - [ ] Mathematical libraries tested for precision
 - [ ] Flash loan system tested for reentrancy protection
 - [ ] Lending markets configured with appropriate parameters
@@ -321,7 +321,7 @@ clarinet console --network mainnet
 
 ### Support Resources
 - **Technical Documentation**: [API Reference](./API_REFERENCE.md)
-- **Implementation Guide**: [Comprehensive Lending Implementation](../COMPREHENSIVE_LENDING_IMPLEMENTATION.md)
+- **Implementation Guide**: [System Specification](../system_spec.md)
 - **Contract Guides**: [Contract Documentation](./contract-guides/)
 - **System Status**: [Current Status](./STATUS.md)
 

@@ -60,8 +60,9 @@
 ;; === OWNER FUNCTIONS ===
 
 (define-public (only-owner-guard)
-  (ok (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED))
-)
+  (if (is-eq tx-sender (var-get contract-owner))
+    (ok true)
+    (err u401)))
 
 (define-public (set-contract-owner (new-owner principal))
   (begin
@@ -77,9 +78,7 @@
     (var-set failure-threshold failure-thresh)
     (var-set success-threshold success-thresh)
     (var-set timeout-duration timeout)
-    (ok true)
-  )
-)
+    (ok true)))
 
 ;; === SERVICE MANAGEMENT ===
 
@@ -342,6 +341,4 @@
     (match circuit
       some-circuit (is-eq (get state some-circuit) STATE_CLOSED)
       false
-    )
-  )
-)
+    )))

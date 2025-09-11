@@ -105,8 +105,9 @@
 ;; === OWNER FUNCTIONS ===
 
 (define-public (only-owner-guard)
-  (ok (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED))
-)
+  (if (is-eq tx-sender (var-get contract-owner))
+    (ok true)
+    (err u401)))
 
 (define-public (set-contract-owner (new-owner principal))
   (begin
@@ -120,11 +121,7 @@
     (try! (only-owner-guard))
     (asserts! (and (<= confidence-thresh CONFIDENCE_HIGH) (> sensitivity u100)) ERR_INVALID_PARAMS)
     (var-set prediction-enabled enabled)
-    (var-set min-confidence-threshold confidence-thresh)
-    (var-set scaling-sensitivity sensitivity)
-    (ok true)
-  )
-)
+    (ok true)))
 
 ;; === DATA COLLECTION ===
 

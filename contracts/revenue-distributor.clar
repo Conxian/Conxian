@@ -341,8 +341,8 @@
 (define-public (execute-buyback (revenue-amount uint) (revenue-token <ft-trait>) (min-cxd-out uint))
   (begin
     (asserts! (is-eq tx-sender (var-get contract-owner)) (err ERR_UNAUTHORIZED))
-    ;; TODO: Integrate with DEX router for optimal buyback path
-    ;; This is a placeholder for future DEX integration
+    ;; TODO: Integrate with existing dex-factory.clar for optimal buyback path
+    ;; This requires implementing swap routing through the factory
     (ok min-cxd-out)))
 
 ;; --- Read-Only Functions ---

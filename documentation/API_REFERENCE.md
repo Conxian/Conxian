@@ -1,6 +1,6 @@
 # API Reference
 
-This document provides a comprehensive reference for all smart contracts in the Conxian system, including the new comprehensive lending system with advanced mathematical libraries.
+This document provides a reference for smart contracts in the Conxian system, including mathematical libraries and lending system framework components.
 
 ## Contract Categories
 
@@ -11,14 +11,14 @@ Advanced mathematical functions providing enterprise-grade precision for DeFi ca
 - **`fixed-point-math.clar`** - 18-decimal precision arithmetic with proper rounding modes  
 - **`precision-calculator.clar`** - Validation and benchmarking tools for mathematical operations
 
-### 💰 Comprehensive Lending System
-Complete lending protocol with supply, borrow, liquidation, and ERC-3156 compatible flash loans.
+### 💰 Lending System Framework
+Lending protocol framework with basic supply, borrow, liquidation structures, and ERC-3156 compatible flash loan implementation.
 
-- **`comprehensive-lending-system.clar`** - Main lending protocol with all core functionality
-- **`enhanced-flash-loan-vault.clar`** - Flash loan system with reentrancy protection and statistics
-- **`interest-rate-model.clar`** - Dynamic interest rates based on utilization curves
-- **`loan-liquidation-manager.clar`** - Automated liquidation system with keeper incentives
-- **`lending-protocol-governance.clar`** - Community governance for protocol parameters
+- **`comprehensive-lending-system.clar`** - Lending protocol framework with basic functionality
+- **`enhanced-flash-loan-vault.clar`** - Flash loan implementation with reentrancy protection
+- **`interest-rate-model.clar`** - Interest rate calculation framework
+- **`loan-liquidation-manager.clar`** - Basic liquidation system structure
+- **`lending-protocol-governance.clar`** - Governance framework for protocol parameters
 - **`flash-loan-receiver-trait.clar`** - Interface for flash loan callback implementations
 - **`lending-system-trait.clar`** - Comprehensive lending protocol interface definitions
 
@@ -99,10 +99,10 @@ Mock contracts and testing utilities.
 ### Mathematical Libraries
 
 #### `math-lib-advanced.clar`
-- **`sqrt-fixed(x)`** - Newton-Raphson square root with 18-decimal precision
-- **`pow-fixed(base, exponent)`** - Binary exponentiation for integer and fractional powers
-- **`ln-fixed(x)`** - Natural logarithm using Taylor series approximation
-- **`exp-fixed(x)`** - Exponential function using Taylor series approximation
+- **`sqrt-fixed(x)`** - Square root calculation with Newton-Raphson method (18-decimal precision)
+- **`pow-fixed(base, exponent)`** - Power function with binary exponentiation (simplified implementation)
+- **`ln-fixed(x)`** - Natural logarithm using Taylor series (basic approximation)
+- **`exp-fixed(x)`** - Exponential function using Taylor series (basic approximation)
 
 #### `fixed-point-math.clar`  
 - **`mul-down(a, b)`** - Multiplication with rounding down
@@ -115,21 +115,21 @@ Mock contracts and testing utilities.
 ### Lending System
 
 #### `comprehensive-lending-system.clar`
-- **`supply(asset, amount)`** - Supply assets to earn interest
+- **`supply(asset, amount)`** - Supply assets to the protocol
 - **`withdraw(asset, amount)`** - Withdraw supplied assets
 - **`borrow(asset, amount)`** - Borrow assets against collateral
 - **`repay(asset, amount)`** - Repay borrowed assets
-- **`liquidate(borrower, debt-asset, collateral-asset, amount)`** - Liquidate undercollateralized positions
-- **`flash-loan(asset, amount, receiver, params)`** - Execute flash loan with callback
-- **`get-health-factor(user)`** - Calculate user's health factor
-- **`get-supply-balance(user, asset)`** - Get user's supply balance
-- **`get-borrow-balance(user, asset)`** - Get user's borrow balance
+- **`liquidate(borrower, asset, repay-amount)`** - Liquidate undercollateralized positions
+- **`flash-loan(asset, amount, receiver, data)`** - Execute flash loan with callback
+- **`get-health-factor(user)`** - Calculate user's health factor (read-only)
+- **`get-supply-balance(user, asset)`** - Get user's supply balance (read-only)
+- **`get-borrow-balance(user, asset)`** - Get user's borrow balance (read-only)
 
 #### `enhanced-flash-loan-vault.clar`
-- **`flash-loan(asset, amount, receiver, data)`** - ERC-3156 compatible flash loan
-- **`get-flash-loan-stats()`** - Get flash loan statistics
-- **`calculate-flash-loan-fee(asset, amount)`** - Calculate flash loan fee
-- **`get-max-flash-loan(asset)`** - Get maximum flash loan amount available
+- **`flash-loan(asset, amount, receiver, data)`** - ERC-3156 compatible flash loan implementation
+- **`get-flash-loan-stats(asset)`** - Get flash loan statistics for specific asset (read-only)
+- **`calculate-flash-loan-fee(asset, amount)`** - Calculate flash loan fee (read-only)
+- **`get-max-flash-loan(asset)`** - Get maximum flash loan amount available (read-only)
 
 #### `interest-rate-model.clar`
 - **`get-borrow-rate(cash, borrows, reserves)`** - Calculate borrow interest rate
@@ -151,4 +151,4 @@ Mock contracts and testing utilities.
 - **`calculate-liquidation-amounts(borrower, debt-asset, collateral-asset)`** - Calculate liquidation parameters
 - **`get-liquidation-stats()`** - Get system liquidation statistics
 
-For detailed function parameters, return values, and usage examples, please refer to the contract source code in the `contracts/` directory or view the comprehensive implementation guide at [COMPREHENSIVE_LENDING_IMPLEMENTATION.md](../COMPREHENSIVE_LENDING_IMPLEMENTATION.md).
+**Note**: This API reference reflects the current contract implementations. Some functions may be basic frameworks requiring further development for production use. For detailed parameters and implementation specifics, refer to the contract source code in the `contracts/` directory.

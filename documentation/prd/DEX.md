@@ -2,25 +2,25 @@
 
 | | |
 |---|---|
-| **Status** | 🔶 Draft |
+| **Status** | 🔄 Framework Implementation |
 | **Version** | 0.4 |
 | **Owner** | R&D WG |
 | **Last Updated** | 2025-08-26 |
-| **References** | `dex-factory.clar` (planned), `dex-router.clar` (planned) |
+| **References** | `dex-factory.clar` (framework implemented), `dex-router.clar` (framework implemented) |
 
 ---
 
 ## 1. Summary & Vision
 
-The Conxian DEX is the native liquidity layer of the ecosystem, providing an on-chain automated market maker (AMM) for internal price discovery, efficient trading, and deep liquidity for vault strategies. The vision is to develop a comprehensive trading infrastructure, starting with foundational constant-product pools and evolving to include more sophisticated pool types, advanced routing, and robust oracle services, making it a cornerstone of Conxian's DeFi offerings.
+The Conxian DEX is the native liquidity framework of the ecosystem, providing a basic automated market maker (AMM) framework for price discovery structure, trading foundation, and liquidity framework for vault strategies. The vision is to develop a comprehensive trading infrastructure framework, starting with foundational constant-product pool structures and evolving to include more sophisticated pool framework types, advanced routing structure, and oracle framework services.
 
 ## 2. Goals / Non-Goals
 
 ### Goals
-- **Core AMM Functionality (v1.0)**: Implement a secure and reliable AMM with a factory for creating constant-product pools, a router for single-hop swaps, and standard liquidity provision mechanisms.
-- **Advanced Routing (v1.1)**: Introduce multi-hop routing to find the most efficient trading paths across multiple pools.
-- **Diverse Pool Types (v1.1+)**: Expand beyond constant-product pools to include stable and weighted pool mathematics for different asset classes.
-- **Ecosystem Integration**: Serve as the primary liquidity source for Conxian's yield strategies and provide reliable price data for internal oracles.
+- **Core AMM Framework (v1.0)**: Implement a basic AMM framework with a factory structure for creating constant-product pools, a router framework for single-hop swaps, and standard liquidity provision framework.
+- **Routing Framework (v1.1)**: Introduce multi-hop routing framework structure to find trading paths across multiple pools.
+- **Pool Framework Types (v1.1+)**: Expand beyond constant-product pools to include stable and weighted pool mathematics framework for different asset classes.
+- **Framework Integration**: Serve as the basic liquidity framework for Conxian's yield strategies and provide basic price data framework for internal oracles.
 
 ### Non-Goals (Future Versions)
 - **Concentrated Liquidity**: Advanced capital efficiency models like concentrated liquidity are planned for v2.0 or later.
@@ -40,11 +40,11 @@ The Conxian DEX is the native liquidity layer of the ecosystem, providing an on-
 
 | ID | Requirement | Status |
 |---|---|---|
-| DEX-FR-01 | The factory must allow anyone to create a new constant-product pool for a unique token pair. | ✅ Implemented |
-| DEX-FR-02 | Users must be able to add and remove liquidity and receive standard LP tokens in return. | ✅ Implemented |
-| DEX-FR-03 | The router must support `swap-exact-in` and `swap-exact-out` for single-hop trades. | ✅ Implemented |
-| DEX-FR-04 | Each pool must accrue trading fees, which are then claimable by liquidity providers. | ✅ Implemented |
-| DEX-FR-05 | Emit events for `Swap`, `AddLiquidity`, and `RemoveLiquidity`. | ✅ Implemented |
+| DEX-FR-01 | The factory must allow anyone to create a new constant-product pool for a unique token pair. | 🔄 Framework Implemented |
+| DEX-FR-02 | Users must be able to add and remove liquidity and receive standard LP tokens in return. | 🔄 Framework Implemented |
+| DEX-FR-03 | The router must support `swap-exact-in` and `swap-exact-out` for single-hop trades. | 🔄 Framework Implemented |
+| DEX-FR-04 | Each pool must accrue trading fees, which are then claimable by liquidity providers. | 🔄 Framework Implemented |
+| DEX-FR-05 | Emit events for `Swap`, `AddLiquidity`, and `RemoveLiquidity`. | 🔄 Framework Implemented |
 | DEX-FR-06 | Integrate with the system-wide circuit breaker to halt trading on abnormal price movements. | 🔄 Planned (v1.1) |
 | DEX-FR-07 | Expose a cumulative price interface to allow for the construction of on-chain TWAP oracles. | 🔄 Planned (v1.1) |
 | DEX-FR-08 | The router must support multi-hop routing to find optimal paths for trades. | 🔄 Planned (v1.1) |

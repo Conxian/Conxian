@@ -1,8 +1,9 @@
-# Conxian Enhanced Tokenomics User Guide
+# Conxian DeFi Protocol User Guide
 
-Welcome to the Conxian Enhanced Multi-Token Tokenomics System.
-This guide will help you understand and interact with the comprehensive token
-ecosystem that powers the Conxian dimensional DeFi protocol.
+Welcome to the Conxian Comprehensive DeFi Protocol.
+This guide will help you understand and interact with the sophisticated
+enterprise-grade DeFi ecosystem with 65+ smart contracts, advanced mathematical
+libraries, lending protocols, flash loans, and sBTC integration.
 
 ## Table of Contents
 
@@ -19,10 +20,11 @@ ecosystem that powers the Conxian dimensional DeFi protocol.
 
 ## Overview
 
-The Conxian Enhanced Tokenomics system is a sophisticated multi-token ecosystem
-designed to align incentives, distribute value, and enable governance across
-the dimensional vault protocol. The system includes four primary tokens with
-distinct purposes and utility mechanisms.
+The Conxian DeFi Protocol is a comprehensive financial ecosystem featuring 65+
+production smart contracts that include advanced mathematical libraries,
+comprehensive lending protocols, flash loan systems, sBTC integration, bond
+issuance, and enterprise-grade security. The system includes multiple tokens
+with distinct purposes and utility mechanisms.
 
 ### Key Features
 
@@ -390,7 +392,7 @@ The system includes multiple layers of protection:
 
 ### Dimensional Integration
 
-The tokenomics system integrates with dimensional vault mechanics:
+The DeFi protocol integrates with advanced mathematical vault mechanics:
 
 1. **Dimensional Yield Distribution:**
    - Dimensional staking rewards flow to CXD stakers

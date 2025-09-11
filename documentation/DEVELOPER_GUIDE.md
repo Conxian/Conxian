@@ -22,8 +22,8 @@ cd Conxian
 npm ci
 
 # Verify setup
-clarinet check   # ✅ 42 contracts
-npx vitest run --config ./vitest.config.enhanced.ts   # ✅ 50 tests
+clarinet check   # ✅ 65+ contracts (syntax validation)
+npx vitest run --config ./vitest.config.enhanced.ts   # 🔄 Framework tests
 ```
 
 ## Project Structure
@@ -162,6 +162,57 @@ npx clarinet format
 npx clarinet docs
 ```
 
+## Nakamoto Development Guide
+
+### Nakamoto Timing Considerations
+
+**Fast Block Development**: Nakamoto introduces 3-5 second block times. The `nakamoto-compatibility.clar` contract provides timing conversion functions:
+
+```typescript
+// Test timing constants from nakamoto-compatibility.clar
+const NAKAMOTO_BLOCKS_PER_HOUR = 720;  // 5s blocks
+const NAKAMOTO_BLOCKS_PER_DAY = 17280;
+const LEGACY_BLOCKS_PER_DAY = 144;     // 10min blocks
+
+// Use contract conversion function
+const conversionResult = simnet.callReadOnlyFn(
+  'nakamoto-compatibility',
+  'convert-legacy-to-nakamoto',
+  [Cl.uint(144)], // 1 day in legacy blocks
+  deployer
+);
+expected(conversionResult.result).toBe(Cl.uint(17280));
+```
+
+**Bitcoin Finality Integration**:
+
+```typescript
+// Test Bitcoin finality functions (implemented in nakamoto-compatibility.clar)
+const result = simnet.callReadOnlyFn(
+  'nakamoto-compatibility',
+  'is-bitcoin-finalized',
+  [Cl.uint(blockHeight - 100)],
+  deployer
+);
+
+// Function uses caching and validation logic
+expect(result.result).toBe(Cl.bool(true));
+```
+
+**MEV Protection Testing**:
+
+```typescript
+// Test MEV protection mechanisms (basic framework in nakamoto-compatibility.clar)
+const protectionResult = simnet.callPublicFn(
+  'nakamoto-compatibility',
+  'enable-mev-protection',
+  [],
+  deployer // Admin function
+);
+
+expect(protectionResult.result).toBeOk();
+```
+
 ## Testing Framework
 
 ### Test Environment Setup
@@ -176,6 +227,57 @@ const simnet = await Simnet.fromFile('Clarinet.toml');
 const accounts = simnet.getAccounts();
 const deployer = accounts.get('deployer')!;
 const user1 = accounts.get('wallet_1')!;
+```
+
+### Nakamoto Testing Patterns
+
+#### Testing Fast Block Functions
+
+```typescript
+// Test epoch calculations with Nakamoto timing
+const epochResult = simnet.callReadOnlyFn(
+  'nakamoto-compatibility',
+  'get-nakamoto-epoch-length',
+  [],
+  deployer
+);
+
+expect(epochResult.result).toBe(Cl.uint(120960)); // 1 week in Nakamoto blocks
+```
+
+#### Testing Bitcoin Finality
+
+```typescript
+// Test finality-dependent operations (framework implementation)
+const finalityResult = simnet.callReadOnlyFn(
+  'nakamoto-compatibility',
+  'is-bitcoin-finalized',
+  [Cl.uint(simnet.blockHeight - 10)],
+  deployer
+);
+
+// Basic finality detection with caching
+expected(finalityResult.result).toBe(Cl.bool(true));
+```
+
+#### Testing Cross-Chain Operations
+
+```typescript
+// Test Wormhole bridge functionality (development framework - events only)
+const bridgeResult = simnet.callPublicFn(
+  'wormhole-integration',
+  'initiate-bridge-transfer',
+  [
+    Cl.contractPrincipal(deployer, 'test-token'),
+    Cl.uint(1000000),
+    Cl.uint(2), // Ethereum (framework only)
+    Cl.bufferFromHex('0x742d35cc6548c63e02e4286d82bae9b8feff4bc8')
+  ],
+  user1
+);
+
+// Returns sequence number and fee (event emission framework)
+expected(bridgeResult.result).toBeOk();
 ```
 
 ### Common Test Patterns
@@ -439,5 +541,5 @@ This developer guide provides:
 
 Follow this guide to contribute effectively to the Conxian project.
 
-*Last Updated: August 17, 2025*  
-*Framework Version: Clarinet v2.0+, clarinet-sdk v3.5.0*
+*Last Updated: September 10, 2025*  
+*Framework Version: Clarinet v3.5.0, Nakamoto-ready, Wormhole-integrated*
