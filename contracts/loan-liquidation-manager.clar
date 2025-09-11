@@ -140,7 +140,7 @@
       ;; Get liquidation parameters
       (let ((params (unwrap! (map-get? liquidation-params { asset: debt-asset-principal }) ERR_UNAUTHORIZED))
             (debt-price u1000000) ;; Placeholder price
-            (collateral-price u1000000) ;; Placeholder price)
+            (collateral-price u1000000)) ;; Placeholder price
         
         ;; Calculate maximum debt that can be repaid
         (let ((borrower-debt u1000000) ;; Placeholder until comprehensive-lending-system integration
@@ -347,6 +347,16 @@
       (liquidation-incentive incentive-value)
       (debt-value debt-value)
       (collateral-value total-collateral-value)))))
+
+;; === LIQUIDATION VERIFICATION ===
+(define-private (verify-liquidatable-position 
+  (borrower principal) 
+  (debt-asset principal) 
+  (collateral-asset principal))
+  (match (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.comprehensive-lending-system 
+                        get-health-factor borrower)
+    (ok health-factor) (ok (<= health-factor LIQUIDATION_THRESHOLD))
+    (err e) (err e)))
 
 ;; === UTILITY FUNCTIONS ===
 (define-private (min (a uint) (b uint))

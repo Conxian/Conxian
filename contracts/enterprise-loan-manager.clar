@@ -319,13 +319,23 @@
     (asserts! (is-eq (get status loan) "active") ERR_LOAN_NOT_FOUND)
     
     ;; Calculate total amount due
-    (let ((yield-result (distribute-bond-yield loan-id u0))
-          (principal (get principal-amount loan))
+    (let ((principal (get principal-amount loan))
           (blocks-outstanding (- block-height (get creation-block loan)))
           (total-interest (calculate-total-interest principal (get interest-rate loan) blocks-outstanding))
           (total-due (+ principal total-interest))
           (interest-already-paid (get total-interest-paid loan))
           (remaining-due (- total-due interest-already-paid)))
+      
+      ;; Distribute any remaining yield to bond holders if bond exists
+      (let ((bond-token (get bond-token-id loan)))
+        (if (is-some bond-token)
+          (match (contract-call? .bond-issuance-system distribute-yield (unwrap-panic bond-token) u0) result
+            (ok (ok true))
+            (error code 
+              (begin 
+                (print (tuple (event "yield-distribution-failed") (error-code code) (message "Failed to distribute yield to bond holders")))
+                (ok true))))  ;; Continue with loan repayment even if yield distribution fails
+          (ok true))))
       
       ;; Update loan status
       (map-set enterprise-loans loan-id
@@ -337,9 +347,9 @@
       ;;                                   tx-sender (get borrower loan) none)))
       
       ;; Handle bond maturation if exists
-      (match (get bond-token-id loan)
-        bond-id (mature-bond bond-id)
-        (ok true))
+      (match (get bond-token-id loan) bond-id
+        (unwrap! (mature-bond bond-id) false)
+        true)
       
       ;; Update system counters
       (var-set total-active-loans (- (var-get total-active-loans) u1))

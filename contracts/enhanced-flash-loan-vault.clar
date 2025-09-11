@@ -33,6 +33,7 @@
 ;; Multi-asset support
 (define-map vault-balances principal uint)       ;; Total balance per asset
 (define-map vault-shares (tuple (user principal) (asset principal)) uint)
+(define-map user-shares (tuple (user principal) (asset principal)) uint)  ;; User's shares per asset
 (define-map supported-assets principal bool)
 (define-map vault-caps principal uint)           ;; Max deposit per asset
 
@@ -46,6 +47,9 @@
   })
 
 (define-map asset-caps principal uint) ;; asset -> max deposit cap
+
+;; Protocol fee tracking
+(define-map collected-fees principal uint) ;; asset -> amount
 
 ;; Flash loan specific
 (define-data-var flash-loan-in-progress bool false)
@@ -106,7 +110,7 @@
     (map-set supported-assets asset true)
     (map-set vault-caps asset cap)
     (map-set vault-balances asset u0)
-    (map-set vault-shares asset u0)
+    (map-set vault-shares { user: tx-sender, asset: asset } u0)
     (ok true)))
 
 ;; === CORE VAULT FUNCTIONS ===
@@ -128,7 +132,7 @@
     
     ;; Update balances
     (map-set vault-balances asset (+ current-balance net-amount))
-    (map-set vault-shares asset (+ current-shares shares))
+    (map-set vault-shares (tuple (user user) (asset asset)) (+ current-shares shares))
     (map-set user-shares (tuple (user user) (asset asset)) (+ user-current-shares shares))
     
     ;; Handle fee
@@ -160,7 +164,7 @@
     
     ;; Update balances
     (map-set vault-balances asset (- current-balance amount))
-    (map-set vault-shares asset (- current-shares shares))
+    (map-set vault-shares (tuple (user user) (asset asset)) (- current-shares shares))
     (map-set user-shares (tuple (user user) (asset asset)) (- user-current-shares shares))
     
     ;; Handle fee
@@ -267,14 +271,20 @@
 
 (define-private (update-flash-loan-stats (asset principal) (amount uint) (fee uint))
   (let ((current-stats (default-to 
-                         {total-flash-loans: u0, total-volume: u0, total-fees-collected: u0, last-flash-loan-block: u0}
+                         {
+                           total-loans: u0, 
+                           total-volume: u0, 
+                           total-fees: u0, 
+                           average-loan-size: u0
+                         }
                          (map-get? flash-loan-stats asset))))
     (map-set flash-loan-stats asset
       {
-        total-flash-loans: (+ (get total-flash-loans current-stats) u1),
+        total-loans: (+ (get total-loans current-stats) u1),
         total-volume: (+ (get total-volume current-stats) amount),
-        total-fees-collected: (+ (get total-fees-collected current-stats) fee),
-        last-flash-loan-block: block-height
+        total-fees: (+ (get total-fees current-stats) fee),
+        average-loan-size: (/ (+ (get total-volume current-stats) amount) 
+                            (+ (get total-loans current-stats) u1))
       })))
 
 (define-private (transfer-asset-from-vault (asset <sip10>) (amount uint) (recipient principal))
@@ -332,7 +342,7 @@
   (ok (default-to u0 (map-get? vault-balances asset))))
 
 (define-read-only (get-total-shares (asset principal))
-  (ok (default-to u0 (map-get? vault-shares asset))))
+  (ok (default-to u0 (map-get? user-shares (tuple (user tx-sender) (asset asset))))))
 
 (define-read-only (get-user-shares (user principal) (asset principal))
   (ok (default-to u0 (map-get? user-shares (tuple (user user) (asset asset))))))
@@ -376,17 +386,34 @@
                                   (fees-collected u0)
                                   (utilization-rate u0)))))
         (stats (default-to 
-                 {total-flash-loans: u0, total-volume: u0, total-fees-collected: u0, last-flash-loan-block: u0}
+                 {
+                   total-loans: u0, 
+                   total-volume: u0, 
+                   total-fees: u0,
+                   average-loan-size: u0
+                 }
                  (map-get? flash-loan-stats asset)))
         (utilization-rate (if (is-eq total-balance u0) 
                             u0 
                             (/ (* (get total-volume stats) PRECISION) total-balance))))
     (ok (tuple 
       (total-balance total-balance)
-      (flash-loans-count (get total-flash-loans stats))
+      (flash-loans-count (get total-loans stats))
       (flash-loan-volume (get total-volume stats))
-      (fees-collected (get total-fees-collected stats))
+      (fees-collected (get total-fees stats))
       (utilization-rate utilization-rate)))))
+
+(define-public (collect-protocol-fees (asset principal))
+  (begin
+    (asserts! (is-eq tx-sender (var-get admin)) ERR_UNAUTHORIZED)
+    (let ((fees (default-to u0 (map-get? collected-fees asset))))
+      (asserts! (> fees u0) ERR_INVALID_AMOUNT)
+      (map-set collected-fees asset u0)
+      (match (contract-of? asset)
+        (some token)
+          (try! (as-contract (contract-call? token transfer fees tx-sender (var-get admin) none)))
+          (ok fees)
+        none (err u1)))))
 
 (define-read-only (get-revenue-stats)
   (ok (tuple 

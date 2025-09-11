@@ -62,7 +62,7 @@
 (define-public (only-owner-guard)
   (if (is-eq tx-sender (var-get contract-owner))
     (ok true)
-    (err u401)))
+    (err u401)))  ;; ERR_UNAUTHORIZED
 
 (define-public (set-contract-owner (new-owner principal))
   (begin

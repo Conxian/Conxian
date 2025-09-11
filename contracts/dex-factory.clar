@@ -105,16 +105,13 @@
 (define-public (only-owner-guard)
   (if (is-eq tx-sender (var-get owner))
     (ok true)
-    (err ERR_UNAUTHORIZED)))
+    (err u6001)))  ;; ERR_UNAUTHORIZED
 
 (define-read-only (get-owner)
   (ok (var-get owner)))
 
 (define-read-only (is-owner (user principal))
   (ok (is-eq user (var-get owner))))
-
-(define-read-only (get-pending-owner)
-  (ok (var-get pending-owner)))
 
 
 (define-private (only-owner)

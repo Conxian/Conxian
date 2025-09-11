@@ -18,6 +18,7 @@
 (define-constant ERR_TRANSFER_FAILED (err u5008))
 (define-constant ERR_POSITION_HEALTHY (err u5009))
 (define-constant ERR_LIQUIDATION_TOO_MUCH (err u5010))
+(define-constant ERR_INTEREST_ACCRUAL_FAILED (err u5011))
 
 (define-constant PRECISION u1000000000000000000) ;; 18 decimals
 (define-constant LIQUIDATION_BONUS u50000000000000000) ;; 5% liquidation bonus
@@ -54,7 +55,7 @@
 ;; User borrow balances (principal amounts)
 (define-map user-borrow-balances
   { user: principal, asset: principal }
-  {
+  { 
     principal-balance: uint,
     borrow-index: uint
   })
@@ -268,79 +269,45 @@
       (asserts! (is-asset-supported asset-principal) ERR_INVALID_ASSET)
       
       ;; Update interest before repay
-      (match (contract-call? .interest-rate-model accrue-interest asset-principal)
-        ok-result true
-        err-result false)
+      (match (contract-call? .interest-rate-model accrue-interest asset-principal) result
+        (ok (unwrap! result (err u1000)))
+        (error code (err code)))
       
-      (let ((current-balance (get-user-borrow-balance user asset-principal))
-            (current-borrow-balance (match (contract-call? .interest-rate-model calculate-current-borrow-balance 
-                                                   asset-principal 
-                                                   (get principal-balance current-balance)
-                                                   (get borrow-index current-balance))
-                                           (ok balance) balance
-                                           (err e) u0))
-            (actual-repay-amount (min amount current-borrow-balance)))
-        
-        ;; Transfer tokens from user
-        (try! (contract-call? asset transfer actual-repay-amount user (as-contract tx-sender) none))
-        
-        ;; Calculate new principal balance
-        (let ((market-info (unwrap! (contract-call? .interest-rate-model get-market-info asset-principal) ERR_INVALID_ASSET))
-              (current-borrow-index (get borrow-index market-info))
-              (principal-to-remove (/ (* actual-repay-amount PRECISION) current-borrow-index))
-              (new-principal-balance (- (get principal-balance current-balance) principal-to-remove)))
-          
-          ;; Update user balance
-          (map-set user-borrow-balances
-            { user: user, asset: asset-principal }
-            {
-              principal-balance: new-principal-balance,
-              borrow-index: current-borrow-index
-            })
-          
-          ;; Update market state
-          (try! (contract-call? .interest-rate-model update-market-state 
-                               asset-principal 
-                               (to-int actual-repay-amount)
-                               (- (to-int actual-repay-amount))
-                               0))
-          
-          (ok actual-repay-amount))))))
-
-;; === FLASH LOAN FUNCTIONS ===
-(define-public (flash-loan (asset <sip10>) (amount uint) (receiver principal) (data (buff 256)))
-  (let ((asset-principal (contract-of asset)))
-    (begin
-      (asserts! (not (var-get paused)) ERR_PAUSED)
-      (asserts! (> amount u0) ERR_ZERO_AMOUNT)
-      (asserts! (is-flash-loan-supported asset-principal) ERR_INVALID_ASSET)
-      
-      ;; Calculate fee
-      (let ((fee (calculate-flash-loan-fee asset-principal amount))
-            (market-info (unwrap! (contract-call? .interest-rate-model get-market-info asset-principal) ERR_INVALID_ASSET))
-            (available-cash (get total-cash market-info)))
-        
-        (asserts! (>= available-cash amount) ERR_INSUFFICIENT_LIQUIDITY)
-        
-        ;; Record balances before
-        (let ((balance-before (unwrap! (contract-call? asset get-balance (as-contract tx-sender)) ERR_FLASH_LOAN_FAILED)))
-          
-          ;; Transfer loan amount to receiver
-          (try! (as-contract (contract-call? asset transfer amount tx-sender receiver none)))
-          
-          ;; Call receiver's flash loan callback
-          ;; Flash loan callback - placeholder implementation
-          ;; (try! (contract-call? receiver on-flash-loan tx-sender asset-principal amount fee data))
-          true
-          
-          ;; Check that loan + fee was repaid
-          (let ((balance-after (unwrap! (contract-call? asset get-balance (as-contract tx-sender)) ERR_FLASH_LOAN_FAILED)))
-            (asserts! (>= balance-after (+ balance-before fee)) ERR_FLASH_LOAN_FAILED)
-            
-            ;; Distribute fee (could be sent to treasury or used for reserves)
-            ;; For now, keep it in the contract as additional liquidity
-            
-            (ok true)))))))
+      (let ((current-balance (get-user-borrow-balance user asset-principal)))
+        (match (contract-call? .interest-rate-model calculate-current-borrow-balance 
+                             asset-principal 
+                             (get principal-balance current-balance)
+                             (get borrow-index current-balance))
+          (ok current-borrow-balance)
+            (let ((actual-repay-amount (min amount current-borrow-balance)))
+              ;; Transfer tokens from user
+              (try! (contract-call? asset transfer actual-repay-amount user (as-contract tx-sender) none))
+              
+              ;; Calculate new principal balance
+              (match (contract-call? .interest-rate-model get-market-info asset-principal)
+                (ok market-info)
+                  (let ((current-borrow-index (get borrow-index market-info))
+                        (principal-to-remove (/ (* actual-repay-amount PRECISION) current-borrow-index))
+                        (new-principal-balance (- (get principal-balance current-balance) principal-to-remove)))
+                    (if (<= new-principal-balance u0)
+                        (map-delete user-borrow-balances { user: user, asset: asset-principal })
+                        (map-set user-borrow-balances 
+                                { user: user, asset: asset-principal }
+                                { 
+                                  principal-balance: new-principal-balance,
+                                  borrow-index: current-borrow-index
+                                }))
+                    
+                    ;; Update market state
+                    (match (contract-call? .interest-rate-model update-market-state 
+                                         asset-principal 
+                                         0 
+                                         (- (to-int actual-repay-amount)) 
+                                         0)
+                      (ok result) (ok actual-repay-amount)
+                      (err code) (err code)))
+                (err code) (err code)))
+          (err code) (err code))))))
 
 ;; === LIQUIDATION ===
 (define-public (liquidate (borrower principal) (asset <sip10>) (repay-amount uint))
@@ -416,9 +383,13 @@
     { principal-balance: u0, supply-index: PRECISION }
     (map-get? user-supply-balances { user: user, asset: asset-principal })))
 
+;; Get a user's borrow balance for a specific asset
 (define-private (get-user-borrow-balance (user principal) (asset-principal principal))
   (default-to 
-    { principal-balance: u0, borrow-index: PRECISION }
+    {
+      principal-balance: u0,
+      borrow-index: u1000000000000000000  ;; 1.0 in 18 decimals
+    }
     (map-get? user-borrow-balances { user: user, asset: asset-principal })))
 
 (define-private (get-asset-price (asset-principal principal))
