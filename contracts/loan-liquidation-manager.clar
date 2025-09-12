@@ -269,7 +269,7 @@
       { success-count: 0 }
       positions
     )))
-    (ok (get success-count result))
+    (ok (get success-count result)))
   )
 )
 ;; Automated liquidation by authorized keepers
@@ -418,7 +418,9 @@
         (incentive-rate (get liquidation-incentive params))
         (incentive-value (/ (* debt-value incentive-rate) PRECISION))
         (total-collateral-value (+ debt-value incentive-value))
-        (collateral-to-seize (/ (* total-collateral-value PRECISION) collateral-price)))
+        (collateral-to-seize (if (is-eq collateral-price u0) 
+                               u0 
+                               (/ (* total-collateral-value PRECISION) collateral-price))))
     
     (ok (tuple
       (max-debt-repayable max-repayable)

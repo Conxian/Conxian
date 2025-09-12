@@ -193,7 +193,7 @@
 
 ;; Get the price of an asset from the oracle
 (define-read-only (get-asset-price (asset principal))
-  (match (contract-call? ORACLE_CONTRACT get-price asset)
+  (match (contract-call? ORACLE_CONTRACT get-price asset none)
     (ok price) (ok price)
     (err error) (err ERR_PRICE_UNAVAILABLE)
   )
@@ -410,7 +410,7 @@
                                       0 
                                       (- (to-int actual-repay-amount)))
                     (ok result) (ok actual-repay-amount)
-                    error (err error)))
+                    (err error) (err error)))
                 error (err error)))
             error (err error)))
         error (err error)))))

@@ -418,7 +418,7 @@
 
 (define-public (flash-loan-basic (amount uint) (recipient principal))
   (let ((token-principal (unwrap-panic (var-get default-loan-asset))))
-    (match (as-contract (contract-call? sip10 transfer token-principal amount tx-sender recipient none))
+    (match (as-contract (contract-call? (as-contract (contract-of token-principal)) transfer amount tx-sender recipient none))
       (ok true) (ok true)
       (err e) (err e))))
 
