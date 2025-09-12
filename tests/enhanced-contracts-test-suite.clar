@@ -2,7 +2,7 @@
 ;; Comprehensive testing for all optimization systems
 ;; Target: Validate +735K TPS improvements
 
-(use-trait sip010 .sip-010-trait.sip-010-trait)
+(use-trait sip010 .traits.sip-010-trait.sip-010-trait)
 
 ;; =============================================================================
 ;; TEST CONSTANTS AND SETUP

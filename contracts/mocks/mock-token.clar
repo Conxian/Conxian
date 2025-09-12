@@ -1,7 +1,7 @@
 ;; mock-token.clar
 ;; Minimal SIP-010-compliant mock for testing dynamic dispatch
 
-(impl-trait .sip-010-trait.sip-010-trait)
+(impl-trait .traits.sip-010-trait.sip-010-trait)
 
 ;; Basic token metadata and accounting (lightweight mock)
 (define-data-var total-supply uint u0)

@@ -2,7 +2,7 @@
 ;; Comprehensive integration tests for the enterprise loan system
 ;; Tests all components working together: loans, bonds, yield distribution, and liquidity optimization
 
-(use-trait sip10 .sip-010-trait.sip-010-trait)
+(use-trait sip10 .traits.sip-010-trait.sip-010-trait)
 (use-trait flash-loan-receiver .flash-loan-receiver-trait.flash-loan-receiver-trait)
 
 ;; Test constants
