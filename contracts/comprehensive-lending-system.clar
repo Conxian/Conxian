@@ -2,39 +2,78 @@
 ;; Full-featured lending and borrowing system with flash loans
 ;; Supports multiple assets, collateralization, and liquidations
 
-(impl-trait .lending-system-trait.lending-system-trait)
-
 (use-trait sip10 .sip-010-trait.sip-010-trait)
 (use-trait flash-loan-receiver .flash-loan-receiver-trait.flash-loan-receiver-trait)
+(use-trait std-constants .standard-constants-trait.standard-constants-trait)
+(use-trait liquidation-trait .liquidation-trait.liquidation-trait)
+(use-trait ownable .ownable-trait.ownable-trait)
 
-;; Oracle contract
-(define-constant ORACLE_CONTRACT_PRINCIPAL 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM)
-(define-constant ORACLE_CONTRACT (contract-of ORACLE_CONTRACT_PRINCIPAL))
+(impl-trait .lending-system-trait.lending-system-trait)
+(impl-trait .ownable-trait.ownable-trait)
+
+;; Oracle integration
+(use-trait oracle .oracle-trait.oracle-trait)
+
+(define-constant ORACLE_CONTRACT 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.oracle)
+(define-constant PRICE_STALE_THRESHOLD (* u60 u60 u24))  ;; 24 hours in blocks (1 block/2s)
 
 ;; === CONSTANTS ===
-(define-constant ERR_UNAUTHORIZED (err u5001))
-(define-constant ERR_PAUSED (err u5002))
-(define-constant ERR_INSUFFICIENT_LIQUIDITY (err u5003))
-(define-constant ERR_INSUFFICIENT_COLLATERAL (err u5004))
-(define-constant ERR_FLASH_LOAN_FAILED (err u5005))
-(define-constant ERR_INVALID_ASSET (err u5006))
-(define-constant ERR_ZERO_AMOUNT (err u5007))
-(define-constant ERR_TRANSFER_FAILED (err u5008))
-(define-constant ERR_POSITION_HEALTHY (err u5009))
-(define-constant ERR_LIQUIDATION_TOO_MUCH (err u5010))
-(define-constant ERR_INTEREST_ACCRUAL_FAILED (err u5011))
+;; Error codes follow the standard ranges defined in error-codes.md
 
-(define-constant PRECISION u1000000000000000000) ;; 18 decimals
-(define-constant LIQUIDATION_BONUS u50000000000000000) ;; 5% liquidation bonus
-(define-constant CLOSE_FACTOR u500000000000000000) ;; 50% max liquidation per tx
-(define-constant MIN_HEALTH_FACTOR u1000000000000000000) ;; 1.0 minimum health factor
+;; 1000-1999: Liquidation and general errors
+(define-constant ERR_UNAUTHORIZED (err u1001))
+(define-constant ERR_PAUSED (err u1002))
+(define-constant ERR_INSUFFICIENT_LIQUIDITY (err u1003))
+(define-constant ERR_POSITION_HEALTHY (err u1004))
+(define-constant ERR_LIQUIDATION_TOO_MUCH (err u1005))
+(define-constant ERR_INTEREST_ACCRUAL_FAILED (err u1006))
+(define-constant ERR_INVALID_ASSET (err u1007))
+(define-constant ERR_INSUFFICIENT_COLLATERAL (err u1008))
+(define-constant ERR_FLASH_LOAN_FAILED (err u1009))
+(define-constant ERR_TRANSFER_FAILED (err u1010))
+(define-constant ERR_ZERO_AMOUNT (err u1011))
+(define-constant ERR_MARKET_UPDATE_FAILED (err u1012))
+
+;; Protocol parameters with standardized precision
+(define-constant LIQUIDATION_BONUS u50000000000000000)  ;; 5% (0.05 * 1e18)
+(define-constant CLOSE_FACTOR u500000000000000000)      ;; 50% (0.5 * 1e18)
+(define-constant MIN_HEALTH_FACTOR u1000000000000000000) ;; 1.0 (1.0 * 1e18)
+(define-constant MAX_LIQUIDATION_BONUS u100000000000000000) ;; 10% (0.1 * 1e18)
 
 ;; === ADMIN ===
 (define-data-var admin principal tx-sender)
 (define-data-var total-borrows uint u0)
 (define-data-var paused bool false)
+(define-data-var oracle-contract (optional principal) (some ORACLE_CONTRACT))
 
 (define-map total-supply { asset: principal } { amount: uint })
+
+;; ===== Oracle Helpers =====
+
+;; Get the oracle contract principal
+(define-read-only (get-oracle-contract)
+  (ok (unwrap-panic (var-get oracle-contract)))
+)
+
+;; Get the price of an asset with validation
+(define-read-only (get-asset-price (asset principal))
+  (let (
+      (oracle (unwrap! (get-oracle-contract) (err u1007)))  ;; ERR_INVALID_ORACLE
+      (price (unwrap! (contract-call? oracle get-price-fresh asset) (err u1008)))  ;; ERR_PRICE_FETCH_FAILED
+    )
+    (ok price)
+  )
+)
+
+;; Check if an asset's price is fresh
+(define-read-only (is-asset-price-fresh (asset principal))
+  (let (
+      (oracle (unwrap! (get-oracle-contract) (err u1007)))  ;; ERR_INVALID_ORACLE
+      (is-fresh (unwrap! (contract-call? oracle is-price-fresh asset) (err u1008)))  ;; ERR_PRICE_FETCH_FAILED
+    )
+    (ok is-fresh)
+  )
+)
 
 (define-private (decrease-total-supply (asset principal) (amount uint))
   (let ((current (default-to { amount: u0 } (map-get? total-supply { asset: asset }))))
@@ -103,6 +142,14 @@
     (asserts! (is-eq tx-sender (var-get admin)) ERR_UNAUTHORIZED)
     (var-set admin new-admin)
     (ok true)))
+
+(define-public (set-oracle-contract (contract principal))
+  (begin
+    (asserts! (is-eq tx-sender (var-get admin)) ERR_UNAUTHORIZED)
+    (var-set oracle-contract (some contract))
+    (ok true)
+  )
+)
 
 (define-public (set-paused (pause bool))
   (begin
@@ -416,100 +463,117 @@
         error (err error)))))
 
 ;; === LIQUIDATION ===
-(define-public (liquidate (borrower principal) (asset <sip10>) (repay-amount uint))
-  (let ((liquidator tx-sender)
-        (asset-principal (contract-of asset)))
-    (begin
-      (asserts! (not (var-get paused)) ERR_PAUSED)
-      (asserts! (> repay-amount u0) ERR_ZERO_AMOUNT)
-      (asserts! (is-asset-supported asset-principal) ERR_INVALID_ASSET)
+(define-public (liquidate
+  (borrower principal)
+  (repay-amount uint)
+  (collateral-asset <sip10>)
+  (repay-asset <sip10>)
+)
+  (let (
+      (repay-principal (contract-of repay-asset))
+      (collateral-principal (contract-of collateral-asset))
+      (liquidator tx-sender)
+      (current-block block-height)
       
-      ;; Update interest before liquidation
-      (let ((interest-result (unwrap! (contract-call? .interest-rate-model accrue-interest asset-principal) (err u1003))))
-        (asserts! (is-ok interest-result) (err (unwrap-err! interest-result u1003))))
+      ;; Get market state with interest accrued
+      (market-state (unwrap! (get-market-state repay-principal) (err u1007)))  ;; ERR_MARKET_NOT_LISTED
+      (collateral-market (unwrap! (get-market-state collateral-principal) (err u1007)))  ;; ERR_MARKET_NOT_LISTED
       
-      ;; Check if borrower is liquidatable
-      (let ((health-factor (unwrap! (get-health-factor borrower) (err u5009))))
-        (asserts! (< health-factor MIN_HEALTH_FACTOR) (err u5009))
+      ;; Get user balances with interest
+      (user-borrow (get-user-borrow-balance borrower repay-principal))
+      (user-collateral (get-user-supply-balance borrower collateral-principal))
+      
+      ;; Calculate health factor
+      (health-factor (unwrap! (get-health-factor borrower) (err u1015)))  ;; ERR_HEALTH_FACTOR_CALCULATION_FAILED
+    )
+    
+    ;; Validation checks
+    (asserts! (not (var-get paused)) ERR_PAUSED)
+    (asserts! (not (is-eq liquidator borrower)) (err u1009))  ;; ERR_SELF_LIQUIDATION
+    (asserts! (> repay-amount 0) ERR_ZERO_AMOUNT)
+    (asserts! (<= health-factor MIN_HEALTH_FACTOR) ERR_POSITION_HEALTHY)
+    
+    ;; Calculate liquidation amounts
+    (let (
+        (max-repay (get principal-balance user-borrow))
+        (repay-amount (if (> repay-amount max-repay) max-repay repay-amount))
         
-        ;; Calculate max liquidatable amount
-        (let ((borrow-balance (get-user-borrow-balance borrower asset-principal))
-              (current-debt (unwrap! 
-                (contract-call? .interest-rate-model calculate-current-borrow-balance 
-                  asset-principal 
-                  (get principal-balance borrow-balance)
-                  (get borrow-index borrow-balance))
-                (err u1004))
-              (max-liquidatable (/ (* current-debt CLOSE_FACTOR) PRECISION))
-              (actual-repay-amount (min repay-amount max-liquidatable)))
-          
-          (asserts! (<= actual-repay-amount max-liquidatable) ERR_LIQUIDATION_TOO_MUCH)
-          
-          ;; Transfer repayment from liquidator
-          (try! (contract-call? asset transfer actual-repay-amount liquidator (as-contract tx-sender) none))
-          
-          ;; Reduce borrower's debt
-          (let ((market-info (unwrap! (contract-call? .interest-rate-model get-market-info asset-principal) ERR_INVALID_ASSET))
-                (current-borrow-index (get borrow-index market-info))
-                (principal-to-remove (/ (* actual-repay-amount PRECISION) current-borrow-index))
-                (new-principal-balance (- (get principal-balance borrow-balance) principal-to-remove)))
-            
-            (map-set user-borrow-balances
-              { user: borrower, asset: asset-principal }
-              {
-                principal-balance: new-principal-balance,
-                borrow-index: current-borrow-index
-              })
-            
-            ;; Calculate collateral to seize (with bonus)
-            (let ((asset-price (get-asset-price asset-principal))
-                  (collateral-value (/ (* actual-repay-amount asset-price) PRECISION))
-                  (liquidation-bonus (get-liquidation-bonus asset-principal))
-                  (seize-value (/ (* collateral-value (+ PRECISION liquidation-bonus)) PRECISION)))
-              
-              ;; Convert seize-value to amount of collateral asset
-              (let ((collateral-asset (unwrap! (get-collateral-asset borrower) (err u1005)))
-                    (collateral-price (get-asset-price collateral-asset))
-                    (amount-to-seize (/ (* seize-value PRECISION) collateral-price))
-                    (borrower-balance (get-user-supply-balance borrower collateral-asset))
-                    (borrower-amount (get principal-balance borrower-balance)))
+        ;; Calculate collateral to seize with bonus
+        (collateral-price (unwrap! (get-asset-price collateral-principal) (err u1008)))  ;; ERR_PRICE_FETCH_FAILED
+        (repay-price (unwrap! (get-asset-price repay-principal) (err u1008)))  ;; ERR_PRICE_FETCH_FAILED
+        
+        (collateral-value (/ (* repay-amount collateral-price) repay-price))
+        (seize-amount (/ (* collateral-value (get liquidation-bonus market-state)) PRECISION_18))
+        
+        ;; Apply close factor if needed
+        (max-seize (get principal-balance user-collateral))
+        (seize-amount (if (> seize-amount max-seize) max-seize seize-amount))
+                  { user: borrower, asset: asset-principal }
+                  {
+                    principal-balance: new-principal-balance,
+                    borrow-index: current-borrow-index
+                  })
                 
-                ;; Verify borrower has sufficient collateral
-                (asserts! (>= borrower-amount amount-to-seize) ERR_INSUFFICIENT_COLLATERAL)
-                
-                ;; Update borrower's balance
-                (map-set user-supply-balances
-                         { user: borrower, asset: collateral-asset }
-                         { principal-balance: (- borrower-amount amount-to-seize), 
-                           supply-index: (get supply-index borrower-balance) })
-                
-                ;; Update liquidator's balance
-                (let ((liquidator-balance (get-user-supply-balance tx-sender collateral-asset)))
-                  (map-set user-supply-balances
-                           { user: tx-sender, asset: collateral-asset }
-                           { principal-balance: (+ (get principal-balance liquidator-balance) amount-to-seize), 
-                             supply-index: (get supply-index liquidator-balance) }))
-                
-                (print (tuple 
-                  (event "collateral-seized")
-                  (borrower borrower)
-                  (liquidator tx-sender)
-                  (asset collateral-asset)
-                  (amount amount-to-seize)
-                ))
-              
-              ;; Update market state
-              ;; Update market state
-              (try! (contract-call? .interest-rate-model update-market-state 
-                                   asset-principal 
-                                   (to-int actual-repay-amount)
-                                   (- (to-int actual-repay-amount))
-                                   0))
-              
-              (ok actual-repay-amount)
+                ;; Calculate collateral to seize (with bonus)
+                (let ((asset-price (get-asset-price asset-principal))
+                      (collateral-value (/ (* actual-repay-amount asset-price) PRECISION))
+                      (liquidation-bonus (get-liquidation-bonus asset-principal))
+                      (seize-value (/ (* collateral-value (+ PRECISION liquidation-bonus)) PRECISION)))
+                  
+                  ;; Convert seize-value to amount of collateral asset
+                  (let ((collateral-asset (unwrap! (get-collateral-asset borrower) (err u1005)))
+                        (collateral-price (get-asset-price collateral-asset))
+                        (amount-to-seize (/ (* seize-value PRECISION) collateral-price))
+                        (borrower-balance (get-user-supply-balance borrower collateral-asset))
+                        (borrower-amount (get principal-balance borrower-balance)))
+                    
+                    ;; Verify borrower has sufficient collateral
+                    (asserts! (>= borrower-amount amount-to-seize) ERR_INSUFFICIENT_COLLATERAL)
+                    
+                    ;; Update borrower's balance
+                    (map-set user-supply-balances
+                      { user: borrower, asset: collateral-asset }
+                      { 
+                        principal-balance: (- borrower-amount amount-to-seize), 
+                        supply-index: (get supply-index borrower-balance) 
+                      })
+                    
+                    ;; Update liquidator's balance
+                    (let ((liquidator-balance (get-user-supply-balance tx-sender collateral-asset)))
+                      (map-set user-supply-balances
+                        { user: tx-sender, asset: collateral-asset }
+                        { 
+                          principal-balance: (+ (get principal-balance liquidator-balance) amount-to-seize), 
+                          supply-index: (get supply-index liquidator-balance) 
+                        }))
+                    
+                    ;; Emit standardized liquidation event
+                    (print (tuple 
+                      (event "liquidation-executed")
+                      (borrower borrower)
+                      (liquidator liquidator)
+                      (debt-asset asset-principal)
+                      (collateral-asset collateral-asset)
+                      (debt-repaid actual-repay-amount)
+                      (collateral-seized amount-to-seize)
+                      (liquidation-bonus liquidation-bonus)
+                    ))
+                    
+                    ;; Update market state using standard interface
+                    (match (contract-call? .interest-rate-model update-market-state 
+                                         asset-principal 
+                                         (to-int actual-repay-amount)
+                                         (- (to-int actual-repay-amount))
+                                         0)
+                      (ok result) (ok actual-repay-amount)
+                      (error error) (err u1006)  ;; ERR_MARKET_UPDATE_FAILED
+                    )
+                  )
+                )
+              )
             )
           )
-        )
+        (error error) (err u1004)  ;; ERR_POSITION_NOT_UNDERWATER
       )
     )
   )
@@ -584,12 +648,54 @@
           acc))
       acc)))
 
-(define-read-only (get-health-factor (user principal))
-  (let ((collateral-result (get-collateral-value user))
-        (borrow-value (get-total-borrow-value user)))
-    (if (is-eq borrow-value u0)
-      (ok (* u1000 PRECISION)) ;; Very high health factor if no debt
-      (ok (/ (* (get total-value collateral-result) PRECISION) borrow-value)))))
+(define-private (get-health-factor (user principal))
+  (let (
+      (collateral-value (unwrap! (get-total-collateral-value user) (err u1013)))  ;; ERR_COLLATERAL_CALCULATION_FAILED
+      (debt-value (unwrap! (get-total-debt-value user) (err u1014)))  ;; ERR_DEBT_CALCULATION_FAILED
+    )
+    (if (<= debt-value u0)
+      (ok MAX_UINT256)  ;; No debt means maximum health factor
+      (ok (/ (* collateral-value PRECISION_18) debt-value))
+    )
+  )
+)
+
+(define-private (get-total-collateral-value (user principal))
+  (let (
+      (collateral-assets (get-user-collateral-assets user))
+      (total-value u0)
+    )
+    (fold collateral-assets total-value
+      (lambda (asset total)
+        (let (
+            (balance (get-user-supply-balance user asset))
+            (price (unwrap! (get-asset-price asset) (err u1008)))  ;; ERR_PRICE_FETCH_FAILED
+            (collateral-factor (get-collateral-factor asset))
+          )
+          (ok (+ total (/ (* (get principal-balance balance) price collateral-factor) (* PRECISION_18 PRECISION_18))))
+        )
+      )
+    )
+  )
+)
+
+(define-private (get-total-debt-value (user principal))
+  (let (
+      (debt-assets (get-user-debt-assets user))
+      (total-value u0)
+    )
+    (fold debt-assets total-value
+      (lambda (asset total)
+        (let (
+            (balance (get-user-borrow-balance user asset))
+            (price (unwrap! (get-asset-price asset) (err u1008)))  ;; ERR_PRICE_FETCH_FAILED
+          )
+          (ok (+ total (/ (* (get principal-balance balance) price) PRECISION_18)))
+        )
+      )
+    )
+  )
+)
 
 (define-read-only (get-supply-apy (asset <sip10>))
   (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.interest-rate-model get-supply-apy (contract-of asset)))

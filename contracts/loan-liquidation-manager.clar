@@ -2,59 +2,46 @@
 ;; Advanced liquidation system for undercollateralized positions
 ;; Supports multiple liquidation strategies and automated liquidations
 
-(use-trait sip10 .sip-010-trait.sip-010-trait)
+(use-trait std-constants .standard-constants-trait.standard-constants-trait)
+(use-trait liquidation .liquidation-trait.liquidation-trait)
+(impl-trait .liquidation-trait.liquidation-trait)
 
 ;; Oracle contract
 (define-constant ORACLE_CONTRACT 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.oracle)
 
-(define-private (min (a uint) (b uint))
-  (if (<= a b) a b))
+;; Contract owner
+(define-constant CONTRACT_OWNER tx-sender)
 
-(define-private (max (a uint) (b uint))
-  (if (>= a b) a b))
-
-(define-constant ERR_UNAUTHORIZED (err u7001))
-(define-constant ERR_POSITION_HEALTHY (err u7002))
-(define-constant ERR_LIQUIDATION_TOO_LARGE (err u7003))
-(define-constant ERR_INSUFFICIENT_BALANCE (err u7004))
-(define-constant ERR_INVALID_COLLATERAL (err u7005))
-(define-constant ERR_PRICE_TOO_OLD (err u7006))
-(define-constant ERR_LIQUIDATION_PAUSED (err u7007))
-(define-constant ERR_POSITION_NOT_FOUND (err u7008))
-(define-constant ERR_ASSET_NOT_WHITELISTED (err u7009))
-(define-constant ERR_POSITION_NOT_UNDERWATER (err u7010))
-
-(define-constant PRECISION u1000000000000000000) ;; 18 decimals
-(define-constant MAX_LIQUIDATION_INCENTIVE u200000000000000000) ;; 20% max bonus
-(define-constant MAX_CLOSE_FACTOR u500000000000000000) ;; 50% max liquidation per tx
-(define-constant LIQUIDATION_THRESHOLD u833333333333333333) ;; 83.33% (1/1.2)
-(define-constant LENDING_SYSTEM_CONTRACT 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.comprehensive-lending-system)
-
-;; Dynamic contract reference for lending system
-(define-data-var lending-system (optional principal) (some LENDING_SYSTEM_CONTRACT))
+;; Data variables
+(define-data-var admin principal CONTRACT_OWNER)
+(define-data-var liquidation-paused bool false)
+(define-data-var keeper-incentive-bps uint u100) ;; 1% keeper incentive
+(define-data-var lending-system (optional principal) none)
 
 ;; Set the lending system contract (admin only)
 (define-public (set-lending-system-contract (contract principal))
   (begin
-    (asserts! (is-eq tx-sender (var-get admin)) ERR_UNAUTHORIZED)
+    (asserts! (is-eq tx-sender (var-get admin)) (err u1002)) ;; ERR_UNAUTHORIZED
     (var-set lending-system (some contract))
     (ok true)))
-
-;; Admin
-(define-data-var admin principal tx-sender)
-(define-data-var liquidation-paused bool false)
-(define-data-var keeper-incentive-bps uint u100) ;; 1% keeper incentive
 
 ;; Liquidation parameters per asset
 (define-map liquidation-params
   { asset: principal }
   {
-    liquidation-threshold: uint,    ;; Collateral ratio below which liquidation is allowed
-    liquidation-incentive: uint,    ;; Bonus percentage for liquidators
-    close-factor: uint,             ;; Maximum portion that can be liquidated
-    min-liquidation-amount: uint,   ;; Minimum amount to liquidate
-    max-liquidation-amount: uint    ;; Maximum amount in single tx
+    liquidation-threshold: uint,    ;; Collateral ratio below which liquidation is allowed (in bps, e.g. 8333 for 83.33%)
+    liquidation-incentive: uint,    ;; Bonus percentage for liquidators (in bps, e.g. 200 for 2%)
+    close-factor: uint,             ;; Maximum portion that can be liquidated (in bps, e.g. 5000 for 50%)
+    min-liquidation-amount: uint,   ;; Minimum amount to liquidate (in asset's base units)
+    max-liquidation-amount: uint    ;; Maximum amount in single tx (in asset's base units)
   })
+
+;; Default liquidation parameters (in basis points)
+(define-constant DEFAULT_LIQUIDATION_THRESHOLD u8333)     ;; 83.33%
+(define-constant DEFAULT_LIQUIDATION_INCENTIVE u200)      ;; 2%
+(define-constant DEFAULT_CLOSE_FACTOR u5000)              ;; 50%
+(define-constant DEFAULT_MIN_LIQUIDATION_AMOUNT u1000)    ;; 1000 base units
+(define-constant DEFAULT_MAX_LIQUIDATION_AMOUNT u1000000000000000000)  ;; 1e18 base units
 
 ;; Liquidation history
 (define-map liquidation-history
@@ -84,6 +71,55 @@
 (define-map asset-prices
   { asset: principal }
   { price: uint, last-update-block: uint, max-age-blocks: uint })
+
+;; Keeper whitelist
+(define-map keepers { keeper: principal } { is-keeper: bool })
+
+;; Initialize liquidation parameters for an asset
+(define-public (init-liquidation-params 
+  (asset principal)
+  (liquidation-threshold uint)
+  (liquidation-incentive uint)
+  (close-factor uint)
+  (min-amount uint)
+  (max-amount uint)
+)
+  (begin
+    (asserts! (is-eq tx-sender (var-get admin)) (err u1002)) ;; ERR_UNAUTHORIZED
+    (asserts! (<= liquidation-threshold u10000) (err u1003))  ;; ERR_INVALID_AMOUNT
+    (asserts! (<= liquidation-incentive u1000) (err u1003))   ;; Max 10% incentive
+    (asserts! (<= close-factor u10000) (err u1003))          ;; Max 100%
+    (asserts! (<= min-amount max-amount) (err u1003))        ;; Min <= Max
+    
+    (map-set liquidation-params 
+      { asset: asset }
+      {
+        liquidation-threshold: (default-to DEFAULT_LIQUIDATION_THRESHOLD liquidation-threshold),
+        liquidation-incentive: (default-to DEFAULT_LIQUIDATION_INCENTIVE liquidation-incentive),
+        close-factor: (default-to DEFAULT_CLOSE_FACTOR close-factor),
+        min-liquidation-amount: (default-to DEFAULT_MIN_LIQUIDATION_AMOUNT min-amount),
+        max-liquidation-amount: (default-to DEFAULT_MAX_LIQUIDATION_AMOUNT max-amount)
+      }
+    )
+    (ok true)
+  )
+)
+
+;; Get liquidation parameters with defaults
+(define-read-only (get-liquidation-params (asset principal))
+  (let ((params (map-get? liquidation-params { asset: asset })))
+    (if (is-none params)
+      {
+        liquidation-threshold: DEFAULT_LIQUIDATION_THRESHOLD,
+        liquidation-incentive: DEFAULT_LIQUIDATION_INCENTIVE,
+        close-factor: DEFAULT_CLOSE_FACTOR,
+        min-liquidation-amount: DEFAULT_MIN_LIQUIDATION_AMOUNT,
+        max-liquidation-amount: DEFAULT_MAX_LIQUIDATION_AMOUNT
+      }
+      (unwrap! params (err u1008))  ;; ERR_ASSET_NOT_WHITELISTED
+    )
+  )
+)
 
 ;; === ADMIN FUNCTIONS ===
 (define-public (set-admin (new-admin principal))
@@ -141,98 +177,107 @@
     (ok true)))
 
 ;; === LIQUIDATION FUNCTIONS ===
-;; Main liquidation function
 ;; Helper function to check if a position is liquidatable
 (define-private (verify-liquidatable-position 
   (borrower principal)
   (debt-asset principal)
   (collateral-asset principal))
   (let ((params (unwrap! (map-get? liquidation-params { asset: debt-asset }) 
-                        ERR_UNAUTHORIZED))
-        (lending-system (unwrap-panic (var-get lending-system))))
-    (match (contract-call? lending-system get-health-factor borrower) result
-      (ok health-factor) 
-        (if (<= health-factor (get liquidation-threshold params))
-          (ok true)
-          (err ERR_POSITION_NOT_UNDERWATER))
-      (err e) (err e))))
+                        (err u1008)))  ;; ERR_ASSET_NOT_WHITELISTED
+        (lending-system (unwrap! (var-get lending-system) (err u1008))))
+    (contract-call? lending-system is-position-liquidatable borrower debt-asset collateral-asset)
+  )
+)
 
+;; Main liquidation function
 (define-public (liquidate-position 
   (borrower principal)
   (debt-asset <sip10>)
   (collateral-asset <sip10>)
-  (debt-to-repay uint)
-  (max-collateral-to-seize uint)
+  (debt-amount uint)
+  (max-collateral-amount uint)
 )
   (let (
       (liquidator tx-sender)
       (debt-asset-principal (contract-of debt-asset))
       (collateral-asset-principal (contract-of collateral-asset))
-      (lending-system (unwrap-panic (var-get lending-system)))
-      (liquidation-id (+ (var-get total-liquidations) u1))
+      (lending-system (unwrap! (var-get lending-system) (err u1008)))  ;; ERR_ASSET_NOT_WHITELISTED
+      
+      ;; Get position data
+      (position (unwrap! (contract-call? lending-system get-position borrower debt-asset collateral-asset) 
+                (err u1009)))  ;; ERR_INSUFFICIENT_COLLATERAL
+      
+      ;; Get liquidation parameters with defaults
+      (params (get-liquidation-params debt-asset-principal))
+      
+      ;; Check if liquidation is allowed
+      (is-liquidatable (unwrap! (contract-call? lending-system 
+                                is-position-liquidatable borrower debt-asset collateral-asset) 
+                      (err u1004)))  ;; ERR_POSITION_NOT_UNDERWATER
+      
+      ;; Calculate liquidation amounts
+      (liquidation-amounts (calculate-liquidation-amounts borrower debt-asset collateral-asset debt-amount))
+      
+      (debt-to-repay (get 'debt-to-repay liquidation-amounts))
+      (collateral-to-seize (get 'collateral-to-seize liquidation-amounts))
+      
+      ;; Check slippage and min/max amounts
+      (slippage-ok? (<= collateral-to-seize max-collateral-amount))
+      (amount-valid? (and 
+                      (>= debt-to-repay (get min-liquidation-amount params))
+                      (<= debt-to-repay (get max-liquidation-amount params))))
     )
-    (begin
-      (asserts! (not (var-get liquidation-paused)) ERR_LIQUIDATION_PAUSED)
-      (asserts! (> debt-to-repay u0) ERR_INSUFFICIENT_BALANCE)
-      
-      ;; Check if position is liquidatable
-      (try! (verify-liquidatable-position borrower debt-asset-principal collateral-asset-principal))
-      
-      ;; Get liquidation parameters
-      (let (
-          (params (unwrap! (map-get? liquidation-params { asset: debt-asset-principal }) ERR_UNAUTHORIZED))
-          (debt-price (get-asset-price-safe debt-asset-principal))
-          (collateral-price (get-asset-price-safe collateral-asset-principal))
-        )
-        ;; Get borrower's debt from lending system
-        (match (contract-call? lending-system get-borrow-balance borrower debt-asset)
-          result (ok borrower-debt)
-          err (err err)
-        )
-        (let (
-            (max-repayable (/ (* borrower-debt (get close-factor params)) PRECISION))
-            (actual-debt-to-repay (min debt-to-repay max-repayable))
-          )
-          (asserts! (<= actual-debt-to-repay (get max-liquidation-amount params)) ERR_LIQUIDATION_TOO_LARGE)
-          (asserts! (>= actual-debt-to-repay (get min-liquidation-amount params)) ERR_LIQUIDATION_TOO_LARGE)
+    
+    (asserts! (not (var-get liquidation-paused)) (err u1001))  ;; ERR_LIQUIDATION_PAUSED
+    (asserts! is-liquidatable (err u1004))  ;; ERR_POSITION_NOT_UNDERWATER
+    (asserts! slippage-ok? (err u1005))    ;; ERR_SLIPPAGE_TOO_HIGH
+    (asserts! amount-valid? (err u1003))   ;; ERR_INVALID_AMOUNT
+    
+    ;; Execute liquidation through lending system
+    (match (contract-call? lending-system 
+            execute-liquidation 
+            borrower 
+            liquidator 
+            debt-asset-principal 
+            collateral-asset-principal 
+            debt-to-repay 
+            collateral-to-seize)
+      (ok result) 
+        (begin
+          ;; Emit liquidation event
+          (print (tuple 
+            (event "liquidation-executed")
+            (borrower borrower)
+            (liquidator liquidator)
+            (debt-asset debt-asset-principal)
+            (collateral-asset collateral-asset-principal)
+            (debt-repaid debt-to-repay)
+            (collateral-seized collateral-to-seize)
+            (incentive (get liquidation-incentive params))
+          ))
           
-          ;; Calculate collateral to seize
-          (let (
-              (debt-value (/ (* actual-debt-to-repay debt-price) PRECISION))
-              (liquidation-incentive (get liquidation-incentive params))
-              (incentive-value (/ (* debt-value liquidation-incentive) PRECISION))
-              (total-collateral-value (+ debt-value incentive-value))
-              (collateral-to-seize (/ (* total-collateral-value PRECISION) collateral-price))
-            )
-            (asserts! (<= collateral-to-seize max-collateral-to-seize) ERR_LIQUIDATION_TOO_LARGE)
-            
-            (match (contract-call? debt-asset transfer actual-debt-to-repay liquidator (as-contract tx-sender) none)
-              (ok transfer-ok)
-              (match (contract-call? lending-system repay-for-user borrower debt-asset actual-debt-to-repay)
-                (ok repay-ok)
-                (match (contract-call? lending-system seize-collateral borrower liquidator collateral-asset collateral-to-seize)
-                  (ok seize-ok)
-                  (begin
-                    ;; Update liquidation stats
-                    (var-set total-liquidations (+ (var-get total-liquidations) u1))
-                    (var-set total-debt-liquidated (+ (var-get total-debt-liquidated) actual-debt-to-repay))
-                    (var-set total-collateral-seized (+ (var-get total-collateral-seized) collateral-to-seize))
-                    
-                    ;; Log the liquidation event
-                    (print (tuple 
-                      (event "liquidation-executed")
-                      (liquidation-id liquidation-id)
-                      (liquidator liquidator)
-                      (borrower borrower)
-                      (debt-asset debt-asset-principal)
-                      (debt-repaid actual-debt-to-repay)
-                      (collateral-seized collateral-to-seize)
-                    ))
-                    
-                    (ok true)
-                  )
-                  (err e) (err e)
-                )
+          ;; Update statistics
+          (unwrap! (update-liquidation-stats debt-to-repay collateral-to-seize) (err u1000))
+          
+          (ok result)
+        )
+      error error
+    )
+  )
+)
+
+;; Update liquidation stats
+(define-private (update-liquidation-stats 
+  (debt-repaid uint) 
+  (collateral-seized uint)
+)
+  (begin
+    (var-set total-liquidations (+ (var-get total-liquidations) u1))
+    (var-set total-debt-liquidated (+ (var-get total-debt-liquidated) debt-repaid))
+    (var-set total-collateral-seized (+ (var-get total-collateral-seized) collateral-seized))
+    (ok true)
+  )
+)
                 (err e) (err e)
               )
               (err e) (err e)
@@ -400,27 +445,52 @@
   (borrower principal)
   (debt-asset <sip10>)
   (collateral-asset <sip10>))
-  (let ((debt-asset-principal (contract-of debt-asset))
-        (collateral-asset-principal (contract-of collateral-asset))
-        (debt-balance (match (contract-call? (unwrap-panic (var-get lending-system)) get-borrow-balance borrower debt-asset)
-                          db db
-                          err u0))
-        (params (default-to { liquidation-threshold: LIQUIDATION_THRESHOLD,
-                              liquidation-incentive: u0,
-                              close-factor: MAX_CLOSE_FACTOR,
-                              min-liquidation-amount: u0,
-                              max-liquidation-amount: u0 }
-                            (map-get? liquidation-params { asset: debt-asset-principal })))
-        (max-repayable (/ (* debt-balance (get close-factor params)) PRECISION))
-        (debt-price (get-asset-price-safe debt-asset-principal))
-        (collateral-price (get-asset-price-safe collateral-asset-principal))
-        (debt-value (/ (* max-repayable debt-price) PRECISION))
-        (incentive-rate (get liquidation-incentive params))
-        (incentive-value (/ (* debt-value incentive-rate) PRECISION))
-        (total-collateral-value (+ debt-value incentive-value))
-        (collateral-to-seize (if (is-eq collateral-price u0) 
-                               u0 
-                               (/ (* total-collateral-value PRECISION) collateral-price))))
+  (let (
+      (debt-asset-principal (contract-of debt-asset))
+      (collateral-asset-principal (contract-of collateral-asset))
+      (lending-system (unwrap! (var-get lending-system) (err u1008)))  ;; ERR_ASSET_NOT_WHITELISTED
+      
+      ;; Get position data
+      (position (unwrap! (contract-call? lending-system get-position borrower debt-asset collateral-asset) 
+                (err u1009)))  ;; ERR_INSUFFICIENT_COLLATERAL
+      
+      ;; Get liquidation parameters with defaults
+      (params (get-liquidation-params debt-asset-principal))
+      
+      ;; Get asset prices from oracle
+      (debt-price (unwrap! (contract-call? ORACLE_CONTRACT get-price debt-asset-principal none) 
+                  (err u4000)))  ;; ERR_PRICE_STALE
+      (collateral-price (unwrap! (contract-call? ORACLE_CONTRACT get-price collateral-asset-principal none) 
+                        (err u4000)))  ;; ERR_PRICE_STALE
+      
+      ;; Calculate maximum debt that can be liquidated (close factor)
+      (max-debt-to-liquidate (/
+        (* (get 'total-borrowed position) (get close-factor params))
+        u10000  ;; 100% in basis points
+      ))
+      
+      ;; Calculate actual debt to be repaid (min of requested and max allowed)
+      (debt-to-repay (if (> debt-amount max-debt-to-liquidate) 
+                        max-debt-to-liquidate 
+                        debt-amount))
+      
+      ;; Calculate collateral to seize based on debt value and liquidation incentive
+      (debt-value (* debt-to-repay debt-price))
+      (liquidation-incentive (/ (* debt-value (get liquidation-incentive params)) u10000))  ;; Convert from bps
+      (total-collateral-value (+ debt-value liquidation-incentive))
+      (collateral-to-seize (/ total-collateral-value collateral-price))
+    )
+    
+    ;; Return the calculated amounts
+    (ok {
+      debt-to-repay: debt-to-repay,
+      collateral-to-seize: collateral-to-seize,
+      liquidation-incentive: (get liquidation-incentive params),
+      debt-value: debt-value,
+      collateral-value: total-collateral-value
+    })
+  )
+)
     
     (ok (tuple
       (max-debt-repayable max-repayable)
@@ -434,13 +504,65 @@
   (borrower principal)
   (debt-asset <sip10>)
   (collateral-asset <sip10>))
-  (begin
-    (asserts! (is-eq tx-sender (var-get admin)) ERR_UNAUTHORIZED)
-    ;; Admin can liquidate any position in emergency
-    (liquidate-position borrower debt-asset collateral-asset u1000000000000000000000 u1000000000000000000000))) ;; Large amounts
+  (let (
+      (liquidator tx-sender)
+      (debt-asset-principal (contract-of debt-asset))
+      (collateral-asset-principal (contract-of collateral-asset))
+      (lending-system (unwrap! (var-get lending-system) (err u1008)))  ;; ERR_ASSET_NOT_WHITELISTED
+    )
+    
+    ;; Only admin can call emergency liquidate
+    (asserts! (is-eq tx-sender (var-get admin)) (err u1002))  ;; ERR_UNAUTHORIZED
+    
+    ;; Get full position data
+    (let (
+        (position (unwrap! (contract-call? lending-system get-position borrower debt-asset collateral-asset) 
+                  (err u1009)))  ;; ERR_INSUFFICIENT_COLLATERAL
+        
+        (debt-amount (get 'total-borrowed position))
+        
+        ;; Calculate liquidation amounts with 100% close factor
+        (liquidation-amounts (calculate-liquidation-amounts 
+                              borrower 
+                              debt-asset 
+                              collateral-asset 
+                              debt-amount))
+        
+        (debt-to-repay (get 'debt-to-repay liquidation-amounts))
+        (collateral-to-seize (get 'collateral-to-seize liquidation-amounts))
+      )
+      
+      ;; Execute liquidation through lending system
+      (match (contract-call? lending-system 
+              execute-liquidation 
+              borrower 
+              liquidator 
+              debt-asset-principal 
+              collateral-asset-principal 
+              debt-to-repay 
+              collateral-to-seize)
+        (ok result) 
+          (begin
+            ;; Emit emergency liquidation event
+            (print (tuple 
+              (event "emergency-liquidation-executed")
+              (admin tx-sender)
+              (borrower borrower)
+              (debt-asset debt-asset-principal)
+              (collateral-asset collateral-asset-principal)
+              (debt-repaid debt-to-repay)
+              (collateral-seized collateral-to-seize)
+            ))
+            (ok result)
+          )
+        error error
+      )
+    )
+  )
+)
 
 (define-public (set-auto-liquidation-enabled (enabled bool))
   (begin
-    (asserts! (is-eq tx-sender (var-get admin)) ERR_UNAUTHORIZED)
+    (asserts! (is-eq tx-sender (var-get admin)) (err u1002))  ;; ERR_UNAUTHORIZED
     (var-set auto-liquidation-enabled enabled)
     (ok true)))
