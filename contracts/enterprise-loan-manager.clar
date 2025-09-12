@@ -38,6 +38,7 @@
 
 ;; Dynamic contract reference for bond issuance
 (define-data-var bond-issuance-system (optional principal) (some BOND_ISSUANCE_CONTRACT))
+(define-data-var lending-system-principal (optional principal) (some LENDING_SYSTEM))
 
 ;; Set the bond issuance system contract (admin only)
 (define-public (set-bond-issuance-contract (contract principal))
@@ -54,7 +55,6 @@
 (define-constant ERR_COLLATERAL_RELEASE_FAILED (err u7014))
 
 ;; Data variables
-(define-data-var lending-system-principal (optional principal) (some LENDING_SYSTEM))
 (define-data-var bond-issuer-principal (optional principal) (some BOND_ISSUANCE_CONTRACT))
 (define-data-var total-active-loans uint u0)
 (define-data-var liquidity-pool-balance uint u0)
@@ -72,9 +72,13 @@
     loan-asset: principal,
     interest-rate: uint,
     creation-block: uint,
+    maturity-block: uint,
     status: (string-ascii 20),
     total-interest-paid: uint,
-    bond-token-id: (optional uint)
+    credit-score: uint,
+    bond-issued: bool,
+    bond-token-id: (optional uint),
+    last-payment-block: uint
   })
 
 (define-map borrower-credit-profiles
@@ -101,35 +105,6 @@
 (define-constant BASIS_POINTS u10000)
 
 ;; Data structures
-(define-map enterprise-loans
-  uint ;; loan-id
-  {
-    borrower: principal,
-    principal-amount: uint,
-    collateral-amount: uint,
-    collateral-asset: principal,
-    loan-asset: principal,
-    interest-rate: uint, ;; basis points
-    creation-block: uint,
-    maturity-block: uint,
-    status: (string-ascii 20), ;; "active", "repaid", "liquidated", "defaulted"
-    credit-score: uint,
-    bond-issued: bool,
-    bond-token-id: (optional uint),
-    total-interest-paid: uint,
-    last-payment-block: uint
-  })
-
-(define-map borrower-credit-profiles
-  principal ;; borrower
-  {
-    credit-score: uint,
-    total-borrowed: uint,
-    successful-repayments: uint,
-    defaults: uint,
-    last-updated: uint
-  })
-
 (define-map bond-backing-loans
   uint ;; bond-token-id
   {
@@ -143,13 +118,7 @@
 ;; System state
 (define-data-var next-loan-id uint u1)
 (define-data-var next-bond-id uint u1)
-(define-data-var admin principal tx-sender)
-(define-data-var system-paused bool false)
-(define-data-var total-active-loans uint u0)
 (define-data-var total-loan-volume uint u0)
-
-;; Liquidity pool for enterprise loans
-(define-data-var liquidity-pool-balance uint u0)
 (define-data-var emergency-reserve uint u0)
 
 ;; Risk management
@@ -198,8 +167,8 @@
     (let ((current-profile (default-to 
                              {credit-score: u700, total-borrowed: u0, successful-repayments: u0, 
                               defaults: u0, last-updated: u0}
-                             (map-get? borrower-credit-profiles borrower))))
-      (map-set borrower-credit-profiles borrower
+                             (map-get? borrower-credit-profiles { borrower: borrower }))))
+      (map-set borrower-credit-profiles { borrower: borrower }
         (merge current-profile 
                {credit-score: new-score, last-updated: block-height}))
       (ok new-score))))
@@ -208,7 +177,7 @@
   (let ((profile (default-to 
                    {credit-score: u700, total-borrowed: u0, successful-repayments: u0, 
                     defaults: u0, last-updated: u0}
-                   (map-get? borrower-credit-profiles borrower)))
+                   (map-get? borrower-credit-profiles { borrower: borrower })))
         (credit-score (get credit-score profile))
         (default-rate (get defaults profile))
         (total-borrowed (get total-borrowed profile)))
@@ -234,7 +203,7 @@
         (credit-score (get credit-score 
                         (default-to {credit-score: u700, total-borrowed: u0, successful-repayments: u0, 
                                      defaults: u0, last-updated: u0}
-                                    (map-get? borrower-credit-profiles borrower))))
+                                    (map-get? borrower-credit-profiles { borrower: borrower }))))
         (interest-rate (assess-credit-risk borrower principal-amount))
         (ltv-ratio (/ (* principal-amount BASIS_POINTS) collateral-amount))
         (maturity-block (+ block-height duration-blocks)))
@@ -252,7 +221,7 @@
     (asserts! (>= (var-get liquidity-pool-balance) principal-amount) ERR_LIQUIDITY_SHORTAGE)
     
     ;; Create loan record
-    (map-set enterprise-loans loan-id
+    (map-set enterprise-loans { loan-id: loan-id }
       {
         borrower: borrower,
         principal-amount: principal-amount,
@@ -313,9 +282,9 @@
       })
     
     ;; Update loan with bond information
-    (match (map-get? enterprise-loans loan-id)
+    (match (map-get? enterprise-loans { loan-id: loan-id })
       loan-data
-        (map-set enterprise-loans loan-id
+        (map-set enterprise-loans { loan-id: loan-id }
           (merge loan-data {bond-issued: true, bond-token-id: (some bond-id)}))
       false)
     
@@ -353,7 +322,7 @@
 
 ;; === LOAN REPAYMENT ===
 (define-public (repay-loan (loan-id uint) (payment-amount uint))
-  (let ((loan (unwrap! (map-get? enterprise-loans loan-id) ERR_LOAN_NOT_FOUND)))
+  (let ((loan (unwrap! (map-get? enterprise-loans { loan-id: loan-id }) ERR_LOAN_NOT_FOUND)))
     (begin
       ;; Validations
       (asserts! (is-eq (get borrower loan) tx-sender) ERR_UNAUTHORIZED)
@@ -367,7 +336,7 @@
                                                   blocks-since-payment)))
         (begin
           ;; Update loan with payment
-          (map-set enterprise-loans loan-id
+          (map-set enterprise-loans { loan-id: loan-id }
             (merge loan 
                    {total-interest-paid: (+ (get total-interest-paid loan) payment-amount),
                     last-payment-block: block-height}))
@@ -384,16 +353,16 @@
           (ok true))))))
 
 (define-public (repay-loan-full (loan-id uint))
-  (let ((loan (unwrap! (map-get? enterprise-loans loan-id) ERR_LOAN_NOT_FOUND))
+  (let ((loan (unwrap! (map-get? enterprise-loans { loan-id: loan-id }) ERR_LOAN_NOT_FOUND))
         (lending-system (unwrap! (var-get lending-system-principal) ERR_LENDING_SYSTEM_NOT_CONFIGURED))
         (bond-issuer (unwrap! (var-get bond-issuance-system-principal) ERR_BOND_ISSUER_NOT_CONFIGURED))
         (enterprise-loan-manager (as-contract tx-sender))
-        (bond-issuance-system (var-get bond-issuance-system-principal)))
-    
+        (bond-issuance-system bond-issuer))
+
     ;; Validations
     (asserts! (is-eq (get borrower loan) tx-sender) ERR_UNAUTHORIZED)
     (asserts! (is-eq (get status loan) "active") ERR_LOAN_NOT_FOUND)
-    
+
     ;; Calculate total amount due
     (let ((principal (get principal-amount loan))
           (blocks-outstanding (- block-height (get creation-block loan)))
@@ -406,7 +375,7 @@
           (collateral-asset (get collateral-asset loan))
           (collateral-amount (get collateral-amount loan))
           (borrower (get borrower loan)))
-      
+
       (begin
         ;; Distribute yield to bond holders if this is a bond-backed loan
         (if (is-some bond-token)
@@ -417,34 +386,34 @@
               true)  ;; Continue with loan repayment even if yield distribution fails
           )
           true)
-        
+
         ;; Update loan status
         (map-set enterprise-loans loan-id
           (merge loan {status: "repaid", total-interest-paid: total-interest}))
-        
+
         ;; Release collateral back to borrower
         (match (as-contract (contract-call? collateral-asset transfer collateral-amount tx-sender borrower none))
           (ok true) true
           (err error) (begin
             (print (tuple (event "collateral-release-failed") (error error)))
             (err ERR_COLLATERAL_RELEASE_FAILED)))
-        
+
         ;; If this was a bond-backed loan, mark the bond as matured
         (if (is-some bond-token)
-          (match (contract-call? (unwrap-panic (var-get bond-issuance-system)) mature-bond (unwrap-panic bond-token)) response
+          (match (contract-call? bond-issuance-system mature-bond (unwrap-panic bond-token)) response
             (ok result) true
             (err error) (err ERR_BOND_MATURATION_FAILED))
           true)
-        
+
         ;; Update system counters
         (var-set total-active-loans (- (var-get total-active-loans) u1))
         (var-set liquidity-pool-balance (+ (var-get liquidity-pool-balance) remaining-due))
-        
+
         ;; Update borrower credit profile positively
         (update-borrower-repayment-history borrower true)
-        
+
         (print (tuple (event "loan-repaid") (loan-id loan-id) (total-paid total-due)))
-        
+
         (ok total-due)))))
 
 ;; === BOND YIELD DISTRIBUTION ===
@@ -470,12 +439,15 @@
 
 ;; === UTILITY FUNCTIONS ===
 
+(define-private (min (a uint) (b uint))
+  (if (<= a b) a b))
+
 (define-private (update-borrower-profile (borrower principal) (loan-amount uint))
   (let ((current-profile (default-to 
                            {credit-score: u700, total-borrowed: u0, successful-repayments: u0, 
                             defaults: u0, last-updated: u0}
-                           (map-get? borrower-credit-profiles borrower))))
-    (map-set borrower-credit-profiles borrower
+                           (map-get? borrower-credit-profiles { borrower: borrower }))))
+    (map-set borrower-credit-profiles { borrower: borrower }
       (merge current-profile 
              {total-borrowed: (+ (get total-borrowed current-profile) loan-amount),
               last-updated: block-height}))))
@@ -484,16 +456,16 @@
   (let ((current-profile (default-to 
                            {credit-score: u700, total-borrowed: u0, successful-repayments: u0, 
                             defaults: u0, last-updated: u0}
-                           (map-get? borrower-credit-profiles borrower))))
+                           (map-get? borrower-credit-profiles { borrower: borrower }))))
     (if successful
-      (map-set borrower-credit-profiles borrower
+      (map-set borrower-credit-profiles { borrower: borrower }
         (merge current-profile 
                {successful-repayments: (+ (get successful-repayments current-profile) u1),
                 credit-score: (if (<= (+ (get credit-score current-profile) u10) u1000)
                                  (+ (get credit-score current-profile) u10)
                                  u1000),
                 last-updated: block-height}))
-      (map-set borrower-credit-profiles borrower
+      (map-set borrower-credit-profiles { borrower: borrower }
         (merge current-profile 
                {defaults: (+ (get defaults current-profile) u1),
                 credit-score: (if (> (get credit-score current-profile) u100) 
@@ -522,7 +494,7 @@
   (map-get? enterprise-loans loan-id))
 
 (define-read-only (get-borrower-profile (borrower principal))
-  (map-get? borrower-credit-profiles borrower))
+  (map-get? borrower-credit-profiles { borrower: borrower }))
 
 (define-read-only (get-bond-info (bond-id uint))
   (map-get? bond-backing-loans bond-id))
@@ -540,7 +512,7 @@
   (let ((credit-score (get credit-score 
                         (default-to {credit-score: u700, total-borrowed: u0, successful-repayments: u0, 
                                      defaults: u0, last-updated: u0}
-                                    (map-get? borrower-credit-profiles borrower))))
+                                    (map-get? borrower-credit-profiles { borrower: borrower }))))
         (interest-rate (assess-credit-risk borrower amount)))
     (ok (tuple
       (eligible (>= credit-score MIN_CREDIT_SCORE))

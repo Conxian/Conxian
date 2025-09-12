@@ -2,11 +2,20 @@
 ;; Enhanced vault with comprehensive flash loan implementation
 ;; Extends the basic vault with full flash loan functionality
 
+;; Import trait at the top
+(use-trait sip10 .sip-010-trait.sip-010-trait)
+
+;; Define flash-loan-receiver trait inline to avoid circular dependency
+(define-trait flash-loan-receiver
+  (
+    (on-flash-loan (sender principal) (token principal) (amount uint) (fee uint) (data (buff 256))) (response bool uint)
+    (get-flash-loan-fee (token principal) (amount uint) (data (buff 256))) (response uint uint)
+    (get-max-flash-loan (token principal)) (response uint uint)
+  )
+)
+
 (impl-trait .vault-trait.vault-trait)
 (impl-trait .vault-admin-trait.vault-admin-trait)
-
-(use-trait sip10 .sip-010-trait.sip-010-trait)
-(use-trait flash-loan-receiver .flash-loan-receiver-trait.flash-loan-receiver-trait)
 
 ;; Constants
 (define-constant ERR_UNAUTHORIZED (err u6001))
@@ -33,7 +42,7 @@
 
 ;; Multi-asset support
 (define-map vault-balances principal uint)       ;; Total balance per asset
-(define-map vault-shares (tuple (user principal) (asset principal)) uint)
+(define-map vault-shares principal uint)         ;; Total shares per asset
 (define-map user-shares (tuple (user principal) (asset principal)) uint)  ;; User's shares per asset
 (define-map supported-assets principal bool)
 (define-map vault-caps principal uint)           ;; Max deposit per asset
@@ -111,7 +120,7 @@
     (map-set supported-assets asset true)
     (map-set vault-caps asset cap)
     (map-set vault-balances asset u0)
-    (map-set vault-shares { user: tx-sender, asset: asset } u0)
+    (map-set vault-shares asset u0)
     (ok true)))
 
 ;; === CORE VAULT FUNCTIONS ===
@@ -119,9 +128,9 @@
   (let ((user tx-sender)
         (fee (calculate-fee amount (var-get deposit-fee-bps)))
         (net-amount (- amount fee))
-        (shares (calculate-shares asset net-amount))
         (current-balance (unwrap! (get-total-balance asset) ERR_INVALID_ASSET))
         (current-shares (unwrap! (get-total-shares asset) ERR_INVALID_ASSET))
+        (shares (calculate-shares asset net-amount))
         (vault-cap (unwrap! (get-vault-cap asset) ERR_INVALID_ASSET))
         (user-current-shares (unwrap! (get-user-shares user asset) ERR_INVALID_ASSET)))
     
@@ -133,7 +142,7 @@
     
     ;; Update balances
     (map-set vault-balances asset (+ current-balance net-amount))
-    (map-set vault-shares (tuple (user user) (asset asset)) (+ current-shares shares))
+    (map-set vault-shares asset (+ current-shares shares))
     (map-set user-shares (tuple (user user) (asset asset)) (+ user-current-shares shares))
     
     ;; Handle fee
@@ -150,12 +159,9 @@
 
 (define-public (withdraw (asset principal) (shares uint))
   (let ((user tx-sender)
-        (amount (calculate-amount asset shares))
-        (fee (calculate-fee amount (var-get withdrawal-fee-bps)))
-        (net-amount (- amount fee))
-        (current-balance (unwrap! (get-total-balance asset) ERR_INVALID_ASSET))
-        (current-shares (unwrap! (get-total-shares asset) ERR_INVALID_ASSET))
-        (user-current-shares (unwrap! (get-user-shares user asset) ERR_INVALID_ASSET)))
+        (current-balance (unwrap! (map-get? vault-balances asset) ERR_INVALID_ASSET))
+        (current-shares (unwrap! (map-get? vault-shares asset) ERR_INVALID_ASSET))
+        (user-current-shares (unwrap! (map-get? user-shares (tuple (user user) (asset asset))) ERR_INVALID_ASSET)))
     
     ;; Validations
     (asserts! (not (var-get paused)) ERR_PAUSED)
@@ -165,7 +171,7 @@
     
     ;; Update balances
     (map-set vault-balances asset (- current-balance amount))
-    (map-set vault-shares (tuple (user user) (asset asset)) (- current-shares shares))
+    (map-set vault-shares asset (- current-shares shares))
     (map-set user-shares (tuple (user user) (asset asset)) (- user-current-shares shares))
     
     ;; Handle fee
@@ -205,9 +211,9 @@
           (try! (transfer-asset-from-vault asset amount receiver-principal))
           
           ;; Call receiver's flash loan callback (expects token principal)
-          (match (contract-call? receiver on-flash-loan tx-sender asset-principal amount fee data)
-            success (asserts! success ERR_CALLBACK_FAILED)
-            error (begin
+          (match (contract-call? receiver on-flash-loan tx-sender asset amount fee data)
+            (ok (success code)) (asserts! success ERR_CALLBACK_FAILED)
+            (err error) (begin
               (var-set flash-loan-in-progress false)
               (asserts! false (err error))))
           
@@ -306,6 +312,9 @@
 (define-private (is-asset-supported (asset principal))
   (default-to false (map-get? supported-assets asset)))
 
+(define-read-only (get-total-shares (asset principal))
+  (default-to u0 (map-get? vault-shares asset)))
+
 (define-private (calculate-fee (amount uint) (fee-bps uint))
   (/ (* amount fee-bps) MAX_BPS))
 
@@ -343,7 +352,7 @@
   (ok (default-to u0 (map-get? vault-balances asset))))
 
 (define-read-only (get-total-shares (asset principal))
-  (ok (default-to u0 (map-get? user-shares (tuple (user tx-sender) (asset asset))))))
+  (ok (default-to u0 (map-get? vault-shares asset))))
 
 (define-read-only (get-user-shares (user principal) (asset principal))
   (ok (default-to u0 (map-get? user-shares (tuple (user user) (asset asset))))))
@@ -404,30 +413,18 @@
       (fees-collected (get total-fees stats))
       (utilization-rate utilization-rate)))))
 
-(use-trait sip010 .sip-010-trait.sip-010-trait)
+;; === LEGACY VAULT TRAIT COMPLIANCE ===
+;; Fix flash-loan-basic function to use trait-based contract call
 
-(define-public (collect-protocol-fees (asset <sip10>))
-  (let ((fees (default-to u0 (map-get? collected-fees (contract-of asset))))
-        (admin-address (var-get admin)))
-    (begin
-      (asserts! (is-eq tx-sender admin-address) ERR_UNAUTHORIZED)
-      (asserts! (> fees u0) ERR_INVALID_AMOUNT)
-      
-      (match (as-contract (contract-call? asset transfer fees tx-sender admin-address none))
-        result (begin 
-                (map-set collected-fees (contract-of asset) u0)
-                (ok (tuple (fees-collected fees))))
-        error (err error))
-    )
-  )
-)
+(define-public (flash-loan-basic (amount uint) (recipient principal))
+  (let ((token-principal (unwrap-panic (var-get default-loan-asset))))
+    (match (as-contract (contract-call? sip10 transfer token-principal amount tx-sender recipient none))
+      (ok true) (ok true)
+      (err e) (err e))))
 
-(define-read-only (get-revenue-stats)
-  (ok (tuple 
-    (protocol-reserve (var-get protocol-reserve))
-    (treasury-reserve (var-get treasury-reserve))
-    (total-revenue (+ (var-get protocol-reserve) (var-get treasury-reserve)))
-    (revenue-share-bps (var-get revenue-share-bps)))))
+;; Define the flash-loan-simple function that will be called by other contracts
+(define-public (flash-loan-simple (token principal) (amount uint) (recipient principal))
+  (flash-loan token amount recipient))
 
 ;; === DEPENDENCY INJECTION ===
 (define-public (set-protocol-monitor (monitor-contract principal))
@@ -488,14 +485,29 @@
     (var-set default-loan-asset (some asset))
     (ok true)))
 
-;; === LEGACY VAULT TRAIT COMPLIANCE ===
-;; Basic flash-loan function for trait compatibility
-(define-public (flash-loan-basic (amount uint) (recipient principal))
-  (let ((token-principal (unwrap-panic (var-get default-loan-asset))))
-    (match (as-contract (contract-call? token-principal transfer amount tx-sender recipient none))
-      (ok true) (ok true)
-      (err e) (err e))))
+;; === COLLECT PROTOCOL FEES ===
+(define-public (collect-protocol-fees (asset <sip10>))
+  (let ((fees (default-to u0 (map-get? collected-fees (contract-of asset))))
+        (admin-address (var-get admin)))
+    (begin
+      (asserts! (is-eq tx-sender admin-address) ERR_UNAUTHORIZED)
+      (asserts! (> fees u0) ERR_INVALID_AMOUNT)
+      
+      (match (as-contract (contract-call? asset transfer fees tx-sender admin-address none))
+        result (begin 
+                (map-set collected-fees (contract-of asset) u0)
+                (ok (tuple (fees-collected fees))))
+        error (err error))
+    )
+  )
+)
 
-;; Define the flash-loan-simple function that will be called by other contracts
-(define-public (flash-loan-simple (token principal) (amount uint) (recipient principal))
-  (flash-loan token amount recipient))
+(define-read-only (get-revenue-stats)
+  (ok (tuple 
+    (protocol-reserve (var-get protocol-reserve))
+    (treasury-reserve (var-get treasury-reserve))
+    (total-revenue (+ (var-get protocol-reserve) (var-get treasury-reserve)))
+    (revenue-share-bps (var-get revenue-share-bps)))))
+
+(define-read-only (get-total-balance (asset principal))
+  (ok (default-to u0 (map-get? vault-balances asset))))
