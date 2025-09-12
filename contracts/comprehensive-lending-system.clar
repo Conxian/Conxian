@@ -240,9 +240,11 @@
 
 ;; Get the price of an asset from the oracle
 (define-read-only (get-asset-price (asset principal))
-  (match (contract-call? ORACLE_CONTRACT get-price asset none)
-    (ok price) (ok price)
-    (err error) (err ERR_PRICE_UNAVAILABLE)
+  (let ((oracle (unwrap! (var-get oracle-contract) ERR_ORACLE_NOT_CONFIGURED)))
+    (match (contract-call? oracle get-price asset)
+      (ok price) (ok price)
+      (err error) (err ERR_PRICE_UNAVAILABLE)
+    )
   )
 )
 

@@ -218,8 +218,8 @@
       ;; Calculate liquidation amounts
       (liquidation-amounts (calculate-liquidation-amounts borrower debt-asset collateral-asset debt-amount))
       
-      (debt-to-repay (get 'debt-to-repay liquidation-amounts))
-      (collateral-to-seize (get 'collateral-to-seize liquidation-amounts))
+      (debt-to-repay (get debt-to-repay liquidation-amounts))
+      (collateral-to-seize (get collateral-to-seize liquidation-amounts))
       
       ;; Check slippage and min/max amounts
       (slippage-ok? (<= collateral-to-seize max-collateral-amount))
@@ -465,7 +465,7 @@
       
       ;; Calculate maximum debt that can be liquidated (close factor)
       (max-debt-to-liquidate (/
-        (* (get 'total-borrowed position) (get close-factor params))
+        (* (get total-borrowed position) (get close-factor params))
         u10000  ;; 100% in basis points
       ))
       
@@ -519,7 +519,7 @@
         (position (unwrap! (contract-call? lending-system get-position borrower debt-asset collateral-asset) 
                   (err u1009)))  ;; ERR_INSUFFICIENT_COLLATERAL
         
-        (debt-amount (get 'total-borrowed position))
+        (debt-amount (get total-borrowed position))
         
         ;; Calculate liquidation amounts with 100% close factor
         (liquidation-amounts (calculate-liquidation-amounts 
@@ -528,8 +528,8 @@
                               collateral-asset 
                               debt-amount))
         
-        (debt-to-repay (get 'debt-to-repay liquidation-amounts))
-        (collateral-to-seize (get 'collateral-to-seize liquidation-amounts))
+        (debt-to-repay (get debt-to-repay liquidation-amounts))
+        (collateral-to-seize (get collateral-to-seize liquidation-amounts))
       )
       
       ;; Execute liquidation through lending system
