@@ -2,14 +2,16 @@
 ;; Full-featured lending and borrowing system with flash loans
 ;; Supports multiple assets, collateralization, and liquidations
 
+;; Traits
 (use-trait sip10 .sip-010-trait.sip-010-trait)
 (use-trait flash-loan-receiver .flash-loan-receiver-trait.flash-loan-receiver-trait)
 (use-trait std-constants .standard-constants-trait.standard-constants-trait)
 (use-trait liquidation-trait .liquidation-trait.liquidation-trait)
-(use-trait ownable .ownable-trait.ownable-trait)
+(use-trait access-control .access-control-trait.access-control-trait)
 
+;; Implement required traits
 (impl-trait .lending-system-trait.lending-system-trait)
-(impl-trait .ownable-trait.ownable-trait)
+(impl-trait .access-control-trait.access-control-trait)
 
 ;; Oracle integration
 (use-trait oracle .oracle-trait.oracle-trait)
@@ -40,11 +42,15 @@
 (define-constant MIN_HEALTH_FACTOR u1000000000000000000) ;; 1.0 (1.0 * 1e18)
 (define-constant MAX_LIQUIDATION_BONUS u100000000000000000) ;; 10% (0.1 * 1e18)
 
-;; === ADMIN ===
-(define-data-var admin principal tx-sender)
+;; === ROLES ===
+(define-constant ROLE_ADMIN 0x41444d494e000000000000000000000000000000000000000000000000000000)  ;; 'ADMIN' in hex
+(define-constant ROLE_OPERATOR 0x4f50455241544f52000000000000000000000000000000000000000000000000)  ;; 'OPERATOR' in hex
+(define-constant ROLE_EMERGENCY 0x454d455247454e4359000000000000000000000000000000000000000000000000)  ;; 'EMERGENCY' in hex
+
+;; === STATE ===
 (define-data-var total-borrows uint u0)
-(define-data-var paused bool false)
 (define-data-var oracle-contract (optional principal) (some ORACLE_CONTRACT))
+(define-data-var paused bool false)
 
 (define-map total-supply { asset: principal } { amount: uint })
 
@@ -137,25 +143,30 @@
   { price: uint, last-update: uint }) ;; Price in USD with 18 decimals
 
 ;; === ADMIN FUNCTIONS ===
-(define-public (set-admin (new-admin principal))
+(define-public (initialize (oracle principal))
   (begin
-    (asserts! (is-eq tx-sender (var-get admin)) ERR_UNAUTHORIZED)
-    (var-set admin new-admin)
-    (ok true)))
-
-(define-public (set-oracle-contract (contract principal))
-  (begin
-    (asserts! (is-eq tx-sender (var-get admin)) ERR_UNAUTHORIZED)
-    (var-set oracle-contract (some contract))
+    (asserts! (contract-call? .access-control has-role ROLE_ADMIN (as-contract tx-sender)) ERR_UNAUTHORIZED)
+    (var-set oracle-contract (some oracle))
     (ok true)
   )
 )
 
-(define-public (set-paused (pause bool))
+(define-public (set-admin (new-admin principal))
   (begin
-    (asserts! (is-eq tx-sender (var-get admin)) ERR_UNAUTHORIZED)
-    (var-set paused pause)
+    (asserts! (contract-call? .access-control has-role ROLE_ADMIN (as-contract tx-sender)) ERR_UNAUTHORIZED)
+    (var-set admin new-admin)
     (ok true)))
+
+(define-public (set-paused (paused-flag bool))
+  (begin
+    (asserts! (or 
+      (contract-call? .access-control has-role ROLE_ADMIN (as-contract tx-sender))
+      (contract-call? .access-control has-role ROLE_EMERGENCY (as-contract tx-sender))
+    ) ERR_UNAUTHORIZED)
+    (var-set paused paused-flag)
+    (ok true)
+  )
+)
 
 (define-public (add-supported-asset 
   (asset <sip10>) 

@@ -1,9 +1,10 @@
 ;; Conxian DEX Factory - Pool creation and registry with enhanced tokenomics integration
 ;; Implements ownable-trait and integrates with protocol monitoring
 
-(impl-trait .ownable-trait.ownable-trait)
-
+(use-trait access-control .access-control-trait.access-control-trait)
 (use-trait sip10 .sip-010-trait.sip-010-trait)
+
+(impl-trait .access-control-trait.access-control-trait)
 
 ;; Constants
 (define-constant ERR_UNAUTHORIZED (err u1001))
@@ -22,9 +23,12 @@
 (define-constant POOL_TYPE_WEIGHTED u3)
 (define-constant POOL_TYPE_CONCENTRATED u4)
 
+;; Roles
+(define-constant ROLE_DEX_ADMIN 0x4445585f41444d494e0000000000000000000000000000000000000000000000)  ;; 'DEX_ADMIN' in hex
+(define-constant ROLE_FEE_MANAGER 0x4645455f4d414e41474552000000000000000000000000000000000000000000)  ;; 'FEE_MANAGER' in hex
+(define-constant ROLE_POOL_MANAGER 0x504f4f4c5f4d414e414745520000000000000000000000000000000000000000)  ;; 'POOL_MANAGER' in hex
+
 ;; Data variables
-(define-data-var owner principal tx-sender)
-(define-data-var pending-owner (optional principal) none)
 (define-data-var pool-count uint u0)
 (define-data-var default-fee-bps uint u30) ;; 0.3% default
 (define-data-var protocol-fee-bps uint u5) ;; 0.05% protocol fee
@@ -113,54 +117,60 @@
 (define-read-only (is-owner (user principal))
   (ok (is-eq user (var-get owner))))
 
-
 (define-private (only-owner)
   (ok (asserts! (is-eq tx-sender (var-get owner)) ERR_UNAUTHORIZED)))
 
-;; Core factory functions
+;; Core factory;; Pool creation
 (define-public (create-pool 
   (pool-type uint) 
   (token-a principal) 
   (token-b principal) 
   (fee uint) 
-  (other-params (optional {tick-spacing: uint, initial-sqrt-price: uint})))
-  (let ((normalized-pair (normalize-token-pair token-a token-b))
-        (impl-contract (try! (get-implementation-contract pool-type))))
-    
-    ;; Validations
-    (asserts! (valid-pool-type? pool-type) ERR_INVALID_PARAMS)
-    (asserts! (not (is-eq token-a token-b)) ERR_INVALID_TOKENS)
-    (asserts! (<= fee MAX_FEE_BPS) ERR_INVALID_FEE)
-    (asserts! (is-none (map-get? pools normalized-pair)) ERR_POOL_EXISTS)
-    
-    ;; Create pool based on type 
-    (let ((pool-address tx-sender)) ;; Placeholder until proper implementation trait exists
+  (sqrt-price-upper uint) 
+  (sqrt-price-lower uint) 
+  (tick-spacing uint))
+  (let (
+      (sender tx-sender)
+      (token-pair (if (<= (principal-ucmp token-a token-b) 0)
+                    {token-a: token-a, token-b: token-b}
+                    {token-b: token-b, token-a: token-a}))
+    )
+    (begin
+      (asserts! (contract-call? .access-control has-role ROLE_POOL_MANAGER (as-contract tx-sender)) ERR_UNAUTHORIZED)
+      (asserts! (is-none (map-get? pools token-pair)) ERR_POOL_EXISTS)
+      (asserts! (not (is-eq token-a token-b)) ERR_INVALID_TOKENS)
       
-      ;; Update registry
-      (map-set pools normalized-pair pool-address)
-      (map-set pool-info pool-address 
-               {token-a: token-a,
-                token-b: token-b,
-                fee-bps: fee,
-                created-at: block-height,
-                pool-type: pool-type})
-      
-      (map-set pool-stats pool-address 
-               {total-volume: u0, 
-                total-fees: u0, 
-                liquidity: u0,
-                last-updated: block-height})
-      
-      (var-set pool-count (+ (var-get pool-count) u1))
-      
-      (print {event: "pool-created", 
-              pool: pool-address,
-              token-a: token-a,
-              token-b: token-b,
-              fee-bps: fee,
-              pool-type: pool-type})
-      
-      (ok pool-address))))
+      (let ((pool-principal (contract-call? .dex-pool deploy 
+        { 
+          token-a: (get token-a token-pair), 
+          token-b: (get token-b token-pair),
+          fee: fee,
+          sqrt-price-upper: sqrt-price-upper,
+          sqrt-price-lower: sqrt-price-lower,
+          tick-spacing: tick-spacing
+        })))
+        
+        (map-set pools token-pair pool-principal)
+        (map-set pool-info pool-principal {
+          token-a: (get token-a token-pair),
+          token-b: (get token-b token-pair),
+          fee-bps: fee,
+          created-at: block-height,
+          pool-type: pool-type
+        })
+        (map-set pool-stats pool-principal {
+          total-volume: u0,
+          total-fees: u0,
+          liquidity: u0,
+          last-updated: block-height
+        })
+        (var-set pool-count (+ (var-get pool-count) u1))
+        (print {event: "pool-created", pool: pool-principal, token-a: (get token-a token-pair), token-b: (get token-b token-pair)})
+        (ok pool-principal)
+      )
+    )
+  )
+)
 
 (define-public (register-pool-implementation (pool-type uint) (implementation principal))
   (begin
@@ -235,19 +245,27 @@
     (print {event: "ownership-renounced"})
     (ok true)))
 
-;; Administrative functions
-(define-public (set-default-fee (new-fee-bps uint))
+;; Administrat;; Fee management functions
+(define-public (set-fee (new-fee uint))
   (begin
-    (try! (only-owner))
-    (asserts! (<= new-fee-bps MAX_FEE_BPS) ERR_INVALID_FEE)
-    (var-set default-fee-bps new-fee-bps)
+    (asserts! (or 
+      (contract-call? .access-control has-role ROLE_DEX_ADMIN (as-contract tx-sender))
+      (contract-call? .access-control has-role ROLE_FEE_MANAGER (as-contract tx-sender))
+    ) ERR_UNAUTHORIZED)
+    (asserts! (<= new-fee MAX_FEE_BPS) ERR_INVALID_FEE)
+    (var-set default-fee-bps new-fee)
+    (print {event: "fee-updated", new-fee: new-fee})
     (ok true)))
 
-(define-public (set-protocol-fee (new-fee-bps uint))
+(define-public (set-protocol-fee (new-fee uint))
   (begin
-    (try! (only-owner))
-    (asserts! (<= new-fee-bps MAX_PROTOCOL_FEE_BPS) ERR_INVALID_FEE)
-    (var-set protocol-fee-bps new-fee-bps)
+    (asserts! (or 
+      (contract-call? .access-control has-role ROLE_DEX_ADMIN (as-contract tx-sender))
+      (contract-call? .access-control has-role ROLE_FEE_MANAGER (as-contract tx-sender))
+    ) ERR_UNAUTHORIZED)
+    (asserts! (<= new-fee MAX_PROTOCOL_FEE_BPS) ERR_INVALID_FEE)
+    (var-set protocol-fee-bps new-fee)
+    (print {event: "protocol-fee-updated", new-fee: new-fee})
     (ok true)))
 
 ;; Emergency functions

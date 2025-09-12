@@ -26,6 +26,51 @@ clarinet check   # ✅ 65+ contracts (syntax validation)
 npx vitest run --config ./vitest.config.enhanced.ts   # 🔄 Framework tests
 ```
 
+## Access Control Implementation
+
+Conxian uses a robust Role-Based Access Control (RBAC) system to manage permissions across the protocol. The implementation follows the OpenZeppelin AccessControl pattern with additional features for DeFi security.
+
+### Key Features
+
+- **Role-Based Permissions**: Granular control over contract functions
+- **Emergency Pause**: Ability to pause critical operations
+- **Multi-signature Support**: For sensitive operations
+- **Time-Delayed Changes**: For critical role modifications
+- **Event Logging**: Comprehensive audit trail
+
+### Available Roles
+
+- **DEFAULT_ADMIN_ROLE**: Full system access and role management
+- **EMERGENCY_ROLE**: Can pause/unpause the system
+- **OPERATOR_ROLE**: Day-to-day operations
+- **GOVERNANCE_ROLE**: Protocol parameter updates
+
+### Usage Example
+
+```typescript
+// Granting a role
+const grantTx = await simnet.callPublicFn(
+  'access-control',
+  'grant-role',
+  [
+    Cl.buffer(hexToBuffer(ROLES.OPERATOR)),
+    Cl.principal(operatorAddress)
+  ],
+  adminAddress
+);
+
+// Checking a role
+const hasRole = await simnet.callReadOnlyFn(
+  'access-control',
+  'has-role',
+  [
+    Cl.buffer(hexToBuffer(ROLES.OPERATOR)),
+    Cl.principal(operatorAddress)
+  ],
+  adminAddress
+);
+```
+
 ## Project Structure
 
 ```text
@@ -43,7 +88,31 @@ Conxian/
 
 ## Development Workflow
 
-### 1. Smart Contract Development
+### 1. Access Control Integration
+
+When developing new contracts, follow these patterns for access control:
+
+1. **Import Access Control**
+   ```clarity
+   (use-trait access-control-trait .access-control.access-control-trait)
+   ```
+
+2. **Define Required Roles**
+   ```clarity
+   (define-constant ROLE_OPERATOR 0x4f50455241544f52)  // "OPERATOR" in hex
+   ```
+
+3. **Add Access Control Checks**
+   ```clarity
+   (define-public (protected-function)
+     (begin
+       (try! (contract-call? .access-control has-role ROLE_OPERATOR (as-contract tx-sender)))
+       ;; Function logic here
+     )
+   )
+   ```
+
+### 2. Smart Contract Development
 
 #### Creating a New Contract
 

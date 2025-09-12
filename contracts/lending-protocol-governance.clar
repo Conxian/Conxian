@@ -1,6 +1,9 @@
 ;; lending-protocol-governance.clar
 ;; Governance system for the comprehensive lending protocol
 ;; Manages protocol parameters, upgrades, and community decisions
+;; Integrates with AccessControl for role-based access
+
+(use-trait access-control .access-control-trait.access-control-trait)
 
 (define-constant ERR_UNAUTHORIZED (err u8001))
 (define-constant ERR_PROPOSAL_NOT_FOUND (err u8002))
@@ -20,9 +23,13 @@
 (define-data-var proposal-threshold uint u10000000000000000000000) ;; 10K tokens to propose
 (define-data-var execution-delay uint u1440) ;; ~1 day timelock
 
-;; Protocol admin (can be updated via governance)
-(define-data-var protocol-admin principal tx-sender)
+;; Roles
+(define-constant ROLE_GOVERNOR 0x474f5645524e4f52000000000000000000000000000000000000000000000000)  ;; 'GOVERNOR' in hex
+(define-constant ROLE_GUARDIAN 0x475541524449414e000000000000000000000000000000000000000000000000)  ;; 'GUARDIAN' in hex
+
+;; Protocol state
 (define-data-var governance-token principal tx-sender) ;; Should be set to CXS token
+(define-data-var timelock-address (optional principal) none) ;; Timelock contract address
 
 ;; Proposal tracking
 (define-data-var next-proposal-id uint u1)
@@ -382,40 +389,50 @@
       voting-power)))
 
 ;; === ADMIN FUNCTIONS ===
-(define-public (update-governance-parameters
-  (new-voting-delay uint)
-  (new-voting-period uint)
-  (new-quorum-threshold uint)
-  (new-proposal-threshold uint)
-  (new-execution-delay uint))
+(define-public (update-governance-params 
+  (voting-delay uint) 
+  (voting-period uint) 
+  (quorum-threshold uint) 
+  (proposal-threshold uint)
+  (execution-delay uint))
   (begin
-    (asserts! (is-eq tx-sender (var-get protocol-admin)) ERR_UNAUTHORIZED)
+    (asserts! (or 
+      (contract-call? .access-control has-role ROLE_GOVERNOR (as-contract tx-sender))
+      (contract-call? .access-control has-role ROLE_GUARDIAN (as-contract tx-sender))
+    ) ERR_UNAUTHORIZED)
     
-    ;; Validate parameters
-    (asserts! (and (> new-voting-delay u0) (< new-voting-delay u10080)) ERR_INVALID_PARAMETERS) ;; Max 1 week delay
-    (asserts! (and (> new-voting-period u144) (< new-voting-period u20160)) ERR_INVALID_PARAMETERS) ;; 1 day to 2 weeks
-    (asserts! (< new-quorum-threshold PRECISION) ERR_INVALID_PARAMETERS) ;; Max 100%
+    (asserts! (>= voting-delay u144) (err u8009)) ;; At least 1 hour
+    (asserts! (and (>= voting-period u144) (<= voting-period u20160)) (err u8010)) ;; 1 hour to 2 weeks
+    (asserts! (and (>= quorum-threshold u10000000000000000) (<= quorum-threshold u1000000000000000000)) (err u8011)) ;; 1% to 100%
+    (asserts! (>= proposal-threshold u1000000000000000000) (err u8012)) ;; At least 1 token
+    (asserts! (and (>= execution-delay u144) (<= execution-delay u20160)) (err u8013)) ;; 1 hour to 2 weeks
     
-    (var-set voting-delay new-voting-delay)
-    (var-set voting-period new-voting-period)
-    (var-set quorum-threshold new-quorum-threshold)
-    (var-set proposal-threshold new-proposal-threshold)
-    (var-set execution-delay new-execution-delay)
-    
-    (ok true)))
+    (var-set voting-delay voting-delay)
+    (var-set voting-period voting-period)
+    (var-set quorum-threshold quorum-threshold)
+    (var-set proposal-threshold proposal-threshold)
+    (var-set execution-delay execution-delay)
+    (ok true)
+  )
+)
 
-(define-public (set-governance-token (token principal))
+(define-public (initialize (gov-token principal) (timelock principal))
   (begin
-    (asserts! (is-eq tx-sender (var-get protocol-admin)) ERR_UNAUTHORIZED)
-    (var-set governance-token token)
-    (ok true)))
+    (asserts! (contract-call? .access-control has-role ROLE_GOVERNOR (as-contract tx-sender)) ERR_UNAUTHORIZED)
+    (var-set governance-token gov-token)
+    (var-set timelock-address (some timelock))
+    (ok true)
+  )
+)
 
 (define-public (cancel-proposal (proposal-id uint))
   (let ((proposal (unwrap! (map-get? proposals proposal-id) ERR_PROPOSAL_NOT_FOUND)))
     (begin
       ;; Only proposer or admin can cancel
-      (asserts! (or (is-eq tx-sender (get proposer proposal)) 
-                    (is-eq tx-sender (var-get protocol-admin))) ERR_UNAUTHORIZED)
+      (asserts! (or 
+        (is-eq tx-sender (get proposer proposal)) 
+        (contract-call? .access-control has-role ROLE_GOVERNOR (as-contract tx-sender))
+      ) ERR_UNAUTHORIZED)
       
       ;; Can only cancel pending or active proposals
       (asserts! (or (is-eq (get state proposal) PROPOSAL_PENDING)
@@ -430,87 +447,21 @@
       
       (ok true))))
 
-;; === VIEW FUNCTIONS ===
-(define-read-only (get-proposal (proposal-id uint))
-  (map-get? proposals proposal-id))
-
-(define-read-only (get-vote-receipt (proposal-id uint) (voter principal))
-  (map-get? vote-receipts { proposal-id: proposal-id, voter: voter }))
-
-(define-read-only (get-governance-parameters)
-  (ok (tuple
-    (voting-delay (var-get voting-delay))
-    (voting-period (var-get voting-period))
-    (quorum-threshold (var-get quorum-threshold))
-    (proposal-threshold (var-get proposal-threshold))
-    (execution-delay (var-get execution-delay))
-    (total-proposals (var-get total-proposals))
-    (governance-token (var-get governance-token)))))
-
-(define-read-only (get-proposal-state (proposal-id uint))
-  (match (map-get? proposals proposal-id)
-    proposal
-      (let ((current-block block-height)
-            (start-block (get start-block proposal))
-            (end-block (get end-block proposal)))
-        
-        (if (< current-block start-block)
-          (ok PROPOSAL_PENDING)
-          (if (<= current-block end-block)
-            (ok PROPOSAL_ACTIVE)
-            ;; Check if succeeded
-            (let ((total-votes (+ (+ (get for-votes proposal) (get against-votes proposal)) (get abstain-votes proposal)))
-                  (quorum-met (>= total-votes (var-get quorum-threshold)))
-                  (majority-for (> (get for-votes proposal) (get against-votes proposal))))
-              (if (and quorum-met majority-for)
-                (ok PROPOSAL_SUCCEEDED)
-                (ok PROPOSAL_DEFEATED))))))
-    ERR_PROPOSAL_NOT_FOUND))
-
-(define-read-only (has-voted (proposal-id uint) (voter principal))
-  (is-some (map-get? vote-receipts { proposal-id: proposal-id, voter: voter })))
-
-;; === PROPOSAL LIFECYCLE MANAGEMENT ===
-;; Update proposal states automatically
-(define-public (update-proposal-state (proposal-id uint))
-  (let ((proposal (unwrap! (map-get? proposals proposal-id) ERR_PROPOSAL_NOT_FOUND))
-        (current-state (get state proposal)))
-    
-    (if (is-eq current-state PROPOSAL_PENDING)
-      ;; Check if should become active
-      (if (>= block-height (get start-block proposal))
-        (begin
-          (map-set proposals proposal-id (merge proposal { state: PROPOSAL_ACTIVE }))
-          (ok PROPOSAL_ACTIVE))
-        (ok current-state))
-      
-      (if (is-eq current-state PROPOSAL_ACTIVE)
-        ;; Check if voting has ended
-        (if (> block-height (get end-block proposal))
-          (let ((total-votes (+ (+ (get for-votes proposal) (get against-votes proposal)) (get abstain-votes proposal)))
-                (quorum-met (>= total-votes (var-get quorum-threshold)))
-                (majority-for (> (get for-votes proposal) (get against-votes proposal))))
-            (if (and quorum-met majority-for)
-              (begin
-                (map-set proposals proposal-id (merge proposal { state: PROPOSAL_SUCCEEDED }))
-                (ok PROPOSAL_SUCCEEDED))
-              (begin
-                (map-set proposals proposal-id (merge proposal { state: PROPOSAL_DEFEATED }))
-                (ok PROPOSAL_DEFEATED))))
-          (ok current-state))
-        
-        (ok current-state)))))
-
 ;; Emergency functions
-(define-public (emergency-cancel-proposal (proposal-id uint))
-  (begin
-    (asserts! (is-eq tx-sender (var-get protocol-admin)) ERR_UNAUTHORIZED)
-    (let ((proposal (unwrap! (map-get? proposals proposal-id) ERR_PROPOSAL_NOT_FOUND)))
-      (map-set proposals proposal-id (merge proposal { state: PROPOSAL_CANCELLED }))
-      (ok true))))
+(define-public (emergency-cancel (proposal-id uint))
+  (let ((proposal (unwrap! (map-get? proposals proposal-id) ERR_PROPOSAL_NOT_FOUND)))
+    (asserts! (contract-call? .access-control has-role ROLE_GUARDIAN (as-contract tx-sender)) ERR_UNAUTHORIZED)
+    (map-set proposals proposal-id (merge proposal {
+      state: PROPOSAL_CANCELLED
+    }))
+    (ok true)
+  )
+)
 
 (define-public (emergency-execute (target-contract principal) (function-name (string-ascii 50)))
   (begin
-    (asserts! (is-eq tx-sender (var-get protocol-admin)) ERR_UNAUTHORIZED)
+    (asserts! (contract-call? .access-control has-role ROLE_GUARDIAN (as-contract tx-sender)) ERR_UNAUTHORIZED)
     ;; Emergency execution without governance - should be very restricted
-    (ok true)))
+    (ok true)
+  )
+)

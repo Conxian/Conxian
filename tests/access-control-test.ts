@@ -1,5 +1,17 @@
 import { describe, expect, it, beforeEach } from 'vitest';
-import { Cl, ResponseOkCV, ResponseErrorCV, ClarityType, boolCV } from '@stacks/transactions';
+import { 
+  Cl, 
+  ResponseOkCV, 
+  ResponseErrorCV, 
+  ClarityType, 
+  boolCV,
+  uintCV
+} from '@stacks/transactions';
+
+// Helper function to convert hex string to buffer
+function hexToBuffer(hex: string): Buffer {
+  return Buffer.from(hex.startsWith('0x') ? hex.slice(2) : hex, 'hex');
+}
 
 // Mock the simnet object for testing
 const simnet = {
@@ -49,7 +61,7 @@ describe('Access Control Tests', () => {
       const grant = await simnet.callPublicFn(
         'access-control',
         'grant-role',
-        [Cl.principal(user1), Cl.bufferFromHex(ROLE_OPERATOR)],
+        [Cl.principal(user1), Cl.buffer(hexToBuffer(ROLE_OPERATOR))],
         admin
       ) as ResponseOkCV;
       expect(grant.value).toEqual(Cl.bool(true));
@@ -58,7 +70,7 @@ describe('Access Control Tests', () => {
       const hasRole = await simnet.callReadOnlyFn(
         'access-control',
         'has-role',
-        [Cl.principal(user1), Cl.bufferFromHex(ROLE_OPERATOR)],
+        [Cl.principal(user1), Cl.buffer(hexToBuffer(ROLE_OPERATOR))],
         admin
       ) as ResponseOkCV;
       expect(hasRole.value).toEqual(Cl.bool(true));
@@ -69,7 +81,7 @@ describe('Access Control Tests', () => {
       const grant = await simnet.callPublicFn(
         'access-control',
         'grant-role',
-        [Cl.principal(user2), Cl.bufferFromHex(ROLE_OPERATOR)],
+        [Cl.principal(user2), Cl.buffer(hexToBuffer(ROLE_OPERATOR))],
         user1
       ) as ResponseErrorCV;
       expect(grant.value).toEqual(Cl.uint(1001)); // ERR_NOT_ADMIN
@@ -80,7 +92,7 @@ describe('Access Control Tests', () => {
       await simnet.callPublicFn(
         'access-control',
         'grant-role',
-        [Cl.principal(user1), Cl.bufferFromHex(ROLE_OPERATOR)],
+        [Cl.principal(user1), Cl.buffer(hexToBuffer(ROLE_OPERATOR))],
         admin
       );
       
@@ -88,7 +100,7 @@ describe('Access Control Tests', () => {
       const result = await simnet.callPublicFn(
         'access-control',
         'revoke-role',
-        [Cl.principal(user1), Cl.bufferFromHex(ROLE_OPERATOR)],
+        [Cl.principal(user1), Cl.buffer(hexToBuffer(ROLE_OPERATOR))],
         admin
       ) as ResponseOkCV;
       expect(result.value).toEqual(Cl.bool(true));
@@ -97,7 +109,7 @@ describe('Access Control Tests', () => {
       const hasRole = await simnet.callReadOnlyFn(
         'access-control',
         'has-role',
-        [Cl.principal(user1), Cl.bufferFromHex(ROLE_OPERATOR)],
+        [Cl.principal(user1), Cl.buffer(hexToBuffer(ROLE_OPERATOR))],
         admin
       ) as ResponseOkCV;
       expect(hasRole.value).toEqual(Cl.bool(false));
@@ -105,64 +117,65 @@ describe('Access Control Tests', () => {
   });
 
   describe('Emergency Controls', () => {
-    it('should allow emergency admin to pause the contract', () => {
+    it('should allow emergency admin to pause the contract', async () => {
       // Grant emergency role to user1
-      simnet.callPublicFn(
+      await simnet.callPublicFn(
         'access-control',
         'grant-role',
-        [Cl.principal(user1), Cl.buffFromHex(ROLE_EMERGENCY)],
+        [Cl.principal(user1), Cl.buffer(hexToBuffer(ROLE_EMERGENCY))],
         admin
       );
       
       // Pause the contract
-      const pause = simnet.callPublicFn(
+      const pauseResult = await simnet.callPublicFn(
         'access-control',
         'pause',
         [],
         user1
-      );
-      expect(pause).toBeOk(Cl.bool(true));
+      ) as ResponseOkCV;
+      
+      expect(pauseResult.value).toEqual(Cl.bool(true));
       
       // Verify contract is paused
-      const isPaused = simnet.callReadOnlyFn(
+      const isPaused = await simnet.callReadOnlyFn(
         'access-control',
         'paused',
         [],
         admin
       );
-      expect(isPaused).toBeOk(Cl.bool(true));
+      expect((isPaused as ResponseOkCV).value).toEqual(Cl.bool(true));
     });
     
     it('should prevent non-emergency admin from pausing', () => {
-      const pause = simnet.callPublicFn(
+      const pause = await simnet.callPublicFn(
         'access-control',
         'pause',
         [],
         user1
-      );
-      expect(pause).toBeErr(Cl.uint(1003)); // ERR_NOT_EMERGENCY_ADMIN
+      ) as ResponseErrorCV;
+      expect(pause.value).toEqual(Cl.uint(1003)); // ERR_NOT_EMERGENCY_ADMIN
     });
   });
 
   describe('Multi-sig Operations', () => {
     it('should allow creating and approving proposals', () => {
       // Grant operator role to user1 and user2
-      simnet.callPublicFn(
+      await simnet.callPublicFn(
         'access-control',
         'grant-role',
-        [Cl.principal(user1), Cl.buffFromHex(ROLE_OPERATOR)],
+        [Cl.principal(user1), Cl.buffer(hexToBuffer(ROLE_OPERATOR))],
         admin
       );
       
-      simnet.callPublicFn(
+      await simnet.callPublicFn(
         'access-control',
         'grant-role',
-        [Cl.principal(user2), Cl.buffFromHex(ROLE_OPERATOR)],
+        [Cl.principal(user2), Cl.buffer(hexToBuffer(ROLE_OPERATOR))],
         admin
       );
       
       // Create a proposal
-      const propose = simnet.callPublicFn(
+      const propose = await simnet.callPublicFn(
         'access-control',
         'propose',
         [
@@ -172,53 +185,52 @@ describe('Access Control Tests', () => {
           Cl.stringUtf8('Test proposal')  // description
         ],
         user1
-      );
-      expect(propose).toBeOk(Cl.uint(1));
+      ) as ResponseOkCV;
+      expect(propose.value).toEqual(Cl.uint(1));
       
       // Approve the proposal
-      const approve = simnet.callPublicFn(
+      const approve = await simnet.callPublicFn(
         'access-control',
         'approve',
         [Cl.uint(1)],
         user2
-      );
-      expect(approve).toBeOk(Cl.bool(true));
+      ) as ResponseOkCV;
+      expect(approve.value).toEqual(Cl.bool(true));
       
       // Execute the proposal
-      const execute = simnet.callPublicFn(
+      const execute = await simnet.callPublicFn(
         'access-control',
         'execute-proposal',
         [Cl.uint(1)],
         user1
-      );
-      expect(execute).toBeOk(Cl.bool(true));
+      ) as ResponseOkCV;
+      expect(execute.value).toEqual(Cl.bool(true));
     });
     
-    it('should enforce approval threshold', () => {
+    it('should enforce approval threshold', async () => {
       // Similar to above but with insufficient approvals
-      simnet.callPublicFn(
+      await simnet.callPublicFn(
         'access-control',
         'propose',
         [
           Cl.principal(admin),
           Cl.uint(0),
           Cl.buffer(Buffer.from('test')),
-          Cl.stringUtf8('Test proposal')
+          Cl.stringUtf8('Test proposal 2')
         ],
         user1
       );
       
       // Try to execute without enough approvals
-      const execute = simnet.callPublicFn(
+      const execute = await simnet.callPublicFn(
         'access-control',
         'execute-proposal',
         [Cl.uint(1)],
         user1
-      );
-      expect(execute).toBeErr(Cl.uint(1007)); // ERR_NOT_ENOUGH_APPROVALS
+      ) as ResponseErrorCV;
+      expect(execute.value).toEqual(Cl.uint(1007)); // ERR_NOT_ENOUGH_APPROVALS
     });
   });
 });
 
-// Run the tests
-run();
+// No need to explicitly run tests - vitest will handle this

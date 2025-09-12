@@ -1,4 +1,15 @@
-import { Cl, ResponseOkCV, ResponseErrorCV, ClarityType, boolCV } from '@stacks/transactions';
+import { 
+  Cl, 
+  ResponseOkCV, 
+  ResponseErrorCV, 
+  ClarityType, 
+  boolCV
+} from '@stacks/transactions';
+
+// Helper function to convert hex string to buffer
+function hexToBuffer(hex: string): Buffer {
+  return Buffer.from(hex.startsWith('0x') ? hex.slice(2) : hex, 'hex');
+}
 
 // Mock the simnet object for deployment
 const simnet = {
@@ -36,11 +47,13 @@ async function deployAccessControl() {
   const setupAdmin = await simnet.callPublicFn(
     'access-control',
     'grant-role',
-    [Cl.principal(admin), Cl.bufferFromHex('0x41444d494e')], // ADMIN role
+    [Cl.principal(admin), Cl.buffer(hexToBuffer('0x41444d494e'))], // ADMIN role
     admin
-  );
+  ) as ResponseOkCV;
   
-  expectOk(setupAdmin);
+  if (setupAdmin.type !== ClarityType.ResponseOk) {
+    throw new Error('Failed to set up admin role');
+  }
   console.log('✅ Admin role set up successfully');
   
   // 3. Verify the deployment
@@ -48,7 +61,7 @@ async function deployAccessControl() {
   const isAdmin = await simnet.callReadOnlyFn(
     'access-control',
     'has-role',
-    [Cl.principal(admin), Cl.bufferFromHex('0x41444d494e')],
+    [Cl.principal(admin), bufferFromHex('0x41444d494e')],
     admin
   ) as ResponseOkCV;
   
