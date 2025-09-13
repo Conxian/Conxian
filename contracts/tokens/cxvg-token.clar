@@ -3,13 +3,13 @@
 ;; Enhanced with system integration hooks for coordinator interface
 
 ;; Import traits
-(use-trait sip010-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.sip-010-trait)
-(use-trait ftm-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.ft-mintable-trait)
-(use-trait monitor-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.monitor-trait)
+(use-trait sip010-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.sip-010-trait.sip-010-trait)
+(use-trait ftm-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.ft-mintable-trait.ft-mintable-trait)
+(use-trait monitor-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.monitor-trait.monitor-trait)
 
 ;; Implement traits
-(impl-trait sip010-trait)
-(impl-trait ftm-trait)
+(impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.sip-010-trait.sip-010-trait)
+(impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.ft-mintable-trait.ft-mintable-trait)
 
 ;; --- Errors ---
 (define-constant ERR_UNAUTHORIZED u100)

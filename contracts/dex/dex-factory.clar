@@ -2,11 +2,11 @@
 ;; Implements access-control-trait and integrates with protocol monitoring
 
 ;; Import traits
-(use-trait access-control 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.access-control-trait)
-(use-trait sip10-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.sip-010-trait)
+(use-trait access-control 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.access-control)
+(use-trait token-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.sip010-trait)
 
 ;; Implement traits
-(impl-trait access-control)
+(impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.access-control)
 
 ;; ===== Error Codes =====
 ;; Access Control (1000-1099)

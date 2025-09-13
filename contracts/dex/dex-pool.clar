@@ -2,11 +2,11 @@
 ;; Implements pool-trait with full system integration
 
 ;; Import traits
-(use-trait 'pool-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.pool-trait)
-(use-trait 'sip10 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.sip-010-trait)
+(use-trait pool-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.pool-trait)
+(use-trait token-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.sip010-trait)
 
 ;; Implement traits
-(impl-trait pool-trait)
+(impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.pool-trait)
 
 ;; Private helper functions
 (define-private (min (a uint) (b uint))

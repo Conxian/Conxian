@@ -3,10 +3,10 @@
 ;; Non-transferable: transfer is disabled to enforce soulbound semantics
 
 ;; Import traits
-(use-trait sip009-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.sip-009-trait)
+(use-trait nft-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.sip009-trait)
 
 ;; Implement traits
-(impl-trait sip009-trait)
+(impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.sip009-trait)
 
 ;; --- Errors ---
 (define-constant ERR_UNAUTHORIZED u100)

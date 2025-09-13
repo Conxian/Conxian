@@ -66,6 +66,16 @@ plan:
             path: "contracts\\tokens\\cxtr-token.clar"
             clarity-version: 2
         - emulated-contract-publish:
+            contract-name: ft-mintable-trait
+            emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            path: "contracts\\traits\\ft-mintable-trait.clar"
+            clarity-version: 2
+        - emulated-contract-publish:
+            contract-name: sip-010-trait
+            emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            path: "contracts\\traits\\sip-010-trait.clar"
+            clarity-version: 2
+        - emulated-contract-publish:
             contract-name: cxvg-token
             emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
             path: "contracts\\tokens\\cxvg-token.clar"
@@ -106,11 +116,6 @@ plan:
             path: "contracts\\lib\\fixed-point-math.clar"
             clarity-version: 2
         - emulated-contract-publish:
-            contract-name: ft-mintable-trait
-            emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            path: "contracts\\traits\\ft-mintable-trait.clar"
-            clarity-version: 2
-        - emulated-contract-publish:
             contract-name: lending-protocol-governance
             emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
             path: "contracts\\governance\\lending-protocol-governance.clar"
@@ -139,11 +144,6 @@ plan:
             contract-name: precision-calculator
             emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
             path: "contracts\\lib\\precision-calculator.clar"
-            clarity-version: 2
-        - emulated-contract-publish:
-            contract-name: sip-010-trait
-            emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            path: "contracts\\traits\\sip-010-trait.clar"
             clarity-version: 2
         - emulated-contract-publish:
             contract-name: strategy-trait

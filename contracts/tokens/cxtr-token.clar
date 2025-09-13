@@ -3,8 +3,8 @@
 ;; Enhanced with system integration hooks for coordinator interface
 
 ;; Import traits
-(use-trait 'sip010-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.sip-010-trait)
-(use-trait 'ftm-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.ft-mintable-trait)
+(use-trait sip010-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.sip-010-trait)
+(use-trait ftm-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.ft-mintable-trait)
 
 ;; Implement traits
 (impl-trait sip010-trait)

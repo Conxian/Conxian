@@ -2,7 +2,7 @@
 ;; Provides single-hop trading and liquidity management with slippage protection
 
 ;; Import traits
-(use-trait sip10 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.sip-010-trait)
+(use-trait sip010-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.sip010-trait)
 (use-trait pool-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.pool-trait)
 
 ;; Constants

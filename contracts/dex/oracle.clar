@@ -2,11 +2,11 @@
 ;; Standard price oracle implementation for the Conxian protocol
 
 ;; Import traits
-(use-trait oracle-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.oracle-trait)
-(use-trait std-constants 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.standard-constants-trait)
+(use-trait oracle 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.oracle)
+(use-trait std-constants 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.standard-constants)
 
 ;; Implement traits
-(impl-trait oracle-trait)
+(impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.oracle)
 
 ;; Error codes
 (define-constant ERR_UNAUTHORIZED (err u1001))
