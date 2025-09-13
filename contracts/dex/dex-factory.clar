@@ -6,7 +6,7 @@
 (define-constant ERR_ALREADY_EXISTS (err u101))
 (define-constant ERR_NOT_FOUND (err u102))
 
-;; Define the access control trait locally
+;; Define Access Control Trait
 (define-trait access-control-trait
   (
     ;; Role Management
@@ -17,33 +17,11 @@
     ;; Role-based Access Control
     (only-role ((string-ascii 32)) (response bool uint))
     (only-roles (list (string-ascii 32)) (response bool uint))
-    
-    ;; Time-locked Operations
-    (schedule ((string-ascii 32) (optional (string-utf8 500)) uint) (response uint uint))
-    (execute (uint) (response bool uint))
-    (cancel (uint) (response bool uint))
-    
-    ;; Emergency Controls
-    (pause () (response bool uint))
-    (unpause () (response bool uint))
-    (paused () (response bool uint))
-    
-    ;; Multi-sig Operations
-    (submit-transaction (principal uint (string-utf8 500) (buff 1024)) (response uint uint))
-    (confirm-transaction (uint) (response bool uint))
-    (execute-transaction (uint) (response (response bool uint) uint))
-    (revoke-confirmation (uint) (response bool uint))
-    
-    ;; Events
-    (role-granted ((string-ascii 32) principal principal) (response bool uint))
-    (role-revoked ((string-ascii 32) principal) (response bool uint))
-    (operation-scheduled (uint (string-ascii 32) uint) (response bool uint))
-    (operation-executed (uint) (response bool uint))
-    (paused-changed (bool) (response bool uint))
   )
 )
 
-(impl-trait access-control-trait)
+;; Implement the access control trait with proper syntax
+(impl-trait .access-control-trait)
 
 (define-data-var roles (map principal (list (string-ascii 32))) {})
 (define-data-var owner principal tx-sender)

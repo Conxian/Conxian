@@ -51,6 +51,34 @@ epoch = "2.4"
 path = "contracts/traits/pool-trait.clar"
 epoch = "2.4"
 
+[contracts.staking-trait]
+path = "contracts/traits/staking-trait.clar"
+epoch = "2.4"
+
+[contracts.standard-constants-trait]
+path = "contracts/traits/standard-constants-trait.clar"
+epoch = "2.4"
+
+[contracts.ownable-trait]
+path = "contracts/traits/ownable-trait.clar"
+epoch = "2.4"
+
+[contracts.oracle-trait]
+path = "contracts/traits/oracle-trait.clar"
+epoch = "2.4"
+
+[contracts.monitor-trait]
+path = "contracts/traits/monitor-trait.clar"
+epoch = "2.4"
+
+[contracts.dimensional-oracle-trait]
+path = "contracts/traits/dimensional-oracle-trait.clar"
+epoch = "2.4"
+
+[contracts.dim-registry-trait]
+path = "contracts/traits/dim-registry-trait.clar"
+epoch = "2.4"
+
 [contracts.vault-trait]
 path = "contracts/traits/vault-trait.clar"
 epoch = "2.4"

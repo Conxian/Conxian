@@ -5,6 +5,9 @@
 (define-constant FEE_TIER_MEDIUM u10000) ;; 1.0%
 (define-constant FEE_TIER_HIGH u30000)  ;; 3.0%
 
+;; Contract state
+(define-data-var contract-owner principal tx-sender)
+
 ;; Define Pool Trait
 (define-trait pool-trait
   (
@@ -17,12 +20,12 @@
 )
 
 ;; Initialize data variables with default values
-(define-data-var pool-token-x principal 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR)
-(define-data-var pool-token-y principal 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR)
+(define-data-var pool-token-x principal tx-sender)
+(define-data-var pool-token-y principal tx-sender)
 (define-data-var fee-tier uint u0)
 (define-data-var tick-spacing uint u60)  ;; 0.05% tick spacing
 (define-data-var liquidity uint u0)
-(define-data-var sqrt-price-x64 u160)
+(define-data-var sqrt-price-x64 uint u0)
 
 ;; Tracks individual positions
 (define-map positions 
@@ -33,8 +36,8 @@
 (define-public (initialize (token-x principal) (token-y principal) (fee uint))
   (begin
     ;; Validate tokens and fee tier
-    (assert (is-eq tx-sender contract-owner) (err u100))
-    (assert (is-valid-fee-tier fee) (err u101))
+    (asserts! (is-eq tx-sender (var-get contract-owner)) (err u100))
+    (asserts! (is-valid-fee-tier fee) (err u101))
     
     ;; Set initial state
     (var-set pool-token-x token-x)
@@ -55,16 +58,16 @@
 
 ;; Internal: Calculate tick spacing based on fee tier
 (define-private (get-tick-spacing (fee uint))
-  (cond
-    ((is-eq fee FEE_TIER_LOW) u10)
-    ((is-eq fee FEE_TIER_MEDIUM) u60)
-    ((is-eq fee FEE_TIER_HIGH) u200)))
+  (if (is-eq fee FEE_TIER_LOW)
+    u10
+    (if (is-eq fee FEE_TIER_MEDIUM)
+      u60
+      (if (is-eq fee FEE_TIER_HIGH)
+        u200
+        u60)))) ;; Default to medium spacing if no match
 
-;; Import pool trait
-(use-trait pool-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.pool-trait)
-
-;; Implement pool trait
-(impl-trait pool-trait)
+;; Implement pool trait with proper syntax
+(impl-trait .pool-trait)
 
 
 

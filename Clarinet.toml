@@ -59,7 +59,7 @@ epoch = "2.4"
 [contracts.cxd-token]
 path = "contracts/tokens/cxd-token.clar"
 epoch = "2.4"
-depends_on = ["sip-010-trait", "ft-mintable-trait", "monitor-trait"]
+depends_on = ["sip-010-trait", "ft-mintable-trait"]
 
 # 2. CXVG Token - Governance Token
 [contracts.cxvg-token]
@@ -71,7 +71,7 @@ depends_on = ["sip-010-trait", "ft-mintable-trait"]
 [contracts.cxtr-token]
 path = "contracts/tokens/cxtr-token.clar"
 epoch = "2.4"
-depends_on = ["sip-010-trait", "ft-mintable-trait", "monitor-trait"]
+depends_on = ["sip-010-trait", "ft-mintable-trait"]
 
 # 4. CXLP Token - Liquidity Provider Token
 [contracts.cxlp-token]
@@ -83,7 +83,7 @@ depends_on = ["sip-010-trait", "ft-mintable-trait"]
 [contracts.cxs-token]
 path = "contracts/tokens/cxs-token.clar"
 epoch = "2.4"
-depends_on = ["sip-009-trait"]
+depends_on = ["sip-010-trait"]
 
 # ===========================================
 # DEX CORE
@@ -116,7 +116,7 @@ depends_on = ["dex-factory"]
 [contracts.lending-protocol-governance]
 path = "contracts/governance/lending-protocol-governance.clar"
 epoch = "2.4"
-depends_on = ["access-control"]
+depends_on = ["access-control-trait"]
 
 [contracts.loan-liquidation-manager]
 path = "contracts/dex/loan-liquidation-manager.clar"
@@ -165,6 +165,10 @@ epoch = "2.4"
 
 [contracts.standard-traits]
 path = "contracts/traits/standard-traits.clar"
+
+[contracts.cxd-staking]
+path = "contracts/dex/cxd-staking.clar"
+depends_on = ["sip-010-trait", "ft-mintable-trait"]
 
 [contracts.fixed-point-math]
 path = "contracts/lib/fixed-point-math.clar"

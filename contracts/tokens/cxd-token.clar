@@ -2,8 +2,8 @@
 ;; Conxian Revenue Token (SIP-010 FT) - accrues protocol revenue to holders off-contract
 ;; Enhanced with integration hooks for staking, revenue distribution, and system monitoring
 
-;; Define the SIP-010 Fungible Token Standard Trait locally
-(define-trait sip010-trait
+;; Define SIP-010 Fungible Token Trait
+(define-trait ft-trait
   (
     (transfer (uint principal principal (optional (buff 34))) (response bool uint))
     (get-name () (response (string-ascii 32) uint))
@@ -15,8 +15,17 @@
   )
 )
 
-;; Implement SIP-010 trait
-(impl-trait sip010-trait)
+;; Define Mintable Trait
+(define-trait ft-mintable-trait
+  (
+    (mint (principal uint (optional (buff 34))) (response bool uint))
+    (burn (principal uint (optional (buff 34))) (response bool uint))
+  )
+)
+
+;; Implement the traits with proper syntax
+(impl-trait ft-trait)
+(impl-trait ft-mintable-trait)
 
 ;; SIP-010 Fungible Token Standard Functions
 (define-read-only (get-name)
@@ -59,35 +68,15 @@
   )
 )
 
-(define-public (transfer (amount uint) (sender principal) (recipient principal) (memo (optional (buff 34))))
-  (if (or (is-eq sender recipient) (is-eq amount u0))
-    (ok true)
-    (let (
-        (sender-balance (unwrap! (get-balance sender) (err u102)))
-        (recipient-balance (default-to u0 (map-get? balances { who: recipient })))
-        (new-sender-balance (try! (safe-sub sender-balance amount)))
-        (new-recipient-balance (try! (safe-add recipient-balance amount)))
-      )
-      (asserts! (is-eq tx-sender sender) (err u103))
-      (map-set balances { who: sender } new-sender-balance)
-      (map-set balances { who: recipient } new-recipient-balance)
-      (ok true)
-    )
-  )
-)
-
-;; Define FT Mintable Trait
 (define-trait ft-mintable-trait
   (
-    ;; Mint new tokens
     (mint (principal uint (optional (buff 34))) (response bool uint))
-    ;; Burn tokens
     (burn (principal uint (optional (buff 34))) (response bool uint))
   )
 )
 
-;; Implement the required traits
-(impl-trait sip010-trait)
+;; Implement the traits
+(impl-trait ft-trait)
 (impl-trait ft-mintable-trait)
 
 ;; --- Errors ---

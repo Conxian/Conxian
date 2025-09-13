@@ -106,35 +106,50 @@
 ;; Linear interpolation between two values
 ;; t should be between 0 and 1 (in 18-decimal fixed point)
 (define-read-only (lerp (a uint) (b uint) (t uint))
-  (if (> t ONE_18)
+  (if (>= t ONE_18)
     b ;; Clamp t to 1.0
-    (+ a (mul-down (- b a) t))))
+    (if (is-eq a b)
+      a ;; If a and b are equal, no need to interpolate
+      (if (or (is-eq t u0) (is-eq a u0) (is-eq b u0))
+        a ;; If t is 0 or any of the values is 0, return a
+        (let ((diff (- b a)))
+          (if (or (is-eq diff u0) (is-eq t u0))
+            a
+            (let ((term (mul-down diff t)))
+              (if (>= term (- b a)) b (+ a term)))))))))
 
 ;; === SQUARE ROOT FUNCTION ===
+;; Helper function for Babylonian method with recursion
+(define-private (sqrt-iter (x uint) (y uint) (z uint) (iterations uint))
+  (if (or (>= iterations u10) (>= z y))  ;; Limit iterations to prevent stack overflow
+    z
+    (let ((new-z (match (div-down (+ (match (div-down x z) (ok v) v) z) u2) (ok v) v)))
+      (sqrt-iter x z new-z (+ iterations u1)))))
+
 ;; Calculate square root using the Babylonian method (Heron's method)
 (define-read-only (sqrt-fixed (x uint))
   (if (or (is-eq x u0) (is-eq x u1))
     x
-    (let (
-      (z (div (+ (div x u2) u1) u2))  ;; Initial guess
-      (y x))
-      (while (< z y)
-        (let ((new-z (div (+ (div x z) z) u2)))
-          (set! y z)
-          (set! z new-z)))
-      z)))
+    (let ((initial-guess (match (div-down (+ (match (div-down x u2) (ok v) v) u1) u2) (ok v) v)))
+      (sqrt-iter x x initial-guess u0))))
 
 ;; === GEOMETRIC MEAN ===
 ;; Calculate geometric mean of two numbers: sqrt(a * b)
 (define-read-only (geometric-mean (a uint) (b uint))
-  (sqrt-fixed (mul-down a b)))
+  (if (or (is-eq a u0) (is-eq b u0))
+    (ok u0)
+    (match (sqrt-fixed (mul-down a b))
+      result (ok result)
+      error error)))
 
 ;; === HARMONIC MEAN ===
 ;; Calculate harmonic mean: 2 / (1/a + 1/b) = 2ab / (a + b)
 (define-read-only (harmonic-mean (a uint) (b uint))
   (if (or (is-eq a u0) (is-eq b u0))
     (ok u0)
-    (div-down (mul-down (* u2 ONE_18) (mul-down a b)) (+ a b))))
+    (match (div-down (mul-down (* u2 ONE_18) (mul-down a b)) (+ a b))
+      result (ok result)
+      error error)))
 
 ;; === COMPOUND INTEREST ===
 ;; Calculate compound interest: principal * (1 + rate)^periods

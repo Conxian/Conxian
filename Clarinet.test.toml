@@ -1,16 +1,15 @@
 # ===========================================
 # CONXIAN TEST CONFIGURATION
-# Comprehensive test environment settings
+# Test-specific configurations and overrides
 # ===========================================
 
 [project]
 name = "conxian-tests"
-description = "Comprehensive Clarinet manifest for all contract tests"
+description = "Test configuration for Conxian contracts"
 clarinet_version = "3.5.0"
 
 [accounts]
-# These values are for local testing only
-# In CI/CD, they are overridden by GitHub Secrets
+# Test accounts with specific mnemonics for deterministic testing
 deployer = { mnemonic = "${TESTNET_DEPLOYER_MNEMONIC:twice kind fence tip hidden tilt action fragile skin nothing glory cousin green tomorrow spring wrist shed math olympic multiply hip blue scout claw}", balance = 100_000_000_000_000 }
 wallet_1 = { mnemonic = "${TESTNET_WALLET1_MNEMONIC:sell invite acquire kitten bamboo drastic jelly vivid peace spawn twice guilt pave pen trash pretty park cube fragile unaware remain midnight betray rebuild}", balance = 100_000_000_000_000 }
 wallet_2 = { mnemonic = "${TESTNET_WALLET2_MNEMONIC:hold excess usual excess ring elephant install account glad dry fragile donkey gaze humble truck breeze nation gasp vacuum limb head keep delay hospital}", balance = 100_000_000_000_000 }
@@ -48,6 +47,15 @@ path = "contracts/traits/staking-trait.clar"
 epoch = "2.4"
 
 # ===========================================
+# TEST-SPECIFIC CONTRACTS (not in base)
+# ===========================================
+
+# CXL Migration Queue (test-specific contract)
+[contracts.cxlp-migration-queue]
+path = "contracts/dex/cxlp-migration-queue.clar"
+depends_on = ["sip-010-trait"]
+
+# ===========================================
 # MOCKS FOR TESTING
 # ===========================================
 
@@ -56,8 +64,11 @@ path = "contracts/mocks/mock-token.clar"
 epoch = "2.4"
 
 # ===========================================
-# DIMENSIONAL SYSTEM
+# TEST CONFIGURATION OVERRIDES
 # ===========================================
+
+# Add any test-specific configuration overrides here
+# These will take precedence over base configurations
 
 [contracts.dim-registry]
 path = "contracts/dimensional/dim-registry.clar"
@@ -92,27 +103,27 @@ depends_on = ["sip-010-trait"]
 # ===========================================
 
 [contracts.cxd-token]
-path = "contracts/cxd-token.clar"
+path = "contracts/tokens/cxd-token.clar"
 epoch = "2.4"
 depends_on = ["sip-010-trait", "ft-mintable-trait"]
 
 [contracts.cxvg-token]
-path = "contracts/cxvg-token.clar"
+path = "contracts/tokens/cxvg-token.clar"
 epoch = "2.4"
 depends_on = ["sip-010-trait"]
 
 [contracts.cxlp-token]
-path = "contracts/cxlp-token.clar"
+path = "contracts/tokens/cxlp-token.clar"
 epoch = "2.4"
 depends_on = ["sip-010-trait", "ft-mintable-trait"]
 
 [contracts.cxtr-token]
-path = "contracts/cxtr-token.clar"
+path = "contracts/tokens/cxtr-token.clar"
 epoch = "2.4"
 depends_on = ["sip-010-trait"]
 
 [contracts.cxs-token]
-path = "contracts/cxs-token.clar"
+path = "contracts/tokens/cxs-token.clar"
 epoch = "2.4"
 depends_on = ["sip-009-trait"]
 
@@ -121,37 +132,32 @@ depends_on = ["sip-009-trait"]
 # ===========================================
 
 [contracts.protocol-invariant-monitor]
-path = "contracts/protocol-invariant-monitor.clar"
+path = "contracts/dex/protocol-invariant-monitor.clar"
 epoch = "2.4"
 depends_on = ["monitor-trait"]
 
 [contracts.token-emission-controller]
-path = "contracts/token-emission-controller.clar"
+path = "contracts/dex/token-emission-controller.clar"
 epoch = "2.4"
 depends_on = ["sip-010-trait", "ft-mintable-trait"]
 
 [contracts.revenue-distributor]
-path = "contracts/revenue-distributor.clar"
+path = "contracts/dex/revenue-distributor.clar"
 epoch = "2.4"
 depends_on = ["sip-010-trait"]
 
 [contracts.cxd-staking]
-path = "contracts/cxd-staking.clar"
+path = "contracts/dex/cxd-staking.clar"
 epoch = "2.4"
 depends_on = ["sip-010-trait", "cxd-token"]
 
-[contracts.cxlp-migration-queue]
-path = "contracts/cxlp-migration-queue.clar"
-epoch = "2.4"
-depends_on = ["sip-010-trait", "cxlp-token", "cxd-token"]
-
 [contracts.cxvg-utility]
-path = "contracts/cxvg-utility.clar"
+path = "contracts/dex/cxvg-utility.clar"
 epoch = "2.4"
 depends_on = ["sip-010-trait", "cxvg-token"]
 
 [contracts.token-system-coordinator]
-path = "contracts/token-system-coordinator.clar"
+path = "contracts/dex/token-system-coordinator.clar"
 epoch = "2.4"
 depends_on = ["sip-010-trait", "ft-mintable-trait", "protocol-invariant-monitor", "revenue-distributor", "token-emission-controller", "cxd-staking", "cxlp-migration-queue", "cxvg-utility"]
 

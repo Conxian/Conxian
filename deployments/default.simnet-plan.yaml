@@ -36,6 +36,11 @@ plan:
     - id: 0
       transactions:
         - emulated-contract-publish:
+            contract-name: cxd-staking
+            emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            path: "contracts\\dex\\cxd-staking.clar"
+            clarity-version: 1
+        - emulated-contract-publish:
             contract-name: standard-traits
             emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
             path: "contracts\\traits\\standard-traits.clar"

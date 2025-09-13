@@ -1,6 +1,31 @@
 ;; cxlp-token.clar
 ;; Conxian Liquidity Provider Token (SIP-010 FT)
 
+;; Define SIP-010 Fungible Token Trait
+(define-trait ft-trait
+  (
+    (transfer (uint principal principal (optional (buff 34))) (response bool uint))
+    (get-name () (response (string-ascii 32) uint))
+    (get-symbol () (response (string-ascii 32) uint))
+    (get-decimals () (response uint uint))
+    (get-balance (principal) (response uint uint))
+    (get-total-supply () (response uint uint))
+    (get-token-uri () (response (optional (string-utf8 256)) uint))
+  )
+)
+
+;; Define Mintable Trait
+(define-trait ft-mintable-trait
+  (
+    (mint (principal uint (optional (buff 34))) (response bool uint))
+    (burn (principal uint (optional (buff 34))) (response bool uint))
+  )
+)
+
+;; Implement the traits
+(impl-trait ft-trait)
+(impl-trait ft-mintable-trait)
+
 ;; Returns the current epoch index since migration start (not capped)
 (define-read-only (current-epoch)
   (let (
@@ -15,31 +40,6 @@
   )
 )
 ;; Supports migration to CXD via epoch bands (1.0x -> 2.0x)
-
-;; Define SIP-010 Fungible Token Standard Trait
-(define-trait sip010-trait
-  (
-    (transfer (uint principal principal (optional (buff 34))) (response bool uint))
-    (get-name () (response (string-ascii 32) uint))
-    (get-symbol () (response (string-ascii 32) uint))
-    (get-decimals () (response uint uint))
-    (get-balance (principal) (response uint uint))
-    (get-total-supply () (response uint uint))
-    (get-token-uri () (response (optional (string-utf8 256)) uint))
-  )
-)
-
-;; Define FT Mintable Trait
-(define-trait ft-mintable-trait
-  (
-    (mint (principal uint (optional (buff 34))) (response bool uint))
-    (burn (principal uint (optional (buff 34))) (response bool uint))
-  )
-)
-
-;; Implement traits with local definitions
-(impl-trait .sip010-trait)
-(impl-trait .ft-mintable-trait)
 
 ;; --- Errors ---
 (define-constant ERR_UNAUTHORIZED u100)

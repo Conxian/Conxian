@@ -3,16 +3,16 @@
 ;; Non-transferable: transfer is disabled to enforce soulbound semantics
 
 ;; Define SIP-009 NFT Trait
-(define-trait nft-trait
+(define-trait sip-009-trait
   (
     (get-owner (uint) (response (optional principal) uint))
     (get-token-uri (uint) (response (optional (string-utf8 256)) uint))
-    (transfer (uint principal principal (optional (buff 34))) (response bool uint))
+    (transfer (principal principal uint (optional (buff 34))) (response bool uint))
   )
 )
 
-;; Implement the trait
-(impl-trait nft-trait)
+;; Implement the SIP-009 trait with proper syntax
+(impl-trait sip-009-trait)
 
 ;; --- Errors ---
 (define-constant ERR_UNAUTHORIZED u100)

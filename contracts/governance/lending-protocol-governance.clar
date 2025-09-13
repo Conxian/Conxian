@@ -3,7 +3,7 @@
 ;; Manages protocol parameters, upgrades, and community decisions
 ;; Integrates with AccessControl for role-based access
 
-;; Define Access Control Trait Locally
+;; Define Access Control Trait
 (define-trait access-control-trait
   (
     ;; Role Management
@@ -14,33 +14,10 @@
     ;; Role-based Access Control
     (only-role ((string-ascii 32)) (response bool uint))
     (only-roles (list (string-ascii 32)) (response bool uint))
-    
-    ;; Time-locked Operations
-    (schedule ((string-ascii 32) (optional (string-utf8 500)) uint) (response uint uint))
-    (execute (uint) (response bool uint))
-    (cancel (uint) (response bool uint))
-    
-    ;; Emergency Controls
-    (pause () (response bool uint))
-    (unpause () (response bool uint))
-    (is-paused () (response bool uint))
-    
-    ;; Multi-sig Operations
-    (propose ((string-ascii 32) (string-utf8 500)) (response uint uint))
-    (approve (uint) (response bool uint))
-    (execute-proposal (uint) (response bool uint))
-    
-    ;; Events
-    (role-granted ((string-ascii 32) principal principal) (response bool uint))
-    (role-revoked ((string-ascii 32) principal) (response bool uint))
-    (operation-scheduled (uint (string-ascii 32) uint) (response bool uint))
-    (operation-executed (uint) (response bool uint))
-    (paused-changed (bool) (response bool uint))
   )
 )
 
-;; Implement access control trait
-(use-trait access-control-trait .access-control-trait)
+;; Implement the access control trait
 (impl-trait access-control-trait)
 
 (define-constant ERR_UNAUTHORIZED (err u8001))

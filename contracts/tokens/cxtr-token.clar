@@ -2,8 +2,8 @@
 ;; Conxian Contributor Token (SIP-010 FT) - merit-based rewards token
 ;; Enhanced with system integration hooks for coordinator interface
 
-;; Define SIP-010 Fungible Token Standard Trait
-(define-trait sip010-trait
+;; Define SIP-010 Fungible Token Trait
+(define-trait ft-trait
   (
     (transfer (uint principal principal (optional (buff 34))) (response bool uint))
     (get-name () (response (string-ascii 32) uint))
@@ -15,7 +15,7 @@
   )
 )
 
-;; Define FT Mintable Trait
+;; Define Mintable Trait
 (define-trait ft-mintable-trait
   (
     (mint (principal uint (optional (buff 34))) (response bool uint))
@@ -23,10 +23,8 @@
   )
 )
 
-;; Import and implement traits
-(use-trait sip010-trait .sip010-trait)
-(use-trait ft-mintable-trait .ft-mintable-trait)
-(impl-trait sip010-trait)
+;; Implement the traits with proper syntax
+(impl-trait ft-trait)
 (impl-trait ft-mintable-trait)
 
 ;; --- Errors ---

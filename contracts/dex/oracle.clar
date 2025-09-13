@@ -2,23 +2,18 @@
 ;; Standard price oracle implementation for the Conxian protocol
 
 ;; Define Oracle Trait
-(define-trait oracle
+(define-trait oracle-trait
   (
-    (get-price (principal) (response (optional (tuple (value uint) (timestamp uint) (decimals uint))) uint))
-    (update-price (principal uint uint) (response bool uint))
-    (get-last-update-time () (response uint uint))
+    (get-price (principal) (response (optional uint) uint))
+    (get-price-in-usd (principal) (response (optional uint) uint))
+    (update-price (principal uint) (response bool uint))
+    (add-or-update-feed (principal principal) (response bool uint))
+    (remove-feed (principal) (response bool uint))
   )
 )
 
-;; Define Standard Constants Trait
-(define-trait standard-constants
-  (
-    (get-constant (string-ascii 32) (response (optional uint) uint))
-  )
-)
-
-;; Implement the oracle trait
-(impl-trait oracle)
+;; Implement the oracle trait with proper syntax
+(impl-trait oracle-trait)
 
 ;; Error codes
 (define-constant ERR_UNAUTHORIZED (err u1001))

@@ -1,29 +1,13 @@
 ;; Conxian DEX Router - User-friendly interface for DEX interactions
 ;; Provides single-hop trading and liquidity management with slippage protection
 
-;; Define SIP-010 Token Trait
-(define-trait sip010-trait
-  (
-    (transfer (uint principal principal (optional (buff 34))) (response bool uint))
-    (get-name () (response (string-ascii 32) uint))
-    (get-symbol () (response (string-ascii 32) uint))
-    (get-decimals () (response uint uint))
-    (get-balance (principal) (response uint uint))
-    (get-total-supply () (response uint uint))
-    (get-token-uri () (response (optional (string-utf8 256)) uint))
-  )
-)
+;; Import standard traits
+(use-trait sip10 .sip-010-trait)
+(use-trait pool .pool-trait)
 
-;; Define Pool Trait
-(define-trait pool-trait
-  (
-    (add-liquidity (uint uint (optional principal)) (response (tuple (dx uint) (dy uint) (shares uint)) uint))
-    (remove-liquidity (uint uint uint) (response (tuple (dx uint) (dy uint)) uint))
-    (swap (uint principal principal) (response (tuple (dx uint) (dy uint)) uint))
-    (get-reserves () (response (tuple (reserve-x uint) (reserve-y uint)) uint))
-    (get-total-supply () (response uint uint))
-  )
-)
+;; Implement traits for this contract
+(impl-trait .sip-010-trait)
+(impl-trait .pool-trait)
 
 ;; Constants
 (define-constant ERR_INVALID_POOL (err u4001))
@@ -37,7 +21,7 @@
   ;; Skip factory call for enhanced deployment - return typed optional principal
   (if false (some tx-sender) none))
 
-(define-read-only (get-amount-out-direct (pool-ctr <pool>) (amount-in uint) (x-to-y bool))
+(define-read-only (get-amount-out-direct (pool-ctr principal) (amount-in uint) (x-to-y bool))
   ;; Get expected output amount for a trade - simplified for enhanced deployment
   (ok (/ (* amount-in u997) u1000))) ;; Simplified calculation with 0.3% fee assumption
 
@@ -52,7 +36,7 @@
       ERR_INVALID_PATH))
 
 ;; Core router functions
-(define-public (add-liquidity-direct (pool-ctr <pool>) (dx uint) (dy uint) (min-shares uint) (deadline uint))
+(define-public (add-liquidity-direct (pool-ctr principal) (dx uint) (dy uint) (min-shares uint) (deadline uint))
   (begin
     (asserts! (<= block-height deadline) ERR_DEADLINE_PASSED)
     (asserts! (and (> dx u0) (> dy u0)) ERR_INVALID_AMOUNT)
@@ -67,7 +51,7 @@
       ;; Add liquidity to pool
       (contract-call? pool-ctr add-liquidity dx dy min-shares))))
 
-(define-public (remove-liquidity-direct (pool-ctr <pool>) (shares uint) (min-dx uint) (min-dy uint) (deadline uint))
+(define-public (remove-liquidity-direct (pool-ctr principal) (shares uint) (min-dx uint) (min-dy uint) (deadline uint))
   (begin
     (asserts! (<= block-height deadline) ERR_DEADLINE_PASSED)
     (asserts! (> shares u0) ERR_INVALID_AMOUNT)
@@ -86,7 +70,7 @@
         
         (ok result)))))
 
-(define-public (swap-exact-in-direct (pool-ctr <pool>) (amount-in uint) (min-out uint) (x-to-y bool) (deadline uint))
+(define-public (swap-exact-in-direct (pool-ctr principal) (amount-in uint) (min-out uint) (x-to-y bool) (deadline uint))
   (begin
     (asserts! (<= block-height deadline) ERR_DEADLINE_PASSED)
     (asserts! (> amount-in u0) ERR_INVALID_AMOUNT)
@@ -108,7 +92,7 @@
         
         (ok swap-result)))))
 
-(define-public (swap-exact-out-direct (pool-ctr <pool>) (max-in uint) (amount-out uint) (x-to-y bool) (deadline uint))
+(define-public (swap-exact-out-direct (pool-ctr principal) (max-in uint) (amount-out uint) (x-to-y bool) (deadline uint))
   (begin
     (asserts! (<= block-height deadline) ERR_DEADLINE_PASSED)
     (asserts! (> amount-out u0) ERR_INVALID_AMOUNT)
@@ -171,7 +155,7 @@
       (ok u0)))
 
 ;; Emergency functions
-(define-public (emergency-withdraw-stuck-tokens (token <sip10>) (amount uint) (recipient principal))
+(define-public (emergency-withdraw-stuck-tokens (token principal) (amount uint) (recipient principal))
   (begin
     ;; In production, would check admin permissions
     (as-contract (contract-call? token transfer amount (as-contract tx-sender) recipient none))))
