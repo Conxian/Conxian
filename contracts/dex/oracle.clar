@@ -1,12 +1,24 @@
 ;; oracle.clar
 ;; Standard price oracle implementation for the Conxian protocol
 
-;; Import traits
-(use-trait oracle 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.oracle)
-(use-trait std-constants 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.standard-constants)
+;; Define Oracle Trait
+(define-trait oracle
+  (
+    (get-price (principal) (response (optional (tuple (value uint) (timestamp uint) (decimals uint))) uint))
+    (update-price (principal uint uint) (response bool uint))
+    (get-last-update-time () (response uint uint))
+  )
+)
 
-;; Implement traits
-(impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.oracle)
+;; Define Standard Constants Trait
+(define-trait standard-constants
+  (
+    (get-constant (string-ascii 32) (response (optional uint) uint))
+  )
+)
+
+;; Implement the oracle trait
+(impl-trait oracle)
 
 ;; Error codes
 (define-constant ERR_UNAUTHORIZED (err u1001))

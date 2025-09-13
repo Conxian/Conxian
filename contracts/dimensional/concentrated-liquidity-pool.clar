@@ -5,12 +5,24 @@
 (define-constant FEE_TIER_MEDIUM u10000) ;; 1.0%
 (define-constant FEE_TIER_HIGH u30000)  ;; 3.0%
 
-(define-data-var pool-token-x principal)
-(define-data-var pool-token-y principal)
-(define-data-var fee-tier uint)
-(define-data-var tick-spacing uint)
-(define-data-var liquidity uint)
-(define-data-var sqrt-price-x64 uint)
+;; Define Pool Trait
+(define-trait pool-trait
+  (
+    (add-liquidity (uint uint (optional principal)) (response (tuple (dx uint) (dy uint) (shares uint)) uint))
+    (remove-liquidity (uint uint uint) (response (tuple (dx uint) (dy uint)) uint))
+    (swap (uint principal principal) (response (tuple (dx uint) (dy uint)) uint))
+    (get-reserves () (response (tuple (reserve-x uint) (reserve-y uint)) uint))
+    (get-total-supply () (response uint uint))
+  )
+)
+
+;; Initialize data variables with default values
+(define-data-var pool-token-x principal 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR)
+(define-data-var pool-token-y principal 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR)
+(define-data-var fee-tier uint u0)
+(define-data-var tick-spacing uint u60)  ;; 0.05% tick spacing
+(define-data-var liquidity uint u0)
+(define-data-var sqrt-price-x64 u160)
 
 ;; Tracks individual positions
 (define-map positions 

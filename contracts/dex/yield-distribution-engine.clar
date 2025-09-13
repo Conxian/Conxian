@@ -2,8 +2,21 @@
 ;; Advanced yield distribution system for enterprise loans and bonds
 ;; Handles complex yield calculations, distribution schedules, and optimization
 
-;; Import SIP-010 trait
-(use-trait sip10-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.sip-010-trait)
+;; Define Yield Engine SIP-010 Token Trait
+(define-trait yield-sip010-trait
+  (
+    (transfer (uint principal principal (optional (buff 34))) (response bool uint))
+    (get-name () (response (string-ascii 32) uint))
+    (get-symbol () (response (string-ascii 32) uint))
+    (get-decimals () (response uint uint))
+    (get-balance (principal) (response uint uint))
+    (get-total-supply () (response uint uint))
+    (get-token-uri () (response (optional (string-utf8 256)) uint))
+  )
+)
+
+;; Alias for compatibility
+(use-trait sip10-trait yield-sip010-trait)
 
 ;; Constants
 (define-constant ERR_UNAUTHORIZED (err u9001))

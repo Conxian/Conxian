@@ -2,13 +2,93 @@
 ;; Conxian Revenue Token (SIP-010 FT) - accrues protocol revenue to holders off-contract
 ;; Enhanced with integration hooks for staking, revenue distribution, and system monitoring
 
-;; Import traits
-(use-trait sip010-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.sip-010-trait)
-(use-trait ftm-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.ft-mintable-trait)
+;; Define the SIP-010 Fungible Token Standard Trait locally
+(define-trait sip010-trait
+  (
+    (transfer (uint principal principal (optional (buff 34))) (response bool uint))
+    (get-name () (response (string-ascii 32) uint))
+    (get-symbol () (response (string-ascii 32) uint))
+    (get-decimals () (response uint uint))
+    (get-balance (principal) (response uint uint))
+    (get-total-supply () (response uint uint))
+    (get-token-uri () (response (optional (string-utf8 256)) uint))
+  )
+)
 
-;; Implement traits
+;; Implement SIP-010 trait
 (impl-trait sip010-trait)
-(impl-trait ftm-trait)
+
+;; SIP-010 Fungible Token Standard Functions
+(define-read-only (get-name)
+  (ok "Conxian Revenue Token")
+)
+
+(define-read-only (get-symbol)
+  (ok "CXD")
+)
+
+(define-read-only (get-decimals)
+  (ok u6)  ;; 6 decimal places
+)
+
+(define-read-only (get-token-uri)
+  (ok none)
+)
+
+(define-read-only (get-balance (who principal))
+  (default-to u0 (map-get? balances { who: who }))
+)
+
+(define-read-only (get-total-supply)
+  (var-get total-supply)
+)
+
+(define-private (safe-sub (a uint) (b uint))
+  (if (>= a b)
+    (ok (- a b))
+    (err u100)  ;; Underflow error
+  )
+)
+
+(define-private (safe-add (a uint) (b uint))
+  (let ((sum (+ a b)))
+    (if (or (<= sum a) (<= sum b))  ;; Check for overflow
+      (err u101)  ;; Overflow error
+      (ok sum)
+    )
+  )
+)
+
+(define-public (transfer (amount uint) (sender principal) (recipient principal) (memo (optional (buff 34))))
+  (if (or (is-eq sender recipient) (is-eq amount u0))
+    (ok true)
+    (let (
+        (sender-balance (unwrap! (get-balance sender) (err u102)))
+        (recipient-balance (default-to u0 (map-get? balances { who: recipient })))
+        (new-sender-balance (try! (safe-sub sender-balance amount)))
+        (new-recipient-balance (try! (safe-add recipient-balance amount)))
+      )
+      (asserts! (is-eq tx-sender sender) (err u103))
+      (map-set balances { who: sender } new-sender-balance)
+      (map-set balances { who: recipient } new-recipient-balance)
+      (ok true)
+    )
+  )
+)
+
+;; Define FT Mintable Trait
+(define-trait ft-mintable-trait
+  (
+    ;; Mint new tokens
+    (mint (principal uint (optional (buff 34))) (response bool uint))
+    ;; Burn tokens
+    (burn (principal uint (optional (buff 34))) (response bool uint))
+  )
+)
+
+;; Implement the required traits
+(impl-trait sip010-trait)
+(impl-trait ft-mintable-trait)
 
 ;; --- Errors ---
 (define-constant ERR_UNAUTHORIZED u100)

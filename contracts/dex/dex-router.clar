@@ -1,9 +1,29 @@
 ;; Conxian DEX Router - User-friendly interface for DEX interactions
 ;; Provides single-hop trading and liquidity management with slippage protection
 
-;; Import traits
-(use-trait sip010-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.sip010-trait)
-(use-trait pool-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.pool-trait)
+;; Define SIP-010 Token Trait
+(define-trait sip010-trait
+  (
+    (transfer (uint principal principal (optional (buff 34))) (response bool uint))
+    (get-name () (response (string-ascii 32) uint))
+    (get-symbol () (response (string-ascii 32) uint))
+    (get-decimals () (response uint uint))
+    (get-balance (principal) (response uint uint))
+    (get-total-supply () (response uint uint))
+    (get-token-uri () (response (optional (string-utf8 256)) uint))
+  )
+)
+
+;; Define Pool Trait
+(define-trait pool-trait
+  (
+    (add-liquidity (uint uint (optional principal)) (response (tuple (dx uint) (dy uint) (shares uint)) uint))
+    (remove-liquidity (uint uint uint) (response (tuple (dx uint) (dy uint)) uint))
+    (swap (uint principal principal) (response (tuple (dx uint) (dy uint)) uint))
+    (get-reserves () (response (tuple (reserve-x uint) (reserve-y uint)) uint))
+    (get-total-supply () (response uint uint))
+  )
+)
 
 ;; Constants
 (define-constant ERR_INVALID_POOL (err u4001))

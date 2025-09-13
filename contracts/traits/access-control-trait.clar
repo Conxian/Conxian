@@ -1,12 +1,6 @@
 ;; Access Control Trait - Role-based access control interface
-;; Implements the functionality specified in AIP-7
-
-;; Import standard constants trait
-(use-trait std-constants 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.standard-constants)
-
-(define-constant ROLE_ADMIN 0x41444d494e)        ;; ADMIN in hex
-(define-constant ROLE_OPERATOR 0x4f50455241544f52)  ;; OPERATOR in hex
-(define-constant ROLE_EMERGENCY 0x454d455247454e4359)  ;; EMERGENCY in hex
+;; This file is now DEPRECATED - Use standard-traits.clar instead
+;; Keeping for backward compatibility
 
 (define-trait access-control-trait
   (
@@ -17,7 +11,7 @@
     
     ;; Role-based Access Control
     (only-role ((string-ascii 32)) (response bool uint))
-    (only-roles (list (string-ascii 32)) (response bool uint))
+    (only-roles ((list 10 (string-ascii 32))) (response bool uint))
     
     ;; Time-locked Operations
     (schedule ((string-ascii 32) (optional (string-utf8 500)) uint) (response uint uint))
@@ -27,7 +21,7 @@
     ;; Emergency Controls
     (pause () (response bool uint))
     (unpause () (response bool uint))
-    (paused () (response bool uint))
+    (is-paused () (response bool uint))
     
     ;; Multi-sig Operations
     (propose ((string-ascii 32) (string-utf8 500)) (response uint uint))
@@ -43,6 +37,14 @@
   )
 )
 
+;; Re-export standard constants for backward compatibility
+(define-constant ERR_NOT_AUTHORIZED (err u100))
+(define-constant ERR_ALREADY_INITIALIZED (err u101))
+(define-constant ERR_NOT_INITIALIZED (err u102))
+(define-constant ROLE_ADMIN 0x41444d494e)        ;; ADMIN in hex
+(define-constant ROLE_OPERATOR 0x4f50455241544f52)  ;; OPERATOR in hex
+(define-constant ROLE_EMERGENCY 0x454d455247454e4359)  ;; EMERGENCY in hex
+
 ;; Implementation of standard roles
 (define-public (is-admin (who principal) (role (string-ascii 32)))
   (ok (or 
@@ -52,10 +54,7 @@
 )
 
 (define-public (is-emergency-admin (who principal) (role (string-ascii 32)))
-  (ok (or
-    (is-eq role ROLE_EMERGENCY)
-    (contract-call? .access-control is-admin who ROLE_EMERGENCY)
-  ))
+  (ok (is-eq role ROLE_EMERGENCY))
 )
 
 

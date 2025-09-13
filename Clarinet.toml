@@ -163,6 +163,9 @@ epoch = "2.4"
 path = "contracts/lib/math-lib-advanced.clar"
 epoch = "2.4"
 
+[contracts.standard-traits]
+path = "contracts/traits/standard-traits.clar"
+
 [contracts.fixed-point-math]
 path = "contracts/lib/fixed-point-math.clar"
 epoch = "2.4"

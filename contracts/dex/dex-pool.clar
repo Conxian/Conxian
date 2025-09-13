@@ -1,12 +1,32 @@
 ;; Conxian DEX Pool - Constant product AMM pool with enhanced tokenomics integration
 ;; Implements pool-trait with full system integration
 
-;; Import traits
-(use-trait pool-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.pool-trait)
-(use-trait token-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.sip010-trait)
+;; Define Pool Trait
+(define-trait pool-trait
+  (
+    (add-liquidity (uint uint (optional principal)) (response (tuple (dx uint) (dy uint) (shares uint)) uint))
+    (remove-liquidity (uint uint uint) (response (tuple (dx uint) (dy uint)) uint))
+    (swap (uint principal principal) (response (tuple (dx uint) (dy uint)) uint))
+    (get-reserves () (response (tuple (reserve-x uint) (reserve-y uint)) uint))
+    (get-total-supply () (response uint uint))
+  )
+)
 
-;; Implement traits
-(impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.pool-trait)
+;; Define SIP-010 Token Trait
+(define-trait sip010-token-trait
+  (
+    (transfer (uint principal principal (optional (buff 34))) (response bool uint))
+    (get-name () (response (string-ascii 32) uint))
+    (get-symbol () (response (string-ascii 32) uint))
+    (get-decimals () (response uint uint))
+    (get-balance (principal) (response uint uint))
+    (get-total-supply () (response uint uint))
+    (get-token-uri () (response (optional (string-utf8 256)) uint))
+  )
+)
+
+;; Implement pool trait
+(impl-trait pool-trait)
 
 ;; Private helper functions
 (define-private (min (a uint) (b uint))
@@ -21,7 +41,7 @@
 (define-constant ERR_DEADLINE_PASSED (err u3004))
 (define-constant ERR_INSUFFICIENT_SHARES (err u3005))
 (define-constant ERR_ZERO_LIQUIDITY (err u3006))
- (define-constant ERR_NOT_INITIALIZED (err u3007))
+(define-constant ERR_NOT_INITIALIZED (err u3007))
 
 (define-constant PRECISION u100000000) ;; 8 decimals
 (define-constant MIN_LIQUIDITY u1000)

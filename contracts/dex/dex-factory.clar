@@ -1,12 +1,183 @@
 ;; Conxian DEX Factory - Pool creation and registry with enhanced tokenomics integration
 ;; Implements access-control-trait and integrates with protocol monitoring
 
-;; Import traits
-(use-trait access-control 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.access-control)
-(use-trait token-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.sip010-trait)
+;; Error constants
+(define-constant ERR_UNAUTHORIZED (err u100))
+(define-constant ERR_ALREADY_EXISTS (err u101))
+(define-constant ERR_NOT_FOUND (err u102))
 
-;; Implement traits
-(impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.access-control)
+;; Define the access control trait locally
+(define-trait access-control-trait
+  (
+    ;; Role Management
+    (has-role (principal (string-ascii 32)) (response bool uint))
+    (grant-role (principal (string-ascii 32)) (response bool uint))
+    (revoke-role (principal (string-ascii 32)) (response bool uint))
+    
+    ;; Role-based Access Control
+    (only-role ((string-ascii 32)) (response bool uint))
+    (only-roles (list (string-ascii 32)) (response bool uint))
+    
+    ;; Time-locked Operations
+    (schedule ((string-ascii 32) (optional (string-utf8 500)) uint) (response uint uint))
+    (execute (uint) (response bool uint))
+    (cancel (uint) (response bool uint))
+    
+    ;; Emergency Controls
+    (pause () (response bool uint))
+    (unpause () (response bool uint))
+    (paused () (response bool uint))
+    
+    ;; Multi-sig Operations
+    (submit-transaction (principal uint (string-utf8 500) (buff 1024)) (response uint uint))
+    (confirm-transaction (uint) (response bool uint))
+    (execute-transaction (uint) (response (response bool uint) uint))
+    (revoke-confirmation (uint) (response bool uint))
+    
+    ;; Events
+    (role-granted ((string-ascii 32) principal principal) (response bool uint))
+    (role-revoked ((string-ascii 32) principal) (response bool uint))
+    (operation-scheduled (uint (string-ascii 32) uint) (response bool uint))
+    (operation-executed (uint) (response bool uint))
+    (paused-changed (bool) (response bool uint))
+  )
+)
+
+(impl-trait access-control-trait)
+
+(define-data-var roles (map principal (list (string-ascii 32))) {})
+(define-data-var owner principal tx-sender)
+
+;; Role constants
+(define-constant ROLE_ADMIN 0x41444d494e)  ;; 'ADMIN' in hex
+(define-constant ROLE_OPERATOR 0x4f50455241544f52)  ;; 'OPERATOR' in hex
+
+;; Role management functions
+(define-read-only (has-role (who principal) (role (string-ascii 32)))
+  (let ((user-roles (default-to (list) (map-get? roles who))))
+    (ok (fold (lambda (acc role-item) (or acc (is-eq role-item role))) false user-roles))
+  )
+)
+
+(define-public (grant-role (who principal) (role (string-ascii 32)))
+  (let ((current-roles (default-to (list) (map-get? roles who))))
+    (if (fold (lambda (acc role-item) (or acc (is-eq role-item role))) false current-roles)
+      (ok true)
+      (let ((new-roles (append current-roles (list role))))
+        (map-set roles who new-roles)
+        (ok true)
+      )
+    )
+  )
+)
+
+(define-public (revoke-role (who principal) (role (string-ascii 32)))
+  (let ((current-roles (default-to (list) (map-get? roles who))))
+    (if (fold (lambda (acc role-item) (or acc (is-eq role-item role))) false current-roles)
+      (let ((new-roles (filter (lambda (r) (not (is-eq r role))) current-roles)))
+        (map-set roles who new-roles)
+        (ok true)
+      )
+      (ok true)
+    )
+  )
+)
+
+(define-private (only-role (role (string-ascii 32)))
+  (let ((has-role (unwrap! (has-role tx-sender role) (err ERR_UNAUTHORIZED))))
+    (asserts has-role (err ERR_UNAUTHORIZED))
+    (ok true)
+  )
+)
+
+(define-private (only-roles (required-roles (list (string-ascii 32))))
+  (let ((user-roles (default-to (list) (map-get? roles tx-sender))))
+    (asserts (fold 
+      (lambda (acc role) 
+        (if acc true (fold (lambda (acc2 r) (or acc2 (is-eq r role))) false user-roles)))
+      false
+      required-roles)
+      (err ERR_UNAUTHORIZED)
+    )
+    (ok true)
+  )
+)
+
+;; SIP-010 Fungible Token Standard
+(define-trait sip010-trait
+  (
+    (transfer (uint principal principal (optional (buff 34))) (response bool uint))
+    (get-name () (response (string-ascii 32) uint))
+    (get-symbol () (response (string-ascii 32) uint))
+    (get-decimals () (response uint uint))
+    (get-balance (principal) (response uint uint))
+    (get-total-supply () (response uint uint))
+    (get-token-uri () (response (optional (string-utf8 256)) uint))
+  )
+)
+
+;; Pool Trait
+(define-trait pool-trait
+  (
+    (add-liquidity (uint uint principal) (response (tuple (dx uint) (dy uint) (shares uint)) uint))
+    (remove-liquidity (uint principal) (response (tuple (dx uint) (dy uint)) uint))
+    (swap (uint principal principal) (response (tuple (dx uint) (dy uint)) uint))
+    (get-reserves () (response (tuple (reserve-x uint) (reserve-y uint)) uint))
+    (get-total-supply () (response uint uint))
+  )
+)
+
+;; Implement required traits
+(impl-trait access-control-trait)
+
+;; Access Control Implementation
+(define-data-var roles (map principal (list (string-ascii 32))) {})
+(define-data-var owner principal tx-sender)
+
+(define-read-only (has-role (who principal) (role (string-ascii 32)))
+  (let ((user-roles (default-to (list) (map-get? roles who))))
+    (ok (fold (lambda (acc role-item) (or acc (is-eq role-item role))) false user-roles))
+  )
+)
+
+(define-public (grant-role (who principal) (role (string-ascii 32)))
+  (let ((current-roles (default-to (list) (map-get? roles who))))
+    (if (contains? current-roles role)
+      (ok true)
+      (let ((new-roles (append current-roles (list role))))
+        (map-set roles who new-roles)
+        (ok true)
+      )
+    )
+  )
+)
+
+(define-public (revoke-role (who principal) (role (string-ascii 32)))
+  (let ((current-roles (default-to (list) (map-get? roles who))))
+    (if (contains? current-roles role)
+      (let ((new-roles (filter (lambda (r) (not (is-eq r role))) current-roles)))
+        (map-set roles who new-roles)
+        (ok true)
+      )
+      (ok true)
+    )
+  )
+)
+
+(define-private (only-role (role (string-ascii 32)))
+  (let ((has-role (unwrap! (has-role tx-sender role) (err ERR_UNAUTHORIZED))))
+    (asserts has-role (err ERR_UNAUTHORIZED))
+    (ok true)
+  )
+)
+
+(define-private (only-roles (required-roles (list (string-ascii 32))))
+  (let ((user-roles (default-to (list) (map-get? roles tx-sender))))
+    (asserts (any (lambda (role) (contains? user-roles role)) required-roles) 
+             (err ERR_UNAUTHORIZED))
+    (ok true)
+  )
+)
 
 ;; ===== Error Codes =====
 ;; Access Control (1000-1099)

@@ -110,10 +110,24 @@
     b ;; Clamp t to 1.0
     (+ a (mul-down (- b a) t))))
 
+;; === SQUARE ROOT FUNCTION ===
+;; Calculate square root using the Babylonian method (Heron's method)
+(define-read-only (sqrt-fixed (x uint))
+  (if (or (is-eq x u0) (is-eq x u1))
+    x
+    (let (
+      (z (div (+ (div x u2) u1) u2))  ;; Initial guess
+      (y x))
+      (while (< z y)
+        (let ((new-z (div (+ (div x z) z) u2)))
+          (set! y z)
+          (set! z new-z)))
+      z)))
+
 ;; === GEOMETRIC MEAN ===
 ;; Calculate geometric mean of two numbers: sqrt(a * b)
 (define-read-only (geometric-mean (a uint) (b uint))
-  (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.math-lib-advanced sqrt-fixed (mul-down a b)))
+  (sqrt-fixed (mul-down a b)))
 
 ;; === HARMONIC MEAN ===
 ;; Calculate harmonic mean: 2 / (1/a + 1/b) = 2ab / (a + b)

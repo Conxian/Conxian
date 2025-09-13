@@ -16,13 +16,30 @@
 )
 ;; Supports migration to CXD via epoch bands (1.0x -> 2.0x)
 
-;; Import traits
-(use-trait sip010-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.sip-010-trait)
-(use-trait ftm-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.ft-mintable-trait)
+;; Define SIP-010 Fungible Token Standard Trait
+(define-trait sip010-trait
+  (
+    (transfer (uint principal principal (optional (buff 34))) (response bool uint))
+    (get-name () (response (string-ascii 32) uint))
+    (get-symbol () (response (string-ascii 32) uint))
+    (get-decimals () (response uint uint))
+    (get-balance (principal) (response uint uint))
+    (get-total-supply () (response uint uint))
+    (get-token-uri () (response (optional (string-utf8 256)) uint))
+  )
+)
 
-;; Implement traits
-(impl-trait sip010-trait)
-(impl-trait ftm-trait)
+;; Define FT Mintable Trait
+(define-trait ft-mintable-trait
+  (
+    (mint (principal uint (optional (buff 34))) (response bool uint))
+    (burn (principal uint (optional (buff 34))) (response bool uint))
+  )
+)
+
+;; Implement traits with local definitions
+(impl-trait .sip010-trait)
+(impl-trait .ft-mintable-trait)
 
 ;; --- Errors ---
 (define-constant ERR_UNAUTHORIZED u100)
