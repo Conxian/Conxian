@@ -2,7 +2,7 @@
 ;; Intent queue system for CXLP to CXD migration with pro-rata settlement
 ;; Prevents FCFS races and enables fair distribution based on duration-weighted requests
 
-(use-trait ft-mintable .ft-mintable-trait.ft-mintable-trait)
+(use-trait ft-mintable 'ft-mintable-trait.ft-mintable-trait)
 
 ;; --- Constants ---
 (define-constant CONTRACT_OWNER tx-sender)
@@ -290,3 +290,6 @@
     cxlp-contract: (var-get cxlp-contract),
     cxd-contract: (var-get cxd-contract)
   })
+
+
+

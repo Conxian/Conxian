@@ -2,11 +2,11 @@
 ;; Enterprise-grade loan management system with bond issuance for large loans
 ;; Supports institutional borrowing, risk-based pricing, and automated bond creation
 
-(use-trait sip10 .traits.sip-010-trait.sip-010-trait)
-(use-trait lending-trait .lending-system-trait.lending-system-trait)
+(use-trait sip10 'traits.sip-010-trait.sip-010-trait)
+(use-trait lending-trait 'lending-system-trait.lending-system-trait)
 
 ;; Import mathematical libraries for enterprise calculations (removed unresolved trait import)
-;; (use-trait math-precision .precision-calculator.precision-calculator-trait)
+;; (use-trait math-precision 'precision-calculator.precision-calculator-trait)
 
 ;; Constants
 (define-constant ERR_UNAUTHORIZED (err u7001))
@@ -558,3 +558,6 @@
     (print (tuple (event "loan-liquidated") (loan-id loan-id)))
     
     (ok true)))
+
+
+

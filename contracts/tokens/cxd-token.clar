@@ -2,8 +2,8 @@
 ;; Conxian Revenue Token (SIP-010 FT) - accrues protocol revenue to holders off-contract
 ;; Enhanced with integration hooks for staking, revenue distribution, and system monitoring
 
-(impl-trait .traits.sip-010-trait.sip-010-trait)
-(impl-trait .traits.ft-mintable-trait.ft-mintable-trait)
+(impl-trait 'traits.sip-010-trait.sip-010-trait)
+(impl-trait 'traits.ft-mintable-trait.ft-mintable-trait)
 
 ;; --- Errors ---
 (define-constant ERR_UNAUTHORIZED u100)
@@ -264,3 +264,6 @@
     revenue-distributor: (var-get revenue-distributor-contract),
     emission-controller: (var-get emission-controller-contract)
   })
+
+
+

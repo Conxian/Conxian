@@ -2,9 +2,9 @@
 ;; xCXD Staking Contract - Revenue distribution with warm-up/cool-down to prevent snapshot sniping
 ;; Implements buyback-and-make mechanism for revenue sharing
 
-(impl-trait .traits.sip-010-trait.sip-010-trait)
-(use-trait ft-trait .traits.sip-010-trait.sip-010-trait)
-(use-trait cxd-contract .traits.sip-010-trait.sip-010-trait)
+(impl-trait 'traits.sip-010-trait.sip-010-trait)
+(use-trait ft-trait 'traits.sip-010-trait.sip-010-trait)
+(use-trait cxd-contract 'traits.sip-010-trait.sip-010-trait)
 
 ;; --- Constants ---
 (define-constant CONTRACT_OWNER tx-sender)
@@ -340,3 +340,6 @@
     paused: (var-get paused),
     kill-switch: (var-get kill-switch)
   })
+
+
+

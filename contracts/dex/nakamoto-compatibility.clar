@@ -383,3 +383,6 @@
   (var-set mev-protection-enabled true)    ;; Enable MEV protection
   (print { event: "nakamoto-compatibility-deployed", version: "1.0.0" })
 )
+
+
+

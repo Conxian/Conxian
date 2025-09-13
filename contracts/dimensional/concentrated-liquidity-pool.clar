@@ -47,3 +47,6 @@
     ((is-eq fee FEE_TIER_LOW) u10)
     ((is-eq fee FEE_TIER_MEDIUM) u60)
     ((is-eq fee FEE_TIER_HIGH) u200)))
+
+(impl-trait pool-trait.pool-trait)
+

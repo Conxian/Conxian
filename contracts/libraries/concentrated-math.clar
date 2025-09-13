@@ -41,3 +41,6 @@
 (define-read-only (calculate-fee (liquidity uint) (fee-rate uint) (time-in-seconds uint))
   (div (* liquidity fee-rate time-in-seconds) u1000000)
 )
+
+
+

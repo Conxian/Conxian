@@ -2,8 +2,8 @@
 ;; Conxian Contributor Token (SIP-010 FT) - merit-based rewards token
 ;; Enhanced with system integration hooks for coordinator interface
 
-(impl-trait .traits.sip-010-trait.sip-010-trait)
-(impl-trait .traits.ft-mintable-trait.ft-mintable-trait)
+(impl-trait 'traits.sip-010-trait.sip-010-trait)
+(impl-trait 'traits.ft-mintable-trait.ft-mintable-trait)
 
 ;; --- Errors ---
 (define-constant ERR_UNAUTHORIZED u100)
@@ -383,3 +383,6 @@
                   (support support)))
     
     (ok true)))
+
+
+

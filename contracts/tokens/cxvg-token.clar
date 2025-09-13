@@ -2,9 +2,9 @@
 ;; Conxian Governance Token (SIP-010 FT) - no direct revenue share
 ;; Enhanced with system integration hooks for coordinator interface
 
-(impl-trait .traits.sip-010-trait.sip-010-trait)
-(impl-trait .traits.ft-mintable-trait.ft-mintable-trait)
-(use-trait monitor-trait .traits.monitor-trait.monitor-trait)
+(impl-trait sip-010-trait)
+(impl-trait ft-mintable-trait)
+(use-trait monitor-trait monitor-trait)
 
 ;; --- Errors ---
 (define-constant ERR_UNAUTHORIZED u100)

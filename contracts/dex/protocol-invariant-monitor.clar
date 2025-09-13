@@ -2,7 +2,7 @@
 ;; Protocol invariant monitoring and circuit breaker system
 ;; Monitors key invariants and triggers automated protection mechanisms
 
- (use-trait staking-ref .staking-trait.staking-trait)
+ (use-trait staking-ref 'staking-trait.staking-trait)
 
 ;; --- Constants ---
 (define-constant CONTRACT_OWNER tx-sender)
@@ -402,3 +402,6 @@
     contract-owner: (var-get contract-owner),
     emergency-operator: (var-get emergency-operator)
   })
+
+
+

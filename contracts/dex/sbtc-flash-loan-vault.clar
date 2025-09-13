@@ -2,7 +2,7 @@
 ;; Enhanced Flash Loan Vault with sBTC Support
 ;; Implements secure flash loans with sBTC collateral and risk management
 
-(use-trait ft-trait .traits.sip-010-trait.sip-010-trait)
+(use-trait ft-trait 'traits.sip-010-trait.sip-010-trait)
 
 ;; =============================================================================
 ;; CONSTANTS
@@ -528,3 +528,6 @@
   owner: CONTRACT_OWNER,
   version: "1.0.0"
 })
+
+
+

@@ -2,9 +2,9 @@
 ;; Advanced liquidation system for undercollateralized positions
 ;; Supports multiple liquidation strategies and automated liquidations
 
-(use-trait std-constants .traits.standard-constants-trait.standard-constants-trait)
-(use-trait liquidation .liquidation-trait.liquidation-trait)
-(impl-trait .liquidation-trait.liquidation-trait)
+(use-trait std-constants traits.standard-constants-trait)
+(use-trait liquidation liquidation-trait)
+(impl-trait liquidation-trait)
 
 ;; Oracle contract
 (define-constant ORACLE_CONTRACT 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.oracle)
@@ -184,7 +184,7 @@
   (collateral-asset principal))
   (let ((params (unwrap! (map-get? liquidation-params { asset: debt-asset }) 
                         (err u1008)))  ;; ERR_ASSET_NOT_WHITELISTED
-        (lending-system (unwrap! (var-get lending-system) (err u1008))))
+        (lending-system (unwrap! (var-get lending-system) (err u1008)))
     (contract-call? lending-system is-position-liquidatable borrower debt-asset collateral-asset)
   )
 )
@@ -565,4 +565,5 @@
   (begin
     (asserts! (is-eq tx-sender (var-get admin)) (err u1002))  ;; ERR_UNAUTHORIZED
     (var-set auto-liquidation-enabled enabled)
-    (ok true)))
+    (ok true)
+

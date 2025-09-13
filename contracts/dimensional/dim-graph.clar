@@ -37,3 +37,6 @@
     (asserts! (is-eq tx-sender (var-get writer-principal)) (err ERR_UNAUTHORIZED))
     (map-set edge {from-dim: f, to-dim: t} {flow: flow-amt})
     (ok (tuple (from f) (to t) (flow flow-amt)))))
+
+
+

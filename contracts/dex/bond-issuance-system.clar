@@ -2,7 +2,7 @@
 ;; Tokenized bond system for backing large enterprise loans
 ;; Issues ERC-1155 style bonds representing shares in loan portfolios
 
-(impl-trait .traits.sip-010-trait.sip-010-trait)
+(impl-trait 'traits.sip-010-trait.sip-010-trait)
 
 ;; Constants
 (define-constant ERR_UNAUTHORIZED (err u8001))
@@ -381,3 +381,6 @@
     (var-set system-paused false)
     (print (tuple (event "emergency-unpause") (block block-height)))
     (ok true)))
+
+
+

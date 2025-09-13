@@ -1,10 +1,10 @@
 ;; oracle.clar
 ;; Standard price oracle implementation for the Conxian protocol
 
-(use-trait oracle-trait .oracle-trait.oracle-trait)
-(use-trait std-constants .traits.standard-constants-trait.standard-constants-trait)
+(use-trait oracle-trait 'oracle-trait.oracle-trait)
+(use-trait std-constants 'traits.standard-constants-trait.standard-constants-trait)
 
-(impl-trait .oracle-trait.oracle-trait)
+(impl-trait 'oracle-trait.oracle-trait)
 
 ;; Error codes
 (define-constant ERR_UNAUTHORIZED (err u1001))
@@ -154,3 +154,6 @@
     (ok true)
   )
 )
+
+
+

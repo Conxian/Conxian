@@ -1,8 +1,8 @@
 ;; Conxian DEX Router - User-friendly interface for DEX interactions
 ;; Provides single-hop trading and liquidity management with slippage protection
 
-(use-trait sip10 .traits.sip-010-trait.sip-010-trait)
-(use-trait pool .pool-trait.pool-trait)
+(use-trait sip10 traits.sip-010-trait)
+(use-trait pool pool-trait)
 
 ;; Constants
 (define-constant ERR_INVALID_POOL (err u4001))
@@ -166,3 +166,4 @@
   (match (resolve-pool token-a token-b)
     pool-addr (ok (tuple (pool pool-addr) (liquidity u0)))
     ERR_INVALID_POOL))
+

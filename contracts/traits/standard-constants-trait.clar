@@ -44,3 +44,6 @@
 (define-constant ZERO u0)
 (define-constant FIFTY_PERCENT u5000)                ;; 50.00%
 (define-constant ONE_HUNDRED_PERCENT u10000)         ;; 100.00%
+
+
+

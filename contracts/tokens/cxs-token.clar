@@ -2,7 +2,7 @@
 ;; Conxian Soulbound Reputation Token (SIP-009-style NFT)
 ;; Non-transferable: transfer is disabled to enforce soulbound semantics
 
-(impl-trait .sip-009-trait.sip009-nft-trait)
+(impl-trait sip-009-trait.sip009-nft-trait)
 
 ;; --- Errors ---
 (define-constant ERR_UNAUTHORIZED u100)
@@ -80,3 +80,4 @@
 (define-read-only (get-token-uri (id uint))
   (ok (default-to none (get uri (map-get? token-uris { id: id }))))
 )
+
