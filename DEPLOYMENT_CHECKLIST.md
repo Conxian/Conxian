@@ -45,6 +45,14 @@
 3. Repeat deployment steps from testnet
 4. Verify all contract interactions
 
+## Manual Deployment (Fallback)
+1. Install stacks-cli: `npm install @stacks/cli`
+2. Deploy a contract:
+   ```powershell
+   npx @stacks/cli deploy_contract ./path/to/contract.clar -t -n testnet -k $env:TESTNET_DEPLOYER_KEY
+   ```
+3. Repeat for all contracts in dependency order
+
 ## Post-Deployment
 - [ ] Verify all contract interactions
 - [ ] Test emergency shutdown procedures

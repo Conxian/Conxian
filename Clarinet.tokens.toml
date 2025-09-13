@@ -16,19 +16,19 @@ wallet_2 = { mnemonic = "${TESTNET_WALLET2_MNEMONIC:hold excess usual excess rin
 
 [contracts.sip-010-trait]
 path = "contracts/traits/sip-010-trait.clar"
-clarity_version = 3
+epoch = "2.4"
 
 [contracts.ft-mintable-trait]
 path = "contracts/traits/ft-mintable-trait.clar"
-clarity_version = 3
+epoch = "2.4"
 
 [contracts.sip-009-trait]
 path = "contracts/traits/sip-009-trait.clar"
-clarity_version = 3
+epoch = "2.4"
 
 [contracts.monitor-trait]
 path = "contracts/traits/monitor-trait.clar"
-clarity_version = 3
+epoch = "2.4"
 
 # ===========================================
 # CORE TOKENS
@@ -37,31 +37,31 @@ clarity_version = 3
 # 1. CXD Token - Main Utility Token
 [contracts.cxd-token]
 path = "contracts/tokens/cxd-token.clar"
-clarity_version = 3
+epoch = "2.4"
 depends_on = ["sip-010-trait", "ft-mintable-trait", "monitor-trait"]
 
 # 2. CXVG Token - Governance Token
 [contracts.cxvg-token]
 path = "contracts/tokens/cxvg-token.clar"
-clarity_version = 3
+epoch = "2.4"
 depends_on = ["sip-010-trait", "ft-mintable-trait"]
 
 # 3. CXTR Token - Creator Economy Token
 [contracts.cxtr-token]
 path = "contracts/tokens/cxtr-token.clar"
-clarity_version = 3
+epoch = "2.4"
 depends_on = ["sip-010-trait", "ft-mintable-trait", "monitor-trait"]
 
 # 4. CXLP Token - Liquidity Provider Token
 [contracts.cxlp-token]
 path = "contracts/tokens/cxlp-token.clar"
-clarity_version = 3
+epoch = "2.4"
 depends_on = ["sip-010-trait", "ft-mintable-trait"]
 
 # 5. CXS Token - Staking Token
 [contracts.cxs-token]
 path = "contracts/tokens/cxs-token.clar"
-clarity_version = 3
+epoch = "2.4"
 depends_on = ["sip-009-trait"]
 
 # ===========================================
@@ -70,22 +70,22 @@ depends_on = ["sip-009-trait"]
 
 [contracts.tokenized-bond]
 path = "contracts/dimensional/tokenized-bond.clar"
-clarity_version = 3
+epoch = "2.4"
 depends_on = ["sip-010-trait"]
 
 [contracts.tokenized-bond-adapter]
 path = "contracts/dimensional/tokenized-bond-adapter.clar"
-clarity_version = 3
+epoch = "2.4"
 depends_on = ["tokenized-bond", "sip-010-trait"]
 
 [contracts.token-emission-controller]
 path = "contracts/dex/token-emission-controller.clar"
-clarity_version = 3
+epoch = "2.4"
 depends_on = ["sip-010-trait"]
 
 [contracts.token-system-coordinator]
 path = "contracts/dex/token-system-coordinator.clar"
-clarity_version = 3
+epoch = "2.4"
 depends_on = ["sip-010-trait"]
 
 # ===========================================
@@ -94,5 +94,6 @@ depends_on = ["sip-010-trait"]
 
 [contracts.mock-token]
 path = "contracts/mocks/mock-token.clar"
-clarity_version = 3
+epoch = "2.4"
 depends_on = ["sip-010-trait", "ft-mintable-trait"]
+

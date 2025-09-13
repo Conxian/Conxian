@@ -21,154 +21,143 @@ genesis:
       balance: "100000000000000"
       sbtc-balance: "1000000000"
   contracts:
-    - genesis
-    - lockup
-    - bns
-    - cost-voting
     - costs
     - pox
-    - costs-2
     - pox-2
-    - costs-3
     - pox-3
     - pox-4
-    - signers
-    - signers-voting
+    - lockup
+    - costs-2
+    - costs-3
+    - cost-voting
+    - bns
 plan:
   batches:
     - id: 0
       transactions:
         - emulated-contract-publish:
-            contract-name: sip-010-trait
+            contract-name: access-control-trait
             emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            path: contracts/traits/sip-010-trait.clar
+            path: "contracts\\traits\\access-control-trait.clar"
             clarity-version: 2
         - emulated-contract-publish:
-            contract-name: cxd-staking
+            contract-name: concentrated-liquidity-pool
             emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            path: contracts/cxd-staking.clar
-            clarity-version: 2
-        - emulated-contract-publish:
-            contract-name: ft-mintable-trait
-            emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            path: contracts/traits/ft-mintable-trait.clar
-            clarity-version: 2
-        - emulated-contract-publish:
-            contract-name: monitor-trait
-            emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            path: contracts/traits/monitor-trait.clar
+            path: "contracts\\dimensional\\concentrated-liquidity-pool.clar"
             clarity-version: 2
         - emulated-contract-publish:
             contract-name: cxd-token
             emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            path: contracts/cxd-token.clar
+            path: "contracts\\tokens\\cxd-token.clar"
             clarity-version: 2
         - emulated-contract-publish:
             contract-name: cxlp-token
             emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            path: contracts/cxlp-token.clar
-            clarity-version: 2
-        - emulated-contract-publish:
-            contract-name: cxlp-migration-queue
-            emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            path: contracts/cxlp-migration-queue.clar
-            clarity-version: 2
-        - emulated-contract-publish:
-            contract-name: sip-009-trait
-            emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            path: contracts/traits/sip-009-trait.clar
+            path: "contracts\\tokens\\cxlp-token.clar"
             clarity-version: 2
         - emulated-contract-publish:
             contract-name: cxs-token
             emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            path: contracts/cxs-token.clar
+            path: "contracts\\tokens\\cxs-token.clar"
             clarity-version: 2
         - emulated-contract-publish:
             contract-name: cxtr-token
             emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            path: contracts/cxtr-token.clar
+            path: "contracts\\tokens\\cxtr-token.clar"
             clarity-version: 2
         - emulated-contract-publish:
             contract-name: cxvg-token
             emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            path: contracts/cxvg-token.clar
+            path: "contracts\\tokens\\cxvg-token.clar"
             clarity-version: 2
         - emulated-contract-publish:
-            contract-name: cxvg-utility
+            contract-name: dex-pool
             emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            path: contracts/cxvg-utility.clar
+            path: "contracts\\dex\\dex-pool.clar"
             clarity-version: 2
         - emulated-contract-publish:
-            contract-name: dim-graph
+            contract-name: dex-factory
             emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            path: contracts/dimensional/dim-graph.clar
+            path: "contracts\\dex\\dex-factory.clar"
+            clarity-version: 2
+        - emulated-contract-publish:
+            contract-name: dex-router
+            emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            path: "contracts\\dex\\dex-router.clar"
             clarity-version: 2
         - emulated-contract-publish:
             contract-name: dim-metrics
             emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            path: contracts/dimensional/dim-metrics.clar
-            clarity-version: 2
-        - emulated-contract-publish:
-            contract-name: dim-registry-trait
-            emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            path: contracts/traits/dim-registry-trait.clar
+            path: "contracts\\dimensional\\dim-metrics.clar"
             clarity-version: 2
         - emulated-contract-publish:
             contract-name: dim-registry
             emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            path: contracts/dimensional/dim-registry.clar
+            path: "contracts\\dimensional\\dim-registry.clar"
             clarity-version: 2
         - emulated-contract-publish:
-            contract-name: dimensional-oracle-trait
+            contract-name: math-lib-advanced
             emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            path: contracts/traits/dimensional-oracle-trait.clar
+            path: "contracts\\lib\\math-lib-advanced.clar"
             clarity-version: 2
         - emulated-contract-publish:
-            contract-name: dim-oracle-automation
+            contract-name: fixed-point-math
             emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            path: contracts/dimensional/dim-oracle-automation.clar
+            path: "contracts\\lib\\fixed-point-math.clar"
             clarity-version: 2
         - emulated-contract-publish:
-            contract-name: dim-yield-stake
+            contract-name: ft-mintable-trait
             emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            path: contracts/dimensional/dim-yield-stake.clar
+            path: "contracts\\traits\\ft-mintable-trait.clar"
+            clarity-version: 2
+        - emulated-contract-publish:
+            contract-name: lending-protocol-governance
+            emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            path: "contracts\\governance\\lending-protocol-governance.clar"
+            clarity-version: 2
+        - emulated-contract-publish:
+            contract-name: loan-liquidation-manager
+            emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            path: "contracts\\dex\\loan-liquidation-manager.clar"
             clarity-version: 2
         - emulated-contract-publish:
             contract-name: mock-token
             emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            path: contracts/mocks/mock-token.clar
+            path: "contracts\\mocks\\mock-token.clar"
             clarity-version: 2
         - emulated-contract-publish:
-            contract-name: staking-trait
+            contract-name: oracle
             emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            path: contracts/traits/staking-trait.clar
+            path: "contracts\\dex\\oracle.clar"
             clarity-version: 2
         - emulated-contract-publish:
-            contract-name: protocol-invariant-monitor
+            contract-name: pool-trait
             emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            path: contracts/protocol-invariant-monitor.clar
+            path: "contracts\\traits\\pool-trait.clar"
             clarity-version: 2
         - emulated-contract-publish:
-            contract-name: revenue-distributor
+            contract-name: precision-calculator
             emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            path: contracts/revenue-distributor.clar
+            path: "contracts\\lib\\precision-calculator.clar"
             clarity-version: 2
         - emulated-contract-publish:
-            contract-name: token-emission-controller
+            contract-name: sip-010-trait
             emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            path: contracts/token-emission-controller.clar
+            path: "contracts\\traits\\sip-010-trait.clar"
             clarity-version: 2
         - emulated-contract-publish:
-            contract-name: token-system-coordinator
+            contract-name: strategy-trait
             emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            path: contracts/token-system-coordinator.clar
+            path: "contracts\\traits\\strategy-trait.clar"
             clarity-version: 2
-      epoch: "2.4"
-    - id: 1
-      transactions:
         - emulated-contract-publish:
-            contract-name: tokenized-bond
+            contract-name: vault-trait
             emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            path: contracts/dimensional/tokenized-bond.clar
+            path: "contracts\\traits\\vault-trait.clar"
+            clarity-version: 2
+        - emulated-contract-publish:
+            contract-name: yield-distribution-engine
+            emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            path: "contracts\\dex\\yield-distribution-engine.clar"
             clarity-version: 2
       epoch: "2.4"

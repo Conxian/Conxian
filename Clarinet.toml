@@ -29,27 +29,27 @@ bitcoin_node_rpc_address = "https://blockstream.info/api"
 
 [contracts.access-control-trait]
 path = "contracts/traits/access-control-trait.clar"
-clarity_version = 3
+epoch = "2.4"
 
 [contracts.sip-010-trait]
 path = "contracts/traits/sip-010-trait.clar"
-clarity_version = 3
+epoch = "2.4"
 
 [contracts.ft-mintable-trait]
 path = "contracts/traits/ft-mintable-trait.clar"
-clarity_version = 3
+epoch = "2.4"
 
 [contracts.strategy-trait]
 path = "contracts/traits/strategy-trait.clar"
-clarity_version = 3
+epoch = "2.4"
 
 [contracts.pool-trait]
 path = "contracts/traits/pool-trait.clar"
-clarity_version = 3
+epoch = "2.4"
 
 [contracts.vault-trait]
 path = "contracts/traits/vault-trait.clar"
-clarity_version = 3
+epoch = "2.4"
 
 # ===========================================
 # TOKENS (SIP-010 Compliant)
@@ -58,31 +58,31 @@ clarity_version = 3
 # 1. CXD Token - Main Utility Token
 [contracts.cxd-token]
 path = "contracts/tokens/cxd-token.clar"
-clarity_version = 3
+epoch = "2.4"
 depends_on = ["sip-010-trait", "ft-mintable-trait", "monitor-trait"]
 
 # 2. CXVG Token - Governance Token
 [contracts.cxvg-token]
 path = "contracts/tokens/cxvg-token.clar"
-clarity_version = 3
+epoch = "2.4"
 depends_on = ["sip-010-trait", "ft-mintable-trait"]
 
 # 3. CXTR Token - Creator Economy Token
 [contracts.cxtr-token]
 path = "contracts/tokens/cxtr-token.clar"
-clarity_version = 3
+epoch = "2.4"
 depends_on = ["sip-010-trait", "ft-mintable-trait", "monitor-trait"]
 
 # 4. CXLP Token - Liquidity Provider Token
 [contracts.cxlp-token]
 path = "contracts/tokens/cxlp-token.clar"
-clarity_version = 3
+epoch = "2.4"
 depends_on = ["sip-010-trait", "ft-mintable-trait"]
 
 # 5. CXS Token - Staking Token
 [contracts.cxs-token]
 path = "contracts/tokens/cxs-token.clar"
-clarity_version = 3
+epoch = "2.4"
 depends_on = ["sip-009-trait"]
 
 # ===========================================
@@ -91,22 +91,22 @@ depends_on = ["sip-009-trait"]
 
 [contracts.dex-factory]
 path = "contracts/dex/dex-factory.clar"
-clarity_version = 3
+epoch = "2.4"
 depends_on = ["access-control-trait", "sip-010-trait"]
 
 [contracts.dex-pool]
 path = "contracts/dex/dex-pool.clar"
-clarity_version = 3
+epoch = "2.4"
 depends_on = ["dex-factory", "sip-010-trait"]
 
 [contracts.dex-router]
 path = "contracts/dex/dex-router.clar"
-clarity_version = 3
+epoch = "2.4"
 depends_on = ["dex-factory", "dex-pool", "sip-010-trait"]
 
 [contracts.oracle]
 path = "contracts/dex/oracle.clar"
-clarity_version = 3
+epoch = "2.4"
 depends_on = ["dex-factory"]
 
 # ===========================================
@@ -115,17 +115,17 @@ depends_on = ["dex-factory"]
 
 [contracts.lending-protocol-governance]
 path = "contracts/governance/lending-protocol-governance.clar"
-clarity_version = 3
+epoch = "2.4"
 depends_on = ["access-control"]
 
 [contracts.loan-liquidation-manager]
 path = "contracts/dex/loan-liquidation-manager.clar"
-clarity_version = 3
+epoch = "2.4"
 depends_on = ["dex-factory", "lending-protocol-governance"]
 
 [contracts.yield-distribution-engine]
 path = "contracts/dex/yield-distribution-engine.clar"
-clarity_version = 3
+epoch = "2.4"
 depends_on = ["dex-factory"]
 
 # ===========================================
@@ -134,17 +134,17 @@ depends_on = ["dex-factory"]
 
 [contracts.dim-registry]
 path = "contracts/dimensional/dim-registry.clar"
-clarity_version = 3
+epoch = "2.4"
 depends_on = ["dex-factory"]
 
 [contracts.dim-metrics]
 path = "contracts/dimensional/dim-metrics.clar"
-clarity_version = 3
+epoch = "2.4"
 depends_on = ["dim-registry"]
 
 [contracts.concentrated-liquidity-pool]
 path = "contracts/dimensional/concentrated-liquidity-pool.clar"
-clarity_version = 3
+epoch = "2.4"
 depends_on = ["dim-registry", "dex-pool"]
 
 # ===========================================
@@ -153,7 +153,7 @@ depends_on = ["dim-registry", "dex-pool"]
 
 [contracts.mock-token]
 path = "contracts/mocks/mock-token.clar"
-clarity_version = 3
+epoch = "2.4"
 
 # ===========================================
 # LIBRARIES
@@ -161,12 +161,13 @@ clarity_version = 3
 
 [contracts.math-lib-advanced]
 path = "contracts/lib/math-lib-advanced.clar"
-clarity_version = 3
+epoch = "2.4"
 
 [contracts.fixed-point-math]
 path = "contracts/lib/fixed-point-math.clar"
-clarity_version = 3
+epoch = "2.4"
 
 [contracts.precision-calculator]
 path = "contracts/lib/precision-calculator.clar"
-clarity_version = 3
+epoch = "2.4"
+

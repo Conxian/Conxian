@@ -33,64 +33,64 @@ bitcoin_node_rpc_address = "https://blockstream.info/api"
 
 [contracts.access-control-trait]
 path = "contracts/traits/access-control-trait.clar"
-clarity_version = "2"
+epoch = "2.4"
 
 [contracts.sip-010-trait]
 path = "contracts/traits/sip-010-trait.clar"
-clarity_version = "2"
+epoch = "2.4"
 
 [contracts.ft-mintable-trait]
 path = "contracts/traits/ft-mintable-trait.clar"
-clarity_version = "2"
+epoch = "2.4"
 
 [contracts.strategy-trait]
 path = "contracts/traits/strategy-trait.clar"
-clarity_version = "2"
+epoch = "2.4"
 
 [contracts.pool-trait]
 path = "contracts/traits/pool-trait.clar"
-clarity_version = "2"
+epoch = "2.4"
 
 [contracts.vault-trait]
 path = "contracts/traits/vault-trait.clar"
-clarity_version = "2"
+epoch = "2.4"
 
 [contracts.lending-system-trait]
 path = "contracts/traits/lending-system-trait.clar"
-clarity_version = "2"
+epoch = "2.4"
 
 [contracts.flash-loan-receiver-trait]
 path = "contracts/traits/flash-loan-receiver-trait.clar"
-clarity_version = "2"
+epoch = "2.4"
 
 [contracts.monitor-trait]
 path = "contracts/traits/monitor-trait.clar"
-clarity_version = "2"
+epoch = "2.4"
 # Tokens (SIP-010, SIP-009)
 # =============================
 [contracts.cxvg-token]
 path = "contracts/cxvg-token.clar"
-clarity_version = 3
+epoch = "2.4"
 depends_on = ["sip-010-trait"]
 
 [contracts.cxd-token]
 path = "contracts/cxd-token.clar"
-clarity_version = 3
+epoch = "2.4"
 depends_on = ["sip-010-trait", "ft-mintable-trait"]
 
 [contracts.cxlp-token]
 path = "contracts/cxlp-token.clar"
-clarity_version = 3
+epoch = "2.4"
 depends_on = ["sip-010-trait", "ft-mintable-trait"]
 
 [contracts.cxtr-token]
 path = "contracts/cxtr-token.clar"
-clarity_version = 3
+epoch = "2.4"
 depends_on = ["sip-010-trait", "ft-mintable-trait"]
 
 [contracts.cxs-token]
 path = "contracts/cxs-token.clar"
-clarity_version = 3
+epoch = "2.4"
 depends_on = ["sip-009-trait"]
 
 # =============================
@@ -98,5 +98,6 @@ depends_on = ["sip-009-trait"]
 # =============================
 [contracts.cxd-staking]
 path = "contracts/cxd-staking.clar"
-clarity_version = 3
+epoch = "2.4"
 depends_on = ["sip-010-trait"]
+

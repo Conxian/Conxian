@@ -2,7 +2,7 @@
 ;; End-to-end system validation tests for Conxian enhanced tokenomics
 ;; Production readiness validation and complete system behavior verification
 
-(use-trait ft-trait .traits.sip-010-trait.sip-010-trait)
+(use-trait ft-trait 'traits.sip-010-trait.sip-010-trait)
 
 ;; =============================================================================
 ;; SYSTEM VALIDATION CONSTANTS
@@ -571,3 +571,4 @@
       min-uptime: MIN_SYSTEM_UPTIME_BPS
     }
   })
+

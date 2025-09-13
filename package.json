@@ -33,6 +33,7 @@
     "@stacks/stacking": "7.2.0",
     "@stacks/transactions": "7.2.0",
     "bignumber.js": "^9.1.2",
+    "clarinet": "^0.12.6",
     "dotenv": "17.2.2",
     "node-fetch": "^3.3.2"
   },

@@ -29,22 +29,22 @@ bitcoin_node_rpc_address = "https://blockstream.info/api"
 
 [contracts.sip-010-trait]
 path = "contracts/traits/sip-010-trait.clar"
-clarity_version = 3
+epoch = "2.4"
 epoch = "2.4"
 
 [contracts.sip-009-trait]
 path = "contracts/traits/sip-009-trait.clar"
-clarity_version = 3
+epoch = "2.4"
 epoch = "2.4"
 
 [contracts.ft-mintable-trait]
 path = "contracts/traits/ft-mintable-trait.clar"
-clarity_version = 3
+epoch = "2.4"
 epoch = "2.4"
 
 [contracts.monitor-trait]
 path = "contracts/traits/monitor-trait.clar"
-clarity_version = 3
+epoch = "2.4"
 epoch = "2.4"
 
 # ===========================================
@@ -53,29 +53,27 @@ epoch = "2.4"
 
 [contracts.cxd-token]
 path = "contracts/cxd-token.clar"
-clarity_version = 3
 epoch = "2.4"
 depends_on = ["sip-010-trait", "ft-mintable-trait"]
 
 [contracts.cxvg-token]
 path = "contracts/cxvg-token.clar"
-clarity_version = 3
 epoch = "2.4"
 depends_on = ["sip-010-trait"]
 
 [contracts.cxlp-token]
 path = "contracts/cxlp-token.clar"
-clarity_version = 3
+epoch = "2.4"
 depends_on = ["sip-010-trait", "ft-mintable-trait"]
 
 [contracts.cxtr-token]
 path = "contracts/cxtr-token.clar"
-clarity_version = 3
+epoch = "2.4"
 depends_on = ["sip-010-trait"]
 
 [contracts.cxs-token]
 path = "contracts/cxs-token.clar"
-clarity_version = 3
+epoch = "2.4"
 depends_on = ["sip-009-trait"]
 
 # ===========================================
@@ -84,24 +82,24 @@ depends_on = ["sip-009-trait"]
 
 [contracts.dimensional-oracle-trait]
 path = "contracts/traits/dimensional-oracle-trait.clar"
-clarity_version = 3
+epoch = "2.4"
 
 [contracts.dim-registry-trait]
 path = "contracts/traits/dim-registry-trait.clar"
-clarity_version = 3
+epoch = "2.4"
 
 [contracts.dim-registry]
 path = "contracts/dimensional/dim-registry.clar"
-clarity_version = 3
+epoch = "2.4"
 depends_on = ["dim-registry-trait"]
 
 [contracts.dim-graph]
 path = "contracts/dimensional/dim-graph.clar"
-clarity_version = 3
+epoch = "2.4"
 
 [contracts.dim-metrics]
 path = "contracts/dimensional/dim-metrics.clar"
-clarity_version = 3
+epoch = "2.4"
 
 # ===========================================
 # PHASE 4: CORE SYSTEM COMPONENTS
@@ -109,17 +107,17 @@ clarity_version = 3
 
 [contracts.protocol-invariant-monitor]
 path = "contracts/protocol-invariant-monitor.clar"
-clarity_version = 3
+epoch = "2.4"
 depends_on = ["monitor-trait"]
 
 [contracts.token-emission-controller]
 path = "contracts/token-emission-controller.clar"
-clarity_version = 3
+epoch = "2.4"
 depends_on = ["sip-010-trait", "ft-mintable-trait"]
 
 [contracts.revenue-distributor]
 path = "contracts/revenue-distributor.clar"
-clarity_version = 3
+epoch = "2.4"
 depends_on = ["sip-010-trait"]
 
 # ===========================================
@@ -128,17 +126,17 @@ depends_on = ["sip-010-trait"]
 
 [contracts.cxd-staking]
 path = "contracts/cxd-staking.clar"
-clarity_version = 3
+epoch = "2.4"
 depends_on = ["sip-010-trait", "cxd-token"]
 
 [contracts.cxlp-migration-queue]
 path = "contracts/cxlp-migration-queue.clar"
-clarity_version = 3
+epoch = "2.4"
 depends_on = ["sip-010-trait", "cxlp-token", "cxd-token"]
 
 [contracts.cxvg-utility]
 path = "contracts/cxvg-utility.clar"
-clarity_version = 3
+epoch = "2.4"
 depends_on = ["sip-010-trait", "cxvg-token"]
 
 # ===========================================
@@ -147,4 +145,5 @@ depends_on = ["sip-010-trait", "cxvg-token"]
 
 [contracts.mock-token]
 path = "contracts/mocks/mock-token.clar"
-clarity_version = 3
+epoch = "2.4"
+

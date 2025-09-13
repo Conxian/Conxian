@@ -33,19 +33,19 @@ extends = ["Clarinet.base.toml"]
 # ===========================================
 [contracts.monitor-trait]
 path = "contracts/traits/monitor-trait.clar"
-clarity_version = 3
+epoch = "2.4"
 
 [contracts.dimensional-oracle-trait]
 path = "contracts/traits/dimensional-oracle-trait.clar"
-clarity_version = 3
+epoch = "2.4"
 
 [contracts.dim-registry-trait]
 path = "contracts/traits/dim-registry-trait.clar"
-clarity_version = 3
+epoch = "2.4"
 
 [contracts.staking-trait]
 path = "contracts/traits/staking-trait.clar"
-clarity_version = 3
+epoch = "2.4"
 
 # ===========================================
 # MOCKS FOR TESTING
@@ -53,7 +53,7 @@ clarity_version = 3
 
 [contracts.mock-token]
 path = "contracts/mocks/mock-token.clar"
-clarity_version = 3
+epoch = "2.4"
 
 # ===========================================
 # DIMENSIONAL SYSTEM
@@ -61,30 +61,30 @@ clarity_version = 3
 
 [contracts.dim-registry]
 path = "contracts/dimensional/dim-registry.clar"
-clarity_version = 3
+epoch = "2.4"
 depends_on = ["dim-registry-trait"]
 
 [contracts.dim-metrics]
 path = "contracts/dimensional/dim-metrics.clar"
-clarity_version = 3
+epoch = "2.4"
 
 [contracts.dim-graph]
 path = "contracts/dimensional/dim-graph.clar"
-clarity_version = 3
+epoch = "2.4"
 
 [contracts.dim-oracle-automation]
 path = "contracts/dimensional/dim-oracle-automation.clar"
-clarity_version = 3
+epoch = "2.4"
 depends_on = ["dim-registry", "dimensional-oracle-trait"]
 
 [contracts.dim-yield-stake]
 path = "contracts/dimensional/dim-yield-stake.clar"
-clarity_version = 3
+epoch = "2.4"
 depends_on = ["dim-metrics", "sip-010-trait"]
 
 [contracts.tokenized-bond]
 path = "contracts/dimensional/tokenized-bond.clar"
-clarity_version = 3
+epoch = "2.4"
 depends_on = ["sip-010-trait"]
 
 # ===========================================
@@ -93,27 +93,27 @@ depends_on = ["sip-010-trait"]
 
 [contracts.cxd-token]
 path = "contracts/cxd-token.clar"
-clarity_version = 3
+epoch = "2.4"
 depends_on = ["sip-010-trait", "ft-mintable-trait"]
 
 [contracts.cxvg-token]
 path = "contracts/cxvg-token.clar"
-clarity_version = 3
+epoch = "2.4"
 depends_on = ["sip-010-trait"]
 
 [contracts.cxlp-token]
 path = "contracts/cxlp-token.clar"
-clarity_version = 3
+epoch = "2.4"
 depends_on = ["sip-010-trait", "ft-mintable-trait"]
 
 [contracts.cxtr-token]
 path = "contracts/cxtr-token.clar"
-clarity_version = 3
+epoch = "2.4"
 depends_on = ["sip-010-trait"]
 
 [contracts.cxs-token]
 path = "contracts/cxs-token.clar"
-clarity_version = 3
+epoch = "2.4"
 depends_on = ["sip-009-trait"]
 
 # ===========================================
@@ -122,35 +122,36 @@ depends_on = ["sip-009-trait"]
 
 [contracts.protocol-invariant-monitor]
 path = "contracts/protocol-invariant-monitor.clar"
-clarity_version = 3
+epoch = "2.4"
 depends_on = ["monitor-trait"]
 
 [contracts.token-emission-controller]
 path = "contracts/token-emission-controller.clar"
-clarity_version = 3
+epoch = "2.4"
 depends_on = ["sip-010-trait", "ft-mintable-trait"]
 
 [contracts.revenue-distributor]
 path = "contracts/revenue-distributor.clar"
-clarity_version = 3
+epoch = "2.4"
 depends_on = ["sip-010-trait"]
 
 [contracts.cxd-staking]
 path = "contracts/cxd-staking.clar"
-clarity_version = 3
+epoch = "2.4"
 depends_on = ["sip-010-trait", "cxd-token"]
 
 [contracts.cxlp-migration-queue]
 path = "contracts/cxlp-migration-queue.clar"
-clarity_version = 3
+epoch = "2.4"
 depends_on = ["sip-010-trait", "cxlp-token", "cxd-token"]
 
 [contracts.cxvg-utility]
 path = "contracts/cxvg-utility.clar"
-clarity_version = 3
+epoch = "2.4"
 depends_on = ["sip-010-trait", "cxvg-token"]
 
 [contracts.token-system-coordinator]
 path = "contracts/token-system-coordinator.clar"
-clarity_version = 3
+epoch = "2.4"
 depends_on = ["sip-010-trait", "ft-mintable-trait", "protocol-invariant-monitor", "revenue-distributor", "token-emission-controller", "cxd-staking", "cxlp-migration-queue", "cxvg-utility"]
+

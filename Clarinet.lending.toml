@@ -28,30 +28,37 @@ bitcoin_node_rpc_address = "https://blockstream.info/api"
 
 [contracts.math-lib-advanced]
 path = "contracts/math-lib-advanced.clar"
+epoch = "2.4"
 depends_on = []
 
 [contracts.fixed-point-math]
 path = "contracts/fixed-point-math.clar"
+epoch = "2.4"
 depends_on = ["math-lib-advanced"]
 
 [contracts.precision-calculator]
 path = "contracts/precision-calculator.clar"
+epoch = "2.4"
 depends_on = ["math-lib-advanced", "fixed-point-math"]
 
 [contracts.flash-loan-receiver-trait]
 path = "contracts/flash-loan-receiver-trait.clar"
+epoch = "2.4"
 depends_on = []
 
 [contracts.lending-system-trait]
 path = "contracts/lending-system-trait.clar"
+epoch = "2.4"
 depends_on = ["flash-loan-receiver-trait"]
 
 [contracts.interest-rate-model]
 path = "contracts/interest-rate-model.clar"
+epoch = "2.4"
 depends_on = ["fixed-point-math"]
 
 [contracts.comprehensive-lending-system]
 path = "contracts/comprehensive-lending-system.clar"
+epoch = "2.4"
 depends_on = [
     "math-lib-advanced",
     "fixed-point-math", 
@@ -61,6 +68,7 @@ depends_on = [
 
 [contracts.enhanced-flash-loan-vault]
 path = "contracts/enhanced-flash-loan-vault.clar"
+epoch = "2.4"
 depends_on = [
     "math-lib-advanced",
     "fixed-point-math",
@@ -69,6 +77,7 @@ depends_on = [
 
 [contracts.loan-liquidation-manager]
 path = "contracts/loan-liquidation-manager.clar"
+epoch = "2.4"
 depends_on = [
     "comprehensive-lending-system",
     "fixed-point-math"
@@ -76,6 +85,7 @@ depends_on = [
 
 [contracts.lending-protocol-governance]
 path = "contracts/lending-protocol-governance.clar"
+epoch = "2.4"
 depends_on = [
     "comprehensive-lending-system",
     "loan-liquidation-manager"
@@ -84,21 +94,26 @@ depends_on = [
 # Existing core contracts that integrate with the new system
 [contracts.vault]
 path = "contracts/vault.clar"
+epoch = "2.4"
 depends_on = ["enhanced-flash-loan-vault", "comprehensive-lending-system"]
 
 [contracts.dex-router]
 path = "contracts/dex-router.clar"
+epoch = "2.4"
 depends_on = ["math-lib-advanced", "fixed-point-math"]
 
 [contracts.cxd-token]
 path = "contracts/cxd-token.clar"
+epoch = "2.4"
 
 [contracts.cxs-token]  
 path = "contracts/cxs-token.clar"
+epoch = "2.4"
 
 # Integration with existing tokenomics
 [contracts.token-system-coordinator]
 path = "contracts/token-system-coordinator.clar"
+epoch = "2.4"
 depends_on = [
     "comprehensive-lending-system",
     "lending-protocol-governance",
@@ -136,3 +151,4 @@ depends_on = ["loan-liquidation-manager"]
 
 [[boot]]
 depends_on = ["lending-protocol-governance"]
+
