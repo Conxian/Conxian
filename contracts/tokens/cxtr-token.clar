@@ -3,6 +3,7 @@
 ;; Enhanced with system integration hooks for coordinator interface
 
 ;; Define SIP-010 Fungible Token Trait
+
 (define-trait ft-trait
   (
     (transfer (uint principal principal (optional (buff 34))) (response bool uint))
@@ -16,6 +17,7 @@
 )
 
 ;; Define Mintable Trait
+
 (define-trait ft-mintable-trait
   (
     (mint (principal uint (optional (buff 34))) (response bool uint))
@@ -24,8 +26,8 @@
 )
 
 ;; Implement the traits with proper syntax
-(impl-trait ft-trait)
-(impl-trait ft-mintable-trait)
+(impl-trait .ft-trait)
+(impl-trait .ft-mintable-trait)
 
 ;; --- Errors ---
 (define-constant ERR_UNAUTHORIZED u100)

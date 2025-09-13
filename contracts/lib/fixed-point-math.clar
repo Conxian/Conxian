@@ -119,19 +119,22 @@
               (if (>= term (- b a)) b (+ a term)))))))))
 
 ;; === SQUARE ROOT FUNCTION ===
-;; Helper function for Babylonian method with recursion
+;; Helper function for Babylonian method with iteration
 (define-private (sqrt-iter (x uint) (y uint) (z uint) (iterations uint))
   (if (or (>= iterations u10) (>= z y))  ;; Limit iterations to prevent stack overflow
     z
     (let ((new-z (match (div-down (+ (match (div-down x z) (ok v) v) z) u2) (ok v) v)))
-      (sqrt-iter x z new-z (+ iterations u1)))))
+      (if (>= new-z y)
+        z
+        (sqrt-iter x z new-z (+ iterations u1))))))
 
 ;; Calculate square root using the Babylonian method (Heron's method)
 (define-read-only (sqrt-fixed (x uint))
   (if (or (is-eq x u0) (is-eq x u1))
     x
     (let ((initial-guess (match (div-down (+ (match (div-down x u2) (ok v) v) u1) u2) (ok v) v)))
-      (sqrt-iter x x initial-guess u0))))
+      (let ((result (sqrt-iter x x initial-guess u0)))
+        result))))
 
 ;; === GEOMETRIC MEAN ===
 ;; Calculate geometric mean of two numbers: sqrt(a * b)

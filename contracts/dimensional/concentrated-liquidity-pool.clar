@@ -66,8 +66,18 @@
         u200
         u60)))) ;; Default to medium spacing if no match
 
-;; Implement pool trait with proper syntax
+;; Define the pool trait
+(define-trait pool-trait
+  (
+    (initialize (uint uint uint) (response bool uint))
+    (mint (principal int24 int24 uint) (response uint uint uint uint uint))
+    (burn (uint) (response uint uint uint))
+    (collect (uint principal) (response uint uint))
+    (swap (bool uint) (response uint uint))
+    (increase-liquidity (uint uint) (response uint uint uint))
+    (decrease-liquidity (uint uint) (response uint uint))
+  )
+)
+
+;; Implement the pool trait with proper syntax
 (impl-trait .pool-trait)
-
-
-

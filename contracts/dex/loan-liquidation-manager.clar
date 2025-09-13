@@ -2,7 +2,7 @@
 ;; Advanced liquidation system for undercollateralized positions
 ;; Supports multiple liquidation strategies and automated liquidations
 
-;; Define Liquidation Trait
+;; Liquidation trait
 (define-trait liquidation-trait
   (
     (liquidate (principal principal uint) (response bool uint))
@@ -19,8 +19,8 @@
   )
 )
 
-;; Implement the liquidation trait with proper syntax
-(impl-trait liquidation-trait)
+;; Implement the liquidation trait
+(impl-trait .liquidation-trait)
 
 ;; Oracle contract (will be set by admin)
 (define-data-var oracle-contract (optional principal) none)

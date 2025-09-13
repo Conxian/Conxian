@@ -13,7 +13,7 @@
 )
 
 ;; Implement the oracle trait with proper syntax
-(impl-trait oracle-trait)
+(impl-trait .oracle-trait)
 
 ;; Error codes
 (define-constant ERR_UNAUTHORIZED (err u1001))

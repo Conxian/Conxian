@@ -31,8 +31,8 @@
 )
 
 ;; Implement the traits with proper syntax
-(impl-trait ft-trait)
-(impl-trait ft-mintable-trait)
+(impl-trait .ft-trait)
+(impl-trait .ft-mintable-trait)
 
 ;; --- Errors ---
 (define-constant ERR_UNAUTHORIZED u100)

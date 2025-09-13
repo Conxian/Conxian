@@ -24,8 +24,8 @@
 )
 
 ;; Implement the traits with proper syntax
-(impl-trait ft-trait)
-(impl-trait ft-mintable-trait)
+(impl-trait .ft-trait)
+(impl-trait .ft-mintable-trait)
 
 ;; SIP-010 Fungible Token Standard Functions
 (define-read-only (get-name)

@@ -15,7 +15,7 @@
   )
 )
 
-;; Implement the trait with proper syntax using local trait reference
+;; Implement the trait with proper syntax
 (impl-trait .ft-trait)
 
 ;; Basic token metadata and accounting (lightweight mock)

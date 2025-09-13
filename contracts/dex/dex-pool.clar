@@ -13,6 +13,7 @@
 )
 
 ;; Implement the pool trait with proper syntax
+(use-trait pool-trait .pool-trait)
 (impl-trait pool-trait)
 
 ;; Private helper functions

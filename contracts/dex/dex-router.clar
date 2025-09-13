@@ -1,11 +1,33 @@
 ;; Conxian DEX Router - User-friendly interface for DEX interactions
 ;; Provides single-hop trading and liquidity management with slippage protection
 
-;; Import standard traits
-(use-trait sip10 .sip-010-trait)
-(use-trait pool .pool-trait)
+;; Define SIP-010 Trait
 
-;; Implement traits for this contract
+(define-trait sip-010-trait
+  (
+    (transfer (uint principal principal (optional (buff 34))) (response bool uint))
+    (get-name () (response (string-ascii 32) uint))
+    (get-symbol () (response (string-ascii 32) uint))
+    (get-decimals () (response uint uint))
+    (get-balance (principal) (response uint uint))
+    (get-total-supply () (response uint uint))
+    (get-token-uri () (response (optional (string-utf8 256)) uint))
+  )
+)
+
+
+;; Define Pool Trait
+(define-trait pool-trait
+  (
+    (add-liquidity (uint uint (optional principal)) (response (tuple (dx uint) (dy uint) (shares uint)) uint))
+    (remove-liquidity (uint uint uint) (response (tuple (dx uint) (dy uint)) uint))
+    (swap (uint principal principal) (response (tuple (dx uint) (dy uint)) uint))
+    (get-reserves () (response (tuple (reserve-x uint) (reserve-y uint)) uint))
+    (get-total-supply () (response uint uint))
+  )
+)
+
+;; Implement traits for this contract with proper syntax
 (impl-trait .sip-010-trait)
 (impl-trait .pool-trait)
 

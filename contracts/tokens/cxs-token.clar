@@ -12,7 +12,7 @@
 )
 
 ;; Implement the SIP-009 trait with proper syntax
-(impl-trait sip-009-trait)
+(impl-trait .sip-009-trait)
 
 ;; --- Errors ---
 (define-constant ERR_UNAUTHORIZED u100)

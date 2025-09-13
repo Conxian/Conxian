@@ -16,7 +16,8 @@
 )
 
 ;; Implement the SIP-010 trait with proper syntax
-(impl-trait .ft-trait)
+(use-trait ft-trait .sip-010-trait.sip-010-trait)
+(impl-trait ft-trait)
 
 ;; Constants
 (define-constant ERR_UNAUTHORIZED (err u9001))

@@ -2,6 +2,7 @@
 ;; Conxian Liquidity Provider Token (SIP-010 FT)
 
 ;; Define SIP-010 Fungible Token Trait
+
 (define-trait ft-trait
   (
     (transfer (uint principal principal (optional (buff 34))) (response bool uint))
@@ -14,6 +15,7 @@
   )
 )
 
+
 ;; Define Mintable Trait
 (define-trait ft-mintable-trait
   (
@@ -22,9 +24,9 @@
   )
 )
 
-;; Implement the traits
-(impl-trait ft-trait)
-(impl-trait ft-mintable-trait)
+;; Implement the traits with proper syntax
+(impl-trait .ft-trait)
+(impl-trait .ft-mintable-trait)
 
 ;; Returns the current epoch index since migration start (not capped)
 (define-read-only (current-epoch)
