@@ -117,7 +117,7 @@
     
     ;; Enhanced deployment: avoid dynamic trait/principal calls here.
     ;; Simulate a single-hop swap using a fixed 0.3% fee quote and return a tuple
-    ;; matching the pool's swap result shape.
+    ;; matching the pools swap result shape.
     (if (is-eq (len path) u2)
         (let ((amount-out (/ (* amount-in u997) u1000)))
           (asserts! (>= amount-out min-amount-out) ERR_INSUFFICIENT_OUTPUT)
@@ -162,9 +162,10 @@
 
 ;; Helper for getting optimal pool for trading
 (define-read-only (get-optimal-pool (token-a principal) (token-b principal) (amount uint))
-  ;; Enhanced deployment: avoid direct dependency on factory; return error if pool can't be resolved
+  ;; Enhanced deployment: avoid direct dependency on factory; return error if pool cant be resolved
   (match (resolve-pool token-a token-b)
     pool-addr (ok (tuple (pool pool-addr) (liquidity u0)))
     ERR_INVALID_POOL))
+
 
 

@@ -2,7 +2,7 @@
 ;; Standard interface for lending and borrowing systems
 ;; Supports both flash loans and traditional collateralized loans
 
-(use-trait sip10 'sip-010-trait.sip-010-trait)
+(use-trait sip10 sip-010-trait.sip-010-trait)
 
 (define-trait lending-system-trait
   (
@@ -33,16 +33,16 @@
     (liquidate (principal <sip10> uint) (response uint uint))
     
     ;; === INFORMATION FUNCTIONS ===
-    ;; Get user's supply balance
+    ;; Get users supply balance
     (get-supply-balance (principal <sip10>) (response uint uint))
     
-    ;; Get user's borrow balance
+    ;; Get users borrow balance
     (get-borrow-balance (principal <sip10>) (response uint uint))
     
-    ;; Get user's collateral value in USD
+    ;; Get users collateral value in USD
     (get-collateral-value (principal) (response uint uint))
     
-    ;; Get user's health factor
+    ;; Get users health factor
     (get-health-factor (principal) (response uint uint))
     
     ;; Get current supply APY for an asset
@@ -65,6 +65,7 @@
     (set-paused (bool) (response bool uint))
   )
 )
+
 
 
 

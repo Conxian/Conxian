@@ -12,11 +12,11 @@
 (define-constant ERR_METRIC_NOT_FOUND u106)
 
 ;; --- Contract Dependencies ---
-(use-trait sip-010 'sip-010-trait.sip-010-trait)
+(use-trait sip-010 sip-010-trait.sip-010-trait)
 
 (define-data-var contract-owner principal tx-sender)
-(define-data-var dim-metrics-contract principal 'ST000000000000000000002AMW42H.dim-metrics) ;; placeholder
-(define-data-var token-contract principal 'ST000000000000000000002AMW42H.reward-token) ;; placeholder
+(define-data-var dim-metrics-contract principal ST000000000000000000002AMW42H.dim-metrics) ;; placeholder
+(define-data-var token-contract principal ST000000000000000000002AMW42H.reward-token) ;; placeholder
 
 ;; --- Data Storage ---
 
@@ -130,6 +130,7 @@
 (define-read-only (get-stake-info (staker principal) (dim-id uint))
     (map-get? stakes {staker: staker, dim-id: dim-id})
 )
+
 
 
 

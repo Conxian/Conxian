@@ -7,7 +7,7 @@
 (impl-trait liquidation-trait)
 
 ;; Oracle contract
-(define-constant ORACLE_CONTRACT 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.oracle)
+(define-constant ORACLE_CONTRACT ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.oracle)
 
 ;; Contract owner
 (define-constant CONTRACT_OWNER tx-sender)
@@ -32,8 +32,8 @@
     liquidation-threshold: uint,    ;; Collateral ratio below which liquidation is allowed (in bps, e.g. 8333 for 83.33%)
     liquidation-incentive: uint,    ;; Bonus percentage for liquidators (in bps, e.g. 200 for 2%)
     close-factor: uint,             ;; Maximum portion that can be liquidated (in bps, e.g. 5000 for 50%)
-    min-liquidation-amount: uint,   ;; Minimum amount to liquidate (in asset's base units)
-    max-liquidation-amount: uint    ;; Maximum amount in single tx (in asset's base units)
+    min-liquidation-amount: uint,   ;; Minimum amount to liquidate (in assets base units)
+    max-liquidation-amount: uint    ;; Maximum amount in single tx (in assets base units)
   })
 
 ;; Default liquidation parameters (in basis points)
@@ -337,7 +337,7 @@
   (borrower principal) 
   (debt-asset principal) 
   (collateral-asset principal))
-  (let ((lending-system 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.comprehensive-lending-system))
+  (let ((lending-system ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.comprehensive-lending-system))
     (match (contract-call? lending-system get-health-factor borrower) result
       (ok health-factor) (ok (<= health-factor LIQUIDATION_THRESHOLD))
       (err e) (err e))))
@@ -566,5 +566,6 @@
     (asserts! (is-eq tx-sender (var-get admin)) (err u1002))  ;; ERR_UNAUTHORIZED
     (var-set auto-liquidation-enabled enabled)
     (ok true)
+
 
 

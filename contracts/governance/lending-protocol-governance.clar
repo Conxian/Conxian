@@ -3,7 +3,7 @@
 ;; Manages protocol parameters, upgrades, and community decisions
 ;; Integrates with AccessControl for role-based access
 
-(use-trait access-control 'access-control-trait.access-control-trait)
+(use-trait access-control access-control-trait.access-control-trait)
 
 (define-constant ERR_UNAUTHORIZED (err u8001))
 (define-constant ERR_PROPOSAL_NOT_FOUND (err u8002))
@@ -24,8 +24,8 @@
 (define-data-var execution-delay uint u1440) ;; ~1 day timelock
 
 ;; Roles
-(define-constant ROLE_GOVERNOR 0x474f5645524e4f52000000000000000000000000000000000000000000000000)  ;; 'GOVERNOR' in hex
-(define-constant ROLE_GUARDIAN 0x475541524449414e000000000000000000000000000000000000000000000000)  ;; 'GUARDIAN' in hex
+(define-constant ROLE_GOVERNOR 0x474f5645524e4f52000000000000000000000000000000000000000000000000)  ;; GOVERNOR in hex
+(define-constant ROLE_GUARDIAN 0x475541524449414e000000000000000000000000000000000000000000000000)  ;; GUARDIAN in hex
 
 ;; Protocol state
 (define-data-var governance-token principal tx-sender) ;; Should be set to CXS token
@@ -154,7 +154,7 @@
       (var-set next-proposal-id (+ proposal-id u1))
       (var-set total-proposals (+ (var-get total-proposals) u1))
       
-      ;; Take snapshot of proposer's voting power
+      ;; Take snapshot of proposers voting power
       (snapshot-voting-power proposer block-height)
       
       ;; Emit proposal event
@@ -222,7 +222,7 @@
       (asserts! (<= current-block (get end-block proposal)) ERR_PROPOSAL_NOT_ACTIVE)
       (asserts! (is-eq (get state proposal) PROPOSAL_ACTIVE) ERR_PROPOSAL_NOT_ACTIVE)
       
-      ;; Check hasn't already voted
+      ;; Check hasnt already voted
       (asserts! (is-none (map-get? vote-receipts { proposal-id: proposal-id, voter: voter })) ERR_ALREADY_VOTED)
       
       ;; Get voting power at proposal start
@@ -465,6 +465,7 @@
     (ok true)
   )
 )
+
 
 
 

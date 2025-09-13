@@ -2,7 +2,7 @@
 ;; Advanced liquidity management and optimization system for enterprise operations
 ;; Handles automated liquidity balancing, capital efficiency, and risk management
 
-(use-trait sip10 'sip-010-trait.sip-010-trait)
+(use-trait sip10 sip-010-trait.sip-010-trait)
 
 ;; Constants
 (define-constant ERR_UNAUTHORIZED (err u10001))
@@ -527,6 +527,7 @@
                           (/ (* (var-get total-yield-generated) BASIS_POINTS) (var-get total-liquidity-managed))
                           u0))
       (failure-rate (if (> total-operations u0) (/ (* total-failure BASIS_POINTS) total-operations) u0))))))
+
 
 
 

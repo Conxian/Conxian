@@ -2,7 +2,7 @@
 ;; CXVG Utility System - Fee discounts, proposal bonding, governance boosts
 ;; Addresses governance token utility sinks and voting power concentration risks
 
-(use-trait ft-trait 'sip-010-trait.sip-010-trait)
+(use-trait ft-trait sip-010-trait.sip-010-trait)
 
 ;; --- Constants ---
 (define-constant CONTRACT_OWNER tx-sender)
@@ -297,7 +297,7 @@
 
 ;; --- External Interface Functions ---
 
-;; Get user's current fee discount
+;; Get users current fee discount
 (define-read-only (get-user-fee-discount (user principal))
   (match (map-get? user-fee-discounts user)
     discount-info
@@ -306,7 +306,7 @@
       u10000) ;; No discount
     u10000))
 
-;; Get user's current dimensional boosts
+;; Get users current dimensional boosts
 (define-read-only (get-user-boosts (user principal))
   (match (map-get? dimensional-boosts user)
     boost-info
@@ -315,7 +315,7 @@
       { vault-boost-bps: u0, farm-boost-bps: u0, expires-at: u0 })
     { vault-boost-bps: u0, farm-boost-bps: u0, expires-at: u0 }))
 
-;; Get user's voting power at specific block
+;; Get users voting power at specific block
 (define-read-only (get-voting-power-at (user principal) (block-height-target uint))
   (match (map-get? voting-snapshots { user: user, block: block-height-target })
     snapshot (get voting-power snapshot)
@@ -350,6 +350,7 @@
       farm-boost-bps: (get farm-boost-bps boosts),
       benefits-expire: (get expires-at boosts)
     }))
+
 
 
 

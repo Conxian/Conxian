@@ -1,9 +1,9 @@
 ;; Enhanced Yield Strategy - Basic yield strategy with enhanced tokenomics integration
 ;; Implements strategy-trait for vault integration
 
-(impl-trait 'strategy-trait.strategy-trait)
+(impl-trait strategy-trait.strategy-trait)
 
-(use-trait sip10 'sip-010-trait.sip-010-trait)
+(use-trait sip10 sip-010-trait.sip-010-trait)
 
 ;; Constants
 (define-constant ERR_UNAUTHORIZED (err u1001))
@@ -265,6 +265,7 @@
 
 ;; Initialize strategy
 ;; Note: Removed invalid top-level map-set initializer. The map will be populated during runtime calls.
+
 
 
 

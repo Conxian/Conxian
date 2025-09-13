@@ -2,7 +2,7 @@
 ;; Advanced yield distribution system for enterprise loans and bonds
 ;; Handles complex yield calculations, distribution schedules, and optimization
 
-(use-trait sip10 'sip-010-trait.sip-010-trait)
+(use-trait sip10 sip-010-trait.sip-010-trait)
 
 ;; Constants
 (define-constant ERR_UNAUTHORIZED (err u9001))
@@ -490,6 +490,7 @@
           (ok (/ (* total-yield-year BASIS_POINTS) total-deposited))
           (ok u0)))
     ERR_POOL_NOT_FOUND))
+
 
 
 

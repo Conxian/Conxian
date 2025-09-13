@@ -6,7 +6,7 @@
 ;;
 ;; This contract is controlled by a contract owner who can designate a whitelisted oracle.
 
-(impl-trait 'dim-registry-trait.dim-registry-trait)
+(impl-trait dim-registry-trait.dim-registry-trait)
 
 (define-constant ERR_UNAUTHORIZED u101)
 (define-constant ERR_INVALID_WEIGHT u102)
@@ -54,6 +54,7 @@
     (asserts! (is-some (map-get? dimension-weights {dim-id: dim-id})) (err ERR_DIMENSION_NOT_FOUND))
     (map-set dimension-weights {dim-id: dim-id} {weight: new-wt})
     (ok new-wt)))
+
 
 
 

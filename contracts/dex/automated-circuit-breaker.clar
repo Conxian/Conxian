@@ -285,7 +285,7 @@
 (define-public (reset-all-circuits)
   (begin
     (try! (only-owner-guard))
-    ;; Note: In a real implementation, we'd iterate through all services
+    ;; Note: In a real implementation, wed iterate through all services
     ;; For now, this serves as a template for emergency reset
     (var-set total-failures u0)
     (var-set total-recoveries u0)
@@ -341,6 +341,7 @@
       some-circuit (is-eq (get state some-circuit) STATE_CLOSED)
       false
     )))
+
 
 
 

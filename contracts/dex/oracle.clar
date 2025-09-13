@@ -1,10 +1,10 @@
 ;; oracle.clar
 ;; Standard price oracle implementation for the Conxian protocol
 
-(use-trait oracle-trait 'oracle-trait.oracle-trait)
-(use-trait std-constants 'standard-constants-trait.standard-constants-trait)
+(use-trait oracle-trait oracle-trait.oracle-trait)
+(use-trait std-constants standard-constants-trait.standard-constants-trait)
 
-(impl-trait 'oracle-trait.oracle-trait)
+(impl-trait oracle-trait.oracle-trait)
 
 ;; Error codes
 (define-constant ERR_UNAUTHORIZED (err u1001))
@@ -125,7 +125,7 @@
   (ok (var-get oracle-contract))
 )
 
-;; Freeze an asset's price to prevent further updates
+;; Freeze an assets price to prevent further updates
 (define-public (freeze-price (asset principal))
   (begin
     (asserts! (is-eq tx-sender (var-get admin)) ERR_UNAUTHORIZED)
@@ -140,7 +140,7 @@
   )
 )
 
-;; Unfreeze an asset's price to allow updates
+;; Unfreeze an assets price to allow updates
 (define-public (unfreeze-price (asset principal))
   (begin
     (asserts! (is-eq tx-sender (var-get admin)) ERR_UNAUTHORIZED)
@@ -154,6 +154,7 @@
     (ok true)
   )
 )
+
 
 
 

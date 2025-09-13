@@ -1,14 +1,14 @@
 ;; Access Control Contract
 ;; Implements the access control functionality specified in AIP-7
 
-(use-trait access-control 'access-control-trait.access-control-trait)
-(use-trait ownable 'ownable-trait.ownable-trait)
-(use-trait std-constants 'standard-constants-trait.standard-constants-trait)
+(use-trait access-control access-control-trait.access-control-trait)
+(use-trait ownable ownable-trait.ownable-trait)
+(use-trait std-constants standard-constants-trait.standard-constants-trait)
 
 ;; Roles
-(define-constant ROLE_ADMIN 0x41444d494e)        ;; 'ADMIN' in hex
-(define-constant ROLE_OPERATOR 0x4f50455241544f52)  ;; 'OPERATOR' in hex
-(define-constant ROLE_EMERGENCY 0x454d455247454e4359)  ;; 'EMERGENCY' in hex
+(define-constant ROLE_ADMIN 0x41444d494e)        ;; ADMIN in hex
+(define-constant ROLE_OPERATOR 0x4f50455241544f52)  ;; OPERATOR in hex
+(define-constant ROLE_EMERGENCY 0x454d455247454e4359)  ;; EMERGENCY in hex
 
 ;; Data storage
 (define-data-var owner principal tx-sender)
@@ -27,7 +27,7 @@
 
 (define-constant PROPOSAL_THRESHOLD u2)  ;; Number of approvals required
 
-(impl-trait 'access-control-trait.access-control-trait)
+(impl-trait access-control-trait.access-control-trait)
 
 ;; ===== Role Management =====
 
@@ -221,6 +221,7 @@
 (define-private (contains? (needle (string-ascii 32)) (haystack (list (string-ascii 32))))
   (any (lambda ((item (string-ascii 32))) (is-eq item needle)) haystack)
 )
+
 
 
 

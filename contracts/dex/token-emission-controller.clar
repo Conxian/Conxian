@@ -2,8 +2,8 @@
 ;; Hard-coded emission rails with governance guards to prevent inflation abuse
 ;; Implements supply discipline across all 4 tokens with supermajority + timelock requirements
 
-(use-trait ft-mintable 'ft-mintable-trait.ft-mintable-trait)
- (use-trait cxd-ref 'ft-mintable-trait.ft-mintable-trait)
+(use-trait ft-mintable ft-mintable-trait.ft-mintable-trait)
+ (use-trait cxd-ref ft-mintable-trait.ft-mintable-trait)
 
 ;; --- Constants ---
 (define-constant CONTRACT_OWNER tx-sender)
@@ -357,6 +357,7 @@
     cxlp-info: (get-emission-info (default-to .cxlp-token (var-get cxlp-contract))),
     cxtr-info: (get-emission-info (default-to .cxtr-token (var-get cxtr-contract)))
   })
+
 
 
 

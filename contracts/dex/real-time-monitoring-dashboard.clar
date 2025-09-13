@@ -243,7 +243,7 @@
   (let (
     (current-time (unwrap-panic (get-block-info? time (- block-height u1))))
   )
-    ;; Note: In a real implementation, we'd iterate through all alert rules
+    ;; Note: In a real implementation, wed iterate through all alert rules
     ;; For now, this serves as a template for alert checking logic
     (ok true)
   )
@@ -398,6 +398,7 @@
     (> (calculate-system-health-score) u7500) ;; Health score above 75%
   )
 )
+
 
 
 

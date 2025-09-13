@@ -1,11 +1,11 @@
 ;; Conxian Vault - Core yield-bearing vault with enhanced tokenomics integration
 ;; Implements vault-trait and vault-admin-trait with full system integration
 
-(impl-trait 'vault-trait.vault-trait)
-(impl-trait 'vault-admin-trait.vault-admin-trait)
+(impl-trait vault-trait.vault-trait)
+(impl-trait vault-admin-trait.vault-admin-trait)
 
-(use-trait sip10 'sip-010-trait.sip-010-trait)
-(use-trait strategy 'strategy-trait.strategy-trait)
+(use-trait sip10 sip-010-trait.sip-010-trait)
+(use-trait strategy strategy-trait.strategy-trait)
 
 ;; Constants
 (define-constant ERR_UNAUTHORIZED (err u1001))
@@ -193,7 +193,7 @@
     (ok (tuple (amount net-amount) (fee fee)))))
 
 (define-public (flash-loan (amount uint) (recipient principal))
-  (let ((asset-principal 'SP000000000000000000002Q6VF78) ;; STX for flash loans
+  (let ((asset-principal SP000000000000000000002Q6VF78) ;; STX for flash loans
         (fee (calculate-fee amount u30))) ;; 0.3% flash loan fee
     
     (asserts! (not (var-get paused)) ERR_PAUSED)
@@ -286,7 +286,8 @@
     (ok true)))
 
 ;; Initialize default supported asset (STX)
-(map-set supported-assets 'SP000000000000000000002Q6VF78 true)
+(map-set supported-assets SP000000000000000000002Q6VF78 true)
+
 
 
 

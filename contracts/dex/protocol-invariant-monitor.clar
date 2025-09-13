@@ -2,7 +2,7 @@
 ;; Protocol invariant monitoring and circuit breaker system
 ;; Monitors key invariants and triggers automated protection mechanisms
 
- (use-trait staking-ref 'staking-trait.staking-trait)
+ (use-trait staking-ref staking-trait.staking-trait)
 
 ;; --- Constants ---
 (define-constant CONTRACT_OWNER tx-sender)
@@ -188,7 +188,7 @@
 ;; Check staking concentration risk
 (define-private (check-staking-concentration)
   ;; This would require tracking individual user stakes
-  ;; For now, we'll implement a basic check
+  ;; For now, well implement a basic check
   (ok true)) ;; Placeholder
 
 ;; --- Violation Recording ---
@@ -402,6 +402,7 @@
     contract-owner: (var-get contract-owner),
     emergency-operator: (var-get emergency-operator)
   })
+
 
 
 

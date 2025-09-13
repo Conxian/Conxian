@@ -2,7 +2,7 @@
 ;; sBTC Integration Module for Conxian Protocol
 ;; Provides sBTC asset management, risk parameters, and oracle integration
 
-(impl-trait 'sip-010-trait.sip-010-trait)
+(impl-trait sip-010-trait.sip-010-trait)
 
 ;; =============================================================================
 ;; CONSTANTS AND ERROR CODES
@@ -20,8 +20,8 @@
 (define-constant ERR_CIRCUIT_BREAKER_ACTIVE (err u1008))
 
 ;; sBTC mainnet and testnet contract addresses
-(define-constant SBTC_MAINNET 'SP3K8BC0PPEVCV7NZ6QSRWPQ2JE9E5B6N3PA0KBR9.sbtc-token)
-(define-constant SBTC_TESTNET 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.sbtc-token)
+(define-constant SBTC_MAINNET SP3K8BC0PPEVCV7NZ6QSRWPQ2JE9E5B6N3PA0KBR9.sbtc-token)
+(define-constant SBTC_TESTNET ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.sbtc-token)
 
 ;; Risk management constants
 (define-constant DEFAULT_LTV u700000)           ;; 70% in basis points (1e6 scale)
@@ -473,7 +473,7 @@
               ERR_INSUFFICIENT_CONFIRMATIONS)
               
     ;; Mint sBTC tokens to recipient
-    (try! (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.sbtc-token mint amount recipient))
+    (try! (contract-call? ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.sbtc-token mint amount recipient))
     
     (print { event: "peg-in-success", tx-id: bitcoin-tx-id, amount: amount, recipient: recipient })
     (ok true)
@@ -484,11 +484,11 @@
   "Handle sBTC peg-out: burn sBTC tokens and initiate Bitcoin transfer"
   (begin
     ;; Verify user has sufficient balance
-    (try! (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.sbtc-token transfer 
+    (try! (contract-call? ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.sbtc-token transfer 
                           amount tx-sender (as-contract)))
     
     ;; Burn sBTC tokens
-    (try! (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.sbtc-token burn amount))
+    (try! (contract-call? ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.sbtc-token burn amount))
     
     ;; Initiate Bitcoin transfer (actual Bitcoin transfer handled off-chain)
     (print { event: "peg-out-initiated", amount: amount, bitcoin-address: bitcoin-address })
@@ -564,6 +564,7 @@
   (try! (register-sbtc-asset SBTC_MAINNET))
   (print { event: "sbtc-integration-deployed", version: "1.0.0" })
 )
+
 
 
 

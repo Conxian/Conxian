@@ -3,7 +3,7 @@
 ;; Extends the basic vault with full flash loan functionality
 
 ;; Import trait at the top
-(use-trait sip10 'sip-010-trait.sip-010-trait)
+(use-trait sip10 sip-010-trait.sip-010-trait)
 
 ;; Define flash-loan-receiver trait inline to avoid circular dependency
 (define-trait flash-loan-receiver
@@ -14,8 +14,8 @@
   )
 )
 
-(impl-trait 'vault-trait.vault-trait)
-(impl-trait 'vault-admin-trait.vault-admin-trait)
+(impl-trait vault-trait.vault-trait)
+(impl-trait vault-admin-trait.vault-admin-trait)
 
 ;; Constants
 (define-constant ERR_UNAUTHORIZED (err u6001))
@@ -43,7 +43,7 @@
 ;; Multi-asset support
 (define-map vault-balances principal uint)       ;; Total balance per asset
 (define-map vault-shares principal uint)         ;; Total shares per asset
-(define-map user-shares (tuple (user principal) (asset principal)) uint)  ;; User's shares per asset
+(define-map user-shares (tuple (user principal) (asset principal)) uint)  ;; Users shares per asset
 (define-map supported-assets principal bool)
 (define-map vault-caps principal uint)           ;; Max deposit per asset
 
@@ -210,7 +210,7 @@
           ;; Transfer loan amount to receiver
           (try! (transfer-asset-from-vault asset amount receiver-principal))
           
-          ;; Call receiver's flash loan callback (expects token principal)
+          ;; Call receivers flash loan callback (expects token principal)
           (match (contract-call? receiver on-flash-loan tx-sender asset amount fee data)
             (ok (success code)) (asserts! success ERR_CALLBACK_FAILED)
             (err error) (begin
@@ -264,7 +264,7 @@
         ;; NOTE: In a simple flash loan, the recipient must ensure repayment
         ;; This is less secure but maintains compatibility
         
-        ;; For demo purposes, we'll assume immediate repayment
+        ;; For demo purposes, well assume immediate repayment
         ;; In production, this would require a callback mechanism
         
         ;; Clear reentrancy guard
@@ -511,6 +511,7 @@
 
 (define-read-only (get-total-balance (asset principal))
   (ok (default-to u0 (map-get? vault-balances asset))))
+
 
 
 

@@ -2,7 +2,7 @@
 ;; sBTC Flash Loan Extension - Advanced flash loan functionality with sBTC support
 ;; Provides flash loans with enhanced security, multi-asset support, and bond integration
 
-(use-trait ft-trait 'sip-010-trait.sip-010-trait)
+(use-trait ft-trait sip-010-trait.sip-010-trait)
 
 ;; =============================================================================
 ;; CONSTANTS AND ERROR CODES
@@ -449,7 +449,7 @@
 ;; =============================================================================
 
 (define-read-only (get-flash-loan-stats (user principal))
-  "Get user's flash loan statistics"
+  "Get users flash loan statistics"
   (map-get? flash-loan-stats { user: user })
 )
 
@@ -512,6 +512,7 @@
     )
   )
 )
+
 
 
 

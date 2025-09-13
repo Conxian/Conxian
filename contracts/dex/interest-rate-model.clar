@@ -2,7 +2,7 @@
 ;; Dynamic interest rate calculation system for lending protocols
 ;; Implements slope-based interest rate models with utilization-based adjustments
 
-(use-trait sip10 'sip-010-trait.sip-010-trait)
+(use-trait sip10 sip-010-trait.sip-010-trait)
 
 (define-constant ERR_UNAUTHORIZED (err u4001))
 (define-constant ERR_INVALID_PARAMETER (err u4002))
@@ -216,7 +216,7 @@
 (define-read-only (get-interest-rate-model-params (asset principal))
   (map-get? interest-rate-models { asset: asset }))
 
-;; Calculate borrower's current debt including accrued interest
+;; Calculate borrowers current debt including accrued interest
 (define-read-only (calculate-current-borrow-balance (asset principal) (principal-balance uint) (user-borrow-index uint))
   (match (map-get? market-state { asset: asset })
     market
@@ -226,7 +226,7 @@
           (/ (* principal-balance current-borrow-index) user-borrow-index)))
     principal-balance))
 
-;; Calculate supplier's current supply balance including accrued interest
+;; Calculate suppliers current supply balance including accrued interest
 (define-read-only (calculate-current-supply-balance (asset principal) (principal-balance uint) (user-supply-index uint))
   (match (map-get? market-state { asset: asset })
     market
@@ -256,6 +256,7 @@
     (> borrowed-value u0) ;; If no collateral but has debt, liquidatable
     (let ((collateral-ratio (/ (* borrowed-value PRECISION) collateral-value)))
       (> collateral-ratio liquidation-threshold))))
+
 
 
 

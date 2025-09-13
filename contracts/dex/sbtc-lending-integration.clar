@@ -2,7 +2,7 @@
 ;; sBTC Lending Integration - extends comprehensive lending system
 ;; Provides sBTC-specific lending, borrowing, and collateral management
 
-(use-trait ft-trait 'sip-010-trait.sip-010-trait)
+(use-trait ft-trait sip-010-trait.sip-010-trait)
 
 ;; =============================================================================
 ;; CONSTANTS AND ERROR CODES
@@ -32,8 +32,8 @@
 (define-map user-positions
   { user: principal, asset: principal }
   {
-    supply-balance: uint,        ;; User's supply balance
-    borrow-balance: uint,        ;; User's borrow balance
+    supply-balance: uint,        ;; Users supply balance
+    borrow-balance: uint,        ;; Users borrow balance
     supply-index: uint,          ;; Interest index at last supply action
     borrow-index: uint,          ;; Interest index at last borrow action
     last-interaction: uint       ;; Last interaction block
@@ -56,12 +56,12 @@
 ;; =============================================================================
 
 (define-read-only (get-user-position (user principal) (asset principal))
-  "Get user's lending position for asset"
+  "Get users lending position for asset"
   (map-get? user-positions { user: user, asset: asset })
 )
 
 (define-read-only (get-user-supply-balance (user principal) (asset principal))
-  "Get user's current supply balance with accrued interest"
+  "Get users current supply balance with accrued interest"
   (match (get-user-position user asset)
     position (let ((supply-balance (get supply-balance position))
                    (supply-index (get supply-index position)))
@@ -78,7 +78,7 @@
 )
 
 (define-read-only (get-user-borrow-balance (user principal) (asset principal))
-  "Get user's current borrow balance with accrued interest"
+  "Get users current borrow balance with accrued interest"
   (match (get-user-position user asset)
     position (let ((borrow-balance (get borrow-balance position))
                    (borrow-index (get borrow-index position)))
@@ -95,7 +95,7 @@
 )
 
 (define-read-only (calculate-account-liquidity (user principal))
-  "Calculate user's account liquidity (collateral value - borrowed value)"
+  "Calculate users account liquidity (collateral value - borrowed value)"
   (let ((sbtc-supply (get-user-supply-balance user .sbtc-integration.SBTC_MAINNET))
         (sbtc-borrow (get-user-borrow-balance user .sbtc-integration.SBTC_MAINNET)))
     (match (contract-call? .sbtc-integration calculate-collateral-value .sbtc-integration.SBTC_MAINNET sbtc-supply)
@@ -114,7 +114,7 @@
 )
 
 (define-read-only (calculate-health-factor (user principal))
-  "Calculate user's health factor (>1.0 = healthy, <1.0 = can be liquidated)"
+  "Calculate users health factor (>1.0 = healthy, <1.0 = can be liquidated)"
   (let ((sbtc-supply (get-user-supply-balance user .sbtc-integration.SBTC_MAINNET))
         (sbtc-borrow (get-user-borrow-balance user .sbtc-integration.SBTC_MAINNET)))
     (if (is-eq sbtc-borrow u0)
@@ -519,6 +519,7 @@
     )
   )
 )
+
 
 
 

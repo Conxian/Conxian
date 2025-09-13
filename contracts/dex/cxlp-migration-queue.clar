@@ -2,7 +2,7 @@
 ;; Intent queue system for CXLP to CXD migration with pro-rata settlement
 ;; Prevents FCFS races and enables fair distribution based on duration-weighted requests
 
-(use-trait ft-mintable 'ft-mintable-trait.ft-mintable-trait)
+(use-trait ft-mintable ft-mintable-trait.ft-mintable-trait)
 
 ;; --- Constants ---
 (define-constant CONTRACT_OWNER tx-sender)
@@ -120,7 +120,7 @@
         (duration-multiplier (get-band-multiplier duration)))
     (/ (* base-weight duration-multiplier) u10000)))
 
-;; Get user's duration held (blocks since last balance change)
+;; Get users duration held (blocks since last balance change)
 (define-read-only (get-user-duration (user principal))
   (match (map-get? user-duration-tracking user)
     tracking-info 
@@ -290,6 +290,7 @@
     cxlp-contract: (var-get cxlp-contract),
     cxd-contract: (var-get cxd-contract)
   })
+
 
 
 

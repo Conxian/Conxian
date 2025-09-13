@@ -2,7 +2,7 @@
 ;; Wormhole Cross-Chain Integration for Conxian Protocol
 ;; Provides cross-chain asset bridging, governance, and yield aggregation
 
-(use-trait ft-trait 'sip-010-trait.sip-010-trait)
+(use-trait ft-trait sip-010-trait.sip-010-trait)
 
 ;; =============================================================================
 ;; CONSTANTS AND ERROR CODES
@@ -172,12 +172,12 @@
 )
 
 (define-read-only (get-cross-chain-position (user principal) (chain-id uint))
-  "Get user's cross-chain position"
+  "Get users cross-chain position"
   (map-get? cross-chain-positions { user: user, chain-id: chain-id })
 )
 
 (define-read-only (calculate-pending-yield (user principal) (chain-id uint))
-  "Calculate pending yield for user's cross-chain position"
+  "Calculate pending yield for users cross-chain position"
   (match (get-cross-chain-position user chain-id)
     position (let ((blocks-since-claim (- block-height (get last-yield-claim position)))
                    (deposited-amount (get total-deposited position)))
@@ -234,7 +234,7 @@
   "Complete cross-chain transfer using Wormhole VAA"
   (let ((vaa-hash (keccak256 vaa)))
     (begin
-      ;; Validate VAA hasn't been processed
+      ;; Validate VAA hasnt been processed
       (asserts! (not (is-vaa-processed vaa-hash)) ERR_VAA_ALREADY_PROCESSED)
       
       ;; Validate guardian signatures
@@ -286,7 +286,7 @@
       ;; Transfer tokens to bridge
       (try! (contract-call? token transfer amount tx-sender (as-contract tx-sender) none))
       
-      ;; Update user's cross-chain position
+      ;; Update users cross-chain position
       (match (get-cross-chain-position tx-sender target-chain)
         existing-position (map-set cross-chain-positions { user: tx-sender, chain-id: target-chain }
           (merge existing-position {
@@ -531,6 +531,7 @@
   (try! (add-supported-chain CHAIN_ID_POLYGON "Polygon" 0x0000000000000000000000007a4b5a56256163f07b2c80a7ca55aBE66c4ec4d7))
   (print { event: "wormhole-integration-deployed", version: "1.0.0", supported-chains: u3 })
 )
+
 
 
 

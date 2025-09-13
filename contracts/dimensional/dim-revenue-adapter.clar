@@ -2,7 +2,7 @@
 ;; Integration adapter connecting dimensional yield system with enhanced tokenomics
 ;; Routes dimensional rewards through revenue distributor for proper token holder distribution
 
-(use-trait ft-trait 'sip-010-trait.sip-010-trait)
+(use-trait ft-trait sip-010-trait.sip-010-trait)
 
 ;; --- Constants ---
 (define-constant CONTRACT_OWNER tx-sender)
@@ -244,6 +244,7 @@
     (asserts! (is-eq tx-sender (var-get contract-owner)) (err ERR_UNAUTHORIZED))
     ;; Implementation would disable revenue routing
     (ok true)))
+
 
 
 

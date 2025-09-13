@@ -30,9 +30,9 @@
 (define-constant POOL_TYPE_CONCENTRATED u4)
 
 ;; Roles
-(define-constant ROLE_DEX_ADMIN 0x4445585f41444d494e0000000000000000000000000000000000000000000000)  ;; 'DEX_ADMIN' in hex
-(define-constant ROLE_FEE_MANAGER 0x4645455f4d414e41474552000000000000000000000000000000000000000000)  ;; 'FEE_MANAGER' in hex
-(define-constant ROLE_POOL_MANAGER 0x504f4f4c5f4d414e414745520000000000000000000000000000000000000000)  ;; 'POOL_MANAGER' in hex
+(define-constant ROLE_DEX_ADMIN 0x4445585f41444d494e0000000000000000000000000000000000000000000000)  ;; DEX_ADMIN in hex
+(define-constant ROLE_FEE_MANAGER 0x4645455f4d414e41474552000000000000000000000000000000000000000000)  ;; FEE_MANAGER in hex
+(define-constant ROLE_POOL_MANAGER 0x504f4f4c5f4d414e414745520000000000000000000000000000000000000000)  ;; POOL_MANAGER in hex
 
 ;; ===== Data Variables =====
 ;; Contract State
@@ -252,7 +252,7 @@
 (define-public (renounce-ownership)
   (begin
     (try! (only-owner-guard))
-    (var-set owner 'SP000000000000000000002Q6VF78)
+    (var-set owner SP000000000000000000002Q6VF78)
     (var-set pending-owner none)
     (print {event: "ownership-renounced"})
     (ok true)))
@@ -332,5 +332,6 @@
     (ok true)
   )
 )
+
 
 

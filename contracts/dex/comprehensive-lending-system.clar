@@ -3,20 +3,20 @@
 ;; Supports multiple assets, collateralization, and liquidations
 
 ;; Traits
-(use-trait sip10 'sip-010-trait.sip-010-trait)
-(use-trait flash-loan-receiver 'flash-loan-receiver-trait.flash-loan-receiver-trait)
-(use-trait std-constants 'standard-constants-trait.standard-constants-trait)
-(use-trait liquidation-trait 'liquidation-trait.liquidation-trait)
-(use-trait access-control 'access-control-trait.access-control-trait)
+(use-trait sip10 sip-010-trait.sip-010-trait)
+(use-trait flash-loan-receiver flash-loan-receiver-trait.flash-loan-receiver-trait)
+(use-trait std-constants standard-constants-trait.standard-constants-trait)
+(use-trait liquidation-trait liquidation-trait.liquidation-trait)
+(use-trait access-control access-control-trait.access-control-trait)
 
 ;; Implement required traits
-(impl-trait 'lending-system-trait.lending-system-trait)
-(impl-trait 'access-control-trait.access-control-trait)
+(impl-trait lending-system-trait.lending-system-trait)
+(impl-trait access-control-trait.access-control-trait)
 
 ;; Oracle integration
-(use-trait oracle 'oracle-trait.oracle-trait)
+(use-trait oracle oracle-trait.oracle-trait)
 
-(define-constant ORACLE_CONTRACT 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.oracle)
+(define-constant ORACLE_CONTRACT ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.oracle)
 (define-constant PRICE_STALE_THRESHOLD (* u60 u60 u24))  ;; 24 hours in blocks (1 block/2s)
 
 ;; === CONSTANTS ===
@@ -43,9 +43,9 @@
 (define-constant MAX_LIQUIDATION_BONUS u100000000000000000) ;; 10% (0.1 * 1e18)
 
 ;; === ROLES ===
-(define-constant ROLE_ADMIN 0x41444d494e000000000000000000000000000000000000000000000000000000)  ;; 'ADMIN' in hex
-(define-constant ROLE_OPERATOR 0x4f50455241544f52000000000000000000000000000000000000000000000000)  ;; 'OPERATOR' in hex
-(define-constant ROLE_EMERGENCY 0x454d455247454e4359000000000000000000000000000000000000000000000000)  ;; 'EMERGENCY' in hex
+(define-constant ROLE_ADMIN 0x41444d494e000000000000000000000000000000000000000000000000000000)  ;; ADMIN in hex
+(define-constant ROLE_OPERATOR 0x4f50455241544f52000000000000000000000000000000000000000000000000)  ;; OPERATOR in hex
+(define-constant ROLE_EMERGENCY 0x454d455247454e4359000000000000000000000000000000000000000000000000)  ;; EMERGENCY in hex
 
 ;; === STATE ===
 (define-data-var total-borrows uint u0)
@@ -71,7 +71,7 @@
   )
 )
 
-;; Check if an asset's price is fresh
+;; Check if an assets price is fresh
 (define-read-only (is-asset-price-fresh (asset principal))
   (let (
       (oracle (unwrap! (get-oracle-contract) (err u1007)))  ;; ERR_INVALID_ORACLE
@@ -194,7 +194,7 @@
         })
       
       ;; Initialize market in interest rate model
-      (try! (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.interest-rate-model initialize-market asset-principal u0))
+      (try! (contract-call? ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.interest-rate-model initialize-market asset-principal u0))
 
       ;; Add to the list of supported assets
       (var-set supported-assets-list (unwrap-panic (as-max-len? (append (var-get supported-assets-list) asset-principal) u50)))
@@ -543,7 +543,7 @@
                     ;; Verify borrower has sufficient collateral
                     (asserts! (>= borrower-amount amount-to-seize) ERR_INSUFFICIENT_COLLATERAL)
                     
-                    ;; Update borrower's balance
+                    ;; Update borrowers balance
                     (map-set user-supply-balances
                       { user: borrower, asset: collateral-asset }
                       { 
@@ -551,7 +551,7 @@
                         supply-index: (get supply-index borrower-balance) 
                       })
                     
-                    ;; Update liquidator's balance
+                    ;; Update liquidators balance
                     (let ((liquidator-balance (get-user-supply-balance tx-sender collateral-asset)))
                       (map-set user-supply-balances
                         { user: tx-sender, asset: collateral-asset }
@@ -604,7 +604,7 @@
     { principal-balance: u0, supply-index: u1000000000000000 } 
     (map-get? user-supply-balances { user: user, asset: asset })))
 
-;; Get a user's borrow balance for a specific asset
+;; Get a users borrow balance for a specific asset
 (define-private (get-user-borrow-balance (user principal) (asset principal))
   (default-to 
     {
@@ -711,10 +711,10 @@
 )
 
 (define-read-only (get-supply-apy (asset <sip10>))
-  (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.interest-rate-model get-supply-apy (contract-of asset)))
+  (contract-call? ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.interest-rate-model get-supply-apy (contract-of asset)))
 
 (define-read-only (get-borrow-apy (asset <sip10>))
-  (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.interest-rate-model get-borrow-apy (contract-of asset)))
+  (contract-call? ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.interest-rate-model get-borrow-apy (contract-of asset)))
 
 (define-read-only (get-max-flash-loan (asset <sip10>))
   (let ((asset-principal (contract-of asset)))
@@ -731,7 +731,7 @@
 (define-public (set-interest-rate-model (asset <sip10>) (base-rate uint) (multiplier uint) (jump-multiplier uint) (kink uint))
   (begin
     (asserts! (is-eq tx-sender (var-get admin)) ERR_UNAUTHORIZED)
-    (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.interest-rate-model set-interest-rate-model 
+    (contract-call? ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.interest-rate-model set-interest-rate-model 
                     (contract-of asset) 
                     base-rate 
                     multiplier 
@@ -810,6 +810,7 @@
             { user: user, total-value: (+ (get total-value acc) value) })
           acc))
       acc)))))
+
 
 
 

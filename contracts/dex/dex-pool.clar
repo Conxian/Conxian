@@ -1,9 +1,9 @@
 ;; Conxian DEX Pool - Constant product AMM pool with enhanced tokenomics integration
 ;; Implements pool-trait with full system integration
 
-(impl-trait 'pool-trait.pool-trait)
+(impl-trait pool-trait.pool-trait)
 
-(use-trait sip10 'sip-010-trait.sip-010-trait)
+(use-trait sip10 sip-010-trait.sip-010-trait)
 
 ;; Private helper functions
 (define-private (min (a uint) (b uint))
@@ -81,7 +81,7 @@
     (ok (tuple (volume-24h u0) (fees-24h u0)))))  ;; Simplified for enhanced deployment
 
 ;; Private functions
-;; Simplified square root using Newton's method
+;; Simplified square root using Newtons method
 (define-private (sqrt (x uint))
   (if (<= x u1)
       x
@@ -306,6 +306,7 @@
 ;; Initialize cumulative price tracking
 (map-set last-update-time "price-a" block-height)
 (map-set last-update-time "price-b" block-height)
+
 
 
 

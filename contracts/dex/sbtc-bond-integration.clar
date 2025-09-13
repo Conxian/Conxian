@@ -2,7 +2,7 @@
 ;; sBTC Bond Integration - Advanced bond issuance with sBTC collateral and yields
 ;; Provides enterprise bond structuring, sBTC yield distribution, and risk management
 
-(use-trait ft-trait 'sip-010-trait.sip-010-trait)
+(use-trait ft-trait sip-010-trait.sip-010-trait)
 
 ;; =============================================================================
 ;; CONSTANTS AND ERROR CODES
@@ -325,7 +325,7 @@
 (define-private (distribute-pool-yield (pool-id uint) (total-yield uint))
   "Distribute yield to bond holders proportionally"
   ;; In a full implementation, this would iterate through all bonds with allocations
-  ;; For now, we'll mark the yield as available for claiming
+  ;; For now, well mark the yield as available for claiming
   (begin
     (print { event: "yield-available-for-claim", pool-id: pool-id, amount: total-yield })
     (ok true)
@@ -573,6 +573,7 @@
     active-yield-pools: (- (var-get next-pool-id) u1)
   }
 )
+
 
 
 

@@ -2,11 +2,11 @@
 ;; Enterprise-grade loan management system with bond issuance for large loans
 ;; Supports institutional borrowing, risk-based pricing, and automated bond creation
 
-(use-trait sip10 'sip-010-trait.sip-010-trait)
-(use-trait lending-trait 'lending-system-trait.lending-system-trait)
+(use-trait sip10 sip-010-trait.sip-010-trait)
+(use-trait lending-trait lending-system-trait.lending-system-trait)
 
 ;; Import mathematical libraries for enterprise calculations (removed unresolved trait import)
-;; (use-trait math-precision 'precision-calculator.precision-calculator-trait)
+;; (use-trait math-precision precision-calculator.precision-calculator-trait)
 
 ;; Constants
 (define-constant ERR_UNAUTHORIZED (err u7001))
@@ -33,8 +33,8 @@
 (define-constant MIN_LOAN_AMOUNT u1000000)  ;; 1.0 STX (6 decimals)
 
 ;; Contract references
-(define-constant BOND_ISSUANCE_CONTRACT 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.bond-issuance-system)
-(define-constant LENDING_SYSTEM 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.comprehensive-lending-system)
+(define-constant BOND_ISSUANCE_CONTRACT ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.bond-issuance-system)
+(define-constant LENDING_SYSTEM ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.comprehensive-lending-system)
 
 ;; Dynamic contract reference for bond issuance
 (define-data-var bond-issuance-system (optional principal) (some BOND_ISSUANCE_CONTRACT))
@@ -558,6 +558,7 @@
     (print (tuple (event "loan-liquidated") (loan-id loan-id)))
     
     (ok true)))
+
 
 
 

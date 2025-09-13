@@ -35,7 +35,7 @@
       (if (< x PRECISION)
         ;; For small values, use approximation
         (ok (/ (* x u707106781186547524) PRECISION)) ;; x * sqrt(0.5)
-        ;; For large values, use Newton's method inline
+        ;; For large values, use Newtons method inline
         (let ((initial-guess (/ x u2)))
           (let ((guess1 (/ (+ initial-guess (/ (* x PRECISION) initial-guess)) u2)))
             (let ((guess2 (/ (+ guess1 (/ (* x PRECISION) guess1)) u2)))
@@ -152,6 +152,7 @@
   (match (ln-fixed E_FIXED) ;; ln(e) should be 1
     result (ok (abs-diff result PRECISION))
     error error))
+
 
 
 

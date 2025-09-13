@@ -1,7 +1,7 @@
 ;; Concentrated Liquidity Position NFT (SIP-009)
 ;; Represents ownership of a liquidity position in a concentrated pool
 
-(impl-trait 'SP3FBR2AGK5H9QBDH3EEN6DF8EK8JY7RX8QJ5SVTE.sip-009-nft-trait.sip-009-nft-trait)
+(impl-trait SP3FBR2AGK5H9QBDH3EEN6DF8EK8JY7RX8QJ5SVTE.sip-009-nft-trait.sip-009-nft-trait)
 
 (define-constant CONTRACT_OWNER tx-sender)
 (define-constant MAX_POSITIONS u10000)
@@ -45,6 +45,7 @@
   ))
 
 ;; Additional SIP-009 functions (transfer, get-owner, etc.) would go here
+
 
 
 
