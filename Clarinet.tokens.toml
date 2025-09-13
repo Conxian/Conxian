@@ -1,48 +1,98 @@
 [project]
 name = "conxian-tokens"
-description = "Token-only configuration for testing core tokens without enhanced features"
+description = "Complete token configuration for all Conxian ecosystem tokens"
 clarinet_version = "3.5.0"
 
 [accounts]
-deployer = { mnemonic = "twice kind fence tip hidden tilt action fragile skin nothing glory cousin green tomorrow spring wrist shed math olympic multiply hip blue scout claw", balance = 100_000_000_000_000 }
-wallet_1 = { mnemonic = "sell invite acquire kitten bamboo drastic jelly vivid peace spawn twice guilt pave pen trash pretty park cube fragile unaware remain midnight betray rebuild", balance = 100_000_000_000_000 }
-wallet_2 = { mnemonic = "hold excess usual excess ring elephant install account glad dry fragile donkey gaze humble truck breeze nation gasp vacuum limb head keep delay hospital", balance = 100_000_000_000_000 }
+# These values are for local development only
+# In CI/CD, they are overridden by GitHub Secrets
+deployer = { mnemonic = "${TESTNET_DEPLOYER_MNEMONIC:twice kind fence tip hidden tilt action fragile skin nothing glory cousin green tomorrow spring wrist shed math olympic multiply hip blue scout claw}", balance = 100_000_000_000_000 }
+wallet_1 = { mnemonic = "${TESTNET_WALLET1_MNEMONIC:sell invite acquire kitten bamboo drastic jelly vivid peace spawn twice guilt pave pen trash pretty park cube fragile unaware remain midnight betray rebuild}", balance = 100_000_000_000_000 }
+wallet_2 = { mnemonic = "${TESTNET_WALLET2_MNEMONIC:hold excess usual excess ring elephant install account glad dry fragile donkey gaze humble truck breeze nation gasp vacuum limb head keep delay hospital}", balance = 100_000_000_000_000 }
 
-# Core traits required for tokens
+# ===========================================
+# CORE TRAITS (SIP Standards)
+# ===========================================
+
 [contracts.sip-010-trait]
 path = "contracts/traits/sip-010-trait.clar"
-clarity_version = 2
-epoch = "2.4"
+clarity_version = 3
 
 [contracts.ft-mintable-trait]
 path = "contracts/traits/ft-mintable-trait.clar"
-clarity_version = 2
-epoch = "2.4"
+clarity_version = 3
 
 [contracts.sip-009-trait]
 path = "contracts/traits/sip-009-trait.clar"
-clarity_version = 2
-epoch = "2.4"
+clarity_version = 3
 
 [contracts.monitor-trait]
 path = "contracts/traits/monitor-trait.clar"
-clarity_version = 2
-epoch = "2.4"
+clarity_version = 3
 
-# Core token contracts (basic tokens only - no system integration)
-[contracts.cxlp-token]
-path = "contracts/cxlp-token.clar"
-clarity_version = 2
-epoch = "2.4"
+# ===========================================
+# CORE TOKENS
+# ===========================================
+
+# 1. CXD Token - Main Utility Token
+[contracts.cxd-token]
+path = "contracts/tokens/cxd-token.clar"
+clarity_version = 3
+depends_on = ["sip-010-trait", "ft-mintable-trait", "monitor-trait"]
+
+# 2. CXVG Token - Governance Token
+[contracts.cxvg-token]
+path = "contracts/tokens/cxvg-token.clar"
+clarity_version = 3
 depends_on = ["sip-010-trait", "ft-mintable-trait"]
 
+# 3. CXTR Token - Creator Economy Token
+[contracts.cxtr-token]
+path = "contracts/tokens/cxtr-token.clar"
+clarity_version = 3
+depends_on = ["sip-010-trait", "ft-mintable-trait", "monitor-trait"]
+
+# 4. CXLP Token - Liquidity Provider Token
+[contracts.cxlp-token]
+path = "contracts/tokens/cxlp-token.clar"
+clarity_version = 3
+depends_on = ["sip-010-trait", "ft-mintable-trait"]
+
+# 5. CXS Token - Staking Token
 [contracts.cxs-token]
-path = "contracts/cxs-token.clar"
-clarity_version = 2
-epoch = "2.4"
+path = "contracts/tokens/cxs-token.clar"
+clarity_version = 3
 depends_on = ["sip-009-trait"]
 
-# Note: Excluded tokens due to system integration hooks:
-# - cxd-token: calls protocol-invariant-monitor
-# - cxvg-token: has system integration with writing operations in read-only
-# - cxtr-token: uses monitor-contract trait with system checks
+# ===========================================
+# TOKEN UTILITIES
+# ===========================================
+
+[contracts.tokenized-bond]
+path = "contracts/dimensional/tokenized-bond.clar"
+clarity_version = 3
+depends_on = ["sip-010-trait"]
+
+[contracts.tokenized-bond-adapter]
+path = "contracts/dimensional/tokenized-bond-adapter.clar"
+clarity_version = 3
+depends_on = ["tokenized-bond", "sip-010-trait"]
+
+[contracts.token-emission-controller]
+path = "contracts/dex/token-emission-controller.clar"
+clarity_version = 3
+depends_on = ["sip-010-trait"]
+
+[contracts.token-system-coordinator]
+path = "contracts/dex/token-system-coordinator.clar"
+clarity_version = 3
+depends_on = ["sip-010-trait"]
+
+# ===========================================
+# MOCKS (for testing)
+# ===========================================
+
+[contracts.mock-token]
+path = "contracts/mocks/mock-token.clar"
+clarity_version = 3
+depends_on = ["sip-010-trait", "ft-mintable-trait"]

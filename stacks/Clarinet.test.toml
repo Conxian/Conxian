@@ -11,22 +11,22 @@ wallet_1 = { mnemonic = "sell invite acquire kitten bamboo drastic jelly vivid p
 
 [contracts.sip-010-trait]
 path = "contracts/traits/sip-010-trait.clar"
-clarity_version = 2
+clarity_version = 3
 epoch = "2.4"
 
 [contracts.dim-registry-trait]
 path = "contracts/traits/dim-registry-trait.clar"
-clarity_version = 2
+clarity_version = 3
 epoch = "2.4"
 
 [contracts.dim-registry]
 path = "contracts/dimensional/dim-registry.clar"
-clarity_version = 2
+clarity_version = 3
 epoch = "2.4"
 depends_on = ["dim-registry-trait"]
 
 [contracts.tokenized-bond]
 path = "contracts/dimensional/tokenized-bond.clar"
-clarity_version = 2
+clarity_version = 3
 epoch = "2.4"
 depends_on = ["sip-010-trait"]

@@ -1,9 +1,30 @@
-# Enhanced Lending System Deployment Plan
-# Complete deployment configuration for all new lending contracts
+[project]
+name = "conxian-lending"
+description = "Lending system configuration for Conxian DeFi Protocol"
+clarinet_version = "3.5.0"
 
-name = "enhanced-lending-system"
-network = "simnet"
-stacks-api = "http://localhost:3999"
+[accounts]
+# These values are for local development only
+# In CI/CD, they are overridden by GitHub Secrets
+deployer = { mnemonic = "${TESTNET_DEPLOYER_MNEMONIC:twice kind fence tip hidden tilt action fragile skin nothing glory cousin green tomorrow spring wrist shed math olympic multiply hip blue scout claw}", balance = 100_000_000_000_000 }
+wallet_1 = { mnemonic = "${TESTNET_WALLET1_MNEMONIC:sell invite acquire kitten bamboo drastic jelly vivid peace spawn twice guilt pave pen trash pretty park cube fragile unaware remain midnight betray rebuild}", balance = 100_000_000_000_000 }
+wallet_2 = { mnemonic = "${TESTNET_WALLET2_MNEMONIC:hold excess usual excess ring elephant install account glad dry fragile donkey gaze humble truck breeze nation gasp vacuum limb head keep delay hospital}", balance = 100_000_000_000_000 }
+
+[network]
+api_endpoint = "http://localhost:3999"
+delay_execution_start = false
+
+[network.testnet]
+stacks_node_rpc_address = "https://api.testnet.hiro.so"
+bitcoin_node_rpc_address = "https://blockstream.info/testnet/api"
+
+[network.mainnet]
+stacks_node_rpc_address = "https://api.hiro.so"
+bitcoin_node_rpc_address = "https://blockstream.info/api"
+
+# ===========================================
+# LENDING SYSTEM CONFIGURATION
+# ===========================================
 
 [contracts.math-lib-advanced]
 path = "contracts/math-lib-advanced.clar"
