@@ -4,7 +4,7 @@
 (impl-trait 'vault-trait.vault-trait)
 (impl-trait 'vault-admin-trait.vault-admin-trait)
 
-(use-trait sip10 'traits.sip-010-trait.sip-010-trait)
+(use-trait sip10 'sip-010-trait.sip-010-trait)
 (use-trait strategy 'strategy-trait.strategy-trait)
 
 ;; Constants
@@ -287,6 +287,7 @@
 
 ;; Initialize default supported asset (STX)
 (map-set supported-assets 'SP000000000000000000002Q6VF78 true)
+
 
 
 

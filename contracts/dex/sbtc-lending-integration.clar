@@ -2,7 +2,7 @@
 ;; sBTC Lending Integration - extends comprehensive lending system
 ;; Provides sBTC-specific lending, borrowing, and collateral management
 
-(use-trait ft-trait 'traits.sip-010-trait.sip-010-trait)
+(use-trait ft-trait 'sip-010-trait.sip-010-trait)
 
 ;; =============================================================================
 ;; CONSTANTS AND ERROR CODES
@@ -519,6 +519,7 @@
     )
   )
 )
+
 
 
 

@@ -3,15 +3,15 @@
 ;; Supports multiple assets, collateralization, and liquidations
 
 ;; Traits
-(use-trait sip10 'traits.sip-010-trait.sip-010-trait)
+(use-trait sip10 'sip-010-trait.sip-010-trait)
 (use-trait flash-loan-receiver 'flash-loan-receiver-trait.flash-loan-receiver-trait)
-(use-trait std-constants 'traits.standard-constants-trait.standard-constants-trait)
+(use-trait std-constants 'standard-constants-trait.standard-constants-trait)
 (use-trait liquidation-trait 'liquidation-trait.liquidation-trait)
-(use-trait access-control 'traits.access-control-trait.access-control-trait)
+(use-trait access-control 'access-control-trait.access-control-trait)
 
 ;; Implement required traits
 (impl-trait 'lending-system-trait.lending-system-trait)
-(impl-trait 'traits.access-control-trait.access-control-trait)
+(impl-trait 'access-control-trait.access-control-trait)
 
 ;; Oracle integration
 (use-trait oracle 'oracle-trait.oracle-trait)
@@ -810,6 +810,7 @@
             { user: user, total-value: (+ (get total-value acc) value) })
           acc))
       acc)))))
+
 
 
 

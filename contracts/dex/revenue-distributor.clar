@@ -2,7 +2,7 @@
 ;; Comprehensive revenue distribution system connecting vaults to token holders
 ;; Routes protocol fees: 80% to xCXD stakers, 20% to treasury/reserves
 
-(use-trait ft-trait 'traits.sip-010-trait.sip-010-trait)
+(use-trait ft-trait 'sip-010-trait.sip-010-trait)
  (use-trait staking-ref 'staking-trait.staking-trait)
 
 ;; --- Constants ---
@@ -399,6 +399,7 @@
         (total-recent-revenue u0)) ;; TODO: Calculate from recent epochs
     ;; Placeholder calculation - requires historical analysis
     (ok u500))) ;; 5% placeholder APY
+
 
 
 

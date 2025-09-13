@@ -3,7 +3,7 @@
 ;; Manages protocol parameters, upgrades, and community decisions
 ;; Integrates with AccessControl for role-based access
 
-(use-trait access-control 'traits.access-control-trait.access-control-trait)
+(use-trait access-control 'access-control-trait.access-control-trait)
 
 (define-constant ERR_UNAUTHORIZED (err u8001))
 (define-constant ERR_PROPOSAL_NOT_FOUND (err u8002))
@@ -465,6 +465,7 @@
     (ok true)
   )
 )
+
 
 
 

@@ -1,7 +1,7 @@
 ;; liquidation-trait.clar
 ;; Defines the standard interface for liquidation operations in the Conxian protocol
 
-(use-trait standard-constants 'traits.standard-constants-trait.standard-constants-trait)
+(use-trait standard-constants 'standard-constants-trait.standard-constants-trait)
 
 (define-trait liquidation-trait
   (
@@ -65,6 +65,7 @@
 (define-constant ERR_ASSET_NOT_WHITELISTED (err u1008))
 (define-constant ERR_INSUFFICIENT_COLLATERAL (err u1009))
 (define-constant ERR_INSUFFICIENT_LIQUIDITY (err u1010))
+
 
 
 

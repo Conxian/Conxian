@@ -3,7 +3,7 @@
 ;; Extends the basic vault with full flash loan functionality
 
 ;; Import trait at the top
-(use-trait sip10 'traits.sip-010-trait.sip-010-trait)
+(use-trait sip10 'sip-010-trait.sip-010-trait)
 
 ;; Define flash-loan-receiver trait inline to avoid circular dependency
 (define-trait flash-loan-receiver
@@ -511,6 +511,7 @@
 
 (define-read-only (get-total-balance (asset principal))
   (ok (default-to u0 (map-get? vault-balances asset))))
+
 
 
 
