@@ -1,10 +1,12 @@
 ;; Conxian DEX Factory - Pool creation and registry with enhanced tokenomics integration
 ;; Implements access-control-trait and integrates with protocol monitoring
 
-(use-trait access-control-trait traits.access-control-trait)
-(use-trait sip10 traits.sip-010-trait)
+;; Import traits
+(use-trait access-control 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.access-control-trait)
+(use-trait sip10-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.sip-010-trait)
 
-(impl-trait access-control-trait)
+;; Implement traits
+(impl-trait access-control)
 
 ;; ===== Error Codes =====
 ;; Access Control (1000-1099)

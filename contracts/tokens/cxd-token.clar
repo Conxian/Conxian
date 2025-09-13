@@ -2,8 +2,13 @@
 ;; Conxian Revenue Token (SIP-010 FT) - accrues protocol revenue to holders off-contract
 ;; Enhanced with integration hooks for staking, revenue distribution, and system monitoring
 
-(impl-trait sip-010-trait.sip-010-trait)
-(impl-trait ft-mintable-trait.ft-mintable-trait)
+;; Import traits
+(use-trait sip010-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.sip-010-trait)
+(use-trait ftm-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.ft-mintable-trait)
+
+;; Implement traits
+(impl-trait sip010-trait)
+(impl-trait ftm-trait)
 
 ;; --- Errors ---
 (define-constant ERR_UNAUTHORIZED u100)

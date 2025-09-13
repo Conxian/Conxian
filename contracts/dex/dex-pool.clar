@@ -1,9 +1,12 @@
 ;; Conxian DEX Pool - Constant product AMM pool with enhanced tokenomics integration
 ;; Implements pool-trait with full system integration
 
-(impl-trait pool-trait.pool-trait)
+;; Import traits
+(use-trait 'pool-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.pool-trait)
+(use-trait 'sip10 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.sip-010-trait)
 
-(use-trait sip10 sip-010-trait.sip-010-trait)
+;; Implement traits
+(impl-trait pool-trait)
 
 ;; Private helper functions
 (define-private (min (a uint) (b uint))

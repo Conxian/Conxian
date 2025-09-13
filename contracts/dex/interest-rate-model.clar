@@ -2,7 +2,7 @@
 ;; Dynamic interest rate calculation system for lending protocols
 ;; Implements slope-based interest rate models with utilization-based adjustments
 
-(use-trait sip10 sip-010-trait.sip-010-trait)
+(use-trait sip10 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.sip-010-trait.sip-010-trait)
 
 (define-constant ERR_UNAUTHORIZED (err u4001))
 (define-constant ERR_INVALID_PARAMETER (err u4002))

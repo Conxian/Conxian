@@ -1,7 +1,8 @@
 ;; Access Control Trait - Role-based access control interface
 ;; Implements the functionality specified in AIP-7
 
-(use-trait std-constants standard-constants-trait.standard-constants-trait)
+;; Import standard constants trait
+(use-trait std-constants 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.standard-constants-trait)
 
 (define-constant ROLE_ADMIN 0x41444d494e)        ;; ADMIN in hex
 (define-constant ROLE_OPERATOR 0x4f50455241544f52)  ;; OPERATOR in hex

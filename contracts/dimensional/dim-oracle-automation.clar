@@ -7,7 +7,7 @@
 ;; This contract implements the dimensional-oracle-trait and is designed
 ;; to be called by a whitelisted keeper principal.
 
-(impl-trait dimensional-oracle-trait.dimensional-oracle-trait)
+(impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.dimensional-oracle-trait.dimensional-oracle-trait)
 
 (define-constant ERR_UNAUTHORIZED u101)
 

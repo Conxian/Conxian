@@ -3,18 +3,18 @@
 ;; Supports multiple assets, collateralization, and liquidations
 
 ;; Traits
-(use-trait sip10 sip-010-trait.sip-010-trait)
-(use-trait flash-loan-receiver flash-loan-receiver-trait.flash-loan-receiver-trait)
-(use-trait std-constants standard-constants-trait.standard-constants-trait)
-(use-trait liquidation-trait liquidation-trait.liquidation-trait)
-(use-trait access-control access-control-trait.access-control-trait)
+(use-trait sip10 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.sip-010-trait.sip-010-trait)
+(use-trait flash-loan-receiver 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.flash-loan-receiver-trait.flash-loan-receiver-trait)
+(use-trait std-constants 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.standard-constants-trait.standard-constants-trait)
+(use-trait liquidation-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.liquidation-trait.liquidation-trait)
+(use-trait access-control 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.access-control-trait.access-control-trait)
 
 ;; Implement required traits
-(impl-trait lending-system-trait.lending-system-trait)
-(impl-trait access-control-trait.access-control-trait)
+(impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.lending-system-trait.lending-system-trait)
+(impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.access-control-trait.access-control-trait)
 
 ;; Oracle integration
-(use-trait oracle oracle-trait.oracle-trait)
+(use-trait oracle 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.oracle-trait.oracle-trait)
 
 (define-constant ORACLE_CONTRACT ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.oracle)
 (define-constant PRICE_STALE_THRESHOLD (* u60 u60 u24))  ;; 24 hours in blocks (1 block/2s)

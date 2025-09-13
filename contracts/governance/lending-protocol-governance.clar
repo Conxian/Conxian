@@ -3,7 +3,11 @@
 ;; Manages protocol parameters, upgrades, and community decisions
 ;; Integrates with AccessControl for role-based access
 
-(use-trait access-control access-control-trait.access-control-trait)
+;; Import access control trait
+(use-trait access-control 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.access-control-trait)
+
+;; Implement access control trait
+(impl-trait access-control)
 
 (define-constant ERR_UNAUTHORIZED (err u8001))
 (define-constant ERR_PROPOSAL_NOT_FOUND (err u8002))
@@ -450,7 +454,7 @@
 ;; Emergency functions
 (define-public (emergency-cancel (proposal-id uint))
   (let ((proposal (unwrap! (map-get? proposals proposal-id) ERR_PROPOSAL_NOT_FOUND)))
-    (asserts! (contract-call? .access-control has-role ROLE_GUARDIAN (as-contract tx-sender)) ERR_UNAUTHORIZED)
+    (asserts! (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.access-control has-role ROLE_GUARDIAN tx-sender) ERR_UNAUTHORIZED)
     (map-set proposals proposal-id (merge proposal {
       state: PROPOSAL_CANCELLED
     }))
@@ -460,13 +464,8 @@
 
 (define-public (emergency-execute (target-contract principal) (function-name (string-ascii 50)))
   (begin
-    (asserts! (contract-call? .access-control has-role ROLE_GUARDIAN (as-contract tx-sender)) ERR_UNAUTHORIZED)
+    (asserts! (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.access-control has-role ROLE_GUARDIAN tx-sender) ERR_UNAUTHORIZED)
     ;; Emergency execution without governance - should be very restricted
     (ok true)
   )
 )
-
-
-
-
-

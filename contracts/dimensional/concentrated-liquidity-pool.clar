@@ -48,7 +48,11 @@
     ((is-eq fee FEE_TIER_MEDIUM) u60)
     ((is-eq fee FEE_TIER_HIGH) u200)))
 
-(impl-trait pool-trait.pool-trait)
+;; Import pool trait
+(use-trait pool-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.pool-trait)
+
+;; Implement pool trait
+(impl-trait pool-trait)
 
 
 

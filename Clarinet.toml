@@ -170,4 +170,3 @@ epoch = "2.4"
 [contracts.precision-calculator]
 path = "contracts/lib/precision-calculator.clar"
 epoch = "2.4"
-

@@ -16,12 +16,13 @@
 )
 ;; Supports migration to CXD via epoch bands (1.0x -> 2.0x)
 
-(impl-trait traits.sip-010-trait)
-(impl-trait traits.ft-mintable-trait)
+;; Import traits
+(use-trait sip010-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.sip-010-trait)
+(use-trait ftm-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.ft-mintable-trait)
 
-;; Import SIP-010 as a type alias for dynamic dispatch
-;; Trait for dynamic minting on CXD
-(use-trait ftm traits.ft-mintable-trait)
+;; Implement traits
+(impl-trait sip010-trait)
+(impl-trait ftm-trait)
 
 ;; --- Errors ---
 (define-constant ERR_UNAUTHORIZED u100)
@@ -346,6 +347,3 @@
     )
   )
 )
-
-
-

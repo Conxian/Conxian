@@ -2,7 +2,8 @@
 ;; Advanced yield distribution system for enterprise loans and bonds
 ;; Handles complex yield calculations, distribution schedules, and optimization
 
-(use-trait sip10 sip-010-trait.sip-010-trait)
+;; Import SIP-010 trait
+(use-trait sip10-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.sip-010-trait)
 
 ;; Constants
 (define-constant ERR_UNAUTHORIZED (err u9001))

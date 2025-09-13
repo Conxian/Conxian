@@ -1,7 +1,7 @@
 ;; standard-constants.clar
 ;; Implementation of standard constants for the Conxian protocol
 
-(use-trait std-constants standard-constants-trait.standard-constants-trait)
+(use-trait std-constants 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.standard-constants-trait.standard-constants-trait)
 
 (define-constant PRECISION_18 u1000000000000000000)  ;; 18 decimals
 (define-constant PRECISION_8  u100000000)            ;; 8 decimals
@@ -20,7 +20,7 @@
 (define-constant FIFTY_PERCENT u5000)                ;; 50.00%
 (define-constant ONE_HUNDRED_PERCENT u10000)         ;; 100.00%
 
-(impl-trait standard-constants-trait.standard-constants-trait)
+(impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.standard-constants-trait.standard-constants-trait)
 
 (define-public (get-precision)
   (ok PRECISION_18))

@@ -113,7 +113,7 @@
 ;; === GEOMETRIC MEAN ===
 ;; Calculate geometric mean of two numbers: sqrt(a * b)
 (define-read-only (geometric-mean (a uint) (b uint))
-  (contract-call? .math-lib-advanced sqrt-fixed (mul-down a b)))
+  (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.math-lib-advanced sqrt-fixed (mul-down a b)))
 
 ;; === HARMONIC MEAN ===
 ;; Calculate harmonic mean: 2 / (1/a + 1/b) = 2ab / (a + b)
@@ -190,8 +190,3 @@
       (if (not (is-eq (/ result a) b)) ;; Overflow check
         ERR_OVERFLOW
         (ok result)))))
-
-
-
-
-

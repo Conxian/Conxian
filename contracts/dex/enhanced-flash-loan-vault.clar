@@ -3,7 +3,7 @@
 ;; Extends the basic vault with full flash loan functionality
 
 ;; Import trait at the top
-(use-trait sip10 sip-010-trait.sip-010-trait)
+(use-trait sip10 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.sip-010-trait.sip-010-trait)
 
 ;; Define flash-loan-receiver trait inline to avoid circular dependency
 (define-trait flash-loan-receiver
@@ -14,8 +14,8 @@
   )
 )
 
-(impl-trait vault-trait.vault-trait)
-(impl-trait vault-admin-trait.vault-admin-trait)
+(impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.vault-trait.vault-trait)
+(impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.vault-admin-trait.vault-admin-trait)
 
 ;; Constants
 (define-constant ERR_UNAUTHORIZED (err u6001))
