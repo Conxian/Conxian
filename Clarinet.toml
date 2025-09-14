@@ -1,17 +1,18 @@
 [project]
 name = "conxian"
-description = "Conxian DeFi protocol - clarinet config"
+description = "Conxian DeFi Protocol - Clarity Smart Contracts"
 requirements = []
 clarinet_version = "3.5.0"
 
 [accounts]
-deployer = { mnemonic = "twice kind fence tip hidden tilt action fragile skin nothing glory cousin green tomorrow spring wrist shed math olympic multiply hip blue scout claw", balance = 100_000_000_000_000 }
-wallet_1 = { mnemonic = "sell invite acquire kitten bamboo drastic jelly vivid peace spawn twice guilt pave pen trash pretty park cube fragile unaware remain midnight betray rebuild", balance = 100_000_000_000_000 }
-wallet_2 = { mnemonic = "hold excess usual excess ring elephant install account glad dry fragile donkey gaze humble truck breeze nation gasp vacuum limb head keep delay hospital", balance = 100_000_000_000_000 }
-wallet_3 = { mnemonic = "cycle puppy glare enroll cost improve round trend wrist mushroom scorpion tower claim oppose clever elephant dinosaur eight problem before frozen dune wagon high", balance = 100_000_000_000_000 }
+# These values are for local development only
+# In CI/CD, they are overridden by GitHub Secrets
+deployer = { mnemonic = "${TESTNET_DEPLOYER_MNEMONIC:twice kind fence tip hidden tilt action fragile skin nothing glory cousin green tomorrow spring wrist shed math olympic multiply hip blue scout claw}", balance = 100_000_000_000_000 }
+wallet_1 = { mnemonic = "${TESTNET_WALLET1_MNEMONIC:sell invite acquire kitten bamboo drastic jelly vivid peace spawn twice guilt pave pen trash pretty park cube fragile unaware remain midnight betray rebuild}", balance = 100_000_000_000_000 }
+wallet_2 = { mnemonic = "${TESTNET_WALLET2_MNEMONIC:hold excess usual excess ring elephant install account glad dry fragile donkey gaze humble truck breeze nation gasp vacuum limb head keep delay hospital}", balance = 100_000_000_000_000 }
 
 [network]
-api_endpoint = "http://localhost:3999" # clarinet devnet default
+api_endpoint = "http://localhost:3999"
 delay_execution_start = false
 
 [network.testnet]
@@ -21,263 +22,158 @@ bitcoin_node_rpc_address = "https://blockstream.info/testnet/api"
 [network.mainnet]
 stacks_node_rpc_address = "https://api.hiro.so"
 bitcoin_node_rpc_address = "https://blockstream.info/api"
- 
+
 # ===========================================
-# TRAITS - Core interfaces (deploy first)
+# CORE TRAITS (Deploy First)
 # ===========================================
+
+[contracts.access-control-trait]
+path = "contracts/traits/access-control-trait.clar"
+epoch = "2.4"
 
 [contracts.sip-010-trait]
 path = "contracts/traits/sip-010-trait.clar"
-clarity_version = 2
-epoch = "2.4"
-
-[contracts.dimensional-oracle-trait]
-path = "contracts/traits/dimensional-oracle-trait.clar"
-clarity_version = 2
-epoch = "2.4"
-
-[contracts.dim-registry-trait]
-path = "contracts/traits/dim-registry-trait.clar"
-clarity_version = 2
 epoch = "2.4"
 
 [contracts.ft-mintable-trait]
 path = "contracts/traits/ft-mintable-trait.clar"
-clarity_version = 2
-epoch = "2.4"
-
-[contracts.sip-009-trait]
-path = "contracts/traits/sip-009-trait.clar"
-clarity_version = 2
-epoch = "2.4"
-
-# ===========================================
-# PERFORMANCE ENHANCEMENT CONTRACTS
-# ===========================================
-
-[contracts.transaction-batch-processor]
-path = "contracts/transaction-batch-processor.clar"
-clarity_version = 2
-epoch = "2.4"
-
-[contracts.distributed-cache-manager]
-path = "contracts/distributed-cache-manager.clar"
-clarity_version = 2
-epoch = 2.4
-
-[contracts.automated-circuit-breaker]
-path = "contracts/automated-circuit-breaker.clar" 
-clarity_version = 2
-epoch = 2.4
-
-[contracts.real-time-monitoring-dashboard]
-path = "contracts/real-time-monitoring-dashboard.clar"
-clarity_version = 2
-epoch = 2.4
-
-[contracts.memory-pool-management]
-path = "contracts/memory-pool-management.clar"
-clarity_version = 2
-epoch = 2.4
-
-[contracts.predictive-scaling-system]
-path = "contracts/predictive-scaling-system.clar"
-clarity_version = 2
-epoch = 2.4
-
-[contracts.monitor-trait]
-path = "contracts/traits/monitor-trait.clar"
-clarity_version = 2
-epoch = "2.4"
-
-# NEW INFRASTRUCTURE TRAITS
-[contracts.vault-trait]
-path = "contracts/traits/vault-trait.clar"
-clarity_version = 2
-epoch = "2.4"
-
-[contracts.vault-admin-trait]
-path = "contracts/traits/vault-admin-trait.clar"
-clarity_version = 2
 epoch = "2.4"
 
 [contracts.strategy-trait]
 path = "contracts/traits/strategy-trait.clar"
-clarity_version = 2
 epoch = "2.4"
 
 [contracts.pool-trait]
 path = "contracts/traits/pool-trait.clar"
-clarity_version = 2
 epoch = "2.4"
 
-[contracts.ownable-trait]
-path = "contracts/traits/ownable-trait.clar"
-clarity_version = 2
-epoch = "2.4"
-
-[contracts.staking-trait]
-path = "contracts/traits/staking-trait.clar"
-clarity_version = 2
+[contracts.vault-trait]
+path = "contracts/traits/vault-trait.clar"
 epoch = "2.4"
 
 # ===========================================
-# DIMENSIONAL DEFI - Metrics-driven system
+# TOKENS (SIP-010 Compliant)
+# ===========================================
+
+# 1. CXD Token - Main Utility Token
+[contracts.cxd-token]
+path = "contracts/tokens/cxd-token.clar"
+epoch = "2.4"
+depends_on = ["sip-010-trait", "ft-mintable-trait"]
+
+# 2. CXVG Token - Governance Token
+[contracts.cxvg-token]
+path = "contracts/tokens/cxvg-token.clar"
+epoch = "2.4"
+depends_on = ["sip-010-trait", "ft-mintable-trait"]
+
+# 3. CXTR Token - Creator Economy Token
+[contracts.cxtr-token]
+path = "contracts/tokens/cxtr-token.clar"
+epoch = "2.4"
+depends_on = ["sip-010-trait", "ft-mintable-trait"]
+
+# 4. CXLP Token - Liquidity Provider Token
+[contracts.cxlp-token]
+path = "contracts/tokens/cxlp-token.clar"
+epoch = "2.4"
+depends_on = ["sip-010-trait", "ft-mintable-trait"]
+
+# 5. CXS Token - Staking Token
+[contracts.cxs-token]
+path = "contracts/tokens/cxs-token.clar"
+epoch = "2.4"
+depends_on = ["sip-010-trait"]
+
+# ===========================================
+# DEX CORE
+# ===========================================
+
+[contracts.dex-factory]
+path = "contracts/dex/dex-factory.clar"
+epoch = "2.4"
+depends_on = ["access-control-trait", "sip-010-trait"]
+
+[contracts.dex-pool]
+path = "contracts/dex/dex-pool.clar"
+epoch = "2.4"
+depends_on = ["dex-factory", "sip-010-trait"]
+
+[contracts.dex-router]
+path = "contracts/dex/dex-router.clar"
+epoch = "2.4"
+depends_on = ["dex-factory", "dex-pool", "sip-010-trait"]
+
+[contracts.oracle]
+path = "contracts/dex/oracle.clar"
+epoch = "2.4"
+depends_on = ["dex-factory"]
+
+# ===========================================
+# LENDING & YIELD
+# ===========================================
+
+[contracts.lending-protocol-governance]
+path = "contracts/governance/lending-protocol-governance.clar"
+epoch = "2.4"
+depends_on = ["access-control-trait"]
+
+[contracts.loan-liquidation-manager]
+path = "contracts/dex/loan-liquidation-manager.clar"
+epoch = "2.4"
+depends_on = ["dex-factory", "lending-protocol-governance"]
+
+[contracts.yield-distribution-engine]
+path = "contracts/dex/yield-distribution-engine.clar"
+epoch = "2.4"
+depends_on = ["dex-factory"]
+
+# ===========================================
+# DIMENSIONAL MODULE
 # ===========================================
 
 [contracts.dim-registry]
 path = "contracts/dimensional/dim-registry.clar"
-clarity_version = 2
 epoch = "2.4"
-depends_on = ["dim-registry-trait"]
-
-[contracts.dim-graph]
-path = "contracts/dimensional/dim-graph.clar"
-clarity_version = 2
-epoch = "2.4"
+depends_on = ["dex-factory"]
 
 [contracts.dim-metrics]
 path = "contracts/dimensional/dim-metrics.clar"
-clarity_version = 2
 epoch = "2.4"
+depends_on = ["dim-registry"]
 
-[contracts.dim-oracle-automation]
-path = "contracts/dimensional/dim-oracle-automation.clar"
-clarity_version = 2
+[contracts.concentrated-liquidity-pool]
+path = "contracts/dimensional/concentrated-liquidity-pool.clar"
 epoch = "2.4"
-depends_on = ["dim-registry", "dimensional-oracle-trait"]
-
-[contracts.dim-yield-stake]
-path = "contracts/dimensional/dim-yield-stake.clar"
-clarity_version = 2
-epoch = "2.4"
-depends_on = ["dim-metrics", "sip-010-trait"]
-
-[contracts.tokenized-bond]
-path = "contracts/dimensional/tokenized-bond.clar"
-clarity_version = 2
-epoch = "2.4"
-depends_on = ["sip-010-trait"]
+depends_on = ["dim-registry", "dex-pool"]
 
 # ===========================================
-# TESTS SUPPORT - Mocks (optional)
+# MOCKS & TESTING
 # ===========================================
 
 [contracts.mock-token]
 path = "contracts/mocks/mock-token.clar"
-clarity_version = 2
 epoch = "2.4"
 
 # ===========================================
-# PROTOCOL TOKENS - SIP-010 / SIP-009
+# LIBRARIES
 # ===========================================
 
-[contracts.cxvg-token]
-path = "contracts/cxvg-token.clar"
-clarity_version = 2
+[contracts.math-lib-advanced]
+path = "contracts/lib/math-lib-advanced.clar"
 epoch = "2.4"
-depends_on = ["sip-010-trait"]
 
-[contracts.cxd-token]
-path = "contracts/cxd-token.clar"
-clarity_version = 2
-epoch = "2.4"
-depends_on = ["sip-010-trait", "ft-mintable-trait", "protocol-invariant-monitor"]
-
-[contracts.cxlp-token]
-path = "contracts/cxlp-token.clar"
-clarity_version = 2
-epoch = "2.4"
-depends_on = ["sip-010-trait", "ft-mintable-trait"]
-
-[contracts.cxtr-token]
-path = "contracts/cxtr-token.clar"
-clarity_version = 2
-epoch = "2.4"
-depends_on = ["sip-010-trait", "ft-mintable-trait"]
-
-[contracts.cxs-token]
-path = "contracts/cxs-token.clar"
-clarity_version = 2
-epoch = "2.4"
-depends_on = ["sip-009-trait"]
-
-# ===========================================
-# ENHANCED TOKENOMICS SYSTEM
-# ===========================================
-
-[contracts.protocol-invariant-monitor]
-path = "contracts/protocol-invariant-monitor.clar"
-clarity_version = 2
-epoch = "2.4"
-depends_on = ["monitor-trait", "staking-trait"]
-
-[contracts.token-emission-controller]
-path = "contracts/token-emission-controller.clar"
-clarity_version = 2
-epoch = "2.4"
-depends_on = ["sip-010-trait", "ft-mintable-trait"]
-
-[contracts.revenue-distributor]
-path = "contracts/revenue-distributor.clar"
-clarity_version = 2
-epoch = "2.4"
-depends_on = ["sip-010-trait", "protocol-invariant-monitor", "staking-trait"]
+[contracts.standard-traits]
+path = "contracts/traits/standard-traits.clar"
 
 [contracts.cxd-staking]
-path = "contracts/cxd-staking.clar"
-clarity_version = 2
-epoch = "2.4"
-depends_on = ["sip-010-trait", "cxd-token", "protocol-invariant-monitor"]
+path = "contracts/dex/cxd-staking.clar"
+depends_on = ["sip-010-trait", "ft-mintable-trait"]
 
-[contracts.cxlp-migration-queue]
-path = "contracts/cxlp-migration-queue.clar"
-clarity_version = 2
+[contracts.fixed-point-math]
+path = "contracts/lib/fixed-point-math.clar"
 epoch = "2.4"
-depends_on = ["sip-010-trait", "cxlp-token", "cxd-token", "protocol-invariant-monitor"]
 
-[contracts.cxvg-utility]
-path = "contracts/cxvg-utility.clar"
-clarity_version = 2
+[contracts.precision-calculator]
+path = "contracts/lib/precision-calculator.clar"
 epoch = "2.4"
-depends_on = ["sip-010-trait", "cxvg-token"]
-
-[contracts.token-system-coordinator]
-path = "contracts/token-system-coordinator.clar"
-clarity_version = 2
-epoch = "2.4"
-depends_on = ["sip-010-trait", "ft-mintable-trait", "protocol-invariant-monitor", "revenue-distributor", "token-emission-controller", "cxd-staking", "cxlp-migration-queue", "cxvg-utility"]
-
-# ===========================================
-# VAULT & DEX INFRASTRUCTURE  
-# ===========================================
-
-[contracts.vault]
-path = "contracts/vault.clar"
-clarity_version = 2
-epoch = "2.4"
-depends_on = ["vault-trait", "vault-admin-trait", "sip-010-trait", "strategy-trait", "protocol-invariant-monitor", "revenue-distributor"]
-
-[contracts.enhanced-yield-strategy]
-path = "contracts/enhanced-yield-strategy.clar"
-clarity_version = 2
-epoch = "2.4"
-depends_on = ["strategy-trait", "sip-010-trait", "revenue-distributor", "dim-registry", "token-system-coordinator"]
-
-[contracts.dex-factory]
-path = "contracts/dex-factory.clar"
-clarity_version = 2
-epoch = "2.4"
-depends_on = ["ownable-trait", "sip-010-trait", "revenue-distributor"]
-
-[contracts.dex-pool]
-path = "contracts/dex-pool.clar"
-clarity_version = 2
-epoch = "2.4"
-depends_on = ["pool-trait", "sip-010-trait", "revenue-distributor", "token-system-coordinator"]
-
-[contracts.dex-router]
-path = "contracts/dex-router.clar"
-clarity_version = 2
-epoch = "2.4"
-depends_on = ["sip-010-trait", "pool-trait", "dex-factory", "token-system-coordinator"]

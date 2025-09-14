@@ -14,3 +14,4 @@
 
 ;; Test registry
 (contract-call? .registry get-count)
+

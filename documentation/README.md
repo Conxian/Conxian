@@ -27,11 +27,16 @@ and purpose.
 
 ### Project Management
 
-- [`STATUS.md`](./STATUS.md) - Current project status
+- [`STATUS.md`](./STATUS.md) - Current project status including comprehensive lending system
 - [`ROADMAP.md`](./ROADMAP.md) - Future development plans
 - [`CHANGELOG.md`](./CHANGELOG.md) - Version history and changes
-- [`BIP-COMPLIANCE.md`](./BIP-COMPLIANCE.md) - Bitcoin integration
-  compliance
+- [`BIP-COMPLIANCE.md`](./BIP-COMPLIANCE.md) - Bitcoin integration compliance
+
+### Technical Implementation
+
+- [`../system_spec.md`](../system_spec.md) - Complete system specification and architecture
+- [`../Clarinet.lending.toml`](../Clarinet.lending.toml) - Lending system deployment configuration
+- [`contract-guides/`](./contract-guides/) - Detailed contract guides and specifications
 
 ## Quick Navigation
 
@@ -45,6 +50,8 @@ and purpose.
 | Review security | [Security](./SECURITY.md) |
 | Check current status | [Status](./STATUS.md) |
 | Deploy to production | [Deployment](./DEPLOYMENT.md) |
+| **Use lending & flash loans** | [**System Specification**](../system_spec.md) |
+| **Understand mathematics** | [**Mathematical Libraries Guide**](./contract-guides/README.md) |
 
 ## Documentation Standards
 

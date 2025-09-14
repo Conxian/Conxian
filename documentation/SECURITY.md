@@ -15,7 +15,26 @@ Conxian implements enterprise-grade security with multiple layers of protection:
 
 ## Core Security Features
 
-### 1. Emergency Pause System (AIP-1)
+### 1. Role-Based Access Control (RBAC)
+
+Status: ACTIVE
+
+```
+Access Control Roles:
+├── Admin: Full system access and role management
+├── Emergency Admin: Can pause/unpause the system
+├── Operator: Day-to-day operations
+└── Multi-sig: Required for critical operations
+```
+
+**Implementation**:
+- Role-based permissions for all critical functions
+- Granular role assignments with proper separation of duties
+- Multi-signature requirements for sensitive operations
+- Event logging for all access control changes
+- Time-delayed role revocation for safety
+
+### 2. Emergency Pause System (AIP-1)
 
 Status: ACTIVE
 
@@ -173,6 +192,21 @@ npm run test:integration
 
 ## 🏗️ Security Architecture
 
+### Access Control Implementation
+
+#### Role Management
+- **Admin Role**: Full system access, can grant/revoke any role
+- **Emergency Role**: Can pause/unpause the system during emergencies
+- **Operator Role**: Limited to operational functions
+- **Multi-sig**: Required for critical operations (configurable threshold)
+
+#### Security Features
+- Role-based function access control
+- Emergency pause functionality
+- Time-delayed role changes
+- Comprehensive event logging
+- Integration with multi-sig wallets
+
 ### Contract Security Layers
 
 ```text
@@ -203,7 +237,7 @@ Network Security
 ### Operational Security
 
 - **Key Management**: Hardware wallets for production
-- **Access Control**: Principle of least privilege
+- [x] **Access Control**: Role-based system implemented with multi-signature support privilege
 - **Monitoring**: 24/7 system health monitoring
 - **Incident Response**: Documented procedures
 - **Communication**: Transparent user updates

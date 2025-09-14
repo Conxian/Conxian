@@ -2,26 +2,26 @@
 
 | | |
 |---|---|
-| **Status** | ✅ Stable |
+| **Status** | 🔄 Framework Implementation |
 | **Version** | 1.2 |
 | **Owner** | Governance WG |
 | **Last Updated** | 2025-08-26 |
-| **References** | AIP-2, `dao-governance.clar` (planned), `timelock.clar` (planned) |
+| **References** | AIP-2, `dao-governance.clar` (framework implemented), `timelock.clar` (framework implemented) |
 
 ---
 
 ## 1. Summary & Vision
 
-The Conxian DAO (Decentralized Autonomous Organization) provides a transparent, secure, and decentralized mechanism for governing the entire Conxian ecosystem. The system is centered around an on-chain proposal and voting process, featuring time-weighted voting to promote long-term stakeholder alignment and a timelock mechanism to ensure safe and predictable execution of proposals. The vision is to create a fully community-driven governance model that is resistant to manipulation and empowers token holders to collectively manage the protocol's future.
+The Conxian DAO (Decentralized Autonomous Organization) provides a governance framework structure for the Conxian ecosystem. The system framework includes basic on-chain proposal and voting structures, featuring time-weighted voting framework to promote stakeholder alignment and a timelock mechanism framework for proposal execution. The vision is to create a community-driven governance framework that provides basic manipulation resistance and empowers token holders with protocol management structure.
 
 ## 2. Goals / Non-Goals
 
 ### Goals
 
-- **Fair & Secure Voting**: Implement time-weighted voting (AIP-2) to reward long-term token holders and mitigate the risk of flash loan governance attacks.
-- **Transparent Lifecycle**: Ensure every proposal follows a clear, on-chain lifecycle: submission, voting, queuing (timelock), and execution.
-- **Comprehensive Control**: Enable the DAO to govern all critical aspects of the Conxian protocol, including contract upgrades, fee changes, and treasury management.
-- **Founder Accountability**: Incentivize active participation from founders through an automated token reallocation mechanism tied to voting activity.
+- **Voting Framework**: Implement time-weighted voting framework (AIP-2) structure for token holders with basic flash loan protection.
+- **Lifecycle Framework**: Provide basic proposal lifecycle framework: submission, voting, queuing (timelock), and execution structure.
+- **Control Framework**: Enable DAO framework to govern basic protocol aspects, including parameter changes and basic treasury management structure.
+- **Accountability Framework**: Provide basic participation incentive framework through token reallocation mechanism structure.
 
 ### Non-Goals
 

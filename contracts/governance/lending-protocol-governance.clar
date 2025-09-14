@@ -1,0 +1,469 @@
+;; lending-protocol-governance.clar
+;; Governance system for the comprehensive lending protocol
+;; Manages protocol parameters, upgrades, and community decisions
+;; Integrates with AccessControl for role-based access
+
+;; Use canonical access-control trait
+(use-trait access-control-trait .access-control-trait)
+(impl-trait access-control-trait)
+
+(define-constant ERR_UNAUTHORIZED (err u8001))
+(define-constant ERR_PROPOSAL_NOT_FOUND (err u8002))
+(define-constant ERR_PROPOSAL_NOT_ACTIVE (err u8003))
+(define-constant ERR_ALREADY_VOTED (err u8004))
+(define-constant ERR_INSUFFICIENT_VOTING_POWER (err u8005))
+(define-constant ERR_PROPOSAL_NOT_PASSED (err u8006))
+(define-constant ERR_EXECUTION_FAILED (err u8007))
+(define-constant ERR_INVALID_PARAMETERS (err u8008))
+
+(define-constant PRECISION u1000000000000000000) ;; 18 decimals
+
+;; Governance parameters
+(define-data-var voting-delay uint u1008) ;; ~1 week in blocks
+(define-data-var voting-period uint u2016) ;; ~2 weeks in blocks
+(define-data-var quorum-threshold uint u40000000000000000) ;; 4% of total supply
+(define-data-var proposal-threshold uint u10000000000000000000000) ;; 10K tokens to propose
+(define-data-var execution-delay uint u1440) ;; ~1 day timelock
+
+;; Roles
+(define-constant ROLE_GOVERNOR 0x474f5645524e4f52000000000000000000000000000000000000000000000000)  ;; GOVERNOR in hex
+(define-constant ROLE_GUARDIAN 0x475541524449414e000000000000000000000000000000000000000000000000)  ;; GUARDIAN in hex
+
+;; Protocol state
+(define-data-var governance-token principal tx-sender) ;; Should be set to CXS token
+(define-data-var timelock-address (optional principal) none) ;; Timelock contract address
+
+;; Proposal tracking
+(define-data-var next-proposal-id uint u1)
+(define-data-var total-proposals uint u0)
+
+;; Proposal states
+(define-constant PROPOSAL_PENDING u1)
+(define-constant PROPOSAL_ACTIVE u2) 
+(define-constant PROPOSAL_SUCCEEDED u3)
+(define-constant PROPOSAL_DEFEATED u4)
+(define-constant PROPOSAL_QUEUED u5)
+(define-constant PROPOSAL_EXECUTED u6)
+(define-constant PROPOSAL_CANCELLED u7)
+
+;; Proposal types
+(define-constant PROPOSAL_TYPE_PARAMETER u1)
+(define-constant PROPOSAL_TYPE_UPGRADE u2)
+(define-constant PROPOSAL_TYPE_TREASURY u3)
+(define-constant PROPOSAL_TYPE_EMERGENCY u4)
+
+;; Proposals
+(define-map proposals
+  uint ;; proposal-id
+  {
+    proposer: principal,
+    title: (string-ascii 100),
+    description: (string-utf8 500),
+    proposal-type: uint,
+    target-contract: (optional principal),
+    function-name: (optional (string-ascii 50)),
+    parameters: (optional (list 10 uint)),
+    for-votes: uint,
+    against-votes: uint,
+    abstain-votes: uint,
+    start-block: uint,
+    end-block: uint,
+    queue-block: (optional uint),
+    execution-block: (optional uint),
+    state: uint,
+    created-at: uint
+  })
+
+;; Vote records
+(define-map vote-receipts
+  { proposal-id: uint, voter: principal }
+  { support: uint, votes: uint, reason: (optional (string-utf8 200)) })
+
+;; Voting power snapshots
+(define-map voting-power-snapshots
+  { user: principal, block-height: uint }
+  uint)
+
+;; Parameter change proposals
+(define-map parameter-proposals
+  uint ;; proposal-id
+  {
+    parameter-name: (string-ascii 50),
+    current-value: uint,
+    proposed-value: uint,
+    target-contract: principal
+  })
+
+;; Treasury proposals
+(define-map treasury-proposals
+  uint ;; proposal-id
+  {
+    recipient: principal,
+    amount: uint,
+    token: principal,
+    purpose: (string-utf8 200)
+  })
+
+;; Delegation
+(define-map delegates
+  principal ;; delegator
+  principal) ;; delegate
+
+(define-map delegated-votes
+  principal ;; delegate
+  uint) ;; total votes delegated to them
+
+;; === GOVERNANCE FUNCTIONS ===
+
+;; Create a new proposal
+(define-public (propose 
+  (title (string-ascii 100))
+  (description (string-utf8 500))
+  (proposal-type uint)
+  (target-contract (optional principal))
+  (function-name (optional (string-ascii 50)))
+  (parameters (optional (list 10 uint))))
+  (let ((proposal-id (var-get next-proposal-id))
+        (proposer tx-sender)
+        (voting-power (get-voting-power-at proposer (- block-height u1))))
+    
+    (begin
+      ;; Check proposal threshold
+      (asserts! (>= voting-power (var-get proposal-threshold)) ERR_INSUFFICIENT_VOTING_POWER)
+      
+      ;; Create proposal
+      (map-set proposals proposal-id
+        {
+          proposer: proposer,
+          title: title,
+          description: description,
+          proposal-type: proposal-type,
+          target-contract: target-contract,
+          function-name: function-name,
+          parameters: parameters,
+          for-votes: u0,
+          against-votes: u0,
+          abstain-votes: u0,
+          start-block: (+ block-height (var-get voting-delay)),
+          end-block: (+ block-height (var-get voting-delay) (var-get voting-period)),
+          queue-block: none,
+          execution-block: none,
+          state: PROPOSAL_PENDING,
+          created-at: (unwrap-panic (get-block-info? time block-height))
+        })
+      
+      ;; Update counters
+      (var-set next-proposal-id (+ proposal-id u1))
+      (var-set total-proposals (+ (var-get total-proposals) u1))
+      
+      ;; Take snapshot of proposers voting power
+      (snapshot-voting-power proposer block-height)
+      
+      ;; Emit proposal event
+      (print (tuple 
+        (event "proposal-created")
+        (proposal-id proposal-id)
+        (proposer proposer)
+        (title title)
+        (start-block (+ block-height (var-get voting-delay)))
+        (end-block (+ block-height (var-get voting-delay) (var-get voting-period)))))
+      
+      (ok proposal-id))))
+
+;; Specialized parameter change proposal
+(define-public (propose-parameter-change
+  (parameter-name (string-ascii 50))
+  (target-contract principal)
+  (new-value uint)
+  (title (string-ascii 100))
+  (description (string-utf8 500)))
+  (let ((proposal-id (try! (propose title description PROPOSAL_TYPE_PARAMETER (some target-contract) none (some (list new-value))))))
+    
+    ;; Store parameter details
+    (map-set parameter-proposals proposal-id
+      {
+        parameter-name: parameter-name,
+        current-value: u0, ;; Would fetch from target contract
+        proposed-value: new-value,
+        target-contract: target-contract
+      })
+    
+    (ok proposal-id)))
+
+;; Treasury spending proposal
+(define-public (propose-treasury-spending
+  (recipient principal)
+  (amount uint)
+  (token principal)
+  (purpose (string-utf8 200)))
+  ;; Keep description within ascii 9 if required elsewhere; store purpose separately
+  (let ((title "Treasury Spending Proposal")
+        (description u"Transfer"))
+    (let ((proposal-id (try! (propose title description PROPOSAL_TYPE_TREASURY none none none))))
+      
+      ;; Store treasury details
+      (map-set treasury-proposals proposal-id
+        {
+          recipient: recipient,
+          amount: amount,
+          token: token,
+          purpose: purpose
+        })
+      
+      (ok proposal-id))))
+
+;; Vote on a proposal
+(define-public (vote (proposal-id uint) (support uint) (reason (optional (string-utf8 200))))
+  (let ((proposal (unwrap! (map-get? proposals proposal-id) ERR_PROPOSAL_NOT_FOUND))
+        (voter tx-sender)
+        (current-block block-height))
+    
+    (begin
+      ;; Check proposal is active
+      (asserts! (>= current-block (get start-block proposal)) ERR_PROPOSAL_NOT_ACTIVE)
+      (asserts! (<= current-block (get end-block proposal)) ERR_PROPOSAL_NOT_ACTIVE)
+      (asserts! (is-eq (get state proposal) PROPOSAL_ACTIVE) ERR_PROPOSAL_NOT_ACTIVE)
+      
+      ;; Check hasnt already voted
+      (asserts! (is-none (map-get? vote-receipts { proposal-id: proposal-id, voter: voter })) ERR_ALREADY_VOTED)
+      
+      ;; Get voting power at proposal start
+      (let ((voting-power (get-voting-power-at voter (get start-block proposal))))
+        
+        (asserts! (> voting-power u0) ERR_INSUFFICIENT_VOTING_POWER)
+        
+        ;; Record vote
+        (map-set vote-receipts
+          { proposal-id: proposal-id, voter: voter }
+          { support: support, votes: voting-power, reason: reason })
+        
+        ;; Update vote tallies
+        (let ((updated-proposal 
+               (if (is-eq support u1) ;; FOR
+                 (merge proposal { for-votes: (+ (get for-votes proposal) voting-power) })
+                 (if (is-eq support u0) ;; AGAINST
+                   (merge proposal { against-votes: (+ (get against-votes proposal) voting-power) })
+                   ;; ABSTAIN
+                   (merge proposal { abstain-votes: (+ (get abstain-votes proposal) voting-power) })))))
+          
+          (map-set proposals proposal-id updated-proposal)
+          
+          ;; Emit vote event
+          (print (tuple 
+            (event "vote-cast")
+            (proposal-id proposal-id)
+            (voter voter)
+            (support support)
+            (votes voting-power)
+            (reason reason)))
+          
+          (ok voting-power))))))
+
+;; Queue a successful proposal for execution
+(define-public (queue-proposal (proposal-id uint))
+  (let ((proposal (unwrap! (map-get? proposals proposal-id) ERR_PROPOSAL_NOT_FOUND)))
+    
+    (begin
+      ;; Check proposal has ended and succeeded
+      (asserts! (> block-height (get end-block proposal)) ERR_PROPOSAL_NOT_ACTIVE)
+      
+      ;; Check if proposal passed
+      (let ((total-votes (+ (+ (get for-votes proposal) (get against-votes proposal)) (get abstain-votes proposal)))
+            (quorum-met (>= total-votes (var-get quorum-threshold)))
+            (majority-for (> (get for-votes proposal) (get against-votes proposal))))
+        
+        (asserts! (and quorum-met majority-for) ERR_PROPOSAL_NOT_PASSED)
+        
+        ;; Queue proposal
+        (let ((queue-block (+ block-height (var-get execution-delay))))
+          (map-set proposals proposal-id
+            (merge proposal 
+              { state: PROPOSAL_QUEUED, queue-block: (some queue-block) }))
+          
+          (print (tuple 
+            (event "proposal-queued")
+            (proposal-id proposal-id)
+            (queue-block queue-block)))
+          
+          (ok queue-block))))))
+
+;; Execute a queued proposal
+(define-public (execute-proposal (proposal-id uint))
+  (let ((proposal (unwrap! (map-get? proposals proposal-id) ERR_PROPOSAL_NOT_FOUND)))
+    
+    (begin
+      ;; Check proposal is queued and ready
+      (asserts! (is-eq (get state proposal) PROPOSAL_QUEUED) ERR_PROPOSAL_NOT_ACTIVE)
+      (asserts! (>= block-height (unwrap! (get queue-block proposal) ERR_PROPOSAL_NOT_ACTIVE)) ERR_PROPOSAL_NOT_ACTIVE)
+      
+      ;; Execute based on proposal type
+      (let ((execution-result 
+             (if (is-eq (get proposal-type proposal) PROPOSAL_TYPE_PARAMETER)
+               (execute-parameter-change proposal-id)
+               (if (is-eq (get proposal-type proposal) PROPOSAL_TYPE_TREASURY)
+                 (execute-treasury-proposal proposal-id)
+                 (ok true))))) ;; Generic execution
+        
+        ;; Unwrap result or fail
+        (let ((executed (unwrap! execution-result ERR_EXECUTION_FAILED)))
+          (map-set proposals proposal-id
+            (merge proposal { state: PROPOSAL_EXECUTED, execution-block: (some block-height) }))
+          
+          (print (tuple 
+            (event "proposal-executed")
+            (proposal-id proposal-id)
+            (execution-block block-height)))
+          
+          (ok true))))))
+
+(define-private (execute-parameter-change (proposal-id uint))
+  (match (map-get? parameter-proposals proposal-id)
+    param-info
+      (begin
+        ;; Log parameter change
+        (print (tuple
+          (event "parameter-changed")
+          (proposal-id proposal-id)
+          (parameter (get parameter-name param-info))
+          (old-value (get current-value param-info))
+          (new-value (get proposed-value param-info))))
+        (ok true))
+    (ok false)))
+
+(define-private (execute-treasury-proposal (proposal-id uint))
+  ;; Would execute treasury transfer
+  ;; This is a simplified implementation
+  (match (map-get? treasury-proposals proposal-id)
+    treasury-info
+      (begin
+        ;; Log treasury action
+        (print (tuple
+          (event "treasury-transfer")
+          (proposal-id proposal-id)
+          (recipient (get recipient treasury-info))
+          (amount (get amount treasury-info))
+          (token (get token treasury-info))))
+        (ok true))
+    (ok false)))
+
+;; === DELEGATION ===
+(define-public (delegate (delegatee principal))
+  (let ((delegator tx-sender)
+        (current-votes (get-voting-power delegator)))
+    
+    (begin
+      ;; Remove votes from current delegate if any
+      (match (map-get? delegates delegator)
+        current-delegate
+          (map-set delegated-votes current-delegate 
+            (- (default-to u0 (map-get? delegated-votes current-delegate)) current-votes))
+        true)
+      
+      ;; Set new delegate
+      (map-set delegates delegator delegatee)
+      
+      ;; Add votes to new delegate
+      (map-set delegated-votes delegatee
+        (+ (default-to u0 (map-get? delegated-votes delegatee)) current-votes))
+      
+      (print (tuple
+        (event "delegation-changed")
+        (delegator delegator)
+        (from-delegate (map-get? delegates delegator))
+        (to-delegate delegatee)
+        (votes current-votes)))
+      
+      (ok true))))
+
+;; === VOTING POWER ===
+(define-read-only (get-voting-power (user principal))
+  (get-voting-power-at user block-height))
+
+(define-read-only (get-voting-power-at (user principal) (at-height uint))
+  ;; This would integrate with the governance token to get balance
+  ;; For now, return a default value
+  (default-to u0 (map-get? voting-power-snapshots { user: user, block-height: at-height })))
+
+(define-private (snapshot-voting-power (user principal) (at-height uint))
+  (let ((voting-power (get-voting-power user)))
+    (map-set voting-power-snapshots
+      { user: user, block-height: at-height }
+      voting-power)))
+
+;; === ADMIN FUNCTIONS ===
+(define-public (update-governance-params 
+  (voting-delay uint) 
+  (voting-period uint) 
+  (quorum-threshold uint) 
+  (proposal-threshold uint)
+  (execution-delay uint))
+  (begin
+    (asserts! (or 
+      (contract-call? .access-control has-role ROLE_GOVERNOR (as-contract tx-sender))
+      (contract-call? .access-control has-role ROLE_GUARDIAN (as-contract tx-sender))
+    ) ERR_UNAUTHORIZED)
+    
+    (asserts! (>= voting-delay u144) (err u8009)) ;; At least 1 hour
+    (asserts! (and (>= voting-period u144) (<= voting-period u20160)) (err u8010)) ;; 1 hour to 2 weeks
+    (asserts! (and (>= quorum-threshold u10000000000000000) (<= quorum-threshold u1000000000000000000)) (err u8011)) ;; 1% to 100%
+    (asserts! (>= proposal-threshold u1000000000000000000) (err u8012)) ;; At least 1 token
+    (asserts! (and (>= execution-delay u144) (<= execution-delay u20160)) (err u8013)) ;; 1 hour to 2 weeks
+    
+    (var-set voting-delay voting-delay)
+    (var-set voting-period voting-period)
+    (var-set quorum-threshold quorum-threshold)
+    (var-set proposal-threshold proposal-threshold)
+    (var-set execution-delay execution-delay)
+    (ok true)
+  )
+)
+
+(define-public (initialize (gov-token principal) (timelock principal))
+  (begin
+    (asserts! (contract-call? .access-control has-role ROLE_GOVERNOR (as-contract tx-sender)) ERR_UNAUTHORIZED)
+    (var-set governance-token gov-token)
+    (var-set timelock-address (some timelock))
+    (ok true)
+  )
+)
+
+(define-public (cancel-proposal (proposal-id uint))
+  (let ((proposal (unwrap! (map-get? proposals proposal-id) ERR_PROPOSAL_NOT_FOUND)))
+    (begin
+      ;; Only proposer or admin can cancel
+      (asserts! (or 
+        (is-eq tx-sender (get proposer proposal)) 
+        (contract-call? .access-control has-role ROLE_GOVERNOR (as-contract tx-sender))
+      ) ERR_UNAUTHORIZED)
+      
+      ;; Can only cancel pending or active proposals
+      (asserts! (or (is-eq (get state proposal) PROPOSAL_PENDING)
+                    (is-eq (get state proposal) PROPOSAL_ACTIVE)) ERR_PROPOSAL_NOT_ACTIVE)
+      
+      (map-set proposals proposal-id
+        (merge proposal { state: PROPOSAL_CANCELLED }))
+      
+      (print (tuple
+        (event "proposal-cancelled")
+        (proposal-id proposal-id)))
+      
+      (ok true))))
+
+;; Emergency functions
+(define-public (emergency-cancel (proposal-id uint))
+  (let ((proposal (unwrap! (map-get? proposals proposal-id) ERR_PROPOSAL_NOT_FOUND)))
+    (asserts! (contract-call? .access-control has-role ROLE_GUARDIAN tx-sender) ERR_UNAUTHORIZED)
+    (map-set proposals proposal-id (merge proposal {
+      state: PROPOSAL_CANCELLED
+    }))
+    (ok true)
+  )
+)
+
+(define-public (emergency-execute (target-contract principal) (function-name (string-ascii 50)))
+  (begin
+    (asserts! (contract-call? .access-control has-role ROLE_GUARDIAN tx-sender) ERR_UNAUTHORIZED)
+    ;; Emergency execution without governance - should be very restricted
+    (ok true)
+  )
+)

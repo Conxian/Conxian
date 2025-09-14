@@ -1,19 +1,20 @@
-# development-config.yaml
-# Development environment configuration for Conxian Enhanced Tokenomics
+# ===========================================
+# CONXIAN DEVELOPMENT CONFIGURATION
+# Development environment settings for Conxian
+# ===========================================
 
-# =============================================================================
-# ENVIRONMENT SETTINGS
-# =============================================================================
+# Environment Settings
+# ===================
 environment: development
 network: simnet
 auto_confirm: true
-gas_limit: 1000000
+gas_limit: 1500000  # Increased for complex transactions
 gas_price: 1
 
-# =============================================================================
-# TOKEN CONFIGURATION
-# =============================================================================
+# Token Configuration
+# ==================
 tokens:
+  # CXD - Conxian Revenue Token
   cxd:
     name: "Conxian Revenue Token"
     symbol: "CXD"
@@ -23,20 +24,39 @@ tokens:
     emission_per_block: 1000000000000  # 1M tokens per epoch
     epoch_length: 10080  # 1 week in blocks
     
+  # CXVG - Conxian Governance Token
   cxvg:
-    name: "Conxian Governance Token" 
+    name: "Conxian Governance Token"
     symbol: "CXVG"
     decimals: 6
     initial_supply: 0
-    max_supply: 10500000000000  # 10.5M tokens
+    max_supply: 100000000000000  # 100M tokens
+    
+  # CXTR - Creator Token
+  cxtr:
+    name: "Conxian Creator Token"
+    symbol: "CXTR"
+    decimals: 6
+    initial_supply: 0
+    max_supply: 50000000000000  # 50M tokens
+    
+  # CXLP - Liquidity Provider Token
+  cxlp:
+    name: "Conxian Liquidity Provider"
+    symbol: "CXLP"
+    decimals: 6
+    initial_supply: 0
+    max_supply: 5000000000000  # 5B tokens
+    
+  # CXS - Staking Token
+  cxs:
+    name: "Conxian Staking"
+    symbol: "CXS"
+    decimals: 6
+    initial_supply: 0
+    max_supply: 1000000000000  # 1B tokens
     emission_per_block: 500000000000  # 500K tokens per epoch
     epoch_length: 10080
-    
-  cxlp:
-    name: "Conxian Liquidity Provider Token"
-    symbol: "CXLP" 
-    decimals: 6
-    initial_supply: 1000000000000  # 1M tokens for testing
     migration_start_delay: 100  # blocks
     
   cxtr:

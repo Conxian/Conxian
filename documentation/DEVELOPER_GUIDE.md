@@ -22,8 +22,53 @@ cd Conxian
 npm ci
 
 # Verify setup
-clarinet check   # ✅ 42 contracts
-npx vitest run --config ./vitest.config.enhanced.ts   # ✅ 50 tests
+clarinet check   # ✅ 65+ contracts (syntax validation)
+npx vitest run --config ./vitest.config.enhanced.ts   # 🔄 Framework tests
+```
+
+## Access Control Implementation
+
+Conxian uses a robust Role-Based Access Control (RBAC) system to manage permissions across the protocol. The implementation follows the OpenZeppelin AccessControl pattern with additional features for DeFi security.
+
+### Key Features
+
+- **Role-Based Permissions**: Granular control over contract functions
+- **Emergency Pause**: Ability to pause critical operations
+- **Multi-signature Support**: For sensitive operations
+- **Time-Delayed Changes**: For critical role modifications
+- **Event Logging**: Comprehensive audit trail
+
+### Available Roles
+
+- **DEFAULT_ADMIN_ROLE**: Full system access and role management
+- **EMERGENCY_ROLE**: Can pause/unpause the system
+- **OPERATOR_ROLE**: Day-to-day operations
+- **GOVERNANCE_ROLE**: Protocol parameter updates
+
+### Usage Example
+
+```typescript
+// Granting a role
+const grantTx = await simnet.callPublicFn(
+  'access-control',
+  'grant-role',
+  [
+    Cl.buffer(hexToBuffer(ROLES.OPERATOR)),
+    Cl.principal(operatorAddress)
+  ],
+  adminAddress
+);
+
+// Checking a role
+const hasRole = await simnet.callReadOnlyFn(
+  'access-control',
+  'has-role',
+  [
+    Cl.buffer(hexToBuffer(ROLES.OPERATOR)),
+    Cl.principal(operatorAddress)
+  ],
+  adminAddress
+);
 ```
 
 ## Project Structure
@@ -43,7 +88,31 @@ Conxian/
 
 ## Development Workflow
 
-### 1. Smart Contract Development
+### 1. Access Control Integration
+
+When developing new contracts, follow these patterns for access control:
+
+1. **Import Access Control**
+   ```clarity
+   (use-trait access-control-trait .access-control.access-control-trait)
+   ```
+
+2. **Define Required Roles**
+   ```clarity
+   (define-constant ROLE_OPERATOR 0x4f50455241544f52)  // "OPERATOR" in hex
+   ```
+
+3. **Add Access Control Checks**
+   ```clarity
+   (define-public (protected-function)
+     (begin
+       (try! (contract-call? .access-control has-role ROLE_OPERATOR (as-contract tx-sender)))
+       ;; Function logic here
+     )
+   )
+   ```
+
+### 2. Smart Contract Development
 
 #### Creating a New Contract
 
@@ -162,6 +231,57 @@ npx clarinet format
 npx clarinet docs
 ```
 
+## Nakamoto Development Guide
+
+### Nakamoto Timing Considerations
+
+**Fast Block Development**: Nakamoto introduces 3-5 second block times. The `nakamoto-compatibility.clar` contract provides timing conversion functions:
+
+```typescript
+// Test timing constants from nakamoto-compatibility.clar
+const NAKAMOTO_BLOCKS_PER_HOUR = 720;  // 5s blocks
+const NAKAMOTO_BLOCKS_PER_DAY = 17280;
+const LEGACY_BLOCKS_PER_DAY = 144;     // 10min blocks
+
+// Use contract conversion function
+const conversionResult = simnet.callReadOnlyFn(
+  'nakamoto-compatibility',
+  'convert-legacy-to-nakamoto',
+  [Cl.uint(144)], // 1 day in legacy blocks
+  deployer
+);
+expected(conversionResult.result).toBe(Cl.uint(17280));
+```
+
+**Bitcoin Finality Integration**:
+
+```typescript
+// Test Bitcoin finality functions (implemented in nakamoto-compatibility.clar)
+const result = simnet.callReadOnlyFn(
+  'nakamoto-compatibility',
+  'is-bitcoin-finalized',
+  [Cl.uint(blockHeight - 100)],
+  deployer
+);
+
+// Function uses caching and validation logic
+expect(result.result).toBe(Cl.bool(true));
+```
+
+**MEV Protection Testing**:
+
+```typescript
+// Test MEV protection mechanisms (basic framework in nakamoto-compatibility.clar)
+const protectionResult = simnet.callPublicFn(
+  'nakamoto-compatibility',
+  'enable-mev-protection',
+  [],
+  deployer // Admin function
+);
+
+expect(protectionResult.result).toBeOk();
+```
+
 ## Testing Framework
 
 ### Test Environment Setup
@@ -176,6 +296,57 @@ const simnet = await Simnet.fromFile('Clarinet.toml');
 const accounts = simnet.getAccounts();
 const deployer = accounts.get('deployer')!;
 const user1 = accounts.get('wallet_1')!;
+```
+
+### Nakamoto Testing Patterns
+
+#### Testing Fast Block Functions
+
+```typescript
+// Test epoch calculations with Nakamoto timing
+const epochResult = simnet.callReadOnlyFn(
+  'nakamoto-compatibility',
+  'get-nakamoto-epoch-length',
+  [],
+  deployer
+);
+
+expect(epochResult.result).toBe(Cl.uint(120960)); // 1 week in Nakamoto blocks
+```
+
+#### Testing Bitcoin Finality
+
+```typescript
+// Test finality-dependent operations (framework implementation)
+const finalityResult = simnet.callReadOnlyFn(
+  'nakamoto-compatibility',
+  'is-bitcoin-finalized',
+  [Cl.uint(simnet.blockHeight - 10)],
+  deployer
+);
+
+// Basic finality detection with caching
+expected(finalityResult.result).toBe(Cl.bool(true));
+```
+
+#### Testing Cross-Chain Operations
+
+```typescript
+// Test Wormhole bridge functionality (development framework - events only)
+const bridgeResult = simnet.callPublicFn(
+  'wormhole-integration',
+  'initiate-bridge-transfer',
+  [
+    Cl.contractPrincipal(deployer, 'test-token'),
+    Cl.uint(1000000),
+    Cl.uint(2), // Ethereum (framework only)
+    Cl.bufferFromHex('0x742d35cc6548c63e02e4286d82bae9b8feff4bc8')
+  ],
+  user1
+);
+
+// Returns sequence number and fee (event emission framework)
+expected(bridgeResult.result).toBeOk();
 ```
 
 ### Common Test Patterns
@@ -439,5 +610,5 @@ This developer guide provides:
 
 Follow this guide to contribute effectively to the Conxian project.
 
-*Last Updated: August 17, 2025*  
-*Framework Version: Clarinet v2.0+, clarinet-sdk v3.5.0*
+*Last Updated: September 10, 2025*  
+*Framework Version: Clarinet v3.5.0, Nakamoto-ready, Wormhole-integrated*

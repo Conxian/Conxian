@@ -7,13 +7,13 @@
 ;; This contract implements the dimensional-oracle-trait and is designed
 ;; to be called by a whitelisted keeper principal.
 
-(impl-trait .dimensional-oracle-trait.dimensional-oracle-trait)
+(impl-trait dimensional-oracle-trait)
 
 (define-constant ERR_UNAUTHORIZED u101)
 
 (define-data-var contract-owner principal tx-sender)
 (define-data-var keeper-principal principal tx-sender)
-(define-data-var dim-registry-contract principal 'ST000000000000000000002AMW42H.dim-registry) ;; placeholder, should be set at deployment
+(define-data-var dim-registry-contract principal tx-sender) ;; placeholder, should be set at deployment
 
 ;; --- Owner Functions ---
 
@@ -56,3 +56,8 @@
     (ok true)
   )
 )
+
+
+
+
+
