@@ -16,6 +16,24 @@
 (define-constant ERR_NOT_ENOUGH_BALANCE u101)
 (define-constant ERR_SYSTEM_PAUSED u102)
 (define-constant ERR_EMISSION_DENIED u103)
+(define-constant ERR_OVERFLOW u105)
+
+;; --- Safe Math Helpers ---
+(define-private (safe-sub (a uint) (b uint))
+  (if (>= a b)
+    (ok (- a b))
+    (err ERR_NOT_ENOUGH_BALANCE)
+  )
+)
+
+(define-private (safe-add (a uint) (b uint))
+  (let ((sum (+ a b)))
+    (if (or (<= sum a) (<= sum b))  ;; Check for overflow
+      (err ERR_OVERFLOW)
+      (ok sum)
+    )
+  )
+)
 
 ;; --- Storage ---
 (define-data-var contract-owner principal tx-sender)
@@ -167,13 +185,13 @@
   (begin
     (asserts! (is-eq tx-sender sender) (err ERR_UNAUTHORIZED))
     (asserts! (check-system-pause) (err ERR_SYSTEM_PAUSED))
+
     (let ((sender-bal (default-to u0 (get bal (map-get? balances { who: sender }))))
-         )
-      (asserts! (>= sender-bal amount) (err ERR_NOT_ENOUGH_BALANCE))
-      (map-set balances { who: sender } { bal: (- sender-bal amount) })
-      (let ((rec-bal (default-to u0 (get bal (map-get? balances { who: recipient })))) )
-        (map-set balances { who: recipient } { bal: (+ rec-bal amount) })
-      )
+          (rec-bal (default-to u0 (get bal (map-get? balances { who: recipient })))))
+
+      (map-set balances { who: sender } { bal: (unwrap! (safe-sub sender-bal amount) (err ERR_NOT_ENOUGH_BALANCE)) })
+      (map-set balances { who: recipient } { bal: (unwrap! (safe-add rec-bal amount) (err ERR_OVERFLOW)) })
+
       ;; Notify system coordinator
       (notify-transfer amount sender recipient)
     )
@@ -221,9 +239,10 @@
     (asserts! (or (is-owner tx-sender) (is-minter tx-sender)) (err ERR_UNAUTHORIZED))
     (asserts! (check-system-pause) (err ERR_SYSTEM_PAUSED))
     (asserts! (check-emission-allowed amount) (err ERR_EMISSION_DENIED))
-    (var-set total-supply (+ (var-get total-supply) amount))
+
+    (var-set total-supply (unwrap! (safe-add (var-get total-supply) amount) (err ERR_OVERFLOW)))
     (let ((bal (default-to u0 (get bal (map-get? balances { who: recipient })))) )
-      (map-set balances { who: recipient } { bal: (+ bal amount) })
+      (map-set balances { who: recipient } { bal: (unwrap! (safe-add bal amount) (err ERR_OVERFLOW)) })
     )
     ;; Notify system coordinator
     (notify-mint amount recipient)
@@ -232,11 +251,13 @@
 )
 
 (define-public (burn (amount uint))
-  (let ((bal (default-to u0 (get bal (map-get? balances { who: tx-sender })))) )
-    (asserts! (>= bal amount) (err ERR_NOT_ENOUGH_BALANCE))
+  (let ((bal (default-to u0 (get bal (map-get? balances { who: tx-sender }))))
+        (supply (var-get total-supply)))
     (asserts! (check-system-pause) (err ERR_SYSTEM_PAUSED))
-    (map-set balances { who: tx-sender } { bal: (- bal amount) })
-    (var-set total-supply (- (var-get total-supply) amount))
+
+    (map-set balances { who: tx-sender } { bal: (unwrap! (safe-sub bal amount) (err ERR_NOT_ENOUGH_BALANCE)) })
+    (var-set total-supply (unwrap! (safe-sub supply amount) (err ERR_NOT_ENOUGH_BALANCE)))
+
     ;; Notify system coordinator
     (notify-burn amount tx-sender)
     (ok true)

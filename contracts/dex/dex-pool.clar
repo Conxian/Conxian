@@ -81,29 +81,6 @@
     (ok (tuple (volume-24h u0) (fees-24h u0)))))  ;; Simplified for enhanced deployment
 
 ;; Private functions
-;; Calculates integer square root using Newton's method over 6 iterations for precision.
-(define-private (integer-sqrt (n uint))
-  (if (is-eq n u0) u0
-    (let ((x0 (if (> n u1) (/ n u2) u1)))
-      (if (is-eq x0 u0) u1 ;; Avoid division by zero if n is 1
-        (let ((x1 (/ (+ x0 (/ n x0)) u2)))
-          (let ((x2 (/ (+ x1 (/ n x1)) u2)))
-            (let ((x3 (/ (+ x2 (/ n x2)) u2)))
-              (let ((x4 (/ (+ x3 (/ n x3)) u2)))
-                (let ((x5 (/ (+ x4 (/ n x4)) u2)))
-                  (let ((x6 (/ (+ x5 (/ n x5)) u2)))
-                    x6
-                  )
-                )
-              )
-            )
-          )
-        )
-      )
-    )
-  )
-)
-
 ;; Calculate output amount for constant product formula with fees
 (define-private (calculate-swap-amount (amount-in uint) (reserve-in uint) (reserve-out uint))
   (let ((amount-in-with-fee (- amount-in (/ (* amount-in (var-get lp-fee-bps)) u10000)))
@@ -200,7 +177,7 @@
         (reserve-y (var-get reserve-b))
         (shares (if (is-eq current-supply u0)
                     ;; First liquidity provision
-                    (- (integer-sqrt (* dx dy)) MIN_LIQUIDITY)
+                    (- (unwrap-panic (contract-call? .math-lib-advanced sqrt-integer (* dx dy))) MIN_LIQUIDITY)
                     ;; Subsequent liquidity provision
                     (min (/ (* dx current-supply) reserve-x)
                          (/ (* dy current-supply) reserve-y))))

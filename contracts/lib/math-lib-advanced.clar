@@ -26,11 +26,13 @@
 ;; For broader ranges, a more advanced algorithm with range reduction would be needed.
 (define-read-only (ln-fixed (x uint))
   (if (is-eq x u0) (err ERR_INVALID_INPUT) ;; ln(0) is undefined
-    (if (is-eq x PRECISION) (ok u0) ;; ln(1) = 0
-      (let
-        (
-          ;; Let y = x - 1. We need to handle both x > 1 and x < 1.
-          (y (if (> x PRECISION) (- x PRECISION) (- PRECISION x)))
+    (begin
+      (asserts! (< x (* u2 PRECISION)) (err ERR_INVALID_INPUT)) ;; Taylor series is only accurate for 0 < x < 2
+      (if (is-eq x PRECISION) (ok u0) ;; ln(1) = 0
+        (let
+          (
+            ;; Let y = x - 1. We need to handle both x > 1 and x < 1.
+            (y (if (> x PRECISION) (- x PRECISION) (- PRECISION x)))
           (y2 (mul-down-safe y y))
           (y3 (mul-down-safe y2 y))
           (y4 (mul-down-safe y3 y))
@@ -125,6 +127,30 @@
     (if (is-eq (mod exp u2) u1)
       (pow-int-iter (mul-down-safe base base) (/ exp u2) (mul-down-safe result base))
       (pow-int-iter (mul-down-safe base base) (/ exp u2) result)
+    )
+  )
+)
+
+;; === INTEGER SQUARE ROOT - LEVEL 1 ===
+;; Calculates integer square root using Newton's method.
+(define-read-only (sqrt-integer (n uint))
+  (if (is-eq n u0) (ok u0)
+    (let ((x0 (if (> n u1) (/ n u2) u1)))
+      (if (is-eq x0 u0) (ok u1) ;; Avoid division by zero if n is 1
+        (let ((x1 (/ (+ x0 (/ n x0)) u2)))
+          (let ((x2 (/ (+ x1 (/ n x1)) u2)))
+            (let ((x3 (/ (+ x2 (/ n x2)) u2)))
+              (let ((x4 (/ (+ x3 (/ n x3)) u2)))
+                (let ((x5 (/ (+ x4 (/ n x4)) u2)))
+                  (let ((x6 (/ (+ x5 (/ n x5)) u2)))
+                    (ok x6)
+                  )
+                )
+              )
+            )
+          )
+        )
+      )
     )
   )
 )

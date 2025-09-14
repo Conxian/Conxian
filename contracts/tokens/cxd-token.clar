@@ -36,14 +36,14 @@
 (define-private (safe-sub (a uint) (b uint))
   (if (>= a b)
     (ok (- a b))
-    (err u100)  ;; Underflow error
+    (err ERR_NOT_ENOUGH_BALANCE)
   )
 )
 
 (define-private (safe-add (a uint) (b uint))
   (let ((sum (+ a b)))
     (if (or (<= sum a) (<= sum b))  ;; Check for overflow
-      (err u101)  ;; Overflow error
+      (err ERR_OVERFLOW)
       (ok sum)
     )
   )
@@ -57,6 +57,7 @@
 (define-constant ERR_SYSTEM_PAUSED u102)
 (define-constant ERR_EMISSION_LIMIT_EXCEEDED u103)
 (define-constant ERR_TRANSFER_HOOK_FAILED u104)
+(define-constant ERR_OVERFLOW u105)
 
 ;; --- Storage ---
 (define-data-var contract-owner principal tx-sender)
@@ -184,16 +185,15 @@
     (asserts! (is-eq tx-sender sender) (err ERR_UNAUTHORIZED))
     (asserts! (not (check-system-pause-status)) (err ERR_SYSTEM_PAUSED))
     
-    (let ((sender-bal (default-to u0 (get bal (map-get? balances { who: sender })))) )
-      (asserts! (>= sender-bal amount) (err ERR_NOT_ENOUGH_BALANCE))
+    (let ((sender-bal (default-to u0 (get bal (map-get? balances { who: sender }))))
+          (rec-bal (default-to u0 (get bal (map-get? balances { who: recipient })))))
       
       ;; Execute transfer hooks if enabled - skip for enhanced deployment
       
-      ;; Perform the actual transfer
-      (map-set balances { who: sender } { bal: (- sender-bal amount) })
-      (let ((rec-bal (default-to u0 (get bal (map-get? balances { who: recipient })))) )
-        (map-set balances { who: recipient } { bal: (+ rec-bal amount) })
-      )
+      ;; Perform the actual transfer using safe math
+      (map-set balances { who: sender } { bal: (unwrap! (safe-sub sender-bal amount) (err ERR_NOT_ENOUGH_BALANCE)) })
+      (map-set balances { who: recipient } { bal: (unwrap! (safe-add rec-bal amount) (err ERR_OVERFLOW)) })
+
       (ok true)
     )
   )
@@ -265,9 +265,9 @@
 
 (define-private (execute-mint (recipient principal) (amount uint))
   (begin
-    (var-set total-supply (+ (var-get total-supply) amount))
+    (var-set total-supply (unwrap! (safe-add (var-get total-supply) amount) (err ERR_OVERFLOW)))
     (let ((bal (default-to u0 (get bal (map-get? balances { who: recipient })))))
-      (map-set balances { who: recipient } { bal: (+ bal amount) }))
+      (map-set balances { who: recipient } { bal: (unwrap! (safe-add bal amount) (err ERR_OVERFLOW)) }))
     
     ;; Notify revenue distributor if configured
     (if (and (var-get system-integration-enabled) (is-some (var-get revenue-distributor)))
@@ -281,12 +281,12 @@
 )
 
 (define-public (burn (amount uint))
-  (let ((bal (default-to u0 (get bal (map-get? balances { who: tx-sender })))) )
-    (asserts! (>= bal amount) (err ERR_NOT_ENOUGH_BALANCE))
+  (let ((bal (default-to u0 (get bal (map-get? balances { who: tx-sender }))))
+        (supply (var-get total-supply)))
     (asserts! (not (check-system-pause-status)) (err ERR_SYSTEM_PAUSED))
     
-    (map-set balances { who: tx-sender } { bal: (- bal amount) })
-    (var-set total-supply (- (var-get total-supply) amount))
+    (map-set balances { who: tx-sender } { bal: (unwrap! (safe-sub bal amount) (err ERR_NOT_ENOUGH_BALANCE)) })
+    (var-set total-supply (unwrap! (safe-sub supply amount) (err ERR_NOT_ENOUGH_BALANCE)))
     
     ;; Notify revenue distributor if configured and enabled - skip for enhanced deployment
     (if (and (var-get system-integration-enabled) (is-some (var-get revenue-distributor)))

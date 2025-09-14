@@ -1,14 +1,14 @@
 # Conxian
 
 [![Tests](https://img.shields.io/badge/Tests-Comprehensive-green)](https://github.com/Anya-org/Conxian)
-[![Contracts](https://img.shields.io/badge/Contracts-65%20Production-blue)](https://github.com/Anya-org/Conxian)
-[![Deployment](https://img.shields.io/badge/Deployment-Ready-green)](https://github.com/Anya-org/Conxian)
+[![Contracts](https://img.shields.io/badge/Contracts-65%2B-blue)](https://github.com/Anya-org/Conxian)
+[![Status](https://img.shields.io/badge/Status-Core%20System%20Implemented-blue)](https://github.com/Anya-org/Conxian)
 
 A comprehensive DeFi platform on Stacks featuring 65+ smart contracts with advanced mathematical libraries, lending & flash loan system framework, governance infrastructure, DEX components, and monitoring systems.
 
 ## Status
 
-🔄 **Framework Implemented** – System with 65+ smart contracts including mathematical libraries (sqrt, pow, ln, exp), flash loan framework, lending protocol foundations, sBTC integration structure, bond system components, and test coverage.
+🔄 **Core Framework Implemented** – The core lending and DEX systems are implemented and near production quality. The repository also contains experimental and in-development contracts for advanced features like sBTC integration, which are not yet part of the deployable system.
 
 [View Complete Status](./documentation/STATUS.md)
 

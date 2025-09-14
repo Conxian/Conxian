@@ -16,9 +16,9 @@ Conxian represents a **comprehensive DeFi ecosystem on Stacks** with **productio
 - **Bond Issuance**: Tokenized bond system for enterprise loan backing
 - **Governance System**: Community-driven parameter management and upgrade mechanisms
 - **Performance Optimization**: Memory management, caching, predictive scaling
-- **Comprehensive Testing**: Integration validation and production-ready test coverage
-- **Testnet Deployment**: Complete with advanced DeFi capabilities
-- **Mainnet Ready**: Yes, with enterprise-grade precision and security
+- **Comprehensive Testing**: Integration validation and production-ready test coverage for the core system. Advanced features have mocked tests.
+- **Testnet Deployment**: Core system is deployable to testnet.
+- **Mainnet Ready**: No. The core system is near-production quality, but requires fixes and a full audit. Advanced features are experimental.
 
 ---
 
@@ -157,9 +157,9 @@ Conxian represents a **comprehensive DeFi ecosystem on Stacks** with **productio
 
 ```text
 📈 DEVELOPMENT METRICS:
-├── Total Contracts: 51 production contracts
+├── Total Contracts: 65+ (including experimental)
 ├── Lines of Code: ~15,000+ lines of Clarity
-├── Test Coverage: 130/131 passing (20 files)
+├── Test Coverage: Comprehensive test coverage for the core system.
 ├── Documentation: 15+ comprehensive documents
 ├── Security Reviews: 5 AIP implementations
 └── Integration Tests: Multi-contract validation
