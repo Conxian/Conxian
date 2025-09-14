@@ -1,62 +1,123 @@
+# ===========================================
+# CONXIAN BASE CONFIGURATION
+# Core traits and settings for all environments
+# ===========================================
+
 [project]
 name = "conxian-base"
 description = "Conxian base manifest: core traits and tokens only"
 clarinet_version = "3.5.0"
 
 [accounts]
-deployer = { mnemonic = "twice kind fence tip hidden tilt action fragile skin nothing glory cousin green tomorrow spring wrist shed math olympic multiply hip blue scout claw", balance = 100_000_000_000_000 }
-wallet_1 = { mnemonic = "sell invite acquire kitten bamboo drastic jelly vivid peace spawn twice guilt pave pen trash pretty park cube fragile unaware remain midnight betray rebuild", balance = 100_000_000_000_000 }
-wallet_2 = { mnemonic = "hold excess usual excess ring elephant install account glad dry fragile donkey gaze humble truck breeze nation gasp vacuum limb head keep delay hospital", balance = 100_000_000_000_000 }
-wallet_3 = { mnemonic = "cycle puppy glare enroll cost improve round trend wrist mushroom scorpion tower claim oppose clever elephant dinosaur eight problem before frozen dune wagon high", balance = 100_000_000_000_000 }
+# These values are for local development only
+# In CI/CD, they are overridden by GitHub Secrets
+deployer = { mnemonic = "${TESTNET_DEPLOYER_MNEMONIC:twice kind fence tip hidden tilt action fragile skin nothing glory cousin green tomorrow spring wrist shed math olympic multiply hip blue scout claw}", balance = 100_000_000_000_000 }
+wallet_1 = { mnemonic = "${TESTNET_WALLET1_MNEMONIC:sell invite acquire kitten bamboo drastic jelly vivid peace spawn twice guilt pave pen trash pretty park cube fragile unaware remain midnight betray rebuild}", balance = 100_000_000_000_000 }
+wallet_2 = { mnemonic = "${TESTNET_WALLET2_MNEMONIC:hold excess usual excess ring elephant install account glad dry fragile donkey gaze humble truck breeze nation gasp vacuum limb head keep delay hospital}", balance = 100_000_000_000_000 }
 
-# =============================
-# Core Traits
-# =============================
+[network]
+api_endpoint = "http://localhost:3999"
+delay_execution_start = false
+
+[network.testnet]
+stacks_node_rpc_address = "https://api.testnet.hiro.so"
+bitcoin_node_rpc_address = "https://blockstream.info/testnet/api"
+
+[network.mainnet]
+stacks_node_rpc_address = "https://api.hiro.so"
+bitcoin_node_rpc_address = "https://blockstream.info/api"
+
+# ===========================================
+# CORE TRAITS (Deploy First)
+# ===========================================
+
+[contracts.access-control-trait]
+path = "contracts/traits/access-control-trait.clar"
+epoch = "2.4"
+
 [contracts.sip-010-trait]
 path = "contracts/traits/sip-010-trait.clar"
-clarity_version = 2
 epoch = "2.4"
 
 [contracts.ft-mintable-trait]
 path = "contracts/traits/ft-mintable-trait.clar"
-clarity_version = 2
 epoch = "2.4"
 
-[contracts.sip-009-trait]
-path = "contracts/traits/sip-009-trait.clar"
-clarity_version = 2
+[contracts.strategy-trait]
+path = "contracts/traits/strategy-trait.clar"
 epoch = "2.4"
 
-# =============================
+[contracts.pool-trait]
+path = "contracts/traits/pool-trait.clar"
+epoch = "2.4"
+
+[contracts.staking-trait]
+path = "contracts/traits/staking-trait.clar"
+epoch = "2.4"
+
+[contracts.standard-constants-trait]
+path = "contracts/traits/standard-constants-trait.clar"
+epoch = "2.4"
+
+[contracts.ownable-trait]
+path = "contracts/traits/ownable-trait.clar"
+epoch = "2.4"
+
+[contracts.oracle-trait]
+path = "contracts/traits/oracle-trait.clar"
+epoch = "2.4"
+
+[contracts.monitor-trait]
+path = "contracts/traits/monitor-trait.clar"
+epoch = "2.4"
+
+[contracts.dimensional-oracle-trait]
+path = "contracts/traits/dimensional-oracle-trait.clar"
+epoch = "2.4"
+
+[contracts.dim-registry-trait]
+path = "contracts/traits/dim-registry-trait.clar"
+epoch = "2.4"
+
+[contracts.vault-trait]
+path = "contracts/traits/vault-trait.clar"
+epoch = "2.4"
+
+[contracts.lending-system-trait]
+path = "contracts/traits/lending-system-trait.clar"
+epoch = "2.4"
+
+[contracts.flash-loan-receiver-trait]
+path = "contracts/traits/flash-loan-receiver-trait.clar"
+epoch = "2.4"
+
+[contracts.monitor-trait]
+path = "contracts/traits/monitor-trait.clar"
+epoch = "2.4"
 # Tokens (SIP-010, SIP-009)
 # =============================
 [contracts.cxvg-token]
 path = "contracts/cxvg-token.clar"
-clarity_version = 2
 epoch = "2.4"
 depends_on = ["sip-010-trait"]
 
 [contracts.cxd-token]
 path = "contracts/cxd-token.clar"
-clarity_version = 2
 epoch = "2.4"
 depends_on = ["sip-010-trait", "ft-mintable-trait"]
 
 [contracts.cxlp-token]
 path = "contracts/cxlp-token.clar"
-clarity_version = 2
 epoch = "2.4"
 depends_on = ["sip-010-trait", "ft-mintable-trait"]
 
 [contracts.cxtr-token]
 path = "contracts/cxtr-token.clar"
-clarity_version = 2
 epoch = "2.4"
 depends_on = ["sip-010-trait", "ft-mintable-trait"]
 
 [contracts.cxs-token]
 path = "contracts/cxs-token.clar"
-clarity_version = 2
 epoch = "2.4"
 depends_on = ["sip-009-trait"]
 
@@ -65,6 +126,6 @@ depends_on = ["sip-009-trait"]
 # =============================
 [contracts.cxd-staking]
 path = "contracts/cxd-staking.clar"
-clarity_version = 2
 epoch = "2.4"
 depends_on = ["sip-010-trait"]
+

@@ -1,0 +1,155 @@
+{
+  "cxlp-token": [
+    "sip-010-trait",
+    "ft-mintable-trait"
+  ],
+  "cxs-token": [
+    "sip-009-trait",
+    "sip-010-trait"
+  ],
+  "cxd-staking": [
+    "sip-010-trait",
+    "cxd-token",
+    "ft-mintable-trait"
+  ],
+  "cxd-token": [
+    "sip-010-trait",
+    "ft-mintable-trait",
+    "monitor-trait"
+  ],
+  "protocol-invariant-monitor": [
+    "monitor-trait",
+    "sip-010-trait",
+    "staking-trait"
+  ],
+  "token-emission-controller": [
+    "sip-010-trait",
+    "ft-mintable-trait"
+  ],
+  "revenue-distributor": [
+    "sip-010-trait",
+    "staking-trait"
+  ],
+  "token-system-coordinator": [
+    "sip-010-trait",
+    "comprehensive-lending-system",
+    "lending-protocol-governance",
+    "cxd-token",
+    "cxs-token",
+    "ft-mintable-trait",
+    "protocol-invariant-monitor",
+    "revenue-distributor",
+    "token-emission-controller",
+    "cxd-staking",
+    "cxlp-migration-queue",
+    "cxvg-utility"
+  ],
+  "math-lib-advanced": [],
+  "fixed-point-math": [
+    "math-lib-advanced"
+  ],
+  "precision-calculator": [
+    "math-lib-advanced",
+    "fixed-point-math"
+  ],
+  "flash-loan-receiver-trait": [],
+  "lending-system-trait": [
+    "flash-loan-receiver-trait"
+  ],
+  "interest-rate-model": [
+    "fixed-point-math"
+  ],
+  "comprehensive-lending-system": [
+    "math-lib-advanced",
+    "fixed-point-math",
+    "interest-rate-model",
+    "lending-system-trait"
+  ],
+  "enhanced-flash-loan-vault": [
+    "math-lib-advanced",
+    "fixed-point-math",
+    "flash-loan-receiver-trait"
+  ],
+  "loan-liquidation-manager": [
+    "comprehensive-lending-system",
+    "fixed-point-math",
+    "dex-factory",
+    "lending-protocol-governance"
+  ],
+  "lending-protocol-governance": [
+    "comprehensive-lending-system",
+    "loan-liquidation-manager",
+    "access-control-trait"
+  ],
+  "vault": [
+    "enhanced-flash-loan-vault",
+    "comprehensive-lending-system"
+  ],
+  "dex-router": [
+    "math-lib-advanced",
+    "fixed-point-math",
+    "dex-factory",
+    "dex-pool",
+    "sip-010-trait"
+  ],
+  "cxlp-migration-queue": [
+    "sip-010-trait"
+  ],
+  "dim-registry": [
+    "dim-registry-trait",
+    "dex-factory"
+  ],
+  "dim-oracle-automation": [
+    "dim-registry",
+    "dimensional-oracle-trait"
+  ],
+  "dim-yield-stake": [
+    "dim-metrics",
+    "sip-010-trait"
+  ],
+  "tokenized-bond": [
+    "sip-010-trait"
+  ],
+  "cxvg-token": [
+    "sip-010-trait",
+    "ft-mintable-trait"
+  ],
+  "cxtr-token": [
+    "sip-010-trait",
+    "ft-mintable-trait",
+    "monitor-trait"
+  ],
+  "cxvg-utility": [
+    "sip-010-trait",
+    "cxvg-token"
+  ],
+  "tokenized-bond-adapter": [
+    "tokenized-bond",
+    "sip-010-trait"
+  ],
+  "mock-token": [
+    "sip-010-trait",
+    "ft-mintable-trait"
+  ],
+  "dex-factory": [
+    "access-control-trait",
+    "sip-010-trait"
+  ],
+  "dex-pool": [
+    "dex-factory",
+    "sip-010-trait"
+  ],
+  "oracle": [
+    "dex-factory"
+  ],
+  "yield-distribution-engine": [
+    "dex-factory"
+  ],
+  "dim-metrics": [
+    "dim-registry"
+  ],
+  "concentrated-liquidity-pool": [
+    "dim-registry",
+    "dex-pool"
+  ]
+}
