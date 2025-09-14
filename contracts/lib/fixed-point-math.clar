@@ -12,32 +12,51 @@
 (define-constant ONE_6 u1000000) ;; 6 decimals
 
 ;; === MULTIPLICATION FUNCTIONS ===
-;; Multiply two 18-decimal fixed-point numbers, round down
+;; Safe multiplication of two 18-decimal fixed-point numbers, rounding down.
+;; Prevents overflow by decomposing the multiplication.
 (define-read-only (mul-down (a uint) (b uint))
-  (/ (* a b) ONE_18))
+  (let ((b-whole (/ b ONE_18))
+        (b-frac (mod b ONE_18)))
+    (+ (* a b-whole) (/ (* a b-frac) ONE_18))))
 
-;; Multiply two 18-decimal fixed-point numbers, round up
+;; Safe multiplication of two 18-decimal fixed-point numbers, rounding up.
+;; Prevents overflow by decomposing the multiplication.
 (define-read-only (mul-up (a uint) (b uint))
-  (let ((product (* a b)))
-    (if (is-eq (mod product ONE_18) u0)
-      (/ product ONE_18)
-      (+ (/ product ONE_18) u1))))
+  (let ((b-whole (/ b ONE_18))
+        (b-frac (mod b ONE_18)))
+    (let ((term1 (* a b-whole))
+          (term2-product (* a b-frac)))
+      (let ((term2 (/ term2-product ONE_18))
+            (rem (mod term2-product ONE_18)))
+        (if (> rem u0)
+          (+ term1 term2 u1)
+          (+ term1 term2))))))
 
 ;; === DIVISION FUNCTIONS ===
-;; Divide two 18-decimal fixed-point numbers, round down
+;; Safe division of two 18-decimal fixed-point numbers, rounding down.
+;; Prevents overflow by decomposing the division.
 (define-read-only (div-down (a uint) (b uint))
   (if (is-eq b u0)
     ERR_DIVISION_BY_ZERO
-    (ok (/ (* a ONE_18) b))))
+    (ok (let ((a-whole (/ a b))
+              (a-frac (mod a b)))
+          (+ (* a-whole ONE_18) (/ (* a-frac ONE_18) b))))))
 
-;; Divide two 18-decimal fixed-point numbers, round up
+;; Safe division of two 18-decimal fixed-point numbers, rounding up.
+;; Prevents overflow by decomposing the division.
 (define-read-only (div-up (a uint) (b uint))
   (if (is-eq b u0)
     ERR_DIVISION_BY_ZERO
-    (let ((numerator (* a ONE_18)))
-      (if (is-eq (mod numerator b) u0)
-        (ok (/ numerator b))
-        (ok (+ (/ numerator b) u1))))))
+    (ok
+      (let ((a-whole (/ a b))
+            (a-frac (mod a b)))
+        (let ((term1 (* a-whole ONE_18))
+              (term2-product (* a-frac ONE_18)))
+          (let ((term2 (/ term2-product b))
+                (rem (mod term2-product b)))
+            (if (> rem u0)
+              (+ term1 term2 u1)
+              (+ term1 term2))))))))
 
 ;; === PRECISION CONVERSION ===
 ;; Convert from 18-decimal to 8-decimal precision

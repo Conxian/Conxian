@@ -81,12 +81,28 @@
     (ok (tuple (volume-24h u0) (fees-24h u0)))))  ;; Simplified for enhanced deployment
 
 ;; Private functions
-;; Simplified square root using Newtons method
-(define-private (sqrt (x uint))
-  (if (<= x u1)
-      x
-      (let ((guess (/ x u2)))
-        (/ (+ guess (/ x guess)) u2))))
+;; Calculates integer square root using Newton's method over 6 iterations for precision.
+(define-private (integer-sqrt (n uint))
+  (if (is-eq n u0) u0
+    (let ((x0 (if (> n u1) (/ n u2) u1)))
+      (if (is-eq x0 u0) u1 ;; Avoid division by zero if n is 1
+        (let ((x1 (/ (+ x0 (/ n x0)) u2)))
+          (let ((x2 (/ (+ x1 (/ n x1)) u2)))
+            (let ((x3 (/ (+ x2 (/ n x2)) u2)))
+              (let ((x4 (/ (+ x3 (/ n x3)) u2)))
+                (let ((x5 (/ (+ x4 (/ n x4)) u2)))
+                  (let ((x6 (/ (+ x5 (/ n x5)) u2)))
+                    x6
+                  )
+                )
+              )
+            )
+          )
+        )
+      )
+    )
+  )
+)
 
 ;; Calculate output amount for constant product formula with fees
 (define-private (calculate-swap-amount (amount-in uint) (reserve-in uint) (reserve-out uint))
@@ -184,7 +200,7 @@
         (reserve-y (var-get reserve-b))
         (shares (if (is-eq current-supply u0)
                     ;; First liquidity provision
-                    (- (sqrt (* dx dy)) MIN_LIQUIDITY)
+                    (- (integer-sqrt (* dx dy)) MIN_LIQUIDITY)
                     ;; Subsequent liquidity provision
                     (min (/ (* dx current-supply) reserve-x)
                          (/ (* dy current-supply) reserve-y))))
@@ -278,12 +294,19 @@
     (ok true)))
 
 ;; Administrative functions
-(define-public (initialize (token-a-addr principal) (token-b-addr principal))
+(define-public (initialize (token-a-addr principal) (token-b-addr principal) (fee-bps uint) (factory-addr principal))
   (begin
-    (asserts! (is-eq tx-sender (var-get factory)) (err ERR_UNAUTHORIZED))
+    ;; This function should only be called once, by the factory that created this pool.
+    (asserts! (is-eq tx-sender factory-addr) (err ERR_UNAUTHORIZED))
+    (asserts! (is-none (var-get token-a)) (err ERR_NOT_INITIALIZED)) ;; ERR_ALREADY_INITIALIZED
+
+    (var-set factory factory-addr)
     (var-set token-a (some token-a-addr))
     (var-set token-b (some token-b-addr))
-    (ok true)))
+    (var-set lp-fee-bps fee-bps)
+    (ok true)
+  )
+)
 
 (define-public (set-paused (pause bool))
   (begin

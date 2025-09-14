@@ -167,6 +167,9 @@
         (map-delete user-fee-discounts tx-sender)
         (map-delete dimensional-boosts tx-sender)
         
+        ;; Create a new snapshot to record the change in voting power to zero
+        (map-set voting-snapshots { user: tx-sender, block: block-height } { voting-power: u0 })
+
         (ok amount)))
     (err ERR_NO_LOCK_FOUND)))
 

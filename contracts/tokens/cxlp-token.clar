@@ -47,6 +47,7 @@
 (define-map balance-since { who: principal } { since: uint })
 
 ;; Migration configuration
+(define-data-var migration-queue-contract (optional principal) none)
 (define-data-var cxd-contract (optional principal) none)
 (define-data-var migration-start-height (optional uint) none)
 (define-data-var epoch-length uint u0)
@@ -194,6 +195,14 @@
   )
 )
 
+(define-public (set-migration-queue-contract (queue principal))
+  (begin
+    (asserts! (is-owner tx-sender) (err ERR_UNAUTHORIZED))
+    (var-set migration-queue-contract (some queue))
+    (ok true)
+  )
+)
+
 (define-public (configure-migration (cxd principal) (start-height uint) (epoch-len uint))
   (begin
     (asserts! (is-owner tx-sender) (err ERR_UNAUTHORIZED))
@@ -243,6 +252,11 @@
         (map-set balance-since { who: recipient } { since: block-height })
       )
     )
+    ;; --- HOOK FOR MIGRATION QUEUE ---
+    (match (var-get migration-queue-contract)
+      queue-contract (try! (contract-call? queue-contract on-cxlp-transfer sender recipient amount))
+      none           true ;; Do nothing if queue contract is not set
+    )
     (ok true)
   )
 )
@@ -289,6 +303,11 @@
     (let ((bal (default-to u0 (get bal (map-get? balances { who: recipient })))) )
       (map-set balances { who: recipient } { bal: (+ bal amount) })
       (map-set balance-since { who: recipient } { since: block-height })
+    )
+    ;; --- HOOK FOR MIGRATION QUEUE ---
+    (match (var-get migration-queue-contract)
+      queue-contract (try! (contract-call? queue-contract initialize-duration-tracking recipient))
+      none           true ;; Do nothing if queue contract is not set
     )
     (ok true)
   )
