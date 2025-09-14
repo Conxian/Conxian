@@ -1,18 +1,7 @@
 ;; Conxian DEX Pool - Constant product AMM pool with enhanced tokenomics integration
 ;; Implements pool-trait with full system integration
 
-;; Define pool trait locally
-(define-trait pool-trait
-  (
-    (add-liquidity (uint uint (optional principal)) (response (tuple (dx uint) (dy uint) (shares uint)) uint))
-    (remove-liquidity (uint uint uint) (response (tuple (dx uint) (dy uint)) uint))
-    (swap (uint principal principal) (response (tuple (dx uint) (dy uint)) uint))
-    (get-reserves () (response (tuple (reserve-x uint) (reserve-y uint)) uint))
-    (get-total-supply () (response uint uint))
-  )
-)
-
-;; Implement the pool trait with proper syntax
+;; Pool trait is defined centrally in contracts/traits. Import and implement the alias.
 (use-trait pool-trait .pool-trait)
 (impl-trait pool-trait)
 

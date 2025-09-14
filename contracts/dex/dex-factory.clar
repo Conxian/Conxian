@@ -6,22 +6,9 @@
 (define-constant ERR_ALREADY_EXISTS (err u101))
 (define-constant ERR_NOT_FOUND (err u102))
 
-;; Define Access Control Trait
-(define-trait access-control-trait
-  (
-    ;; Role Management
-    (has-role (principal (string-ascii 32)) (response bool uint))
-    (grant-role (principal (string-ascii 32)) (response bool uint))
-    (revoke-role (principal (string-ascii 32)) (response bool uint))
-    
-    ;; Role-based Access Control
-    (only-role ((string-ascii 32)) (response bool uint))
-    (only-roles (list (string-ascii 32)) (response bool uint))
-  )
-)
-
-;; Implement the access control trait with proper syntax
-(impl-trait .access-control-trait)
+;; Use canonical access-control trait
+(use-trait access-control-trait .access-control-trait)
+(impl-trait access-control-trait)
 
 (define-data-var roles (map principal (list (string-ascii 32))) {})
 (define-data-var owner principal tx-sender)
@@ -106,6 +93,7 @@
 )
 
 ;; Implement required traits
+(use-trait access-control-trait .access-control-trait)
 (impl-trait access-control-trait)
 
 ;; Access Control Implementation

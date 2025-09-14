@@ -131,10 +131,10 @@
 ;; Calculate square root using the Babylonian method (Heron's method)
 (define-read-only (sqrt-fixed (x uint))
   (if (or (is-eq x u0) (is-eq x u1))
-    x
+    (ok x)
     (let ((initial-guess (match (div-down (+ (match (div-down x u2) (ok v) v) u1) u2) (ok v) v)))
       (let ((result (sqrt-iter x x initial-guess u0)))
-        result))))
+        (ok result)))))
 
 ;; === GEOMETRIC MEAN ===
 ;; Calculate geometric mean of two numbers: sqrt(a * b)

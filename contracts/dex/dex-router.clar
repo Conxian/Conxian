@@ -28,8 +28,8 @@
 )
 
 ;; Implement traits for this contract with proper syntax
-(impl-trait .sip-010-trait)
-(impl-trait .pool-trait)
+(impl-trait sip-010-trait)
+(impl-trait pool-trait)
 
 ;; Constants
 (define-constant ERR_INVALID_POOL (err u4001))

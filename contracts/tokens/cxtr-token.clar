@@ -2,32 +2,11 @@
 ;; Conxian Contributor Token (SIP-010 FT) - merit-based rewards token
 ;; Enhanced with system integration hooks for coordinator interface
 
-;; Define SIP-010 Fungible Token Trait
-
-(define-trait ft-trait
-  (
-    (transfer (uint principal principal (optional (buff 34))) (response bool uint))
-    (get-name () (response (string-ascii 32) uint))
-    (get-symbol () (response (string-ascii 32) uint))
-    (get-decimals () (response uint uint))
-    (get-balance (principal) (response uint uint))
-    (get-total-supply () (response uint uint))
-    (get-token-uri () (response (optional (string-utf8 256)) uint))
-  )
-)
-
-;; Define Mintable Trait
-
-(define-trait ft-mintable-trait
-  (
-    (mint (principal uint (optional (buff 34))) (response bool uint))
-    (burn (principal uint (optional (buff 34))) (response bool uint))
-  )
-)
-
-;; Implement the traits with proper syntax
-(impl-trait .ft-trait)
-(impl-trait .ft-mintable-trait)
+;; Use canonical trait definitions from contracts/traits
+ (use-trait ft-trait .sip-010-trait)
+ (impl-trait ft-trait)
+ (use-trait ft-mintable-trait .ft-mintable-trait)
+ (impl-trait ft-mintable-trait)
 
 ;; --- Errors ---
 (define-constant ERR_UNAUTHORIZED u100)

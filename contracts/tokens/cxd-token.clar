@@ -2,30 +2,11 @@
 ;; Conxian Revenue Token (SIP-010 FT) - accrues protocol revenue to holders off-contract
 ;; Enhanced with integration hooks for staking, revenue distribution, and system monitoring
 
-;; Define SIP-010 Fungible Token Trait
-(define-trait ft-trait
-  (
-    (transfer (uint principal principal (optional (buff 34))) (response bool uint))
-    (get-name () (response (string-ascii 32) uint))
-    (get-symbol () (response (string-ascii 32) uint))
-    (get-decimals () (response uint uint))
-    (get-balance (principal) (response uint uint))
-    (get-total-supply () (response uint uint))
-    (get-token-uri () (response (optional (string-utf8 256)) uint))
-  )
-)
-
-;; Define Mintable Trait
-(define-trait ft-mintable-trait
-  (
-    (mint (principal uint (optional (buff 34))) (response bool uint))
-    (burn (principal uint (optional (buff 34))) (response bool uint))
-  )
-)
-
-;; Implement the traits with proper syntax
-(impl-trait .ft-trait)
-(impl-trait .ft-mintable-trait)
+;; Use canonical SIP-010 FT and FT-mintable traits
+(use-trait ft-trait .sip-010-trait)
+(impl-trait ft-trait)
+(use-trait ft-mintable-trait .ft-mintable-trait)
+(impl-trait ft-mintable-trait)
 
 ;; SIP-010 Fungible Token Standard Functions
 (define-read-only (get-name)
@@ -68,16 +49,7 @@
   )
 )
 
-(define-trait ft-mintable-trait
-  (
-    (mint (principal uint (optional (buff 34))) (response bool uint))
-    (burn (principal uint (optional (buff 34))) (response bool uint))
-  )
-)
-
-;; Implement the traits
-(impl-trait ft-trait)
-(impl-trait ft-mintable-trait)
+;; Traits are centralized under `contracts/traits/` and imported above
 
 ;; --- Errors ---
 (define-constant ERR_UNAUTHORIZED u100)

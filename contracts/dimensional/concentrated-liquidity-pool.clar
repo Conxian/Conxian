@@ -8,16 +8,9 @@
 ;; Contract state
 (define-data-var contract-owner principal tx-sender)
 
-;; Define Pool Trait
-(define-trait pool-trait
-  (
-    (add-liquidity (uint uint (optional principal)) (response (tuple (dx uint) (dy uint) (shares uint)) uint))
-    (remove-liquidity (uint uint uint) (response (tuple (dx uint) (dy uint)) uint))
-    (swap (uint principal principal) (response (tuple (dx uint) (dy uint)) uint))
-    (get-reserves () (response (tuple (reserve-x uint) (reserve-y uint)) uint))
-    (get-total-supply () (response uint uint))
-  )
-)
+;; Pool trait is centralized; import canonical trait and implement alias
+(use-trait pool-trait .pool-trait)
+(impl-trait pool-trait)
 
 ;; Initialize data variables with default values
 (define-data-var pool-token-x principal tx-sender)
@@ -66,18 +59,4 @@
         u200
         u60)))) ;; Default to medium spacing if no match
 
-;; Define the pool trait
-(define-trait pool-trait
-  (
-    (initialize (uint uint uint) (response bool uint))
-    (mint (principal int24 int24 uint) (response uint uint uint uint uint))
-    (burn (uint) (response uint uint uint))
-    (collect (uint principal) (response uint uint))
-    (swap (bool uint) (response uint uint))
-    (increase-liquidity (uint uint) (response uint uint uint))
-    (decrease-liquidity (uint uint) (response uint uint))
-  )
-)
-
-;; Implement the pool trait with proper syntax
-(impl-trait .pool-trait)
+;; Additional pool-trait variants are implemented by the canonical pool trait file.

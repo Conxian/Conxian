@@ -1,22 +1,9 @@
 ;; mock-token.clar
 ;; Minimal SIP-010-compliant mock for testing dynamic dispatch
 
-;; Define SIP-010 FT Trait
-
-(define-trait ft-trait
-  (
-    (transfer (uint principal principal (optional (buff 34))) (response bool uint))
-    (get-name () (response (string-ascii 32) uint))
-    (get-symbol () (response (string-ascii 32) uint))
-    (get-decimals () (response uint uint))
-    (get-balance (principal) (response uint uint))
-    (get-total-supply () (response uint uint))
-    (get-token-uri () (response (optional (string-utf8 256)) uint))
-  )
-)
-
-;; Implement the trait with proper syntax
-(impl-trait .ft-trait)
+;; Use canonical SIP-010 FT trait and implement
+(use-trait ft-trait .sip-010-trait)
+(impl-trait ft-trait)
 
 ;; Basic token metadata and accounting (lightweight mock)
 (define-data-var total-supply uint u0)

@@ -2,7 +2,9 @@
 ;; Enhanced Flash Loan Vault with sBTC Support
 ;; Implements secure flash loans with sBTC collateral and risk management
 
-(use-trait ft-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.sip-010-trait.sip-010-trait)
+ (use-trait ft-trait .sip-010-trait)
+ (use-trait flash-loan-receiver .flash-loan-receiver-trait)
+ (impl-trait flash-loan-receiver)
 
 ;; =============================================================================
 ;; CONSTANTS
@@ -88,15 +90,7 @@
 (define-data-var vault-paused bool false)
 (define-data-var emergency-admin (optional principal) none)
 
-;; =============================================================================
-;; FLASH LOAN TRAIT
-;; =============================================================================
-
-(define-trait flash-loan-receiver-trait
-  (
-    ;; Called during flash loan execution
-    (execute-operation (uint principal uint principal) (response bool uint))
-  ))
+;; Trait implementation is provided by the canonical trait file under contracts/traits/
 
 ;; =============================================================================
 ;; CORE FLASH LOAN FUNCTIONS

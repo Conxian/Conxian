@@ -2,8 +2,8 @@
 ;; Comprehensive unit tests for Conxian enhanced tokenomics system
 ;; Tests all token contracts, staking, migration, governance utilities, and revenue distribution
 
-(use-trait ft-trait 'traits.sip-010-trait.sip-010-trait)
-(use-trait ftm-trait 'ft-mintable-trait.ft-mintable-trait)
+(use-trait ft-trait .sip-010-trait)
+(use-trait ftm-trait .ft-mintable-trait)
 
 ;; =============================================================================
 ;; TEST CONSTANTS AND SETUP

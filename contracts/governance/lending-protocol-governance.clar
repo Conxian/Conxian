@@ -3,21 +3,8 @@
 ;; Manages protocol parameters, upgrades, and community decisions
 ;; Integrates with AccessControl for role-based access
 
-;; Define Access Control Trait
-(define-trait access-control-trait
-  (
-    ;; Role Management
-    (has-role (principal (string-ascii 32)) (response bool uint))
-    (grant-role (principal (string-ascii 32)) (response bool uint))
-    (revoke-role (principal (string-ascii 32)) (response bool uint))
-    
-    ;; Role-based Access Control
-    (only-role ((string-ascii 32)) (response bool uint))
-    (only-roles (list (string-ascii 32)) (response bool uint))
-  )
-)
-
-;; Implement the access control trait
+;; Use canonical access-control trait
+(use-trait access-control-trait .access-control-trait)
 (impl-trait access-control-trait)
 
 (define-constant ERR_UNAUTHORIZED (err u8001))

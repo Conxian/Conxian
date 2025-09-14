@@ -2,7 +2,9 @@
 ;; sBTC Flash Loan Extension - Advanced flash loan functionality with sBTC support
 ;; Provides flash loans with enhanced security, multi-asset support, and bond integration
 
-(use-trait ft-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.sip-010-trait.sip-010-trait)
+ (use-trait ft-trait .sip-010-trait)
+ (use-trait flash-loan-receiver .flash-loan-receiver-trait)
+ (impl-trait flash-loan-receiver)
 
 ;; =============================================================================
 ;; CONSTANTS AND ERROR CODES
@@ -81,16 +83,7 @@
 (define-data-var total-flash-volume uint u0)
 (define-data-var total-fees-collected uint u0)
 
-;; =============================================================================
-;; FLASH LOAN TRAIT
-;; =============================================================================
-
-(define-trait flash-loan-receiver-trait
-  (
-    ;; Execute flash loan callback
-    (execute-flash-loan (uint principal (buff 2048)) (response bool uint))
-  )
-)
+;; Trait implementation is provided by the canonical trait file under contracts/traits/
 
 ;; =============================================================================
 ;; ASSET MANAGEMENT

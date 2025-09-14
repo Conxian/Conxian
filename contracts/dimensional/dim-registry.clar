@@ -16,7 +16,7 @@
 )
 
 ;; Implement the dim-registry trait with proper syntax
-(use-trait dim-registry-trait .dim-registry-trait.dim-registry-trait)
+(use-trait dim-registry-trait .dim-registry-trait)
 (impl-trait dim-registry-trait)
 
 (define-constant ERR_UNAUTHORIZED u101)
