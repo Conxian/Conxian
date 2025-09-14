@@ -2,8 +2,8 @@
 ;; Minimal SIP-010-compliant mock for testing dynamic dispatch
 
 ;; Use canonical SIP-010 FT trait and implement
-(use-trait ft-trait .sip-010-trait)
-(impl-trait ft-trait)
+(use-trait ft-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.sip-010-trait)
+(impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.sip-010-trait)
 
 ;; Basic token metadata and accounting (lightweight mock)
 (define-data-var total-supply uint u0)

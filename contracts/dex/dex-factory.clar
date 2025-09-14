@@ -7,8 +7,8 @@
 (define-constant ERR_NOT_FOUND (err u102))
 
 ;; Use canonical access-control trait
-(use-trait access-control-trait .access-control-trait)
-(impl-trait access-control-trait)
+(use-trait access-control-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.access-control-trait)
+(impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.access-control-trait)
 
 (define-data-var roles (map principal (list (string-ascii 32))) {})
 (define-data-var owner principal tx-sender)
@@ -93,8 +93,8 @@
 )
 
 ;; Implement required traits
-(use-trait access-control-trait .access-control-trait)
-(impl-trait access-control-trait)
+(use-trait access-control-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.access-control-trait)
+(impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.access-control-trait)
 
 ;; Access Control Implementation
 (define-data-var roles (map principal (list (string-ascii 32))) {})

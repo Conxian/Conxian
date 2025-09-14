@@ -2,11 +2,11 @@
 ;; Enterprise-grade loan management system with bond issuance for large loans
 ;; Supports institutional borrowing, risk-based pricing, and automated bond creation
 
-(use-trait sip10 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.sip-010-trait.sip-010-trait)
-(use-trait lending-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.lending-system-trait.lending-system-trait)
+(use-trait sip10 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.sip-010-trait)
+(use-trait lending-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.lending-system-trait)
 
 ;; Import mathematical libraries for enterprise calculations (removed unresolved trait import)
-;; (use-trait math-precision 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.precision-calculator.precision-calculator-trait)
+;; (use-trait math-precision 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.precision-calculator)
 
 ;; Constants
 (define-constant ERR_UNAUTHORIZED (err u7001))

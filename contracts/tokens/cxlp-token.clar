@@ -2,10 +2,10 @@
 ;; Conxian Liquidity Provider Token (SIP-010 FT)
 
 ;; Use canonical trait definitions from contracts/traits
- (use-trait ft-trait .sip-010-trait)
- (impl-trait ft-trait)
- (use-trait ft-mintable-trait .ft-mintable-trait)
- (impl-trait ft-mintable-trait)
+ (use-trait ft-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.sip-010-trait)
+ (impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.sip-010-trait)
+ (use-trait ft-mintable-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.ft-mintable-trait)
+ (impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.ft-mintable-trait)
 
 ;; Returns the current epoch index since migration start (not capped)
 (define-read-only (current-epoch)

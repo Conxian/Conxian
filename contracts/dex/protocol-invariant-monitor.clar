@@ -2,8 +2,6 @@
 ;; Protocol invariant monitoring and circuit breaker system
 ;; Monitors key invariants and triggers automated protection mechanisms
 
- (use-trait staking-ref 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.staking-trait)
-
 ;; --- Constants ---
 (define-constant CONTRACT_OWNER tx-sender)
 (define-constant PRECISION u100000000)

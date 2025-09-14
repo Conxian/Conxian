@@ -13,8 +13,8 @@
 )
 
 ;; Implement the oracle trait with proper syntax
-(use-trait oracle-trait .oracle-trait)
-(impl-trait oracle-trait)
+(use-trait oracle-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.oracle-trait)
+(impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.oracle-trait)
 
 ;; Error codes
 (define-constant ERR_UNAUTHORIZED (err u1001))

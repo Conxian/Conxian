@@ -3,10 +3,10 @@
 ;; Enhanced with integration hooks for staking, revenue distribution, and system monitoring
 
 ;; Use canonical SIP-010 FT and FT-mintable traits
-(use-trait ft-trait .sip-010-trait)
-(impl-trait ft-trait)
-(use-trait ft-mintable-trait .ft-mintable-trait)
-(impl-trait ft-mintable-trait)
+(use-trait ft-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.sip-010-trait)
+(impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.sip-010-trait)
+(use-trait ft-mintable-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.ft-mintable-trait)
+(impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.ft-mintable-trait)
 
 ;; SIP-010 Fungible Token Standard Functions
 (define-read-only (get-name)

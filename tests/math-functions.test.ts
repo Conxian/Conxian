@@ -1,4 +1,3 @@
-import { describe, expect, it, beforeEach } from '@jest/globals';
 import { Cl } from '@stacks/transactions';
 
 // Test suite for comprehensive mathematical function validation

@@ -3,8 +3,8 @@
 ;; Handles complex yield calculations, distribution schedules, and optimization
 
 ;; Use canonical SIP-010 trait
- (use-trait ft-trait .sip-010-trait)
- (impl-trait ft-trait)
+ (use-trait ft-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.sip-010-trait)
+ (impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.sip-010-trait)
 
 ;; Constants
 (define-constant ERR_UNAUTHORIZED (err u9001))

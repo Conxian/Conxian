@@ -3,8 +3,8 @@
 ;; Supports multiple liquidation strategies and automated liquidations
 
 ;; Use canonical liquidation trait from traits/ and implement
-(use-trait liquidation-trait .liquidation-trait)
-(impl-trait liquidation-trait)
+(use-trait liquidation-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.liquidation-trait)
+(impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.liquidation-trait)
 
 ;; Oracle contract (will be set by admin)
 (define-data-var oracle-contract (optional principal) none)
