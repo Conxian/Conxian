@@ -240,42 +240,46 @@
     (asserts! (>= (- block-height (get last-execution strategy)) (get rebalance-frequency strategy)) ERR_OPTIMIZATION_FAILED)
     
     ;; Execute optimization based on goal
-    (let ((optimization-result 
-            (match (get optimization-goal strategy)
-              "YIELD_MAX" (try! (optimize-for-yield (get target-pools strategy)))
-              "RISK_MIN" (try! (optimize-for-risk (get target-pools strategy)))
-              "BALANCED" (try! (optimize-balanced (get target-pools strategy)))
-              (err ERR_OPTIMIZATION_FAILED))))
-      
-      ;; Update strategy execution record
-      (map-set optimization-strategies strategy-id
-        (merge strategy {last-execution: block-height}))
-      
-      ;; Update performance tracking
-      (var-set successful-optimizations (+ (var-get successful-optimizations) u1))
-      
-      (print (tuple (event "optimization-executed") (strategy-id strategy-id) (result optimization-result)))
-      
-      (ok optimization-result))))
+    (let ((optimization-result (if (is-eq (get optimization-goal strategy) "YIELD_MAX")
+                                 (optimize-for-yield (get target-pools strategy))
+                                 (if (is-eq (get optimization-goal strategy) "RISK_MIN")
+                                     (optimize-for-risk (get target-pools strategy))
+                                     (if (is-eq (get optimization-goal strategy) "BALANCED")
+                                         (optimize-balanced (get target-pools strategy))
+                                         (err u0))))))
+      (match optimization-result
+        result
+          (begin
+            ;; Update strategy execution record
+            (map-set optimization-strategies strategy-id
+              (merge strategy {last-execution: block-height}))
+
+            ;; Update performance tracking
+            (var-set successful-optimizations (+ (var-get successful-optimizations) u1))
+
+            (print (tuple (event "optimization-executed") (strategy-id strategy-id) (result result)))
+
+            (ok result))
+        error (err error)))))
 
 ;; === OPTIMIZATION ALGORITHMS ===
 (define-private (optimize-for-yield (pools (list 10 {pool-id: uint, asset: principal})))
   ;; Move liquidity to highest yielding pools
   (begin
     (print (tuple (optimization "yield-maximization") (pools-count (len pools))))
-    (ok u1))) ;; Simplified implementation
+    (if true (ok u1) (err u0))))
 
 (define-private (optimize-for-risk (pools (list 10 {pool-id: uint, asset: principal})))
   ;; Distribute liquidity to minimize risk concentration
   (begin
     (print (tuple (optimization "risk-minimization") (pools-count (len pools))))
-    (ok u2))) ;; Simplified implementation
+    (if true (ok u2) (err u0))))
 
 (define-private (optimize-balanced (pools (list 10 {pool-id: uint, asset: principal})))
   ;; Balance between yield and risk
   (begin
     (print (tuple (optimization "balanced-approach") (pools-count (len pools))))
-    (ok u3))) ;; Simplified implementation
+    (if true (ok u3) (err u0))))
 
 ;; === AUTOMATED REBALANCING ===
 (define-public (create-rebalancing-rule
@@ -313,29 +317,17 @@
 
 (define-private (internal-check-rebalance-triggers (pool-id uint) (asset principal))
   (begin
-    ;; Check if any rebalancing rules should be triggered
     (let ((pool (unwrap! (map-get? liquidity-pools {pool-id: pool-id, asset: asset}) ERR_POOL_NOT_FOUND)))
-      
-      ;; Calculate current utilization rate
       (let ((utilization-rate (if (> (get total-liquidity pool) u0)
                                 (/ (* (get utilized-liquidity pool) BASIS_POINTS) (get total-liquidity pool))
                                 u0)))
-        
-        ;; Check emergency threshold
         (if (<= utilization-rate EMERGENCY_THRESHOLD)
-          (begin
-            (try! (trigger-emergency-mode pool-id asset))
-            (print (tuple (event "emergency-triggered") (pool-id pool-id) (utilization utilization-rate))))
-          
-          ;; Check rebalancing threshold
+          (trigger-emergency-mode pool-id asset)
           (if (or (>= utilization-rate (+ (get target-utilization pool) REBALANCE_THRESHOLD))
                   (<= utilization-rate (- (get target-utilization pool) REBALANCE_THRESHOLD)))
-            (begin
-              (try! (execute-pool-rebalance pool-id asset))
-              (print (tuple (event "rebalance-triggered") (pool-id pool-id) (utilization utilization-rate))))
-            (ok true)))))
-    
-    (ok true)))
+            (execute-pool-rebalance pool-id asset)
+            (ok true))))))
+)
 
 ;; Public wrapper to align expected two-argument usage across contracts
 (define-public (check-rebalance-triggers (pool-id uint) (asset principal))
@@ -382,13 +374,13 @@
   (begin
     ;; Find liquidity from other pools or external sources
     (print (tuple (rebalance "add-liquidity") (pool-id pool-id)))
-    (ok true))) ;; Simplified
+    (if true (ok true) (err u0)))) ;; Simplified
 
 (define-private (remove-excess-liquidity (pool-id uint) (asset principal))
   (begin
     ;; Move excess liquidity to better opportunities
     (print (tuple (rebalance "remove-excess") (pool-id pool-id)))
-    (ok true))) ;; Simplified
+    (if true (ok true) (err u0)))) ;; Simplified
 
 ;; === ARBITRAGE DETECTION ===
 (define-public (scan-arbitrage-opportunities)
@@ -433,6 +425,9 @@
       (print (tuple (event "liquidity-provider-added") (provider provider) (amount amount)))
       
       (ok true))))
+
+(define-private (min (a uint) (b uint))
+  (if (< a b) a b))
 
 ;; === READ-ONLY FUNCTIONS ===
 (define-read-only (get-liquidity-pool (pool-id uint) (asset principal))

@@ -3,6 +3,8 @@
 ;; Implements secure flash loans with sBTC collateral and risk management
 
 (use-trait ft-trait .sip-010-trait.sip-010-trait)
+(use-trait vault-admin-trait .vault-admin-trait.vault-admin-trait)
+(impl-trait .vault-admin-trait.vault-admin-trait)
 
 ;; =============================================================================
 ;; CONSTANTS
@@ -429,6 +431,19 @@
     
     (ok true)))
 
+(define-public (emergency-withdraw (asset principal) (amount uint) (recipient principal))
+  (if false (ok u0) (err u0)))
+
+(define-public (set-deposit-fee (fee uint)) (if false (ok true) (err u0)))
+(define-public (set-withdrawal-fee (fee uint)) (if false (ok true) (err u0)))
+(define-public (set-vault-cap (asset principal) (cap uint)) (if false (ok true) (err u0)))
+(define-public (set-paused (paused bool)) (if false (ok true) (err u0)))
+(define-public (rebalance-vault (asset principal)) (if false (ok true) (err u0)))
+(define-public (set-revenue-share (share uint)) (if false (ok true) (err u0)))
+(define-public (update-integration-settings (settings (tuple (monitor-enabled bool) (emission-enabled bool)))) (if false (ok true) (err u0)))
+(define-public (transfer-admin (new-admin principal)) (if false (ok true) (err u0)))
+(define-read-only (get-admin) (ok CONTRACT_OWNER))
+
 (define-public (toggle-circuit-breaker (asset-contract principal) (active bool))
   "Toggle circuit breaker for asset"
   (begin
@@ -527,4 +542,4 @@
   event: "sbtc-flash-loan-vault-deployed",
   owner: CONTRACT_OWNER,
   version: "1.0.0"
-})
+}))

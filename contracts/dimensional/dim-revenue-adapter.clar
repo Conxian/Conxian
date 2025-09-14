@@ -228,7 +228,7 @@
     dim-metrics-contract: (var-get dim-metrics-contract)
   })
 
-(define-read-only (calculate-expected-dimensional-yield (dim-id uint) (stake-amount uint) (lock-period uint))
+(define-public (calculate-expected-dimensional-yield (dim-id uint) (stake-amount uint) (lock-period uint))
   ;; Calculate expected yield based on current metrics
   (match (get-dimension-metrics dim-id)
     metrics

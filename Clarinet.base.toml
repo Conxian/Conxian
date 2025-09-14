@@ -1,6 +1,7 @@
 [project]
 name = "conxian-base"
 description = "Conxian base manifest: core traits and tokens only"
+requirements = []
 clarinet_version = "3.5.0"
 
 [accounts]
@@ -26,45 +27,3 @@ epoch = "2.4"
 path = "contracts/traits/sip-009-trait.clar"
 clarity_version = 2
 epoch = "2.4"
-
-# =============================
-# Tokens (SIP-010, SIP-009)
-# =============================
-[contracts.cxvg-token]
-path = "contracts/cxvg-token.clar"
-clarity_version = 2
-epoch = "2.4"
-depends_on = ["sip-010-trait"]
-
-[contracts.cxd-token]
-path = "contracts/cxd-token.clar"
-clarity_version = 2
-epoch = "2.4"
-depends_on = ["sip-010-trait", "ft-mintable-trait"]
-
-[contracts.cxlp-token]
-path = "contracts/cxlp-token.clar"
-clarity_version = 2
-epoch = "2.4"
-depends_on = ["sip-010-trait", "ft-mintable-trait"]
-
-[contracts.cxtr-token]
-path = "contracts/cxtr-token.clar"
-clarity_version = 2
-epoch = "2.4"
-depends_on = ["sip-010-trait", "ft-mintable-trait"]
-
-[contracts.cxs-token]
-path = "contracts/cxs-token.clar"
-clarity_version = 2
-epoch = "2.4"
-depends_on = ["sip-009-trait"]
-
-# =============================
-# Optional: Staking (SIP-010 based)
-# =============================
-[contracts.cxd-staking]
-path = "contracts/cxd-staking.clar"
-clarity_version = 2
-epoch = "2.4"
-depends_on = ["sip-010-trait"]

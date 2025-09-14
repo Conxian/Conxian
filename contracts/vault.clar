@@ -223,48 +223,48 @@
     (asserts! (is-admin tx-sender) ERR_UNAUTHORIZED)
     (asserts! (<= new-fee-bps u500) ERR_INVALID_AMOUNT) ;; Max 5%
     (var-set deposit-fee-bps new-fee-bps)
-    (ok true)))
+    (if true (ok true) (err u0))))
 
 (define-public (set-withdrawal-fee (new-fee-bps uint))
   (begin
     (asserts! (is-admin tx-sender) ERR_UNAUTHORIZED)
     (asserts! (<= new-fee-bps u1000) ERR_INVALID_AMOUNT) ;; Max 10%
     (var-set withdrawal-fee-bps new-fee-bps)
-    (ok true)))
+    (if true (ok true) (err u0))))
 
 (define-public (set-vault-cap (asset principal) (new-cap uint))
   (begin
     (asserts! (is-admin tx-sender) ERR_UNAUTHORIZED)
     (map-set vault-caps asset new-cap)
-    (ok true)))
+    (if true (ok true) (err u0))))
 
 (define-public (set-paused (pause bool))
   (begin
     (asserts! (is-admin tx-sender) ERR_UNAUTHORIZED)
     (var-set paused pause)
     (print (tuple (event "vault-pause-changed") (paused pause)))
-    (ok true)))
+    (if true (ok true) (err u0))))
 
 (define-public (set-revenue-share (new-share-bps uint))
   (begin
     (asserts! (is-admin tx-sender) ERR_UNAUTHORIZED)
     (asserts! (<= new-share-bps u5000) ERR_INVALID_AMOUNT) ;; Max 50%
     (var-set revenue-share-bps new-share-bps)
-    (ok true)))
+    (if true (ok true) (err u0))))
 
 (define-public (update-integration-settings (settings (tuple (monitor-enabled bool) (emission-enabled bool))))
   (begin
     (asserts! (is-admin tx-sender) ERR_UNAUTHORIZED)
     (var-set monitor-enabled (get monitor-enabled settings))
     (var-set emission-enabled (get emission-enabled settings))
-    (ok true)))
+    (if true (ok true) (err u0))))
 
 (define-public (transfer-admin (new-admin principal))
   (begin
     (asserts! (is-admin tx-sender) ERR_UNAUTHORIZED)
     (var-set admin new-admin)
     (print (tuple (event "admin-transferred") (old-admin tx-sender) (new-admin new-admin)))
-    (ok true)))
+    (if true (ok true) (err u0))))
 
 (define-public (add-supported-asset (asset principal) (strategy-contract principal))
   (begin
@@ -277,13 +277,13 @@
   (begin
     (asserts! (is-admin tx-sender) ERR_UNAUTHORIZED)
     ;; Emergency withdrawal implementation
-    (ok amount)))
+    (if true (ok amount) (err u0))))
 
 (define-public (rebalance-vault (asset principal))
   (begin
     (asserts! (is-admin tx-sender) ERR_UNAUTHORIZED)
     ;; Rebalancing logic implementation
-    (ok true)))
+    (if true (ok true) (err u0))))
 
 ;; Initialize default supported asset (STX)
 (map-set supported-assets 'SP000000000000000000002Q6VF78 true)

@@ -57,8 +57,7 @@
 
 (define-read-only (get-user-position (user principal) (asset principal))
   "Get user's lending position for asset"
-  (map-get? user-positions { user: user, asset: asset })
-)
+  (map-get? user-positions { user: user, asset: asset }))
 
 (define-read-only (get-user-supply-balance (user principal) (asset principal))
   "Get user's current supply balance with accrued interest"

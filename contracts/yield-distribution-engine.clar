@@ -233,9 +233,7 @@
                     (distribute-weighted pool-id)
                     (if (is-eq strategy "TIERED")
                       (distribute-tiered pool-id)
-                      (if (is-eq strategy "VESTING")
-                        (distribute-vesting pool-id)
-                        (ok false))))))))
+                      (ok false))))))
           (try! exec-result)))
       
       ;; Update pool last distribution
@@ -338,9 +336,10 @@
     (try! (add-yield-to-pool (get pool-id schedule) (get amount-per-distribution schedule)))
     
     ;; Distribute if not auto-compounding
-    (if (not (get auto-compound schedule))
-      (try! (distribute-yield (get pool-id schedule)))
-      (ok true))
+    (let ((distribution-result (if (not (get auto-compound schedule))
+                                 (distribute-yield (get pool-id schedule))
+                                 (ok true))))
+      (try! distribution-result))
     
     ;; Update schedule
     (map-set distribution-schedules schedule-id
@@ -483,10 +482,10 @@
 (define-read-only (calculate-apy (pool-id uint))
   ;; Calculate annualized percentage yield
   (match (map-get? yield-pools pool-id)
-    (some pool)
+    pool
       (let ((total-yield-year (get total-yield-distributed pool)) ;; Simplified
             (total-deposited (get total-deposited pool)))
         (if (> total-deposited u0)
           (ok (/ (* total-yield-year BASIS_POINTS) total-deposited))
           (ok u0)))
-    none ERR_POOL_NOT_FOUND))
+    ERR_POOL_NOT_FOUND))

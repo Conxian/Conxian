@@ -64,77 +64,73 @@
 ;; === MATHEMATICAL CONSTANT VALIDATION ===
 (define-public (validate-mathematical-constants)
   (begin
-    (let ((e-check (try! (contract-call? .math-lib-advanced exp-fixed u1000000000000000000)))
+    (let ((e-check (unwrap-panic (contract-call? .math-lib-advanced exp-fixed u1000000000000000000)))
           (pi-check PI_EXPECTED) ;; Would need geometric calculation for Pi
-          (ln2-check (try! (contract-call? .math-lib-advanced ln-fixed u2000000000000000000)))
-          (sqrt2-check (try! (contract-call? .math-lib-advanced sqrt-fixed u2000000000000000000))))
+          (ln2-check (unwrap-panic (contract-call? .math-lib-advanced ln-fixed u2000000000000000000)))
+          (sqrt2-check (unwrap-panic (contract-call? .math-lib-advanced sqrt-fixed u2000000000000000000))))
       (ok (tuple
         (e-valid (< (abs-diff e-check E_EXPECTED) (/ E_EXPECTED u1000)))
         (pi-valid true) ;; Placeholder
         (ln2-valid (< (abs-diff ln2-check LN2_EXPECTED) (/ LN2_EXPECTED u1000)))
-        (sqrt2-valid (< (abs-diff sqrt2-check SQRT2_EXPECTED) (/ SQRT2_EXPECTED u1000)))))))
+        (sqrt2-valid (< (abs-diff sqrt2-check SQRT2_EXPECTED) (/ SQRT2_EXPECTED u1000))))))))
 
 ;; === BENCHMARKING FUNCTIONS ===
 ;; Run sqrt benchmark test
 (define-public (run-sqrt-benchmark (input uint) (expected uint))
-  (match (contract-call? .math-lib-advanced sqrt-fixed input)
-    actual (let ((precision-loss (abs-diff actual expected))
-                 (precision-loss-bps (if (is-eq expected u0) u0 (/ (* precision-loss u10000) expected))))
-             (ok (tuple
-               (operation "sqrt")
-               (input input)
-               (expected expected)
-               (actual actual)
-               (precision-loss precision-loss)
-               (precision-loss-bps precision-loss-bps)
-               (passed (<= precision-loss-bps MAX_PRECISION_LOSS_BPS)))))
-    error (err u3003)))
+  (let ((actual (unwrap-panic (contract-call? .math-lib-advanced sqrt-fixed input))))
+    (let ((precision-loss (abs-diff actual expected))
+          (precision-loss-bps (if (is-eq expected u0) u0 (/ (* precision-loss u10000) expected))))
+      (ok (tuple
+        (operation "sqrt")
+        (input input)
+        (expected expected)
+        (actual actual)
+        (precision-loss precision-loss)
+        (precision-loss-bps precision-loss-bps)
+        (passed (<= precision-loss-bps MAX_PRECISION_LOSS_BPS)))))))
 
 ;; Run power function benchmark
 (define-public (run-pow-benchmark (base uint) (exponent uint) (expected uint))
-  (match (contract-call? .math-lib-advanced pow-fixed base exponent)
-    actual (let ((precision-loss (abs-diff actual expected))
-                 (precision-loss-bps (if (is-eq expected u0) u0 (/ (* precision-loss u10000) expected))))
-             (ok (tuple
-               (operation "pow")
-               (base base)
-               (exponent exponent)
-               (expected expected)
-               (actual actual)
-               (precision-loss precision-loss)
-               (precision-loss-bps precision-loss-bps)
-               (passed (<= precision-loss-bps MAX_PRECISION_LOSS_BPS)))))
-    error (err u3003)))
+  (let ((actual (unwrap-panic (contract-call? .math-lib-advanced pow-fixed base exponent))))
+    (let ((precision-loss (abs-diff actual expected))
+          (precision-loss-bps (if (is-eq expected u0) u0 (/ (* precision-loss u10000) expected))))
+      (ok (tuple
+        (operation "pow")
+        (base base)
+        (exponent exponent)
+        (expected expected)
+        (actual actual)
+        (precision-loss precision-loss)
+        (precision-loss-bps precision-loss-bps)
+        (passed (<= precision-loss-bps MAX_PRECISION_LOSS_BPS)))))))
 
 ;; Run natural logarithm benchmark
 (define-public (run-ln-benchmark (input uint) (expected uint))
-  (match (contract-call? .math-lib-advanced ln-fixed input)
-    actual (let ((precision-loss (abs-diff actual expected))
-                 (precision-loss-bps (if (is-eq expected u0) u0 (/ (* precision-loss u10000) expected))))
-             (ok (tuple
-               (operation "ln")
-               (input input)
-               (expected expected)
-               (actual actual)
-               (precision-loss precision-loss)
-               (precision-loss-bps precision-loss-bps)
-               (passed (<= precision-loss-bps MAX_PRECISION_LOSS_BPS)))))
-    error (err u3003)))
+  (let ((actual (unwrap-panic (contract-call? .math-lib-advanced ln-fixed input))))
+    (let ((precision-loss (abs-diff actual expected))
+          (precision-loss-bps (if (is-eq expected u0) u0 (/ (* precision-loss u10000) expected))))
+      (ok (tuple
+        (operation "ln")
+        (input input)
+        (expected expected)
+        (actual actual)
+        (precision-loss precision-loss)
+        (precision-loss-bps precision-loss-bps)
+        (passed (<= precision-loss-bps MAX_PRECISION_LOSS_BPS)))))))
 
 ;; Run exponential function benchmark
 (define-public (run-exp-benchmark (input uint) (expected uint))
-  (match (contract-call? .math-lib-advanced exp-fixed input)
-    actual (let ((precision-loss (abs-diff actual expected))
-                 (precision-loss-bps (if (is-eq expected u0) u0 (/ (* precision-loss u10000) expected))))
-             (ok (tuple
-               (operation "exp")
-               (input input)
-               (expected expected)
-               (actual actual)
-               (precision-loss precision-loss)
-               (precision-loss-bps precision-loss-bps)
-               (passed (<= precision-loss-bps MAX_PRECISION_LOSS_BPS)))))
-    error (err u3003)))
+  (let ((actual (unwrap-panic (contract-call? .math-lib-advanced exp-fixed input))))
+    (let ((precision-loss (abs-diff actual expected))
+          (precision-loss-bps (if (is-eq expected u0) u0 (/ (* precision-loss u10000) expected))))
+      (ok (tuple
+        (operation "exp")
+        (input input)
+        (expected expected)
+        (actual actual)
+        (precision-loss precision-loss)
+        (precision-loss-bps precision-loss-bps)
+        (passed (<= precision-loss-bps MAX_PRECISION_LOSS_BPS)))))))
 
 ;; === ERROR ACCUMULATION TRACKING ===
 (define-public (track-error-accumulation (operations (list 10 (string-ascii 32))) (intermediate-results (list 10 uint)) (expected-final uint) (actual-final uint))
@@ -187,17 +183,13 @@
 
 ;; === COMPREHENSIVE VALIDATION SUITE ===
 (define-public (run-comprehensive-validation)
-  (let ((sqrt-test (run-sqrt-benchmark u4000000000000000000 u2000000000000000000)) ;; sqrt(4) = 2
-        (pow-test (run-pow-benchmark u2000000000000000000 u3000000000000000000 u8000000000000000000)) ;; 2^3 = 8
-        (ln-test (run-ln-benchmark u2718281828459045235 u1000000000000000000)) ;; ln(e) = 1
-        (exp-test (run-exp-benchmark u1000000000000000000 u2718281828459045235))) ;; exp(1) = e
+  (let ((sqrt-ok (is-ok (run-sqrt-benchmark u4000000000000000000 u2000000000000000000)))
+        (pow-ok (is-ok (run-pow-benchmark u2000000000000000000 u3000000000000000000 u8000000000000000000)))
+        (ln-ok (is-ok (run-ln-benchmark u2718281828459045235 u1000000000000000000)))
+        (exp-ok (is-ok (run-exp-benchmark u1000000000000000000 u2718281828459045235))))
     (ok (tuple
-      (sqrt-test sqrt-test)
-      (pow-test pow-test)
-      (ln-test ln-test)
-      (exp-test exp-test)
-      (overall-status (and 
-                        (is-ok sqrt-test)
-                        (is-ok pow-test)
-                        (is-ok ln-test)
-                        (is-ok exp-test)))))
+      (sqrt-passed sqrt-ok)
+      (pow-passed pow-ok)
+      (ln-passed ln-ok)
+      (exp-passed exp-ok)
+      (overall-status (and sqrt-ok pow-ok ln-ok exp-ok))))))

@@ -178,13 +178,13 @@
       (asserts! (is-asset-supported asset-principal) ERR_INVALID_ASSET)
       
       ;; Update interest before withdrawal
-      (try! (contract-call? .interest-rate-model accrue-interest asset-principal))
+      (unwrap! (contract-call? .interest-rate-model accrue-interest asset-principal) ERR_INVALID_ASSET)
       
       (let ((current-balance (get-user-supply-balance user asset-principal))
-            (current-supply-balance (unwrap! (contract-call? .interest-rate-model calculate-current-supply-balance 
+            (current-supply-balance (contract-call? .interest-rate-model calculate-current-supply-balance
                                                    asset-principal 
                                                    (get principal-balance current-balance)
-                                                   (get supply-index current-balance)) u5006)))
+                                                   (get supply-index current-balance))))
         
         (asserts! (>= current-supply-balance amount) ERR_INSUFFICIENT_LIQUIDITY)
         
@@ -227,7 +227,7 @@
       (asserts! (is-asset-supported asset-principal) ERR_INVALID_ASSET)
       
       ;; Update interest before borrow
-      (try! (contract-call? .interest-rate-model accrue-interest asset-principal))
+      (unwrap! (contract-call? .interest-rate-model accrue-interest asset-principal) ERR_INVALID_ASSET)
       
       ;; Check if user has enough collateral
       (try! (check-account-liquidity user asset-principal (to-int amount)))
@@ -271,13 +271,13 @@
       (asserts! (is-asset-supported asset-principal) ERR_INVALID_ASSET)
       
       ;; Update interest before repay
-      (try! (contract-call? .interest-rate-model accrue-interest asset-principal))
+      (unwrap! (contract-call? .interest-rate-model accrue-interest asset-principal) ERR_INVALID_ASSET)
       
       (let ((current-balance (get-user-borrow-balance user asset-principal))
-            (current-borrow-balance (unwrap! (contract-call? .interest-rate-model calculate-current-borrow-balance 
+            (current-borrow-balance (contract-call? .interest-rate-model calculate-current-borrow-balance
                                                    asset-principal 
                                                    (get principal-balance current-balance)
-                                                   (get borrow-index current-balance)) u5006))
+                                                   (get borrow-index current-balance)))
             (actual-repay-amount (min amount current-borrow-balance)))
         
         ;; Transfer tokens from user
@@ -307,7 +307,7 @@
           (ok actual-repay-amount))))))
 
 ;; === FLASH LOAN FUNCTIONS ===
-(define-public (flash-loan (asset <sip10>) (amount uint) (receiver principal) (data (buff 256)))
+(define-public (flash-loan-extended (asset <sip10>) (amount uint) (receiver <flash-loan-receiver>) (data (buff 256)))
   (let ((asset-principal (contract-of asset)))
     (begin
       (asserts! (not (var-get paused)) ERR_PAUSED)
@@ -325,7 +325,7 @@
         (let ((balance-before (unwrap! (contract-call? asset get-balance (as-contract tx-sender)) ERR_FLASH_LOAN_FAILED)))
           
           ;; Transfer loan amount to receiver
-          (try! (as-contract (contract-call? asset transfer amount tx-sender receiver none)))
+          (try! (as-contract (contract-call? asset transfer amount tx-sender (contract-of receiver) none)))
           
           ;; Call receiver's flash loan callback
           (try! (contract-call? receiver on-flash-loan tx-sender asset-principal amount fee data))
@@ -349,18 +349,18 @@
       (asserts! (is-asset-supported asset-principal) ERR_INVALID_ASSET)
       
       ;; Update interest before liquidation
-      (try! (contract-call? .interest-rate-model accrue-interest asset-principal))
+      (unwrap! (contract-call? .interest-rate-model accrue-interest asset-principal) ERR_INVALID_ASSET)
       
       ;; Check if borrower is liquidatable
-      (let ((health-factor (unwrap! (get-health-factor borrower) u5009)))
+      (let ((health-factor (unwrap-panic (get-health-factor borrower))))
         (asserts! (< health-factor MIN_HEALTH_FACTOR) ERR_POSITION_HEALTHY)
         
         ;; Calculate max liquidatable amount
         (let ((borrow-balance (get-user-borrow-balance borrower asset-principal))
-              (current-debt (unwrap! (contract-call? .interest-rate-model calculate-current-borrow-balance 
+              (current-debt (contract-call? .interest-rate-model calculate-current-borrow-balance
                                            asset-principal 
                                            (get principal-balance borrow-balance)
-                                           (get borrow-index borrow-balance)) u5006))
+                                           (get borrow-index borrow-balance)))
               (max-liquidatable (/ (* current-debt CLOSE_FACTOR) PRECISION))
               (actual-repay-amount (min repay-amount max-liquidatable)))
           
@@ -440,8 +440,8 @@
         (current-borrow-value (get-total-borrow-value user))
         (asset-price (get-asset-price asset-principal)))
     (let ((value-change (if (>= amount-change 0)
-                          (/ (* (unwrap-panic (to-uint amount-change)) asset-price) PRECISION)
-                          (/ (* (unwrap-panic (to-uint (- amount-change))) asset-price) PRECISION)))
+                          (/ (* (to-uint amount-change) asset-price) PRECISION)
+                          (/ (* (to-uint (- amount-change)) asset-price) PRECISION)))
           (adjusted-borrow-value (if (>= amount-change 0)
                                    (+ current-borrow-value value-change)
                                    (- current-borrow-value value-change))))
@@ -460,31 +460,31 @@
   (let ((user (get user acc))
         (balance (get-user-borrow-balance user asset-principal)))
     (if (> (get principal-balance balance) u0)
-      (let ((current-balance (unwrap-panic (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.interest-rate-model calculate-current-borrow-balance 
-                                                         asset-principal 
+      (let ((current-balance (contract-call? .interest-rate-model calculate-current-borrow-balance
+                                                         asset-principal
                                                          (get principal-balance balance)
-                                                         (get borrow-index balance)))))
-            (asset-price (get-asset-price asset-principal))
-            (value (/ (* current-balance asset-price) PRECISION)))
-        { user: user, total-value: (+ (get total-value acc) value) })
+                                                         (get borrow-index balance)))
+            (price (get-asset-price asset-principal)))
+        (let ((value (/ (* current-balance price) PRECISION)))
+          { user: user, total-value: (+ (get total-value acc) value) }))
       acc)))
 
 ;; === VIEW FUNCTIONS ===
 (define-read-only (get-supply-balance (user principal) (asset <sip10>))
   (let ((asset-principal (contract-of asset))
         (balance (get-user-supply-balance user asset-principal)))
-    (ok (unwrap! (contract-call? .interest-rate-model calculate-current-supply-balance 
-                       asset-principal 
+    (ok (contract-call? .interest-rate-model calculate-current-supply-balance
+                       asset-principal
                        (get principal-balance balance)
-                       (get supply-index balance)) u5006))))
+                       (get supply-index balance)))))
 
 (define-read-only (get-borrow-balance (user principal) (asset <sip10>))
   (let ((asset-principal (contract-of asset))
         (balance (get-user-borrow-balance user asset-principal)))
-    (ok (unwrap! (contract-call? .interest-rate-model calculate-current-borrow-balance 
-                       asset-principal 
+    (ok (contract-call? .interest-rate-model calculate-current-borrow-balance
+                       asset-principal
                        (get principal-balance balance)
-                       (get borrow-index balance)) u5006))))
+                       (get borrow-index balance)))))
 
 (define-read-only (get-collateral-value (user principal))
   (ok (get total-value (fold calculate-user-collateral-value
@@ -497,18 +497,18 @@
     (if is-collateral
       (let ((balance (get-user-supply-balance user asset-principal)))
         (if (> (get principal-balance balance) u0)
-          (let ((current-balance (unwrap-panic (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.interest-rate-model calculate-current-supply-balance 
-                                                             asset-principal 
+          (let ((current-balance (contract-call? .interest-rate-model calculate-current-supply-balance
+                                                             asset-principal
                                                              (get principal-balance balance)
-                                                             (get supply-index balance)))))
-                (asset-price (get-asset-price asset-principal))
-                (value (/ (* current-balance asset-price) PRECISION)))
-            { user: user, total-value: (+ (get total-value acc) value) })
+                                                             (get supply-index balance)))
+                (price (get-asset-price asset-principal)))
+            (let ((value (/ (* current-balance price) PRECISION)))
+              { user: user, total-value: (+ (get total-value acc) value) }))
           acc))
       acc)))
 
 (define-read-only (get-health-factor (user principal))
-  (let ((collateral-value (try! (get-collateral-value user)))
+  (let ((collateral-value (unwrap-panic (get-collateral-value user)))
         (borrow-value (get-total-borrow-value user)))
     (if (is-eq borrow-value u0)
       (ok (* u1000 PRECISION)) ;; Very high health factor if no debt

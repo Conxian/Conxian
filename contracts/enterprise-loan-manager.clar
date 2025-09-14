@@ -275,78 +275,37 @@
 ;; === LOAN REPAYMENT ===
 (define-public (make-loan-payment (loan-id uint) (payment-amount uint))
   (let ((loan (unwrap! (map-get? enterprise-loans loan-id) ERR_LOAN_NOT_FOUND)))
-    
     ;; Validations
     (asserts! (is-eq (get borrower loan) tx-sender) ERR_UNAUTHORIZED)
     (asserts! (is-eq (get status loan) "active") ERR_LOAN_NOT_FOUND)
     (asserts! (> payment-amount u0) ERR_INVALID_AMOUNT)
     
-    ;; Calculate interest due
-    (let ((blocks-since-payment (- block-height (get last-payment-block loan)))
-          (interest-due (calculate-interest-due (get principal-amount loan) 
-                                                (get interest-rate loan) 
-                                                blocks-since-payment)))
-      (begin
-        ;; Update loan with payment
-        (map-set enterprise-loans loan-id
-          (merge loan 
-                 {total-interest-paid: (+ (get total-interest-paid loan) payment-amount),
-                  last-payment-block: block-height}))
-        
-        ;; Distribute yield to bond holders if bond exists
-        (match (get bond-token-id loan)
-          (some bond-id) (try! (distribute-bond-yield bond-id payment-amount))
-          (none (ok true)))
-        
-        ;; Transfer payment from borrower
-        ;; (try! (contract-call? (get loan-asset loan) transfer payment-amount tx-sender (as-contract tx-sender) none))
-        
-    (asserts! (is-eq (get borrower loan) tx-sender) ERR_UNAUTHORIZED)
-    (asserts! (is-eq (get status loan) "active") ERR_LOAN_NOT_FOUND)
+    ;; Update loan with payment
+    (map-set enterprise-loans loan-id
+      (merge loan
+             {total-interest-paid: (+ (get total-interest-paid loan) payment-amount),
+              last-payment-block: block-height}))
     
-    ;; Calculate total amount due
-    (let ((principal (get principal-amount loan))
-          (blocks-outstanding (- block-height (get creation-block loan)))
-          (total-interest (calculate-total-interest principal (get interest-rate loan) blocks-outstanding))
-          (total-due (+ principal total-interest))
-          (interest-already-paid (get total-interest-paid loan))
-          (remaining-due (- total-due interest-already-paid)))
-      
-      ;; Update loan status
-      (map-set enterprise-loans loan-id
-        (merge loan {status: "repaid", total-interest-paid: total-interest}))
-      
-      ;; Release collateral back to borrower
-      ;; (try! (as-contract (contract-call? (get collateral-asset loan) 
-      ;;                                   transfer (get collateral-amount loan) 
-      ;;                                   tx-sender (get borrower loan) none)))
-      
-      ;; Handle bond maturation if exists
-      (match (get bond-token-id loan)
-        (some bond-id) (try! (mature-bond bond-id))
-        (none (ok true)))
-      
-      ;; Update system counters
-      (var-set total-active-loans (- (var-get total-active-loans) u1))
-      (var-set liquidity-pool-balance (+ (var-get liquidity-pool-balance) remaining-due))
-      
-      ;; Update borrower credit profile positively
-      (update-borrower-repayment-history (get borrower loan) true)
-      
-      (print (tuple (event "loan-repaid") (loan-id loan-id) (total-paid total-due)))
-      
-      (ok total-due))))
+    ;; Distribute yield to bond holders if bond exists
+    (try! (match (get bond-token-id loan)
+      bond-id (distribute-bond-yield bond-id payment-amount)
+      (ok true)))
+
+    ;; Transfer payment from borrower
+    ;; (try! (contract-call? (get loan-asset loan) transfer payment-amount tx-sender (as-contract tx-sender) none))
+    (ok true)))
 
 ;; === BOND YIELD DISTRIBUTION ===
 (define-private (distribute-bond-yield (bond-id uint) (yield-amount uint))
   ;; This would integrate with the yield distribution engine
   ;; For now, just record the distribution
   (match (var-get yield-distribution-contract)
-    (some yield-contract)
-      ;; This would be the actual call in a real implementation
-      ;; (contract-call? yield-contract add-yield-to-pool bond-id yield-amount)
-      (ok true)
-    none (err ERR_BOND_CREATION_FAILED)))
+    yield-contract
+      (begin
+        ;; This would be the actual call in a real implementation
+        ;; (contract-call? yield-contract add-yield-to-pool bond-id yield-amount)
+        (ok true))
+    (err u0)))
 
 (define-private (mature-bond (bond-id uint))
   ;; Handle bond maturation - return principal to bond holders
