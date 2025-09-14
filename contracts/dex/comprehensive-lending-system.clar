@@ -3,20 +3,20 @@
 ;; Supports multiple assets, collateralization, and liquidations
 
 ;; Traits
-(use-trait sip10 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.sip-010-trait.sip-010-trait)
-(use-trait flash-loan-receiver 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.flash-loan-receiver-trait.flash-loan-receiver-trait)
-(use-trait std-constants 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.standard-constants-trait.standard-constants-trait)
-(use-trait liquidation-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.liquidation-trait.liquidation-trait)
-(use-trait access-control 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.access-control-trait.access-control-trait)
+(use-trait sip10 .sip-010-trait)
+(use-trait flash-loan-receiver .flash-loan-receiver-trait)
+(use-trait std-constants .standard-constants-trait)
+(use-trait liquidation-trait .liquidation-trait)
+(use-trait access-control .access-control-trait)
 
 ;; Implement required traits
-(impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.lending-system-trait.lending-system-trait)
-(impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.access-control-trait.access-control-trait)
+(impl-trait lending-system-trait)
+(impl-trait access-control-trait)
 
 ;; Oracle integration
-(use-trait oracle 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.oracle-trait.oracle-trait)
+(use-trait oracle .oracle-trait)
 
-(define-constant ORACLE_CONTRACT ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.oracle)
+(define-constant ORACLE_CONTRACT .oracle)
 (define-constant PRICE_STALE_THRESHOLD (* u60 u60 u24))  ;; 24 hours in blocks (1 block/2s)
 
 ;; === CONSTANTS ===
@@ -193,8 +193,8 @@
           flash-loan-fee-bps: flash-loan-fee-bps
         })
       
-      ;; Initialize market in interest rate model
-      (try! (contract-call? ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.interest-rate-model initialize-market asset-principal u0))
+  ;; Initialize market in interest rate model
+  (try! (contract-call? .interest-rate-model initialize-market asset-principal u0))
 
       ;; Add to the list of supported assets
       (var-set supported-assets-list (unwrap-panic (as-max-len? (append (var-get supported-assets-list) asset-principal) u50)))
@@ -711,10 +711,10 @@
 )
 
 (define-read-only (get-supply-apy (asset <sip10>))
-  (contract-call? ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.interest-rate-model get-supply-apy (contract-of asset)))
+  (contract-call? .interest-rate-model get-supply-apy (contract-of asset)))
 
 (define-read-only (get-borrow-apy (asset <sip10>))
-  (contract-call? ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.interest-rate-model get-borrow-apy (contract-of asset)))
+  (contract-call? .interest-rate-model get-borrow-apy (contract-of asset)))
 
 (define-read-only (get-max-flash-loan (asset <sip10>))
   (let ((asset-principal (contract-of asset)))
@@ -731,7 +731,7 @@
 (define-public (set-interest-rate-model (asset <sip10>) (base-rate uint) (multiplier uint) (jump-multiplier uint) (kink uint))
   (begin
     (asserts! (is-eq tx-sender (var-get admin)) ERR_UNAUTHORIZED)
-    (contract-call? ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.interest-rate-model set-interest-rate-model 
+  (contract-call? .interest-rate-model set-interest-rate-model 
                     (contract-of asset) 
                     base-rate 
                     multiplier 

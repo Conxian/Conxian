@@ -36,141 +36,78 @@ plan:
     - id: 0
       transactions:
         - emulated-contract-publish:
-            contract-name: cxd-staking
+            contract-name: comprehensive-lending-system
             emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            path: "contracts\\dex\\cxd-staking.clar"
-            clarity-version: 1
-        - emulated-contract-publish:
-            contract-name: standard-traits
-            emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            path: "contracts\\traits\\standard-traits.clar"
-            clarity-version: 1
-      epoch: "2.05"
-    - id: 1
-      transactions:
-        - emulated-contract-publish:
-            contract-name: access-control-trait
-            emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            path: "contracts\\traits\\access-control-trait.clar"
-            clarity-version: 2
-        - emulated-contract-publish:
-            contract-name: concentrated-liquidity-pool
-            emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            path: "contracts\\dimensional\\concentrated-liquidity-pool.clar"
+            path: "ontracts\\dex\\comprehensive-lending-system.clar"
             clarity-version: 2
         - emulated-contract-publish:
             contract-name: cxd-token
             emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            path: "contracts\\tokens\\cxd-token.clar"
-            clarity-version: 2
-        - emulated-contract-publish:
-            contract-name: cxlp-token
-            emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            path: "contracts\\tokens\\cxlp-token.clar"
+            path: "ontracts\\tokens\\cxd-token.clar"
             clarity-version: 2
         - emulated-contract-publish:
             contract-name: cxs-token
             emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            path: "contracts\\tokens\\cxs-token.clar"
-            clarity-version: 2
-        - emulated-contract-publish:
-            contract-name: cxtr-token
-            emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            path: "contracts\\tokens\\cxtr-token.clar"
-            clarity-version: 2
-        - emulated-contract-publish:
-            contract-name: cxvg-token
-            emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            path: "contracts\\tokens\\cxvg-token.clar"
-            clarity-version: 2
-        - emulated-contract-publish:
-            contract-name: dex-pool
-            emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            path: "contracts\\dex\\dex-pool.clar"
-            clarity-version: 2
-        - emulated-contract-publish:
-            contract-name: dex-factory
-            emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            path: "contracts\\dex\\dex-factory.clar"
+            path: "ontracts\\tokens\\cxs-token.clar"
             clarity-version: 2
         - emulated-contract-publish:
             contract-name: dex-router
             emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            path: "contracts\\dex\\dex-router.clar"
+            path: "ontracts\\dex\\dex-router.clar"
             clarity-version: 2
         - emulated-contract-publish:
-            contract-name: dim-metrics
+            contract-name: enhanced-flash-loan-vault
             emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            path: "contracts\\dimensional\\dim-metrics.clar"
-            clarity-version: 2
-        - emulated-contract-publish:
-            contract-name: dim-registry
-            emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            path: "contracts\\dimensional\\dim-registry.clar"
+            path: "ontracts\\dex\\enhanced-flash-loan-vault.clar"
             clarity-version: 2
         - emulated-contract-publish:
             contract-name: math-lib-advanced
             emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            path: "contracts\\lib\\math-lib-advanced.clar"
+            path: "ontracts\\lib\\math-lib-advanced.clar"
             clarity-version: 2
         - emulated-contract-publish:
             contract-name: fixed-point-math
             emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            path: "contracts\\lib\\fixed-point-math.clar"
+            path: "ontracts\\lib\\fixed-point-math.clar"
             clarity-version: 2
         - emulated-contract-publish:
-            contract-name: ft-mintable-trait
+            contract-name: flash-loan-receiver-trait
             emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            path: "contracts\\traits\\ft-mintable-trait.clar"
+            path: "ontracts\\traits\\flash-loan-receiver-trait.clar"
+            clarity-version: 2
+        - emulated-contract-publish:
+            contract-name: interest-rate-model
+            emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            path: "ontracts\\dex\\interest-rate-model.clar"
             clarity-version: 2
         - emulated-contract-publish:
             contract-name: lending-protocol-governance
             emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            path: "contracts\\governance\\lending-protocol-governance.clar"
+            path: "ontracts\\governance\\lending-protocol-governance.clar"
+            clarity-version: 2
+        - emulated-contract-publish:
+            contract-name: lending-system-trait
+            emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            path: "ontracts\\traits\\lending-system-trait.clar"
             clarity-version: 2
         - emulated-contract-publish:
             contract-name: loan-liquidation-manager
             emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            path: "contracts\\dex\\loan-liquidation-manager.clar"
-            clarity-version: 2
-        - emulated-contract-publish:
-            contract-name: mock-token
-            emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            path: "contracts\\mocks\\mock-token.clar"
-            clarity-version: 2
-        - emulated-contract-publish:
-            contract-name: oracle
-            emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            path: "contracts\\dex\\oracle.clar"
-            clarity-version: 2
-        - emulated-contract-publish:
-            contract-name: pool-trait
-            emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            path: "contracts\\traits\\pool-trait.clar"
+            path: "ontracts\\dex\\loan-liquidation-manager.clar"
             clarity-version: 2
         - emulated-contract-publish:
             contract-name: precision-calculator
             emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            path: "contracts\\lib\\precision-calculator.clar"
+            path: "ontracts\\lib\\precision-calculator.clar"
             clarity-version: 2
         - emulated-contract-publish:
-            contract-name: sip-010-trait
+            contract-name: token-system-coordinator
             emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            path: "contracts\\traits\\sip-010-trait.clar"
+            path: "ontracts\\dex\\token-system-coordinator.clar"
             clarity-version: 2
         - emulated-contract-publish:
-            contract-name: strategy-trait
+            contract-name: vault
             emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            path: "contracts\\traits\\strategy-trait.clar"
-            clarity-version: 2
-        - emulated-contract-publish:
-            contract-name: vault-trait
-            emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            path: "contracts\\traits\\vault-trait.clar"
-            clarity-version: 2
-        - emulated-contract-publish:
-            contract-name: yield-distribution-engine
-            emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            path: "contracts\\dex\\yield-distribution-engine.clar"
+            path: "ontracts\\dex\\vault.clar"
             clarity-version: 2
       epoch: "2.4"

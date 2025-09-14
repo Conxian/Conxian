@@ -33,8 +33,8 @@
 (define-constant MIN_LOAN_AMOUNT u1000000)  ;; 1.0 STX (6 decimals)
 
 ;; Contract references
-(define-constant BOND_ISSUANCE_CONTRACT ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.bond-issuance-system)
-(define-constant LENDING_SYSTEM ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.comprehensive-lending-system)
+(define-constant BOND_ISSUANCE_CONTRACT .bond-issuance-system)
+(define-constant LENDING_SYSTEM .comprehensive-lending-system)
 
 ;; Dynamic contract reference for bond issuance
 (define-data-var bond-issuance-system (optional principal) (some BOND_ISSUANCE_CONTRACT))

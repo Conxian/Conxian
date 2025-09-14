@@ -201,9 +201,9 @@
                                 (debt-asset (get debt-asset position))
                                 (collateral-asset (get collateral-asset position))
                                 (debt-amount (get debt-amount position)))
-                            (match (contract-call? (unwrap-panic (var-get lending-system)) liquidate borrower debt-asset collateral-asset debt-amount)
-                              (ok _r) (merge acc { success-count: (+ (get success-count acc) u1) })
-                              (err _e) (begin (print (tuple (event "liquidation-failed") (error _e))) acc))))
+            (match (contract-call? (unwrap-panic (var-get lending-system)) liquidate borrower debt-asset collateral-asset debt-amount)
+              (ok r) (merge acc { success-count: (+ (get success-count acc) u1) })
+              (err e) (begin (print (tuple (event "liquidation-failed") (error e))) acc))))
                         { success-count: u0 }
                         positions)))
       (ok (get success-count result))))

@@ -1,9 +1,9 @@
 ;; liquidation-manager.clar
 ;; Centralized liquidation manager for the Conxian protocol
 
-(use-trait standard-constants 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.standard-constants-trait.standard-constants-trait)
-(use-trait liquidation-interface 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.liquidation-trait.liquidation-trait)
-(impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.liquidation-trait.liquidation-trait)
+(use-trait standard-constants .standard-constants-trait)
+(use-trait liquidation-interface .liquidation-trait)
+(impl-trait liquidation-trait)
 
 ;; Constants
 (define-constant CONTRACT_OWNER tx-sender)
