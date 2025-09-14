@@ -1,476 +1,140 @@
-;; Conxian DEX Factory - Pool creation and registry with enhanced tokenomics integration
-;; Implements access-control-trait and integrates with protocol monitoring
+;; Conxian DEX Factory - Pool creation and registry
+;; This contract is responsible for creating and registering new DEX pools.
 
-;; Error constants
-(define-constant ERR_UNAUTHORIZED (err u100))
-(define-constant ERR_ALREADY_EXISTS (err u101))
-(define-constant ERR_NOT_FOUND (err u102))
+;; --- Traits ---
+(use-trait access-control-trait .access-control-trait.access-control-trait)
+(use-trait pool-trait .pool-trait.pool-trait)
 
-;; Use canonical access-control trait
-(use-trait access-control-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.access-control-trait)
-(impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.access-control-trait)
-
-(define-data-var roles (map principal (list (string-ascii 32))) {})
-(define-data-var owner principal tx-sender)
-
-;; Role constants
-(define-constant ROLE_ADMIN 0x41444d494e)  ;; 'ADMIN' in hex
-(define-constant ROLE_OPERATOR 0x4f50455241544f52)  ;; 'OPERATOR' in hex
-
-;; Role management functions
-(define-read-only (has-role (who principal) (role (string-ascii 32)))
-  (let ((user-roles (default-to (list) (map-get? roles who))))
-    (ok (fold (lambda (acc role-item) (or acc (is-eq role-item role))) false user-roles))
-  )
-)
-
-(define-public (grant-role (who principal) (role (string-ascii 32)))
-  (let ((current-roles (default-to (list) (map-get? roles who))))
-    (if (fold (lambda (acc role-item) (or acc (is-eq role-item role))) false current-roles)
-      (ok true)
-      (let ((new-roles (append current-roles (list role))))
-        (map-set roles who new-roles)
-        (ok true)
-      )
-    )
-  )
-)
-
-(define-public (revoke-role (who principal) (role (string-ascii 32)))
-  (let ((current-roles (default-to (list) (map-get? roles who))))
-    (if (fold (lambda (acc role-item) (or acc (is-eq role-item role))) false current-roles)
-      (let ((new-roles (filter (lambda (r) (not (is-eq r role))) current-roles)))
-        (map-set roles who new-roles)
-        (ok true)
-      )
-      (ok true)
-    )
-  )
-)
-
-(define-private (only-role (role (string-ascii 32)))
-  (let ((has-role (unwrap! (has-role tx-sender role) (err ERR_UNAUTHORIZED))))
-    (asserts has-role (err ERR_UNAUTHORIZED))
-    (ok true)
-  )
-)
-
-(define-private (only-roles (required-roles (list (string-ascii 32))))
-  (let ((user-roles (default-to (list) (map-get? roles tx-sender))))
-    (asserts (fold 
-      (lambda (acc role) 
-        (if acc true (fold (lambda (acc2 r) (or acc2 (is-eq r role))) false user-roles)))
-      false
-      required-roles)
-      (err ERR_UNAUTHORIZED)
-    )
-    (ok true)
-  )
-)
-
-;; SIP-010 Fungible Token Standard
-(define-trait sip010-trait
-  (
-    (transfer (uint principal principal (optional (buff 34))) (response bool uint))
-    (get-name () (response (string-ascii 32) uint))
-    (get-symbol () (response (string-ascii 32) uint))
-    (get-decimals () (response uint uint))
-    (get-balance (principal) (response uint uint))
-    (get-total-supply () (response uint uint))
-    (get-token-uri () (response (optional (string-utf8 256)) uint))
-  )
-)
-
-;; Pool Trait
-(define-trait pool-trait
-  (
-    (add-liquidity (uint uint principal) (response (tuple (dx uint) (dy uint) (shares uint)) uint))
-    (remove-liquidity (uint principal) (response (tuple (dx uint) (dy uint)) uint))
-    (swap (uint principal principal) (response (tuple (dx uint) (dy uint)) uint))
-    (get-reserves () (response (tuple (reserve-x uint) (reserve-y uint)) uint))
-    (get-total-supply () (response uint uint))
-  )
-)
-
-;; Implement required traits
-(use-trait access-control-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.access-control-trait)
-(impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.access-control-trait)
-
-;; Access Control Implementation
-(define-data-var roles (map principal (list (string-ascii 32))) {})
-(define-data-var owner principal tx-sender)
-
-(define-read-only (has-role (who principal) (role (string-ascii 32)))
-  (let ((user-roles (default-to (list) (map-get? roles who))))
-    (ok (fold (lambda (acc role-item) (or acc (is-eq role-item role))) false user-roles))
-  )
-)
-
-(define-public (grant-role (who principal) (role (string-ascii 32)))
-  (let ((current-roles (default-to (list) (map-get? roles who))))
-    (if (contains? current-roles role)
-      (ok true)
-      (let ((new-roles (append current-roles (list role))))
-        (map-set roles who new-roles)
-        (ok true)
-      )
-    )
-  )
-)
-
-(define-public (revoke-role (who principal) (role (string-ascii 32)))
-  (let ((current-roles (default-to (list) (map-get? roles who))))
-    (if (contains? current-roles role)
-      (let ((new-roles (filter (lambda (r) (not (is-eq r role))) current-roles)))
-        (map-set roles who new-roles)
-        (ok true)
-      )
-      (ok true)
-    )
-  )
-)
-
-(define-private (only-role (role (string-ascii 32)))
-  (let ((has-role (unwrap! (has-role tx-sender role) (err ERR_UNAUTHORIZED))))
-    (asserts has-role (err ERR_UNAUTHORIZED))
-    (ok true)
-  )
-)
-
-(define-private (only-roles (required-roles (list (string-ascii 32))))
-  (let ((user-roles (default-to (list) (map-get? roles tx-sender))))
-    (asserts (any (lambda (role) (contains? user-roles role)) required-roles) 
-             (err ERR_UNAUTHORIZED))
-    (ok true)
-  )
-)
-
-;; ===== Error Codes =====
-;; Access Control (1000-1099)
-(define-constant ERR_ACCESS_CONTROL_NOT_SET (err u1000))
-(define-constant ERR_ALREADY_INITIALIZED (err u1001))
-(define-constant ERR_NOT_INITIALIZED (err u1002))
+;; --- Constants ---
+;; Error Codes
 (define-constant ERR_UNAUTHORIZED (err u1003))
-
-;; Pool Management (2000-2099)
 (define-constant ERR_POOL_EXISTS (err u2001))
 (define-constant ERR_INVALID_TOKENS (err u2002))
 (define-constant ERR_POOL_NOT_FOUND (err u2003))
 (define-constant ERR_INVALID_FEE (err u2004))
-(define-constant ERR_INVALID_PARAMS (err u2005))
-(define-constant ERR_IMPLEMENTATION_NOT_FOUND (err u2006))
 
-(define-constant MAX_FEE_BPS u1000) ;; 10% max fee
-(define-constant MAX_PROTOCOL_FEE_BPS u100) ;; 1% max protocol fee
+;; Roles - These would be defined in the access-control-trait contract
+(define-constant ROLE_POOL_MANAGER "pool-manager")
 
-(define-constant POOL_TYPE_CONSTANT_PRODUCT u1)
-(define-constant POOL_TYPE_STABLE u2)
-(define-constant POOL_TYPE_WEIGHTED u3)
-(define-constant POOL_TYPE_CONCENTRATED u4)
-
-;; Roles
-(define-constant ROLE_DEX_ADMIN 0x4445585f41444d494e0000000000000000000000000000000000000000000000)  ;; DEX_ADMIN in hex
-(define-constant ROLE_FEE_MANAGER 0x4645455f4d414e41474552000000000000000000000000000000000000000000)  ;; FEE_MANAGER in hex
-(define-constant ROLE_POOL_MANAGER 0x504f4f4c5f4d414e414745520000000000000000000000000000000000000000)  ;; POOL_MANAGER in hex
-
-;; ===== Data Variables =====
-;; Contract State
-(define-data-var initialized bool false)
+;; --- Data Variables ---
 (define-data-var contract-owner principal tx-sender)
-(define-data-var access-contract (optional principal) none)
-
-;; Pool Configuration
+(define-data-var access-control-contract principal .access-control) ;; The main access control contract
 (define-data-var pool-count uint u0)
-(define-data-var default-fee-bps uint u30) ;; 0.3% default
-(define-data-var protocol-fee-bps uint u5) ;; 0.05% protocol fee
 
-;; Maps
-(define-map pools 
-  {token-a: principal, token-b: principal} 
-  principal)
+;; --- Maps ---
+;; Maps a pair of tokens to the principal of their pool contract.
+(define-map pools { token-a: principal, token-b: principal } principal)
 
-(define-map pool-info 
-  principal 
-  {token-a: principal, token-b: principal, fee-bps: uint, created-at: uint, pool-type: uint})
+;; Maps a pool principal to its information.
+(define-map pool-info principal { token-a: principal, token-b: principal, fee-bps: uint, created-at: uint })
 
-(define-map pool-stats 
-  principal 
-  {total-volume: uint, total-fees: uint, liquidity: uint, last-updated: uint})
 
-(define-map pool-implementations 
-  uint 
-  {contract: principal, enabled: bool})
+;; --- Private Functions ---
 
-;; Read-only functions
-
-(define-read-only (get-pending-owner)
-  (ok (var-get pending-owner)))
-
-(define-read-only (get-pool (token-a principal) (token-b principal))
-  (let ((normalized-pair (normalize-token-pair token-a token-b)))
-    (map-get? pools normalized-pair)))
-
-(define-read-only (get-pool-info (pool principal))
-  (map-get? pool-info pool))
-
-(define-read-only (get-pool-count)
-  (var-get pool-count))
-
-(define-read-only (get-default-fee)
-  (var-get default-fee-bps))
-
-(define-read-only (get-protocol-fee)
-  (var-get protocol-fee-bps))
-
-(define-read-only (get-pool-stats (pool principal))
-  (default-to {total-volume: u0, total-fees: u0, liquidity: u0, last-updated: u0}
-              (map-get? pool-stats pool)))
-
-(define-read-only (get-factory-stats)
-  {total-pools: (var-get pool-count),
-   default-fee: (var-get default-fee-bps),
-   protocol-fee: (var-get protocol-fee-bps)})
-
-(define-read-only (get-pool-implementation (pool-type uint))
-  (map-get? pool-implementations pool-type))
-
-;; Private helper functions
 (define-private (normalize-token-pair (token-a principal) (token-b principal))
-  ;; Simple principal comparison using buff conversion
-  (let ((token-a-buff (unwrap-panic (principal-destruct? token-a)))
-        (token-b-buff (unwrap-panic (principal-destruct? token-b))))
-    (if (< (get hash-bytes token-a-buff) (get hash-bytes token-b-buff))
-        {token-a: token-a, token-b: token-b}
-        {token-a: token-b, token-b: token-a})))
+  ;; Lexicographical comparison of principals to ensure consistent keying.
+  (if (is-eq (principal-to-buff token-a) (principal-to-buff token-b))
+    (err ERR_INVALID_TOKENS)
+    (ok (if (< (principal-to-buff token-a) (principal-to-buff token-b))
+      { token-a: token-a, token-b: token-b }
+      { token-a: token-b, token-b: token-a }
+    ))
+  )
+)
 
-(define-private (valid-pool-type? (pool-type uint))
-  (or (is-eq pool-type POOL_TYPE_CONSTANT_PRODUCT)
-      (is-eq pool-type POOL_TYPE_STABLE)
-      (is-eq pool-type POOL_TYPE_WEIGHTED)
-      (is-eq pool-type POOL_TYPE_CONCENTRATED)))
+(define-private (check-is-owner)
+  (ok (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED))
+)
 
-(define-private (get-implementation-contract (pool-type uint))
-  (match (map-get? pool-implementations pool-type)
-    impl-info (if (get enabled impl-info)
-                  (ok (get contract impl-info))
-                  ERR_IMPLEMENTATION_NOT_FOUND)
-    ERR_IMPLEMENTATION_NOT_FOUND))
+(define-private (check-pool-manager)
+  (let ((access-control (var-get access-control-contract)))
+    (ok (asserts! (unwrap! (contract-call? access-control has-role ROLE_POOL_MANAGER tx-sender) (err ERR_UNAUTHORIZED)) ERR_UNAUTHORIZED))
+  )
+)
 
-;; Access control - ownable-trait implementation
-(define-public (only-owner-guard)
-  (if (is-eq tx-sender (var-get owner))
-    (ok true)
-    (err u6001)))  ;; ERR_UNAUTHORIZED
 
-(define-read-only (get-owner)
-  (ok (var-get owner)))
+;; --- Public Functions ---
 
-(define-read-only (is-owner (user principal))
-  (ok (is-eq user (var-get owner))))
+;; Creates a new DEX pool by publishing a new contract.
+(define-public (create-pool (pool-template <pool-trait>) (token-a principal) (token-b principal) (fee-bps uint))
+  (begin
+    (try! (check-pool-manager))
 
-(define-private (only-owner)
-  (ok (asserts! (is-eq tx-sender (var-get owner)) ERR_UNAUTHORIZED)))
-
-;; Core factory;; Pool creation
-(define-public (create-pool 
-  (pool-type uint) 
-  (token-a principal) 
-  (token-b principal) 
-  (fee uint) 
-  (sqrt-price-upper uint) 
-  (sqrt-price-lower uint) 
-  (tick-spacing uint))
-  (let (
-      (sender tx-sender)
-      (token-pair (if (<= (principal-ucmp token-a token-b) 0)
-                    {token-a: token-a, token-b: token-b}
-                    {token-b: token-b, token-a: token-a}))
-    )
-    (begin
-      (asserts! (contract-call? .access-control has-role ROLE_POOL_MANAGER (as-contract tx-sender)) ERR_UNAUTHORIZED)
-      (asserts! (is-none (map-get? pools token-pair)) ERR_POOL_EXISTS)
-      (asserts! (not (is-eq token-a token-b)) ERR_INVALID_TOKENS)
+    (let ((normalized-pair (unwrap! (normalize-token-pair token-a token-b) (err ERR_INVALID_TOKENS))))
       
-      (let ((pool-principal (contract-call? .dex-pool deploy 
-        { 
-          token-a: (get token-a token-pair), 
-          token-b: (get token-b token-pair),
-          fee: fee,
-          sqrt-price-upper: sqrt-price-upper,
-          sqrt-price-lower: sqrt-price-lower,
-          tick-spacing: tick-spacing
-        })))
+      (asserts! (is-none (map-get? pools normalized-pair)) ERR_POOL_EXISTS)
+
+      ;; Publish the new pool contract from the provided template trait
+      (let ((pool-principal (contract-publish pool-template)))
         
-        (map-set pools token-pair pool-principal)
-        (map-set pool-info pool-principal {
-          token-a: (get token-a token-pair),
-          token-b: (get token-b token-pair),
-          fee-bps: fee,
-          created-at: block-height,
-          pool-type: pool-type
-        })
-        (map-set pool-stats pool-principal {
-          total-volume: u0,
-          total-fees: u0,
-          liquidity: u0,
-          last-updated: block-height
-        })
+        ;; Initialize the newly published pool
+        (try! (contract-call? pool-principal initialize
+          (get token-a normalized-pair)
+          (get token-b normalized-pair)
+          fee-bps
+          tx-sender ;; set the factory as the initial owner/admin of the pool
+        ))
+
+        ;; Register the new pool
+        (map-set pools normalized-pair pool-principal)
+        (map-set pool-info pool-principal
+          {
+            token-a: (get token-a normalized-pair),
+            token-b: (get token-b normalized-pair),
+            fee-bps: fee-bps,
+            created-at: block-height
+          }
+        )
         (var-set pool-count (+ (var-get pool-count) u1))
-        (print {event: "pool-created", pool: pool-principal, token-a: (get token-a token-pair), token-b: (get token-b token-pair)})
+
+        (print {
+          event: "pool-created",
+          pool-address: pool-principal,
+          token-a: (get token-a normalized-pair),
+          token-b: (get token-b normalized-pair)
+        })
         (ok pool-principal)
       )
     )
   )
 )
 
-(define-public (register-pool-implementation (pool-type uint) (implementation principal))
+;; Allows the contract owner to set the address of the access control contract.
+(define-public (set-access-control-contract (new-access-control principal))
   (begin
-    (try! (only-owner))
-    (asserts! (valid-pool-type? pool-type) ERR_INVALID_PARAMS)
-    (map-set pool-implementations pool-type 
-             {contract: implementation, enabled: true})
-    (ok true)))
+    (try! (check-is-owner))
+    (var-set access-control-contract new-access-control)
+    (ok true)
+  )
+)
 
-(define-public (toggle-implementation (pool-type uint) (enabled bool))
-  (begin
-    (try! (only-owner))
-    (match (map-get? pool-implementations pool-type)
-      impl-info (begin
-                  (map-set pool-implementations pool-type 
-                           {contract: (get contract impl-info), enabled: enabled})
-                  (ok true))
-      ERR_IMPLEMENTATION_NOT_FOUND)))
-
-(define-public (recommend-pool (token-a principal) (token-b principal) (amount uint))
-  (match (get-pool token-a token-b)
-    pool (let ((stats (get-pool-stats pool)))
-           (ok {pool: pool, 
-                liquidity: (get liquidity stats),
-                estimated-slippage: u100})) ;; Simplified calculation
-    ERR_POOL_NOT_FOUND))
-
-(define-public (update-pool-stats (pool principal) (volume uint) (fees uint) (liquidity uint))
-  (let ((current-stats (get-pool-stats pool)))
-    (map-set pool-stats pool 
-             {total-volume: (+ (get total-volume current-stats) volume),
-              total-fees: (+ (get total-fees current-stats) fees),
-              liquidity: liquidity,
-              last-updated: block-height})
-    (ok true)))
-
-;; Ownership management
-(define-public (set-pending-owner (new-owner principal))
-  (begin
-    (try! (only-owner-guard))
-    (var-set pending-owner (some new-owner))
-    (print {event: "ownership-transfer-initiated", 
-            current-owner: (var-get owner),
-            pending-owner: new-owner})
-    (ok true)))
-
+;; Allows the contract owner to transfer ownership to a new principal.
 (define-public (transfer-ownership (new-owner principal))
   (begin
-    (try! (only-owner))
-    (var-set pending-owner (some new-owner))
-    (print {event: "ownership-transfer-initiated", 
-            current-owner: (var-get owner),
-            pending-owner: new-owner})
-    (ok true)))
-
-(define-public (accept-ownership)
-  (match (var-get pending-owner)
-    pending (if (is-eq tx-sender pending)
-                (begin
-                  (var-set owner pending)
-                  (var-set pending-owner none)
-                  (print {event: "ownership-transferred", new-owner: pending})
-                  (ok true))
-                ERR_UNAUTHORIZED)
-    ERR_UNAUTHORIZED))
-
-(define-public (renounce-ownership)
-  (begin
-    (try! (only-owner-guard))
-    (var-set owner SP000000000000000000002Q6VF78)
-    (var-set pending-owner none)
-    (print {event: "ownership-renounced"})
-    (ok true)))
-
-;; Fee management functions
-(define-public (set-fee (new-fee uint))
-  (begin
-    (asserts! (var-get initialized) ERR_NOT_INITIALIZED)
-    (asserts! (or 
-      (is-eq tx-sender (var-get contract-owner))
-      (unwrap! (has-role ROLE_FEE_MANAGER tx-sender) (err ERR_UNAUTHORIZED))
-    ) ERR_UNAUTHORIZED)
-    (asserts! (<= new-fee MAX_FEE_BPS) ERR_INVALID_FEE)
-    (var-set default-fee-bps new-fee)
-    (print {event: "fee-updated", new-fee: new-fee})
-    (ok true)))
-
-(define-public (set-protocol-fee (new-fee uint))
-  (begin
-    (asserts! (var-get initialized) ERR_NOT_INITIALIZED)
-    (asserts! (or 
-      (is-eq tx-sender (var-get contract-owner))
-      (unwrap! (has-role ROLE_FEE_MANAGER tx-sender) (err ERR_UNAUTHORIZED))
-    ) ERR_UNAUTHORIZED)
-    (asserts! (<= new-fee MAX_PROTOCOL_FEE_BPS) ERR_INVALID_FEE)
-    (var-set protocol-fee-bps new-fee)
-    (print {event: "protocol-fee-updated", new-fee: new-fee})
-    (ok true)))
-
-;; Emergency functions
-(define-public (pause-pool (pool principal))
-  (begin
-    (try! (only-owner))
-    (print {event: "pool-paused", pool: pool})
-    (ok true)))
-
-(define-public (unpause-pool (pool principal))
-  (begin
-    (try! (only-owner))
-    (print {event: "pool-unpaused", pool: pool})
-    (ok true)))
-
-;; ===== Access Control Helpers =====
-(define-private (has-role (role (buff 32)) (who principal))
-  (match (var-get access-contract)
-    access-principal (contract-call? access-principal has-role role who)
-    (err ERR_ACCESS_CONTROL_NOT_SET)
-  )
-)
-
-(define-private (only-owner (sender principal))
-  (asserts! (is-eq sender (var-get contract-owner)) ERR_UNAUTHORIZED)
-  (ok true)
-)
-
-;; ===== Initialization =====
-(define-public (initialize (owner principal) (access-principal principal))
-  (begin
-    (asserts! (not (var-get initialized)) ERR_ALREADY_INITIALIZED)
-    (var-set contract-owner owner)
-    (var-set access-contract (some access-principal))
-    
-    ;; Initialize default implementations
-    (map-set pool-implementations POOL_TYPE_CONSTANT_PRODUCT 
-             {contract: .dex-pool, enabled: true})
-    
-    (var-set initialized true)
+    (try! (check-is-owner))
+    (var-set contract-owner new-owner)
     (ok true)
   )
 )
 
-;; ===== Contract Management =====
-(define-public (set-access-contract (contract principal))
-  (begin
-    (try! (only-owner tx-sender))
-    (var-set access-contract (some contract))
-    (ok true)
+;; --- Read-Only Functions ---
+
+;; Gets the pool principal for a given pair of tokens.
+(define-read-only (get-pool (token-a principal) (token-b principal))
+  (let ((normalized-pair (unwrap-panic (normalize-token-pair token-a token-b))))
+    (map-get? pools normalized-pair)
   )
 )
 
+;; Gets the information for a given pool principal.
+(define-read-only (get-pool-info (pool principal))
+  (map-get? pool-info pool)
+)
 
+(define-read-only (get-pool-count)
+  (ok (var-get pool-count))
+)
 
+(define-read-only (get-owner)
+  (ok (var-get contract-owner))
+)
