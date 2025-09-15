@@ -3,53 +3,8 @@
 ;; Enhanced with integration hooks for staking, revenue distribution, and system monitoring
 
 ;; Use canonical SIP-010 FT and FT-mintable traits
-(use-trait ft-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.sip-010-trait)
-(impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.sip-010-trait)
-(use-trait ft-mintable-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.ft-mintable-trait)
-(impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.ft-mintable-trait)
-
-;; SIP-010 Fungible Token Standard Functions
-(define-read-only (get-name)
-  (ok "Conxian Revenue Token")
-)
-
-(define-read-only (get-symbol)
-  (ok "CXD")
-)
-
-(define-read-only (get-decimals)
-  (ok u6)  ;; 6 decimal places
-)
-
-(define-read-only (get-token-uri)
-  (ok none)
-)
-
-(define-read-only (get-balance (who principal))
-  (default-to u0 (map-get? balances { who: who }))
-)
-
-(define-read-only (get-total-supply)
-  (var-get total-supply)
-)
-
-(define-private (safe-sub (a uint) (b uint))
-  (if (>= a b)
-    (ok (- a b))
-    (err ERR_NOT_ENOUGH_BALANCE)
-  )
-)
-
-(define-private (safe-add (a uint) (b uint))
-  (let ((sum (+ a b)))
-    (if (or (<= sum a) (<= sum b))  ;; Check for overflow
-      (err ERR_OVERFLOW)
-      (ok sum)
-    )
-  )
-)
-
-;; Traits are centralized under `contracts/traits/` and imported above
+(impl-trait .sip-010-trait)
+(impl-trait .ft-mintable-trait)
 
 ;; --- Errors ---
 (define-constant ERR_UNAUTHORIZED u100)
@@ -75,7 +30,7 @@
 (define-data-var system-coordinator-contract principal .token-system-coordinator)
 
 ;; Enhanced storage
-(define-map balances { who: principal } { bal: uint })
+(define-map balances principal uint)
 (define-map minters { who: principal } { enabled: bool })
 (define-data-var transfer-hooks-enabled bool true)
 (define-data-var system-integration-enabled bool false)
@@ -185,14 +140,14 @@
     (asserts! (is-eq tx-sender sender) (err ERR_UNAUTHORIZED))
     (asserts! (not (check-system-pause-status)) (err ERR_SYSTEM_PAUSED))
     
-    (let ((sender-bal (default-to u0 (get bal (map-get? balances { who: sender }))))
-          (rec-bal (default-to u0 (get bal (map-get? balances { who: recipient })))))
+    (let ((sender-bal (default-to u0 (map-get? balances sender)))
+          (rec-bal (default-to u0 (map-get? balances recipient))))
       
       ;; Execute transfer hooks if enabled - skip for enhanced deployment
       
       ;; Perform the actual transfer using safe math
-      (map-set balances { who: sender } { bal: (unwrap! (safe-sub sender-bal amount) (err ERR_NOT_ENOUGH_BALANCE)) })
-      (map-set balances { who: recipient } { bal: (unwrap! (safe-add rec-bal amount) (err ERR_OVERFLOW)) })
+      (map-set balances sender (unwrap! (safe-sub sender-bal amount) (err ERR_NOT_ENOUGH_BALANCE)))
+      (map-set balances recipient (unwrap! (safe-add rec-bal amount) (err ERR_OVERFLOW)))
 
       (ok true)
     )
@@ -208,7 +163,7 @@
 )
 
 (define-read-only (get-balance (who principal))
-  (ok (default-to u0 (get bal (map-get? balances { who: who }))))
+  (ok (default-to u0 (map-get? balances who)))
 )
 
 (define-read-only (get-total-supply)
@@ -266,8 +221,9 @@
 (define-private (execute-mint (recipient principal) (amount uint))
   (begin
     (var-set total-supply (unwrap! (safe-add (var-get total-supply) amount) (err ERR_OVERFLOW)))
-    (let ((bal (default-to u0 (get bal (map-get? balances { who: recipient })))))
-      (map-set balances { who: recipient } { bal: (unwrap! (safe-add bal amount) (err ERR_OVERFLOW)) }))
+    (let ((bal (default-to u0 (map-get? balances recipient))))
+      (map-set balances recipient (unwrap! (safe-add bal amount) (err ERR_OVERFLOW)))
+    )
     
     ;; Notify revenue distributor if configured
     (if (and (var-get system-integration-enabled) (is-some (var-get revenue-distributor)))
@@ -281,11 +237,11 @@
 )
 
 (define-public (burn (amount uint))
-  (let ((bal (default-to u0 (get bal (map-get? balances { who: tx-sender }))))
+  (let ((bal (default-to u0 (map-get? balances tx-sender)))
         (supply (var-get total-supply)))
     (asserts! (not (check-system-pause-status)) (err ERR_SYSTEM_PAUSED))
     
-    (map-set balances { who: tx-sender } { bal: (unwrap! (safe-sub bal amount) (err ERR_NOT_ENOUGH_BALANCE)) })
+    (map-set balances tx-sender (unwrap! (safe-sub bal amount) (err ERR_NOT_ENOUGH_BALANCE)))
     (var-set total-supply (unwrap! (safe-sub supply amount) (err ERR_NOT_ENOUGH_BALANCE)))
     
     ;; Notify revenue distributor if configured and enabled - skip for enhanced deployment
@@ -310,8 +266,3 @@
     revenue-distributor: (var-get revenue-distributor-contract),
     emission-controller: (var-get emission-controller-contract)
   })
-
-
-
-
-

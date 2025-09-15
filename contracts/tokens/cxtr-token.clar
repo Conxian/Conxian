@@ -3,10 +3,10 @@
 ;; Enhanced with system integration hooks for coordinator interface
 
 ;; Use canonical trait definitions from contracts/traits
- (use-trait ft-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.sip-010-trait)
- (impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.sip-010-trait)
- (use-trait ft-mintable-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.ft-mintable-trait)
- (impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.ft-mintable-trait)
+(use-trait sip010-trait .sip-010-trait)
+(impl-trait .sip-010-trait)
+(use-trait ft-mintable-trait .ft-mintable-trait)
+(impl-trait .ft-mintable-trait)
 
 ;; --- Errors ---
 (define-constant ERR_UNAUTHORIZED u100)
@@ -22,7 +22,7 @@
 (define-data-var symbol (string-ascii 10) "CXTR")
 (define-data-var token-uri (optional (string-utf8 256)) none)
 
-(define-map balances { who: principal } { bal: uint })
+(define-map balances principal { bal: uint })
 (define-map minters { who: principal } { enabled: bool })
 
 ;; --- System Integration ---
@@ -51,23 +51,6 @@
 
 (define-read-only (is-minter (who principal))
   (is-some (map-get? minters { who: who }))
-)
-
-(define-public (mint (recipient principal) (amount uint))
-  (begin
-    (asserts! (or (is-owner tx-sender) (is-minter tx-sender)) (err ERR_UNAUTHORIZED))
-    (asserts! (not (check-system-pause)) (err ERR_SYSTEM_PAUSED))
-    
-    ;; Update total supply
-    (var-set total-supply (+ (var-get total-supply) amount))
-    
-    ;; Update recipient balance
-    (let ((bal (default-to u0 (get bal (map-get? balances { who: recipient })))))
-      (map-set balances { who: recipient } { bal: (+ bal amount) })
-    )
-    
-    (ok true)
-  )
 )
 
 ;; --- Owner/Admin ---
@@ -183,11 +166,11 @@
   (begin
     (asserts! (is-eq tx-sender sender) (err ERR_UNAUTHORIZED))
     (asserts! (check-system-pause) (err ERR_SYSTEM_PAUSED))
-    (let ((sender-bal (default-to u0 (get bal (map-get? balances { who: sender })))) )
+    (let ((sender-bal (default-to u0 (get bal (map-get? balances sender)))))
       (asserts! (>= sender-bal amount) (err ERR_NOT_ENOUGH_BALANCE))
-      (map-set balances { who: sender } { bal: (- sender-bal amount) })
-      (let ((rec-bal (default-to u0 (get bal (map-get? balances { who: recipient })))) )
-        (map-set balances { who: recipient } { bal: (+ rec-bal amount) })
+      (map-set balances sender { bal: (- sender-bal amount) })
+      (let ((rec-bal (default-to u0 (get bal (map-get? balances recipient)))))
+        (map-set balances recipient { bal: (+ rec-bal amount) })
       )
       ;; Notify system coordinator
       (notify-transfer amount sender recipient)
@@ -197,7 +180,7 @@
 )
 
 (define-read-only (get-balance (who principal))
-  (ok (default-to u0 (get bal (map-get? balances { who: who }))))
+  (ok (default-to u0 (get bal (map-get? balances who))))
 )
 
 (define-read-only (get-total-supply)
@@ -237,8 +220,8 @@
     (asserts! (check-system-pause) (err ERR_SYSTEM_PAUSED))
     (asserts! (check-emission-allowed amount) (err ERR_EMISSION_DENIED))
     (var-set total-supply (+ (var-get total-supply) amount))
-    (let ((bal (default-to u0 (get bal (map-get? balances { who: recipient })))) )
-      (map-set balances { who: recipient } { bal: (+ bal amount) })
+    (let ((bal (default-to u0 (get bal (map-get? balances recipient)))))
+      (map-set balances recipient { bal: (+ bal amount) })
     )
     ;; Notify system coordinator
     (notify-mint amount recipient)
@@ -247,10 +230,10 @@
 )
 
 (define-public (burn (amount uint))
-  (let ((bal (default-to u0 (get bal (map-get? balances { who: tx-sender })))) )
+  (let ((bal (default-to u0 (get bal (map-get? balances tx-sender)))))
     (asserts! (>= bal amount) (err ERR_NOT_ENOUGH_BALANCE))
     (asserts! (check-system-pause) (err ERR_SYSTEM_PAUSED))
-    (map-set balances { who: tx-sender } { bal: (- bal amount) })
+    (map-set balances tx-sender { bal: (- bal amount) })
     (var-set total-supply (- (var-get total-supply) amount))
     ;; Notify system coordinator
     (notify-burn amount tx-sender)
@@ -283,8 +266,8 @@
     
     ;; Mint tokens
     (var-set total-supply (+ (var-get total-supply) total-amount))
-    (let ((current-bal (default-to u0 (get bal (map-get? balances { who: recipient })))))
-      (map-set balances { who: recipient } { bal: (+ current-bal total-amount) }))
+    (let ((current-bal (default-to u0 (get bal (map-get? balances recipient)))))
+      (map-set balances recipient { bal: (+ current-bal total-amount) }))
     
     ;; Update creator contributions
     (let ((contributions (default-to (tuple (total-bounties u0) (successful-proposals u0) (reputation u0))
@@ -386,8 +369,3 @@
                   (support support)))
     
     (ok true)))
-
-
-
-
-
