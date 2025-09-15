@@ -3,8 +3,8 @@
 ;; Enhanced with system integration hooks for coordinator interface
 
 ;; Use canonical trait definitions from contracts/traits
-(use-trait sip010-trait .sip-010-trait)
-(impl-trait .sip-010-trait)
+(use-trait sip010-trait .sip-010-trait-v2)
+(impl-trait .sip-010-trait-v2)
 (use-trait ft-mintable-trait .ft-mintable-trait)
 (impl-trait .ft-mintable-trait)
 

@@ -1,1 +1,61 @@
-;; math-lib-advanced.clar\n;; Advanced mathematical library with essential DeFi functions\n;; Standalone implementation without dependencies\n\n(define-constant ERR_INVALID_INPUT (err u1001))\n(define-constant ERR_OVERFLOW (err u1002))\n(define-constant ERR_UNDERFLOW (err u1003))\n(define-constant ERR_PRECISION_LOSS (err u1004))\n\n;; Fixed-point precision constant\n(define-constant PRECISION u1000000000000000000) ;; 18 decimals (1e18)\n\n;; Mathematical constants in 18-decimal fixed point\n(define-constant E_FIXED u2718281828459045235) ;; e ~ 2.718281828459045235\n\n;; === SAFE MATH ===\n(define-private (mul-down (a uint) (b uint))\n  (/ (* a b) PRECISION))\n\n(define-private (div-down (a uint) (b uint))\n  (if (is-eq b u0)\n    u0 ;; Return 0 for division by zero - caller should check result\n    (/ (* a PRECISION) b)))\n\n;; === NATURAL LOGARITHM ===\n(define-read-only (ln-fixed (x uint))\n  (if (is-eq x u0)\n    (err ERR_INVALID_INPUT)\n    (begin\n      (asserts! (< x (* u2 PRECISION)) (err ERR_INVALID_INPUT))\n      (if (is-eq x PRECISION)\n        (ok u0)\n        (let ((y (if (> x PRECISION)\n                    (- x PRECISION)\n                    (- PRECISION x))))\n          (let ((result (+ (- y (/ (mul-down y y) u2))\n                          (+ (/ (mul-down (mul-down y y) y) u3)\n                             (- (/ (mul-down (mul-down (mul-down y y) y) y) u4)))))\n            (ok (if (> x PRECISION)\n                   result\n                   (- u0 result)))))))))\n\n;; === EXPONENTIAL ===\n(define-read-only (exp-fixed (x uint))\n  (if (is-eq x u0)\n    (ok PRECISION)\n    (if (> x (* u5 PRECISION))\n      (err ERR_OVERFLOW)\n      (let ((x2 (mul-down x x)))\n        (ok (+ PRECISION\n               (+ x\n                  (+ (/ x2 u2)\n                     (+ (/ (mul-down x2 x) u6)\n                        (/ (mul-down x2 x2) u24)))))))))\n\n;; === POWER FUNCTION ===\n(define-read-only (pow-fixed (base uint) (exponent uint))\n  (if (is-eq base u0)\n    (if (is-eq exponent u0)\n        (err ERR_INVALID_INPUT)\n        (ok u0))\n    (if (is-eq exponent u0)\n      (ok PRECISION)\n      (if (is-eq exponent PRECISION)\n        (ok base)\n        (if (is-eq (mod exponent PRECISION) u0)\n          (ok (pow-int-iter base (/ exponent PRECISION) PRECISION))\n          (match (ln-fixed base)\n            ln-base (exp-fixed (mul-down ln-base exponent))\n            error error))))))\n\n;; === HELPER FUNCTIONS ===\n(define-private (pow-int-iter (base uint) (exp uint) (result uint))\n  (if (is-eq exp u0)\n    result\n    (if (is-eq (mod exp u2) u1)\n      (pow-int-iter (mul-down base base) (/ exp u2) (mul-down result base))\n      (pow-int-iter (mul-down base base) (/ exp u2) result))))\n\n;; === INTEGER SQUARE ROOT ===\n(define-read-only (sqrt-integer (n uint))\n  (if (is-eq n u0)\n    (ok u0)\n    (ok (sqrt-iter n (max u1 (/ n u2)) u0))))\n\n(define-private (sqrt-iter (n uint) (guess uint) (iterations uint))\n  (if (>= iterations u10)\n    guess\n    (let ((new-guess (/ (+ guess (/ n guess)) u2)))\n      (if (is-eq new-guess guess)\n        guess\n        (sqrt-iter n new-guess (+ iterations u1))))))\n\n;; === BENCHMARKING FUNCTIONS ===\n(define-read-only (benchmark-exp)\n  (match (exp-fixed PRECISION)\n    result (ok (if (> result E_FIXED)\n                  (- result E_FIXED)\n                  (- E_FIXED result)))\n    error error))\n\n(define-read-only (benchmark-ln)\n  (match (ln-fixed E_FIXED)\n    result (ok (if (> result PRECISION)\n                  (- result PRECISION)\n                  (- PRECISION result)))\n    error error))
+;; math-lib-advanced.clar
+;; Advanced mathematical library with essential DeFi functions
+;; Standalone implementation without dependencies
+
+(define-constant ERR_INVALID_INPUT (err u1001))
+(define-constant ERR_OVERFLOW (err u1002))
+(define-constant ERR_UNDERFLOW (err u1003))
+(define-constant ERR_PRECISION_LOSS (err u1004))
+
+;; Fixed-point precision constant
+(define-constant PRECISION u1000000000000000000) ;; 18 decimals (1e18)
+
+;; Mathematical constants in 18-decimal fixed point
+(define-constant E_FIXED u2718281828459045235) ;; e ~ 2.718281828459045235
+
+;; === SAFE MATH ===
+(define-private (mul-down (a uint) (b uint))
+  (/ (* a b) PRECISION))
+
+(define-private (div-down (a uint) (b uint))
+  (if (is-eq b u0)
+    u0 ;; Return 0 for division by zero - caller should check result
+    (/ (* a PRECISION) b)))
+
+;; === ABS ===
+(define-private (abs (x int))
+  (if (< x 0)
+    (* x -1)
+    x
+  )
+)
+
+(define-private (abs (x uint))
+  x
+)
+
+;; === INTEGER SQUARE ROOT ===
+(define-private (sqrt-iter (n uint) (guess uint) (prev-guess uint))
+  (if (or (is-eq guess prev-guess) (<= (abs (- guess prev-guess)) u1))
+    guess
+    (sqrt-iter n (average guess (/ n guess)) guess)
+  )
+)
+
+(define-read-only (sqrt-integer (n uint))
+  (if (is-eq n u0)
+    (ok u0)
+    (ok (sqrt-iter n (max u1 (/ n u2)) n))
+  )
+)
+
+;; === MIN/MAX ===
+(define-read-only (min (a uint) (b uint))
+  (if (< a b)
+    (ok a)
+    (ok b)))
+
+(define-read-only (max (a uint) (b uint))
+  (if (> a b)
+    (ok a)
+    (ok b)))

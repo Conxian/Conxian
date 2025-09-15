@@ -3,8 +3,9 @@
 ;; Enhanced with integration hooks for staking, revenue distribution, and system monitoring
 
 ;; Use canonical SIP-010 FT and FT-mintable traits
-(impl-trait .sip-010-trait)
-(impl-trait .ft-mintable-trait)
+(impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.sip-010-trait)
+(impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.sip-010-ft-trait)
+(impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.traits.ft-mintable-trait)
 
 ;; --- Errors ---
 (define-constant ERR_UNAUTHORIZED u100)
@@ -13,6 +14,7 @@
 (define-constant ERR_EMISSION_LIMIT_EXCEEDED u103)
 (define-constant ERR_TRANSFER_HOOK_FAILED u104)
 (define-constant ERR_OVERFLOW u105)
+(define-constant ERR_SUB_UNDERFLOW u106)
 
 ;; --- Storage ---
 (define-data-var contract-owner principal tx-sender)
@@ -151,6 +153,20 @@
 
       (ok true)
     )
+  )
+)
+
+(define-private (safe-sub (a uint) (b uint))
+  (if (>= a b)
+    (ok (- a b))
+    (err ERR_SUB_UNDERFLOW)
+  )
+)
+
+(define-private (safe-add (a uint) (b uint))
+  (if (>= (unwrap! (safe-sub u4294967295 b) (err ERR_OVERFLOW)) a)
+    (ok (+ a b))
+    (err ERR_OVERFLOW)
   )
 )
 
