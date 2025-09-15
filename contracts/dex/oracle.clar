@@ -13,7 +13,8 @@
 )
 
 ;; Implement the oracle trait with proper syntax
-(use-trait oracle-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.oracle-trait)
+;; Temporarily commented out for initial deployment
+;; (use-trait oracle-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.oracle-trait)
 (impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.oracle-trait)
 
 ;; Error codes
@@ -164,8 +165,3 @@
     (ok true)
   )
 )
-
-
-
-
-

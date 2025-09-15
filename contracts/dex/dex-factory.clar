@@ -32,13 +32,13 @@
 ;; --- Private Functions ---
 
 (define-private (normalize-token-pair (token-a principal) (token-b principal))
-  ;; Lexicographical comparison of principals to ensure consistent keying.
-  (if (is-eq (principal-to-buff token-a) (principal-to-buff token-b))
+  ;; Use (to-uint token) for comparisons
+  (if (is-eq token-a token-b)
     (err ERR_INVALID_TOKENS)
-    (ok (if (< (principal-to-buff token-a) (principal-to-buff token-b))
-      { token-a: token-a, token-b: token-b }
-      { token-a: token-b, token-b: token-a }
-    ))
+    (ok {
+      token-a: (if (< (unwrap! (to-uint token-a) u0) (unwrap! (to-uint token-b) u0)) token-a token-b),
+      token-b: (if (< (unwrap! (to-uint token-a) u0) (unwrap! (to-uint token-b) u0)) token-b token-a)
+    })
   )
 )
 
@@ -64,8 +64,8 @@
       
       (asserts! (is-none (map-get? pools normalized-pair)) ERR_POOL_EXISTS)
 
-      ;; Publish the new pool contract from the provided template trait
-      (let ((pool-principal (contract-publish pool-template)))
+      ;; Use contract-call? to interact with pool-template
+      (let ((pool-principal (contract-call? pool-template create-pool token-a token-b fee-bps)))
         
         ;; Initialize the newly published pool
         (try! (contract-call? pool-principal initialize

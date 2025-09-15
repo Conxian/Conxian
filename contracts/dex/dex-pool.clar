@@ -2,8 +2,8 @@
 ;; Implements pool-trait with full system integration
 
 ;; Pool trait is defined centrally in contracts/traits. Import and implement the alias.
-(use-trait pool-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.pool-trait)
-(impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.pool-trait)
+(use-trait pool-trait .pool-trait)
+(impl-trait .pool-trait)
 
 ;; Private helper functions
 (define-private (min (a uint) (b uint))
@@ -306,8 +306,3 @@
 ;; Initialize cumulative price tracking
 (map-set last-update-time "price-a" block-height)
 (map-set last-update-time "price-b" block-height)
-
-
-
-
-
