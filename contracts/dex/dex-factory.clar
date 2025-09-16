@@ -1,9 +1,16 @@
 ;; Conxian DEX Factory - Pool creation and registry
 ;; This contract is responsible for creating and registering new DEX pools.
 
-;; --- Traits ---
-(use-trait access-control-trait .access-control-trait.access-control-trait)
-(use-trait pool-trait .pool-trait.pool-trait)
+;; --- Constants ---
+(define-constant ACCESS_CONTROL 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.access-control)
+
+;; Define basic trait for token operations
+(define-trait ft-trait
+  (
+    (transfer (uint principal principal (optional (buff 34))) (response bool uint))
+    (get-symbol () (response (string-ascii 10) uint))
+  )
+)
 
 ;; --- Constants ---
 ;; Error Codes
@@ -18,7 +25,7 @@
 
 ;; --- Data Variables ---
 (define-data-var contract-owner principal tx-sender)
-(define-data-var access-control-contract principal .access-control) ;; The main access control contract
+(define-data-var access-control-contract principal 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.access-control) ;; The main access control contract
 (define-data-var pool-count uint u0)
 
 ;; --- Maps ---
@@ -48,32 +55,52 @@
 
 (define-private (check-pool-manager)
   (let ((access-control (var-get access-control-contract)))
-    (ok (asserts! (unwrap! (contract-call? access-control has-role ROLE_POOL_MANAGER tx-sender) (err ERR_UNAUTHORIZED)) ERR_UNAUTHORIZED))
+    (ok (asserts! (unwrap! (contract-call? access-control has-role tx-sender ROLE_POOL_MANAGER) (err ERR_UNAUTHORIZED)) ERR_UNAUTHORIZED))
   )
 )
 
 
 ;; --- Public Functions ---
 
-;; Creates a new DEX pool by publishing a new contract.
-(define-public (create-pool (pool-template <pool-trait>) (token-a principal) (token-b principal) (fee-bps uint))
+;; Creates a new DEX pool by deploying a new contract
+(define-public (create-pool (token-a principal) (token-b principal) (fee-bps uint))
   (begin
     (try! (check-pool-manager))
+    (asserts! (>= fee-bps u0) (err ERR_INVALID_FEE))
+    (asserts! (<= fee-bps u10000) (err ERR_INVALID_FEE)) ;; Max 100% fee
+    (asserts! (is-ok (contract-call? token-a get-symbol)) (err ERR_INVALID_TOKENS))
+    (asserts! (is-ok (contract-call? token-b get-symbol)) (err ERR_INVALID_TOKENS))
+    (asserts! (not (is-eq token-a token-b)) (err ERR_INVALID_TOKENS))
 
     (let ((normalized-pair (unwrap! (normalize-token-pair token-a token-b) (err ERR_INVALID_TOKENS))))
       
       (asserts! (is-none (map-get? pools normalized-pair)) ERR_POOL_EXISTS)
 
-      ;; Use contract-call? to interact with pool-template
-      (let ((pool-principal (contract-call? pool-template create-pool token-a token-b fee-bps)))
+      ;; In a real implementation, we would deploy a new contract here
+      ;; For now, we'll simulate pool creation with a placeholder principal
+      (let ((pool-principal (as-contract tx-sender)))  ;; Placeholder for actual deployment
         
-        ;; Initialize the newly published pool
-        (try! (contract-call? pool-principal initialize
-          (get token-a normalized-pair)
-          (get token-b normalized-pair)
-          fee-bps
-          tx-sender ;; set the factory as the initial owner/admin of the pool
-        ))
+        ;; Store pool info
+        (map-set pools normalized-pair pool-principal)
+        (map-set pool-info pool-principal
+          {
+            token-a: (get token-a normalized-pair),
+            token-b: (get token-b normalized-pair),
+            fee-bps: fee-bps,
+            created-at: block-height
+          }
+        )
+        
+        (var-set pool-count (+ (var-get pool-count) u1))
+        
+        (print {
+          event: "pool-created",
+          pool-address: pool-principal,
+          token-a: (get token-a normalized-pair),
+          token-b: (get token-b normalized-pair)
+        })
+        
+        (ok pool-principal)
 
         ;; Register the new pool
         (map-set pools normalized-pair pool-principal)
@@ -106,6 +133,28 @@
     (var-set access-control-contract new-access-control)
     (ok true)
   )
+)
+
+;; --- Read-Only Functions ---
+
+;; Gets the pool principal for a given pair of tokens.
+(define-read-only (get-pool (token-a principal) (token-b principal))
+  (let ((normalized-pair (unwrap-panic (normalize-token-pair token-a token-b))))
+    (map-get? pools normalized-pair)
+  )
+)
+
+;; Gets the information for a given pool principal.
+(define-read-only (get-pool-info (pool principal))
+  (map-get? pool-info pool)
+)
+
+(define-read-only (get-pool-count)
+  (ok (var-get pool-count))
+)
+
+(define-read-only (get-owner)
+  (ok (var-get contract-owner))
 )
 
 ;; Allows the contract owner to transfer ownership to a new principal.

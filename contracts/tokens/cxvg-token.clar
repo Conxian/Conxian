@@ -2,13 +2,17 @@
 ;; Conxian Governance Token (SIP-010 FT) - no direct revenue share
 ;; Enhanced with system integration hooks for coordinator interface
 
-;; Traits are defined centrally under `contracts/traits/*`.
-;; Import the canonical trait definitions and implement their aliases.
-(use-trait ft-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.sip-010-ft-trait)
+;; Constants
+(define-constant TRAIT_REGISTRY 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.trait-registry)
+
+;; Resolve traits using the trait registry
+(use-trait sip010-ft-trait (unwrap! (contract-call? TRAIT_REGISTRY get-trait-contract 'sip-010-ft-trait) (err u1000)))
+(use-trait ft-mintable-trait (unwrap! (contract-call? TRAIT_REGISTRY get-trait-contract 'ft-mintable-trait) (err u1001)))
+(use-trait monitor-trait (unwrap! (contract-call? TRAIT_REGISTRY get-trait-contract 'monitor-trait) (err u1002)))
+
+;; Implement the standard traits
 (impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.sip-010-ft-trait)
-(use-trait ft-mintable-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.ft-mintable-trait)
 (impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.ft-mintable-trait)
-(use-trait monitor-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.monitor-trait)
 (impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.monitor-trait)
 
 ;; --- Errors ---

@@ -1,11 +1,16 @@
 ;; cxlp-token.clar
 ;; Conxian Liquidity Provider Token (SIP-010 FT)
 
-;; Use canonical trait definitions from contracts/traits
- (use-trait ft-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.sip-010-trait)
- (impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.sip-010-trait)
- (use-trait ft-mintable-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.ft-mintable-trait)
- (impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.ft-mintable-trait)
+;; Constants
+(define-constant TRAIT_REGISTRY 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.trait-registry)
+
+;; Resolve traits using the trait registry
+(use-trait ft-trait (unwrap! (contract-call? TRAIT_REGISTRY get-trait-contract 'sip-010-ft-trait) (err u1000)))
+(use-trait ft-mintable-trait (unwrap! (contract-call? TRAIT_REGISTRY get-trait-contract 'ft-mintable-trait) (err u1001)))
+
+;; Implement the standard traits using full trait identifiers
+(impl-trait 'sip-010-ft-trait)
+(impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.traits.ft-mintable-trait)
 
 ;; Returns the current epoch index since migration start (not capped)
 (define-read-only (current-epoch)

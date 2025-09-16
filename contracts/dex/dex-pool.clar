@@ -1,9 +1,15 @@
 ;; Conxian DEX Pool - Constant product AMM pool with enhanced tokenomics integration
 ;; Implements pool-trait with full system integration
 
-;; Pool trait is defined centrally in contracts/traits. Import and implement the alias.
-(use-trait pool-trait .pool-trait)
-(impl-trait .pool-trait)
+;; Constants
+(define-constant TRAIT_REGISTRY 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.trait-registry)
+
+;; Resolve traits using the trait registry
+(use-trait pool-trait (unwrap! (contract-call? TRAIT_REGISTRY get-trait-contract 'pool-trait) (err u1000)))
+(use-trait ft-trait (unwrap! (contract-call? TRAIT_REGISTRY get-trait-contract 'sip-010-ft-trait) (err u1001)))
+
+;; Implement the standard pool trait
+(impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.traits.pool-trait)
 
 ;; Private helper functions
 (define-private (min (a uint) (b uint))

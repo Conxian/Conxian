@@ -2,7 +2,14 @@
 ;; Conxian Soulbound Reputation Token (SIP-009-style NFT)
 ;; Non-transferable: transfer is disabled to enforce soulbound semantics
 
-(impl-trait .sip-009-trait.sip009-nft-trait)
+;; Constants
+(define-constant TRAIT_REGISTRY 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.trait-registry)
+
+;; Resolve traits using the trait registry
+(use-trait sip009-nft-trait (unwrap! (contract-call? TRAIT_REGISTRY get-trait-contract 'sip-009-trait) (err u1000)))
+
+;; Implement the standard trait
+(impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.sip-009-trait)
 
 ;; --- Errors ---
 (define-constant ERR_UNAUTHORIZED u100)

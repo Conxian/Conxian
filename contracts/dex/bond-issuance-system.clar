@@ -2,7 +2,8 @@
 ;; Tokenized bond system for backing large enterprise loans
 ;; Issues ERC-1155 style bonds representing shares in loan portfolios
 
-(impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.sip-010-trait.sip-010-trait)
+(use-trait ft-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.sip-010-ft-trait)
+(impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.sip-010-ft-trait)
 
 ;; Constants
 (define-constant ERR_UNAUTHORIZED (err u8001))
@@ -17,6 +18,7 @@
 (define-fungible-token conxian-bond)
 (define-constant TOKEN_NAME "Conxian Enterprise Bonds")
 (define-constant TOKEN_SYMBOL "CXB")
+(define-constant DECIMALS u8)
 (define-constant TOKEN_DECIMALS u6) ;; 6 decimals for bonds
 
 ;; Bond series tracking

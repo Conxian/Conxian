@@ -5,11 +5,23 @@
 
 # Environment Settings
 # ===================
-environment: development
-network: simnet
+network: "testnet"
+node_url: "https://stacks-node-api.testnet.stacks.co"
+chain_id: 2147483648  # Testnet chain ID
 auto_confirm: true
 gas_limit: 1500000  # Increased for complex transactions
 gas_price: 1
+
+# Contract addresses (will be populated during deployment)
+contracts: {}
+
+# Testnet accounts
+# Note: These are testnet addresses with testnet STX
+accounts:
+  deployer: "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM"
+  wallet_1: "ST1SJ3DTE5DN7X54YDH5D64R3BCB6A2AG2ZQ8YPD5"
+  wallet_2: "ST2CY5V39NHDPWSXMW9QDT3HC3GD6Q6XX4CFRK9AG"
+  wallet_3: "ST2JHG361ZXG51QTKY2NQCVBPPRRE2KZB1HR05NNC"
 
 # Token Configuration
 # ==================

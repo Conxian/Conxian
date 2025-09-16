@@ -3,7 +3,7 @@
 ;; Refactored for clarity and to work with the overhauled lending system.
 
 ;; --- Traits ---
-(use-trait sip10-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.sip-010-trait)
+(use-trait ft-trait 'sip-010-ft-trait)
 (use-trait lending-system-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.lending-system-trait)
 
 ;; --- Constants ---
@@ -42,7 +42,7 @@
 ;; --- Public Functions ---
 
 ;; The primary public function that allows anyone to liquidate an unhealthy position.
-(define-public (liquidate (borrower principal) (repay-asset <sip10-trait>) (collateral-asset <sip10-trait>) (repay-amount uint))
+(define-public (liquidate (borrower principal) (repay-asset <ft-trait>) (collateral-asset <ft-trait>) (repay-amount uint))
   (let ((lending-system (unwrap! (var-get lending-system-contract) ERR_LENDING_SYSTEM_NOT_SET))
         (liquidator tx-sender))
 

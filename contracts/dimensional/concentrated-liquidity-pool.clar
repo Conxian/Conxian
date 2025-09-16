@@ -8,9 +8,14 @@
 ;; Contract state
 (define-data-var contract-owner principal tx-sender)
 
-;; Pool trait is centralized; import canonical trait and implement alias
-(use-trait pool-trait .pool-trait)
-(impl-trait .pool-trait)
+;; Constants
+(define-constant TRAIT_REGISTRY 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.trait-registry)
+
+;; Resolve pool-trait using the trait registry
+(use-trait pool-trait (unwrap! (contract-call? TRAIT_REGISTRY get-trait-contract 'pool-trait) (err u1000)))
+
+;; Implement the standard pool trait
+(impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.traits.pool-trait)
 
 ;; Initialize data variables with default values
 (define-data-var pool-token-x principal tx-sender)

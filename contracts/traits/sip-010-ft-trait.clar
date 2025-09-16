@@ -1,10 +1,9 @@
 ;; SIP-010 Fungible Token Trait with additional functionality
-
-(use-trait sip-010-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.sip-010-trait)
+;; This is a complete implementation of SIP-010 with extensions
 
 (define-trait sip-010-ft-trait
   (
-    ;; Inherit all functions from sip-010-trait
+    ;; Standard SIP-010 functions
     (transfer (uint principal principal (optional (buff 34))) (response bool uint))
     (get-balance (principal) (response uint uint))
     (get-total-supply () (response uint uint))
@@ -13,7 +12,7 @@
     (get-symbol () (response (string-ascii 10) uint))
     (get-token-uri () (response (optional (string-utf8 256)) uint))
     
-    ;; Additional functions for extended functionality
+    ;; Extended functionality
     (mint (uint principal) (response bool uint))
     (burn (uint) (response bool uint))
     (set-contract-owner (principal) (response bool uint))
