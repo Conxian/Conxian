@@ -4,11 +4,8 @@
 ;; Constants
 (define-constant TRAIT_REGISTRY 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.trait-registry)
 
-;; Resolve oracle trait using the trait registry
-(use-trait oracle-trait (unwrap! (contract-call? TRAIT_REGISTRY get-trait-contract 'oracle-trait) (err u1000)))
-
-;; Implement the standard oracle trait
-(impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.oracle-trait)
+(use-trait oracle-trait .oracle-trait.oracle-trait)
+(impl-trait .oracle-trait.oracle-trait)
 
 ;; Error codes
 (define-constant ERR_UNAUTHORIZED (err u1001))

@@ -1,9 +1,10 @@
 ;; Enhanced Yield Strategy - Basic yield strategy with enhanced tokenomics integration
 ;; Implements strategy-trait for vault integration
 
-(impl-trait strategy-trait)
+(use-trait ft-trait .traits.sip-010-ft-trait)
+(use-trait strategy-trait .traits.strategy-trait)
 
-(use-trait ft-trait 'sip-010-ft-trait)
+(impl-trait .traits.strategy-trait)
 
 ;; Constants
 (define-constant ERR_UNAUTHORIZED (err u1001))

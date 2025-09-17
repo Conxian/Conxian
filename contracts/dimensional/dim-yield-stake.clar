@@ -12,7 +12,7 @@
 (define-constant ERR_METRIC_NOT_FOUND u106)
 
 ;; --- Contract Dependencies ---
-(use-trait sip-010 'sip-010-ft-trait)
+(use-trait sip-010 .sip-010-ft-trait.sip-010-ft-trait)
 
 (define-data-var contract-owner principal tx-sender)
 (define-data-var dim-metrics-contract principal tx-sender) ;; placeholder, should be set at deployment
@@ -56,7 +56,7 @@
 
 ;; --- Staking Functions ---
 
-(define-public (stake-dimension (dim-id uint) (amount uint) (lock-period uint) (token <sip-010>))
+(define-public (stake-dimension (dim-id uint) (amount uint) (lock-period uint) (token sip-010))
   (begin
     (asserts! (> amount u0) (err ERR_INVALID_AMOUNT))
     (asserts! (is-some (map-get? dimension-params {dim-id: dim-id})) (err ERR_DIMENSION_NOT_CONFIGURED))
@@ -73,7 +73,7 @@
 
 ;; --- Claiming Functions ---
 
-(define-public (claim-rewards (dim-id uint) (token <sip-010>))
+(define-public (claim-rewards (dim-id uint) (token sip-010))
   (let (
       (staker tx-sender)
       (stake-info (unwrap! (map-get? stakes {staker: staker, dim-id: dim-id}) (err ERR_NO_STAKE_FOUND)))

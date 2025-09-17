@@ -4,8 +4,8 @@
 ;; Integrates with AccessControl for role-based access
 
 ;; Import the access-control-trait
-(use-trait access-control-trait 'access-control-trait)
-(impl-trait 'access-control-trait)
+(use-trait access-control-trait .access-control-trait.access-control-trait)
+(impl-trait .access-control-trait.access-control-trait)
 
 (define-constant ERR_UNAUTHORIZED (err u8001))
 (define-constant ERR_PROPOSAL_NOT_FOUND (err u8002))

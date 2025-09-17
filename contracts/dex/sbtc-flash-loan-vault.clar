@@ -2,9 +2,8 @@
 ;; Enhanced Flash Loan Vault with sBTC Support
 ;; Implements secure flash loans with sBTC collateral and risk management
 
-(use-trait sip010-ft-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.sip-010-ft-trait)
-(use-trait flash-loan-receiver-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.flash-loan-receiver-trait)
-(impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.flash-loan-receiver-trait)
+(use-trait ft-trait .sip-010-ft-trait.sip-010-ft-trait)
+(use-trait flash-loan-receiver-trait .flash-loan-receiver-trait.flash-loan-receiver-trait)
 
 ;; =============================================================================
 ;; CONSTANTS
@@ -96,9 +95,9 @@
 ;; CORE FLASH LOAN FUNCTIONS
 ;; =============================================================================
 
-(define-public (flash-loan (asset principal) 
+(define-public (flash-loan (asset <ft-trait>)
                           (amount uint) 
-                          (receiver principal)
+                          (receiver <flash-loan-receiver-trait>)
                           (params (buff 1024)))
   "Execute flash loan with callback to receiver contract"
   (let ((asset-contract (contract-of asset)))

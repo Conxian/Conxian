@@ -2,7 +2,7 @@
 ;; Dynamic interest rate calculation system for lending protocols
 ;; Refactored for correctness and proper access control.
 
-(use-trait ft-trait 'sip-010-ft-trait)
+(use-trait ft-trait .traits.sip-010-ft-trait)
 
 (define-constant ERR_UNAUTHORIZED (err u4001))
 (define-constant ERR_INVALID_PARAMETER (err u4002))

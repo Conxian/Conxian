@@ -127,7 +127,7 @@
 
 ;; === CIRCUIT BREAKER LOGIC ===
 
-(define-public (check-circuit-state (service-name (string-ascii 64)))
+(define-private (get-circuit-state (service-name (string-ascii 64)))
   (let (
     (circuit (unwrap! (map-get? service-circuits { service-name: service-name }) ERR_SERVICE_NOT_FOUND))
     (config (unwrap! (map-get? service-configs { service-name: service-name }) ERR_SERVICE_NOT_FOUND))
@@ -143,11 +143,15 @@
           )
           (ok STATE_HALF_OPEN)
         )
-        ERR_CIRCUIT_OPEN
+        (err ERR_CIRCUIT_OPEN)
       )
       (ok (get state circuit))
     )
   )
+)
+
+(define-read-only (check-circuit-state (service-name (string-ascii 64)))
+  (get-circuit-state service-name)
 )
 
 (define-public (record-success (service-name (string-ascii 64)))
@@ -244,7 +248,7 @@
 
 ;; === EMERGENCY CONTROLS ===
 
-(define-public (force-open-circuit (service-name (string-ascii 64)))
+(define-public (emergency-open-circuit (service-name (string-ascii 64)))
   (begin
     (try! (only-owner-guard))
     (let (
@@ -263,7 +267,7 @@
   )
 )
 
-(define-public (force-close-circuit (service-name (string-ascii 64)))
+(define-public (emergency-close-circuit (service-name (string-ascii 64)))
   (begin
     (try! (only-owner-guard))
     (let (

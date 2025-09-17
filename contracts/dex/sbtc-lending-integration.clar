@@ -2,7 +2,7 @@
 ;; sBTC Lending Integration - extends comprehensive lending system
 ;; Provides sBTC-specific lending, borrowing, and collateral management
 
-(use-trait ft-trait 'sip-010-ft-trait)
+(use-trait ft-trait .sip-010-ft-trait.sip-010-ft-trait)
 
 ;; =============================================================================
 ;; CONSTANTS AND ERROR CODES
@@ -182,7 +182,7 @@
 ;; SUPPLY FUNCTIONS
 ;; =============================================================================
 
-(define-public (supply (asset <ft-trait>) (amount uint))
+(define-public (supply (asset ft-trait) (amount uint))
   "Supply sBTC to earn interest"
   (let ((asset-principal (contract-of asset)))
     (begin
@@ -239,7 +239,7 @@
   )
 )
 
-(define-public (withdraw (asset <ft-trait>) (amount uint))
+(define-public (withdraw (asset ft-trait) (amount uint))
   "Withdraw supplied sBTC"
   (let ((asset-principal (contract-of asset)))
     (begin
@@ -298,7 +298,7 @@
 ;; BORROW FUNCTIONS
 ;; =============================================================================
 
-(define-public (borrow (asset <ft-trait>) (amount uint))
+(define-public (borrow (asset ft-trait) (amount uint))
   "Borrow sBTC against collateral"
   (let ((asset-principal (contract-of asset)))
     (begin
@@ -362,7 +362,7 @@
   )
 )
 
-(define-public (repay (asset <ft-trait>) (amount uint))
+(define-public (repay (asset ft-trait) (amount uint))
   "Repay borrowed sBTC"
   (let ((asset-principal (contract-of asset)))
     (begin
@@ -414,7 +414,7 @@
 ;; LIQUIDATION FUNCTIONS
 ;; =============================================================================
 
-(define-public (liquidate (borrower principal) (asset <ft-trait>) (repay-amount uint) (collateral-asset <ft-trait>))
+(define-public (liquidate (borrower principal) (asset ft-trait) (repay-amount uint) (collateral-asset ft-trait))
   "Liquidate undercollateralized position"
   (let ((asset-principal (contract-of asset))
         (collateral-principal (contract-of collateral-asset)))
