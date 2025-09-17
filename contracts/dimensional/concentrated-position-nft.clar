@@ -39,7 +39,7 @@
       (var-set last-token-id new-id)
       
       ;; Emit transfer event (SIP-009)
-      (print (tuple (event: "mint") (value: new-id) (recipient: recipient)))
+      (print (tuple (event "mint") (value new-id) (recipient recipient)))
       (ok new-id)
     )
   ))

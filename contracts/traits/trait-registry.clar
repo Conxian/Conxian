@@ -60,7 +60,7 @@
 
 ;; List all registered traits with their implementations
 (define-read-only (list-traits)
-  (let ((traits []))
+  (let ((traits (list)))
     (map-get-keys trait-registry (element (name) 
       (set! traits (append traits (list name)))))
     (ok traits)

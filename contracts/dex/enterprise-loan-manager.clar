@@ -2,11 +2,11 @@
 ;; Enterprise Loan Manager - Advanced loan management with bond issuance
 ;; Supports institutional borrowing, risk-based pricing, and automated bond creation
 
-(use-trait ft-trait 'sip-010-ft-trait)
-(use-trait lending-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.lending-system-trait)
+(use-trait ft-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.sip-010-ft-trait)
+(use-trait lending-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.lending-system-trait)
 
 ;; Import mathematical libraries for enterprise calculations (removed unresolved trait import)
-;; (use-trait math-precision 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.precision-calculator)
+;; (use-trait math-precision 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.precision-calculator)
 
 ;; Constants
 (define-constant ERR_UNAUTHORIZED (err u7001))
@@ -33,8 +33,8 @@
 (define-constant MIN_LOAN_AMOUNT u1000000)  ;; 1.0 STX (6 decimals)
 
 ;; Contract references
-(define-constant BOND_ISSUANCE_CONTRACT .bond-issuance-system)
-(define-constant LENDING_SYSTEM .comprehensive-lending-system)
+(define-constant BOND_ISSUANCE_CONTRACT 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.bond-issuance-system)
+(define-constant LENDING_SYSTEM 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.comprehensive-lending-system)
 
 ;; Dynamic contract reference for bond issuance
 (define-data-var bond-issuance-system (optional principal) (some BOND_ISSUANCE_CONTRACT))

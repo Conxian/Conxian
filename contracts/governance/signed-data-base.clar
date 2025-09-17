@@ -2,7 +2,7 @@
 ;; Base implementation of SIP-018 Signed Structured Data standard
 ;; Provides reusable functionality for contracts needing signature verification
 
-(impl-trait .sip-018-trait.sip-018-trait)
+(impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.sip-018-trait)
 
 ;; Constants
 (define-constant ERR_INVALID_SIGNATURE (err u6300))

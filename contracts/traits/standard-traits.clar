@@ -27,13 +27,6 @@
   )
 )
 
-;; ===== FT Mintable Trait =====
-(define-trait ft-mintable-trait
-  (
-    (mint (principal uint (optional (buff 34))) (response bool uint))
-    (burn (principal uint (optional (buff 34))) (response bool uint))
-  )
-)
 
 ;; ===== Pool Trait =====
 (define-trait pool-trait

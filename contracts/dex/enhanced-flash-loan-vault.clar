@@ -3,19 +3,10 @@
 ;; Extends the basic vault with full flash loan functionality
 
 ;; Import trait at the top
-(use-trait ft-trait 'sip-010-ft-trait)
+(use-trait ft-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.sip-010-ft-trait)
 
-;; Define flash-loan-receiver trait inline to avoid circular dependency
-(define-trait flash-loan-receiver
-  (
-    (on-flash-loan (sender principal) (token principal) (amount uint) (fee uint) (data (buff 256))) (response bool uint)
-    (get-flash-loan-fee (token principal) (amount uint) (data (buff 256))) (response uint uint)
-    (get-max-flash-loan (token principal)) (response uint uint)
-  )
-)
-
-(impl-trait vault-trait)
-(impl-trait vault-admin-trait)
+(impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.vault-trait)
+(impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.vault-admin-trait)
 
 ;; Constants
 (define-constant ERR_UNAUTHORIZED (err u6001))

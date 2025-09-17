@@ -6,7 +6,7 @@
 (define-constant TRAIT_REGISTRY 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.trait-registry)
 
 ;; Resolve traits using the trait registry
-(use-trait sip009-nft-trait (unwrap! (contract-call? TRAIT_REGISTRY get-trait-contract 'sip-009-trait) (err u1000)))
+(use-trait sip009-nft-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.sip-009-trait)
 
 ;; Implement the standard trait
 (impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.sip-009-trait)

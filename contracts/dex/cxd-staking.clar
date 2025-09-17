@@ -6,11 +6,11 @@
 (define-constant TRAIT_REGISTRY 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.trait-registry)
 
 ;; Resolve traits using the trait registry
-(use-trait ft-trait .sip-010-ft-trait.sip-010-ft-trait)
-(use-trait staking-trait .staking-trait.staking-trait)
+(use-trait ft-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.sip-010-ft-trait)
+(use-trait staking-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.staking-trait)
 
 ;; Implement the staking trait
-(impl-trait .staking-trait.staking-trait)
+(impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.staking-trait)
 
 ;; --- Constants ---
 (define-constant CONTRACT_OWNER tx-sender)
@@ -43,7 +43,7 @@
 (define-data-var paused bool false)
 
 ;; CXD token contract
-(define-data-var cxd-token-contract principal .cxd-token)
+(define-data-var cxd-token-contract principal 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.cxd-token)
 
 ;; --- User State ---
 (define-map user-balances principal uint) ;; xCXD balances

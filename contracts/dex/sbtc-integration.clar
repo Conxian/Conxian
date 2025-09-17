@@ -2,7 +2,7 @@
 ;; sBTC Integration Module for Conxian Protocol
 ;; Provides sBTC asset management, risk parameters, and oracle integration
 
-(use-trait ft-trait .sip-010-ft-trait.sip-010-ft-trait)
+(use-trait ft-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.sip-010-ft-trait)
 
 ;; =============================================================================
 ;; CONSTANTS AND ERROR CODES
@@ -20,7 +20,7 @@
 (define-constant ERR_CIRCUIT_BREAKER_ACTIVE (err u1008))
 
 ;; sBTC mainnet and testnet contract addresses
-(define-constant SBTC_MAINNET SP3K8BC0PPEVCV7NZ6QSRWPQ2JE9E5B6N3PA0KBR9.sbtc-token)
+(define-constant SBTC_MAINNET 'SP3K8BC0PPEVCV7NZ6QSRWPQ2JE9E5B6N3PA0KBR9.sbtc-token)
 (define-constant SBTC_TESTNET .sbtc-token)
 
 ;; Risk management constants

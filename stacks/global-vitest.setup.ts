@@ -2,7 +2,7 @@
 import { getSDK } from '@hirosystems/clarinet-sdk';
 
 // Use a minimal test manifest at project root to avoid loading optional/missing contracts
-const manifestPath = 'Clarinet.test.toml';
+const manifestPath = 'Clarinet.toml';
 
 // Configure Clarinet SDK options for tests at module load time
 global.options = {

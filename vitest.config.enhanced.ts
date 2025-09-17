@@ -31,12 +31,13 @@ export default defineConfig({
     
     // Parallel execution defaults used (remove explicit thread options for compatibility)
     
+    // Parallel execution defaults used (remove explicit thread options for compatibility)
+    globals: true,
+
     // Global setup and teardown
-    globalSetup: ['./stacks/tests/helpers/global-setup.ts'],
     setupFiles: [
       './stacks/global-vitest.setup.ts',
-      './node_modules/@hirosystems/clarinet-sdk/vitest-helpers/src/vitest.setup.ts',
-      './stacks/tests/helpers/test-setup.ts'
+      './node_modules/@hirosystems/clarinet-sdk/vitest-helpers/src/vitest.setup.ts'
     ],
     
     // Coverage configuration

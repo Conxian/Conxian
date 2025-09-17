@@ -2,7 +2,7 @@
 ;; Standard interface for lending and borrowing systems
 ;; Supports both flash loans and traditional collateralized loans
 
-(use-trait ft-trait 'sip-010-ft-trait)
+(use-trait ft-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.sip-010-ft-trait)
 
 (define-trait lending-system-trait
   (
