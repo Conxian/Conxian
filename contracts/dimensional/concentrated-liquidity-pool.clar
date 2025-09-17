@@ -12,7 +12,7 @@
 (define-constant TRAIT_REGISTRY 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.trait-registry)
 
 ;; Resolve pool-trait using the trait registry
-(use-trait pool-trait (unwrap! (contract-call? TRAIT_REGISTRY get-trait-contract 'pool-trait) (err u1000)))
+(use-trait pool-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.traits.pool-trait)
 
 ;; Implement the standard pool trait
 (impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.traits.pool-trait)

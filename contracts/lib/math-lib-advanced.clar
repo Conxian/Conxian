@@ -38,15 +38,20 @@
 )
 
 ;; === ABS ===
-(define-read-only (abs (x int))
+(define-read-only (abs-int (x int))
   (if (< x 0)
     (* x -1)
     x
   )
 )
 
-(define-read-only (abs (x uint))
+(define-read-only (abs-uint (x uint))
   x
+)
+
+;; === UTILITY FUNCTIONS ===
+(define-read-only (average (a uint) (b uint))
+  (unwrap! (safe-div (+ a b) u2) (err ERR_OVERFLOW))
 )
 
 ;; === INTEGER SQUARE ROOT (Newton's method) ===
@@ -60,17 +65,12 @@
 )
 
 (define-private (sqrt-iter (n uint) (guess uint) (prev-guess uint))
-  (if (or (is-eq guess prev-guess) (<= (abs (- guess prev-guess)) u1))
+  (if (or (is-eq guess prev-guess) (<= (abs-uint (- guess prev-guess)) u1))
     guess
     (let ((next-guess (average guess (unwrap! (div-down n guess) (err ERR_OVERFLOW)))))
       (sqrt-iter n next-guess guess)
     )
   )
-)
-
-;; === UTILITY FUNCTIONS ===
-(define-read-only (average (a uint) (b uint))
-  (unwrap! (safe-div (+ a b) u2) (err ERR_OVERFLOW))
 )
 
 (define-read-only (min (a uint) (b uint))

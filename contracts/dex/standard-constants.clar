@@ -1,8 +1,7 @@
 ;; standard-constants.clar
 ;; Implementation of standard constants for the Conxian protocol
 
-(use-trait std-constants .standard-constants-trait)
-(use-trait bond-trait .bond-trait)
+(use-trait std-constants 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.standard-constants-trait.standard-constants-trait)
 
 ;; ===== PRECISION CONSTANTS =====
 (define-constant PRECISION_18 u1000000000000000000)  ;; 18 decimals
@@ -23,7 +22,7 @@
 (define-constant MIN_BOND_AMOUNT u100000000)         ;; 1.0 bond with 8 decimals
 (define-constant MAX_BOND_AMOUNT (* u1000000000000 u100000000)) ;; 1 trillion max
 (define-constant MIN_BOND_DURATION (* BLOCKS_PER_DAY u30))     ;; 30 days minimum
-(define-constant MAX_BOND_DURATION MAX_BOND_MATURITY
+(define-constant MAX_BOND_DURATION MAX_BOND_MATURITY)
 
 ;; Bond status values
 (define-constant BOND_STATUS_ACTIVE "active")
@@ -41,7 +40,7 @@
 ;; ===== BOND TRAIT DEFINITION =====
 (define-trait bond-trait
   ;; Get bond details
-  ((get-bond-details (uint) (response {
+  (get-bond-details (uint) (response {
     issuer: principal,
     principal-amount: uint,
     coupon-rate: uint,           ;; in basis points (100 = 1%)
@@ -84,7 +83,7 @@
   (get-bond-price (uint) (response uint uint))
 )
 
-(impl-trait .standard-constants-trait)
+(impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.standard-constants-trait.standard-constants-trait)
 
 (define-public (get-precision)
   (ok PRECISION_18))
