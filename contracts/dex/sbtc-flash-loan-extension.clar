@@ -2,7 +2,7 @@
 ;; sBTC Flash Loan Extension - Advanced flash loan functionality with sBTC support
 ;; Provides flash loans with enhanced security, multi-asset support, and bond integration
 
- (use-trait ft-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.sip-010-trait)
+ (use-trait ft-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.sip-010-ft-trait)
  (use-trait flash-loan-receiver 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.flash-loan-receiver-trait)
  (impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.flash-loan-receiver-trait)
 
@@ -338,7 +338,7 @@
   (let ((asset-principal (contract-of asset)))
     (begin
       ;; Verify bond ownership and value
-      (match (contract-call? .bond-issuance-system get-bond-details bond-id)
+      (match (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.bond-issuance-system get-bond-details bond-id)
         bond-details (let ((bond-value (get current-value bond-details)))
           ;; Allow larger loan amounts with bond collateral
           (if (>= bond-value amount)

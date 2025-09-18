@@ -15,7 +15,7 @@
 )
 
 ;; ===== SIP-010 Fungible Token Standard =====
-(define-trait sip010-trait
+(define-trait sip-010-ft-trait
   (
     (transfer (uint principal principal (optional (buff 34))) (response bool uint))
     (get-name () (response (string-ascii 32) uint))
@@ -27,13 +27,6 @@
   )
 )
 
-;; ===== FT Mintable Trait =====
-(define-trait ft-mintable-trait
-  (
-    (mint (principal uint (optional (buff 34))) (response bool uint))
-    (burn (principal uint (optional (buff 34))) (response bool uint))
-  )
-)
 
 ;; ===== Pool Trait =====
 (define-trait pool-trait

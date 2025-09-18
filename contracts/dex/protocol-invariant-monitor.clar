@@ -4,9 +4,8 @@
 ;; Refactored for real functionality.
 
 ;; --- Traits ---
-(use-trait sip10-trait .sip-010-trait.sip-010-trait)
-(use-trait staking-trait .staking-trait.staking-trait)
-(use-trait migration-queue-trait .migration-queue-trait.migration-queue-trait)
+(use-trait ft-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.sip-010-ft-trait)
+(use-trait staking-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.staking-trait)
 
 ;; --- Constants ---
 (define-constant CONTRACT_OWNER tx-sender)

@@ -1,8 +1,9 @@
-# Conxian
+# Conxian Protocol
 
 [![Tests](https://img.shields.io/badge/Tests-Comprehensive-green)](https://github.com/Anya-org/Conxian)
 [![Contracts](https://img.shields.io/badge/Contracts-65%2B-blue)](https://github.com/Anya-org/Conxian)
 [![Status](https://img.shields.io/badge/Status-Core%20System%20Implemented-blue)](https://github.com/Anya-org/Conxian)
+[![Network](https://img.shields.io/badge/Network-Testnet%2FMainnet-9cf)](https://docs.hiro.so/)
 
 A comprehensive DeFi platform on Stacks featuring 65+ smart contracts with advanced mathematical libraries, lending & flash loan system framework, governance infrastructure, DEX components, and monitoring systems.
 
@@ -45,6 +46,61 @@ A comprehensive DeFi platform on Stacks featuring 65+ smart contracts with advan
 - **Yield Framework**: Structure for yield optimization strategies
 
 [Complete Feature Documentation](./documentation/)
+
+## 🚀 Deployment
+
+### Prerequisites
+
+1. Install [Clarinet](https://docs.hiro.so/smart-contracts/clarinet)
+2. Set up your Stacks wallet with testnet STX (for testnet deployment)
+3. Set environment variables for sensitive information
+
+### Testnet Deployment
+
+1. Configure your testnet settings in `deployments/staging-config.yaml`
+2. Deploy to testnet:
+   ```bash
+   clarinet deployment apply -n testnet
+   ```
+3. Verify deployment:
+   ```bash
+   clarinet deployment list -n testnet
+   ```
+
+### Mainnet Deployment
+
+1. Update production settings in `deployments/production-config.yaml`
+2. Set required environment variables:
+   ```bash
+   export DEPLOYER_MNEMONIC="your-mnemonic-here"
+   export GOVERNANCE_ADDRESS="your-governance-address"
+   ```
+3. Deploy to mainnet:
+   ```bash
+   clarinet deployment apply -n mainnet
+   ```
+4. Verify deployment:
+   ```bash
+   clarinet deployment list -n mainnet
+   ```
+
+## 🔧 Development
+
+### Testing
+
+Run the test suite:
+```bash
+clarinet test
+```
+
+### Environment Setup
+
+1. Copy `.env.example` to `.env`
+2. Update environment variables as needed
+3. Run tests with:
+   ```bash
+   source .env && clarinet test
+   ```
 
 ## Core Principles
 

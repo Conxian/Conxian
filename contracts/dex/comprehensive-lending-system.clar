@@ -2,13 +2,11 @@
 ;; Refactored for clarity, security, and correctness.
 
 ;; --- Traits ---
-(use-trait sip10-trait .sip-010-trait.sip-010-trait)
-(use-trait oracle-trait .oracle-trait.oracle-trait)
-(use-trait interest-rate-model-trait .interest-rate-model-trait.interest-rate-model-trait)
-(use-trait lending-system-trait .lending-system-trait.lending-system-trait)
-(use-trait access-control-trait .access-control-trait.access-control-trait)
+(use-trait oracle-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.oracle-trait)
+(use-trait lending-system-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.lending-system-trait)
+(use-trait access-control-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.access-control-trait)
 
-(impl-trait .lending-system-trait.lending-system-trait)
+(impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.lending-system-trait)
 
 (define-trait circuit-breaker-trait
   (
@@ -38,10 +36,14 @@
 (define-data-var paused bool false)
 
 ;; Contract Dependencies (set by owner)
-(define-data-var oracle-contract principal .oracle)
-(define-data-var interest-rate-model-contract principal .interest-rate-model)
-(define-data-var loan-liquidation-manager-contract principal .loan-liquidation-manager)
-(define-data-var access-control-contract principal .access-control)
+(define-constant oracle 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.oracle)
+(define-constant interest-rate-model 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.interest-rate-model)
+(define-constant loan-liquidation-manager 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.loan-liquidation-manager)
+(define-constant access-control 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.access-control)
+(define-data-var oracle-contract principal oracle)
+(define-data-var interest-rate-model-contract principal interest-rate-model)
+(define-data-var loan-liquidation-manager-contract principal loan-liquidation-manager)
+(define-data-var access-control-contract principal access-control)
 (define-data-var circuit-breaker-contract (optional principal) none)
 
 ;; --- Maps ---
@@ -108,7 +110,7 @@
         (borrow-value (get-total-borrow-value-in-usd user)))
     (if (> borrow-value u0)
       (ok (/ (* collateral-value PRECISION) borrow-value))
-      (ok u115792089237316195423570985008687907853269984665640564039457584007913129639935) ;; max-uint
+      (ok u18446744073709551615) ;; max-uint (2^64 - 1)
     )
   )
 )
@@ -129,20 +131,18 @@
   )
 )
 
-(define-public (supply (asset <sip10-trait>) (amount uint))
-  (let ((asset-principal (contract-of asset)))
-    (match (supply-internal asset-principal amount)
-      (ok result)
-        (begin
-          (try! (call-circuit-breaker-success))
-          (ok result)
-        )
-      (err error-code)
-        (begin
-          (try! (call-circuit-breaker-failure))
-          (err error-code)
-        )
-    )
+(define-public (supply (asset principal) (amount uint))
+  (match (supply-internal asset amount)
+    (ok result)
+      (begin
+        (try! (call-circuit-breaker-success))
+        (ok result)
+      )
+    (err error-code)
+      (begin
+        (try! (call-circuit-breaker-failure))
+        (err error-code)
+      )
   )
 )
 
@@ -182,8 +182,8 @@
   )
 )
 
-(define-public (withdraw (asset <sip10-trait>) (amount uint))
-  (match (withdraw-internal (contract-of asset) amount)
+(define-public (withdraw (asset principal) (amount uint))
+  (match (withdraw-internal asset amount)
     (ok result)
       (begin
         (try! (call-circuit-breaker-success))
@@ -220,8 +220,8 @@
   )
 )
 
-(define-public (borrow (asset <sip10-trait>) (amount uint))
-  (match (borrow-internal (contract-of asset) amount)
+(define-public (borrow (asset principal) (amount uint))
+  (match (borrow-internal asset amount)
     (ok result)
       (begin
         (try! (call-circuit-breaker-success))
@@ -262,8 +262,8 @@
   )
 )
 
-(define-public (repay (asset <sip10-trait>) (amount uint))
-  (match (repay-internal (contract-of asset) amount)
+(define-public (repay (asset principal) (amount uint))
+  (match (repay-internal asset amount)
     (ok result)
       (begin
         (try! (call-circuit-breaker-success))
@@ -300,7 +300,7 @@
 
 ;; --- Liquidation ---
 ;; This function can only be called by the authorized loan-liquidation-manager contract.
-(define-public (liquidate (liquidator principal) (borrower principal) (repay-asset <sip10-trait>) (collateral-asset <sip10-trait>) (repay-amount uint))
+(define-public (liquidate (liquidator principal) (borrower principal) (repay-asset principal) (collateral-asset principal) (repay-amount uint))
   (begin
     (asserts! (is-eq tx-sender (var-get loan-liquidation-manager-contract)) ERR_UNAUTHORIZED)
     (try! (check-not-paused))

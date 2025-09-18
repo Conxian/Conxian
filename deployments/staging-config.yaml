@@ -1,14 +1,18 @@
-# staging-config.yaml
-# Staging environment configuration for Conxian Enhanced Tokenomics
+# ===========================================
+# CONXIAN STAGING CONFIGURATION
+# Testnet deployment settings for Conxian
+# ===========================================
 
-# =============================================================================
-# ENVIRONMENT SETTINGS
-# =============================================================================
-environment: staging
-network: testnet
-auto_confirm: false
+# Environment Settings
+# ===================
+environment: "staging"
+network: "testnet"
+node_url: "https://stacks-node-api.testnet.stacks.co"
+chain_id: 2147483648  # Testnet chain ID
+auto_confirm: true  # Auto-confirm for testnet
 gas_limit: 2000000
 gas_price: 1
+require_manual_approval: false  # No manual approval needed for testnet
 
 # =============================================================================
 # TOKEN CONFIGURATION

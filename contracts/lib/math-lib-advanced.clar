@@ -14,48 +14,67 @@
 (define-constant E_FIXED u2718281828459045235) ;; e ~ 2.718281828459045235
 
 ;; === SAFE MATH ===
-(define-private (mul-down (a uint) (b uint))
-  (/ (* a b) PRECISION))
+(define-read-only (mul-down (a uint) (b uint))
+  (if (or (is-eq a u0) (is-eq b u0))
+    (ok u0)
+    (let ((result (/ (* a b) PRECISION)))
+      (if (is-eq result u0)
+        (err ERR_UNDERFLOW)
+        (ok result)
+      )
+    )
+  )
+)
 
-(define-private (div-down (a uint) (b uint))
+(define-read-only (div-down (a uint) (b uint))
   (if (is-eq b u0)
-    u0 ;; Return 0 for division by zero - caller should check result
-    (/ (* a PRECISION) b)))
+    (err ERR_INVALID_INPUT)
+    (ok (/ (* a PRECISION) b)))
+)
+
+;; Alias for div-down to maintain compatibility
+(define-read-only (safe-div (a uint) (b uint))
+  (div-down a b)
+)
 
 ;; === ABS ===
-(define-private (abs (x int))
+(define-read-only (abs-int (x int))
   (if (< x 0)
     (* x -1)
     x
   )
 )
 
-(define-private (abs (x uint))
+(define-read-only (abs-uint (x uint))
   x
 )
 
-;; === INTEGER SQUARE ROOT ===
-(define-private (sqrt-iter (n uint) (guess uint) (prev-guess uint))
-  (if (or (is-eq guess prev-guess) (<= (abs (- guess prev-guess)) u1))
-    guess
-    (sqrt-iter n (average guess (/ n guess)) guess)
-  )
+;; === UTILITY FUNCTIONS ===
+(define-read-only (average (a uint) (b uint))
+  (unwrap! (safe-div (+ a b) u2) (err ERR_OVERFLOW))
 )
 
+;; === INTEGER SQUARE ROOT (Newton's method) ===
 (define-read-only (sqrt-integer (n uint))
   (if (is-eq n u0)
     (ok u0)
-    (ok (sqrt-iter n (max u1 (/ n u2)) n))
+    (let ((initial-guess (max u1 (unwrap! (div-down n u2) (err ERR_OVERFLOW)))))
+      (ok (sqrt-iter n initial-guess u0))
+    )
   )
 )
 
-;; === MIN/MAX ===
+(define-private (sqrt-iter (n uint) (guess uint) (prev-guess uint))
+  (if (or (is-eq guess prev-guess) (<= (abs-uint (- guess prev-guess)) u1))
+    guess
+    (let ((next-guess (average guess (unwrap! (div-down n guess) (err ERR_OVERFLOW)))))
+      (sqrt-iter n next-guess guess)
+    )
+  )
+)
+
 (define-read-only (min (a uint) (b uint))
-  (if (< a b)
-    (ok a)
-    (ok b)))
+  (if (< a b) a b))
 
 (define-read-only (max (a uint) (b uint))
-  (if (> a b)
-    (ok a)
-    (ok b)))
+  (if (> a b) a b))

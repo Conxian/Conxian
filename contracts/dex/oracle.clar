@@ -1,20 +1,10 @@
 ;; oracle.clar
 ;; Standard price oracle implementation for the Conxian protocol
 
-;; Define Oracle Trait
-(define-trait oracle-trait
-  (
-    (get-price (principal) (response (optional uint) uint))
-    (get-price-in-usd (principal) (response (optional uint) uint))
-    (update-price (principal uint) (response bool uint))
-    (add-or-update-feed (principal principal) (response bool uint))
-    (remove-feed (principal) (response bool uint))
-  )
-)
+;; Constants
+(define-constant TRAIT_REGISTRY 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.trait-registry)
 
-;; Implement the oracle trait with proper syntax
-;; Temporarily commented out for initial deployment
-;; (use-trait oracle-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.oracle-trait)
+(use-trait oracle-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.oracle-trait)
 (impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.oracle-trait)
 
 ;; Error codes

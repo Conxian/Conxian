@@ -16,6 +16,8 @@
     "test:production": "npm run test:enterprise && npm run test:flash-loans && npm run test:integration",
     "clarinet:test": "clarinet test",
     "clarinet:check": "clarinet check",
+    "check": "clarinet check",
+    "check": "clarinet check",
     "clarinet:console": "clarinet console",
     "validate:docs": "node ./scripts/validate-docs.js",
     "ci": "node ./scripts/ensure-deps.js && node ./scripts/validate-docs.js && npx vitest run",
