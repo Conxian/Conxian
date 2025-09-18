@@ -2,8 +2,8 @@
 ;; Minimal SIP-010-compliant mock for testing
 
 ;; Import the SIP-010 FT trait
-(use-trait sip010-ft-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.sip-010-trait)
-(impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.sip-010-trait)
+(use-trait sip010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.sip-010-trait)
+(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.sip-010-trait)
 
 ;; Error codes
 (define-constant ERR_UNAUTHORIZED (err u100))

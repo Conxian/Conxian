@@ -2,9 +2,9 @@
 ;; sBTC Flash Loan Extension - Advanced flash loan functionality with sBTC support
 ;; Provides flash loans with enhanced security, multi-asset support, and bond integration
 
- (use-trait ft-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.sip-010-ft-trait)
- (use-trait flash-loan-receiver 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.flash-loan-receiver-trait)
- (impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.flash-loan-receiver-trait)
+ (use-trait ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.sip-010-ft-trait)
+ (use-trait flash-loan-receiver 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.flash-loan-receiver-trait)
+ (impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.flash-loan-receiver-trait)
 
 ;; =============================================================================
 ;; CONSTANTS AND ERROR CODES
@@ -338,7 +338,7 @@
   (let ((asset-principal (contract-of asset)))
     (begin
       ;; Verify bond ownership and value
-      (match (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.bond-issuance-system get-bond-details bond-id)
+      (match (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.bond-issuance-system get-bond-details bond-id)
         bond-details (let ((bond-value (get current-value bond-details)))
           ;; Allow larger loan amounts with bond collateral
           (if (>= bond-value amount)

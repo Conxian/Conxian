@@ -28,6 +28,7 @@ bitcoin_node_rpc_address = "https://blockstream.info/api"
 
 [contracts]
 # --- Core Traits ---
+router-trait = { path = "contracts/traits/router-trait.clar" }
 sip-010-trait = { path = "contracts/traits/sip-010-trait.clar" }
 sip-010-ft-trait = { path = "contracts/traits/sip-010-ft-trait.clar" }
 pool-trait = { path = "contracts/traits/pool-trait.clar" }

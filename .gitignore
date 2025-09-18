@@ -169,3 +169,4 @@ analytics/cache/
 stx-wallet*
 btc-wallet*
 .kiro/specs/
+.secrets/

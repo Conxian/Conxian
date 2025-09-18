@@ -1,9 +1,9 @@
 ;; bond-factory.clar
 ;; Factory contract for creating and managing bond tokens
 
-(use-trait std-constants 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.standard-constants-trait)
-(use-trait bond-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.bond-trait)
-;; (impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.bond-factory-trait)
+(use-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.traits.standard-constants-trait)
+(use-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.traits.bond-trait)
+(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.traits.bond-factory-trait)
 
 ;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED (err u5000))
@@ -35,7 +35,7 @@
 
 (define-private (safe-mul (a uint) (b uint))
   (let ((c (* a b)))
-    (if (or (= a 0) (= c (div c a)))
+    (if (or (= a u0) (= c (div c a)))
       (ok c)
       (err ERR_OVERFLOW)
     )
@@ -283,7 +283,7 @@
     )
         (ok result)
       )
-      (err error) (err error)
+      (err error) error
     )
   )
 )

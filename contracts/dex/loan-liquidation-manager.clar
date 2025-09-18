@@ -3,8 +3,8 @@
 ;; Refactored for clarity and to work with the overhauled lending system.
 
 ;; --- Traits ---
-(use-trait ft-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.traits.sip-010-trait)
-(use-trait lending-system-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.traits.lending-system-trait)
+(use-trait ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.traits.sip-010-trait)
+(use-trait lending-system-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.traits.lending-system-trait)
 
 ;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED (err u2001))

@@ -1,11 +1,11 @@
 ;; Conxian DEX Pool - Constant product AMM pool with enhanced tokenomics integration
 ;; Implements pool-trait with full system integration
 
-(use-trait pool-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.pool-trait)
-(use-trait sip-010-ft-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.sip-010-ft-trait)
+(use-trait pool-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.pool-trait)
+(use-trait sip-010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.sip-010-ft-trait)
 
 ;; Implement the standard pool trait
-(impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.pool-trait)
+(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.pool-trait)
 
 ;; Private helper functions
 (define-private (min (a uint) (b uint))
@@ -179,7 +179,7 @@
         (reserve-y (var-get reserve-b))
         (shares (if (is-eq current-supply u0)
                     ;; First liquidity provision
-                    (- (unwrap-panic (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.math-lib-advanced sqrt-integer (* dx dy))) MIN_LIQUIDITY)
+                    (- (unwrap-panic (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math-lib-advanced sqrt-integer (* dx dy))) MIN_LIQUIDITY)
                     ;; Subsequent liquidity provision
                     (min (/ (* dx current-supply) reserve-x)
                          (/ (* dy current-supply) reserve-y))))

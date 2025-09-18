@@ -2,10 +2,10 @@
 ;; This contract is responsible for creating and registering new DEX pools.
 
 ;; --- Constants ---
-(define-constant ACCESS_CONTROL 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.access-control)
+(define-constant ACCESS_CONTROL 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.access-control)
 
 ;; Use standard SIP-010 trait for token operations
-(use-trait sip-010-ft-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.sip-010-ft-trait)
+(use-trait sip-010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.sip-010-ft-trait)
 
 ;; --- Constants ---
 ;; Error Codes
@@ -20,7 +20,7 @@
 
 ;; --- Data Variables ---
 (define-data-var contract-owner principal tx-sender)
-(define-data-var access-control-contract principal 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.access-control) ;; The main access control contract
+(define-data-var access-control-contract principal 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.access-control) ;; The main access control contract
 (define-data-var pool-count uint u0)
 
 ;; --- Maps ---
