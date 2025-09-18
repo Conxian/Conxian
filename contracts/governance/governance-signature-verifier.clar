@@ -2,8 +2,8 @@
 ;; Governance signature verification using SIP-018 implementation
 ;; Handles proposal signing and verification for governance operations
 
-(use-trait sip018-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.sip-018-trait)
-(impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.sip-018-trait)
+(use-trait sip018-trait .sip-018-trait)
+(impl-trait .sip-018-trait)
 
 ;; --- Constants ---
 (define-constant ERR_INVALID_PROPOSAL (err u8001))
@@ -11,8 +11,8 @@
 (define-constant ERR_INSUFFICIENT_VOTING_POWER (err u8003))
 (define-constant ERR_ALREADY_SIGNED (err u8004))
 
-(define-constant governance 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.lending-protocol-governance)
-(define-constant signed-data-base 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.signed-data-base)
+(define-constant governance .lending-protocol-governance)
+(define-constant signed-data-base .signed-data-base)
 
 ;; --- Storage ---
 (define-map signed-proposals

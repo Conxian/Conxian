@@ -166,7 +166,7 @@
       (collateral-asset (get collateral-asset position))
       (debt-amount (get debt-amount position))
     )
-    (match (liquidate-position borrower debt-asset collateral-asset debt-amount u115792089237316195423570985008687907853269984665640564039457584007913129639935)  ;; Max uint256
+    (match (liquidate-position borrower debt-asset collateral-asset debt-amount u1000000000000)  ;; Max amount for liquidation (1M with 6 decimals)
       (ok result)
         (merge acc {
           success-count: (+ (get success-count acc) u1),

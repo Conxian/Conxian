@@ -2,7 +2,7 @@
 ;; Integration tests for Conxian enhanced tokenomics system
 ;; Tests cross-contract interactions, revenue flows, and system coordination
 
-(use-trait ft-trait .sip-010-trait)
+(use-trait sip-010-ft-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.sip-010-ft-trait)
 
 ;; =============================================================================
 ;; TEST CONSTANTS AND SETUP

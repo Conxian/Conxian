@@ -18,6 +18,10 @@ contracts: {}
 # Testnet accounts
 # Note: These are testnet addresses with testnet STX
 accounts:
+  # System account for protocol operations
+  system:
+    mnemonic: "theme apart absurd gasp river used vessel screen fiction slice slab ice jar hurt slam puppy snake life radar sign ship list excuse trick"
+    balance: 100000000000000  # 100,000,000 STX
   deployer: "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM"
   wallet_1: "ST1SJ3DTE5DN7X54YDH5D64R3BCB6A2AG2ZQ8YPD5"
   wallet_2: "ST2CY5V39NHDPWSXMW9QDT3HC3GD6Q6XX4CFRK9AG"

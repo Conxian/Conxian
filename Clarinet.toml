@@ -7,8 +7,8 @@ clarinet_version = "3.5.0"
 deployer = { mnemonic = "twice kind fence tip hidden tilt action fragile skin nothing glory cousin green tomorrow spring wrist shed math olympic multiply hip blue scout claw", balance = 100000000000000 }
 wallet_1 = { mnemonic = "sell invite acquire kitten bamboo drastic jelly vivid peace spawn twice guilt pave pen trash pretty park cube fragile unaware remain midnight betray rebuild", balance = 100000000000000 }
 wallet_2 = { mnemonic = "hold excess usual excess ring elephant install account glad dry fragile donkey gaze humble truck breeze nation gasp vacuum limb head keep delay hospital", balance = 100000000000000 }
-wallet_3 = { mnemonic = "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about", balance = 50000000000 }
-wallet_4 = { mnemonic = "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about", balance = 50000000000 }
+wallet_3 = { mnemonic = "cycle puppy glare enroll cost improve round trend wrist mushroom scorpion tower claim oppose clever elephant dinosaur eight problem before frozen dune wagon high", balance = 100000000000000 }
+system = { mnemonic = "theme apart absurd gasp river used vessel screen fiction slice slab ice jar hurt slam puppy snake life radar sign ship list excuse trick", balance = 100000000000000 }
 
 [network]
 api_endpoint = "http://localhost:3999"
@@ -23,17 +23,16 @@ stacks_node_rpc_address = "https://api.hiro.so"
 bitcoin_node_rpc_address = "https://blockstream.info/api"
 
 # ===========================================
-# CONTRACTS
+# CORE CONTRACTS
 # ===========================================
 
 [contracts]
-# --- Traits ---
-access-control-trait = { path = "contracts/traits/access-control-trait.clar" }
+# --- Core Traits ---
 sip-010-trait = { path = "contracts/traits/sip-010-trait.clar" }
-ft-mintable-trait = { path = "contracts/traits/ft-mintable-trait.clar" }
-strategy-trait = { path = "contracts/traits/strategy-trait.clar" }
+sip-010-ft-trait = { path = "contracts/traits/sip-010-ft-trait.clar" }
 pool-trait = { path = "contracts/traits/pool-trait.clar" }
-staking-trait = { path = "contracts/traits/staking-trait.clar" }
+bond-trait = { path = "contracts/traits/bond-trait.clar" }
+flash-loan-receiver-trait = { path = "contracts/traits/flash-loan-receiver-trait.clar" }
 standard-constants-trait = { path = "contracts/traits/standard-constants-trait.clar" }
 ownable-trait = { path = "contracts/traits/ownable-trait.clar" }
 oracle-trait = { path = "contracts/traits/oracle-trait.clar" }
@@ -42,24 +41,15 @@ dimensional-oracle-trait = { path = "contracts/traits/dimensional-oracle-trait.c
 dim-registry-trait = { path = "contracts/traits/dim-registry-trait.clar" }
 vault-trait = { path = "contracts/traits/vault-trait.clar" }
 lending-system-trait = { path = "contracts/traits/lending-system-trait.clar" }
-flash-loan-receiver-trait = { path = "contracts/traits/flash-loan-receiver-trait.clar" }
 sip-009-trait = { path = "contracts/traits/sip-009-trait.clar" }
-standard-traits = { path = "contracts/traits/standard-traits.clar" }
-trait-registry = { path = "contracts/traits/trait-registry.clar" }
-traits-manifest = { path = "contracts/traits/traits-manifest.clar" }
 
-# --- Tokens ---
-cxd-token = { path = "contracts/tokens/cxd-token.clar" }
-cxvg-token = { path = "contracts/tokens/cxvg-token.clar" }
-cxtr-token = { path = "contracts/tokens/cxtr-token.clar" }
-cxlp-token = { path = "contracts/tokens/cxlp-token.clar" }
-cxs-token = { path = "contracts/tokens/cxs-token.clar" }
-
-# --- DEX ---
+# --- Core DEX Contracts ---
 dex-factory = { path = "contracts/dex/dex-factory.clar" }
 dex-pool = { path = "contracts/dex/dex-pool.clar" }
-pool-template = { path = "contracts/dex/pool-template.clar" }
 dex-router = { path = "contracts/dex/dex-router.clar" }
+pool-template = { path = "contracts/dex/pool-template.clar" }
+
+# --- DEX Components ---
 oracle = { path = "contracts/dex/oracle.clar" }
 automated-circuit-breaker = { path = "contracts/dex/automated-circuit-breaker.clar" }
 bond-issuance-system = { path = "contracts/dex/bond-issuance-system.clar" }
@@ -73,6 +63,7 @@ enterprise-loan-manager = { path = "contracts/dex/enterprise-loan-manager.clar" 
 interest-rate-model = { path = "contracts/dex/interest-rate-model.clar" }
 liquidation-manager = { path = "contracts/dex/liquidation-manager.clar" }
 liquidity-optimization-engine = { path = "contracts/dex/liquidity-optimization-engine.clar" }
+loan-liquidation-manager = { path = "contracts/dex/loan-liquidation-manager.clar" }
 memory-pool-management = { path = "contracts/dex/memory-pool-management.clar" }
 nakamoto-compatibility = { path = "contracts/dex/nakamoto-compatibility.clar" }
 pool-factory-template = { path = "contracts/dex/pool-factory-template.clar" }
@@ -94,10 +85,24 @@ token-system-coordinator = { path = "contracts/dex/token-system-coordinator.clar
 transaction-batch-processor = { path = "contracts/dex/transaction-batch-processor.clar" }
 vault = { path = "contracts/dex/vault.clar" }
 wormhole-integration = { path = "contracts/dex/wormhole-integration.clar" }
-cxd-staking = { path = "contracts/dex/cxd-staking.clar" }
-loan-liquidation-manager = { path = "contracts/dex/loan-liquidation-manager.clar" }
 yield-distribution-engine = { path = "contracts/dex/yield-distribution-engine.clar" }
+
+# --- Staking and Bonds ---
+cxd-staking = { path = "contracts/dex/cxd-staking.clar" }
 bond-factory = { path = "contracts/dex/bond-factory.clar" }
+
+# --- Dimensional Contracts ---
+tokenized-bond = { path = "contracts/dimensional/tokenized-bond.clar" }
+tokenized-bond-adapter = { path = "contracts/dimensional/tokenized-bond-adapter.clar" }
+
+# --- Standard Traits ---
+standard-traits = { path = "contracts/traits/standard-traits.clar" }
+trait-registry = { path = "contracts/traits/trait-registry.clar" }
+traits-manifest = { path = "contracts/traits/traits-manifest.clar" }
+
+# --- Interfaces ---
+access-control-interface = { path = "contracts/interfaces/access-control.clar" }
+audit-registry-interface = { path = "contracts/interfaces/audit-registry-trait.clar" }
 
 # --- Governance ---
 lending-protocol-governance = { path = "contracts/governance/lending-protocol-governance.clar" }
@@ -109,21 +114,31 @@ signed-data-base = { path = "contracts/governance/signed-data-base.clar" }
 dim-registry = { path = "contracts/dimensional/dim-registry.clar" }
 dim-metrics = { path = "contracts/dimensional/dim-metrics.clar" }
 concentrated-liquidity-pool = { path = "contracts/dimensional/concentrated-liquidity-pool.clar" }
-tokenized-bond-adapter = { path = "contracts/dimensional/tokenized-bond-adapter.clar" }
 concentrated-position-nft = { path = "contracts/dimensional/concentrated-position-nft.clar" }
 dim-graph = { path = "contracts/dimensional/dim-graph.clar" }
 dim-oracle-automation = { path = "contracts/dimensional/dim-oracle-automation.clar" }
 dim-revenue-adapter = { path = "contracts/dimensional/dim-revenue-adapter.clar" }
 dim-yield-stake = { path = "contracts/dimensional/dim-yield-stake.clar" }
-tokenized-bond = { path = "contracts/dimensional/tokenized-bond.clar" }
+
+# --- Tokens ---
+cxd-token = { path = "contracts/tokens/cxd-token.clar" }
+cxvg-token = { path = "contracts/tokens/cxvg-token.clar" }
+cxlp-token = { path = "contracts/tokens/cxlp-token.clar" }
+cxtr-token = { path = "contracts/tokens/cxtr-token.clar" }
+cxs-token = { path = "contracts/tokens/cxs-token.clar" }
 
 # --- Libs ---
 math-lib-advanced = { path = "contracts/lib/math-lib-advanced.clar" }
 fixed-point-math = { path = "contracts/lib/fixed-point-math.clar" }
 precision-calculator = { path = "contracts/lib/precision-calculator.clar" }
+concentrated-math = { path = "contracts/libraries/concentrated-math.clar" }
 
 # --- Mocks ---
 mock-token = { path = "contracts/mocks/mock-token.clar" }
+
+# --- Audit Registry ---
+audit-registry = { path = "contracts/audit-registry/audit-registry.clar" }
+audit-badge-nft = { path = "contracts/audit-registry/audit-badge-nft.clar" }
 
 [repl.remappings]
 # This section can be used to remap contract identifiers for local testing.
@@ -208,6 +223,11 @@ dim-graph = ".dim-graph"
 dim-oracle-automation = ".dim-oracle-automation"
 dim-revenue-adapter = ".dim-revenue-adapter"
 dim-yield-stake = ".dim-yield-stake"
+access-control-interface = ".access-control-interface"
+audit-registry-interface = ".audit-registry-interface"
+concentrated-math = ".concentrated-math"
+audit-registry = ".audit-registry"
+audit-badge-nft = ".audit-badge-nft"
 tokenized-bond = ".tokenized-bond"
 math-lib-advanced = ".math-lib-advanced"
 fixed-point-math = ".fixed-point-math"

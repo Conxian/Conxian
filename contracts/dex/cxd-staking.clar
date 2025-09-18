@@ -6,11 +6,11 @@
 (define-constant TRAIT_REGISTRY 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.trait-registry)
 
 ;; Resolve traits using the trait registry
-(use-trait ft-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.sip-010-ft-trait)
-(use-trait staking-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.staking-trait)
+(use-trait ft-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.traits.sip-010-trait)
+(use-trait staking-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.traits.staking-trait)
 
 ;; Implement the staking trait
-(impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.staking-trait)
+(impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.traits.staking-trait)
 
 ;; --- Constants ---
 (define-constant CONTRACT_OWNER tx-sender)
@@ -239,7 +239,7 @@
 ;; --- Revenue Distribution ---
 
 ;; Distribute revenue to all xCXD holders (called by protocol/vault contracts)
-(define-public (distribute-revenue (revenue-amount uint) (revenue-token ft-trait))
+(define-public (distribute-revenue (revenue-amount uint) (revenue-token principal))
   (let ((total-shares (var-get total-supply)))
     (begin
       (asserts! (is-owner tx-sender) (err ERR_UNAUTHORIZED)) ;; Only protocol can call this

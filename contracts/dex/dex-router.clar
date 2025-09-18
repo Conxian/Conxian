@@ -5,6 +5,10 @@
 ;; --- Traits ---
 (use-trait std-constants 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.standard-constants-trait)
 (use-trait bond-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.bond-trait)
+(use-trait router-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.router-trait)
+(use-trait sip-010-ft-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.sip-010-ft-trait)
+(use-trait pool-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.pool-trait)
+
 (impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.router-trait)
 
 ;; --- Constants ---
@@ -21,7 +25,7 @@
 (define-constant ERR_BOND_NOT_MATURE (err u4011))
 (define-constant ERR_INSUFFICIENT_LIQUIDITY (err u4012))
 (define-constant ERR_REENTRANCY (err u4013))
-(define-constant MAX_RECURSION_DEPTH u5
+(define-constant MAX_RECURSION_DEPTH u5)
 
 ;; --- Data Variables ---
 (define-data-var contract-owner principal tx-sender)
@@ -230,36 +234,28 @@
 )
 
 ;; Execute a single swap
-(define-private (execute-swap 
+(define-private (process-next-hop
     (token-in principal)
-    (token-out principal)
+    (path (list 5 principal))
     (amount-in uint)
     (min-amount-out uint)
     (deadline uint)
-    (is-final-hop bool))
-  ;; Input validation
-  (asserts! (> amount-in u0) ERR_ZERO_AMOUNT)
-  (asserts! (<= block-height deadline) ERR_DEADLINE_PASSED)
-  (let ((factory (var-get factory-address)))
-    (match (contract-call? factory get-pool token-in token-out)
-      pool-principal (match (contract-call? pool-principal get-token-a)
-        token-a (let ((x-to-y (is-eq token-in token-a)))
-          (match (as-contract (contract-call? pool-principal swap-exact-in 
-            amount-in 
-            min-amount-out 
-            x-to-y 
-            deadline))
-            swap-result (ok {
-              amount-out: (get amount-out swap-result),
-              token-out: token-out,
-              is-final-hop: is-final-hop
-            })
-            err (err ERR_INSUFFICIENT_OUTPUT)
-          )
-        )
-        err (err ERR_POOL_NOT_FOUND)
+    (recipient principal)
+    (depth uint))
+  (let (
+      (token-out (unwrap! (element-at path 0) (err ERR_INVALID_PATH)))
+      (remaining-path (unwrap! (slice path 1 u5) (err ERR_INVALID_PATH)))
+      (pool (unwrap! (contract-call? (var-get factory-address) get-pool token-in token-out) (err ERR_POOL_NOT_FOUND)))
+      (amount-out (unwrap! (contract-call? pool get-amount-out amount-in token-in token-out) (err ERR_SWAP_FAILED)))
+    )
+    (if (is-eq (len remaining-path) u0)
+      ;; Last hop - execute the swap
+      (contract-call? pool swap token-in token-out amount-in amount-out recipient)
+      ;; More hops - process the next one
+      (match (contract-call? pool swap token-in token-out amount-in amount-out (as-contract tx-sender))
+        success (process-next-hop token-out remaining-path amount-out min-amount-out deadline recipient (+ depth u1))
+        error error
       )
-      err (err ERR_POOL_NOT_FOUND)
     )
   )
 )

@@ -2,7 +2,7 @@
 ;; Enhanced Flash Loan Vault with sBTC Support
 ;; Implements secure flash loans with sBTC collateral and risk management
 
-(use-trait ft-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.sip-010-ft-trait)
+(use-trait sip-010-ft-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.sip-010-ft-trait)
 (use-trait flash-loan-receiver-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.flash-loan-receiver-trait)
 
 ;; =============================================================================
@@ -95,12 +95,19 @@
 ;; CORE FLASH LOAN FUNCTIONS
 ;; =============================================================================
 
-(define-public (flash-loan (asset <ft-trait>)
+(define-public (flash-loan (asset principal)
                           (amount uint) 
-                          (receiver <flash-loan-receiver-trait>)
+                          (receiver principal)
                           (params (buff 1024)))
   "Execute flash loan with callback to receiver contract"
-  (let ((asset-contract (contract-of asset)))
+  (let (
+      (asset-contract (contract-of asset))
+      (nonce (var-get flash-loan-nonce))
+      (config (unwrap! (map-get? flash-loan-config { asset: asset-contract }) ERR_INVALID_ASSET))
+      (pool (unwrap! (map-get? liquidity-pools { asset: asset-contract }) ERR_INVALID_ASSET))
+      (fee (calculate-flash-loan-fee asset-contract amount))
+      (total-repayment (+ amount fee)))
+    
     (begin
       ;; Reentrancy guard
       (asserts! (not (var-get flash-loan-active)) ERR_REENTRANCY)
@@ -112,57 +119,50 @@
       ;; Start flash loan
       (var-set flash-loan-active true)
       (var-set current-borrower (some tx-sender))
-      (var-set flash-loan-nonce (+ (var-get flash-loan-nonce) u1))
+      (var-set flash-loan-nonce (+ nonce u1))
       
-      (let ((nonce (var-get flash-loan-nonce))
-            (config (unwrap! (map-get? flash-loan-config { asset: asset-contract }) ERR_INVALID_ASSET))
-            (pool (unwrap! (map-get? liquidity-pools { asset: asset-contract }) ERR_INVALID_ASSET)))
-        
-        (let ((fee (calculate-flash-loan-fee asset-contract amount))
-              (total-repayment (+ amount fee)))
-          
-          ;; Record active loan
-          (map-set active-flash-loans
-            { borrower: tx-sender, asset: asset-contract, nonce: nonce }
-            {
-              amount: amount,
-              fee: fee,
-              start-block: block-height,
-              repayment-deadline: (+ block-height u10), ;; 10 blocks to repay
-              callback-contract: (some receiver),
-              status: "active"
-            })
-          
-          ;; Update pool state
-          (map-set liquidity-pools
-            { asset: asset-contract }
-            (merge pool {
-              available-liquidity: (- (get available-liquidity pool) amount),
-              flash-loan-volume: (+ (get flash-loan-volume pool) amount)
-            }))
-          
-          ;; Transfer tokens to borrower
-          (try! (contract-call? asset transfer amount (as-contract tx-sender) tx-sender none))
-          
-          ;; Execute callback
-          (let ((callback-result (contract-call? receiver execute-operation 
-                                                amount asset-contract fee (as-contract tx-sender))))
-            (match callback-result
-              success (if success
-                        (try! (complete-flash-loan asset amount fee nonce))
-                        (try! (fail-flash-loan asset-contract amount fee nonce)))
-              error (try! (fail-flash-loan asset-contract amount fee nonce))))
-          
-          (print {
-            event: "flash-loan-completed",
-            borrower: tx-sender,
-            asset: asset-contract,
-            amount: amount,
-            fee: fee,
-            nonce: nonce
-          })
-          
-          (ok nonce)))))
+      ;; Record active loan
+      (map-set active-flash-loans
+        { borrower: tx-sender, asset: asset-contract, nonce: nonce }
+        {
+          amount: amount,
+          fee: fee,
+          start-block: block-height,
+          repayment-deadline: (+ block-height u10), ;; 10 blocks to repay
+          callback-contract: (some receiver),
+          status: "active"
+        })
+      
+      ;; Update pool state
+      (map-set liquidity-pools
+        { asset: asset-contract }
+        (merge pool {
+          available-liquidity: (- (get available-liquidity pool) amount),
+          flash-loan-volume: (+ (get flash-loan-volume pool) amount)
+        }))
+      
+      ;; Transfer tokens to borrower
+      (try! (contract-call? asset transfer amount (as-contract tx-sender) tx-sender none))
+      
+      ;; Execute callback
+      (let ((callback-result (contract-call? receiver on-flash-loan 
+                                            tx-sender asset-contract amount fee (some (as-contract tx-sender)))))
+        (match callback-result
+          success (if success
+                    (try! (complete-flash-loan asset amount fee nonce))
+                    (try! (fail-flash-loan asset-contract amount fee nonce)))
+          error (try! (fail-flash-loan asset-contract amount fee nonce))))
+      
+      (print {
+        event: "flash-loan-completed",
+        borrower: tx-sender,
+        asset: asset-contract,
+        amount: amount,
+        fee: fee,
+        nonce: nonce
+      })
+      
+      (ok nonce))))
 
 (define-private (complete-flash-loan (asset principal) 
                                    (amount uint) 

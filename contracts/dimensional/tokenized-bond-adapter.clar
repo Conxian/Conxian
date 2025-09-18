@@ -2,7 +2,7 @@
 ;; Integration adapter for tokenized bonds to connect with enhanced tokenomics system
 ;; Routes bond proceeds and coupon payments through revenue distribution system
 
-(use-trait ft-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.sip-010-ft-trait)
+(use-trait ft-trait .sip-010-trait)
 
 ;; --- Constants ---
 (define-constant CONTRACT_OWNER tx-sender)
@@ -83,7 +83,7 @@
     (bond-contract principal)
     (face-value uint)
     (proceeds uint)
-    (payment-token <ft-trait>))
+    (payment-token principal))
   (begin
     (asserts! (default-to false (map-get? registered-bonds bond-contract)) (err ERR_BOND_NOT_FOUND))
     (asserts! (> proceeds u0) (err ERR_INVALID_AMOUNT))
@@ -147,7 +147,7 @@
 (define-public (report-coupon-payment
     (bond-contract principal)
     (coupon-amount uint)
-    (payment-token <ft-trait>)
+    (payment-token principal)
     (bondholders-count uint))
   (begin
     (asserts! (default-to false (map-get? registered-bonds bond-contract)) (err ERR_BOND_NOT_FOUND))

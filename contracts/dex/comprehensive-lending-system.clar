@@ -5,6 +5,9 @@
 (use-trait oracle-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.oracle-trait)
 (use-trait lending-system-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.lending-system-trait)
 (use-trait access-control-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.access-control-trait)
+(use-trait sip-010-ft-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.sip-010-ft-trait)
+(use-trait pool-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.pool-trait)
+(use-trait flash-loan-receiver-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.flash-loan-receiver-trait)
 
 (impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.lending-system-trait)
 
@@ -36,10 +39,10 @@
 (define-data-var paused bool false)
 
 ;; Contract Dependencies (set by owner)
-(define-constant oracle 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.oracle)
-(define-constant interest-rate-model 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.interest-rate-model)
-(define-constant loan-liquidation-manager 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.loan-liquidation-manager)
-(define-constant access-control 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.access-control)
+(define-constant oracle .oracle)
+(define-constant interest-rate-model .interest-rate-model)
+(define-constant loan-liquidation-manager .loan-liquidation-manager)
+(define-constant access-control .access-control)
 (define-data-var oracle-contract principal oracle)
 (define-data-var interest-rate-model-contract principal interest-rate-model)
 (define-data-var loan-liquidation-manager-contract principal loan-liquidation-manager)

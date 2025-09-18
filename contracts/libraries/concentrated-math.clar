@@ -1,22 +1,25 @@
 ;; Math utilities for concentrated liquidity
+;; Uses fixed-point arithmetic with Q64 precision
 
 (define-constant Q64 u18446744073709551616)  ;; 2^64
 (define-constant MAX_TICK 776363)  ;; Corresponds to sqrt(2^128)
 (define-constant MIN_TICK (- MAX_TICK))
+(define-constant TICK_BASE u10000)  ;; 1.0001 in fixed-point with 4 decimals
 
-;; Calculate sqrt price from tick
+;; Calculate sqrt price from tick using fixed-point arithmetic
 (define-read-only (tick-to-sqrt-price (tick int))
   (if (>= tick 0)
-    (pow (to-uint (pow 1.0001 (to-int tick))) 0.5)
-    (pow (to-uint (pow 1.0001 (to-int (- tick)))) -0.5)
+    (sqrt (pow TICK_BASE (to-uint tick)))
+    (div Q64 (sqrt (pow TICK_BASE (to-uint (- tick)))))
   ))
 
-;; Calculate tick from sqrt price
+;; Calculate tick from sqrt price using fixed-point arithmetic
 (define-read-only (sqrt-price-to-tick (sqrt-price uint))
   (let (
       (log-sqrt (log2 (div (* sqrt-price sqrt-price) Q64)))
+      (log-tick-base (log2 TICK_BASE))
     )
-    (to-int (div log-sqrt (log2 1.0001)))
+    (to-int (div (* log-sqrt Q64) log-tick-base))
   ))
 
 ;; Calculate liquidity amounts for given ticks
@@ -24,7 +27,7 @@
   (let (
       (liquidity-x (if (<= sqrt-price-current sqrt-price-lower)
         u0
-        (div amount-x (sub (sqrt-price-current) sqrt-price-lower))
+        (div (mul amount-x sqrt-price-current) (sub sqrt-price-current sqrt-price-lower))
       ))
       (liquidity-y (if (>= sqrt-price-current sqrt-price-upper)
         u0
