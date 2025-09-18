@@ -1,9 +1,9 @@
 ;; bond-factory.clar
 ;; Factory contract for creating and managing bond tokens
 
-(use-trait std-constants 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.traits.standard-constants-trait)
-(use-trait bond-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.traits.bond-trait)
-(impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.traits.bond-factory-trait)
+(use-trait std-constants 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.standard-constants-trait)
+(use-trait bond-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.bond-trait)
+;; (impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.bond-factory-trait)
 
 ;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED (err u5000))
@@ -151,7 +151,7 @@
       (var-set next-bond-id (unwrap! (safe-add bond-id u1) (err ERR_OVERFLOW)))
       
       ;; Deploy new bond token contract
-    (let ((bond-contract (contract-call? 'ST000000000000000000002AM6PHMS deploy-contract 
+    (let ((bond-contract (contract-call? .bond-token deploy-contract
       (unwrap-panic (string-utf8-append 
         "(define-constant BOND_ISSUER '" 
         (unwrap-panic (principal-to-address issuer)) 
@@ -363,15 +363,14 @@
 (define-read-only (list-bonds (offset uint) (limit uint))
   (let (
       (max-id (var-get next-bond-id))
-      (result [])
     )
-    (fold (range offset (min (+ offset limit) max-id)) result
-      (lambda (acc id)
+    (ok (fold (range offset (min (+ offset limit) max-id)) (list)
+      (lambda (id acc)
         (match (map-get? bonds id)
-          bond (append acc (list (merge bond {bond-id: id})))
+          (some bond) (append acc (list (merge bond {bond-id: id})))
           acc
         )
       )
-    )
+    ))
   )
 )

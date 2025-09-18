@@ -3,9 +3,9 @@
 ;; Non-custodial, immutable design with bond trading support
 
 ;; --- Traits ---
-(use-trait std-constants .standard-constants-trait)
-(use-trait bond-trait .bond-trait)
-(impl-trait .router-trait)
+(use-trait std-constants 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.standard-constants-trait)
+(use-trait bond-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.bond-trait)
+(impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.router-trait)
 
 ;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED (err u4000))
@@ -77,7 +77,7 @@
 (define-private (calculate-bond-price (bond-contract principal) (amount uint))
   (match (contract-call? bond-contract get-bond-price amount)
     (ok price) (ok price)
-    (err _) (err ERR_INVALID_BOND)
+    (err e) (err ERR_INVALID_BOND)
   )
 )
 
@@ -165,7 +165,7 @@
               })
             )
           )
-          (err _) (begin
+          (err e) (begin
             ;; Create new pool and add initial liquidity
             (let ((new-pool (try! (contract-call? factory create-pool bond-contract token-contract))))
               (let ((lp-tokens (try! (contract-call? new-pool add-liquidity bond-amount token-amount min-lp-tokens))))
@@ -224,7 +224,7 @@
         }))
         (ok true)
       )
-      (err _) (err ERR_INVALID_BOND)
+      (err e) (err ERR_INVALID_BOND)
     )
   )
 )
@@ -298,7 +298,7 @@
                                  x-to-y 
                                  deadline)))
                      (match result
-                       (ok _) (ok {
+                       (ok val) (ok {
                          amount-out: amount-out,
                          token-out: token-out,
                          is-final-hop: is-final-hop

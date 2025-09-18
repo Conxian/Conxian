@@ -1,7 +1,7 @@
 ;; liquidation-trait.clar
 ;; Defines the standard interface for liquidation operations in the Conxian protocol
 
-(use-trait standard-constants 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSR.standard-constants-trait)
+(use-trait standard-constants 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.standard-constants-trait)
 
 (define-trait liquidation-trait
   (

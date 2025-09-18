@@ -1,6 +1,6 @@
 import { Cl, ClarityType, ClarityValue, ResponseOk, ResponseError, TupleCV, uintCV, standardPrincipalCV, someCV, noneCV, contractPrincipalCV } from '@stacks/transactions';
 import { describe, expect, it, beforeEach, beforeAll, afterEach } from 'vitest';
-import { getDefaultSimnetAccounts, getSimnet } from '@hirosystems/clarinet-sdk';
+import { initSimnet } from '@hirosystems/clarinet-sdk';
 import { Simnet } from '@hirosystems/clarinet-sdk';
 
 // Helper function to parse response
@@ -14,13 +14,12 @@ const parseResponse = (response: any) => {
 };
 
 describe('DEX Factory Tests', () => {
-  // Get simnet and accounts
-  const simnet = getSimnet();
-  const accounts = getDefaultSimnetAccounts();
-  const deployer = accounts.deployer;
-  const wallet1 = accounts.wallet_1;
-  const wallet2 = accounts.wallet_2;
-  const wallet3 = accounts.wallet_3;
+  let simnet: Simnet;
+  let accounts: Map<string, any>;
+  let deployer: any;
+  let wallet1: any;
+  let wallet2: any;
+  let wallet3: any;
 
   // Contract principals
   let factoryContract: string;
@@ -29,30 +28,45 @@ describe('DEX Factory Tests', () => {
   let poolTemplateContract: string;
 
   beforeAll(async () => {
+    simnet = await initSimnet();
+    accounts = simnet.getAccounts();
+    deployer = accounts.get('deployer');
+    wallet1 = accounts.get('wallet_1');
+    wallet2 = accounts.get('wallet_2');
+    wallet3 = accounts.get('wallet_3');
+
     // Deploy test tokens
     const tokenADeploy = await simnet.deployContract(
       'test-token-a',
-      'tests/mocks/test-token-a.clar'
+      'tests/mocks/test-token-a.clar',
+      null,
+      deployer.address
     );
     tokenAContract = tokenADeploy.contract_id;
 
     const tokenBDeploy = await simnet.deployContract(
       'test-token-b',
-      'tests/mocks/test-token-b.clar'
+      'tests/mocks/test-token-b.clar',
+      null,
+      deployer.address
     );
     tokenBContract = tokenBDeploy.contract_id;
 
     // Deploy pool template
     const poolDeploy = await simnet.deployContract(
       'pool-template',
-      'contracts/dex/pool-template.clar'
+      'contracts/dex/pool-template.clar',
+      null,
+      deployer.address
     );
     poolTemplateContract = poolDeploy.contract_id;
 
     // Deploy factory
     const factoryDeploy = await simnet.deployContract(
       'dex-factory',
-      'contracts/dex/dex-factory.clar'
+      'contracts/dex/dex-factory.clar',
+      null,
+      deployer.address
     );
     factoryContract = factoryDeploy.contract_id;
 

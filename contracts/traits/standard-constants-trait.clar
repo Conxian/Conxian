@@ -34,7 +34,7 @@
 (define-constant BASIS_POINTS u10000)                ;; 100.00%
 
 ;; Time constants (assuming ~1 block per minute)
-(define-constant BLOCKS_PER_MINUTE u1
+(define-constant BLOCKS_PER_MINUTE u1)
 (define-constant BLOCKS_PER_HOUR (* BLOCKS_PER_MINUTE u60))
 (define-constant BLOCKS_PER_DAY (* BLOCKS_PER_HOUR u24))
 (define-constant BLOCKS_PER_WEEK (* BLOCKS_PER_DAY u7))

@@ -155,7 +155,7 @@
   ) (var-get operations))))
     (match operation
       (list op) (ok op)
-      _ (err u1003)  ;; ERR_OPERATION_NOT_FOUND
+      (err e) (err u1003)  ;; ERR_OPERATION_NOT_FOUND
     )
   )
 )
