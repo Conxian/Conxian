@@ -1,9 +1,11 @@
 ;; Conxian DEX Pool - Constant product AMM pool with enhanced tokenomics integration
 ;; Implements pool-trait with full system integration
 
-;; Pool trait is defined centrally in contracts/traits. Import and implement the alias.
-(use-trait pool-trait .pool-trait)
-(impl-trait pool-trait)
+(use-trait pool-trait .traits.pool-trait)
+(use-trait ft-trait .traits.sip-010-ft-trait)
+
+;; Implement the standard pool trait
+(impl-trait .traits.pool-trait)
 
 ;; Private helper functions
 (define-private (min (a uint) (b uint))
@@ -81,13 +83,6 @@
     (ok (tuple (volume-24h u0) (fees-24h u0)))))  ;; Simplified for enhanced deployment
 
 ;; Private functions
-;; Simplified square root using Newtons method
-(define-private (sqrt (x uint))
-  (if (<= x u1)
-      x
-      (let ((guess (/ x u2)))
-        (/ (+ guess (/ x guess)) u2))))
-
 ;; Calculate output amount for constant product formula with fees
 (define-private (calculate-swap-amount (amount-in uint) (reserve-in uint) (reserve-out uint))
   (let ((amount-in-with-fee (- amount-in (/ (* amount-in (var-get lp-fee-bps)) u10000)))
@@ -184,7 +179,7 @@
         (reserve-y (var-get reserve-b))
         (shares (if (is-eq current-supply u0)
                     ;; First liquidity provision
-                    (- (sqrt (* dx dy)) MIN_LIQUIDITY)
+                    (- (unwrap-panic (contract-call? .math-lib-advanced sqrt-integer (* dx dy))) MIN_LIQUIDITY)
                     ;; Subsequent liquidity provision
                     (min (/ (* dx current-supply) reserve-x)
                          (/ (* dy current-supply) reserve-y))))
@@ -278,12 +273,19 @@
     (ok true)))
 
 ;; Administrative functions
-(define-public (initialize (token-a-addr principal) (token-b-addr principal))
+(define-public (initialize (token-a-addr principal) (token-b-addr principal) (fee-bps uint) (factory-addr principal))
   (begin
-    (asserts! (is-eq tx-sender (var-get factory)) (err ERR_UNAUTHORIZED))
+    ;; This function should only be called once, by the factory that created this pool.
+    (asserts! (is-eq tx-sender factory-addr) (err ERR_UNAUTHORIZED))
+    (asserts! (is-none (var-get token-a)) (err ERR_NOT_INITIALIZED)) ;; ERR_ALREADY_INITIALIZED
+
+    (var-set factory factory-addr)
     (var-set token-a (some token-a-addr))
     (var-set token-b (some token-b-addr))
-    (ok true)))
+    (var-set lp-fee-bps fee-bps)
+    (ok true)
+  )
+)
 
 (define-public (set-paused (pause bool))
   (begin
@@ -306,8 +308,3 @@
 ;; Initialize cumulative price tracking
 (map-set last-update-time "price-a" block-height)
 (map-set last-update-time "price-b" block-height)
-
-
-
-
-

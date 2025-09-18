@@ -2,9 +2,15 @@
 ;; xCXD Staking Contract - Revenue distribution with warm-up/cool-down to prevent snapshot sniping
 ;; Implements buyback-and-make mechanism for revenue sharing
 
-(use-trait ft-trait .sip-010-trait)
-(use-trait staking-trait .staking-trait)
-(impl-trait staking-trait)
+;; Constants
+(define-constant TRAIT_REGISTRY 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.trait-registry)
+
+;; Resolve traits using the trait registry
+(use-trait ft-trait .sip-010-ft-trait.sip-010-ft-trait)
+(use-trait staking-trait .staking-trait.staking-trait)
+
+;; Implement the staking trait
+(impl-trait .staking-trait.staking-trait)
 
 ;; --- Constants ---
 (define-constant CONTRACT_OWNER tx-sender)
@@ -213,7 +219,7 @@
         (ok true)))))
 
 ;; Step 2: Complete unstake (after cool-down period)  
-(define-public (complete-unstake (cxd-token <ft-trait>))
+(define-public (complete-unstake (cxd-token ft-trait))
   (let ((unstake-result (get-pending-unstake tx-sender)))
     (match unstake-result
       unstake-info
@@ -233,7 +239,7 @@
 ;; --- Revenue Distribution ---
 
 ;; Distribute revenue to all xCXD holders (called by protocol/vault contracts)
-(define-public (distribute-revenue (revenue-amount uint) (revenue-token <ft-trait>))
+(define-public (distribute-revenue (revenue-amount uint) (revenue-token ft-trait))
   (let ((total-shares (var-get total-supply)))
     (begin
       (asserts! (is-owner tx-sender) (err ERR_UNAUTHORIZED)) ;; Only protocol can call this
@@ -251,7 +257,7 @@
         (ok true)))))
 
 ;; Claim available revenue
-(define-public (claim-revenue (revenue-token <ft-trait>))
+(define-public (claim-revenue (revenue-token ft-trait))
   (let ((claimable (get-claimable-revenue tx-sender))
         (user-debt-current (default-to u0 (map-get? user-debt tx-sender)))
         (user-xcxd (default-to u0 (map-get? user-balances tx-sender))))

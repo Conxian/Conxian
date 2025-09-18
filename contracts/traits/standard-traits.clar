@@ -15,7 +15,7 @@
 )
 
 ;; ===== SIP-010 Fungible Token Standard =====
-(define-trait sip010-trait
+(define-trait sip-010-ft-trait
   (
     (transfer (uint principal principal (optional (buff 34))) (response bool uint))
     (get-name () (response (string-ascii 32) uint))

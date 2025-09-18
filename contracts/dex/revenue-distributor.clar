@@ -2,10 +2,10 @@
 ;; Comprehensive revenue distribution system connecting vaults to token holders
 ;; Routes protocol fees: 80% to xCXD stakers, 20% to treasury/reserves
 
-(use-trait ft-trait .sip-010-trait)
-(impl-trait ft-trait)
-(use-trait staking-ref .staking-trait)
-(impl-trait staking-ref)
+(use-trait ft-trait .sip-010-ft-trait.sip-010-ft-trait)
+(impl-trait .sip-010-ft-trait.sip-010-ft-trait)
+(use-trait staking-trait .staking-trait.staking-trait)
+(impl-trait .staking-trait.staking-trait)
 
 ;; --- Constants ---
 (define-constant CONTRACT_OWNER tx-sender)

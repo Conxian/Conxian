@@ -1,9 +1,9 @@
 ;; Access Control Contract
 ;; Implements the access control functionality specified in AIP-7
 
-(use-trait access-control .access-control-trait)
-(use-trait ownable .ownable-trait)
-(use-trait std-constants .standard-constants-trait)
+(use-trait access-control 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.access-control-trait)
+(use-trait ownable 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.ownable-trait)
+(use-trait std-constants 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.standard-constants-trait)
 
 ;; Roles
 (define-constant ROLE_ADMIN 0x41444d494e)        ;; ADMIN in hex
@@ -27,7 +27,7 @@
 
 (define-constant PROPOSAL_THRESHOLD u2)  ;; Number of approvals required
 
-(impl-trait access-control-trait)
+(impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.access-control-trait)
 
 ;; ===== Role Management =====
 

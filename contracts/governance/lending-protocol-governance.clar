@@ -3,9 +3,9 @@
 ;; Manages protocol parameters, upgrades, and community decisions
 ;; Integrates with AccessControl for role-based access
 
-;; Use canonical access-control trait
-(use-trait access-control-trait .access-control-trait)
-(impl-trait access-control-trait)
+;; Import the access-control-trait
+(use-trait access-control-trait .access-control-trait.access-control-trait)
+(impl-trait .access-control-trait.access-control-trait)
 
 (define-constant ERR_UNAUTHORIZED (err u8001))
 (define-constant ERR_PROPOSAL_NOT_FOUND (err u8002))
@@ -109,9 +109,8 @@
   principal ;; delegator
   principal) ;; delegate
 
-(define-map delegated-votes
-  principal ;; delegate
-  uint) ;; total votes delegated to them
+;; Protocol state
+(define-data-var cxvg-utility-contract principal .cxvg-utility)
 
 ;; === GOVERNANCE FUNCTIONS ===
 
@@ -316,79 +315,65 @@
           
           (ok true))))))
 
-(define-private (execute-parameter-change (proposal-id uint))
-  (match (map-get? parameter-proposals proposal-id)
-    param-info
-      (begin
-        ;; Log parameter change
-        (print (tuple
-          (event "parameter-changed")
-          (proposal-id proposal-id)
-          (parameter (get parameter-name param-info))
-          (old-value (get current-value param-info))
-          (new-value (get proposed-value param-info))))
-        (ok true))
-    (ok false)))
+(define-private (execute-parameter-change (proposal-id uint) (proposal (tuple
+    (proposer principal) (title (string-ascii 100)) (description (string-utf8 500))
+    (proposal-type uint) (target-contract (optional principal)) (function-name (optional (string-ascii 50)))
+    (parameters (optional (list 10 uint))) (for-votes uint) (against-votes uint) (abstain-votes uint)
+    (start-block uint) (end-block uint) (queue-block (optional uint)) (execution-block (optional uint))
+    (state uint) (created-at uint))))
+  (let ((target-contract (unwrap! (get target-contract proposal) (err ERR_INVALID_PARAMETERS)))
+        (function-name (unwrap! (get function-name proposal) (err ERR_INVALID_PARAMETERS)))
+        (params (unwrap! (get parameters proposal) (err ERR_INVALID_PARAMETERS))))
+    ;; This is a generic execution call. It is powerful and requires that the
+    ;; target function has appropriate access control (i.e., only callable by this governance contract).
+    (as-contract (contract-call? target-contract function-name params))
+  )
+)
 
 (define-private (execute-treasury-proposal (proposal-id uint))
-  ;; Would execute treasury transfer
-  ;; This is a simplified implementation
-  (match (map-get? treasury-proposals proposal-id)
-    treasury-info
-      (begin
-        ;; Log treasury action
-        (print (tuple
-          (event "treasury-transfer")
-          (proposal-id proposal-id)
-          (recipient (get recipient treasury-info))
+  (let ((treasury-info (unwrap! (map-get? treasury-proposals proposal-id) ERR_INVALID_PARAMETERS)))
+    (let ((token-contract (get token treasury-info))
           (amount (get amount treasury-info))
-          (token (get token treasury-info))))
-        (ok true))
-    (ok false)))
+          (recipient (get recipient treasury-info)))
+      ;; The governance contract itself acts as the treasury and calls the transfer.
+      (as-contract (contract-call? token-contract transfer amount (as-contract tx-sender) recipient none))
+    )
+  )
+)
 
 ;; === DELEGATION ===
+;; Note: True delegation logic should be handled within the cxvg-utility contract
+;; to keep vote-escrow logic self-contained. This function can be a placeholder
+;; or a trigger if the utility contract requires it.
 (define-public (delegate (delegatee principal))
-  (let ((delegator tx-sender)
-        (current-votes (get-voting-power delegator)))
-    
-    (begin
-      ;; Remove votes from current delegate if any
-      (match (map-get? delegates delegator)
-        current-delegate
-          (map-set delegated-votes current-delegate 
-            (- (default-to u0 (map-get? delegated-votes current-delegate)) current-votes))
-        true)
-      
-      ;; Set new delegate
-      (map-set delegates delegator delegatee)
-      
-      ;; Add votes to new delegate
-      (map-set delegated-votes delegatee
-        (+ (default-to u0 (map-get? delegated-votes delegatee)) current-votes))
-      
-      (print (tuple
-        (event "delegation-changed")
-        (delegator delegator)
-        (from-delegate (map-get? delegates delegator))
-        (to-delegate delegatee)
-        (votes current-votes)))
-      
-      (ok true))))
+  (let ((utility-contract (var-get cxvg-utility-contract)))
+    ;; This call assumes the utility contract has a `delegate` function.
+    ;; If not, this function is a NO-OP.
+    (contract-call? utility-contract delegate delegatee)
+  )
+)
 
 ;; === VOTING POWER ===
 (define-read-only (get-voting-power (user principal))
-  (get-voting-power-at user block-height))
+  (get-voting-power-at user block-height)
+)
 
+;; Fetches the voting power of a user at a specific block height
+;; by calling the cxvg-utility contract.
 (define-read-only (get-voting-power-at (user principal) (at-height uint))
-  ;; This would integrate with the governance token to get balance
-  ;; For now, return a default value
-  (default-to u0 (map-get? voting-power-snapshots { user: user, block-height: at-height })))
+  (let ((utility-contract (var-get cxvg-utility-contract)))
+    (unwrap-panic (contract-call? utility-contract get-voting-power-at user at-height))
+  )
+)
 
+;; Takes a snapshot of a user's current voting power for a given block height.
+;; This is crucial for proposals to use the voting power from when the proposal was created.
 (define-private (snapshot-voting-power (user principal) (at-height uint))
-  (let ((voting-power (get-voting-power user)))
-    (map-set voting-power-snapshots
-      { user: user, block-height: at-height }
-      voting-power)))
+  (let ((voting-power (get-voting-power-at user at-height)))
+    (map-set voting-power-snapshots { user: user, block-height: at-height } voting-power)
+    (ok true)
+  )
+)
 
 ;; === ADMIN FUNCTIONS ===
 (define-public (update-governance-params 

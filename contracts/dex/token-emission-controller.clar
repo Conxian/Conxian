@@ -2,8 +2,8 @@
 ;; Hard-coded emission rails with governance guards to prevent inflation abuse
 ;; Implements supply discipline across all 4 tokens with supermajority + timelock requirements
 
-(use-trait ft-mintable .ft-mintable-trait)
-(use-trait cxd-ref .ft-mintable-trait)
+(use-trait ft-mintable 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.ft-mintable-trait)
+(use-trait cxd-ref 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.ft-mintable-trait)
 
 ;; --- Constants ---
 (define-constant CONTRACT_OWNER tx-sender)

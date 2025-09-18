@@ -2,9 +2,8 @@
 ;; Enhanced Flash Loan Vault with sBTC Support
 ;; Implements secure flash loans with sBTC collateral and risk management
 
- (use-trait ft-trait .sip-010-trait)
- (use-trait flash-loan-receiver .flash-loan-receiver-trait)
- (impl-trait flash-loan-receiver)
+(use-trait ft-trait .sip-010-ft-trait.sip-010-ft-trait)
+(use-trait flash-loan-receiver-trait .flash-loan-receiver-trait.flash-loan-receiver-trait)
 
 ;; =============================================================================
 ;; CONSTANTS
@@ -96,9 +95,9 @@
 ;; CORE FLASH LOAN FUNCTIONS
 ;; =============================================================================
 
-(define-public (flash-loan (asset <ft-trait>) 
+(define-public (flash-loan (asset <ft-trait>)
                           (amount uint) 
-                          (receiver principal)
+                          (receiver <flash-loan-receiver-trait>)
                           (params (buff 1024)))
   "Execute flash loan with callback to receiver contract"
   (let ((asset-contract (contract-of asset)))
@@ -165,7 +164,7 @@
           
           (ok nonce)))))
 
-(define-private (complete-flash-loan (asset <ft-trait>) 
+(define-private (complete-flash-loan (asset principal) 
                                    (amount uint) 
                                    (fee uint) 
                                    (nonce uint))
@@ -237,7 +236,7 @@
 ;; LIQUIDITY MANAGEMENT
 ;; =============================================================================
 
-(define-public (add-liquidity (asset <ft-trait>) (amount uint))
+(define-public (add-liquidity (asset principal) (amount uint))
   "Add liquidity to flash loan pool"
   (let ((asset-contract (contract-of asset)))
     (begin
@@ -277,7 +276,7 @@
       
       (ok amount))))
 
-(define-public (remove-liquidity (asset <ft-trait>) (amount uint))
+(define-public (remove-liquidity (asset principal) (amount uint))
   "Remove liquidity from flash loan pool"
   (let ((asset-contract (contract-of asset)))
     (begin
@@ -522,8 +521,3 @@
   owner: CONTRACT_OWNER,
   version: "1.0.0"
 })
-
-
-
-
-

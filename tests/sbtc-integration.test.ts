@@ -2,12 +2,6 @@ import { describe, it, expect, beforeEach } from "vitest";
 import { Cl } from "@stacks/transactions";
 import { simnet } from "@hirosystems/clarinet-sdk";
 
-// Test contracts
-const contracts = simnet.getContractsInterfaces();
-const sbtcIntegration = contracts["sbtc-integration"];
-const sbtcFlashLoanVault = contracts["sbtc-flash-loan-vault"];  
-const sbtcLendingSystem = contracts["sbtc-lending-system"];
-
 // Test addresses
 const deployerAddress = "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM";
 const wallet1 = "ST1SJ3DTE5DN7X54YDH5D64R3BCB6A2AG2ZQ8YPD5";

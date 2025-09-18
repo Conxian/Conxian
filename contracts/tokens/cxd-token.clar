@@ -2,54 +2,16 @@
 ;; Conxian Revenue Token (SIP-010 FT) - accrues protocol revenue to holders off-contract
 ;; Enhanced with integration hooks for staking, revenue distribution, and system monitoring
 
-;; Use canonical SIP-010 FT and FT-mintable traits
-(use-trait ft-trait .sip-010-trait)
-(impl-trait ft-trait)
-(use-trait ft-mintable-trait .ft-mintable-trait)
-(impl-trait ft-mintable-trait)
+;; Constants
+(define-constant TRAIT_REGISTRY 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.trait-registry)
 
-;; SIP-010 Fungible Token Standard Functions
-(define-read-only (get-name)
-  (ok "Conxian Revenue Token")
-)
+;; Resolve traits using the trait registry
+(use-trait ft-trait .sip-010-ft-trait.sip-010-ft-trait)
+(use-trait ft-mintable-trait .ft-mintable-trait.ft-mintable-trait)
 
-(define-read-only (get-symbol)
-  (ok "CXD")
-)
-
-(define-read-only (get-decimals)
-  (ok u6)  ;; 6 decimal places
-)
-
-(define-read-only (get-token-uri)
-  (ok none)
-)
-
-(define-read-only (get-balance (who principal))
-  (default-to u0 (map-get? balances { who: who }))
-)
-
-(define-read-only (get-total-supply)
-  (var-get total-supply)
-)
-
-(define-private (safe-sub (a uint) (b uint))
-  (if (>= a b)
-    (ok (- a b))
-    (err u100)  ;; Underflow error
-  )
-)
-
-(define-private (safe-add (a uint) (b uint))
-  (let ((sum (+ a b)))
-    (if (or (<= sum a) (<= sum b))  ;; Check for overflow
-      (err u101)  ;; Overflow error
-      (ok sum)
-    )
-  )
-)
-
-;; Traits are centralized under `contracts/traits/` and imported above
+;; Implement the standard traits
+(impl-trait .sip-010-ft-trait.sip-010-ft-trait)
+(impl-trait .ft-mintable-trait.ft-mintable-trait)
 
 ;; --- Errors ---
 (define-constant ERR_UNAUTHORIZED u100)
@@ -57,6 +19,8 @@
 (define-constant ERR_SYSTEM_PAUSED u102)
 (define-constant ERR_EMISSION_LIMIT_EXCEEDED u103)
 (define-constant ERR_TRANSFER_HOOK_FAILED u104)
+(define-constant ERR_OVERFLOW u105)
+(define-constant ERR_SUB_UNDERFLOW u106)
 
 ;; --- Storage ---
 (define-data-var contract-owner principal tx-sender)
@@ -74,7 +38,7 @@
 (define-data-var system-coordinator-contract principal .token-system-coordinator)
 
 ;; Enhanced storage
-(define-map balances { who: principal } { bal: uint })
+(define-map balances principal uint)
 (define-map minters { who: principal } { enabled: bool })
 (define-data-var transfer-hooks-enabled bool true)
 (define-data-var system-integration-enabled bool false)
@@ -184,18 +148,31 @@
     (asserts! (is-eq tx-sender sender) (err ERR_UNAUTHORIZED))
     (asserts! (not (check-system-pause-status)) (err ERR_SYSTEM_PAUSED))
     
-    (let ((sender-bal (default-to u0 (get bal (map-get? balances { who: sender })))) )
-      (asserts! (>= sender-bal amount) (err ERR_NOT_ENOUGH_BALANCE))
+    (let ((sender-bal (default-to u0 (map-get? balances sender)))
+          (rec-bal (default-to u0 (map-get? balances recipient))))
       
       ;; Execute transfer hooks if enabled - skip for enhanced deployment
       
-      ;; Perform the actual transfer
-      (map-set balances { who: sender } { bal: (- sender-bal amount) })
-      (let ((rec-bal (default-to u0 (get bal (map-get? balances { who: recipient })))) )
-        (map-set balances { who: recipient } { bal: (+ rec-bal amount) })
-      )
+      ;; Perform the actual transfer using safe math
+      (map-set balances sender (unwrap! (safe-sub sender-bal amount) (err ERR_NOT_ENOUGH_BALANCE)))
+      (map-set balances recipient (unwrap! (safe-add rec-bal amount) (err ERR_OVERFLOW)))
+
       (ok true)
     )
+  )
+)
+
+(define-private (safe-sub (a uint) (b uint))
+  (if (>= a b)
+    (ok (- a b))
+    (err ERR_SUB_UNDERFLOW)
+  )
+)
+
+(define-private (safe-add (a uint) (b uint))
+  (if (>= (unwrap! (safe-sub u4294967295 b) (err ERR_OVERFLOW)) a)
+    (ok (+ a b))
+    (err ERR_OVERFLOW)
   )
 )
 
@@ -208,7 +185,7 @@
 )
 
 (define-read-only (get-balance (who principal))
-  (ok (default-to u0 (get bal (map-get? balances { who: who }))))
+  (ok (default-to u0 (map-get? balances who)))
 )
 
 (define-read-only (get-total-supply)
@@ -265,9 +242,10 @@
 
 (define-private (execute-mint (recipient principal) (amount uint))
   (begin
-    (var-set total-supply (+ (var-get total-supply) amount))
-    (let ((bal (default-to u0 (get bal (map-get? balances { who: recipient })))))
-      (map-set balances { who: recipient } { bal: (+ bal amount) }))
+    (var-set total-supply (unwrap! (safe-add (var-get total-supply) amount) (err ERR_OVERFLOW)))
+    (let ((bal (default-to u0 (map-get? balances recipient))))
+      (map-set balances recipient (unwrap! (safe-add bal amount) (err ERR_OVERFLOW)))
+    )
     
     ;; Notify revenue distributor if configured
     (if (and (var-get system-integration-enabled) (is-some (var-get revenue-distributor)))
@@ -281,12 +259,12 @@
 )
 
 (define-public (burn (amount uint))
-  (let ((bal (default-to u0 (get bal (map-get? balances { who: tx-sender })))) )
-    (asserts! (>= bal amount) (err ERR_NOT_ENOUGH_BALANCE))
+  (let ((bal (default-to u0 (map-get? balances tx-sender)))
+        (supply (var-get total-supply)))
     (asserts! (not (check-system-pause-status)) (err ERR_SYSTEM_PAUSED))
     
-    (map-set balances { who: tx-sender } { bal: (- bal amount) })
-    (var-set total-supply (- (var-get total-supply) amount))
+    (map-set balances tx-sender (unwrap! (safe-sub bal amount) (err ERR_NOT_ENOUGH_BALANCE)))
+    (var-set total-supply (unwrap! (safe-sub supply amount) (err ERR_NOT_ENOUGH_BALANCE)))
     
     ;; Notify revenue distributor if configured and enabled - skip for enhanced deployment
     (if (and (var-get system-integration-enabled) (is-some (var-get revenue-distributor)))
@@ -310,8 +288,3 @@
     revenue-distributor: (var-get revenue-distributor-contract),
     emission-controller: (var-get emission-controller-contract)
   })
-
-
-
-
-

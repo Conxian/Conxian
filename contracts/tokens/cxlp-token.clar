@@ -1,11 +1,15 @@
 ;; cxlp-token.clar
 ;; Conxian Liquidity Provider Token (SIP-010 FT)
 
-;; Use canonical trait definitions from contracts/traits
- (use-trait ft-trait .sip-010-trait)
- (impl-trait ft-trait)
- (use-trait ft-mintable-trait .ft-mintable-trait)
- (impl-trait ft-mintable-trait)
+;; Constants
+(define-constant TRAIT_REGISTRY 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.trait-registry)
+
+(use-trait ft-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.sip-010-ft-trait)
+(use-trait ft-mintable-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.ft-mintable-trait)
+
+;; Implement the standard traits using full trait identifiers
+(impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.sip-010-ft-trait)
+(impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.ft-mintable-trait)
 
 ;; Returns the current epoch index since migration start (not capped)
 (define-read-only (current-epoch)
@@ -47,6 +51,7 @@
 (define-map balance-since { who: principal } { since: uint })
 
 ;; Migration configuration
+(define-data-var migration-queue-contract (optional principal) none)
 (define-data-var cxd-contract (optional principal) none)
 (define-data-var migration-start-height (optional uint) none)
 (define-data-var epoch-length uint u0)
@@ -194,6 +199,14 @@
   )
 )
 
+(define-public (set-migration-queue-contract (queue principal))
+  (begin
+    (asserts! (is-owner tx-sender) (err ERR_UNAUTHORIZED))
+    (var-set migration-queue-contract (some queue))
+    (ok true)
+  )
+)
+
 (define-public (configure-migration (cxd principal) (start-height uint) (epoch-len uint))
   (begin
     (asserts! (is-owner tx-sender) (err ERR_UNAUTHORIZED))
@@ -243,6 +256,11 @@
         (map-set balance-since { who: recipient } { since: block-height })
       )
     )
+    ;; --- HOOK FOR MIGRATION QUEUE ---
+    (match (var-get migration-queue-contract)
+      queue-contract (try! (contract-call? queue-contract on-cxlp-transfer sender recipient amount))
+      none           true ;; Do nothing if queue contract is not set
+    )
     (ok true)
   )
 )
@@ -289,6 +307,11 @@
     (let ((bal (default-to u0 (get bal (map-get? balances { who: recipient })))) )
       (map-set balances { who: recipient } { bal: (+ bal amount) })
       (map-set balance-since { who: recipient } { since: block-height })
+    )
+    ;; --- HOOK FOR MIGRATION QUEUE ---
+    (match (var-get migration-queue-contract)
+      queue-contract (try! (contract-call? queue-contract initialize-duration-tracking recipient))
+      none           true ;; Do nothing if queue contract is not set
     )
     (ok true)
   )

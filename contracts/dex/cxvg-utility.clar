@@ -2,7 +2,7 @@
 ;; CXVG Utility System - Fee discounts, proposal bonding, governance boosts
 ;; Addresses governance token utility sinks and voting power concentration risks
 
-(use-trait ft-trait .sip-010-trait)
+(use-trait ft-trait .sip-010-ft-trait.sip-010-ft-trait)
 
 ;; --- Constants ---
 (define-constant CONTRACT_OWNER tx-sender)
@@ -167,6 +167,9 @@
         (map-delete user-fee-discounts tx-sender)
         (map-delete dimensional-boosts tx-sender)
         
+        ;; Create a new snapshot to record the change in voting power to zero
+        (map-set voting-snapshots { user: tx-sender, block: block-height } { voting-power: u0 })
+
         (ok amount)))
     (err ERR_NO_LOCK_FOUND)))
 

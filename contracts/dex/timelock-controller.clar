@@ -1,8 +1,8 @@
 ;; Timelock Controller
 ;; Implements the time-delayed execution functionality specified in AIP-7
 
-(use-trait access-control .access-control-trait)
-(use-trait std-constants .standard-constants-trait)
+(use-trait access-control 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.access-control-trait)
+(use-trait std-constants 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.standard-constants-trait)
 
 (define-constant MIN_DELAY u86400)  ;; 24 hours in seconds
 (define-constant MAX_DELAY u2592000)  ;; 30 days in seconds

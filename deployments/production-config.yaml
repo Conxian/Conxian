@@ -1,15 +1,18 @@
-# production-config.yaml
-# Production environment configuration for Conxian Enhanced Tokenomics
+# ===========================================
+# CONXIAN PRODUCTION CONFIGURATION
+# Mainnet deployment settings for Conxian
+# ===========================================
 
-# =============================================================================
-# ENVIRONMENT SETTINGS
-# =============================================================================
-environment: production
-network: mainnet
-auto_confirm: false
-gas_limit: 3000000
+# Environment Settings
+# ===================
+environment: "production"
+network: "mainnet"
+node_url: "https://stacks-node-api.mainnet.stacks.co"
+chain_id: 1  # Mainnet chain ID
+auto_confirm: false  # Always require confirmation for mainnet
+gas_limit: 3000000  # Higher gas limit for complex mainnet transactions
 gas_price: 1
-require_manual_approval: true
+require_manual_approval: true  # Extra safety for production
 
 # =============================================================================
 # TOKEN CONFIGURATION

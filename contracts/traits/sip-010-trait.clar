@@ -1,6 +1,6 @@
 ;; SIP-010 Fungible Token Trait
 
-(define-trait sip-010-trait
+(define-trait sip-010-ft-trait
   (
     (transfer (uint principal principal (optional (buff 34))) (response bool uint))
     (get-balance (principal) (response uint uint))

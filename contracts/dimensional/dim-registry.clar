@@ -6,18 +6,8 @@
 ;;
 ;; This contract is controlled by a contract owner who can designate a whitelisted oracle.
 
-;; Define the dimension registry trait locally
-(define-trait dim-registry-trait
-  (
-    (register-dimension (uint) (response bool uint))
-    (update-dimension-weight (uint uint) (response bool uint))
-    (get-dimension-weight (uint) (response uint uint))
-  )
-)
-
-;; Implement the dim-registry trait with proper syntax
-(use-trait dim-registry-trait .dim-registry-trait)
-(impl-trait dim-registry-trait)
+(use-trait dim-registry-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dim-registry-trait)
+(impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dim-registry-trait)
 
 (define-constant ERR_UNAUTHORIZED u101)
 (define-constant ERR_INVALID_WEIGHT u102)

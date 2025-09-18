@@ -2,7 +2,7 @@
 ;; Enhanced Lending System with sBTC Collateral Support
 ;; Implements lending/borrowing with sBTC as collateral and enterprise bond integration
 
-(use-trait ft-trait .sip-010-trait)
+(use-trait ft-trait 'sip-010-ft-trait)
 
 ;; =============================================================================
 ;; CONSTANTS

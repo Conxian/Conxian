@@ -2,9 +2,9 @@
 ;; Advanced yield distribution system for enterprise loans and bonds
 ;; Handles complex yield calculations, distribution schedules, and optimization
 
-;; Use canonical SIP-010 trait
- (use-trait ft-trait .sip-010-trait)
- (impl-trait ft-trait)
+;; Import the SIP-010 FT trait
+(use-trait ft-trait .sip-010-ft-trait.sip-010-ft-trait)
+(impl-trait .sip-010-ft-trait.sip-010-ft-trait)
 
 ;; Constants
 (define-constant ERR_UNAUTHORIZED (err u9001))
@@ -492,8 +492,3 @@
           (ok (/ (* total-yield-year BASIS_POINTS) total-deposited))
           (ok u0)))
     ERR_POOL_NOT_FOUND))
-
-
-
-
-

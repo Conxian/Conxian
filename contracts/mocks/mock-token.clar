@@ -1,9 +1,14 @@
 ;; mock-token.clar
-;; Minimal SIP-010-compliant mock for testing dynamic dispatch
+;; Minimal SIP-010-compliant mock for testing
 
-;; Use canonical SIP-010 FT trait and implement
-(use-trait ft-trait .sip-010-trait)
-(impl-trait ft-trait)
+;; Import the SIP-010 FT trait
+(use-trait sip010-ft-trait 'sip-010-ft-trait)
+(impl-trait 'sip-010-ft-trait)
+
+;; Error codes
+(define-constant ERR_UNAUTHORIZED (err u100))
+(define-constant ERR_INVALID_AMOUNT (err u101))
+(define-constant ERR_INSUFFICIENT_BALANCE (err u102))
 
 ;; Basic token metadata and accounting (lightweight mock)
 (define-data-var total-supply uint u0)
@@ -11,19 +16,29 @@
 (define-data-var name (string-ascii 32) "Mock Token")
 (define-data-var symbol (string-ascii 10) "MOCK")
 (define-data-var token-uri (optional (string-utf8 256)) none)
+(define-data-var contract-owner principal tx-sender)
 (define-map balances { who: principal } { bal: uint })
 
 ;; --- SIP-010 functions ---
 (define-public (transfer (amount uint) (sender principal) (recipient principal) (memo (optional (buff 34))))
   (begin
-    ;; For testing, simply succeed when sender authorizes the call
-    (asserts! (is-eq tx-sender sender) (err u1))
-    (ok true)
+    (asserts! (is-eq tx-sender sender) (err ERR_UNAUTHORIZED))
+    (asserts! (> amount u0) (err ERR_INVALID_AMOUNT))
+    
+    (let ((sender-bal (default-to u0 (get bal (map-get? balances {who: sender})))))
+      (asserts! (>= sender-bal amount) (err ERR_INSUFFICIENT_BALANCE))
+      
+      (let ((recipient-bal (default-to u0 (get bal (map-get? balances {who: recipient})))))
+        (map-set balances {who: sender} {bal: (- sender-bal amount)})
+        (map-set balances {who: recipient} {bal: (+ recipient-bal amount)})
+        (ok true)
+      )
+    )
   )
 )
 
 (define-read-only (get-balance (who principal))
-  (ok (default-to u0 (get bal (map-get? balances { who: who }))))
+  (ok (default-to u0 (get bal (map-get? balances {who: who}))))
 )
 
 (define-read-only (get-total-supply)
@@ -52,8 +67,3 @@
     (ok true)
   )
 )
-
-
-
-
-

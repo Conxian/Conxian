@@ -2,20 +2,42 @@
 ;; Conxian Governance Token (SIP-010 FT) - no direct revenue share
 ;; Enhanced with system integration hooks for coordinator interface
 
-;; Traits are defined centrally under `contracts/traits/*`.
-;; Import the canonical trait definitions and implement their aliases.
-(use-trait ft-trait .sip-010-trait)
-(impl-trait ft-trait)
-(use-trait ft-mintable-trait .ft-mintable-trait)
-(impl-trait ft-mintable-trait)
-(use-trait monitor-trait .monitor-trait)
-(impl-trait monitor-trait)
+;; Constants
+(define-constant TRAIT_REGISTRY 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.trait-registry)
+
+;; Resolve traits using the trait registry
+(use-trait sip010-ft-trait (unwrap! (contract-call? TRAIT_REGISTRY get-trait-contract 'sip-010-ft-trait) (err u1000)))
+(use-trait ft-mintable-trait (unwrap! (contract-call? TRAIT_REGISTRY get-trait-contract 'ft-mintable-trait) (err u1001)))
+(use-trait monitor-trait (unwrap! (contract-call? TRAIT_REGISTRY get-trait-contract 'monitor-trait) (err u1002)))
+
+;; Implement the standard traits
+(impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.sip-010-ft-trait)
+(impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.ft-mintable-trait)
+(impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.monitor-trait)
 
 ;; --- Errors ---
 (define-constant ERR_UNAUTHORIZED u100)
 (define-constant ERR_NOT_ENOUGH_BALANCE u101)
 (define-constant ERR_SYSTEM_PAUSED u102)
 (define-constant ERR_EMISSION_DENIED u103)
+(define-constant ERR_OVERFLOW u105)
+
+;; --- Safe Math Helpers ---
+(define-private (safe-sub (a uint) (b uint))
+  (if (>= a b)
+    (ok (- a b))
+    (err ERR_NOT_ENOUGH_BALANCE)
+  )
+)
+
+(define-private (safe-add (a uint) (b uint))
+  (let ((sum (+ a b)))
+    (if (or (<= sum a) (<= sum b))  ;; Check for overflow
+      (err ERR_OVERFLOW)
+      (ok sum)
+    )
+  )
+)
 
 ;; --- Storage ---
 (define-data-var contract-owner principal tx-sender)
@@ -167,13 +189,13 @@
   (begin
     (asserts! (is-eq tx-sender sender) (err ERR_UNAUTHORIZED))
     (asserts! (check-system-pause) (err ERR_SYSTEM_PAUSED))
+
     (let ((sender-bal (default-to u0 (get bal (map-get? balances { who: sender }))))
-         )
-      (asserts! (>= sender-bal amount) (err ERR_NOT_ENOUGH_BALANCE))
-      (map-set balances { who: sender } { bal: (- sender-bal amount) })
-      (let ((rec-bal (default-to u0 (get bal (map-get? balances { who: recipient })))) )
-        (map-set balances { who: recipient } { bal: (+ rec-bal amount) })
-      )
+          (rec-bal (default-to u0 (get bal (map-get? balances { who: recipient })))))
+
+      (map-set balances { who: sender } { bal: (unwrap! (safe-sub sender-bal amount) (err ERR_NOT_ENOUGH_BALANCE)) })
+      (map-set balances { who: recipient } { bal: (unwrap! (safe-add rec-bal amount) (err ERR_OVERFLOW)) })
+
       ;; Notify system coordinator
       (notify-transfer amount sender recipient)
     )
@@ -221,9 +243,10 @@
     (asserts! (or (is-owner tx-sender) (is-minter tx-sender)) (err ERR_UNAUTHORIZED))
     (asserts! (check-system-pause) (err ERR_SYSTEM_PAUSED))
     (asserts! (check-emission-allowed amount) (err ERR_EMISSION_DENIED))
-    (var-set total-supply (+ (var-get total-supply) amount))
+
+    (var-set total-supply (unwrap! (safe-add (var-get total-supply) amount) (err ERR_OVERFLOW)))
     (let ((bal (default-to u0 (get bal (map-get? balances { who: recipient })))) )
-      (map-set balances { who: recipient } { bal: (+ bal amount) })
+      (map-set balances { who: recipient } { bal: (unwrap! (safe-add bal amount) (err ERR_OVERFLOW)) })
     )
     ;; Notify system coordinator
     (notify-mint amount recipient)
@@ -232,11 +255,13 @@
 )
 
 (define-public (burn (amount uint))
-  (let ((bal (default-to u0 (get bal (map-get? balances { who: tx-sender })))) )
-    (asserts! (>= bal amount) (err ERR_NOT_ENOUGH_BALANCE))
+  (let ((bal (default-to u0 (get bal (map-get? balances { who: tx-sender }))))
+        (supply (var-get total-supply)))
     (asserts! (check-system-pause) (err ERR_SYSTEM_PAUSED))
-    (map-set balances { who: tx-sender } { bal: (- bal amount) })
-    (var-set total-supply (- (var-get total-supply) amount))
+
+    (map-set balances { who: tx-sender } { bal: (unwrap! (safe-sub bal amount) (err ERR_NOT_ENOUGH_BALANCE)) })
+    (var-set total-supply (unwrap! (safe-sub supply amount) (err ERR_NOT_ENOUGH_BALANCE)))
+
     ;; Notify system coordinator
     (notify-burn amount tx-sender)
     (ok true)
@@ -252,5 +277,3 @@
     protocol-monitor: (var-get protocol-monitor)
   }
 )
-
-

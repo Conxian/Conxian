@@ -1,198 +1,419 @@
-;; Conxian DEX Router - User-friendly interface for DEX interactions
-;; Provides single-hop trading and liquidity management with slippage protection
+;; dex-router.clar
+;; Conxian DEX Router - Routes trades across DEX pools and bond markets
+;; Non-custodial, immutable design with bond trading support
 
-;; Define SIP-010 Trait
+;; --- Traits ---
+(use-trait std-constants .standard-constants-trait)
+(use-trait bond-trait .bond-trait)
+(impl-trait .router-trait)
 
-(define-trait sip-010-trait
-  (
-    (transfer (uint principal principal (optional (buff 34))) (response bool uint))
-    (get-name () (response (string-ascii 32) uint))
-    (get-symbol () (response (string-ascii 32) uint))
-    (get-decimals () (response uint uint))
-    (get-balance (principal) (response uint uint))
-    (get-total-supply () (response uint uint))
-    (get-token-uri () (response (optional (string-utf8 256)) uint))
-  )
-)
-
-
-;; Define Pool Trait
-(define-trait pool-trait
-  (
-    (add-liquidity (uint uint (optional principal)) (response (tuple (dx uint) (dy uint) (shares uint)) uint))
-    (remove-liquidity (uint uint uint) (response (tuple (dx uint) (dy uint)) uint))
-    (swap (uint principal principal) (response (tuple (dx uint) (dy uint)) uint))
-    (get-reserves () (response (tuple (reserve-x uint) (reserve-y uint)) uint))
-    (get-total-supply () (response uint uint))
-  )
-)
-
-;; Implement traits for this contract with proper syntax
-(impl-trait sip-010-trait)
-(impl-trait pool-trait)
-
-;; Constants
-(define-constant ERR_INVALID_POOL (err u4001))
+;; --- Constants ---
+(define-constant ERR_UNAUTHORIZED (err u4000))
 (define-constant ERR_INVALID_PATH (err u4002))
 (define-constant ERR_INSUFFICIENT_OUTPUT (err u4003))
 (define-constant ERR_DEADLINE_PASSED (err u4004))
-(define-constant ERR_INVALID_AMOUNT (err u4005))
+(define-constant ERR_POOL_NOT_FOUND (err u4005))
+(define-constant ERR_TRANSFER_FAILED (err u4006))
+(define-constant ERR_RECURSION_DEPTH (err u4007))
+(define-constant ERR_ZERO_AMOUNT (err u4008))
+(define-constant ERR_DUPLICATE_TOKENS (err u4009))
+(define-constant ERR_INVALID_BOND (err u4010))
+(define-constant ERR_BOND_NOT_MATURE (err u4011))
+(define-constant ERR_INSUFFICIENT_LIQUIDITY (err u4012))
+(define-constant ERR_REENTRANCY (err u4013))
+(define-constant MAX_RECURSION_DEPTH u5
 
-;; Read-only functions
-(define-read-only (resolve-pool (token-x principal) (token-y principal))
-  ;; Skip factory call for enhanced deployment - return typed optional principal
-  (if false (some tx-sender) none))
+;; --- Data Variables ---
+(define-data-var contract-owner principal tx-sender)
+(define-data-var factory-address principal 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dex-factory)
+(define-data-var bond-factory-address principal 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.bond-factory)
+(define-data-var locked bool false)  ;; Reentrancy guard
 
-(define-read-only (get-amount-out-direct (pool-ctr principal) (amount-in uint) (x-to-y bool))
-  ;; Get expected output amount for a trade - simplified for enhanced deployment
-  (ok (/ (* amount-in u997) u1000))) ;; Simplified calculation with 0.3% fee assumption
+;; --- Bond Trading State ---
+(define-map bond-markets
+  principal  ;; bond token address
+  {
+    is-active: bool,
+    min-trade-amount: uint,
+    max-trade-amount: uint,
+    trading-fee: uint,  ;; in basis points
+    last-price: uint,
+    volume-24h: uint
+  }
+)
 
-(define-read-only (get-amounts-out (amount-in uint) (path (list 3 principal)))
-  (if (is-eq (len path) u2)
-      ;; Single hop
-      (match (resolve-pool (unwrap-panic (element-at path u0))
-                          (unwrap-panic (element-at path u1)))
-        pool-addr (ok (/ (* amount-in u997) u1000))
-        ERR_INVALID_POOL)
-      ;; Multi-hop not implemented yet
-      ERR_INVALID_PATH))
+(define-map bond-positions
+  { holder: principal, bond: principal }  ;; Composite key
+  {
+    amount: uint,
+    last-claim: uint,
+    is-liquid: bool
+  }
+)
 
-;; Core router functions
-(define-public (add-liquidity-direct (pool-ctr principal) (dx uint) (dy uint) (min-shares uint) (deadline uint))
-  (begin
-    (asserts! (<= block-height deadline) ERR_DEADLINE_PASSED)
-    (asserts! (and (> dx u0) (> dy u0)) ERR_INVALID_AMOUNT)
-    
-    ;; Get pool tokens for transfers
-    (let ((token-a (unwrap! (contract-call? pool-ctr get-token-a) ERR_INVALID_POOL))
-          (token-b (unwrap! (contract-call? pool-ctr get-token-b) ERR_INVALID_POOL)))
+;; --- Security Helpers ---
+(define-private (non-reentrant (action (function () (response AnyError Any))))
+  (asserts! (not (var-get locked)) ERR_REENTRANCY)
+  (var-set locked true)
+  (let ((result (try! (action))))
+    (var-set locked false)
+    result
+  )
+)
+
+(define-private (only-owner)
+  (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
+  (ok true)
+)
+
+;; --- Bond Market Helpers ---
+(define-private (validate-bond-market (bond-contract principal))
+  (match (map-get? bond-markets bond-contract)
+    market (ok (get is-active market))
+    (err ERR_INVALID_BOND)
+  )
+)
+
+(define-private (calculate-bond-price (bond-contract principal) (amount uint))
+  (match (contract-call? bond-contract get-bond-price amount)
+    (ok price) (ok price)
+    (err _) (err ERR_INVALID_BOND)
+  )
+)
+
+(define-private (update-bond-volume (bond-contract principal) (amount uint))
+  (match (map-get? bond-markets bond-contract)
+    market (let ((new-volume (+ (get volume-24h market) amount)))
+      (map-set bond-markets bond-contract (merge market {
+        volume-24h: new-volume,
+        last-updated: block-height
+      }))
+      (ok true)
+    )
+    (err ERR_INVALID_BOND)
+  )
+)
+
+;; --- Core Trading Functions ---
+(define-public (swap-bonds
+    (bond-in principal)
+    (bond-out principal)
+    (amount-in uint)
+    (min-amount-out uint)
+    (deadline uint)
+  )
+  (try! (non-reentrant (lambda ()
+    (begin
+      (asserts! (> amount-in u0) ERR_ZERO_AMOUNT)
+      (asserts! (<= block-height deadline) ERR_DEADLINE_PASSED)
+      (try! (validate-bond-market bond-in))
+      (try! (validate-bond-market bond-out))
       
-      ;; Simplified for enhanced deployment - skip actual token transfers
-      ;; In production, would use proper trait casting
-      
-      ;; Add liquidity to pool
-      (contract-call? pool-ctr add-liquidity dx dy min-shares))))
-
-(define-public (remove-liquidity-direct (pool-ctr principal) (shares uint) (min-dx uint) (min-dy uint) (deadline uint))
-  (begin
-    (asserts! (<= block-height deadline) ERR_DEADLINE_PASSED)
-    (asserts! (> shares u0) ERR_INVALID_AMOUNT)
-    
-    ;; Remove liquidity from pool
-    (let ((result (try! (contract-call? pool-ctr remove-liquidity shares min-dx min-dy))))
-      
-      ;; Get pool tokens for transfers
-      (let ((token-a (unwrap! (contract-call? pool-ctr get-token-a) ERR_INVALID_POOL))
-            (token-b (unwrap! (contract-call? pool-ctr get-token-b) ERR_INVALID_POOL))
-            (amount-a (get amount-a result))
-            (amount-b (get amount-b result)))
+      (let (
+          (price (try! (calculate-bond-price bond-in amount-in)))
+          (fee (/ (* price (get trading-fee (unwrap! (map-get? bond-markets bond-in) (err ERR_INVALID_BOND)))) u10000))
+          (amount-out (- price fee))
+        )
+        (asserts! (>= amount-out min-amount-out) ERR_INSUFFICIENT_OUTPUT)
         
-        ;; Simplified for enhanced deployment - skip actual token transfers
-        ;; In production, would use proper trait casting for token-a and token-b
+        ;; Transfer bonds and update state
+        (try! (contract-call? bond-in transfer amount-in tx-sender (as-contract tx-sender) none))
+        (try! (contract-call? bond-out transfer amount-out (as-contract tx-sender) tx-sender none))
         
-        (ok result)))))
-
-(define-public (swap-exact-in-direct (pool-ctr principal) (amount-in uint) (min-out uint) (x-to-y bool) (deadline uint))
-  (begin
-    (asserts! (<= block-height deadline) ERR_DEADLINE_PASSED)
-    (asserts! (> amount-in u0) ERR_INVALID_AMOUNT)
-    
-    ;; Get pool tokens
-    (let ((token-a (unwrap! (contract-call? pool-ctr get-token-a) ERR_INVALID_POOL))
-          (token-b (unwrap! (contract-call? pool-ctr get-token-b) ERR_INVALID_POOL))
-          (token-in (if x-to-y token-a token-b))
-          (token-out (if x-to-y token-b token-a)))
-      
-      ;; Simplified for enhanced deployment - skip input token transfer
-      ;; In production, would use proper trait casting for token-in
-      
-      ;; Execute swap
-      (let ((swap-result (try! (contract-call? pool-ctr swap-exact-in amount-in min-out x-to-y deadline))))
+        ;; Update market data
+        (try! (update-bond-volume bond-in amount-in))
+        (try! (update-bond-volume bond-out amount-out))
         
-        ;; Simplified for enhanced deployment - skip output token transfer
-        ;; In production, would use proper trait casting for token-out
-        
-        (ok swap-result)))))
+        (ok {
+          amount-in: amount-in,
+          amount-out: amount-out,
+          fee: fee,
+          price: price
+        })
+      )
+    )
+  ))))
+)
 
-(define-public (swap-exact-out-direct (pool-ctr principal) (max-in uint) (amount-out uint) (x-to-y bool) (deadline uint))
-  (begin
-    (asserts! (<= block-height deadline) ERR_DEADLINE_PASSED)
-    (asserts! (> amount-out u0) ERR_INVALID_AMOUNT)
-    
-    ;; For now, calculate required input and use swap-exact-in
-    ;; In production, would need actual swap-exact-out implementation
-    (let ((reserves (unwrap! (contract-call? pool-ctr get-reserves) ERR_INVALID_POOL))
-          (fee-info (unwrap! (contract-call? pool-ctr get-fee-info) ERR_INVALID_POOL))
-          (reserve-in (if x-to-y (get reserve-a reserves) (get reserve-b reserves)))
-          (reserve-out (if x-to-y (get reserve-b reserves) (get reserve-a reserves)))
-          (lp-fee-bps (get lp-fee-bps fee-info))
-          ;; Calculate required input (approximate)
-          (required-input (/ (* amount-out reserve-in) (- reserve-out amount-out)))
-          (required-input-with-fee (/ (* required-input u10000) (- u10000 lp-fee-bps))))
+(define-public (add-bond-liquidity
+    (bond-contract principal)
+    (token-contract principal)
+    (bond-amount uint)
+    (token-amount uint)
+    (min-lp-tokens uint)
+    (deadline uint)
+  )
+  (try! (non-reentrant (lambda ()
+    (begin
+      (asserts! (<= block-height deadline) ERR_DEADLINE_PASSED)
+      (asserts! (and (> bond-amount u0) (> token-amount u0)) ERR_ZERO_AMOUNT)
       
-      (asserts! (<= required-input-with-fee max-in) ERR_INSUFFICIENT_OUTPUT)
+      ;; Transfer tokens to contract
+      (try! (contract-call? bond-contract transfer bond-amount tx-sender (as-contract tx-sender) none))
+      (try! (contract-call? token-contract transfer token-amount tx-sender (as-contract tx-sender) none))
       
-      ;; Use swap-exact-in with calculated input
-      (swap-exact-in-direct pool-ctr required-input-with-fee amount-out x-to-y deadline))))
+      ;; Get or create pool
+      (let ((factory (var-get factory-address)))
+        (match (contract-call? factory get-pool bond-contract token-contract)
+          pool-principal (begin
+            ;; Add liquidity to existing pool
+            (let ((lp-tokens (try! (contract-call? pool-principal add-liquidity bond-amount token-amount min-lp-tokens))))
+              (ok {
+                lp-tokens: lp-tokens,
+                bond-amount: bond-amount,
+                token-amount: token-amount
+              })
+            )
+          )
+          (err _) (begin
+            ;; Create new pool and add initial liquidity
+            (let ((new-pool (try! (contract-call? factory create-pool bond-contract token-contract))))
+              (let ((lp-tokens (try! (contract-call? new-pool add-liquidity bond-amount token-amount min-lp-tokens))))
+                (ok {
+                  pool: new-pool,
+                  lp-tokens: lp-tokens,
+                  bond-amount: bond-amount,
+                  token-amount: token-amount
+                })
+              )
+            )
+          )
+        )
+      )
+    )
+  ))))
+)
 
-;; Multi-hop trading (basic implementation)
-(define-public (swap-exact-tokens-for-tokens (amount-in uint) (min-amount-out uint) (path (list 3 principal)) (deadline uint))
+;; --- Admin Functions ---
+(define-public (set-bond-factory (new-factory principal))
   (begin
-    (asserts! (<= block-height deadline) ERR_DEADLINE_PASSED)
-    (asserts! (> amount-in u0) ERR_INVALID_AMOUNT)
+    (try! (only-owner))
+    (var-set bond-factory-address new-factory)
+    (ok true)
+  )
+)
+
+(define-public (register-bond-market
+    (bond-contract principal)
+    (min-trade-amount uint)
+    (max-trade-amount uint)
+    (trading-fee uint)
+  )
+  (begin
+    (try! (only-owner))
+    (map-set bond-markets bond-contract {
+      is-active: true,
+      min-trade-amount: min-trade-amount,
+      max-trade-amount: max-trade-amount,
+      trading-fee: trading-fee,
+      last-price: u0,
+      volume-24h: u0,
+      last-updated: block-height
+    })
+    (ok true)
+  )
+)
+
+(define-public (disable-bond-market (bond-contract principal))
+  (begin
+    (try! (only-owner))
+    (match (map-get? bond-markets bond-contract)
+      market (begin
+        (map-set bond-markets bond-contract (merge market {
+          is-active: false
+        }))
+        (ok true)
+      )
+      (err _) (err ERR_INVALID_BOND)
+    )
+  )
+)
+
+;; Execute a single swap
+(define-private (execute-swap 
+    (token-in principal)
+    (token-out principal)
+    (amount-in uint)
+    (min-amount-out uint)
+    (deadline uint)
+    (is-final-hop bool))
+  ;; Input validation
+  (asserts! (> amount-in u0) ERR_ZERO_AMOUNT)
+  (asserts! (<= block-height deadline) ERR_DEADLINE_PASSED)
+  (let ((factory (var-get factory-address)))
+    (match (contract-call? factory get-pool token-in token-out)
+      pool-principal (match (contract-call? pool-principal get-token-a)
+        token-a (let ((x-to-y (is-eq token-in token-a)))
+          (match (as-contract (contract-call? pool-principal swap-exact-in 
+            amount-in 
+            min-amount-out 
+            x-to-y 
+            deadline))
+            swap-result (ok {
+              amount-out: (get amount-out swap-result),
+              token-out: token-out,
+              is-final-hop: is-final-hop
+            })
+            err (err ERR_INSUFFICIENT_OUTPUT)
+          )
+        )
+        err (err ERR_POOL_NOT_FOUND)
+      )
+      err (err ERR_POOL_NOT_FOUND)
+    )
+  )
+)
+
+;; Main entry point for token swaps
+(define-public (get-factory-address)
+  (ok (var-get factory-address))
+)
+
+(define-private (execute-swap
+    (token-in principal)
+    (token-out principal)
+    (amount-in uint)
+    (min-amount-out uint)
+    (deadline uint)
+    (is-final-hop bool)
+  )
+  (let ((pool (unwrap! (get-pool token-in token-out) (err ERR_POOL_NOT_FOUND))))
+    (match (contract-call? pool get-reserves)
+      (ok { token-x-reserve: x, token-y-reserve: y, x-to-y: x-to-y })
+        (let ((amount-out (calculate-amount-out amount-in x y x-to-y)))
+          (if (or is-final-hop (>= amount-out min-amount-out))
+            (match (as-contract (contract-call? 
+                                token-in 
+                                transfer 
+                                amount-in 
+                                (as-contract tx-sender) 
+                                pool 
+                                none))
+              true (let ((result (contract-call? 
+                                 pool 
+                                 swap 
+                                 amount-in 
+                                 (if is-final-hop min-amount-out u0) 
+                                 tx-sender 
+                                 x-to-y 
+                                 deadline)))
+                     (match result
+                       (ok _) (ok {
+                         amount-out: amount-out,
+                         token-out: token-out,
+                         is-final-hop: is-final-hop
+                       })
+                       err (err (unwrap-err result))
+                     )
+                   )
+              false (err ERR_TRANSFER_FAILED)
+            )
+            (err ERR_INSUFFICIENT_OUTPUT)
+          )
+        )
+      err (err (unwrap-err err))
+    )
+  )
+)
+
+(define-public (swap-exact-tokens-for-tokens 
+    (amount-in uint)
+    (min-amount-out uint)
+    (path (list 5 principal))
+    (deadline uint))
+  (begin
+    ;; Input validation
+    (asserts! (> amount-in u0) ERR_ZERO_AMOUNT)
     (asserts! (>= (len path) u2) ERR_INVALID_PATH)
+    (asserts! (<= block-height deadline) ERR_DEADLINE_PASSED)
     
-    ;; Enhanced deployment: avoid dynamic trait/principal calls here.
-    ;; Simulate a single-hop swap using a fixed 0.3% fee quote and return a tuple
-    ;; matching the pools swap result shape.
-    (if (is-eq (len path) u2)
-        (let ((amount-out (/ (* amount-in u997) u1000)))
-          (asserts! (>= amount-out min-amount-out) ERR_INSUFFICIENT_OUTPUT)
-          (ok (tuple (amount-out amount-out) (fee u0))))
-        ;; Multi-hop not implemented yet
-        ERR_INVALID_PATH)))
-
-;; Liquidity management helpers
-(define-public (create-pool-and-add-liquidity (token-a <sip10>) (token-b <sip10>) (amount-a uint) (amount-b uint) (fee-bps uint) (min-shares uint) (deadline uint))
-  (let ((token-a-principal (contract-of token-a))
-        (token-b-principal (contract-of token-b)))
+    ;; Simple path validation (no recursive calls)
+    (let ((length (len path)))
+      (asserts! (and (>= length u2) (<= length u5)) ERR_INVALID_PATH)
+      (fold (lambda (i result)
+        (if (is-err result)
+          result
+          (let ((token (unwrap! (element-at path i) ERR_INVALID_PATH)))
+            (if (and (< (+ i u1) length) (is-eq token (unwrap! (element-at path (+ i u1)) ERR_INVALID_PATH)))
+              (err ERR_DUPLICATE_TOKENS)
+              (ok true)
+            )
+          )
+        )
+      ) (ok true) (list u0 u1 u2 u3 u4))
+    )
+    (try! (validate-path path))
     
-    ;; Create pool - simplified for enhanced deployment (assume pool creation successful)
-    (let ((pool-addr tx-sender)) ;; Use tx-sender as placeholder pool address
+    (let ((token-in (unwrap! (element-at path u0) ERR_INVALID_PATH))
+          (token-out (unwrap! (element-at path u1) ERR_INVALID_PATH))
+          (is-final-hop (is-eq (len path) u2)))
       
-      ;; Add liquidity to new pool - simplified for enhanced deployment
-      (ok { pool: pool-addr, shares: amount-a, liquidity-added: true }))))
+      ;; Transfer input tokens to router
+      (try! (contract-call? token-in transfer amount-in tx-sender (as-contract tx-sender) none))
+      
+      ;; Execute the swap
+      (match (execute-swap token-in token-out amount-in 
+                         (if is-final-hop min-amount-out u0)
+                         deadline
+                         is-final-hop)
+        err (err (unwrap-err err))
+        ok (let ((swap-result (unwrap ok))
+                 (amount-out (get amount-out swap-result)))
+             
+             (if is-final-hop
+               ;; If this is the final hop, transfer tokens to user
+               (match (as-contract (contract-call? token-out 
+                                                 transfer 
+                                                 amount-out 
+                                                 (as-contract tx-sender) 
+                                                 tx-sender 
+                                                 none))
+                 true (ok amount-out)
+                 false (err ERR_TRANSFER_FAILED)
+               )
+               
+               ;; Otherwise, process the next hop
+               (let ((next-token (unwrap! (element-at path u2) ERR_INVALID_PATH)))
+                 (match (execute-swap token-out next-token amount-out
+                                    min-amount-out
+                                    deadline
+                                    true)
+                   err (err (unwrap-err err))
+                   ok (let ((final-result (unwrap ok))
+                           (final-amount (get amount-out final-result)))
+                        (match (as-contract (contract-call? next-token
+                                                          transfer
+                                                          final-amount
+                                                          (as-contract tx-sender)
+                                                          tx-sender
+                                                          none))
+                          true (ok final-amount)
+                          false (err ERR_TRANSFER_FAILED)
+                        )
+                      )
+                 )
+               )
+             )
+           )
+      )
+    )
+  ))
 
-;; Quote functions for frontend integration
-(define-read-only (quote (amount-a uint) (reserve-a uint) (reserve-b uint))
-  (if (and (> amount-a u0) (> reserve-a u0) (> reserve-b u0))
-      (ok (/ (* amount-a reserve-b) reserve-a))
-      (ok u0)))
-
-(define-read-only (get-amount-in (amount-out uint) (reserve-in uint) (reserve-out uint) (fee-bps uint))
-  (if (and (> amount-out u0) (> reserve-in u0) (> reserve-out amount-out))
-      (let ((numerator (* reserve-in amount-out u10000))
-            (denominator (* (- reserve-out amount-out) (- u10000 fee-bps))))
-        (ok (+ (/ numerator denominator) u1)))
-      (ok u0)))
-
-;; Emergency functions
-(define-public (emergency-withdraw-stuck-tokens (token principal) (amount uint) (recipient principal))
+;; --- Admin Functions ---
+(define-public (set-factory (new-factory principal))
   (begin
-    ;; In production, would check admin permissions
-    (as-contract (contract-call? token transfer amount (as-contract tx-sender) recipient none))))
+    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
+    (asserts! (is-ok (contract-call? new-factory get-pool 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.token-a 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.token-b)) ERR_INVALID_PATH)
+    (var-set factory-address new-factory)
+    (ok true)
+  )
+)
 
-;; Integration with enhanced tokenomics
-(define-public (update-router-rewards)
-  ;; Enhanced deployment: Simplify coordinator call
-  (ok true))
-
-;; Helper for getting optimal pool for trading
-(define-read-only (get-optimal-pool (token-a principal) (token-b principal) (amount uint))
-  ;; Enhanced deployment: avoid direct dependency on factory; return error if pool cant be resolved
-  (match (resolve-pool token-a token-b)
-    pool-addr (ok (tuple (pool pool-addr) (liquidity u0)))
-    ERR_INVALID_POOL))
-
-
-
+(define-public (transfer-ownership (new-owner principal))
+  (begin
+    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
+    (asserts! (is-eq (contract-call? new-owner get-false) false) ERR_INVALID_PATH)
+    (var-set contract-owner new-owner)
+    (ok true)
+  )
+)

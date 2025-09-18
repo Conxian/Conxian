@@ -1,179 +1,224 @@
 [project]
-name = "conxian"
-description = "Conxian DeFi Protocol - Clarity Smart Contracts"
-requirements = []
+name = "Conxian"
 clarinet_version = "3.5.0"
 
-[accounts]
-# These values are for local development only
-# In CI/CD, they are overridden by GitHub Secrets
-deployer = { mnemonic = "${TESTNET_DEPLOYER_MNEMONIC:twice kind fence tip hidden tilt action fragile skin nothing glory cousin green tomorrow spring wrist shed math olympic multiply hip blue scout claw}", balance = 100_000_000_000_000 }
-wallet_1 = { mnemonic = "${TESTNET_WALLET1_MNEMONIC:sell invite acquire kitten bamboo drastic jelly vivid peace spawn twice guilt pave pen trash pretty park cube fragile unaware remain midnight betray rebuild}", balance = 100_000_000_000_000 }
-wallet_2 = { mnemonic = "${TESTNET_WALLET2_MNEMONIC:hold excess usual excess ring elephant install account glad dry fragile donkey gaze humble truck breeze nation gasp vacuum limb head keep delay hospital}", balance = 100_000_000_000_000 }
+[repl]
+include_boot_contracts = true
 
+# Testnet configuration
+[testnet]
+node_rpc_address = "https://stacks-node-api.testnet.stacks.co"
+
+[testnet.accounts]
+deployer = "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM"
+wallet_1 = "ST1SJ3DTE5DN7X54YDH5D64R3BCB6A2AG2ZQ8YPD5"
+wallet_2 = "ST2CY5V39NHDPWSXMW9QDT3HC3GD6Q6XX4CFRK9AG"
+wallet_3 = "ST2JHG361ZXG51QTKY2NQCVBPPRRE2KZB1HR05NNC"
+
+# Network configuration
 [network]
-api_endpoint = "http://localhost:3999"
-delay_execution_start = false
+# p2sh for testnet/mainnet
+mode = "p2sh"
 
-[network.testnet]
-stacks_node_rpc_address = "https://api.testnet.hiro.so"
-bitcoin_node_rpc_address = "https://blockstream.info/testnet/api"
+# Deployer address
+deployer = "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM"
 
-[network.mainnet]
-stacks_node_rpc_address = "https://api.hiro.so"
-bitcoin_node_rpc_address = "https://blockstream.info/api"
+# Deployment configuration for testnet
+[network.deployment]
+path = "./deployments/testnet-plan.yaml"
 
-# ===========================================
-# CORE TRAITS (Deploy First)
-# ===========================================
+# Contracts configuration
+[contracts]
+# Core traits - these are defined first as they're dependencies for other contracts
+access-control-trait = { path = "contracts/traits/access-control-trait.clar" }
+ft-mintable-trait = { path = "contracts/traits/ft-mintable-trait.clar" }
+strategy-trait = { path = "contracts/traits/strategy-trait.clar" }
+pool-trait = { path = "contracts/traits/pool-trait.clar" }
+vault-trait = { path = "contracts/traits/vault-trait.clar" }
+oracle-trait = { path = "contracts/traits/oracle-trait.clar" }
+sip-010-ft-trait = { path = "contracts/traits/sip-010-ft-trait.clar" }
+router-trait = { path = "contracts/traits/router-trait.clar" }
 
-[contracts.access-control-trait]
-path = "contracts/traits/access-control-trait.clar"
-epoch = "2.4"
+# Tokens
+cxd-token = { path = "contracts/tokens/cxd-token.clar" }
+cxvg-token = { path = "contracts/tokens/cxvg-token.clar" }
+cxtr-token = { path = "contracts/tokens/cxtr-token.clar" }
+cxlp-token = { path = "contracts/tokens/cxlp-token.clar" }
+cxs-token = { path = "contracts/tokens/cxs-token.clar" }
 
-[contracts.sip-010-trait]
-path = "contracts/traits/sip-010-trait.clar"
-epoch = "2.4"
+# DEX Core
+dex-factory = { path = "contracts/dex/dex-factory.clar" }
+dex-pool = { path = "contracts/dex/dex-pool.clar" }
+pool-template = { path = "contracts/dex/pool-template.clar" }
+dex-router = { path = "contracts/dex/dex-router.clar" }
+oracle = { path = "contracts/dex/oracle.clar" }
 
-[contracts.ft-mintable-trait]
-path = "contracts/traits/ft-mintable-trait.clar"
-epoch = "2.4"
+# Lending & Yield
+lending-protocol-governance = { path = "contracts/governance/lending-protocol-governance.clar" }
+loan-liquidation-manager = { path = "contracts/dex/loan-liquidation-manager.clar" }
+yield-distribution-engine = { path = "contracts/dex/yield-distribution-engine.clar" }
+bond-factory = { path = "contracts/dex/bond-factory.clar" }
 
-[contracts.strategy-trait]
-path = "contracts/traits/strategy-trait.clar"
-epoch = "2.4"
+# Dimensional Module
+dim-registry = { path = "contracts/dimensional/dim-registry.clar" }
+dim-metrics = { path = "contracts/dimensional/dim-metrics.clar" }
+concentrated-liquidity-pool = { path = "contracts/dimensional/concentrated-liquidity-pool.clar" }
+tokenized-bond-adapter = { path = "contracts/dimensional/tokenized-bond-adapter.clar" }
+concentrated-position-nft = { path = "contracts/dimensional/concentrated-position-nft.clar" }
+dim-graph = { path = "contracts/dimensional/dim-graph.clar" }
+dim-oracle-automation = { path = "contracts/dimensional/dim-oracle-automation.clar" }
+dim-revenue-adapter = { path = "contracts/dimensional/dim-revenue-adapter.clar" }
+dim-yield-stake = { path = "contracts/dimensional/dim-yield-stake.clar" }
+tokenized-bond = { path = "contracts/dimensional/tokenized-bond.clar" }
 
-[contracts.pool-trait]
-path = "contracts/traits/pool-trait.clar"
-epoch = "2.4"
+# Governance
+access-control = { path = "contracts/governance/access-control.clar" }
+governance-signature-verifier = { path = "contracts/governance/governance-signature-verifier.clar" }
+signed-data-base = { path = "contracts/governance/signed-data-base.clar" }
 
-[contracts.vault-trait]
-path = "contracts/traits/vault-trait.clar"
-epoch = "2.4"
+# Mocks & Testing
+mock-token = { path = "contracts/mocks/mock-token.clar" }
 
-# ===========================================
-# TOKENS (SIP-010 Compliant)
-# ===========================================
+# DEX Contracts
+automated-circuit-breaker = { path = "contracts/dex/automated-circuit-breaker.clar" }
+bond-issuance-system = { path = "contracts/dex/bond-issuance-system.clar" }
+comprehensive-lending-system = { path = "contracts/dex/comprehensive-lending-system.clar" }
+cxlp-migration-queue = { path = "contracts/dex/cxlp-migration-queue.clar" }
+cxvg-utility = { path = "contracts/dex/cxvg-utility.clar" }
+distributed-cache-manager = { path = "contracts/dex/distributed-cache-manager.clar" }
+enhanced-flash-loan-vault = { path = "contracts/dex/enhanced-flash-loan-vault.clar" }
+enhanced-yield-strategy = { path = "contracts/dex/enhanced-yield-strategy.clar" }
+enterprise-loan-manager = { path = "contracts/dex/enterprise-loan-manager.clar" }
+interest-rate-model = { path = "contracts/dex/interest-rate-model.clar" }
+liquidation-manager = { path = "contracts/dex/liquidation-manager.clar" }
+liquidity-optimization-engine = { path = "contracts/dex/liquidity-optimization-engine.clar" }
+memory-pool-management = { path = "contracts/dex/memory-pool-management.clar" }
+nakamoto-compatibility = { path = "contracts/dex/nakamoto-compatibility.clar" }
+pool-factory-template = { path = "contracts/dex/pool-factory-template.clar" }
+predictive-scaling-system = { path = "contracts/dex/predictive-scaling-system.clar" }
+protocol-invariant-monitor = { path = "contracts/dex/protocol-invariant-monitor.clar" }
+real-time-monitoring-dashboard = { path = "contracts/dex/real-time-monitoring-dashboard.clar" }
+revenue-distributor = { path = "contracts/dex/revenue-distributor.clar" }
+sbtc-bond-integration = { path = "contracts/dex/sbtc-bond-integration.clar" }
+sbtc-flash-loan-extension = { path = "contracts/dex/sbtc-flash-loan-extension.clar" }
+sbtc-flash-loan-vault = { path = "contracts/dex/sbtc-flash-loan-vault.clar" }
+sbtc-integration = { path = "contracts/dex/sbtc-integration.clar" }
+sbtc-lending-integration = { path = "contracts/dex/sbtc-lending-integration.clar" }
+sbtc-lending-system = { path = "contracts/dex/sbtc-lending-system.clar" }
+sbtc-oracle-adapter = { path = "contracts/dex/sbtc-oracle-adapter.clar" }
+standard-constants = { path = "contracts/dex/standard-constants.clar" }
+timelock-controller = { path = "contracts/dex/timelock-controller.clar" }
+token-emission-controller = { path = "contracts/dex/token-emission-controller.clar" }
+token-system-coordinator = { path = "contracts/dex/token-system-coordinator.clar" }
+transaction-batch-processor = { path = "contracts/dex/transaction-batch-processor.clar" }
+vault = { path = "contracts/dex/vault.clar" }
+wormhole-integration = { path = "contracts/dex/wormhole-integration.clar" }
 
-# 1. CXD Token - Main Utility Token
-[contracts.cxd-token]
-path = "contracts/tokens/cxd-token.clar"
-epoch = "2.4"
-depends_on = ["sip-010-trait", "ft-mintable-trait"]
+# Libraries
+math-lib-advanced = { path = "contracts/lib/math-lib-advanced.clar" }
+standard-traits = { path = "contracts/traits/standard-traits.clar" }
+cxd-staking = { path = "contracts/dex/cxd-staking.clar" }
+fixed-point-math = { path = "contracts/lib/fixed-point-math.clar" }
+precision-calculator = { path = "contracts/lib/precision-calculator.clar" }
 
-# 2. CXVG Token - Governance Token
-[contracts.cxvg-token]
-path = "contracts/tokens/cxvg-token.clar"
-epoch = "2.4"
-depends_on = ["sip-010-trait", "ft-mintable-trait"]
+[repl.remappings]
+# Remappings for all contracts - using relative paths for local development
+# Traits
+access-control-trait = ".access-control-trait"
+ft-mintable-trait = ".ft-mintable-trait"
+strategy-trait = ".strategy-trait"
+pool-trait = ".pool-trait"
+vault-trait = ".vault-trait"
+oracle-trait = ".oracle-trait"
+sip-010-ft-trait = ".sip-010-ft-trait"
+router-trait = ".router-trait"
+dim-registry-trait = ".dim-registry-trait"
+dimensional-oracle-trait = ".dimensional-oracle-trait"
+flash-loan-receiver-trait = ".flash-loan-receiver-trait"
+lending-system-trait = ".lending-system-trait"
+liquidation-trait = ".liquidation-trait"
+monitor-trait = ".monitor-trait"
+ownable-trait = ".ownable-trait"
+sip-009-trait = ".sip-009-trait"
+sip-010-trait = ".sip-010-trait"
+sip-018-trait = ".sip-018-trait"
+staking-trait = ".staking-trait"
+standard-constants-trait = ".standard-constants-trait"
+trait-registry = ".trait-registry"
+traits-manifest = ".traits-manifest"
+vault-admin-trait = ".vault-admin-trait"
 
-# 3. CXTR Token - Creator Economy Token
-[contracts.cxtr-token]
-path = "contracts/tokens/cxtr-token.clar"
-epoch = "2.4"
-depends_on = ["sip-010-trait", "ft-mintable-trait"]
+# Token contracts
+cxd-token = ".cxd-token"
+cxvg-token = ".cxvg-token"
+cxtr-token = ".cxtr-token"
+cxlp-token = ".cxlp-token"
+cxs-token = ".cxs-token"
 
-# 4. CXLP Token - Liquidity Provider Token
-[contracts.cxlp-token]
-path = "contracts/tokens/cxlp-token.clar"
-epoch = "2.4"
-depends_on = ["sip-010-trait", "ft-mintable-trait"]
+# DEX contracts
+dex-factory = ".dex-factory"
+dex-pool = ".dex-pool"
+dex-router = ".dex-router"
+oracle = ".oracle"
 
-# 5. CXS Token - Staking Token
-[contracts.cxs-token]
-path = "contracts/tokens/cxs-token.clar"
-epoch = "2.4"
-depends_on = ["sip-010-trait"]
+# Dimensional Module
+dim-registry = ".dim-registry"
+dim-metrics = ".dim-metrics"
+concentrated-liquidity-pool = ".concentrated-liquidity-pool"
+tokenized-bond-adapter = ".tokenized-bond-adapter"
 
-# ===========================================
-# DEX CORE
-# ===========================================
+# Libraries
+math-lib-advanced = ".math-lib-advanced"
+standard-traits = ".standard-traits"
+fixed-point-math = ".fixed-point-math"
+precision-calculator = ".precision-calculator"
+# Lending & Yield
+lending-protocol-governance = ".lending-protocol-governance"
+loan-liquidation-manager = ".loan-liquidation-manager"
+yield-distribution-engine = ".yield-distribution-engine"
+bond-factory = ".bond-factory"
 
-[contracts.dex-factory]
-path = "contracts/dex/dex-factory.clar"
-epoch = "2.4"
-depends_on = ["access-control-trait", "sip-010-trait"]
+# Mocks & Testing
+mock-token = ".mock-token"
+cxd-staking = ".cxd-staking"
 
-[contracts.dex-pool]
-path = "contracts/dex/dex-pool.clar"
-epoch = "2.4"
-depends_on = ["dex-factory", "sip-010-trait"]
+# DEX Contracts Remappings
+automated-circuit-breaker = ".automated-circuit-breaker"
+bond-issuance-system = ".bond-issuance-system"
+comprehensive-lending-system = ".comprehensive-lending-system"
+cxlp-migration-queue = ".cxlp-migration-queue"
+cxvg-utility = ".cxvg-utility"
+distributed-cache-manager = ".distributed-cache-manager"
+enhanced-flash-loan-vault = ".enhanced-flash-loan-vault"
+enhanced-yield-strategy = ".enhanced-yield-strategy"
+enterprise-loan-manager = ".enterprise-loan-manager"
+interest-rate-model = ".interest-rate-model"
+liquidation-manager = ".liquidation-manager"
+liquidity-optimization-engine = ".liquidity-optimization-engine"
+memory-pool-management = ".memory-pool-management"
+nakamoto-compatibility = ".nakamoto-compatibility"
+pool-factory-template = ".pool-factory-template"
+predictive-scaling-system = ".predictive-scaling-system"
+protocol-invariant-monitor = ".protocol-invariant-monitor"
+real-time-monitoring-dashboard = ".real-time-monitoring-dashboard"
+revenue-distributor = ".revenue-distributor"
+sbtc-bond-integration = ".sbtc-bond-integration"
+sbtc-flash-loan-extension = ".sbtc-flash-loan-extension"
+sbtc-flash-loan-vault = ".sbtc-flash-loan-vault"
+sbtc-integration = ".sbtc-integration"
+sbtc-lending-integration = ".sbtc-lending-integration"
+sbtc-lending-system = ".sbtc-lending-system"
+sbtc-oracle-adapter = ".sbtc-oracle-adapter"
+standard-constants = ".standard-constants"
+timelock-controller = ".timelock-controller"
+token-emission-controller = ".token-emission-controller"
+token-system-coordinator = ".token-system-coordinator"
+transaction-batch-processor = ".transaction-batch-processor"
+vault = ".vault"
+wormhole-integration = ".wormhole-integration"
 
-[contracts.dex-router]
-path = "contracts/dex/dex-router.clar"
-epoch = "2.4"
-depends_on = ["dex-factory", "dex-pool", "sip-010-trait"]
-
-[contracts.oracle]
-path = "contracts/dex/oracle.clar"
-epoch = "2.4"
-depends_on = ["dex-factory"]
-
-# ===========================================
-# LENDING & YIELD
-# ===========================================
-
-[contracts.lending-protocol-governance]
-path = "contracts/governance/lending-protocol-governance.clar"
-epoch = "2.4"
-depends_on = ["access-control-trait"]
-
-[contracts.loan-liquidation-manager]
-path = "contracts/dex/loan-liquidation-manager.clar"
-epoch = "2.4"
-depends_on = ["dex-factory", "lending-protocol-governance"]
-
-[contracts.yield-distribution-engine]
-path = "contracts/dex/yield-distribution-engine.clar"
-epoch = "2.4"
-depends_on = ["dex-factory"]
-
-# ===========================================
-# DIMENSIONAL MODULE
-# ===========================================
-
-[contracts.dim-registry]
-path = "contracts/dimensional/dim-registry.clar"
-epoch = "2.4"
-depends_on = ["dex-factory"]
-
-[contracts.dim-metrics]
-path = "contracts/dimensional/dim-metrics.clar"
-epoch = "2.4"
-depends_on = ["dim-registry"]
-
-[contracts.concentrated-liquidity-pool]
-path = "contracts/dimensional/concentrated-liquidity-pool.clar"
-epoch = "2.4"
-depends_on = ["dim-registry", "dex-pool"]
-
-# ===========================================
-# MOCKS & TESTING
-# ===========================================
-
-[contracts.mock-token]
-path = "contracts/mocks/mock-token.clar"
-epoch = "2.4"
-
-# ===========================================
-# LIBRARIES
-# ===========================================
-
-[contracts.math-lib-advanced]
-path = "contracts/lib/math-lib-advanced.clar"
-epoch = "2.4"
-
-[contracts.standard-traits]
-path = "contracts/traits/standard-traits.clar"
-
-[contracts.cxd-staking]
-path = "contracts/dex/cxd-staking.clar"
-depends_on = ["sip-010-trait", "ft-mintable-trait"]
-
-[contracts.fixed-point-math]
-path = "contracts/lib/fixed-point-math.clar"
-epoch = "2.4"
-
-[contracts.precision-calculator]
-path = "contracts/lib/precision-calculator.clar"
-epoch = "2.4"
+# Dimensional Module Remappings
+dim-registry = ".dim-registry"
+dim-metrics = ".dim-metrics"
+concentrated-liquidity-pool = ".concentrated-liquidity-pool"
+tokenized-bond-adapter = ".tokenized-bond-adapter"
