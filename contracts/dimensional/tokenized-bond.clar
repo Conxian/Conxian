@@ -69,8 +69,6 @@
   )
 )
 
- (use-trait sip-010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
-
 (define-public (claim-coupons (payment-token <sip-010-ft-trait>))
   (let (
       (user tx-sender)
@@ -194,8 +192,3 @@
 (define-read-only (get-payment-token-contract)
   (ok (var-get payment-token-contract))
 )
-
-
-
-
-
