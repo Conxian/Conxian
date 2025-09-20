@@ -3,6 +3,7 @@
 
 (use-trait pool-trait .all-traits.pool-trait)
 (use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
+(use-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math-lib-advanced)
 
 ;; Implement the standard pool trait
 (impl-trait .all-traits.pool-trait)
@@ -179,7 +180,7 @@
         (reserve-y (var-get reserve-b))
         (shares (if (is-eq current-supply u0)
                     ;; First liquidity provision
-                    (- (unwrap-panic (contract-call? .math-lib-advanced sqrt-integer (* dx dy))) MIN_LIQUIDITY)
+                    (- (unwrap-panic (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math-lib-advanced sqrt-integer (* dx dy))) MIN_LIQUIDITY)
                     ;; Subsequent liquidity provision
                     (min (/ (* dx current-supply) reserve-x)
                          (/ (* dy current-supply) reserve-y))))

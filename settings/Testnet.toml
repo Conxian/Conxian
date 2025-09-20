@@ -5,6 +5,7 @@ node_rpc_address = "https://api.testnet.hiro.so"
 [accounts.deployer]
 # SECURE TESTNET DEPLOYER - Uses environment variable for mnemonic
 mnemonic = "${TESTNET_DEPLOYER_MNEMONIC}"
+private_key = "${STACKS_DEPLOYER_PRIVKEY}"
 balance = 500000000  # FUNDED - Ready for deployment 
 
 [accounts.wallet_1]  

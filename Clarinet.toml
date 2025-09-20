@@ -23,145 +23,11 @@ stacks_node_rpc_address = "https://api.hiro.so"
 bitcoin_node_rpc_address = "https://blockstream.info/api"
 
 [contracts]
-# Core Libraries
-constants = { path = "contracts/constants.clar" }
-error-codes = { path = "contracts/lib/error-codes.clar" }
-fixed-point-math = { path = "contracts/lib/fixed-point-math.clar" }
-precision-calculator = { path = "contracts/lib/precision-calculator.clar" }
-math-lib-advanced = { path = "contracts/lib/math-lib-advanced.clar" }
-concentrated-math = { path = "contracts/libraries/concentrated-math.clar" }
-
-# ===========================================
-# TRAIT DEFINITIONS
-# ===========================================
-# All traits are centralized in all-traits.clar
-# Usage in contracts: (use-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.<trait-name>)
-all-traits = { path = "contracts/traits/all-traits.clar" }
-
-# Oracle System
-oracle-trait = { path = "contracts/traits/oracle-trait.clar" }
-circuit-breaker-trait = { path = "contracts/traits/circuit-breaker-trait.clar" }
-monitoring-trait = { path = "contracts/traits/monitoring-trait.clar" }
-access-control-trait = { path = "contracts/access/access-control-trait.clar" }
-pausable-trait = { path = "contracts/security/pausable-trait.clar" }
-
-# ===========================================
-# TRAIT IMPLEMENTATIONS
-# (These are actual contracts that implement the traits)
-# ===========================================
-
-# Access Control & Security
-access-control = { path = "contracts/access/AccessControl.clar" }
-pausable = { path = "contracts/security/Pausable.clar" }
-
-# Core Protocol Implementations
-standard-constants = { path = "contracts/implementations/standard-constants.clar" }
-vault = { path = "contracts/implementations/vault.clar" }
-strategy = { path = "contracts/implementations/strategy.clar" }
-dim-registry = { path = "contracts/dimensional/dim-registry.clar" }
-dao = { path = "contracts/mocks/mock-dao.clar" }
-liquidation = { path = "contracts/implementations/liquidation.clar" }
-
-# Oracle System
-dimensional-oracle = { path = "contracts/oracle/dimensional-oracle.clar" }
-circuit-breaker = { path = "contracts/risk/circuit-breaker.clar" }
-system-monitor = { path = "contracts/monitoring/system-monitor.clar" }
-mock-oracle = { path = "contracts/mocks/mock-oracle.clar" }
-
-# Trait Management
-trait-registry = { path = "contracts/traits/trait-registry.clar" }
-traits-manifest = { path = "contracts/traits/traits-manifest.clar" }
-staking-trait = { path = "contracts/traits/staking-trait.clar" }
-vault-admin-trait = { path = "contracts/traits/vault-admin-trait.clar" }
-
-# Interfaces
-access-control-interface = { path = "contracts/interfaces/access-control.clar" }
-audit-registry-trait = { path = "contracts/interfaces/audit-registry-trait.clar" }
-
-# Tokens
-cxd-token = { path = "contracts/tokens/cxd-token.clar" }
-cxvg-token = { path = "contracts/tokens/cxvg-token.clar" }
-cxlp-token = { path = "contracts/tokens/cxlp-token.clar" }
-cxtr-token = { path = "contracts/tokens/cxtr-token.clar" }
-cxs-token = { path = "contracts/tokens/cxs-token.clar" }
-
-# DEX Core
-dex-factory = { path = "contracts/dex/dex-factory.clar" }
 dex-pool = { path = "contracts/dex/dex-pool.clar" }
-dex-router = { path = "contracts/dex/dex-router.clar" }
-pool-template = { path = "contracts/dex/pool-template.clar" }
-pool-factory-template = { path = "contracts/dex/pool-factory-template.clar" }
-
-# DEX Components
-oracle = { path = "contracts/dex/oracle.clar" }
-automated-circuit-breaker = { path = "contracts/dex/automated-circuit-breaker.clar" }
-interest-rate-model = { path = "contracts/dex/interest-rate-model.clar" }
-liquidation-manager = { path = "contracts/dex/liquidation-manager.clar" }
-loan-liquidation-manager = { path = "contracts/dex/loan-liquidation-manager.clar" }
-revenue-distributor = { path = "contracts/dex/revenue-distributor.clar" }
-timelock-controller = { path = "contracts/dex/timelock-controller.clar" }
-token-emission-controller = { path = "contracts/dex/token-emission-controller.clar" }
-token-system-coordinator = { path = "contracts/dex/token-system-coordinator.clar" }
-
-# Lending & Flash Loans
-bond-issuance-system = { path = "contracts/dex/bond-issuance-system.clar" }
-comprehensive-lending-system = { path = "contracts/dex/comprehensive-lending-system.clar" }
-enhanced-flash-loan-vault = { path = "contracts/dex/enhanced-flash-loan-vault.clar" }
-enterprise-loan-manager = { path = "contracts/dex/enterprise-loan-manager.clar" }
-
-# Staking & Yield
-cxd-staking = { path = "contracts/dex/cxd-staking.clar" }
-bond-factory = { path = "contracts/dex/bond-factory.clar" }
-enhanced-yield-strategy = { path = "contracts/dex/enhanced-yield-strategy.clar" }
-yield-distribution-engine = { path = "contracts/dex/yield-distribution-engine.clar" }
-
-# System Management
-cxlp-migration-queue = { path = "contracts/dex/cxlp-migration-queue.clar" }
-cxvg-utility = { path = "contracts/dex/cxvg-utility.clar" }
-distributed-cache-manager = { path = "contracts/dex/distributed-cache-manager.clar" }
-liquidity-optimization-engine = { path = "contracts/dex/liquidity-optimization-engine.clar" }
-memory-pool-management = { path = "contracts/dex/memory-pool-management.clar" }
-predictive-scaling-system = { path = "contracts/dex/predictive-scaling-system.clar" }
-protocol-invariant-monitor = { path = "contracts/dex/protocol-invariant-monitor.clar" }
-real-time-monitoring-dashboard = { path = "contracts/dex/real-time-monitoring-dashboard.clar" }
-transaction-batch-processor = { path = "contracts/dex/transaction-batch-processor.clar" }
-
-# Bitcoin Integration
-nakamoto-compatibility = { path = "contracts/dex/nakamoto-compatibility.clar" }
-sbtc-bond-integration = { path = "contracts/dex/sbtc-bond-integration.clar" }
-sbtc-flash-loan-extension = { path = "contracts/dex/sbtc-flash-loan-extension.clar" }
-sbtc-flash-loan-vault = { path = "contracts/dex/sbtc-flash-loan-vault.clar" }
-sbtc-integration = { path = "contracts/dex/sbtc-integration.clar" }
-sbtc-lending-integration = { path = "contracts/dex/sbtc-lending-integration.clar" }
-sbtc-lending-system = { path = "contracts/dex/sbtc-lending-system.clar" }
-sbtc-oracle-adapter = { path = "contracts/dex/sbtc-oracle-adapter.clar" }
-wormhole-integration = { path = "contracts/dex/wormhole-integration.clar" }
-
-# Governance
-lending-protocol-governance = { path = "contracts/governance/lending-protocol-governance.clar" }
-access-control = { path = "contracts/governance/access-control.clar" }
-governance-signature-verifier = { path = "contracts/governance/governance-signature-verifier.clar" }
-signed-data-base = { path = "contracts/governance/signed-data-base.clar" }
-
-# Dimensional
-dim-metrics = { path = "contracts/dimensional/dim-metrics.clar" }
-concentrated-liquidity-pool = { path = "contracts/dimensional/concentrated-liquidity-pool.clar" }
-concentrated-position-nft = { path = "contracts/dimensional/concentrated-position-nft.clar" }
-dim-graph = { path = "contracts/dimensional/dim-graph.clar" }
-dim-oracle-automation = { path = "contracts/dimensional/dim-oracle-automation.clar" }
-dim-revenue-adapter = { path = "contracts/dimensional/dim-revenue-adapter.clar" }
-dim-yield-stake = { path = "contracts/dimensional/dim-yield-stake.clar" }
 tokenized-bond = { path = "contracts/dimensional/tokenized-bond.clar" }
-tokenized-bond-adapter = { path = "contracts/dimensional/tokenized-bond-adapter.clar" }
-
-# Audit Registry
-audit-registry = { path = "contracts/audit-registry/audit-registry.clar" }
-audit-badge-nft = { path = "contracts/audit-registry/audit-badge-nft.clar" }
-
-# Mocks & Testing
-mock-token = { path = "contracts/mocks/mock-token.clar" }
-mock-dao = { path = "contracts/mocks/mock-dao.clar" }
-test-access = { path = "contracts/test/test-access.clar" }
+comprehensive-lending-system = { path = "contracts/dex/comprehensive-lending-system.clar" }
+math-lib-advanced = { path = "contracts/lib/math-lib-advanced.clar" }
+all-traits = { path = "contracts/traits/all-traits.clar" }
 
 [repl.remappings]
 # Traits
@@ -181,6 +47,7 @@ lending-system-trait = ".lending-system-trait"
 flash-loan-receiver-trait = ".flash-loan-receiver-trait"
 trait-registry = ".trait-registry"
 traits-manifest = ".traits-manifest"
+all-traits = ".all-traits"
 
 # Tokens
 cxd-token = ".cxd-token"
@@ -239,7 +106,6 @@ wormhole-integration = ".wormhole-integration"
 
 # Governance
 lending-protocol-governance = ".lending-protocol-governance"
-access-control = ".access-control"
 governance-signature-verifier = ".governance-signature-verifier"
 signed-data-base = ".signed-data-base"
 

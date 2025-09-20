@@ -1,17 +1,6 @@
 name: Protected Testnet Deployment
 
-on:
-  workflow_dispatch:
-    inputs:
-      confirmation:
-        description: 'Type DEPLOY to confirm testnet deployment'
-        required: true
-        type: string
-      dry_run:
-        description: 'Dry run only (no broadcast)'
-        required: false
-        type: boolean
-        default: true
+on: [workflow_dispatch]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -195,7 +184,10 @@ jobs:
             echo "- Network: Stacks Testnet"
             echo "- Contracts deployed: $(find deployments -name '*.yaml' | wc -l)"
             echo "- Deployment logs available in workflow artifacts"
-          fi
+      - name: Deploy Contracts
+        run: clarinet deployments apply --testnet
+        env:
+          STACKS_DEPLOYER_PRIVKEY: ${{ secrets.STACKS_DEPLOYER_PRIVKEY }}
       - name: Post Verification (Read-Only)
         env:
           NETWORK: testnet

@@ -140,3 +140,17 @@
     (ok true)
   )
 )
+
+(define-read-only (get-role-name (role uint))
+  (match (map-get? role-names { role: role })
+    role-entry (ok (get name (unwrap-panic role-entry)))
+    _ (none (err ERR_INVALID_ROLE))
+  )
+)
+
+(define-read-only (get-role-name (role uint))
+  (match (map-get? role-names { role: role })
+    role-entry (ok (get name (unwrap-panic role-entry)))
+    _ (none (err ERR_INVALID_ROLE))
+  )
+)

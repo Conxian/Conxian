@@ -2,7 +2,9 @@
 ;; Advanced mathematical library with essential DeFi functions
 ;; Implements math-trait for standard interface
 
-;; Use the math-trait from all-traits
+;; Standardized trait references
+(use-trait sip-010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.sip-010-ft-trait)
+(use-trait ownable-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.ownable-trait)
 (use-trait math-trait .all-traits.math-trait)
 (impl-trait .all-traits.math-trait)
 
@@ -255,4 +257,9 @@
       (err ERR_OVERFLOW)
     )
   )
+)
+
+(define-constant AUDIT_REGISTRY (concat CONTRACT_OWNER .audit-registry))
+
+(define-public (validate-mathematical-constants)
 )
