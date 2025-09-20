@@ -3,14 +3,12 @@
 ;; Enhanced with integration hooks for staking, revenue distribution, and system monitoring
 
 ;; --- Traits ---
-;; SIP-010 FT Trait (Fully Qualified)
-(use-trait ft-trait 'ST1PQHQKV0RJXZ9KCNB7T7QRB4FTSQKZQKXZJQZJZ.sip-010-ft-trait)
-;; Ownable Trait (Fully Qualified)
-(use-trait ownable 'ST1PQHQKV0RJXZ9KCNB7T7QRB4FTSQKZQKXZJQZJZ.ownable-trait)
+(use-trait sip-010-ft-trait .sip-010-ft-trait)
+(use-trait ownable-trait .ownable-trait)
 
 ;; Implement required traits
-(impl-trait 'ST1PQHQKV0RJXZ9KCNB7T7QRB4FTSQKZQKXZJQZJZ.sip-010-ft-trait)
-(impl-trait 'ST1PQHQKV0RJXZ9KCNB7T7QRB4FTSQKZQKXZJQZJZ.ownable-trait)
+(impl-trait 'sip-010-ft-trait)
+(impl-trait 'ownable-trait)
 
 ;; Constants
 (define-constant TRAIT_REGISTRY 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.trait-registry)
@@ -61,11 +59,52 @@
 (define-data-var staking-contract-ref (optional principal) none)
 (define-data-var initialization-complete bool false)
 
-;; --- System Integration Helper ---
-(define-private (check-system-pause-status)
-  (if (and (var-get system-integration-enabled) (is-some (var-get protocol-monitor)))
-    false ;; Simplified for enhanced deployment
+;; --- System Integration Helpers ---
+(define-private (check-system-pause)
+  "Check if system operations are paused"
+  (if (var-get system-integration-enabled)
+    (match (var-get protocol-monitor)
+      monitor (contract-call? monitor is-paused)
+      false)
     false))
+
+(define-private (check-emission-allowed (amount uint))
+  "Check if token emission is allowed for the given amount"
+  (if (var-get system-integration-enabled)
+    (match (var-get emission-controller)
+      controller (contract-call? controller can-emit amount)
+      true)
+    true))
+
+(define-private (notify-transfer (amount uint) (sender principal) (recipient principal))
+  "Notify relevant contracts about token transfer"
+  (if (var-get system-integration-enabled)
+    (begin
+      (match (var-get token-coordinator)
+        coordinator (contract-call? coordinator on-transfer amount sender recipient)
+        true)
+      true)
+    true))
+
+(define-private (notify-mint (amount uint) (recipient principal))
+  "Notify relevant contracts about token mint"
+  (if (var-get system-integration-enabled)
+    (begin
+      (match (var-get token-coordinator)
+        coordinator (contract-call? coordinator on-mint amount recipient)
+        true)
+      true)
+    true))
+
+(define-private (notify-burn (amount uint) (sender principal))
+  "Notify relevant contracts about token burn"
+  (if (var-get system-integration-enabled)
+    (begin
+      (match (var-get token-coordinator)
+        coordinator (contract-call? coordinator on-burn amount sender)
+        true)
+      true)
+    true))
 
 ;; --- System Integration Status (Read-Only) ---
 (define-read-only (is-system-paused)
