@@ -6,6 +6,7 @@
 (use-trait sip-010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.sip-010-ft-trait)
 (use-trait ownable-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.ownable-trait)
 (use-trait math-trait .all-traits.math-trait)
+(use-trait math-operations .math-operations)
 (impl-trait .all-traits.math-trait)
 
 (define-constant ERR_INVALID_INPUT (err u1001))
@@ -65,19 +66,20 @@
   (if (is-eq n u0)
     (ok u0)
     (let ((initial-guess (max u1 (unwrap! (div-down n u2) (err ERR_OVERFLOW)))))
-      (ok (sqrt-iter n initial-guess u0))
+      (ok (sqrt-iter n initial-guess))
     )
   )
 )
 
-(define-private (sqrt-iter (n uint) (guess uint) (prev-guess uint))
-  (if (or (is-eq guess prev-guess) (<= (abs-uint (- guess prev-guess)) u1))
-    guess
-    (let ((next-guess (average guess (unwrap! (div-down n guess) (err ERR_OVERFLOW)))))
-      (sqrt-iter n next-guess guess)
-    )
-  )
+(define-private (sqrt-iter (n uint) (guess uint))
+  (let ((next-guess (average guess (unwrap! (div-down n guess) (err ERR_OVERFLOW)))))
+  (if (or (is-eq guess next-guess) (<= (abs-uint (- guess next-guess)) u1))
+      next-guess
+      (sqrt-iter n next-guess))
 )
+
+(define-private (improve (guess uint) (n uint))
+  (unwrap! (safe-div (+ guess (unwrap! (safe-div n guess) (err ERR_OVERFLOW))) u2) (err ERR_OVERFLOW)))
 
 (define-read-only (min (a uint) (b uint))
   (if (< a b) a b))
@@ -91,18 +93,9 @@
     (ok x)
     (let (
       (guess (unwrap! (div-down x u2) (err ERR_OVERFLOW)))
-      (result (unwrap! (sqrt-iter x guess u0) (err ERR_UNDERFLOW)))
+      (result (unwrap! (sqrt-iter x guess) (err ERR_UNDERFLOW)))
     )
       (ok result)
-    )
-  )
-)
-
-(define-private (sqrt-iter (n uint) (guess uint) (prev-guess uint))
-  (if (or (is-eq guess prev-guess) (<= (abs-uint (- guess prev-guess)) u1))
-    guess
-    (let ((next-guess (average guess (unwrap! (div-down n guess) (err ERR_OVERFLOW)))))
-      (sqrt-iter n next-guess guess)
     )
   )
 )

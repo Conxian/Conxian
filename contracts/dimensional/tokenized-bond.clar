@@ -8,8 +8,8 @@
 ;; - Periodic coupon payments that can be claimed by bondholders.
 ;; - Principal payout at maturity.
 
-(use-trait sip-010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
-(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
+(use-trait sip10-trait .traits.sip10-trait)
+(use-trait bond-trait .bond-trait)
 (define-fungible-token tokenized-bond)
 
 (define-constant ERR_UNAUTHORIZED u201)
@@ -69,7 +69,7 @@
   )
 )
 
-(define-public (claim-coupons (payment-token <sip-010-ft-trait>))
+(define-public (claim-coupons (payment-token <sip10-trait>))
   (let (
       (user tx-sender)
       (last-period (default-to u0 (get period (map-get? last-claimed-coupon { user: user }))))

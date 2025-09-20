@@ -2,8 +2,8 @@
 ;; Implements pool-trait with full system integration
 
 (use-trait pool-trait .all-traits.pool-trait)
-(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
-(use-trait math-lib-advanced 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math-lib-advanced)
+(use-trait sip10-trait .all-traits.sip10-trait)
+(use-trait math-trait .all-traits.math-trait)
 
 ;; Implement the standard pool trait
 (impl-trait .all-traits.pool-trait)

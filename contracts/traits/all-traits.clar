@@ -47,6 +47,22 @@
   )
 )
 
+;; SIP-010 Trait
+(define-trait sip10-trait
+  (
+    (transfer (principal principal uint) (response bool uint))
+    (get-balance (principal) (response uint uint))
+  )
+)
+
+;; SIP-010 Trait
+(define-trait sip10-trait
+  (
+    (transfer (principal principal uint) (response bool uint))
+    (get-balance (principal) (response uint uint))
+  )
+)
+
 ;; Lending System Trait
 (define-trait lending-system-trait
   (
@@ -198,23 +214,16 @@
 ;; Advanced Math Library Trait
 (define-trait math-trait
   (
-    ;; Basic Operations
-    (mul-down (uint uint) (response uint uint))
-    (div-down (uint uint) (response uint uint))
-    (safe-div (uint uint) (response uint uint))
-    (abs-int (int) (response uint uint))
-    (abs-uint (uint) (response uint uint))
-    
-    ;; Advanced Functions
-    (exp-fixed (uint) (response uint uint))
-    (ln-fixed (uint) (response uint uint))
-    (sqrt-fixed (uint) (response uint uint))
-    (pow-fixed (uint uint) (response uint uint))
-    
-    ;; Utility Functions
-    (safe-add (uint uint) (response uint uint))
-    (safe-sub (uint uint) (response uint uint))
-    (safe-mul (uint uint) (response uint uint))
+    (add (uint uint) (response uint uint))
+    (sqrt (uint) (response uint uint))
+  )
+)
+
+;; Advanced Math Library Trait
+(define-trait math-trait
+  (
+    (add (uint uint) (response uint uint))
+    (sqrt (uint) (response uint uint))
   )
 )
 
