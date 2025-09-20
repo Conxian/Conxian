@@ -35,7 +35,7 @@ and purpose.
 ### Technical Implementation
 
 - [`../system_spec.md`](../system_spec.md) - Complete system specification and architecture
-- [`../Clarinet.lending.toml`](../Clarinet.lending.toml) - Lending system deployment configuration
+- [`../Clarinet.toml`](../Clarinet.toml) - Main deployment configuration
 - [`contract-guides/`](./contract-guides/) - Detailed contract guides and specifications
 
 ## Quick Navigation

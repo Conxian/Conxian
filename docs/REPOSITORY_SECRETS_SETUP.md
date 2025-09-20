@@ -55,7 +55,7 @@ Click **New repository secret** and add each of the following:
 
 - **Name**: `VAULT_CONTRACT_ADDRESS`
 - **Value**: Deployed vault contract principal address
-- **Example format**: `ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.vault-v1`
+- **Example format**: `ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.vault-v1`
 - **Note**: Update this after deploying your vault contract
 
 ## Security Best Practices

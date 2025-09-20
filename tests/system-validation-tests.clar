@@ -2,14 +2,14 @@
 ;; End-to-end system validation tests for Conxian enhanced tokenomics
 ;; Production readiness validation and complete system behavior verification
 
-(use-trait sip-010-ft-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.sip-010-ft-trait)
+(use-trait sip-010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.sip-010-ft-trait)
 
 ;; =============================================================================
 ;; SYSTEM VALIDATION CONSTANTS
 ;; =============================================================================
 
 (define-constant VALIDATION_DEPLOYER tx-sender)
-(define-constant PROD_USER_1 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM)
+(define-constant PROD_USER_1 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6)
 (define-constant PROD_USER_2 'ST1SJ3DTE5DN7X54YDH5D64R3BCB6A2AG2ZQ8YPD5)
 (define-constant PROD_USER_3 'ST2CY5V39NHDPWSXMW9QDT3HC3GD6Q6XX4CFRK9AG)
 (define-constant PROD_VAULT_1 'ST3NBRSFKX28FQ2ZJ1MAKX58HKHSDGNV5N7R21XCP)

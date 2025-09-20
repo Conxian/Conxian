@@ -1,3 +1,18 @@
+;; ===========================================
+;; CONXIAN PROTOCOL - CENTRALIZED TRAIT DEFINITIONS
+;; ===========================================
+;;
+;; This file serves as the single source of truth for all trait definitions
+;; in the Conxian protocol. All contracts should reference traits from this file
+;; to ensure consistency and avoid duplication.
+;;
+;; USAGE:
+;; (use-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.<trait-name>)
+;;
+;; ===========================================
+;; CORE TRAITS
+;; ===========================================
+
 ;; all-traits.clar
 ;; Centralized trait definitions for the Conxian protocol
 
@@ -203,3 +218,92 @@
   )
 )
 
+;; Standard Constants Trait
+(define-trait standard-constants-trait
+  (
+    (get-precision () (response uint uint))
+    (get-percent-100 () (response uint uint))
+    (get-max-uint64 () (response uint uint))
+  )
+)
+
+;; Error Codes Trait
+(define-trait error-codes-trait
+  (
+    (get-err-unauthorized () (response uint uint))
+    (get-err-paused () (response uint uint))
+    (get-err-invalid-parameters () (response uint uint))
+    (get-err-not-found () (response uint uint))
+    (get-err-already-exists () (response uint uint))
+    (get-err-deadline-passed () (response uint uint))
+    (get-err-zero-amount () (response uint uint))
+  )
+)
+
+;; Vault Trait
+(define-trait vault-trait
+  (
+    (deposit (uint principal) (response uint uint))
+    (withdraw (uint principal) (response uint uint))
+    (get-vault-tvl () (response uint uint))
+    (get-share-value () (response uint uint))
+  )
+)
+
+;; Vault Admin Trait
+(define-trait vault-admin-trait
+  (
+    (set-fee-rate (uint) (response bool uint))
+    (set-fee-recipient (principal) (response bool uint))
+    (set-strategy (principal) (response bool uint))
+    (harvest () (response uint uint))
+  )
+)
+
+;; Strategy Trait
+(define-trait strategy-trait
+  (
+    (harvest () (response uint uint))
+    (withdraw (uint) (response uint uint))
+    (deposit (uint) (response uint uint))
+    (balance-of () (response uint uint))
+  )
+)
+
+;; Staking Trait
+(define-trait staking-trait
+  (
+    (stake (uint) (response uint uint))
+    (unstake (uint) (response uint uint))
+    (get-staked-balance (principal) (response uint uint))
+    (get-total-staked () (response uint uint))
+  )
+)
+
+;; DIM Registry Trait
+(define-trait dim-registry-trait
+  (
+    (register-dimension (principal (string-ascii 32)) (response bool uint))
+    (unregister-dimension (principal) (response bool uint))
+    (get-dimension (principal) (response (optional (string-ascii 32)) uint))
+    (get-dimension-by-name ((string-ascii 32)) (response (optional principal) uint))
+  )
+)
+
+;; Circuit Breaker Trait
+(define-trait circuit-breaker-trait
+  (
+    (check-circuit-state ((string-ascii 32)) (response uint uint))
+    (record-success ((string-ascii 32)) (response uint uint))
+    (record-failure ((string-ascii 32)) (response uint uint))
+  )
+)
+
+;; Dimensional Oracle Trait
+(define-trait dimensional-oracle-trait
+  (
+    (update-dimension (principal (string-ascii 32)) (response bool uint))
+    (get-dimension-value (principal) (response (optional uint) uint))
+    (get-dimension-name (principal) (response (optional (string-ascii 32)) uint))
+  )
+)

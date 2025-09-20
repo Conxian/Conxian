@@ -44,7 +44,7 @@ Public Key: 0321397ade90f85e6d634bba310633f442cef6f9dae4df054c7a3a244e78192573
 Contracts can reference the system account using the `system` principal:
 
 ```clarity
-(define-constant SYSTEM_CONTRACT 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.system)
+(define-constant SYSTEM_CONTRACT 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.system)
 ```
 
 ## Emergency Procedures

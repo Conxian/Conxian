@@ -2,8 +2,9 @@
 ;; Advanced mathematical library with essential DeFi functions
 ;; Implements math-trait for standard interface
 
-(use-trait math-trait '.math-trait)
-(impl-trait '.math-trait)
+;; Use the math-trait from all-traits
+(use-trait math-trait .all-traits.math-trait)
+(impl-trait .all-traits.math-trait)
 
 (define-constant ERR_INVALID_INPUT (err u1001))
 (define-constant ERR_OVERFLOW (err u1002))

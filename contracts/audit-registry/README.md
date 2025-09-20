@@ -63,11 +63,11 @@ The Audit Registry system consists of three main components:
 Contracts can check audit status using:
 
 ```clarity
-(use-trait audit-registry-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.interfaces.audit-registry-trait)
+(use-trait audit-registry-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.interfaces.audit-registry-trait)
 
 ;; Check if a contract has a valid audit
 (define-read-only (is-audited (contract-address principal))
-  (match (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.audit-registry get-audit-status contract-address)
+  (match (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.audit-registry get-audit-status contract-address)
     status (ok (is-eq (get 'status status) "approved"))
     (ok false)
   )

@@ -1,10 +1,10 @@
 import { Clarinet, Tx, Chain, Account, types } from 'https://deno.land/x/clarinet@v1.5.4/index.ts';
 import { assertEquals } from 'https://deno.land/std@0.170.0/testing/asserts.ts';
 
-const CONTRACT_OWNER = 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM';
+const CONTRACT_OWNER = 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6';
 const AUDITOR = 'ST1SJ3DTE5DN7X54YDH5D64R3BCB6A2AG2ZQ8YPD5';
-const CONTRACT_ADDRESS = 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.audit-registry';
-const NFT_CONTRACT = 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.audit-badge-nft';
+const CONTRACT_ADDRESS = 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.audit-registry';
+const NFT_CONTRACT = 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.audit-badge-nft';
 const AUDIT_HASH = 'a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b8c7d6e5f4a3b2c1d0e9f8a7b6';
 const REPORT_URI = 'https://example.com/audit-reports/1';
 
@@ -91,7 +91,7 @@ Clarinet.test({
     ]);
     
     // Submit audit
-    const contractAddress = 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.some-contract';
+    const contractAddress = 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.some-contract';
     const block = submitAudit(chain, auditor, contractAddress, AUDIT_HASH, REPORT_URI);
     block.receipts[0].result.expectOk().expectUint(1);
     

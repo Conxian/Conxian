@@ -29,7 +29,7 @@ The Trait Registry is a central contract that manages trait implementations in t
   "my-trait"  ;; trait name
   1           ;; version
   "Description of my trait"
-  'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.my-contract
+  'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.my-contract
   false       ;; deprecated
   none        ;; replacement (optional)
 )
@@ -39,13 +39,13 @@ The Trait Registry is a central contract that manages trait implementations in t
 
 ```clarity
 ;; 1. Define the trait registry constant
-(define-constant TRAIT_REGISTRY 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.trait-registry)
+(define-constant TRAIT_REGISTRY 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.trait-registry)
 
 ;; 2. Resolve the trait at deployment time
 (use-trait my-trait (unwrap! (contract-call? TRAIT_REGISTRY get-trait-contract 'my-trait) (err u1000)))
 
 ;; 3. Implement the trait
-(impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.my-trait)
+(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.my-trait)
 ```
 
 ### Checking if a Trait is Deprecated
