@@ -136,9 +136,9 @@
 ;; Circuit Breaker Trait
 (define-trait circuit-breaker-trait
   (
-    (check-circuit-state (string-ascii 64) (response uint uint))
-    (record-success (string-ascii 64) (response uint uint))
-    (record-failure (string-ascii 64) (response uint uint))
+    (check-circuit-state ((string-ascii 32)) (response uint uint))
+    (record-success ((string-ascii 32)) (response uint uint))
+    (record-failure ((string-ascii 32)) (response uint uint))
   )
 )
 
@@ -287,15 +287,6 @@
     (unregister-dimension (principal) (response bool uint))
     (get-dimension (principal) (response (optional (string-ascii 32)) uint))
     (get-dimension-by-name ((string-ascii 32)) (response (optional principal) uint))
-  )
-)
-
-;; Circuit Breaker Trait
-(define-trait circuit-breaker-trait
-  (
-    (check-circuit-state ((string-ascii 32)) (response uint uint))
-    (record-success ((string-ascii 32)) (response uint uint))
-    (record-failure ((string-ascii 32)) (response uint uint))
   )
 )
 
