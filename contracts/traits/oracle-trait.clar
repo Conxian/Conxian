@@ -1,4 +1,8 @@
 ;; oracle-trait.clar
+;; This file is deprecated. Please use all-traits.clar instead.
+;; The oracle-trait is now defined in all-traits.clar
+
+;; oracle-trait.clar
 ;; Standard interface for price oracles in the Conxian protocol
 
 (define-trait oracle-trait

@@ -1,3 +1,7 @@
+;; ownable-trait.clar
+;; This file is deprecated. Please use all-traits.clar instead.
+;; The ownable-trait is now defined in all-traits.clar
+
 ;; Ownable Trait - Ownership management interface
 ;; Provides basic ownership and access control functionality
 

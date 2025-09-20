@@ -147,7 +147,7 @@
 ;; === COMPOUND INTEREST ===
 (define-read-only (compound-interest (principal uint) (rate uint) (periods uint))
   (let ((rate-plus-one (+ ONE_18 rate)))
-    (match (contract-call? %math-lib-advanced pow-fixed rate-plus-one (from-6-decimal periods))
+    (match (contract-call? .math-lib-advanced pow-fixed rate-plus-one (from-6-decimal periods))
       powered-rate (ok (mul-down principal powered-rate))
       error (err u3001))))
 

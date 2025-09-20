@@ -1,7 +1,7 @@
 ;; Enhanced Yield Strategy - Basic yield strategy with enhanced tokenomics integration
 ;; Implements strategy-trait for vault integration
 
-(use-trait ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.sip-010-ft-trait)
+(use-trait sip-010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.sip-010-ft-trait)
 (use-trait strategy-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.strategy-trait)
 
 (impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.strategy-trait)

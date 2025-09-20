@@ -1,6 +1,9 @@
 ;; math-lib-advanced.clar
 ;; Advanced mathematical library with essential DeFi functions
-;; Standalone implementation without dependencies
+;; Implements math-trait for standard interface
+
+(use-trait math-trait '.math-trait)
+(impl-trait '.math-trait)
 
 (define-constant ERR_INVALID_INPUT (err u1001))
 (define-constant ERR_OVERFLOW (err u1002))

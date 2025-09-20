@@ -1,15 +1,17 @@
 ;; cxlp-token.clar
-;; Conxian Liquidity Provider Token (SIP-010 FT)
+;; Conxian Liquidity Provider Token (SIP-010 FT) - represents liquidity provider positions
+;; Enhanced with staking, yield distribution, and system integration hooks
+
+;; --- Traits ---
+(use-trait sip-010-ft-trait '.sip-010-ft-trait)
+(use-trait ownable-trait '.ownable-trait)
+
+;; Implement the standard traits
+(impl-trait '.sip-010-ft-trait)
+(impl-trait '.ownable-trait)
 
 ;; Constants
 (define-constant TRAIT_REGISTRY 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.trait-registry)
-
-(use-trait sip-010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.sip-010-ft-trait)
-(use-trait sip-010-ft-mintable-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.sip-010-ft-mintable-trait)
-
-;; Implement the standard traits using full trait identifiers
-(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.sip-010-ft-trait)
-(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.sip-010-ft-mintable-trait)
 
 ;; Returns the current epoch index since migration start (not capped)
 (define-read-only (current-epoch)
@@ -327,7 +329,8 @@
 )
 
 ;; --- Migration: CXLP -> CXD ---
-(define-public (migrate-to-cxd (amount uint) (recipient principal) (cxd <ft-trait>))
+(use-trait sip-010-ft-trait '.sip-010-ft-trait)
+(define-public (migrate-to-cxd (amount uint) (recipient principal) (cxd <sip-010-ft-trait>))
   (let (
       (start (unwrap! (var-get migration-start-height) (err ERR_MIGRATION_NOT_SET)))
       (len (var-get epoch-length))

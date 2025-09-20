@@ -1,4 +1,8 @@
 ;; flash-loan-receiver-trait.clar
+;; This file is deprecated. Please use all-traits.clar instead.
+;; The flash-loan-receiver-trait is now defined in all-traits.clar
+
+;; flash-loan-receiver-trait.clar
 ;; Standard interface for contracts that can receive flash loans
 ;; Based on ERC-3156 Flash Loan standard adapted for Stacks
 

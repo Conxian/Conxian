@@ -1,3 +1,7 @@
+;; access-control-trait.clar
+;; This file is deprecated. Please use all-traits.clar instead.
+;; The access-control-trait is now defined in all-traits.clar
+
 ;; Access Control Trait - Role-based access control interface
 ;; Standardized interface for role-based access control
 

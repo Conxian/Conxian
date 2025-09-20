@@ -2,7 +2,7 @@
 ;; Integration adapter for tokenized bonds to connect with enhanced tokenomics system
 ;; Routes bond proceeds and coupon payments through revenue distribution system
 
-(use-trait ft-trait .sip-010-trait)
+(use-trait sip-010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
 
 ;; --- Constants ---
 (define-constant CONTRACT_OWNER tx-sender)
@@ -210,7 +210,7 @@
 (define-public (report-bond-maturity
     (bond-contract principal)
     (principal-amount uint)
-    (payment-token <ft-trait>))
+    (payment-token <sip-010-ft-trait>))
   (begin
     (asserts! (default-to false (map-get? registered-bonds bond-contract)) (err ERR_BOND_NOT_FOUND))
     (asserts! (> principal-amount u0) (err ERR_INVALID_AMOUNT))
@@ -287,7 +287,7 @@
     ;; Implementation would disable bond revenue routing
     (ok true)))
 
-(define-public (emergency-withdraw-bond-funds (bond-contract principal) (amount uint) (token <ft-trait>))
+(define-public (emergency-withdraw-bond-funds (bond-contract principal) (amount uint) (token <sip-010-ft-trait>))
   (begin
     (asserts! (is-eq tx-sender (var-get contract-owner)) (err ERR_UNAUTHORIZED))
     ;; Emergency withdrawal function

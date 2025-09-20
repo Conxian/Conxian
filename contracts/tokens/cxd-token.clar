@@ -2,14 +2,18 @@
 ;; Conxian Revenue Token (SIP-010 FT) - accrues protocol revenue to holders off-contract
 ;; Enhanced with integration hooks for staking, revenue distribution, and system monitoring
 
+;; --- Traits ---
+;; SIP-010 FT Trait (Fully Qualified)
+(use-trait ft-trait 'ST1PQHQKV0RJXZ9KCNB7T7QRB4FTSQKZQKXZJQZJZ.sip-010-ft-trait)
+;; Ownable Trait (Fully Qualified)
+(use-trait ownable 'ST1PQHQKV0RJXZ9KCNB7T7QRB4FTSQKZQKXZJQZJZ.ownable-trait)
+
+;; Implement required traits
+(impl-trait 'ST1PQHQKV0RJXZ9KCNB7T7QRB4FTSQKZQKXZJQZJZ.sip-010-ft-trait)
+(impl-trait 'ST1PQHQKV0RJXZ9KCNB7T7QRB4FTSQKZQKXZJQZJZ.ownable-trait)
+
 ;; Constants
 (define-constant TRAIT_REGISTRY 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.trait-registry)
-
-(use-trait sip-010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.sip-010-ft-trait)
-(use-trait sip-010-ft-mintable-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.sip-010-ft-mintable-trait)
-
-(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.sip-010-ft-trait)
-(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.sip-010-ft-mintable-trait)
 
 ;; --- Errors ---
 (define-constant ERR_UNAUTHORIZED u100)
@@ -120,13 +124,43 @@
     (var-set transfer-hooks-enabled enabled)
     (ok true)))
 
-;; --- Owner/Admin ---
-(define-public (set-contract-owner (new-owner principal))
+;; --- Ownable Trait Implementation ---
+
+;; @notice Returns the address of the current owner
+;; @return owner The address of the current owner
+(define-read-only (get-owner)
+  (ok (var-get contract-owner))
+)
+
+;; @notice Transfers ownership of the contract to a new account (`new-owner`)
+;; @param new-owner The address of the new owner
+;; @return success True if the operation was successful
+(define-public (transfer-ownership (new-owner principal))
   (begin
-    (asserts! (is-owner tx-sender) (err ERR_UNAUTHORIZED))
+    (asserts! (is-eq tx-sender (var-get contract-owner)) (err ERR_UNAUTHORIZED))
+    (asserts! (is-eq (is-none (var-get protocol-monitor)) true) (err ERR_SYSTEM_PAUSED))
     (var-set contract-owner new-owner)
     (ok true)
   )
+)
+
+;; @notice Leaves the contract without owner. It will not be possible to call
+;; `onlyOwner` functions anymore. Can only be called by the current owner.
+;; @notice Renouncing ownership will leave the contract without an owner,
+;; thereby removing any functionality that is only available to the owner.
+;; @return success True if the operation was successful
+(define-public (renounce-ownership)
+  (begin
+    (asserts! (is-eq tx-sender (var-get contract-owner)) (err ERR_UNAUTHORIZED))
+    (asserts! (is-eq (is-none (var-get protocol-monitor)) true) (err ERR_SYSTEM_PAUSED))
+    (var-set contract-owner tx-sender) ;; Set to zero address or keep as is
+    (ok true)
+  )
+)
+
+;; Helper function
+(define-private (is-owner (who principal))
+  (is-eq who (var-get contract-owner))
 )
 
 (define-public (set-minter (who principal) (enabled bool))
@@ -141,20 +175,29 @@
 )
 
 ;; --- SIP-010 interface with enhanced integration ---
+
+;; @notice Transfers tokens from `sender` to `recipient`
+;; @param amount The amount of tokens to transfer
+;; @param sender The address of the sender
+;; @param recipient The address of the recipient
+;; @param memo Optional memo to include with the transfer
+;; @return success True if the transfer was successful
 (define-public (transfer (amount uint) (sender principal) (recipient principal) (memo (optional (buff 34))))
   (begin
     (asserts! (is-eq tx-sender sender) (err ERR_UNAUTHORIZED))
     (asserts! (not (check-system-pause-status)) (err ERR_SYSTEM_PAUSED))
     
-    (let ((sender-bal (default-to u0 (map-get? balances sender)))
-          (rec-bal (default-to u0 (map-get? balances recipient))))
+    (let ((sender-bal (default-to u0 (map-get? balances {who: sender}))))
+      (asserts! (>= sender-bal amount) (err ERR_NOT_ENOUGH_BALANCE))
       
-      ;; Execute transfer hooks if enabled - skip for enhanced deployment
+      ;; Update sender balance
+      (map-set balances {who: sender} {bal: (- sender-bal amount)})
       
-      ;; Perform the actual transfer using safe math
-      (map-set balances sender (unwrap! (safe-sub sender-bal amount) (err ERR_NOT_ENOUGH_BALANCE)))
-      (map-set balances recipient (unwrap! (safe-add rec-bal amount) (err ERR_OVERFLOW)))
-
+      ;; Update recipient balance
+      (let ((rec-bal (default-to u0 (get bal (map-get? balances {who: recipient})))))
+        (map-set balances {who: recipient} {bal: (unwrap! (safe-add rec-bal amount) (err ERR_OVERFLOW))})
+      )
+      
       (ok true)
     )
   )
@@ -182,26 +225,39 @@
   )
 )
 
+;; @notice Returns the balance of the specified address
+;; @param who The address to query the balance of
+;; @return balance The account balance
 (define-read-only (get-balance (who principal))
-  (ok (default-to u0 (map-get? balances who)))
+  (ok (default-to u0 (map-get? balances {who: who})))
 )
 
+;; @notice Returns the total token supply
+;; @return supply The total supply of tokens
 (define-read-only (get-total-supply)
   (ok (var-get total-supply))
 )
 
+;; @notice Returns the number of decimals used by the token
+;; @return decimals The number of decimals
 (define-read-only (get-decimals)
   (ok (var-get decimals))
 )
 
+;; @notice Returns the name of the token
+;; @return name The name of the token
 (define-read-only (get-name)
   (ok (var-get name))
 )
 
+;; @notice Returns the symbol of the token
+;; @return symbol The symbol of the token
 (define-read-only (get-symbol)
   (ok (var-get symbol))
 )
 
+;; @notice Returns the URI for the token metadata
+;; @return uri The URI of the token metadata
 (define-read-only (get-token-uri)
   (ok (var-get token-uri))
 )

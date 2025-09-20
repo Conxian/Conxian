@@ -1,3 +1,7 @@
+;; sip-010-ft-trait.clar
+;; This file is deprecated. Please use all-traits.clar instead.
+;; The sip-010-ft-trait is now defined in all-traits.clar
+
 ;; SIP-010 Fungible Token Trait with additional functionality
 ;; This is a complete implementation of SIP-010 with extensions
 

@@ -2,7 +2,7 @@
 ;; Enhanced Lending System with sBTC Collateral Support
 ;; Implements lending/borrowing with sBTC as collateral and enterprise bond integration
 
-(use-trait ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.sip-010-ft-trait)
+(use-trait sip-010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.sip-010-ft-trait)
 
 ;; =============================================================================
 ;; CONSTANTS
@@ -118,7 +118,7 @@
 ;; SUPPLY FUNCTIONS
 ;; =============================================================================
 
-(define-public (supply (asset <ft-trait>) (amount uint))
+(define-public (supply (asset <sip-010-ft-trait>) (amount uint))
   "Supply tokens to earn interest"
   (let ((asset-contract (contract-of asset)))
     (begin
@@ -178,7 +178,7 @@
         
         (ok amount)))))
 
-(define-public (withdraw (asset <ft-trait>) (amount uint))
+(define-public (withdraw (asset <sip-010-ft-trait>) (amount uint))
   "Withdraw supplied tokens"
   (let ((asset-contract (contract-of asset)))
     (begin
@@ -229,7 +229,7 @@
 ;; BORROW FUNCTIONS  
 ;; =============================================================================
 
-(define-public (borrow (asset <ft-trait>) (amount uint))
+(define-public (borrow (asset <sip-010-ft-trait>) (amount uint))
   "Borrow tokens against collateral"
   (let ((asset-contract (contract-of asset)))
     (begin
@@ -300,7 +300,7 @@
         
         (ok amount)))))
 
-(define-public (repay (asset <ft-trait>) (amount uint))
+(define-public (repay (asset <sip-010-ft-trait>) (amount uint))
   "Repay borrowed tokens"
   (let ((asset-contract (contract-of asset)))
     (begin
@@ -345,7 +345,7 @@
 ;; COLLATERAL MANAGEMENT
 ;; =============================================================================
 
-(define-public (enable-collateral (asset <ft-trait>))
+(define-public (enable-collateral (asset <sip-010-ft-trait>))
   "Enable asset as collateral"
   (let ((asset-contract (contract-of asset)))
     (begin
@@ -369,7 +369,7 @@
         
         (ok true)))))
 
-(define-public (disable-collateral (asset <ft-trait>))
+(define-public (disable-collateral (asset <sip-010-ft-trait>))
   "Disable asset as collateral"
   (let ((asset-contract (contract-of asset)))
     (begin
@@ -398,8 +398,8 @@
 ;; =============================================================================
 
 (define-public (liquidate (borrower principal) 
-                         (repay-asset <ft-trait>) 
-                         (collateral-asset <ft-trait>) 
+                         (repay-asset <sip-010-ft-trait>) 
+                         (collateral-asset <sip-010-ft-trait>) 
                          (repay-amount uint))
   "Liquidate undercollateralized position"
   (let ((repay-contract (contract-of repay-asset))

@@ -27,22 +27,72 @@ bitcoin_node_rpc_address = "https://blockstream.info/api"
 # ===========================================
 
 [contracts]
-# --- Core Traits ---
-router-trait = { path = "contracts/traits/router-trait.clar" }
-sip-010-trait = { path = "contracts/traits/sip-010-trait.clar" }
-sip-010-ft-trait = { path = "contracts/traits/sip-010-ft-trait.clar" }
-pool-trait = { path = "contracts/traits/pool-trait.clar" }
-bond-trait = { path = "contracts/traits/bond-trait.clar" }
-flash-loan-receiver-trait = { path = "contracts/traits/flash-loan-receiver-trait.clar" }
-standard-constants-trait = { path = "contracts/traits/standard-constants-trait.clar" }
-ownable-trait = { path = "contracts/traits/ownable-trait.clar" }
-oracle-trait = { path = "contracts/traits/oracle-trait.clar" }
-monitor-trait = { path = "contracts/traits/monitor-trait.clar" }
+# ===========================================
+# CORE TRAITS
+# ===========================================
+
+# --- All Traits Collection ---
+all-traits = { path = "contracts/traits/all-traits.clar" }
+math-trait = { path = "contracts/traits/all-traits.clar" }
+
+# ===========================================
+# STANDARD INTERFACES
+# ===========================================
+
+# --- SIP Standards ---
+sip-010-ft-trait = { path = "contracts/traits/all-traits.clar" }
+sip-010-ft-mintable-trait = { path = "contracts/traits/all-traits.clar" }
+sip-009-nft-trait = { path = "contracts/traits/all-traits.clar" }
+
+# --- Access Control ---
+ownable-trait = { path = "contracts/traits/all-traits.clar" }
+access-control-trait = { path = "contracts/traits/all-traits.clar" }
+reentrancy-guard-trait = { path = "contracts/traits/all-traits.clar" }
+pausable-trait = { path = "contracts/traits/all-traits.clar" }
+circuit-breaker-trait = { path = "contracts/traits/all-traits.clar" }
+monitor-trait = { path = "contracts/traits/all-traits.clar" }
+
+# --- Core Protocol ---
+lending-system-trait = { path = "contracts/traits/all-traits.clar" }
+flash-loan-receiver-trait = { path = "contracts/traits/all-traits.clar" }
+
+# ===========================================
+# DEX PROTOCOL
+# ===========================================
+
+# --- DEX Protocol ---
+pool-trait = { path = "contracts/traits/all-traits.clar" }
+factory-trait = { path = "contracts/traits/all-traits.clar" }
+router-trait = { path = "contracts/traits/all-traits.clar" }
+
+# --- Oracle ---
+oracle-trait = { path = "contracts/traits/all-traits.clar" }
 dimensional-oracle-trait = { path = "contracts/traits/dimensional-oracle-trait.clar" }
-dim-registry-trait = { path = "contracts/traits/dim-registry-trait.clar" }
+standard-constants-trait = { path = "contracts/traits/standard-constants-trait.clar" }
+
+# ===========================================
+# FINANCIAL INSTRUMENTS
+# ===========================================
+
+# --- Bonds ---
+bond-trait = { path = "contracts/traits/all-traits.clar" }
+
+# --- Vaults & Strategies ---
 vault-trait = { path = "contracts/traits/vault-trait.clar" }
-lending-system-trait = { path = "contracts/traits/lending-system-trait.clar" }
-sip-009-trait = { path = "contracts/traits/sip-009-trait.clar" }
+strategy-trait = { path = "contracts/traits/strategy-trait.clar" }
+
+# ===========================================
+# SYSTEM COMPONENTS
+# ===========================================
+dim-registry-trait = { path = "contracts/traits/dim-registry-trait.clar" }
+
+# Math Libraries
+math-lib-advanced = { path = "contracts/lib/math-lib-advanced.clar" }
+
+# ===========================================
+# TEST CONTRACTS
+# ===========================================
+test-access = { path = "contracts/test/test-access.clar" }
 
 # --- Core DEX Contracts ---
 dex-factory = { path = "contracts/dex/dex-factory.clar" }
@@ -129,7 +179,6 @@ cxtr-token = { path = "contracts/tokens/cxtr-token.clar" }
 cxs-token = { path = "contracts/tokens/cxs-token.clar" }
 
 # --- Libs ---
-math-lib-advanced = { path = "contracts/lib/math-lib-advanced.clar" }
 fixed-point-math = { path = "contracts/lib/fixed-point-math.clar" }
 precision-calculator = { path = "contracts/lib/precision-calculator.clar" }
 concentrated-math = { path = "contracts/libraries/concentrated-math.clar" }

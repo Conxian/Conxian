@@ -1,13 +1,16 @@
 ;; cxtr-token.clar
-;; Conxian Contributor Token (SIP-010 FT) - merit-based rewards token
+;; Conxian Treasury Token (SIP-010 FT) - represents treasury reserves and protocol-controlled value
 ;; Enhanced with system integration hooks for coordinator interface
 
-;; Constants
-(use-trait sip-010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.sip-010-ft-trait)
-(use-trait sip-010-ft-mintable-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.sip-010-ft-mintable-trait)
+;; --- Traits ---
+(use-trait sip-010-ft-trait '.sip-010-ft-trait)
+(use-trait sip-010-ft-mintable-trait '.sip-010-ft-mintable-trait)
 
-(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.sip-010-ft-trait)
-(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.sip-010-ft-mintable-trait)
+(impl-trait '.sip-010-ft-trait)
+(impl-trait '.sip-010-ft-mintable-trait)
+
+;; Constants
+(define-constant TRAIT_REGISTRY 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.trait-registry)
 
 ;; --- Errors ---
 (define-constant ERR_UNAUTHORIZED u100)

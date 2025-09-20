@@ -1,4 +1,5 @@
 ;; Standard Traits for Conxian Protocol
+;; This file contains all standard traits used across the Conxian Protocol
 
 ;; ===== Access Control Trait =====
 (define-trait access-control-trait
@@ -17,6 +18,7 @@
 ;; ===== SIP-010 Fungible Token Standard =====
 (define-trait sip-010-ft-trait
   (
+    ;; Standard SIP-010 functions
     (transfer (uint principal principal (optional (buff 34))) (response bool uint))
     (get-name () (response (string-ascii 32) uint))
     (get-symbol () (response (string-ascii 32) uint))

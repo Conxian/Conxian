@@ -1,11 +1,15 @@
 ;; Conxian DEX Factory - Pool creation and registry
 ;; This contract is responsible for creating and registering new DEX pools.
 
+;; --- Traits ---
+(use-trait access-control-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.access-control-trait)
+(use-trait sip-010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
+(use-trait factory-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.factory-trait)
+
+(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.factory-trait)
+
 ;; --- Constants ---
 (define-constant ACCESS_CONTROL 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.access-control)
-
-;; Use standard SIP-010 trait for token operations
-(use-trait sip-010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.sip-010-ft-trait)
 
 ;; --- Constants ---
 ;; Error Codes
@@ -14,9 +18,6 @@
 (define-constant ERR_INVALID_TOKENS (err u2002))
 (define-constant ERR_POOL_NOT_FOUND (err u2003))
 (define-constant ERR_INVALID_FEE (err u2004))
-
-;; Roles - These would be defined in the access-control-trait contract
-(define-constant ROLE_POOL_MANAGER "pool-manager")
 
 ;; --- Data Variables ---
 (define-data-var contract-owner principal tx-sender)

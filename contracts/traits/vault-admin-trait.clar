@@ -1,3 +1,7 @@
+;; vault-admin-trait.clar
+;; This file is deprecated. Please use all-traits.clar instead.
+;; The vault-admin-trait is now defined in all-traits.clar
+
 ;; Vault Admin Trait - Administrative interface for vault management
 ;; Provides governance and operational controls
 

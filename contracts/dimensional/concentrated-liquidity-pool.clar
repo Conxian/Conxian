@@ -1,21 +1,22 @@
 ;; Concentrated Liquidity Pool (v1)
 ;; Implements tick-based liquidity positions with customizable fee tiers
+;; Implements the pool-trait interface for compatibility with the DEX router
 
+;; --- Constants ---
 (define-constant FEE_TIER_LOW u3000)   ;; 0.3%
 (define-constant FEE_TIER_MEDIUM u10000) ;; 1.0%
 (define-constant FEE_TIER_HIGH u30000)  ;; 3.0%
-
-;; Contract state
-(define-data-var contract-owner principal tx-sender)
-
-;; Constants
 (define-constant TRAIT_REGISTRY 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.trait-registry)
 
-;; Resolve pool-trait using the trait registry
-(use-trait pool-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.pool-trait)
+;; --- Traits ---
+(use-trait pool-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.pool-trait)
+(use-trait sip-010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
 
 ;; Implement the standard pool trait
-(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.pool-trait)
+(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.pool-trait)
+
+;; --- Contract State ---
+(define-data-var contract-owner principal tx-sender)
 
 ;; Initialize data variables with default values
 (define-data-var pool-token-x principal tx-sender)

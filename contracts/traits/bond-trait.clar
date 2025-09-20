@@ -1,4 +1,8 @@
 ;; bond-trait.clar
+;; This file is deprecated. Please use all-traits.clar instead.
+;; The bond-trait is now defined in all-traits.clar
+
+;; bond-trait.clar
 ;; Defines the interface for bond contracts in the Conxian protocol
 
 (define-trait bond-trait

@@ -12,7 +12,7 @@
 (define-constant ERR_METRIC_NOT_FOUND u106)
 
 ;; --- Contract Dependencies ---
-(use-trait sip-010 .sip-010-trait)
+(use-trait sip-010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
 
 (define-data-var contract-owner principal tx-sender)
 (define-data-var dim-metrics-contract principal tx-sender) ;; placeholder, should be set at deployment

@@ -1,4 +1,8 @@
 ;; router-trait.clar
+;; This file is deprecated. Please use all-traits.clar instead.
+;; The router-trait is now defined in all-traits.clar
+
+;; router-trait.clar
 ;; Defines the interface for the DEX Router contract
 
 (define-trait router-trait

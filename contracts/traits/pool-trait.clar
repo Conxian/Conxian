@@ -1,3 +1,7 @@
+;; pool-trait.clar
+;; This file is deprecated. Please use all-traits.clar instead.
+;; The pool-trait is now defined in all-traits.clar
+
 ;; Pool Trait - DEX pool interface for AMM functionality
 ;; Supports multiple pool types with enhanced tokenomics integration
 

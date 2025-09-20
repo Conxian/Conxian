@@ -2,8 +2,12 @@
 ;; Governance signature verification using SIP-018 implementation
 ;; Handles proposal signing and verification for governance operations
 
-(use-trait sip018-trait .sip-018-trait)
-(impl-trait .sip-018-trait)
+;; --- Traits ---
+(use-trait sip018-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-018-trait)
+(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-018-trait)
+
+;; Constants
+(define-constant TRAIT_REGISTRY 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.trait-registry)
 
 ;; --- Constants ---
 (define-constant ERR_INVALID_PROPOSAL (err u8001))

@@ -1,3 +1,7 @@
+;; vault-trait.clar
+;; This file is deprecated. Please use all-traits.clar instead.
+;; The vault-trait is now defined in all-traits.clar
+
 ;; Vault Trait - Core vault interface for Conxian DeFi system
 ;; Supports SIP-010 tokens and enhanced tokenomics integration
 

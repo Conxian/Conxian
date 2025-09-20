@@ -1,13 +1,18 @@
 ;; dim-registry.clar
 ;; Dimensional Registry & Weight Updates
-;; Responsibilities:
-;; - Register dimensions
-;; - Store and update dimension weights
+;; Registry for dimensional contracts and their associated metrics
 ;;
 ;; This contract is controlled by a contract owner who can designate a whitelisted oracle.
 
-(use-trait dim-registry-trait .dim-registry-trait)
-(impl-trait .dim-registry-trait)
+;; --- Traits ---
+(use-trait dim-registry-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.dim-registry-trait)
+(use-trait ownable-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.ownable-trait)
+
+(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.dim-registry-trait)
+(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.ownable-trait)
+
+;; Constants
+(define-constant TRAIT_REGISTRY 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.trait-registry)
 
 (define-constant ERR_UNAUTHORIZED u101)
 (define-constant ERR_INVALID_WEIGHT u102)
