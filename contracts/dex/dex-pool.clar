@@ -12,6 +12,13 @@
 (define-private (min (a uint) (b uint))
   (if (< a b) a b))
 
+;; Square root using Newton's method
+(define-private (sqrt-iter (n uint) (guess uint))
+  (let ((next-guess (/ (+ guess (/ n guess)) u2)))
+    (if (or (is-eq guess next-guess) (<= (if (> guess next-guess) (- guess next-guess) (- next-guess guess)) u1))
+      next-guess
+      (sqrt-iter n next-guess))))
+
 ;; Constants
 (define-constant ERR_UNAUTHORIZED (err u1001))
 (define-constant ERR_PAUSED (err u1002))
@@ -179,8 +186,13 @@
         (reserve-x (var-get reserve-a))
         (reserve-y (var-get reserve-b))
         (shares (if (is-eq current-supply u0)
-                    ;; First liquidity provision
-                    (- (unwrap-panic (contract-call? 'SP3G2V79EJ1K575F5R5S9J4B9E58ZKF3NVEE9J0.math-lib-advanced sqrt-integer (* dx dy))) MIN_LIQUIDITY)
+                    ;; First liquidity provision - use local square root implementation
+                    (let ((product (* dx dy))
+                          (guess (if (> product u1000000) u1000 u100)))
+                      (let ((sqrt-result (sqrt-iter product guess)))
+                        (if (< sqrt-result MIN_LIQUIDITY)
+                          (err u3008) ;; ERR_INSUFFICIENT_LIQUIDITY
+                          (- sqrt-result MIN_LIQUIDITY))))
                     ;; Subsequent liquidity provision
                     (min (/ (* dx current-supply) reserve-x)
                          (/ (* dy current-supply) reserve-y))))

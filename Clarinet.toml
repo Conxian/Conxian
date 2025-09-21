@@ -23,11 +23,14 @@ stacks_node_rpc_address = "https://api.hiro.so"
 bitcoin_node_rpc_address = "https://blockstream.info/api"
 
 [contracts]
-dex-pool = { path = "contracts/dex/dex-pool.clar" }
-tokenized-bond = { path = "contracts/dimensional/tokenized-bond.clar" }
-comprehensive-lending-system = { path = "contracts/dex/comprehensive-lending-system.clar" }
-math-lib-advanced = { path = "contracts/lib/math-lib-advanced.clar" }
-all-traits = { path = "contracts/traits/all-traits.clar" }
+# Core Contracts
+tokenized-bond = { path = "contracts/dimensional/tokenized-bond.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.tokenized-bond" }
+all-traits = { path = "contracts/traits/all-traits.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits" }
+math-lib-advanced = { path = "contracts/lib/math-lib-advanced.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math-lib-advanced" }
+
+# DEX Contracts
+dex-pool = { path = "contracts/dex/dex-pool.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dex-pool" }
+comprehensive-lending-system = { path = "contracts/dex/comprehensive-lending-system.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.comprehensive-lending-system" }
 
 [repl.remappings]
 # Traits

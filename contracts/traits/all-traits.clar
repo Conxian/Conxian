@@ -18,6 +18,80 @@
 
 ;; ===========================================
 ;; CORE TRAITS
+
+;; SIP-010 Fungible Token Trait (Standard)
+(define-trait sip10-trait
+  (
+    ;; Transfer from the caller to a new principal
+    (transfer (uint principal principal) (response bool uint))
+    
+    ;; Get the token name
+    (get-name () (response (string-ascii 32) uint))
+    
+    ;; Get the token symbol
+    (get-symbol () (response (string-ascii 32) uint))
+    
+    ;; Get the token decimals
+    (get-decimals () (response uint uint))
+    
+    ;; Get the token balance of a principal
+    (get-balance (principal) (response uint uint))
+    
+    ;; Get the total supply of the token
+    (get-total-supply () (response uint uint))
+    
+    ;; Get the token URI
+    (get-token-uri () (response (optional (string-utf8 256)) uint))
+  )
+)
+
+;; Bond Trait for Tokenized Bonds
+(define-trait bond-trait
+  (
+    ;; Get the bond issuer
+    (get-issuer () (response principal uint))
+    
+    ;; Get the bond maturity date (in block height)
+    (get-maturity-height () (response uint uint))
+    
+    ;; Get the bond face value
+    (get-face-value () (response uint uint))
+    
+    ;; Get the bond coupon rate (in basis points, e.g., 500 = 5%)
+    (get-coupon-rate () (response uint uint))
+    
+    ;; Get the coupon payment interval (in blocks)
+    (get-coupon-interval () (response uint uint))
+    
+    ;; Get the last coupon payment height
+    (get-last-coupon-height () (response uint uint))
+    
+    ;; Check if the bond is callable
+    (is-callable () (response bool uint))
+    
+    ;; Get the call price (if callable)
+    (get-call-price () (response (optional uint) uint))
+    
+    ;; Claim coupon payment
+    (claim-coupon () (response (tuple (amount uint) (payment-token principal)) uint))
+    
+    ;; Redeem bond at maturity
+    (redeem-at-maturity (principal) (response uint uint))
+    
+    ;; Get bond information
+    (get-bond-info () (response (tuple 
+      (issuer principal)
+      (maturity-height uint)
+      (face-value uint)
+      (coupon-rate uint)
+      (coupon-interval uint)
+      (last-coupon-height uint)
+      (is-called bool)
+      (call-price (optional uint))
+      (total-supply uint)
+    ) uint))
+  )
+)
 ;; ===========================================
 
 ;; Access Control Trait
@@ -44,14 +118,6 @@
     (get-name () (response (string-ascii 32) uint))
     (get-symbol () (response (string-ascii 10) uint))
     (get-token-uri () (response (optional (string-utf8 256)) uint))
-  )
-)
-
-;; SIP-010 Trait
-(define-trait sip10-trait
-  (
-    (transfer (principal principal uint) (response bool uint))
-    (get-balance (principal) (response uint uint))
   )
 )
 
@@ -208,14 +274,6 @@
 (define-trait reentrancy-guard-trait
   (
     (non-reentrant () (response bool uint))
-  )
-)
-
-;; Advanced Math Library Trait
-(define-trait math-trait
-  (
-    (add (uint uint) (response uint uint))
-    (sqrt (uint) (response uint uint))
   )
 )
 
