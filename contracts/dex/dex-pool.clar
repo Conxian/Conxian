@@ -180,7 +180,7 @@
         (reserve-y (var-get reserve-b))
         (shares (if (is-eq current-supply u0)
                     ;; First liquidity provision
-                    (- (unwrap-panic (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math-lib-advanced sqrt-integer (* dx dy))) MIN_LIQUIDITY)
+                    (- (unwrap-panic (contract-call? 'SP3G2V79EJ1K575F5R5S9J4B9E58ZKF3NVEE9J0.math-lib-advanced sqrt-integer (* dx dy))) MIN_LIQUIDITY)
                     ;; Subsequent liquidity provision
                     (min (/ (* dx current-supply) reserve-x)
                          (/ (* dy current-supply) reserve-y))))

@@ -8,8 +8,8 @@
 ;; - Periodic coupon payments that can be claimed by bondholders.
 ;; - Principal payout at maturity.
 
-(use-trait sip10-trait .traits.sip10-trait)
-(use-trait bond-trait .bond-trait)
+(use-trait sip10-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-trait)
+(use-trait bond-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.traits.bond-trait)
 (define-fungible-token tokenized-bond)
 
 (define-constant ERR_UNAUTHORIZED u201)

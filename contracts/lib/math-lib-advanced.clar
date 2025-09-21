@@ -62,14 +62,9 @@
 )
 
 ;; === INTEGER SQUARE ROOT (Newton's method) ===
-(define-read-only (sqrt-integer (n uint))
-  (if (is-eq n u0)
-    (ok u0)
-    (let ((initial-guess (max u1 (unwrap! (div-down n u2) (err ERR_OVERFLOW)))))
-      (ok (sqrt-iter n initial-guess))
-    )
-  )
-)
+(define-private (sqrt-integer (n uint))
+  (let ((guess (if (> n u1000000) u1000 u100)))
+    (sqrt-iter n guess)))
 
 (define-private (sqrt-iter (n uint) (guess uint))
   (let ((next-guess (average guess (unwrap! (div-down n guess) (err ERR_OVERFLOW)))))
