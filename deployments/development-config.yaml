@@ -18,7 +18,11 @@ contracts: {}
 # Testnet accounts
 # Note: These are testnet addresses with testnet STX
 accounts:
-  deployer: "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM"
+  # System account for protocol operations
+  system:
+    mnemonic: "theme apart absurd gasp river used vessel screen fiction slice slab ice jar hurt slam puppy snake life radar sign ship list excuse trick"
+    balance: 100000000000000  # 100,000,000 STX
+  deployer: "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
   wallet_1: "ST1SJ3DTE5DN7X54YDH5D64R3BCB6A2AG2ZQ8YPD5"
   wallet_2: "ST2CY5V39NHDPWSXMW9QDT3HC3GD6Q6XX4CFRK9AG"
   wallet_3: "ST2JHG361ZXG51QTKY2NQCVBPPRRE2KZB1HR05NNC"
@@ -139,7 +143,7 @@ security:
   invariant_monitoring_enabled: true
   pause_on_violation: true
   emergency_contacts:
-    - "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM"  # Dev admin
+    - "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"  # Dev admin
   
 monitoring:
   health_check_frequency: 144  # Every 2 hours (dev)
@@ -172,7 +176,7 @@ testing:
   system_validation_enabled: true
   
 test_accounts:
-  - "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM"
+  - "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
   - "ST1SJ3DTE5DN7X54YDH5D64R3BCB6A2AG2ZQ8YPD5"  
   - "ST2CY5V39NHDPWSXMW9QDT3HC3GD6Q6XX4CFRK9AG"
 

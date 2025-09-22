@@ -3,14 +3,14 @@
 ;; Handles audit submissions, DAO voting, and NFT badge issuance
 
 ;; --- External Traits ---
-(use-trait nft-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.audit-registry.audit-badge-nft)
-(use-trait dao-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.traits.dao-trait)
+(use-trait nft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.audit-registry.audit-badge-nft)
+(use-trait dao-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.dao-trait)
 
 ;; --- Internal Traits ---
-(use-trait audit-registry-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.interfaces.audit-registry-trait)
+(use-trait audit-registry-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.audit-registry-trait)
 
 ;; Implement required traits
-(impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.interfaces.audit-registry-trait)
+(impl-trait .audit-registry-trait)
 
 ;; --- Constants ---
 (define-constant CONTRACT_OWNER tx-sender)

@@ -10,7 +10,7 @@ Clarinet.test({
     // Set bond token template
     let block = chain.mineBlock([
       Tx.contractCall('bond-factory', 'set-bond-token-code', [
-        types.utf8('(define-constant BOND_ISSUER \'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM)')
+        types.utf8('(define-constant BOND_ISSUER \'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6)')
       ], deployer.address)
     ]);
     assertEquals(block.receipts.length, 1);
@@ -41,7 +41,7 @@ Clarinet.test({
     // Register bond market
     const block = chain.mineBlock([
       Tx.contractCall('dex-router', 'register-bond-market', [
-        types.principal('ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.bond-token'),
+        types.principal('ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.bond-token'),
         types.uint(1000000),  // min trade
         types.uint(1000000000), // max trade
         types.uint(30)        // 0.3% fee

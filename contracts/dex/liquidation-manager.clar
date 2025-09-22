@@ -1,12 +1,12 @@
 ;; liquidation-manager.clar
 ;; Centralized liquidation manager for the Conxian protocol
 
-(use-trait ft-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.sip-010-ft-trait)
-(use-trait lending-system-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.lending-system-trait)
-(use-trait standard-constants 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.standard-constants-trait)
-(use-trait liquidation-interface 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.liquidation-trait)
+(use-trait sip-010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
+(use-trait lending-system-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.lending-system-trait)
+(use-trait standard-constants-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.standard-constants-trait)
+(use-trait liquidation-interface 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.liquidation-trait)
 
-(impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.liquidation-trait)
+(impl-trait .liquidation-interface)
 
 ;; Constants
 (define-constant CONTRACT_OWNER tx-sender)
@@ -166,7 +166,7 @@
       (collateral-asset (get collateral-asset position))
       (debt-amount (get debt-amount position))
     )
-    (match (liquidate-position borrower debt-asset collateral-asset debt-amount u115792089237316195423570985008687907853269984665640564039457584007913129639935)  ;; Max uint256
+    (match (liquidate-position borrower debt-asset collateral-asset debt-amount u1000000000000)  ;; Max amount for liquidation (1M with 6 decimals)
       (ok result)
         (merge acc {
           success-count: (+ (get success-count acc) u1),

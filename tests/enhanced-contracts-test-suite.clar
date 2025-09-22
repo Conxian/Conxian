@@ -9,9 +9,9 @@
 ;; =============================================================================
 
 (define-constant TEST_DEPLOYER tx-sender)
-(define-constant TEST_USER_1 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM)
+(define-constant TEST_USER_1 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6)
 (define-constant TEST_USER_2 'ST1SJ3DTE5DN7X54YDH5D64R3BCB6A2AG2ZQ8YPD5)
-(define-constant TEST_TOKEN_A 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.test-token-a)
+(define-constant TEST_TOKEN_A 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.test-token-a)
 (define-constant TEST_TOKEN_B 'ST1SJ3DTE5DN7X54YDH5D64R3BCB6A2AG2ZQ8YPD5.test-token-b)
 
 ;; Test performance targets

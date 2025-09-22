@@ -2,11 +2,13 @@
 ;; Enhanced vault with comprehensive flash loan implementation
 ;; Extends the basic vault with full flash loan functionality
 
-;; Import trait at the top
-(use-trait ft-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.sip-010-ft-trait)
+;; Import traits at the top
+(use-trait sip-010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
+(use-trait vault-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.vault-trait)
+(use-trait vault-admin-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.vault-admin-trait)
 
-(impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.vault-trait)
-(impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.vault-admin-trait)
+(impl-trait .vault-trait)
+(impl-trait .vault-admin-trait)
 
 ;; Constants
 (define-constant ERR_UNAUTHORIZED (err u6001))
@@ -178,7 +180,7 @@
     (ok (tuple (amount net-amount) (fee fee)))))
 
 ;; === FLASH LOAN IMPLEMENTATION ===
-(define-public (flash-loan (asset <ft-trait>) (amount uint) (receiver <flash-loan-receiver>) (data (buff 256)))
+(define-public (flash-loan (asset <sip-010-ft-trait>) (amount uint) (receiver principal) (data (buff 256)))
   (let ((receiver-principal (contract-of receiver))
         (asset-principal (contract-of asset)))
     (begin
@@ -233,7 +235,7 @@
             (ok true)))))))
 
 ;; Simplified flash loan for basic receivers (legacy support)
-(define-public (flash-loan-simple (asset <ft-trait>) (amount uint) (recipient principal))
+(define-public (flash-loan-simple (asset <sip-010-ft-trait>) (amount uint) (recipient principal))
   (begin
     (asserts! (not (var-get paused)) ERR_PAUSED)
     (asserts! (> amount u0) ERR_INVALID_AMOUNT)
@@ -285,7 +287,7 @@
                             (+ (get total-loans current-stats) u1))
       })))
 
-(define-private (transfer-asset-from-vault (asset <ft-trait>) (amount uint) (recipient principal))
+(define-private (transfer-asset-from-vault (asset <sip-010-ft-trait>) (amount uint) (recipient principal))
   ;; SIP-010 transfer: (transfer (amount uint) (sender principal) (recipient principal) (memo (optional (buff 34))))
   (begin
     (try! (as-contract (contract-call? asset transfer amount tx-sender recipient none)))
@@ -296,7 +298,7 @@
       (ok true))))
 
 ;; Get actual token balance from SIP-010 contract
-(define-private (get-actual-token-balance (asset <ft-trait>))
+(define-private (get-actual-token-balance (asset <sip-010-ft-trait>))
   (contract-call? asset get-balance (as-contract tx-sender)))
 
 ;; === UTILITY FUNCTIONS ===
@@ -477,7 +479,7 @@
     (ok true)))
 
 ;; === COLLECT PROTOCOL FEES ===
-(define-public (collect-protocol-fees (asset <ft-trait>))
+(define-public (collect-protocol-fees (asset <sip-010-ft-trait>))
   (let ((fees (default-to u0 (map-get? collected-fees (contract-of asset))))
         (admin-address (var-get admin)))
     (begin

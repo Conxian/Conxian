@@ -1,15 +1,15 @@
 ;; cxs-token.clar
-;; Conxian Soulbound Reputation Token (SIP-009-style NFT)
-;; Non-transferable: transfer is disabled to enforce soulbound semantics
+;; Conxian Staking Token (SIP-009 NFT) - represents staked positions in the Conxian protocol
+;; Implements SIP-009 NFT standard with staking and governance features
 
-;; Constants
-(define-constant TRAIT_REGISTRY 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.trait-registry)
-
-;; Resolve traits using the trait registry
-(use-trait sip009-nft-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.sip-009-trait)
+;; --- Traits ---
+(use-trait sip-009-nft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-009-nft-trait)
 
 ;; Implement the standard trait
-(impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.sip-009-trait)
+(impl-trait .sip-009-nft-trait)
+
+;; Constants
+(define-constant TRAIT_REGISTRY 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.trait-registry)
 
 ;; --- Errors ---
 (define-constant ERR_UNAUTHORIZED u100)

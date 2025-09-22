@@ -1,4 +1,8 @@
 ;; dao-trait.clar
+;; This file is deprecated. Please use all-traits.clar instead.
+;; The dao-trait is now defined in all-traits.clar
+
+;; dao-trait.clar
 ;; Defines the interface for DAO functionality
 
 (define-trait dao-trait

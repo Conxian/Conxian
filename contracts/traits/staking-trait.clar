@@ -1,4 +1,8 @@
 ;; staking-trait.clar
+;; This file is deprecated. Please use all-traits.clar instead.
+;; The staking-trait is now defined in all-traits.clar
+
+;; staking-trait.clar
 ;; Minimal staking interface used by monitors and distributors
 
 (define-trait staking-trait

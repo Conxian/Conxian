@@ -26,26 +26,3 @@
     (get-precision-6) (response uint uint)
   )
 )
-
-;; Standard implementation of the constants trait
-(define-constant PRECISION_18 u1000000000000000000)  ;; 18 decimals
-(define-constant PRECISION_8  u100000000)            ;; 8 decimals
-(define-constant PRECISION_6  u1000000)              ;; 6 decimals
-(define-constant BASIS_POINTS u10000)                ;; 100.00%
-
-;; Time constants (assuming ~1 block per minute)
-(define-constant BLOCKS_PER_MINUTE u1)
-(define-constant BLOCKS_PER_HOUR (* BLOCKS_PER_MINUTE u60))
-(define-constant BLOCKS_PER_DAY (* BLOCKS_PER_HOUR u24))
-(define-constant BLOCKS_PER_WEEK (* BLOCKS_PER_DAY u7))
-(define-constant BLOCKS_PER_YEAR (* BLOCKS_PER_DAY u365))
-
-;; Common percentage values
-(define-constant ZERO u0)
-(define-constant FIFTY_PERCENT u5000)                ;; 50.00%
-(define-constant ONE_HUNDRED_PERCENT u10000)         ;; 100.00%
-
-
-
-
-

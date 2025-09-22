@@ -2,7 +2,7 @@ import os
 import re
 
 contracts_dir = "contracts"
-deployer_principal = "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM"
+deployer_principal = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 # This regex will find all `(use-trait ...)` statements and capture the alias and the principal.
 # It's designed to be a bit loose to capture the various incorrect formats.

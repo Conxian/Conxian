@@ -1,3 +1,7 @@
+;; strategy-trait.clar
+;; This file is deprecated. Please use all-traits.clar instead.
+;; The strategy-trait is now defined in all-traits.clar
+
 ;; Strategy Trait - Yield strategy interface for vault integration
 ;; Supports multiple yield strategies with enhanced tokenomics integration
 

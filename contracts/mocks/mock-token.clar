@@ -1,9 +1,12 @@
 ;; mock-token.clar
 ;; Minimal SIP-010-compliant mock for testing
 
-;; Import the SIP-010 FT trait
-(use-trait sip010-ft-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.sip-010-ft-trait)
-(impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.sip-010-ft-trait)
+;; --- Traits ---
+(use-trait sip-010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
+(impl-trait .sip-010-ft-trait)
+
+;; Constants
+(define-constant TRAIT_REGISTRY 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.trait-registry)
 
 ;; Error codes
 (define-constant ERR_UNAUTHORIZED (err u100))

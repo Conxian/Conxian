@@ -1,17 +1,6 @@
 name: Protected Testnet Deployment
 
-on:
-  workflow_dispatch:
-    inputs:
-      confirmation:
-        description: 'Type DEPLOY to confirm testnet deployment'
-        required: true
-        type: string
-      dry_run:
-        description: 'Dry run only (no broadcast)'
-        required: false
-        type: boolean
-        default: true
+on: [workflow_dispatch]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -83,6 +72,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     needs: prepare
+    environment: 
+      name: testnet
+      url: https://explorer.hiro.so/
     permissions:
       contents: read
       deployments: write
@@ -93,21 +85,25 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
           cache-dependency-path: package-lock.json
+      - name: Configure Git
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
       - name: Install Dependencies
         run: npm ci --no-audit --no-fund
       - name: Install Clarinet
         run: |
           curl -L https://github.com/hirosystems/clarinet/releases/download/v3.5.0/clarinet-linux-x64-glibc.tar.gz | tar xz
-          sudo mv clarinet /usr/local/bin/clarinet
+          sudo mv clarinet /usr/local/bin/
           chmod +x /usr/local/bin/clarinet
-      - name: Verify Clarinet Installation
-        run: clarinet --version
-      - name: Compile Contracts
-        timeout-minutes: 5
-        run: clarinet check
-        
-      - name: Deploy to Testnet
-        timeout-minutes: 15
+      - name: Configure Testnet Deployer
+        run: |
+          mkdir -p ~/.stacks/keys/testnet
+          echo "${{ secrets.TESTNET_DEPLOYER_KEY }}" > ~/.stacks/keys/testnet/testnet_deployer.key
+      - name: Verify Setup
+        run: |
+          echo "Using deployer address: $(cat ~/.stacks/keys/testnet/testnet_deployer.key | clarinet keys:show -t | grep 'address' | awk '{print $2}')"
+      - name: Deploy Contracts
         env:
           TESTNET_DEPLOYER_KEY: ${{ secrets.TESTNET_DEPLOYER_KEY }}
           HIRO_API_KEY: ${{ secrets.HIRO_API_KEY }}
@@ -117,7 +113,24 @@ jobs:
         run: |
           set -e
           
+          # Export deployer key for clarinet
+          export STACKS_DEPLOYER_KEY=$(cat ~/.stacks/keys/testnet/testnet_deployer.key)
+          
           # Validate required secrets for live deployment
+          if [ "${{ github.event.inputs.dry_run }}" = "false" ]; then
+            if [ -z "$TESTNET_DEPLOYER_KEY" ]; then
+              echo "TESTNET_DEPLOYER_KEY is required for live deployment"
+              exit 1
+            fi
+            if [ -z "$HIRO_API_KEY" ]; then
+              echo "HIRO_API_KEY is required for live deployment"
+              exit 1
+            fi
+          fi
+          
+          # Run deployment
+          echo "Starting deployment to testnet..."
+          clarinet deployments apply -p testnet
           if [ "${{ github.event.inputs.dry_run }}" != "true" ]; then
             if [ -z "$TESTNET_DEPLOYER_KEY" ]; then
               echo "❌ Error: TESTNET_DEPLOYER_KEY secret not found"
@@ -171,7 +184,10 @@ jobs:
             echo "- Network: Stacks Testnet"
             echo "- Contracts deployed: $(find deployments -name '*.yaml' | wc -l)"
             echo "- Deployment logs available in workflow artifacts"
-          fi
+      - name: Deploy Contracts
+        run: clarinet deployments apply --testnet
+        env:
+          STACKS_DEPLOYER_PRIVKEY: ${{ secrets.STACKS_DEPLOYER_PRIVKEY }}
       - name: Post Verification (Read-Only)
         env:
           NETWORK: testnet

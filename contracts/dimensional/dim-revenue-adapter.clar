@@ -2,9 +2,14 @@
 ;; Integration adapter connecting dimensional yield system with enhanced tokenomics
 ;; Routes dimensional rewards through revenue distributor for proper token holder distribution
 
-(use-trait ft-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.sip-010-ft-trait)
+;; --- Traits ---
+(use-trait sip-010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
+(use-trait ownable-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.ownable-trait)
+
+(impl-trait .ownable-trait)
 
 ;; --- Constants ---
+(define-constant TRAIT_REGISTRY 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.trait-registry)
 (define-constant CONTRACT_OWNER tx-sender)
 (define-constant PRECISION u100000000)
 
@@ -85,7 +90,7 @@
 (define-public (report-dimensional-yield 
     (dim-id uint)
     (total-yield uint)
-    (reward-token <ft-trait>))
+    (reward-token <sip-010-ft-trait>))
   (begin
     ;; Only dimensional yield contract can call this
     (asserts! (is-some (var-get dim-yield-contract)) (err ERR_CONTRACT_NOT_SET))
@@ -180,7 +185,7 @@
 (define-public (report-bond-coupon-payment
     (bond-contract principal)
     (coupon-amount uint)
-    (payment-token <ft-trait>)
+    (payment-token <sip-010-ft-trait>)
     (bond-holders-count uint))
   (begin
     (asserts! (is-eq tx-sender (var-get contract-owner)) (err ERR_UNAUTHORIZED)) ;; Only owner can report for now

@@ -3,11 +3,11 @@ import { Cl } from "@stacks/transactions";
 import { simnet } from "@hirosystems/clarinet-sdk";
 
 // Test addresses
-const deployerAddress = "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM";
+const deployerAddress = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6";
 const wallet1 = "ST1SJ3DTE5DN7X54YDH5D64R3BCB6A2AG2ZQ8YPD5";
 const wallet2 = "ST2CY5V39NHDPWSXMW9QDT3HC3GD6Q6XX4CFRK9AG";
 const wallet3 = "ST2JHG361ZXG51QTKY2NQCVBPPRRE2KZB1HR05NNC";
-const sbtcContract = "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.sbtc-token";
+const sbtcContract = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.sbtc-token";
 
 describe("sBTC Integration System Tests", () => {
   beforeEach(() => {
@@ -78,7 +78,7 @@ describe("sBTC Integration System Tests", () => {
     });
 
     it("should configure oracle for sBTC price feeds", () => {
-      const oracleAddress = "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.sbtc-oracle";
+      const oracleAddress = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.sbtc-oracle";
       
       const { result } = simnet.callPublicFn(
         "sbtc-integration",
@@ -107,7 +107,7 @@ describe("sBTC Integration System Tests", () => {
 
     it("should update sBTC price with validation", () => {
       // Setup oracle first
-      const oracleAddress = "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.sbtc-oracle";
+      const oracleAddress = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.sbtc-oracle";
       
       simnet.callPublicFn(
         "sbtc-integration",
@@ -146,7 +146,7 @@ describe("sBTC Integration System Tests", () => {
     });
 
     it("should reject price updates with excessive deviation", () => {
-      const oracleAddress = "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.sbtc-oracle";
+      const oracleAddress = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.sbtc-oracle";
       
       // Setup oracle with low deviation threshold
       simnet.callPublicFn(
@@ -752,7 +752,7 @@ describe("sBTC Integration System Tests", () => {
       // 4. Emergency pause scenarios
 
       // Setup oracle with price updates
-      const oracleAddress = "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.sbtc-oracle";
+      const oracleAddress = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.sbtc-oracle";
       
       simnet.callPublicFn(
         "sbtc-integration",
@@ -966,7 +966,7 @@ export const testHelpers = {
   },
 
   mockPriceOracle: (price: number) => {
-    const oracleAddress = "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.sbtc-oracle";
+    const oracleAddress = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.sbtc-oracle";
     
     simnet.callPublicFn(
       "sbtc-integration",

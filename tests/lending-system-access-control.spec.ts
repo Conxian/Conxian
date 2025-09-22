@@ -61,7 +61,7 @@ describe('Lending System Access Control', () => {
     await simnet.callPublicFn(
       'lending-system',
       'initialize',
-      [Cl.principal('ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.oracle')],
+      [Cl.principal('ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.oracle')],
       admin
     );
   });

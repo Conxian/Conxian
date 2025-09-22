@@ -1,7 +1,7 @@
 ;; trait-registry.clar
 ;; Central registry for managing trait implementations in the Conxian protocol
 
-(define-constant contract-owner 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM)
+(define-constant contract-owner tx-sender)
 (define-constant ERR_UNAUTHORIZED (err u100))
 (define-constant ERR_TRAIT_EXISTS (err u101))
 (define-constant ERR_TRAIT_NOT_FOUND (err u404))

@@ -63,10 +63,10 @@
 
 ;; === MATHEMATICAL CONSTANT VALIDATION ===
 (define-public (validate-mathematical-constants)
-  (let ((e-check (unwrap-panic (contract-call? %math-lib-advanced exp-fixed u1000000000000000000)))
+  (let ((e-check (unwrap-panic (contract-call? .math-lib-advanced exp-fixed u1000000000000000000)))
         (pi-check PI_EXPECTED) ;; Would need geometric calculation for Pi
-        (ln2-check (unwrap-panic (contract-call? %math-lib-advanced ln-fixed u2000000000000000000)))
-        (sqrt2-check (unwrap-panic (contract-call? %math-lib-advanced sqrt-fixed u4000000000000000000))))
+        (ln2-check (unwrap-panic (contract-call? .math-lib-advanced ln-fixed u2000000000000000000)))
+        (sqrt2-check (unwrap-panic (contract-call? .math-lib-advanced sqrt-fixed u4000000000000000000))))
     (ok (tuple
       (e-valid (< (abs-diff e-check E_EXPECTED) (/ E_EXPECTED u1000)))
       (pi-valid true) ;; Placeholder
@@ -76,7 +76,7 @@
 ;; === BENCHMARKING FUNCTIONS ===
 ;; Run sqrt benchmark test
 (define-public (run-sqrt-benchmark (input uint) (expected uint))
-  (let ((actual (unwrap-panic (contract-call? %math-lib-advanced sqrt-fixed input))))
+  (let ((actual (unwrap-panic (contract-call? .math-lib-advanced sqrt-fixed input))))
     (let ((precision-loss (abs-diff actual expected))
           (precision-loss-bps (if (is-eq expected u0) u0 (/ (* precision-loss u10000) expected))))
       (ok (tuple
@@ -90,7 +90,7 @@
 
 ;; Run power function benchmark
 (define-public (run-pow-benchmark (base uint) (exponent uint) (expected uint))
-  (match (contract-call? %math-lib-advanced pow-fixed base exponent)
+  (match (contract-call? .math-lib-advanced pow-fixed base exponent)
     actual (let ((precision-loss (abs-diff actual expected))
                  (precision-loss-bps (if (is-eq expected u0) u0 (/ (* precision-loss u10000) expected))))
              (ok (tuple
@@ -106,7 +106,7 @@
 
 ;; Run natural logarithm benchmark
 (define-public (run-ln-benchmark (input uint) (expected uint))
-  (match (contract-call? %math-lib-advanced ln-fixed input)
+  (match (contract-call? .math-lib-advanced ln-fixed input)
     actual (let ((precision-loss (abs-diff actual expected))
                  (precision-loss-bps (if (is-eq expected u0) u0 (/ (* precision-loss u10000) expected))))
              (ok (tuple
@@ -121,7 +121,7 @@
 
 ;; Run exponential function benchmark
 (define-public (run-exp-benchmark (input uint) (expected uint))
-  (match (contract-call? %math-lib-advanced exp-fixed input)
+  (match (contract-call? .math-lib-advanced exp-fixed input)
     actual (let ((precision-loss (abs-diff actual expected))
                  (precision-loss-bps (if (is-eq expected u0) u0 (/ (* precision-loss u10000) expected))))
              (ok (tuple
@@ -202,28 +202,12 @@
 
 ;; === MATHEMATICAL CONSTANT VALIDATION ===
 (define-public (validate-mathematical-constants)
-  (let ((e-check (unwrap-panic (contract-call? %math-lib-advanced exp-fixed u1000000000000000000)))
-        (pi-check PI_EXPECTED) ;; Would need geometric calculation for Pi
-        (ln2-check (unwrap-panic (contract-call? %math-lib-advanced ln-fixed u2000000000000000000)))
-        (sqrt2-check (unwrap-panic (contract-call? %math-lib-advanced sqrt-fixed u4000000000000000000))))
-    (ok (tuple
-      (e-valid (< (abs-diff e-check E_EXPECTED) (/ E_EXPECTED u1000)))
-      (pi-valid true) ;; Placeholder
-      (ln2-valid (< (abs-diff ln2-check LN2_EXPECTED) (/ LN2_EXPECTED u1000)))
-      (sqrt2-valid (< (abs-diff sqrt2-check SQRT2_EXPECTED) (/ SQRT2_EXPECTED u1000)))))))
 
 ;; Temporarily commented out for initial deployment
-;; (let ((e-check (unwrap-panic (contract-call? %math-lib-advanced exp-fixed u1000000000000000000)))
-;;       (ln2-check (unwrap-panic (contract-call? %math-lib-advanced ln-fixed u2000000000000000000)))
-;;       (sqrt2-check (unwrap-panic (contract-call? %math-lib-advanced sqrt-fixed u4000000000000000000))))
+;; (let ((e-check (unwrap-panic (contract-call? .math-lib-advanced exp-fixed u1000000000000000000)))
+;;       (ln2-check (unwrap-panic (contract-call? .math-lib-advanced ln-fixed u2000000000000000000)))
+;;       (sqrt2-check (unwrap-panic (contract-call? .math-lib-advanced sqrt-fixed u4000000000000000000))))
 ;;   (ok (tuple
 ;;     (e-valid (< (abs-diff e-check E_EXPECTED) (/ E_EXPECTED u1000)))
 ;;     (ln2-valid (< (abs-diff ln2-check LN2_EXPECTED) (/ LN2_EXPECTED u1000)))
 ;;     (sqrt2-valid (< (abs-diff sqrt2-check SQRT2_EXPECTED) (/ SQRT2_EXPECTED u1000))))))
-
-(define-public (validate-mathematical-constants)
-  (let ((pi-check PI_EXPECTED) ;; Would need geometric calculation for Pi
-        )
-    (ok (tuple
-      (pi-valid true) ;; Placeholder
-      ))))

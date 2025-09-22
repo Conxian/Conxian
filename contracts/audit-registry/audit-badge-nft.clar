@@ -1,7 +1,7 @@
 ;; audit-badge-nft.clar
 ;; SIP-009 compliant NFT contract for audit badges
 
-(impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.SIP009.sip-009-nft-trait)
+(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.SIP009.sip-009-nft-trait)
 (define-constant CONTRACT_OWNER tx-sender)
 (define-constant ERR_UNAUTHORIZED (err u100))
 (define-constant ERR_NONEXISTENT_TOKEN (err u101))

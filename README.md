@@ -13,6 +13,39 @@ A comprehensive DeFi platform on Stacks featuring 65+ smart contracts with advan
 
 [View Complete Status](./documentation/STATUS.md)
 
+## Development Setup
+
+### Git Hooks
+
+This repository includes pre-commit hooks to help prevent accidental commits of sensitive information. To set up the hooks:
+
+1. Run the setup script:
+   ```powershell
+   .\setup-git-hooks.ps1
+   ```
+
+2. The pre-commit hook will now check for:
+   - Private keys
+   - Mnemonic phrases
+   - AWS credentials
+   - API keys
+
+### System Account
+
+The protocol uses a dedicated system account for privileged operations. The current system account details are:
+
+- **Address**: `SP2ED6H1EHHTZA1NTWR2GKBMT0800Y6F081EEJ45R`
+- **Public Key**: `0321397ade90f85e6d634bba310633f442cef6f9dae4df054c7a3a244e78192573`
+- **Private Key**: (Stored in `.env` as `SYSTEM_PRIVKEY`)
+- **Mnemonic**: (Stored in `.env` as `SYSTEM_MNEMONIC`)
+
+### Security Notes
+
+1. The system account should be secured with the highest level of protection.
+2. For production, generate a new mnemonic and private key.
+3. Never commit the actual private key or mnemonic to version control.
+4. Consider using a hardware wallet for the production system account.
+
 ## 🚀 Features
 
 ### 💰 Lending & Flash Loan Framework

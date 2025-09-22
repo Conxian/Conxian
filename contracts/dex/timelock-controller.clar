@@ -1,8 +1,8 @@
 ;; Timelock Controller
 ;; Implements the time-delayed execution functionality specified in AIP-7
 
-(use-trait access-control 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.access-control-trait)
-(use-trait std-constants 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.standard-constants-trait)
+(use-trait access-control-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.access-control-trait)
+(use-trait standard-constants-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.standard-constants-trait)
 
 (define-constant MIN_DELAY u86400)  ;; 24 hours in seconds
 (define-constant MAX_DELAY u2592000)  ;; 30 days in seconds
@@ -19,7 +19,7 @@
 (define-constant OP_DONE 0x02)
 (define-constant OP_CANCELED 0x03)
 
-(impl-trait access-control-trait)
+(impl-trait .access-control-trait)
 
 ;; ===== Core Functions =====
 
@@ -193,8 +193,3 @@
     (fold find-index (var-get operations) 0)
   )
 )
-
-
-
-
-

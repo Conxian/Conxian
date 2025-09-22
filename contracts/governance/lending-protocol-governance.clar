@@ -1,11 +1,12 @@
 ;; lending-protocol-governance.clar
-;; Governance system for the comprehensive lending protocol
-;; Manages protocol parameters, upgrades, and community decisions
+;; Governance contract for the Conxian lending protocol
 ;; Integrates with AccessControl for role-based access
 
-;; Import the access-control-trait
-(use-trait access-control-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.access-control-trait)
-(impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.access-control-trait)
+;; --- Traits ---
+(use-trait access-control-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.access-control-trait)
+(impl-trait .access-control-trait)
+
+(define-constant TRAIT_REGISTRY 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.trait-registry)
 
 (define-constant ERR_UNAUTHORIZED (err u8001))
 (define-constant ERR_PROPOSAL_NOT_FOUND (err u8002))

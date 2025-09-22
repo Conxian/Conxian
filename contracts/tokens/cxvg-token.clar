@@ -1,19 +1,19 @@
 ;; cxvg-token.clar
-;; Conxian Governance Token (SIP-010 FT) - no direct revenue share
-;; Enhanced with system integration hooks for coordinator interface
+;; Conxian Governance Token (SIP-010 FT) - used for governance and protocol parameter adjustments
+;; Enhanced with delegation, voting power, and governance features
 
-;; Constants
-(define-constant TRAIT_REGISTRY 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.trait-registry)
-
-;; Resolve traits using the trait registry
-(use-trait sip010-ft-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.sip-010-ft-trait.sip-010-ft-trait)
-(use-trait ft-mintable-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.ft-mintable-trait.ft-mintable-trait)
-(use-trait monitor-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.monitor-trait.monitor-trait)
+;; --- Traits ---
+(use-trait sip-010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
+(use-trait sip-010-ft-mintable-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-mintable-trait)
+(use-trait monitor-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.monitor-trait)
 
 ;; Implement the standard traits
-(impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.sip-010-ft-trait.sip-010-ft-trait)
-(impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.ft-mintable-trait.ft-mintable-trait)
-(impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.monitor-trait.monitor-trait)
+(impl-trait .sip-010-ft-trait)
+(impl-trait .sip-010-ft-mintable-trait)
+(impl-trait .monitor-trait)
+
+;; Constants
+(define-constant TRAIT_REGISTRY 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.trait-registry)
 
 ;; --- Errors ---
 (define-constant ERR_UNAUTHORIZED u100)

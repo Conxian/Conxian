@@ -1,3 +1,11 @@
+# Environment variables
+.env
+*.env.*
+!.env.example
+
+# Git hooks directory
+.githooks/
+
 # Node / tooling
 node_modules/
 npm-debug.log*
@@ -17,6 +25,43 @@ pip-delete-this-directory.txt
 # Rust (legacy just in case)
 target/
 Cargo.lock
+
+# IDE specific files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Local development
+.deployments/
+.cache/
+
+# Logs
+logs/
+*.log
+
+# System Files
+.DS_Store
+Thumbs.db
+
+# Secrets
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+*.cert
+
+# Local development
+.deployments/
+.cache/
+
+# Environment files (except example)
+!.env.example
+
+# Deployment artifacts
+*.deployed.json
+*.deployed.yaml
 
 # OS/editor
 .DS_Store
@@ -124,3 +169,4 @@ analytics/cache/
 stx-wallet*
 btc-wallet*
 .kiro/specs/
+.secrets/

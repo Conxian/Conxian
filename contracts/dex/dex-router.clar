@@ -3,9 +3,12 @@
 ;; Non-custodial, immutable design with bond trading support
 
 ;; --- Traits ---
-(use-trait std-constants 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.standard-constants-trait)
-(use-trait bond-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.bond-trait)
-(impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.router-trait)
+(use-trait bond-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.bond-trait)
+(use-trait router-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.router-trait)
+(use-trait sip-010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
+(use-trait pool-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.pool-trait)
+
+(impl-trait .router-trait)
 
 ;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED (err u4000))
@@ -21,13 +24,14 @@
 (define-constant ERR_BOND_NOT_MATURE (err u4011))
 (define-constant ERR_INSUFFICIENT_LIQUIDITY (err u4012))
 (define-constant ERR_REENTRANCY (err u4013))
-(define-constant MAX_RECURSION_DEPTH u5
+(define-constant MAX_RECURSION_DEPTH u5)
 
 ;; --- Data Variables ---
 (define-data-var contract-owner principal tx-sender)
-(define-data-var factory-address principal 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dex-factory)
-(define-data-var bond-factory-address principal 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.bond-factory)
+(define-data-var factory-address principal 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dex-factory)
+(define-data-var bond-factory-address principal 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.bond-factory)
 (define-data-var locked bool false)  ;; Reentrancy guard
+(define-data-var swap-iteration uint u0)  ;; Track swap iterations
 
 ;; --- Bond Trading State ---
 (define-map bond-markets
@@ -229,37 +233,89 @@
   )
 )
 
-;; Execute a single swap
-(define-private (execute-swap 
+;; Helper function to get the next token in the path
+(define-private (get-next-token (path (list 5 principal)))
+  (unwrap! (element-at path u1) ERR_INVALID_PATH)
+)
+
+;; Helper function to get remaining path
+(define-private (get-remaining-path (path (list 5 principal)))
+  (slice path u1 u5)
+)
+
+;; Process swap with multiple hops (direct implementation without interdependency)
+(define-private (process-multi-hop
     (token-in principal)
-    (token-out principal)
+    (path (list 5 principal))
     (amount-in uint)
     (min-amount-out uint)
     (deadline uint)
-    (is-final-hop bool))
-  ;; Input validation
-  (asserts! (> amount-in u0) ERR_ZERO_AMOUNT)
-  (asserts! (<= block-height deadline) ERR_DEADLINE_PASSED)
-  (let ((factory (var-get factory-address)))
-    (match (contract-call? factory get-pool token-in token-out)
-      pool-principal (match (contract-call? pool-principal get-token-a)
-        token-a (let ((x-to-y (is-eq token-in token-a)))
-          (match (as-contract (contract-call? pool-principal swap-exact-in 
-            amount-in 
-            min-amount-out 
-            x-to-y 
-            deadline))
-            swap-result (ok {
-              amount-out: (get amount-out swap-result),
-              token-out: token-out,
-              is-final-hop: is-final-hop
+    (recipient principal)
+  )
+  (let (
+      (current-token token-in)
+      (current-amount amount-in)
+      (remaining-path path)
+    )
+    ;; Process each hop in the path
+    (fold (lambda (hop result)
+      (if (is-err result)
+        result
+        (let* (
+            (hop-result (unwrap-panic result))
+            (current-token (get current-token hop-result))
+            (current-amount (get current-amount hop-result))
+            (remaining-path (get remaining-path hop-result))
+            (path-length (len remaining-path))
+          )
+          (if (<= path-length u1)
+            (ok {
+              current-token: current-token,
+              current-amount: current-amount,
+              remaining-path: remaining-path
             })
-            err (err ERR_INSUFFICIENT_OUTPUT)
+            (let* (
+                (token-out (unwrap! (element-at remaining-path u1) ERR_INVALID_PATH))
+                (pool (unwrap! (get-pool current-token token-out) ERR_POOL_NOT_FOUND))
+                (is-final-hop (is-eq path-length u2))
+                (amount-out (if is-final-hop
+                  min-amount-out
+                  (unwrap! (contract-call? pool get-amount-out current-amount current-token token-out) 
+                          ERR_INSUFFICIENT_LIQUIDITY)
+                ))
+                (swap-result (contract-call? pool swap 
+                  current-token 
+                  token-out 
+                  current-amount 
+                  amount-out 
+                  (if is-final-hop recipient (as-contract tx-sender))
+                ))
+              )
+              (if (is-ok swap-result)
+                (ok {
+                  current-token: token-out,
+                  current-amount: amount-out,
+                  remaining-path: (slice remaining-path u1 u5)
+                })
+                (err (unwrap-err swap-result))
+              )
+            )
           )
         )
-        err (err ERR_POOL_NOT_FOUND)
       )
-      err (err ERR_POOL_NOT_FOUND)
+    ) (ok {
+      current-token: token-in,
+      current-amount: amount-in,
+      remaining-path: path
+    }) (list u0 u1 u2 u3 u4))  ;; Max 5 hops
+    
+    ;; Check if we completed all hops successfully
+    (match result
+      (ok hop-result) (if (<= (len (get remaining-path hop-result)) u1)
+        (ok true)
+        (err ERR_INSUFFICIENT_LIQUIDITY)
+      )
+      err (err (unwrap-err result))
     )
   )
 )
@@ -269,141 +325,44 @@
   (ok (var-get factory-address))
 )
 
-(define-private (execute-swap
-    (token-in principal)
-    (token-out principal)
-    (amount-in uint)
-    (min-amount-out uint)
-    (deadline uint)
-    (is-final-hop bool)
-  )
-  (let ((pool (unwrap! (get-pool token-in token-out) (err ERR_POOL_NOT_FOUND))))
-    (match (contract-call? pool get-reserves)
-      (ok { token-x-reserve: x, token-y-reserve: y, x-to-y: x-to-y })
-        (let ((amount-out (calculate-amount-out amount-in x y x-to-y)))
-          (if (or is-final-hop (>= amount-out min-amount-out))
-            (match (as-contract (contract-call? 
-                                token-in 
-                                transfer 
-                                amount-in 
-                                (as-contract tx-sender) 
-                                pool 
-                                none))
-              true (let ((result (contract-call? 
-                                 pool 
-                                 swap 
-                                 amount-in 
-                                 (if is-final-hop min-amount-out u0) 
-                                 tx-sender 
-                                 x-to-y 
-                                 deadline)))
-                     (match result
-                       (ok val) (ok {
-                         amount-out: amount-out,
-                         token-out: token-out,
-                         is-final-hop: is-final-hop
-                       })
-                       err (err (unwrap-err result))
-                     )
-                   )
-              false (err ERR_TRANSFER_FAILED)
-            )
-            (err ERR_INSUFFICIENT_OUTPUT)
-          )
-        )
-      err (err (unwrap-err err))
-    )
-  )
-)
-
 (define-public (swap-exact-tokens-for-tokens 
     (amount-in uint)
     (min-amount-out uint)
     (path (list 5 principal))
-    (deadline uint))
-  (begin
-    ;; Input validation
-    (asserts! (> amount-in u0) ERR_ZERO_AMOUNT)
-    (asserts! (>= (len path) u2) ERR_INVALID_PATH)
-    (asserts! (<= block-height deadline) ERR_DEADLINE_PASSED)
-    
-    ;; Simple path validation (no recursive calls)
-    (let ((length (len path)))
-      (asserts! (and (>= length u2) (<= length u5)) ERR_INVALID_PATH)
-      (fold (lambda (i result)
-        (if (is-err result)
-          result
-          (let ((token (unwrap! (element-at path i) ERR_INVALID_PATH)))
-            (if (and (< (+ i u1) length) (is-eq token (unwrap! (element-at path (+ i u1)) ERR_INVALID_PATH)))
-              (err ERR_DUPLICATE_TOKENS)
-              (ok true)
-            )
+    (to principal)
+    (deadline uint)
+  )
+  (if (>= block-height deadline)
+    (err ERR_DEADLINE_PASSED)
+    (if (or (is-eq (len path) u0) (> (len path) u5))
+      (err ERR_INVALID_PATH)
+      (let (
+          (token-in (unwrap! (element-at path u0) ERR_INVALID_PATH))
+          (balance-before (contract-call? token-in balance-of tx-sender))
+        )
+        ;; Transfer tokens to contract
+        (try! (contract-call? token-in transfer amount-in tx-sender (as-contract tx-sender) none))
+        
+        ;; Process the swap through all hops
+        (match (process-multi-hop token-in path amount-in min-amount-out deadline to)
+          success (ok true)
+          error (begin
+            ;; On error, refund any tokens
+            (try! (contract-call? token-in transfer amount-in (as-contract tx-sender) tx-sender none))
+            (err ERR_TRANSFER_FAILED)
           )
         )
-      ) (ok true) (list u0 u1 u2 u3 u4))
-    )
-    (try! (validate-path path))
-    
-    (let ((token-in (unwrap! (element-at path u0) ERR_INVALID_PATH))
-          (token-out (unwrap! (element-at path u1) ERR_INVALID_PATH))
-          (is-final-hop (is-eq (len path) u2)))
-      
-      ;; Transfer input tokens to router
-      (try! (contract-call? token-in transfer amount-in tx-sender (as-contract tx-sender) none))
-      
-      ;; Execute the swap
-      (match (execute-swap token-in token-out amount-in 
-                         (if is-final-hop min-amount-out u0)
-                         deadline
-                         is-final-hop)
-        err (err (unwrap-err err))
-        ok (let ((swap-result (unwrap ok))
-                 (amount-out (get amount-out swap-result)))
-             
-             (if is-final-hop
-               ;; If this is the final hop, transfer tokens to user
-               (match (as-contract (contract-call? token-out 
-                                                 transfer 
-                                                 amount-out 
-                                                 (as-contract tx-sender) 
-                                                 tx-sender 
-                                                 none))
-                 true (ok amount-out)
-                 false (err ERR_TRANSFER_FAILED)
-               )
-               
-               ;; Otherwise, process the next hop
-               (let ((next-token (unwrap! (element-at path u2) ERR_INVALID_PATH)))
-                 (match (execute-swap token-out next-token amount-out
-                                    min-amount-out
-                                    deadline
-                                    true)
-                   err (err (unwrap-err err))
-                   ok (let ((final-result (unwrap ok))
-                           (final-amount (get amount-out final-result)))
-                        (match (as-contract (contract-call? next-token
-                                                          transfer
-                                                          final-amount
-                                                          (as-contract tx-sender)
-                                                          tx-sender
-                                                          none))
-                          true (ok final-amount)
-                          false (err ERR_TRANSFER_FAILED)
-                        )
-                      )
-                 )
-               )
-             )
-           )
       )
     )
-  ))
+  )
+)
+
 
 ;; --- Admin Functions ---
 (define-public (set-factory (new-factory principal))
   (begin
     (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
-    (asserts! (is-ok (contract-call? new-factory get-pool 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.token-a 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.token-b)) ERR_INVALID_PATH)
+    (asserts! (is-ok (contract-call? new-factory get-pool 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.token-a 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.token-b)) ERR_INVALID_PATH)
     (var-set factory-address new-factory)
     (ok true)
   )

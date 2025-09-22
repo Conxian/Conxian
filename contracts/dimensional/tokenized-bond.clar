@@ -8,8 +8,9 @@
 ;; - Periodic coupon payments that can be claimed by bondholders.
 ;; - Principal payout at maturity.
 
-(use-trait ft-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.sip-010-ft-trait.sip-010-ft-trait)
-(impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.sip-010-ft-trait.sip-010-ft-trait)
+(use-trait sip10-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip10-trait)
+(use-trait bond-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.bond-trait)
+(impl-trait .bond-trait)
 (define-fungible-token tokenized-bond)
 
 (define-constant ERR_UNAUTHORIZED u201)
@@ -69,7 +70,7 @@
   )
 )
 
- (define-public (claim-coupons (payment-token <ft-trait>))
+(define-public (claim-coupons (payment-token <sip10-trait>))
   (let (
       (user tx-sender)
       (last-period (default-to u0 (get period (map-get? last-claimed-coupon { user: user }))))
@@ -91,7 +92,7 @@
         (total-coupon-payment (* balance (* periods-to-claim coupon-per-token-per-period)))
       )
       (asserts!
-        (is-ok (contract-call? payment-token transfer total-coupon-payment tx-sender user none))
+        (is-ok (contract-call? payment-token transfer total-coupon-payment tx-sender user))
         (err u400)
       )
       (map-set last-claimed-coupon { user: user } { period: current-period })
@@ -100,7 +101,7 @@
   )
 )
 
- (define-public (redeem-at-maturity (payment-token <ft-trait>))
+ (define-public (redeem-at-maturity (payment-token principal))
   (let (
       (user tx-sender)
       (balance (ft-get-balance tokenized-bond user))
@@ -192,8 +193,3 @@
 (define-read-only (get-payment-token-contract)
   (ok (var-get payment-token-contract))
 )
-
-
-
-
-

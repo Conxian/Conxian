@@ -1,5 +1,9 @@
-﻿# Auto detect text files and perform LF normalization
+# Auto detect text files and perform LF normalization
 * text=auto
+
+# Git hooks configuration
+.githooks/* eol=lf
+.git/hooks/* eol=lf
 
 # Explicitly declare text files to be normalized and converted to LF on checkin
 *.clar text eol=lf

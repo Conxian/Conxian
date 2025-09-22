@@ -1,10 +1,11 @@
 ;; loan-liquidation-manager.clar
-;; Securely manages the liquidation of undercollateralized loans.
-;; Refactored for clarity and to work with the overhauled lending system.
+;; Manages liquidations for undercollateralized loans
+;; Implements a permissionless liquidation entry point
+
+(use-trait sip-010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
 
 ;; --- Traits ---
-(use-trait ft-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.sip-010-ft-trait)
-(use-trait lending-system-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.lending-system-trait)
+(use-trait lending-system-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.lending-system-trait)
 
 ;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED (err u2001))
@@ -42,7 +43,7 @@
 ;; --- Public Functions ---
 
 ;; The primary public function that allows anyone to liquidate an unhealthy position.
-(define-public (liquidate (borrower principal) (repay-asset <ft-trait>) (collateral-asset <ft-trait>) (repay-amount uint))
+(define-public (liquidate (borrower principal) (repay-asset <sip-010-ft-trait>) (collateral-asset <sip-010-ft-trait>) (repay-amount uint))
   (let ((lending-system (unwrap! (var-get lending-system-contract) ERR_LENDING_SYSTEM_NOT_SET))
         (liquidator tx-sender))
 

@@ -2,7 +2,7 @@ import os
 import re
 
 contracts_dir = "contracts"
-deployer_principal = "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM"
+deployer_principal = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 # Regex to find all `(impl-trait ...)` statements.
 impl_trait_pattern = re.compile(r"\(\s*impl-trait\s+([^\s\)]+)\s*\)")

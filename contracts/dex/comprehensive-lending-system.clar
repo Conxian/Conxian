@@ -2,19 +2,16 @@
 ;; Refactored for clarity, security, and correctness.
 
 ;; --- Traits ---
-(use-trait oracle-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.oracle-trait)
-(use-trait lending-system-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.lending-system-trait)
-(use-trait access-control-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.access-control-trait)
+(use-trait oracle-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.oracle-trait)
+(use-trait lending-system-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.lending-system-trait)
+(use-trait sip-010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
+(use-trait access-control-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.access-control-trait)
+(use-trait pool-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.pool-trait)
+(use-trait flash-loan-receiver-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.flash-loan-receiver-trait)
+(use-trait circuit-breaker-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.circuit-breaker-trait)
 
-(impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.lending-system-trait)
-
-(define-trait circuit-breaker-trait
-  (
-    (check-circuit-state (string-ascii 64) (response uint uint))
-    (record-success (string-ascii 64) (response uint uint))
-    (record-failure (string-ascii 64) (response uint uint))
-  )
-)
+(impl-trait .lending-system-trait)
+(impl-trait .circuit-breaker-trait)
 
 ;; --- Constants ---
 (define-constant LENDING_SERVICE "lending-service")
@@ -36,14 +33,10 @@
 (define-data-var paused bool false)
 
 ;; Contract Dependencies (set by owner)
-(define-constant oracle 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.oracle)
-(define-constant interest-rate-model 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.interest-rate-model)
-(define-constant loan-liquidation-manager 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.loan-liquidation-manager)
-(define-constant access-control 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.access-control)
-(define-data-var oracle-contract principal oracle)
-(define-data-var interest-rate-model-contract principal interest-rate-model)
-(define-data-var loan-liquidation-manager-contract principal loan-liquidation-manager)
-(define-data-var access-control-contract principal access-control)
+(define-data-var oracle-contract principal 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.oracle)
+(define-data-var interest-rate-model-contract principal 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.interest-rate-model)
+(define-data-var loan-liquidation-manager-contract principal 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.loan-liquidation-manager)
+(define-data-var access-control-contract principal 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.access-control)
 (define-data-var circuit-breaker-contract (optional principal) none)
 
 ;; --- Maps ---
@@ -61,7 +54,7 @@
 )
 
 (define-private (accrue-interest (asset principal))
-  (contract-call? (var-get interest-rate-model-contract) accrue-interest asset)
+  (contract-call? (var-get interest-rate-model-contract) 'accrue-interest (list asset))
 )
 
 ;; Calculates the total value of a user's collateral, adjusted by collateral factors.
@@ -119,14 +112,14 @@
 
 (define-private (call-circuit-breaker-success)
   (match (var-get circuit-breaker-contract)
-    breaker (try! (contract-call? breaker record-success LENDING_SERVICE))
+    breaker (try! (contract-call? breaker 'record-success (list LENDING_SERVICE)))
     none    true
   )
 )
 
 (define-private (call-circuit-breaker-failure)
   (match (var-get circuit-breaker-contract)
-    breaker (try! (contract-call? breaker record-failure LENDING_SERVICE))
+    breaker (try! (contract-call? breaker 'record-failure (list LENDING_SERVICE)))
     none    true
   )
 )
@@ -150,7 +143,7 @@
   (begin
     (try! (check-not-paused))
     (match (var-get circuit-breaker-contract)
-      breaker (try! (contract-call? breaker check-circuit-state LENDING_SERVICE))
+      breaker (try! (contract-call? breaker 'check-circuit-state (list LENDING_SERVICE)))
       none    true
     )
     (asserts! (> amount u0) ERR_ZERO_AMOUNT)
@@ -159,7 +152,7 @@
 
     ;; Transfer asset from user to this contract
     (let ((asset-trait (contract-of asset-principal)))
-        (try! (contract-call? asset-trait transfer amount tx-sender (as-contract tx-sender) none))
+        (try! (contract-call? asset-trait 'transfer (list amount tx-sender (as-contract tx-sender) none)))
     )
 
     ;; Update user's supply balance
@@ -201,7 +194,7 @@
   (begin
     (try! (check-not-paused))
     (match (var-get circuit-breaker-contract)
-      breaker (try! (contract-call? breaker check-circuit-state LENDING_SERVICE))
+      breaker (try! (contract-call? breaker 'check-circuit-state (list LENDING_SERVICE)))
       none    true
     )
     (asserts! (> amount u0) ERR_ZERO_AMOUNT)
@@ -213,7 +206,7 @@
         (asserts! (>= health PRECISION) ERR_INSUFFICIENT_COLLATERAL)
       )
       (let ((asset-trait (contract-of asset-principal)))
-        (try! (as-contract (contract-call? asset-trait transfer amount (as-contract tx-sender) tx-sender none)))
+        (try! (as-contract (contract-call? asset-trait 'transfer (list amount (as-contract tx-sender) tx-sender none))))
       )
       (ok true)
     )
@@ -239,7 +232,7 @@
   (begin
     (try! (check-not-paused))
     (match (var-get circuit-breaker-contract)
-      breaker (try! (contract-call? breaker check-circuit-state LENDING_SERVICE))
+      breaker (try! (contract-call? breaker 'check-circuit-state (list LENDING_SERVICE)))
       none    true
     )
     (asserts! (> amount u0) ERR_ZERO_AMOUNT)
@@ -256,7 +249,7 @@
       (map-set user-borrow-balances { user: tx-sender, asset: asset-principal } { balance: (+ current-borrow amount) })
     )
     (let ((asset-trait (contract-of asset-principal)))
-      (try! (as-contract (contract-call? asset-trait transfer amount (as-contract tx-sender) tx-sender none)))
+      (try! (as-contract (contract-call? asset-trait 'transfer (list amount (as-contract tx-sender) tx-sender none))))
     )
     (ok true)
   )
@@ -281,7 +274,7 @@
   (begin
     (try! (check-not-paused))
     (match (var-get circuit-breaker-contract)
-      breaker (try! (contract-call? breaker check-circuit-state LENDING_SERVICE))
+      breaker (try! (contract-call? breaker 'check-circuit-state (list LENDING_SERVICE)))
       none    true
     )
     (asserts! (> amount u0) ERR_ZERO_AMOUNT)
@@ -289,7 +282,7 @@
     (let ((current-borrow (default-to u0 (map-get? user-borrow-balances { user: tx-sender, asset: asset-principal }))))
       (let ((repay-amount (min amount current-borrow)))
         (let ((asset-trait (contract-of asset-principal)))
-          (try! (contract-call? asset-trait transfer repay-amount tx-sender (as-contract tx-sender) none))
+          (try! (contract-call? asset-trait 'transfer (list repay-amount tx-sender (as-contract tx-sender) none)))
         )
         (map-set user-borrow-balances { user: tx-sender, asset: asset-principal } { balance: (- current-borrow repay-amount) })
         (ok true)
@@ -337,14 +330,14 @@
 
                   ;; --- EFFECTS ---
                   ;; 1. Liquidator repays borrower's debt
-                  (try! (contract-call? repay-asset transfer actual-repay-amount liquidator (as-contract tx-sender) none))
+                  (try! (contract-call? repay-asset 'transfer (list actual-repay-amount liquidator (as-contract tx-sender) none)))
                   (map-set user-borrow-balances { user: borrower, asset: repay-asset-principal } { balance: (- borrow-balance actual-repay-amount) })
                   
                   ;; 2. Liquidator receives borrower's collateral
                   (map-set user-supply-balances { user: borrower, asset: collateral-asset-principal } { balance: (- borrower-collateral collateral-to-seize) })
 
                   ;; --- INTERACTION ---
-                  (try! (as-contract (contract-call? collateral-asset transfer collateral-to-seize (as-contract tx-sender) liquidator none)))
+                  (try! (as-contract (contract-call? collateral-asset 'transfer (list collateral-to-seize (as-contract tx-sender) liquidator none))))
 
                   (print {
                     event: "liquidation",

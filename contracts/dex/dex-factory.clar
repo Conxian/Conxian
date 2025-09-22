@@ -1,16 +1,15 @@
 ;; Conxian DEX Factory - Pool creation and registry
 ;; This contract is responsible for creating and registering new DEX pools.
 
-;; --- Constants ---
-(define-constant ACCESS_CONTROL 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.access-control)
+;; --- Traits ---
+(use-trait access-control-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.access-control-trait)
+(use-trait sip-010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
+(use-trait factory-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.factory-trait)
 
-;; Define basic trait for token operations
-(define-trait ft-trait
-  (
-    (transfer (uint principal principal (optional (buff 34))) (response bool uint))
-    (get-symbol () (response (string-ascii 10) uint))
-  )
-)
+(impl-trait .factory-trait)
+
+;; --- Constants ---
+(define-constant ACCESS_CONTROL 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.access-control)
 
 ;; --- Constants ---
 ;; Error Codes
@@ -20,12 +19,9 @@
 (define-constant ERR_POOL_NOT_FOUND (err u2003))
 (define-constant ERR_INVALID_FEE (err u2004))
 
-;; Roles - These would be defined in the access-control-trait contract
-(define-constant ROLE_POOL_MANAGER "pool-manager")
-
 ;; --- Data Variables ---
 (define-data-var contract-owner principal tx-sender)
-(define-data-var access-control-contract principal 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.access-control) ;; The main access control contract
+(define-data-var access-control-contract principal 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.access-control) ;; The main access control contract
 (define-data-var pool-count uint u0)
 
 ;; --- Maps ---
@@ -39,13 +35,16 @@
 ;; --- Private Functions ---
 
 (define-private (normalize-token-pair (token-a principal) (token-b principal))
-  ;; Use (to-uint token) for comparisons
+  ;; Compare principals directly instead of converting to uint
   (if (is-eq token-a token-b)
     (err ERR_INVALID_TOKENS)
-    (ok {
-      token-a: (if (< (unwrap! (to-uint token-a) u0) (unwrap! (to-uint token-b) u0)) token-a token-b),
-      token-b: (if (< (unwrap! (to-uint token-a) u0) (unwrap! (to-uint token-b) u0)) token-b token-a)
-    })
+    (let ((token-a-str (unwrap! (as-max-len? (to-buff token-a) u20) token-a))
+          (token-b-str (unwrap! (as-max-len? (to-buff token-b) u20) token-b)))
+      (if (< (buff-to-uint-be token-a-str) (buff-to-uint-be token-b-str))
+        (ok { token-a: token-a, token-b: token-b })
+        (ok { token-a: token-b, token-b: token-a })
+      )
+    )
   )
 )
 

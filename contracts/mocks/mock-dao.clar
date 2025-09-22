@@ -1,7 +1,12 @@
 ;; mock-dao.clar
 ;; Mock DAO implementation for testing the audit registry
 
-(impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.traits.dao-trait)
+;; --- Traits ---
+(use-trait dao-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.dao-trait)
+(impl-trait .dao-trait)
+
+;; Constants
+(define-constant TRAIT_REGISTRY 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.trait-registry)
 
 (define-constant CONTRACT_OWNER tx-sender)
 (define-constant ERR_UNAUTHORIZED (err u1001))

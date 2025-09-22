@@ -4,11 +4,11 @@ description = "A comprehensive, standardized Clarinet configuration for the Conx
 clarinet_version = "3.5.0"
 
 [accounts]
-deployer = { mnemonic = "twice kind fence tip hidden tilt action fragile skin nothing glory cousin green tomorrow spring wrist shed math olympic multiply hip blue scout claw", balance = 100000000000000 }
-wallet_1 = { mnemonic = "sell invite acquire kitten bamboo drastic jelly vivid peace spawn twice guilt pave pen trash pretty park cube fragile unaware remain midnight betray rebuild", balance = 100000000000000 }
-wallet_2 = { mnemonic = "hold excess usual excess ring elephant install account glad dry fragile donkey gaze humble truck breeze nation gasp vacuum limb head keep delay hospital", balance = 100000000000000 }
-wallet_3 = { mnemonic = "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about", balance = 50000000000 }
-wallet_4 = { mnemonic = "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about", balance = 50000000000 }
+deployer = { mnemonic = "twice kind fence tip hidden tilt action fragile skin nothing glory cousin green tomorrow spring wrist shed math olympic multiply hip blue scout claw", balance = 100_000_000_000_000 }
+wallet_1 = { mnemonic = "sell invite acquire kitten bamboo drastic jelly vivid peace spawn twice guilt pave pen trash pretty park cube fragile unaware remain midnight betray rebuild", balance = 100_000_000_000_000 }
+wallet_2 = { mnemonic = "hold excess usual excess ring elephant install account glad dry fragile donkey gaze humble truck breeze nation gasp vacuum limb head keep delay hospital", balance = 100_000_000_000_000 }
+wallet_3 = { mnemonic = "cycle puppy glare enroll cost improve round trend wrist mushroom scorpion tower claim oppose clever elephant dinosaur eight problem before frozen dune wagon high", balance = 100_000_000_000_000 }
+system = { mnemonic = "theme apart absurd gasp river used vessel screen fiction slice slab ice jar hurt slam puppy snake life radar sign ship list excuse trick", balance = 100_000_000_000_000 }
 
 [network]
 api_endpoint = "http://localhost:3999"
@@ -22,115 +22,19 @@ bitcoin_node_rpc_address = "https://blockstream.info/testnet/api"
 stacks_node_rpc_address = "https://api.hiro.so"
 bitcoin_node_rpc_address = "https://blockstream.info/api"
 
-# ===========================================
-# CONTRACTS
-# ===========================================
-
 [contracts]
-# --- Traits ---
-access-control-trait = { path = "contracts/traits/access-control-trait.clar" }
-sip-010-trait = { path = "contracts/traits/sip-010-trait.clar" }
-ft-mintable-trait = { path = "contracts/traits/ft-mintable-trait.clar" }
-strategy-trait = { path = "contracts/traits/strategy-trait.clar" }
-pool-trait = { path = "contracts/traits/pool-trait.clar" }
-staking-trait = { path = "contracts/traits/staking-trait.clar" }
-standard-constants-trait = { path = "contracts/traits/standard-constants-trait.clar" }
-ownable-trait = { path = "contracts/traits/ownable-trait.clar" }
-oracle-trait = { path = "contracts/traits/oracle-trait.clar" }
-monitor-trait = { path = "contracts/traits/monitor-trait.clar" }
-dimensional-oracle-trait = { path = "contracts/traits/dimensional-oracle-trait.clar" }
-dim-registry-trait = { path = "contracts/traits/dim-registry-trait.clar" }
-vault-trait = { path = "contracts/traits/vault-trait.clar" }
-lending-system-trait = { path = "contracts/traits/lending-system-trait.clar" }
-flash-loan-receiver-trait = { path = "contracts/traits/flash-loan-receiver-trait.clar" }
-sip-009-trait = { path = "contracts/traits/sip-009-trait.clar" }
-standard-traits = { path = "contracts/traits/standard-traits.clar" }
-trait-registry = { path = "contracts/traits/trait-registry.clar" }
-traits-manifest = { path = "contracts/traits/traits-manifest.clar" }
+# Core Contracts
+tokenized-bond = { path = "contracts/dimensional/tokenized-bond.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.tokenized-bond" }
+all-traits = { path = "contracts/traits/all-traits.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits" }
+math-lib-advanced = { path = "contracts/lib/math-lib-advanced.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math-lib-advanced" }
 
-# --- Tokens ---
-cxd-token = { path = "contracts/tokens/cxd-token.clar" }
-cxvg-token = { path = "contracts/tokens/cxvg-token.clar" }
-cxtr-token = { path = "contracts/tokens/cxtr-token.clar" }
-cxlp-token = { path = "contracts/tokens/cxlp-token.clar" }
-cxs-token = { path = "contracts/tokens/cxs-token.clar" }
-
-# --- DEX ---
-dex-factory = { path = "contracts/dex/dex-factory.clar" }
-dex-pool = { path = "contracts/dex/dex-pool.clar" }
-pool-template = { path = "contracts/dex/pool-template.clar" }
-dex-router = { path = "contracts/dex/dex-router.clar" }
-oracle = { path = "contracts/dex/oracle.clar" }
-automated-circuit-breaker = { path = "contracts/dex/automated-circuit-breaker.clar" }
-bond-issuance-system = { path = "contracts/dex/bond-issuance-system.clar" }
-comprehensive-lending-system = { path = "contracts/dex/comprehensive-lending-system.clar" }
-cxlp-migration-queue = { path = "contracts/dex/cxlp-migration-queue.clar" }
-cxvg-utility = { path = "contracts/dex/cxvg-utility.clar" }
-distributed-cache-manager = { path = "contracts/dex/distributed-cache-manager.clar" }
-enhanced-flash-loan-vault = { path = "contracts/dex/enhanced-flash-loan-vault.clar" }
-enhanced-yield-strategy = { path = "contracts/dex/enhanced-yield-strategy.clar" }
-enterprise-loan-manager = { path = "contracts/dex/enterprise-loan-manager.clar" }
-interest-rate-model = { path = "contracts/dex/interest-rate-model.clar" }
-liquidation-manager = { path = "contracts/dex/liquidation-manager.clar" }
-liquidity-optimization-engine = { path = "contracts/dex/liquidity-optimization-engine.clar" }
-memory-pool-management = { path = "contracts/dex/memory-pool-management.clar" }
-nakamoto-compatibility = { path = "contracts/dex/nakamoto-compatibility.clar" }
-pool-factory-template = { path = "contracts/dex/pool-factory-template.clar" }
-predictive-scaling-system = { path = "contracts/dex/predictive-scaling-system.clar" }
-protocol-invariant-monitor = { path = "contracts/dex/protocol-invariant-monitor.clar" }
-real-time-monitoring-dashboard = { path = "contracts/dex/real-time-monitoring-dashboard.clar" }
-revenue-distributor = { path = "contracts/dex/revenue-distributor.clar" }
-sbtc-bond-integration = { path = "contracts/dex/sbtc-bond-integration.clar" }
-sbtc-flash-loan-extension = { path = "contracts/dex/sbtc-flash-loan-extension.clar" }
-sbtc-flash-loan-vault = { path = "contracts/dex/sbtc-flash-loan-vault.clar" }
-sbtc-integration = { path = "contracts/dex/sbtc-integration.clar" }
-sbtc-lending-integration = { path = "contracts/dex/sbtc-lending-integration.clar" }
-sbtc-lending-system = { path = "contracts/dex/sbtc-lending-system.clar" }
-sbtc-oracle-adapter = { path = "contracts/dex/sbtc-oracle-adapter.clar" }
-standard-constants = { path = "contracts/dex/standard-constants.clar" }
-timelock-controller = { path = "contracts/dex/timelock-controller.clar" }
-token-emission-controller = { path = "contracts/dex/token-emission-controller.clar" }
-token-system-coordinator = { path = "contracts/dex/token-system-coordinator.clar" }
-transaction-batch-processor = { path = "contracts/dex/transaction-batch-processor.clar" }
-vault = { path = "contracts/dex/vault.clar" }
-wormhole-integration = { path = "contracts/dex/wormhole-integration.clar" }
-cxd-staking = { path = "contracts/dex/cxd-staking.clar" }
-loan-liquidation-manager = { path = "contracts/dex/loan-liquidation-manager.clar" }
-yield-distribution-engine = { path = "contracts/dex/yield-distribution-engine.clar" }
-bond-factory = { path = "contracts/dex/bond-factory.clar" }
-
-# --- Governance ---
-lending-protocol-governance = { path = "contracts/governance/lending-protocol-governance.clar" }
-access-control = { path = "contracts/governance/access-control.clar" }
-governance-signature-verifier = { path = "contracts/governance/governance-signature-verifier.clar" }
-signed-data-base = { path = "contracts/governance/signed-data-base.clar" }
-
-# --- Dimensional ---
-dim-registry = { path = "contracts/dimensional/dim-registry.clar" }
-dim-metrics = { path = "contracts/dimensional/dim-metrics.clar" }
-concentrated-liquidity-pool = { path = "contracts/dimensional/concentrated-liquidity-pool.clar" }
-tokenized-bond-adapter = { path = "contracts/dimensional/tokenized-bond-adapter.clar" }
-concentrated-position-nft = { path = "contracts/dimensional/concentrated-position-nft.clar" }
-dim-graph = { path = "contracts/dimensional/dim-graph.clar" }
-dim-oracle-automation = { path = "contracts/dimensional/dim-oracle-automation.clar" }
-dim-revenue-adapter = { path = "contracts/dimensional/dim-revenue-adapter.clar" }
-dim-yield-stake = { path = "contracts/dimensional/dim-yield-stake.clar" }
-tokenized-bond = { path = "contracts/dimensional/tokenized-bond.clar" }
-
-# --- Libs ---
-math-lib-advanced = { path = "contracts/lib/math-lib-advanced.clar" }
-fixed-point-math = { path = "contracts/lib/fixed-point-math.clar" }
-precision-calculator = { path = "contracts/lib/precision-calculator.clar" }
-
-# --- Mocks ---
-mock-token = { path = "contracts/mocks/mock-token.clar" }
+# DEX Contracts
+dex-pool = { path = "contracts/dex/dex-pool.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dex-pool" }
+comprehensive-lending-system = { path = "contracts/dex/comprehensive-lending-system.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.comprehensive-lending-system" }
 
 [repl.remappings]
-# This section can be used to remap contract identifiers for local testing.
-# For example, to use a local version of a contract instead of a deployed one.
-# All contracts are remapped to their local versions by default.
+# Traits
 access-control-trait = ".access-control-trait"
-sip-010-trait = ".sip-010-trait"
 ft-mintable-trait = ".ft-mintable-trait"
 strategy-trait = ".strategy-trait"
 pool-trait = ".pool-trait"
@@ -144,20 +48,25 @@ dim-registry-trait = ".dim-registry-trait"
 vault-trait = ".vault-trait"
 lending-system-trait = ".lending-system-trait"
 flash-loan-receiver-trait = ".flash-loan-receiver-trait"
-sip-009-trait = ".sip-009-trait"
-standard-traits = ".standard-traits"
 trait-registry = ".trait-registry"
 traits-manifest = ".traits-manifest"
+all-traits = ".all-traits"
+
+# Tokens
 cxd-token = ".cxd-token"
 cxvg-token = ".cxvg-token"
 cxtr-token = ".cxtr-token"
 cxlp-token = ".cxlp-token"
 cxs-token = ".cxs-token"
+
+# DEX Core
 dex-factory = ".dex-factory"
 dex-pool = ".dex-pool"
 pool-template = ".pool-template"
 dex-router = ".dex-router"
 oracle = ".oracle"
+
+# DEX Components
 automated-circuit-breaker = ".automated-circuit-breaker"
 bond-issuance-system = ".bond-issuance-system"
 comprehensive-lending-system = ".comprehensive-lending-system"
@@ -177,6 +86,18 @@ predictive-scaling-system = ".predictive-scaling-system"
 protocol-invariant-monitor = ".protocol-invariant-monitor"
 real-time-monitoring-dashboard = ".real-time-monitoring-dashboard"
 revenue-distributor = ".revenue-distributor"
+standard-constants = ".standard-constants"
+timelock-controller = ".timelock-controller"
+token-emission-controller = ".token-emission-controller"
+token-system-coordinator = ".token-system-coordinator"
+transaction-batch-processor = ".transaction-batch-processor"
+vault = ".vault"
+cxd-staking = ".cxd-staking"
+loan-liquidation-manager = ".loan-liquidation-manager"
+yield-distribution-engine = ".yield-distribution-engine"
+bond-factory = ".bond-factory"
+
+# Bitcoin Integration
 sbtc-bond-integration = ".sbtc-bond-integration"
 sbtc-flash-loan-extension = ".sbtc-flash-loan-extension"
 sbtc-flash-loan-vault = ".sbtc-flash-loan-vault"
@@ -184,21 +105,14 @@ sbtc-integration = ".sbtc-integration"
 sbtc-lending-integration = ".sbtc-lending-integration"
 sbtc-lending-system = ".sbtc-lending-system"
 sbtc-oracle-adapter = ".sbtc-oracle-adapter"
-standard-constants = ".standard-constants"
-timelock-controller = ".timelock-controller"
-token-emission-controller = ".token-emission-controller"
-token-system-coordinator = ".token-system-coordinator"
-transaction-batch-processor = ".transaction-batch-processor"
-vault = ".vault"
 wormhole-integration = ".wormhole-integration"
-cxd-staking = ".cxd-staking"
-loan-liquidation-manager = ".loan-liquidation-manager"
-yield-distribution-engine = ".yield-distribution-engine"
-bond-factory = ".bond-factory"
+
+# Governance
 lending-protocol-governance = ".lending-protocol-governance"
-access-control = ".access-control"
 governance-signature-verifier = ".governance-signature-verifier"
 signed-data-base = ".signed-data-base"
+
+# Dimensional
 dim-registry = ".dim-registry"
 dim-metrics = ".dim-metrics"
 concentrated-liquidity-pool = ".concentrated-liquidity-pool"
@@ -209,7 +123,14 @@ dim-oracle-automation = ".dim-oracle-automation"
 dim-revenue-adapter = ".dim-revenue-adapter"
 dim-yield-stake = ".dim-yield-stake"
 tokenized-bond = ".tokenized-bond"
+
+# Interfaces & Libraries
+access-control-interface = ".access-control-interface"
+audit-registry-interface = ".audit-registry-interface"
+concentrated-math = ".concentrated-math"
 math-lib-advanced = ".math-lib-advanced"
 fixed-point-math = ".fixed-point-math"
 precision-calculator = ".precision-calculator"
-mock-token = ".mock-token"
+
+# Audit & Testing
+audit-registry = ".audit-registry"
