@@ -1,18 +1,6 @@
 ;; dim-registry-trait.clar
 ;; This file is deprecated. Please use all-traits.clar instead.
-;; The dim-registry-trait is now defined in all-traits.clar
 
-;; dim-registry-trait.clar
-;;
-;; Trait for the dimensional registry contract.
-;;
-(define-trait dim-registry-trait
-  (
-    (update-weight (uint uint) (response uint uint))
-  )
+(define-public (dim-registry-trait)
+  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits dim-registry-trait)
 )
-
-
-
-
-
