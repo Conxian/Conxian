@@ -8,6 +8,7 @@
 ;; Resolve traits using the trait registry
 (use-trait sip-010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
 (use-trait staking-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.staking-trait)
+(use-trait circuit-breaker-trait .circuit-breaker-trait.circuit-breaker-trait)
 
 ;; Implement the staking trait
 (impl-trait .staking-trait)
@@ -30,6 +31,7 @@
 (define-constant ERR_REVENUE_DISTRIBUTION_FAILED u407)
 (define-constant ERR_INVALID_AMOUNT u408)
 (define-constant ERR_CONTRACT_PAUSED u409)
+(define-constant ERR_CIRCUIT_OPEN (err u5000))
 
 ;; --- Storage ---
 (define-data-var contract-owner principal CONTRACT_OWNER)
@@ -41,6 +43,7 @@
 (define-data-var symbol (string-ascii 10) "xCXD")
 (define-data-var token-uri (optional (string-utf8 256)) none)
 (define-data-var paused bool false)
+(define-data-var circuit-breaker principal .circuit-breaker)
 
 ;; CXD token contract
 (define-data-var cxd-token-contract principal 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.cxd-token)
@@ -70,6 +73,11 @@
 
 ;; --- Emergency Controls ---
 (define-data-var kill-switch bool false)
+
+;; --- Private Functions ---
+(define-private (check-circuit-breaker) 
+  (contract-call? (var-get circuit-breaker) is-circuit-open)
+)
 
 ;; --- Helpers ---
 (define-read-only (is-owner (who principal))
@@ -131,6 +139,14 @@
     (var-set cxd-token-contract new-contract)
     (ok true)))
 
+(define-public (set-circuit-breaker (new-circuit-breaker principal))
+  (begin
+    (asserts! (is-eq tx-sender CONTRACT_OWNER) (err ERR_UNAUTHORIZED))
+    (var-set circuit-breaker new-circuit-breaker)
+    (ok true)
+  )
+)
+
 (define-public (pause-contract)
   (begin
     (asserts! (is-owner tx-sender) (err ERR_UNAUTHORIZED))
@@ -157,6 +173,7 @@
 (define-public (initiate-stake (amount uint))
   (let ((cxd-token-ref (var-get cxd-token-contract)))
     (begin
+      (asserts! (not (try! (check-circuit-breaker))) ERR_CIRCUIT_OPEN)
       (asserts! (not (var-get paused)) (err ERR_CONTRACT_PAUSED))
       (asserts! (not (var-get kill-switch)) (err ERR_CONTRACT_PAUSED))
       (asserts! (> amount u0) (err ERR_INVALID_AMOUNT))
@@ -172,110 +189,121 @@
 
 ;; Step 2: Complete stake (after warm-up period)
 (define-public (complete-stake)
-  (match (get-pending-stake tx-sender)
-    stake-info
-    (begin
-      (asserts! (>= block-height (+ (get created-at stake-info) WARM_UP_BLOCKS)) (err ERR_WARM_UP_NOT_COMPLETE))
-      
-      (let ((cxd-amount (get amount stake-info))
-            (xcxd-amount (cxd-to-xcxd cxd-amount))
-            (current-revenue-per-share (var-get revenue-per-share)))
+  (begin
+    (asserts! (not (try! (check-circuit-breaker))) ERR_CIRCUIT_OPEN)
+    (match (get-pending-stake tx-sender)
+      stake-info
+      (begin
+        (asserts! (>= block-height (+ (get created-at stake-info) WARM_UP_BLOCKS)) (err ERR_WARM_UP_NOT_COMPLETE))
         
-        ;; Update user balance and debt
-        (map-set user-balances tx-sender 
-          (+ (default-to u0 (map-get? user-balances tx-sender)) xcxd-amount))
-        
-        ;; Set debt to current revenue level to prevent claiming past revenue
-        (map-set user-debt tx-sender
-          (+ (default-to u0 (map-get? user-debt tx-sender))
-             (/ (* xcxd-amount current-revenue-per-share) PRECISION)))
-        
-        ;; Update totals
-        (var-set total-supply (+ (var-get total-supply) xcxd-amount))
-        (var-set total-staked-cxd (+ (var-get total-staked-cxd) cxd-amount))
-        
-        ;; Clear pending stake
-        (map-delete pending-stakes tx-sender)
-        
-        (ok xcxd-amount)))
-    (err ERR_NO_PENDING_STAKE)))
+        (let ((cxd-amount (get amount stake-info))
+              (xcxd-amount (cxd-to-xcxd cxd-amount))
+              (current-revenue-per-share (var-get revenue-per-share)))
+          
+          ;; Update user balance and debt
+          (map-set user-balances tx-sender 
+            (+ (default-to u0 (map-get? user-balances tx-sender)) xcxd-amount))
+          
+          ;; Set debt to current revenue level to prevent claiming past revenue
+          (map-set user-debt tx-sender
+            (+ (default-to u0 (map-get? user-debt tx-sender))
+               (/ (* xcxd-amount current-revenue-per-share) PRECISION)))
+          
+          ;; Update totals
+          (var-set total-supply (+ (var-get total-supply) xcxd-amount))
+          (var-set total-staked-cxd (+ (var-get total-staked-cxd) cxd-amount))
+          
+          ;; Clear pending stake
+          (map-delete pending-stakes tx-sender)
+          
+          (ok xcxd-amount)))
+      (err ERR_NO_PENDING_STAKE))))
 
 ;; Step 1: Initiate unstake (starts cool-down period)
 (define-public (initiate-unstake (xcxd-amount uint))
-  (let ((user-balance (default-to u0 (map-get? user-balances tx-sender))))
-    (begin
-      (asserts! (>= user-balance xcxd-amount) (err ERR_INSUFFICIENT_STAKED))
-      (asserts! (> xcxd-amount u0) (err ERR_INVALID_AMOUNT))
-      
-      (let ((cxd-amount (xcxd-to-cxd xcxd-amount)))
-        ;; Update user balance immediately
-        (map-set user-balances tx-sender (- user-balance xcxd-amount))
-        (var-set total-supply (- (var-get total-supply) xcxd-amount))
+  (begin
+    (asserts! (not (try! (check-circuit-breaker))) ERR_CIRCUIT_OPEN)
+    (let ((user-balance (default-to u0 (map-get? user-balances tx-sender))))
+      (begin
+        (asserts! (>= user-balance xcxd-amount) (err ERR_INSUFFICIENT_STAKED))
+        (asserts! (> xcxd-amount u0) (err ERR_INVALID_AMOUNT))
         
-        ;; Store pending unstake
-        (map-set pending-unstakes tx-sender 
-          { xcxd-amount: xcxd-amount, cxd-amount: cxd-amount, created-at: block-height })
-        
-        (ok true)))))
+        (let ((cxd-amount (xcxd-to-cxd xcxd-amount)))
+          ;; Update user balance immediately
+          (map-set user-balances tx-sender (- user-balance xcxd-amount))
+          (var-set total-supply (- (var-get total-supply) xcxd-amount))
+          
+          ;; Store pending unstake
+          (map-set pending-unstakes tx-sender 
+            { xcxd-amount: xcxd-amount, cxd-amount: cxd-amount, created-at: block-height })
+          
+          (ok true))))))
 
 ;; Step 2: Complete unstake (after cool-down period)  
 (define-public (complete-unstake (cxd-token ft-trait))
-  (let ((unstake-result (get-pending-unstake tx-sender)))
-    (match unstake-result
-      unstake-info
-      (begin
-        (asserts! (>= block-height (+ (get created-at unstake-info) COOL_DOWN_BLOCKS)) (err ERR_COOL_DOWN_ACTIVE))
-        
-        (let ((cxd-amount (get cxd-amount unstake-info)))
-          ;; Transfer CXD back to user from the staking contract using provided CXD contract
-          (try! (as-contract (contract-call? cxd-token transfer cxd-amount (as-contract tx-sender) tx-sender none)))
-          ;; Update total staked
-          (var-set total-staked-cxd (- (var-get total-staked-cxd) cxd-amount))
-          ;; Clear pending unstake
-          (map-delete pending-unstakes tx-sender)
-          (ok cxd-amount)))
-      (err ERR_NO_PENDING_UNSTAKE))))
+  (begin
+    (asserts! (not (try! (check-circuit-breaker))) ERR_CIRCUIT_OPEN)
+    (let ((unstake-result (get-pending-unstake tx-sender)))
+      (match unstake-result
+        unstake-info
+        (begin
+          (asserts! (>= block-height (+ (get created-at unstake-info) COOL_DOWN_BLOCKS)) (err ERR_COOL_DOWN_ACTIVE))
+          
+          (let ((cxd-amount (get cxd-amount unstake-info)))
+            ;; Transfer CXD back to user from the staking contract using provided CXD contract
+            (try! (as-contract (contract-call? cxd-token transfer cxd-amount (as-contract tx-sender) tx-sender none)))
+            ;; Update total staked
+            (var-set total-staked-cxd (- (var-get total-staked-cxd) cxd-amount))
+            ;; Clear pending unstake
+            (map-delete pending-unstakes tx-sender)
+            (ok cxd-amount)))
+        (err ERR_NO_PENDING_UNSTAKE)))))
 
 ;; --- Revenue Distribution ---
 
 ;; Distribute revenue to all xCXD holders (called by protocol/vault contracts)
 (define-public (distribute-revenue (revenue-amount uint) (revenue-token principal))
-  (let ((total-shares (var-get total-supply)))
-    (begin
-      (asserts! (is-owner tx-sender) (err ERR_UNAUTHORIZED)) ;; Only protocol can call this
-      (asserts! (> total-shares u0) (err ERR_REVENUE_DISTRIBUTION_FAILED))
-      
-      ;; Update revenue per share
-      (let ((additional-per-share (/ (* revenue-amount PRECISION) total-shares)))
-        (var-set revenue-per-share (+ (var-get revenue-per-share) additional-per-share))
-        (var-set total-revenue-distributed (+ (var-get total-revenue-distributed) revenue-amount))
-        (var-set current-epoch (+ (var-get current-epoch) u1))
+  (begin
+    (asserts! (not (try! (check-circuit-breaker))) ERR_CIRCUIT_OPEN)
+    (let ((total-shares (var-get total-supply)))
+      (begin
+        (asserts! (is-owner tx-sender) (err ERR_UNAUTHORIZED)) ;; Only protocol can call this
+        (asserts! (> total-shares u0) (err ERR_REVENUE_DISTRIBUTION_FAILED))
         
-        ;; Transfer revenue to this contract for distribution
-        (try! (contract-call? revenue-token transfer revenue-amount tx-sender (as-contract tx-sender) none))
-        
-        (ok true)))))
+        ;; Update revenue per share
+        (let ((additional-per-share (/ (* revenue-amount PRECISION) total-shares)))
+          (var-set revenue-per-share (+ (var-get revenue-per-share) additional-per-share))
+          (var-set total-revenue-distributed (+ (var-get total-revenue-distributed) revenue-amount))
+          (var-set current-epoch (+ (var-get current-epoch) u1))
+          
+          ;; Transfer revenue to this contract for distribution
+          (try! (contract-call? revenue-token transfer revenue-amount tx-sender (as-contract tx-sender) none))
+          
+          (ok true))))))
 
 ;; Claim available revenue
 (define-public (claim-revenue (revenue-token ft-trait))
-  (let ((claimable (get-claimable-revenue tx-sender))
-        (user-debt-current (default-to u0 (map-get? user-debt tx-sender)))
-        (user-xcxd (default-to u0 (map-get? user-balances tx-sender))))
-    (begin
-      (asserts! (> claimable u0) (err ERR_INVALID_AMOUNT))
-      
-      ;; Update user debt to prevent double claiming
-      (map-set user-debt tx-sender 
-        (+ user-debt-current claimable))
-      
-      ;; Transfer revenue to user
-      (try! (as-contract (contract-call? revenue-token transfer claimable (as-contract tx-sender) tx-sender none)))
-      
-      (ok claimable))))
+  (begin
+    (asserts! (not (try! (check-circuit-breaker))) ERR_CIRCUIT_OPEN)
+    (let ((claimable (get-claimable-revenue tx-sender))
+          (user-debt-current (default-to u0 (map-get? user-debt tx-sender)))
+          (user-xcxd (default-to u0 (map-get? user-balances tx-sender))))
+      (begin
+        (asserts! (> claimable u0) (err ERR_INVALID_AMOUNT))
+        
+        ;; Update user debt to prevent double claiming
+        (map-set user-debt tx-sender 
+          (+ user-debt-current claimable))
+        
+        ;; Transfer revenue to user
+        (try! (as-contract (contract-call? revenue-token transfer claimable (as-contract tx-sender) tx-sender none)))
+        
+        (ok claimable)))))
 
 ;; --- SIP-010 Interface (for xCXD) ---
 (define-public (transfer (amount uint) (sender principal) (recipient principal) (memo (optional (buff 34))))
   (begin
+    (asserts! (not (try! (check-circuit-breaker))) ERR_CIRCUIT_OPEN)
     (asserts! (is-eq tx-sender sender) (err ERR_UNAUTHORIZED))
     (let ((sender-balance (default-to u0 (map-get? user-balances sender))))
       (asserts! (>= sender-balance amount) (err ERR_NOT_ENOUGH_BALANCE))

@@ -5,6 +5,7 @@
 (use-trait access-control-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.access-control-trait)
 (use-trait ownable-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.ownable-trait)
 (use-trait standard-constants-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.standard-constants-trait)
+(use-trait circuit-breaker-trait .circuit-breaker-trait.circuit-breaker-trait)
 
 (impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.access-control-trait)
 (impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.ownable-trait)
@@ -16,11 +17,13 @@
 (define-constant ROLE_ADMIN 0x41444d494e)        ;; ADMIN in hex
 (define-constant ROLE_OPERATOR 0x4f50455241544f52)  ;; OPERATOR in hex
 (define-constant ROLE_EMERGENCY 0x454d455247454e4359)  ;; EMERGENCY in hex
+(define-constant ERR_CIRCUIT_OPEN (err u5000))
 
 ;; Data storage
 (define-data-var owner principal tx-sender)
 (define-data-var roles (map principal (list (string-ascii 32))) (map))
 (define-data-var paused bool false)
+(define-data-var circuit-breaker principal .circuit-breaker)
 (define-data-var proposals (map uint {
   id: uint,
   proposer: principal,
@@ -31,8 +34,13 @@
   approvals: (list principal),
   executed: bool
 }) (map))
+(define-data-var last-proposal-id uint u0)
 
 (define-constant PROPOSAL_THRESHOLD u2)  ;; Number of approvals required
+
+(define-private (check-circuit-breaker) 
+  (contract-call? (var-get circuit-breaker) is-circuit-open)
+)
 
 (impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.access-control-trait)
 
@@ -46,6 +54,7 @@
 
 (define-public (grant-role (who principal) (role (string-ascii 32)))
   (begin
+    (asserts! (not (try! (check-circuit-breaker))) ERR_CIRCUIT_OPEN)
     (asserts! (is-admin tx-sender) (err u1001))  ;; ERR_NOT_ADMIN
     
     (let ((user-roles (unwrap! (map-get? roles who) (list))))
@@ -67,6 +76,7 @@
 
 (define-public (revoke-role (who principal) (role (string-ascii 32)))
   (begin
+    (asserts! (not (try! (check-circuit-breaker))) ERR_CIRCUIT_OPEN)
     (asserts! (is-admin tx-sender) (err u1001))  ;; ERR_NOT_ADMIN
     
     (let ((user-roles (unwrap! (map-get? roles who) (list))))
@@ -110,10 +120,19 @@
   )
 )
 
+(define-public (set-circuit-breaker (new-circuit-breaker principal))
+  (begin
+    (asserts! (is-eq tx-sender (var-get owner)) (err u1001))
+    (var-set circuit-breaker new-circuit-breaker)
+    (ok true)
+  )
+)
+
 ;; ===== Emergency Controls =====
 
 (define-public (pause)
   (begin
+    (asserts! (not (try! (check-circuit-breaker))) ERR_CIRCUIT_OPEN)
     (asserts! (unwrap! (contract-call? .self has-role tx-sender ROLE_EMERGENCY) false) (err u1003))  ;; ERR_NOT_EMERGENCY_ADMIN
     (var-set paused true)
     (print {event: "paused", by: tx-sender})
@@ -123,6 +142,7 @@
 
 (define-public (unpause)
   (begin
+    (asserts! (not (try! (check-circuit-breaker))) ERR_CIRCUIT_OPEN)
     (asserts! (unwrap! (contract-call? .self has-role tx-sender ROLE_EMERGENCY) false) (err u1003))  ;; ERR_NOT_EMERGENCY_ADMIN
     (var-set paused false)
     (print {event: "unpaused", by: tx-sender})
@@ -137,79 +157,88 @@
 ;; ===== Multi-sig Operations =====
 
 (define-public (propose (target principal) (value uint) (data (buff 1024)) (description (string-utf8 500)))
-  (let (
-      (proposal-id (+ (unwrap! (var-get last-proposal-id) u0) u1))
-      (proposal {
+  (begin
+    (asserts! (not (try! (check-circuit-breaker))) ERR_CIRCUIT_OPEN)
+    (let (
+        (proposal-id (+ (var-get last-proposal-id) u1))
+        (proposal {
+          id: proposal-id,
+          proposer: tx-sender,
+          target: target,
+          value: value,
+          data: data,
+          description: description,
+          approvals: (list tx-sender),
+          executed: false
+        })
+      )
+      (map-set proposals proposal-id proposal)
+      (var-set last-proposal-id proposal-id)
+      
+      (print {
+        event: "proposal-created",
         id: proposal-id,
         proposer: tx-sender,
-        target: target,
-        value: value,
-        data: data,
-        description: description,
-        approvals: (list tx-sender),
-        executed: false
+        description: description
       })
+      
+      (ok proposal-id)
     )
-    (map-set proposals proposal-id proposal)
-    (var-set last-proposal-id proposal-id)
-    
-    (print {
-      event: "proposal-created",
-      id: proposal-id,
-      proposer: tx-sender,
-      description: description
-    })
-    
-    (ok proposal-id)
   )
 )
 
 (define-public (approve (proposal-id uint))
-  (let ((proposal (unwrap! (map-get? proposals proposal-id) (err u1004))))  ;; ERR_PROPOSAL_NOT_FOUND
-    (asserts! (not (contains? tx-sender (get approvals proposal))) (err u1005))  ;; ERR_ALREADY_APPROVED
-    
-    (map-set proposals proposal-id (merge proposal {
-      approvals: (append (get approvals proposal) (list tx-sender))
-    }))
-    
-    (print {
-      event: "proposal-approved",
-      id: proposal-id,
-      approver: tx-sender,
-      approvals: (len (get approvals proposal))
-    })
-    
-    (ok true)
+  (begin
+    (asserts! (not (try! (check-circuit-breaker))) ERR_CIRCUIT_OPEN)
+    (let ((proposal (unwrap! (map-get? proposals proposal-id) (err u1004))))  ;; ERR_PROPOSAL_NOT_FOUND
+      (asserts! (not (contains? tx-sender (get approvals proposal))) (err u1005))  ;; ERR_ALREADY_APPROVED
+      
+      (map-set proposals proposal-id (merge proposal {
+        approvals: (append (get approvals proposal) (list tx-sender))
+      }))
+      
+      (print {
+        event: "proposal-approved",
+        id: proposal-id,
+        approver: tx-sender,
+        approvals: (len (get approvals proposal))
+      })
+      
+      (ok true)
+    )
   )
 )
 
 (define-public (execute-proposal (proposal-id uint))
-  (let ((proposal (unwrap! (map-get? proposals proposal-id) (err u1004))))  ;; ERR_PROPOSAL_NOT_FOUND
-    (asserts! (not (get executed proposal)) (err u1006))  ;; ERR_ALREADY_EXECUTED
-    (asserts! (>= (len (get approvals proposal)) PROPOSAL_THRESHOLD) (err u1007))  ;; ERR_NOT_ENOUGH_APPROVALS
-    
-    ;; Mark as executed before execution to prevent reentrancy
-    (map-set proposals proposal-id (merge proposal {executed: true}))
-    
-    ;; Execute the proposal
-    (let ((result (contract-call? 
-      (get target proposal)
-      (get value proposal)
-      (get data proposal)
-    )))
-      (match result
-        (ok success) (begin
-          (print {
-            event: "proposal-executed",
-            id: proposal-id,
-            executor: tx-sender
-          })
-          (ok success)
-        )
-        (err error) (begin
-          ;; Revert execution status on failure
-          (map-set proposals proposal-id (merge proposal {executed: false}))
-          (err error)
+  (begin
+    (asserts! (not (try! (check-circuit-breaker))) ERR_CIRCUIT_OPEN)
+    (let ((proposal (unwrap! (map-get? proposals proposal-id) (err u1004))))  ;; ERR_PROPOSAL_NOT_FOUND
+      (asserts! (not (get executed proposal)) (err u1006))  ;; ERR_ALREADY_EXECUTED
+      (asserts! (>= (len (get approvals proposal)) PROPOSAL_THRESHOLD) (err u1007))  ;; ERR_NOT_ENOUGH_APPROVALS
+      
+      ;; Mark as executed before execution to prevent reentrancy
+      (map-set proposals proposal-id (merge proposal {executed: true}))
+      
+      ;; Execute the proposal
+      (let ((result (contract-call? 
+        (get target proposal)
+        (get value proposal)
+        (get data proposal)
+      )))
+        (match result
+          (ok success) (begin
+            (print {
+              event: "proposal-executed",
+              id: proposal-id,
+              executor: tx-sender
+            })
+            (ok success)
+          )
+          (err error) (begin
+            ;; Revert execution status on failure
+            (map-set proposals proposal-id (merge proposal {executed: false}))
+            (err error)
+          )
         )
       )
     )

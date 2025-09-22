@@ -3,6 +3,7 @@
 ;; Handles multiple oracle sources, price validation, and emergency controls
 
 (use-trait oracle-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.oracle-trait)
+(use-trait circuit-breaker-trait .circuit-breaker-trait.circuit-breaker-trait)
 
 ;; =============================================================================
 ;; CONSTANTS AND ERROR CODES
@@ -17,6 +18,7 @@
 (define-constant ERR_INSUFFICIENT_ORACLES (err u3005))
 (define-constant ERR_ORACLE_ALREADY_EXISTS (err u3006))
 (define-constant ERR_ORACLE_NOT_FOUND (err u3007))
+(define-constant ERR_CIRCUIT_OPEN (err u5000))
 
 ;; Price validation constants
 (define-constant MAX_PRICE_DEVIATION u100000)    ;; 10% max deviation
@@ -80,6 +82,7 @@
 
 (define-data-var oracle-count uint u0)
 (define-data-var emergency-pause bool false)
+(define-data-var circuit-breaker principal .circuit-breaker)
 
 ;; =============================================================================
 ;; ORACLE MANAGEMENT
@@ -146,6 +149,14 @@
   )
 )
 
+(define-public (set-circuit-breaker (new-circuit-breaker principal))
+  (begin
+    (asserts! (is-eq tx-sender CONTRACT_OWNER) ERR_NOT_AUTHORIZED)
+    (var-set circuit-breaker new-circuit-breaker)
+    (ok true)
+  )
+)
+
 ;; =============================================================================
 ;; PRICE FEED FUNCTIONS
 ;; =============================================================================
@@ -153,6 +164,7 @@
 (define-public (update-price (asset principal) (price uint) (confidence uint) (volume uint))
   "Update price from oracle (called by registered oracles)"
   (let ((oracle tx-sender))
+    (asserts! (not (try! (check-circuit-breaker))) ERR_CIRCUIT_OPEN)
     (match (map-get? oracle-config { oracle: oracle })
       config (begin
         (asserts! (get is-active config) ERR_NOT_AUTHORIZED)
