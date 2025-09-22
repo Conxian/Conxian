@@ -11,6 +11,7 @@
 (define-constant ERR_OVERFLOW (err u1002))
 (define-constant ERR_UNDERFLOW (err u1003))
 (define-constant ERR_PRECISION_LOSS (err u1004))
+(define-constant ERR_DIVISION_BY_ZERO (err u1005))
 
 ;; Fixed-point precision constants
 (define-constant PRECISION u1000000000000000000) ;; 18 decimals (1e18)
@@ -33,18 +34,43 @@
 (define-read-only (max (a uint) (b uint))
   (if (> a b) a b))
 
+(define-read-only (div-down (a uint) (b uint))
+  (if (is-eq b u0)
+    (err ERR_DIVISION_BY_ZERO)
+    (ok (/ a b))))
+
+(define-read-only (log2 (x uint))
+  (if (<= x u0)
+    (err ERR_INVALID_INPUT)
+    (let ((result u0))
+      (let loop ((x x))
+        (if (<= x u1)
+          (ok result)
+          (begin
+            (set! result (+ result u1))
+            (loop (/ x u2))
+          )
+        )
+      )
+    ))
+  )
+)
+
 (define-read-only (average (a uint) (b uint))
-  (unwrap! (div-down (+ a b) u2) (err ERR_OVERFLOW)))
+  (let ((sum (unwrap! (safe-add a b) (err ERR_OVERFLOW))))
+    (div-down sum u2)))
 
 ;; ======================
 ;; Safe Math Operations
 ;; ======================
 
 (define-read-only (safe-add (a uint) (b uint))
-  (let ((sum (+ a b)))
-    (if (or (< sum a) (< sum b))
-      (err ERR_OVERFLOW)
-      (ok sum))))
+  (if (or (>= a (pow u2 u255)) (>= b (pow u2 u255)))
+    (err ERR_OVERFLOW)
+    (let ((sum (+ a b)))
+      (if (or (< sum a) (< sum b))
+        (err ERR_OVERFLOW)
+        (ok sum)))))
 
 (define-read-only (safe-sub (a uint) (b uint))
   (if (< a b)

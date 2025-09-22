@@ -2,33 +2,38 @@
 ;; Implements pool-trait with full system integration
 
 (use-trait pool-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.pool-trait)
-(use-trait sip10-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip10-trait)
-(use-trait math-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.math-trait)
+(use-trait sip10-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
 
-;; Implement the standard pool trait
-(impl-trait .pool-trait)
+(define-constant ONE u1)
+(define-constant TWO u2)
+(define-constant TEN u10)
+
+(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.pool-trait)
+(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
 
 ;; Private helper functions
 (define-private (min (a uint) (b uint))
   (if (< a b) a b))
 
-;; Square root using Newton's method
-(define-private (sqrt-iter (n uint) (guess uint))
-  (let ((next-guess (/ (+ guess (/ n guess)) u2)))
-    (if (or (is-eq guess next-guess) (<= (if (> guess next-guess) (- guess next-guess) (- next-guess guess)) u1))
-      next-guess
-      (sqrt-iter n next-guess))))
+;; Use math library for square root
+(define-constant MATH_CONTRACT 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math-lib-advanced)
+
+(define-private (sqrt (n uint))
+  (match (contract-call? MATH_CONTRACT sqrt-fixed n)
+    result (ok result)
+    error (err u0)  ;; Fallback to 0 on error
+  ))
 
 ;; Constants
-(define-constant ERR_UNAUTHORIZED (err u1001))
-(define-constant ERR_PAUSED (err u1002))
-(define-constant ERR_INSUFFICIENT_LIQUIDITY (err u3001))
-(define-constant ERR_SLIPPAGE_TOO_HIGH (err u3002))
-(define-constant ERR_INVALID_AMOUNT (err u3003))
-(define-constant ERR_DEADLINE_PASSED (err u3004))
-(define-constant ERR_INSUFFICIENT_SHARES (err u3005))
-(define-constant ERR_ZERO_LIQUIDITY (err u3006))
-(define-constant ERR_NOT_INITIALIZED (err u3007))
+(define-constant ERR_UNAUTHORIZED u1001)
+(define-constant ERR_PAUSED u1002)
+(define-constant ERR_INSUFFICIENT_LIQUIDITY u3001)
+(define-constant ERR_SLIPPAGE_TOO_HIGH u3002)
+(define-constant ERR_INVALID_AMOUNT u3003)
+(define-constant ERR_DEADLINE_PASSED u3004)
+(define-constant ERR_INSUFFICIENT_SHARES u3005)
+(define-constant ERR_ZERO_LIQUIDITY u3006)
+(define-constant ERR_NOT_INITIALIZED u3007)
 
 (define-constant PRECISION u100000000) ;; 8 decimals
 (define-constant MIN_LIQUIDITY u1000)

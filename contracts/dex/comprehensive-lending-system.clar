@@ -10,8 +10,8 @@
 (use-trait flash-loan-receiver-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.flash-loan-receiver-trait)
 (use-trait circuit-breaker-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.circuit-breaker-trait)
 
-(impl-trait .lending-system-trait)
-(impl-trait .circuit-breaker-trait)
+(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.lending-system-trait)
+(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.circuit-breaker-trait)
 
 ;; --- Constants ---
 (define-constant LENDING_SERVICE "lending-service")
@@ -33,11 +33,11 @@
 (define-data-var paused bool false)
 
 ;; Contract Dependencies (set by owner)
-(define-data-var oracle-contract principal 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.oracle)
-(define-data-var interest-rate-model-contract principal 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.interest-rate-model)
-(define-data-var loan-liquidation-manager-contract principal 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.loan-liquidation-manager)
-(define-data-var access-control-contract principal 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.access-control)
-(define-data-var circuit-breaker-contract (optional principal) none)
+(define-data-var oracle-contract principal tx-sender)  ;; Will be set by owner
+(define-data-var interest-rate-model-contract principal tx-sender)  ;; Will be set by owner
+(define-data-var loan-liquidation-manager-contract principal tx-sender)  ;; Will be set by owner
+(define-data-var access-control-contract principal tx-sender)  ;; Will be set by owner
+(define-data-var circuit-breaker-contract (optional principal) none)  ;; Optional, will be set by owner
 
 ;; --- Maps ---
 (define-map supported-assets { asset: principal } { collateral-factor: uint, liquidation-threshold: uint, liquidation-bonus: uint })

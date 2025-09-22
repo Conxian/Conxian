@@ -13,6 +13,20 @@
 ;; CORE TRAITS
 ;; ===========================================
 
+(define-trait lending-system-trait
+  (
+    (deposit (principal uint) (response bool uint))
+    (withdraw (principal uint) (response bool uint))
+    (borrow (principal uint) (response bool uint))
+    (repay (principal uint) (response bool uint))
+    (liquidate (principal principal principal principal uint) (response bool uint))
+    (get-account-liquidity (principal) (response (tuple (liquidity uint) (shortfall uint)) uint))
+    (get-asset-price (principal) (response uint uint))
+    (get-borrow-rate (principal) (response uint uint))
+    (get-supply-rate (principal) (response uint uint))
+  )
+)
+
 (define-trait sip-010-ft-trait
   (
     (transfer (uint principal principal (optional (buff 34))) (response bool uint))
@@ -22,6 +36,30 @@
     (get-name () (response (string-ascii 32) uint))
     (get-symbol () (response (string-ascii 10) uint))
     (get-token-uri () (response (optional (string-utf8 256)) uint))
+  )
+)
+
+(define-trait bond-trait
+  (
+    (issue-bond (string-ascii 32) (string-ascii 10) uint uint uint uint uint principal) (response bool uint)
+    (claim-coupon () (response uint uint))
+    (redeem-at-maturity (principal) (response uint uint))
+    (get-maturity-block () (response uint uint))
+    (get-coupon-rate () (response uint uint))
+    (get-face-value () (response uint uint))
+    (get-payment-token () (response principal uint))
+    (is-matured () (response bool uint))
+    (get-next-coupon-block (principal) (response (optional uint) uint))
+  )
+)
+
+(define-trait pool-trait
+  (
+    (add-liquidity (uint uint principal) (response (tuple (tokens-minted uint) (token-a-used uint) (token-b-used uint)) uint))
+    (remove-liquidity (uint principal) (response (tuple (token-a-returned uint) (token-b-returned uint)) uint))
+    (swap (principal uint principal) (response uint uint))
+    (get-reserves () (response (tuple (reserve-a uint) (reserve-b uint)) uint))
+    (get-total-supply () (response uint uint))
   )
 )
 
@@ -249,8 +287,8 @@
 
 (define-trait dao-trait
   (
-    (has-voting-power (address principal) (response bool uint))
-    (get-voting-power (address principal) (response uint uint))
+    (has-voting-power (principal) (response bool uint))
+    (get-voting-power (principal) (response uint uint))
     (get-total-voting-power () (response uint uint))
     (delegate (delegatee principal) (response bool uint))
     (undelegate () (response bool uint))
@@ -304,7 +342,7 @@
         (liquidation-incentive uint)
         (debt-value uint)
         (collateral-value uint)
-      ) uint)
+      ) uint))
     (emergency-liquidate
       (borrower principal)
       (debt-asset principal)
@@ -327,12 +365,13 @@
 
 (define-trait monitoring-trait
   (
-    (log-event (component (string-ascii 32))
-               (event-type (string-ascii 32))
-               (severity uint)
-               (message (string-ascii 256))
-               (data (optional {}))
-               (response bool uint))
+    (log-event 
+      (component (string-ascii 32))
+      (event-type (string-ascii 32))
+      (severity uint)
+      (message (string-ascii 256))
+      (data (optional {}))
+    ) (response bool uint)
     (get-events (component (string-ascii 32))
                 (limit uint)
                 (offset uint)
