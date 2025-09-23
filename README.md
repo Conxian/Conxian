@@ -20,6 +20,7 @@ A comprehensive DeFi platform on Stacks featuring 65+ smart contracts with advan
 This repository includes pre-commit hooks to help prevent accidental commits of sensitive information. To set up the hooks:
 
 1. Run the setup script:
+
    ```powershell
    .\setup-git-hooks.ps1
    ```
@@ -92,10 +93,13 @@ The protocol uses a dedicated system account for privileged operations. The curr
 
 1. Configure your testnet settings in `deployments/staging-config.yaml`
 2. Deploy to testnet:
+
    ```bash
    clarinet deployment apply -n testnet
    ```
+
 3. Verify deployment:
+
    ```bash
    clarinet deployment list -n testnet
    ```
@@ -104,15 +108,20 @@ The protocol uses a dedicated system account for privileged operations. The curr
 
 1. Update production settings in `deployments/production-config.yaml`
 2. Set required environment variables:
+
    ```bash
    export DEPLOYER_MNEMONIC="your-mnemonic-here"
    export GOVERNANCE_ADDRESS="your-governance-address"
    ```
+
 3. Deploy to mainnet:
+
    ```bash
    clarinet deployment apply -n mainnet
    ```
+
 4. Verify deployment:
+
    ```bash
    clarinet deployment list -n mainnet
    ```
@@ -122,6 +131,7 @@ The protocol uses a dedicated system account for privileged operations. The curr
 ### Testing
 
 Run the test suite:
+
 ```bash
 clarinet test
 ```
@@ -131,6 +141,7 @@ clarinet test
 1. Copy `.env.example` to `.env`
 2. Update environment variables as needed
 3. Run tests with:
+
    ```bash
    source .env && clarinet test
    ```
@@ -206,30 +217,31 @@ bash scripts/deploy-testnet.sh
 
 [Complete Setup Guide](./documentation/DEVELOPER_GUIDE.md)
 
-📚 **[Complete Architecture Documentation](./documentation/)**
+📚 **[Complete Documentation](./documentation/)**
 
-## Documentation (Updated Sep 06, 2025)
+## 📚 Documentation (Updated September 23, 2025)
 
-### For Users
+### 📖 Complete Documentation Hub
 
-| Guide | Description |
-|-------|-------------|
-| [**User Manual**](./documentation/USER_MANUAL.md) | **Complete user guide and onboarding** |
-| [Quick Start](./documentation/QUICK_START.md) | 5-minute getting started guide |
+All documentation has been reorganized into a clear, structured system:
 
-### For Developers & Stakeholders
+| Audience | Location | Description |
+|----------|----------|-------------|
+| **👥 Users** | [`./documentation/user/`](./documentation/user/) | User guides and quick start |
+| **👨‍💻 Developers** | [`./documentation/developer/`](./documentation/developer/) | Development setup and standards |
+| **🏗️ Architecture** | [`./documentation/architecture/`](./documentation/architecture/) | System design and specifications |
+| **🚀 Deployment** | [`./documentation/deployment/`](./documentation/deployment/) | Deployment and operations |
+| **🔒 Security** | [`./documentation/security/`](./documentation/security/) | Security and compliance |
+| **📖 API Reference** | [`./documentation/api/`](./documentation/api/) | Smart contract functions |
 
-| Topic | Description |
-|-------|-------------|
-| [Architecture](./documentation/ARCHITECTURE.md) | System design (incl. DEX, breaker, monitoring) |
-| [Tokenomics](./documentation/TOKENOMICS.md) | Economic model and token mechanics |
-| [Security](./documentation/SECURITY.md) | Security features and audit information |
-| [API Reference](./documentation/API_REFERENCE.md) | Smart contract functions |
-| [Deployment](./documentation/DEPLOYMENT.md) | Production deployment guide |
-| [Developer Guide](./documentation/DEVELOPER_GUIDE.md) | Development setup and contributing |
-| [Status](./documentation/STATUS.md) | Current contract & test inventory |
+**[📚 View Complete Documentation](./documentation/)**
 
-[View All Documentation](./documentation/)
+### Quick Access
+
+- [**User Manual**](./documentation/user/USER_MANUAL.md) - Complete user guide
+- [**Developer Guide**](./documentation/developer/DEVELOPER_GUIDE.md) - Development setup
+- [**API Reference**](./documentation/api/API_REFERENCE.md) - Contract functions
+- [**Architecture**](./documentation/architecture/ARCHITECTURE.md) - System design
 
 ## License
 
