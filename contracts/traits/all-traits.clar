@@ -13,6 +13,20 @@
 ;; CORE TRAITS
 ;; ===========================================
 
+(define-trait lending-system-trait
+  (
+    (deposit (principal uint) (response bool uint))
+    (withdraw (principal uint) (response bool uint))
+    (borrow (principal uint) (response bool uint))
+    (repay (principal uint) (response bool uint))
+    (liquidate (principal principal principal principal uint) (response bool uint))
+    (get-account-liquidity (principal) (response (tuple (liquidity uint) (shortfall uint)) uint))
+    (get-asset-price (principal) (response uint uint))
+    (get-borrow-rate (principal) (response uint uint))
+    (get-supply-rate (principal) (response uint uint))
+  )
+)
+
 (define-trait sip-010-ft-trait
   (
     (transfer (uint principal principal (optional (buff 34))) (response bool uint))
@@ -22,6 +36,30 @@
     (get-name () (response (string-ascii 32) uint))
     (get-symbol () (response (string-ascii 10) uint))
     (get-token-uri () (response (optional (string-utf8 256)) uint))
+  )
+)
+
+(define-trait bond-trait
+  (
+    (issue-bond (string-ascii 32) (string-ascii 10) uint uint uint uint uint principal) (response bool uint)
+    (claim-coupon () (response uint uint))
+    (redeem-at-maturity (principal) (response uint uint))
+    (get-maturity-block () (response uint uint))
+    (get-coupon-rate () (response uint uint))
+    (get-face-value () (response uint uint))
+    (get-payment-token () (response principal uint))
+    (is-matured () (response bool uint))
+    (get-next-coupon-block (principal) (response (optional uint) uint))
+  )
+)
+
+(define-trait pool-trait
+  (
+    (add-liquidity (uint uint principal) (response (tuple (tokens-minted uint) (token-a-used uint) (token-b-used uint)) uint))
+    (remove-liquidity (uint principal) (response (tuple (token-a-returned uint) (token-b-returned uint)) uint))
+    (swap (principal uint principal) (response uint uint))
+    (get-reserves () (response (tuple (reserve-a uint) (reserve-b uint)) uint))
+    (get-total-supply () (response uint uint))
   )
 )
 
@@ -37,21 +75,68 @@
 
 (define-trait access-control-trait
   (
-    (has-role (principal (string-ascii 32)) (response bool uint))
-    (grant-role (principal (string-ascii 32)) (response bool uint))
-    (revoke-role (principal (string-ascii 32)) (response bool uint))
-    (only-role ((string-ascii 32)) (response bool uint))
-    (only-roles ((list 10 (string-ascii 32))) (response bool uint))
+    ;; Check if an account has a specific role
+    (has-role (account principal) (role uint) (response bool uint))
+
+    ;; Get the admin address
+    (get-admin () (response principal uint))
+
+    ;; Transfer admin rights
+    (set-admin (new-admin principal) (response bool uint))
+
+    ;; Grant a role to an account
+    (grant-role (role uint) (account principal) (response bool uint))
+
+    ;; Revoke a role from an account
+    (revoke-role (role uint) (account principal) (response bool uint))
+
+    ;; Renounce a role (callable by role holder only)
+    (renounce-role (role uint) (response bool uint))
+
+    ;; Get role name by ID
+    (get-role-name (role uint) (response (string-ascii 64) uint))
+
+    ;; Check if caller has admin role (convenience function)
+    (is-admin (caller principal) (response bool uint))
   )
 )
 
+;; Standard Roles
+(define-constant ROLE_ADMIN 0x0000000000000000000000000000000000000000000000000000000000000001)
+(define-constant ROLE_PAUSER 0x0000000000000000000000000000000000000000000000000000000000000002)
+(define-constant ROLE_ORACLE_UPDATER 0x0000000000000000000000000000000000000000000000000000000000000004)
+(define-constant ROLE_LIQUIDATOR 0x0000000000000000000000000000000000000000000000000000000000000008)
+(define-constant ROLE_STRATEGIST 0x0000000000000000000000000000000000000000000000000000000000000010)
+
+;; Error Codes
+(define-constant ERR_NOT_AUTHORIZED (err u100))
+(define-constant ERR_INVALID_ROLE (err u101))
+(define-constant ERR_ROLE_ALREADY_GRANTED (err u102))
+(define-constant ERR_ROLE_NOT_GRANTED (err u103))
+(define-constant ERR_INVALID_ADMIN (err u104))
+
 (define-trait pausable-trait
   (
+    ;; Pause the contract (only callable by pauser role)
     (pause () (response bool uint))
+
+    ;; Unpause the contract (only callable by pauser role)
     (unpause () (response bool uint))
-    (paused () (response bool uint))
+
+    ;; Check if the contract is paused
+    (is-paused () (response bool uint))
+
+    ;; Require that the contract is not paused
+    (when-not-paused () (response bool uint))
+
+    ;; Require that the contract is paused
+    (when-paused () (response bool uint))
   )
 )
+
+;; Error Codes
+(define-constant ERR_PAUSED (err u200))
+(define-constant ERR_NOT_PAUSED (err u201))
 
 (define-trait ownable-trait
   (
@@ -63,44 +148,131 @@
 
 (define-trait circuit-breaker-trait
   (
-    (check-circuit-state ((string-ascii 32)) (response uint uint))
-    (record-success ((string-ascii 32)) (response uint uint))
-    (record-failure ((string-ascii 32)) (response uint uint))
+    ;; Check if the circuit is open for a given operation
+    (check-circuit-state (operation (string-ascii 64)) (response bool uint))
+
+    ;; Record a successful operation
+    (record-success (operation (string-ascii 64)) (response bool uint))
+
+    ;; Record a failed operation
+    (record-failure (operation (string-ascii 64)) (response bool uint))
+
+    ;; Get the failure rate for an operation
+    (get-failure-rate (operation (string-ascii 64)) (response uint uint))
+
+    ;; Get the current state of the circuit
+    (get-circuit-state (operation (string-ascii 64)) (response (tuple (state uint) (last-checked uint) (failure-rate uint)) uint))
+
+    ;; Manually override the circuit state (admin only)
+    (set-circuit-state (operation (string-ascii 64)) (state bool) (response bool uint))
+
+    ;; Set the failure threshold (admin only)
+    (set-failure-threshold (threshold uint) (response bool uint))
+
+    ;; Set the reset timeout (admin only)
+    (set-reset-timeout (timeout uint) (response bool uint))
+
+    ;; Get the admin address
+    (get-admin () (response principal uint))
+
+    ;; Transfer admin rights
+    (set-admin (new-admin principal) (response bool uint))
   )
 )
 
 (define-trait standard-constants-trait
   (
-    (get-precision () (response uint uint))
-    (get-percent-100 () (response uint uint))
-    (get-max-uint64 () (response uint uint))
+    ;; Precision and mathematical constants (18 decimals)
+    (get-precision) (response uint uint)
+    (get-basis-points) (response uint uint)
+
+    ;; Common time constants (in blocks, assuming ~1 block per minute)
+    (get-blocks-per-minute) (response uint uint)
+    (get-blocks-per-hour) (response uint uint)
+    (get-blocks-per-day) (response uint uint)
+    (get-blocks-per-week) (response uint uint)
+    (get-blocks-per-year) (response uint uint)
+
+    ;; Common percentage values (in basis points)
+    (get-max-bps) (response uint uint)
+    (get-one-hundred-percent) (response uint uint)
+    (get-fifty-percent) (response uint uint)
+    (get-zero) (response uint uint)
+
+    ;; Common precision values
+    (get-precision-18) (response uint uint)
+    (get-precision-8) (response uint uint)
+    (get-precision-6) (response uint uint)
   )
 )
 
 (define-trait vault-trait
   (
-    (deposit (uint principal) (response uint uint))
-    (withdraw (uint principal) (response uint uint))
-    (get-vault-tvl () (response uint uint))
-    (get-share-value () (response uint uint))
+    ;; Core vault operations
+    (deposit (principal uint) (response (tuple (shares uint) (fee uint)) uint))
+    (withdraw (principal uint) (response (tuple (amount uint) (fee uint)) uint))
+    (flash-loan (uint principal) (response bool uint))
+
+    ;; Asset management
+    (get-total-balance (principal) (response uint uint))
+    (get-total-shares (principal) (response uint uint))
+    (get-user-shares (principal principal) (response uint uint))
+
+    ;; Vault configuration
+    (get-deposit-fee () (response uint uint))
+    (get-withdrawal-fee () (response uint uint))
+    (get-vault-cap (principal) (response uint uint))
+    (is-paused () (response bool uint))
+
+    ;; Enhanced tokenomics integration
+    (get-revenue-share () (response uint uint))
+    (collect-protocol-fees (principal) (response uint uint))
   )
 )
 
 (define-trait vault-admin-trait
   (
-    (set-fee-rate (uint) (response bool uint))
-    (set-fee-recipient (principal) (response bool uint))
-    (set-strategy (principal) (response bool uint))
-    (harvest () (response uint uint))
+    ;; Administrative controls
+    (set-deposit-fee (uint) (response bool uint))
+    (set-withdrawal-fee (uint) (response bool uint))
+    (set-vault-cap (principal uint) (response bool uint))
+    (set-paused (bool) (response bool uint))
+
+    ;; Asset management
+    (emergency-withdraw (principal uint principal) (response uint uint))
+    (rebalance-vault (principal) (response bool uint))
+
+    ;; Enhanced tokenomics integration
+    (set-revenue-share (uint) (response bool uint))
+    (update-integration-settings ((tuple (monitor-enabled bool) (emission-enabled bool))) (response bool uint))
+
+    ;; Governance
+    (transfer-admin (principal) (response bool uint))
+    (get-admin () (response principal uint))
   )
 )
 
 (define-trait strategy-trait
   (
-    (harvest () (response uint uint))
-    (withdraw (uint) (response uint uint))
-    (deposit (uint) (response uint uint))
-    (balance-of () (response uint uint))
+    ;; Core strategy operations
+    (deploy-funds (uint) (response uint uint))
+    (withdraw-funds (uint) (response uint uint))
+    (harvest-rewards () (response uint uint))
+
+    ;; Strategy information
+    (get-total-deployed () (response uint uint))
+    (get-current-value () (response uint uint))
+    (get-expected-apy () (response uint uint))
+    (get-strategy-risk-level () (response uint uint))
+
+    ;; Asset management
+    (get-underlying-asset () (response principal uint))
+    (emergency-exit () (response uint uint))
+
+    ;; Enhanced tokenomics integration
+    (distribute-rewards () (response uint uint))
+    (get-performance-fee () (response uint uint))
+    (update-dimensional-weights () (response bool uint))
   )
 )
 
@@ -115,8 +287,8 @@
 
 (define-trait dao-trait
   (
-    (has-voting-power (address principal) (response bool uint))
-    (get-voting-power (address principal) (response uint uint))
+    (has-voting-power (principal) (response bool uint))
+    (get-voting-power (principal) (response uint uint))
     (get-total-voting-power () (response uint uint))
     (delegate (delegatee principal) (response bool uint))
     (undelegate () (response bool uint))
@@ -170,7 +342,7 @@
         (liquidation-incentive uint)
         (debt-value uint)
         (collateral-value uint)
-      ) uint)
+      ) uint))
     (emergency-liquidate
       (borrower principal)
       (debt-asset principal)
@@ -179,14 +351,27 @@
   )
 )
 
+;; Error codes for liquidation operations
+(define-constant ERR_LIQUIDATION_PAUSED (err u1001))
+(define-constant ERR_UNAUTHORIZED (err u1002))
+(define-constant ERR_INVALID_AMOUNT (err u1003))
+(define-constant ERR_POSITION_NOT_UNDERWATER (err u1004))
+(define-constant ERR_SLIPPAGE_TOO_HIGH (err u1005))
+(define-constant ERR_LIQUIDATION_NOT_PROFITABLE (err u1006))
+(define-constant ERR_MAX_POSITIONS_EXCEEDED (err u1007))
+(define-constant ERR_ASSET_NOT_WHITELISTED (err u1008))
+(define-constant ERR_INSUFFICIENT_COLLATERAL (err u1009))
+(define-constant ERR_INSUFFICIENT_LIQUIDITY (err u1010))
+
 (define-trait monitoring-trait
   (
-    (log-event (component (string-ascii 32))
-               (event-type (string-ascii 32))
-               (severity uint)
-               (message (string-ascii 256))
-               (data (optional {}))
-               (response bool uint))
+    (log-event 
+      (component (string-ascii 32))
+      (event-type (string-ascii 32))
+      (severity uint)
+      (message (string-ascii 256))
+      (data (optional {}))
+    ) (response bool uint)
     (get-events (component (string-ascii 32))
                 (limit uint)
                 (offset uint)
@@ -224,9 +409,44 @@
 
 (define-trait oracle-trait
   (
-    (get-price (principal) (response uint uint))
-    (update-price (principal uint) (response bool uint))
-    (get-last-updated (principal) (response uint uint))
+    ;; Get the current price of an asset
+    (get-price (token principal) (response uint uint))
+
+    ;; Update the price of an asset (restricted to oracle admin)
+    (update-price (token principal) (price uint) (response bool uint))
+
+    ;; Get the last update time for an asset
+    (get-last-updated (token principal) (response uint uint))
+
+    ;; Add a new price feed (admin only)
+    (add-price-feed (token principal) (feed principal) (response bool uint))
+
+    ;; Remove a price feed (admin only)
+    (remove-price-feed (token principal) (response bool uint))
+
+    ;; Set the heartbeat interval (admin only)
+    (set-heartbeat (token principal) (interval uint) (response bool uint))
+
+    ;; Set the maximum price deviation (admin only)
+    (set-max-deviation (token principal) (deviation uint) (response bool uint))
+
+    ;; Get the current deviation threshold for a token
+    (get-deviation-threshold (token principal) (response uint uint))
+
+    ;; Emergency price override (admin only)
+    (emergency-price-override (token principal) (price uint) (response bool uint))
+
+    ;; Check if a price is stale
+    (is-price-stale (token principal) (response bool uint))
+
+    ;; Get the number of feeds for a token
+    (get-feed-count (token principal) (response uint uint))
+
+    ;; Get the admin address
+    (get-admin () (response principal uint))
+
+    ;; Transfer admin rights
+    (set-admin (new-admin principal) (response bool uint))
   )
 )
 
