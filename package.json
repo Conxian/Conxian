@@ -29,7 +29,7 @@
     "update-autonomics": "tsx scripts/sdk_update_autonomics.ts"
   },
   "dependencies": {
-    "@clarigen/core": "^0.9.2",
+    "@clarigen/core": "^3.0.0",
     "@hirosystems/clarinet-sdk": "3.5.0",
     "@scure/base": "2.0.0",
     "@scure/btc-signer": "2.0.1",
@@ -38,7 +38,7 @@
     "@stacks/stacking": "7.2.0",
     "@stacks/transactions": "7.2.0",
     "bignumber.js": "^9.1.2",
-    "clarigen": "^0.9.2",
+    "clarigen": "^3.0.0",
     "clarinet": "^0.12.6",
     "dotenv": "17.2.2",
     "node-fetch": "^3.3.2"

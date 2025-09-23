@@ -2,6 +2,8 @@
 ;; Advanced mathematical library with essential DeFi functions
 ;; Implements math-trait for standard interface
 
+;; Square root implementation using Newton's method (Babylonian method)
+
 ;; Standardized trait references
 (use-trait math-trait .all-traits.math-trait)
 (impl-trait .all-traits.math-trait)
@@ -270,6 +272,29 @@
                           (unwrap! (safe-add x (unwrap! (div-down x-sq u2) (err ERR_UNDERFLOW))) (err ERR_OVERFLOW))) (err ERR_OVERFLOW)))
   )
     (ok (unwrap! (safe-add PRECISION t1) (err ERR_OVERFLOW)))
+  )
+)
+
+(define-read-only (sqrt-iter (n uint) (guess uint))
+  (let (
+    (new-guess (/ (+ guess (/ n guess)) u2))
+  )
+    (if (or (is-eq guess new-guess) (is-eq guess (+ new-guess u1)))
+      guess
+      (sqrt-iter n new-guess)
+    )
+  )
+)
+
+(define-read-only (sqrt (n uint))
+  (if (is-eq n u0)
+    (ok u0)
+    (if (is-eq n u1)
+      (ok u1)
+      (let ((guess (if (> n u1000000) u1000 u100)))
+        (ok (sqrt-iter n guess))
+      )
+    )
   )
 )
 

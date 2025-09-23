@@ -1,15 +1,15 @@
 ;; Conxian DEX Pool - Constant product AMM pool with enhanced tokenomics integration
 ;; Implements pool-trait with full system integration
 
-(use-trait pool-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.pool-trait)
-(use-trait sip10-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
+(use-trait pool-trait '.pool-trait)
+(use-trait sip10-trait '.sip-010-ft-trait)
 
 (define-constant ONE u1)
 (define-constant TWO u2)
 (define-constant TEN u10)
 
-(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.pool-trait)
-(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
+(impl-trait '.pool-trait)
+(impl-trait '.sip-010-ft-trait)
 
 ;; Private helper functions
 (define-private (min (a uint) (b uint))
@@ -191,10 +191,9 @@
         (reserve-x (var-get reserve-a))
         (reserve-y (var-get reserve-b))
         (shares (if (is-eq current-supply u0)
-                    ;; First liquidity provision - use local square root implementation
-                    (let ((product (* dx dy))
-                          (guess (if (> product u1000000) u1000 u100)))
-                      (let ((sqrt-result (sqrt-iter product guess)))
+                    ;; First liquidity provision - use math library for square root
+                    (let ((product (* dx dy)))
+                      (let ((sqrt-result (unwrap! (contract-call? MATH_CONTRACT sqrt product) (err u3008))))
                         (if (< sqrt-result MIN_LIQUIDITY)
                           (err u3008) ;; ERR_INSUFFICIENT_LIQUIDITY
                           (- sqrt-result MIN_LIQUIDITY))))
