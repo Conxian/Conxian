@@ -338,7 +338,7 @@
                 (liquidation-bonus (get liquidation-bonus (unwrap! (map-get? supported-assets { asset: collateral-asset-principal }) (err u0)))))
             (let ((repay-value-in-usd (/ (* actual-repay-amount repay-price) PRECISION))
                   (bonus-value (/ (* repay-value-in-usd liquidation-bonus) PRECISION))
-                  (seize-value-in-usd (+ repay-value-in-usd bonus-value)))
+                  (seize-value-in-usd (+ repay-value-in-usd bonus-value))))
               (let ((collateral-to-seize (/ (* seize-value-in-usd PRECISION) collateral-price)))
 
                 (let ((borrower-collateral (default-to u0 (map-get? user-supply-balances { user: borrower, asset: collateral-asset-principal }))))

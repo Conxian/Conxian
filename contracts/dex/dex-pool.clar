@@ -122,8 +122,6 @@
         false)))
 
 ;; Update daily trading statistics
-(define-map daily-stats {day: (string-ascii 10)} {volume: uint, fees: uint, trades: uint})
-
 (define-private (update-daily-stats (volume uint) (fees uint))
   (let ((today-key "current")
         (current-stats (default-to (tuple (volume u0) (fees u0) (trades u0))
