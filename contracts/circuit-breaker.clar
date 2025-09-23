@@ -81,7 +81,7 @@
                                             is-open: bool, last-state-change: uint, rate-limit: uint, 
                                             rate-window: uint, rate-count: uint, rate-window-start: uint}))
   (let ((timeout (var-get global-reset-timeout))
-        (time-since-change (- block-height (get last-state-change stats))))
+        (time-since-change (- stacks-block-height (get last-state-change stats))))
     (>= time-since-change timeout)
   )
 )
@@ -90,7 +90,7 @@
                                          is-open: bool, last-state-change: uint, rate-limit: uint, 
                                          rate-window: uint, rate-count: uint, rate-window-start: uint}) 
                                  (is-success bool))
-  (let ((current-time block-height)
+  (let ((current-time stacks-block-height)
         (window-start (get rate-window-start stats))
         (window (get rate-window stats)))
     
@@ -130,7 +130,7 @@
       (if (should-circuit-close stats)
         (merge stats {
           is-open: false,
-          last-state-change: block-height,
+          last-state-change: stacks-block-height,
           success-count: u0,  ;; Reset counters when closing
           failure-count: u0
         })
@@ -139,7 +139,7 @@
       (if (should-circuit-open stats)
         (merge stats {
           is-open: true,
-          last-state-change: block-height
+          last-state-change: stacks-block-height
         })
         stats)
     )
@@ -164,7 +164,7 @@
 )
 
 (define-read-only (check-circuit-state (operation (string-ascii 64)))
-  (let ((current-time block-height))
+  (let ((current-time stacks-block-height))
     (match (map-get? operation-stats {operation: operation})
       stats
       (let ((state stats))
@@ -180,7 +180,7 @@
 
 (define-public (record-success (operation (string-ascii 64)))
   (begin
-    (let ((current-time block-height)
+    (let ((current-time stacks-block-height)
           (stats (default-to 
             { 
               success-count: u0, 
@@ -209,7 +209,7 @@
 
 (define-public (record-failure (operation (string-ascii 64)))
   (begin
-    (let ((current-time block-height)
+    (let ((current-time stacks-block-height)
           (stats (default-to 
             { 
               success-count: u0, 
@@ -252,7 +252,7 @@
 )
 
 (define-read-only (get-circuit-state (operation (string-ascii 64)))
-  (let ((stats (default-to (get-default-stats block-height) 
+  (let ((stats (default-to (get-default-stats stacks-block-height) 
                           (map-get? operation-stats {operation: operation})))
         (failure-rate (calculate-failure-rate (get success-count stats) (get failure-count stats))))
     
@@ -272,13 +272,13 @@
   (begin
     (asserts! (is-eq tx-sender (var-get admin)) ERR_UNAUTHORIZED)
     
-    (let ((stats (default-to (get-default-stats block-height) 
+    (let ((stats (default-to (get-default-stats stacks-block-height) 
                             (map-get? operation-stats {operation: operation}))))
       
       (map-set operation-stats {operation: operation} 
         (merge stats {
           is-open: state,
-          last-state-change: block-height
+          last-state-change: stacks-block-height
         }))
       
       (ok true)
@@ -310,7 +310,7 @@
     (asserts! (> limit u0) ERR_INVALID_RATE_LIMIT)
     (asserts! (and (> window u0) (<= window MAX_RATE_WINDOW)) ERR_INVALID_RATE_WINDOW)
     
-    (let ((stats (default-to (get-default-stats block-height) 
+    (let ((stats (default-to (get-default-stats stacks-block-height) 
                             (map-get? operation-stats {operation: operation}))))
       
       (map-set operation-stats {operation: operation} 
@@ -318,7 +318,7 @@
           rate-limit: limit,
           rate-window: window,
           rate-count: u0,
-          rate-window-start: block-height
+          rate-window-start: stacks-block-height
         }))
       
       (ok true)
@@ -353,7 +353,7 @@
 ;; ===== Read-Only Functions =====
 
 (define-read-only (get-rate-limit (operation (string-ascii 64)))
-  (let ((stats (default-to (get-default-stats block-height) 
+  (let ((stats (default-to (get-default-stats stacks-block-height) 
                           (map-get? operation-stats {operation: operation})))
         (window-end (+ (get rate-window-start stats) (get rate-window stats))))
     
@@ -378,7 +378,7 @@
   (ok {
     is_operational: (not (var-get emergency-shutdown-active)),
     total_failure_rate: u0,  ;; Would need aggregation across all operations
-    last_checked: block-height,
+    last_checked: stacks-block-height,
     uptime: u100,  ;; Would need actual uptime tracking
     total_operations: u0,  ;; Would need global counter
     failed_operations: u0   ;; Would need global counter

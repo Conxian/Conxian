@@ -43,7 +43,7 @@
 )
 
 (define-public (record-price (token-a principal) (token-b principal) (price uint) (volume uint))
-  (map-set price-history { token-a: token-a, token-b: token-b, block: block-height } { price: price, volume: volume })
+  (map-set price-history { token-a: token-a, token-b: token-b, block: stacks-block-height } { price: price, volume: volume })
   (ok true)
 )
 
@@ -60,7 +60,7 @@
   (let ((current-block stacks-block-height))
     (fold (lambda (i acc)
       (match (map-get? price-history { token-a: token-a, token-b: token-b, block: (- current-block i) })
-        (some data) (append acc (list (get price data)))
+        (ok (> (- stacks-block-height last-updated) (var-get heartbeat-interval)))
         (none) acc
       )
     ) (range period) (list))

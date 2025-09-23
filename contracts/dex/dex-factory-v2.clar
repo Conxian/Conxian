@@ -55,7 +55,7 @@
 )
 
 (define-private (check-circuit-breaker)
-  (contract-call? (var-get circuit-breaker) is-circuit-open)
+  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.circuit-breaker is-circuit-open)
 )
 
 ;; --- Public Functions ---
