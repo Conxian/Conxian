@@ -1,9 +1,6 @@
 ;; circuit-breaker.clar
 ;; Implements the enhanced circuit breaker pattern
 
-(use-trait 'circuit-breaker-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.circuit-breaker-trait)
-(use-trait 'ownable-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.ownable-trait)
-
 (impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.circuit-breaker-trait)
 (impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.ownable-trait)
 
@@ -17,20 +14,18 @@
 (define-constant ERR_RATE_LIMIT_EXCEEDED (err u1007))
 (define-constant ERR_INVALID_RATE_LIMIT (err u1008))
 (define-constant ERR_INVALID_RATE_WINDOW (err u1009))
-(define-constant ERR_INVALID_RATE_LIMIT (err u1008))
-(define-constant ERR_INVALID_RATE_WINDOW (err u1009))
 
 ;; Default values
-(define-constant DEFAULT_THRESHOLD (u5000))  ;; 50% failure rate
-(define-constant DEFAULT_TIMEOUT (u144))     ;; ~24 hours at 1 block/10min
-(define-constant MAX_OPERATION_LENGTH (u64))
-(define-constant MAX_RATE_WINDOW (u10080))   ;; ~10 days at 1 block/10min
+(define-constant DEFAULT_THRESHOLD u5000)  ;; 50% failure rate
+(define-constant DEFAULT_TIMEOUT u144)     ;; ~24 hours at 1 block/10min
+(define-constant MAX_OPERATION_LENGTH u64)
+(define-constant MAX_RATE_WINDOW u10080)   ;; ~10 days at 1 block/10min
 (define-constant MAX_THRESHOLD u10000)     ;; 100% in basis points
 
 ;; ===== Data Structures =====
 (define-data-var admin principal tx-sender)
-(define-data-var global-failure-threshold uint (u5000))  ;; 50%
-(define-data-var global-reset-timeout uint (u144))       ;; ~24 hours
+(define-data-var global-failure-threshold uint u5000)  ;; 50%
+(define-data-var global-reset-timeout uint u144)       ;; ~24 hours
 (define-data-var emergency-shutdown-active bool false)
 (define-data-var circuit-mode (optional bool) none)      ;; none = auto, some true = forced open, some false = forced closed
 
@@ -148,10 +143,19 @@
         })
         stats)
     )
-  )
+(define-private (get-default-stats (current-time uint))
+  {
+    success-count: u0,
+    failure-count: u0,
+    last-updated: current-time,
+    is-open: false,
+    last-state-change: current-time,
+    rate-limit: u0,
+    rate-window: u0,
+    rate-count: u0,
+    rate-window-start: current-time
+  }
 )
-
-;; ===== Core Functions =====
 
 (define-read-only (is-circuit-open)
   (ok (var-get emergency-shutdown-active))
@@ -160,14 +164,14 @@
 (define-read-only (check-circuit-state (operation (string-ascii 64)))
   (let ((current-time block-height))
     (match (map-get? operation-stats {operation: operation})
-      stats => 
-        (let ((state (unwrap-panic stats)))
-          (if (get is-open state)
-            (ok true)
-            (ok false)
-          )
+      stats
+      (let ((state stats))
+        (if (get is-open state)
+          (ok true)
+          (ok false)
         )
-      none (ok false)
+      )
+      (ok false)
     )
   )
 )
@@ -232,16 +236,16 @@
 
 (define-read-only (get-failure-rate (operation (string-ascii 64)))
   (match (map-get? operation-stats {operation: operation})
-    stats => 
-      (let ((state (unwrap-panic stats)))
-        (let ((total (+ (get success-count state) (get failure-count state))))
-          (if (> total u0)
-            (ok (/ (* (get failure-count state) u100) total))
-            (ok u0)
-          )
+    stats
+    (let ((state stats))
+      (let ((total (+ (get success-count state) (get failure-count state))))
+        (if (> total u0)
+          (ok (/ (* (get failure-count state) u100) total))
+          (ok u0)
         )
       )
-    none (ok u0)
+    )
+    (ok u0)
   )
 )
 

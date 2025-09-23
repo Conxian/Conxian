@@ -87,7 +87,8 @@ test-access = { path = "contracts/test/test-access.clar", address = "ST3PPMPR7SA
 # Mock Contracts
 mock-dao = { path = "contracts/mocks/mock-dao.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.mock-dao" }
 mock-oracle = { path = "contracts/mocks/mock-oracle.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.mock-oracle" }
-mock-token = { path = "contracts/mocks/mock-token.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.mock-token" }
+token-system-coordinator = { path = "contracts/token-system-coordinator.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.token-system-coordinator" }
+revenue-distributor = { path = "contracts/revenue-distributor.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.revenue-distributor" }
 
 [repl.remappings]
 # Traits

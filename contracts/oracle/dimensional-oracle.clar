@@ -1,8 +1,9 @@
 ;; Dimensional Oracle
 ;; Implements a robust price oracle with multiple data sources and deviation checks
 
-(use-trait access-control-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.access-control-trait)
-(use-trait pausable-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.pausable-trait)
+(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.oracle-trait)
+(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.access-control-trait)
+(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.pausable-trait)
 
 (define-constant ERR_NOT_AUTHORIZED (err u100))
 (define-constant ERR_INVALID_PRICE (err u101))
@@ -243,14 +244,16 @@
     (let ((median-price (get-median valid-prices)))
       ;; Check deviation if price exists
       (match (map-get? price-data {token: token})
-        existing-data =>
-          (let ((current-price (get price (unwrap-panic existing-data))))
+        existing-data
+        (begin
+          (let ((current-price (get price existing-data)))
             (if (not (is-price-deviation-valid? current-price median-price))
               ERR_DEVIATION_TOO_HIGH
               (ok true)
             )
           )
-        _ (ok true)  ;; First price update
+        )
+        (ok true)  ;; First price update
       )
       
       ;; Update price data
@@ -294,33 +297,35 @@
 
 (define-read-only (get-price (token principal))
   (match (map-get? price-data {token: token})
-    data => (ok (get price (unwrap-panic data)))
-    _ (err ERR_INVALID_PRICE)
+    data (ok (get price data))
+    (err ERR_INVALID_PRICE)
   )
 )
 
 (define-read-only (get-last-updated (token principal))
   (match (map-get? price-data {token: token})
-    data => (ok (get last-updated (unwrap-panic data)))
-    _ (err ERR_INVALID_PRICE)
+    data (ok (get last-updated data))
+    (err ERR_INVALID_PRICE)
   )
 )
 
 (define-read-only (get-deviation-threshold (token principal))
   (match (map-get? price-data {token: token})
-    data => (ok (get deviation-threshold (unwrap-panic data)))
-    _ (ok (var-get max-deviation))
+    data (ok (get deviation-threshold data))
+    (ok (var-get max-deviation))
   )
 )
 
 (define-read-only (is-price-stale (token principal))
   (match (map-get? price-data {token: token})
-    data => 
-      (let ((last-updated (get last-updated (unwrap-panic data)))
-            (current-block (block-height)))
+    data
+    (begin
+      (let ((last-updated (get last-updated data))
+            (current-block block-height))
         (ok (> (- current-block last-updated) (var-get heartbeat-interval)))
       )
-    _ (ok true)  ;; If no price data, consider it stale
+    )
+    (ok true)  ;; If no price data, consider it stale
   )
 )
 
