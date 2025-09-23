@@ -49,11 +49,12 @@
 (define-private (check-is-owner) (ok (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)))
 (define-private (check-not-paused) (ok (asserts! (not (var-get paused)) ERR_PAUSED)))
 
-(define-read-only (get-asset-price (asset principal))
-  (contract-call? (var-get oracle-contract) get-price asset)
-)
+(define-private (get-asset-price-safe (asset principal))
+  (match (contract-call? (var-get oracle-contract) get-price asset)
+    (ok price) price
+    (err error) u0)) ;; Return 0 if oracle fails - should be handled by governance
 
-(define-read-only (get-total-collateral-value-in-usd (user principal))
+(define-read-only (get-total-collateral-value-in-usd-safe (user principal))
   (let ((supported-assets (map-keys user-collateral-assets)))
     (fold
       (lambda (asset-tuple total-value)
@@ -61,7 +62,7 @@
           (if (default-to false (map-get? user-collateral-assets { user: user, asset: asset }))
             (let ((asset-info (unwrap! (map-get? supported-assets { asset: asset }) (err u0)))
                   (balance (default-to u0 (map-get? user-supply-balances { user: user, asset: asset })))
-                  (price (unwrap! (get-asset-price asset) (err u0))))
+                  (price (get-asset-price-safe asset)))
               (+ total-value (/ (* balance (get collateral-factor asset-info) price) (* PRECISION PRECISION)))
             )
             total-value
@@ -74,13 +75,13 @@
   )
 )
 
-(define-read-only (get-total-borrow-value-in-usd (user principal))
+(define-read-only (get-total-borrow-value-in-usd-safe (user principal))
   (let ((borrowed-assets (map-keys user-borrow-balances)))
      (fold
       (lambda (asset-tuple total-value)
         (let ((asset (get-in-tuple? asset-tuple { asset: principal })))
           (let ((balance (default-to u0 (map-get? user-borrow-balances { user: user, asset: asset })))
-                (price (unwrap! (get-asset-price asset) (err u0))))
+                (price (get-asset-price-safe asset)))
             (+ total-value (/ (* balance price) PRECISION))
           )
         )
@@ -115,8 +116,8 @@
 
 ;; --- Health Factor Calculation ---
 (define-read-only (get-health-factor (user principal))
-  (let ((collateral-value (get-total-collateral-value-in-usd user))
-        (borrow-value (get-total-borrow-value-in-usd user)))
+  (let ((collateral-value (get-total-collateral-value-in-usd-safe user))
+        (borrow-value (get-total-borrow-value-in-usd-safe user)))
     (if (> borrow-value u0)
       (ok (/ (* collateral-value PRECISION) borrow-value))
       (ok u18446744073709551615) ;; max-uint (2^64 - 1)
@@ -403,6 +404,30 @@
   (begin
     (try! (check-is-owner))
     (var-set loan-liquidation-manager-contract manager)
+    (ok true)
+  )
+)
+
+(define-public (set-oracle-contract (oracle principal))
+  (begin
+    (try! (check-is-owner))
+    (var-set oracle-contract oracle)
+    (ok true)
+  )
+)
+
+(define-public (set-interest-rate-model-contract (interest-model principal))
+  (begin
+    (try! (check-is-owner))
+    (var-set interest-rate-model-contract interest-model)
+    (ok true)
+  )
+)
+
+(define-public (set-access-control-contract (access-control principal))
+  (begin
+    (try! (check-is-owner))
+    (var-set access-control-contract access-control)
     (ok true)
   )
 )

@@ -115,8 +115,8 @@
     (asserts! (is-asset-supported asset) ERR_INVALID_ASSET)
     (asserts! (or (is-eq vault-cap u0) (<= (+ current-balance net-amount) vault-cap)) ERR_CAP_EXCEEDED)
     
-    ;; Transfer tokens from user to vault - simplified for enhanced deployment
-    ;; (try! (contract-call? asset transfer amount user (as-contract tx-sender) none))
+    ;; Transfer tokens from user to vault - PRODUCTION IMPLEMENTATION
+    (try! (contract-call? asset transfer amount user (as-contract tx-sender) none))
     
     ;; Update vault state
     (map-set vault-balances asset (+ current-balance net-amount))
@@ -128,14 +128,23 @@
         (begin
           (map-set collected-fees asset 
                    (+ (default-to u0 (map-get? collected-fees asset)) fee))
-          ;; Skip revenue distributor for enhanced deployment
-          (and (var-get emission-enabled) true))
+          ;; Notify revenue distributor - PRODUCTION IMPLEMENTATION
+          (try! (contract-call? .token-system-coordinator
+                               trigger-revenue-distribution
+                               asset
+                               fee))
         true)
     
-    ;; Deploy funds to strategy if available - simplified for enhanced deployment
+;; Deploy funds to strategy if available - PRODUCTION IMPLEMENTATION
     (match (map-get? asset-strategies asset)
-      strategy-contract true ;; Simplified - assume funds deployed successfully
-      true)
+      strategy-contract
+        (let ((deploy-result (try! (contract-call? strategy-contract deploy-funds net-amount))))
+          ;; Verify deployment was successful
+          (asserts! (>= deploy-result net-amount) ERR_STRATEGY_FAILED)
+          (ok deploy-result))
+      (begin
+        ;; No strategy configured - keep funds in vault
+        (ok net-amount)))
     
     ;; Notify monitoring system
     (notify-protocol-monitor "deposit" (tuple (asset asset) (amount net-amount)))
@@ -161,10 +170,16 @@
     (asserts! (>= user-current-shares shares) ERR_INSUFFICIENT_BALANCE)
     (asserts! (>= current-balance amount) ERR_INSUFFICIENT_BALANCE)
     
-    ;; Withdraw from strategy if needed - simplified for enhanced deployment
+    ;; Withdraw from strategy if needed - PRODUCTION IMPLEMENTATION
     (match (map-get? asset-strategies asset)
-      strategy-contract true ;; Assume withdrawal successful for enhanced deployment
-      true)
+      strategy-contract
+        (let ((withdraw-result (try! (contract-call? strategy-contract withdraw-funds amount))))
+          ;; Verify withdrawal was successful
+          (asserts! (>= withdraw-result amount) ERR_STRATEGY_FAILED)
+          (ok withdraw-result))
+      (begin
+        ;; No strategy configured - funds are already in vault
+        (ok amount)))
     
     ;; Update vault state
     (map-set vault-balances asset (- current-balance amount))
@@ -176,14 +191,16 @@
         (begin
           (map-set collected-fees asset 
                    (+ (default-to u0 (map-get? collected-fees asset)) fee))
-          ;; Notify revenue distributor - simplified for enhanced deployment
-          (and (var-get emission-enabled) true))
+          ;; Notify revenue distributor - PRODUCTION IMPLEMENTATION
+          (try! (contract-call? .token-system-coordinator
+                               trigger-revenue-distribution
+                               asset
+                               fee))
         true)
     
-    ;; Transfer tokens to user - simplified for enhanced deployment
-    ;; Note: In production, would call asset contract for transfer
-    ;; (try! (as-contract (contract-call? asset transfer net-amount 
-    ;;                                  (as-contract tx-sender) user none)))
+    ;; Transfer tokens to user - PRODUCTION IMPLEMENTATION
+    (try! (as-contract (contract-call? asset transfer net-amount 
+                                     (as-contract tx-sender) user none)))
     
     ;; Notify monitoring system
     (notify-protocol-monitor "withdraw" (tuple (asset asset) (amount net-amount)))
@@ -214,8 +231,11 @@
     ;; Reset collected fees
     (map-set collected-fees asset u0)
     
-    ;; Notify revenue distributor - simplified for enhanced deployment
-    (and (var-get emission-enabled) true)
+    ;; Notify revenue distributor - PRODUCTION IMPLEMENTATION
+    (try! (contract-call? .token-system-coordinator
+                         trigger-revenue-distribution
+                         asset
+                         collected))
     
     (ok collected)))
 

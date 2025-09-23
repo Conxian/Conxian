@@ -528,49 +528,70 @@
   )
 )
 
-(define-trait audit-registry-trait
+(define-trait compliance-hooks-trait
   (
-    (submit-audit
-      (contract-address principal)
-      (audit-hash (string-ascii 64))
-      (report-uri (string-utf8 256))
-      (response uint uint)
-    )
-    (vote (audit-id uint) (approve bool) (response bool uint))
-    (finalize-audit (audit-id uint) (response bool uint))
-    (get-audit (audit-id uint)
-      (response {
-        contract-address: principal,
-        audit-hash: (string-ascii 64),
-        auditor: principal,
-        report-uri: (string-utf8 256),
-        timestamp: uint,
-        status: {
-          status: (string-ascii 20),
-          reason: (optional (string-utf8 500))
-        },
-        votes: {
-          for: uint,
-          against: uint,
-          voters: (list 100 principal)
-        },
-        voting-ends: uint
-      } uint)
-    )
-    (get-audit-status (audit-id uint)
-      (response {
-        status: (string-ascii 20),
-        reason: (optional (string-utf8 500))
-      } uint)
-    )
-    (get-audit-votes (audit-id uint)
-      (response {
-        for: uint,
-        against: uint,
-        voters: (list 100 principal)
-      } uint)
-    )
-    (set-voting-period (blocks uint) (response bool uint))
-    (emergency-pause-audit (audit-id uint) (reason (string-utf8 500)) (response bool uint))
+    (pre-transfer-hook (uint principal principal) (response bool uint))
+    (post-transfer-hook (uint principal principal) (response bool uint))
+    (pre-mint-hook (uint principal) (response bool uint))
+    (post-mint-hook (uint principal) (response bool uint))
+    (pre-burn-hook (uint principal) (response bool uint))
+    (post-burn-hook (uint principal) (response bool uint))
+  )
+)
+
+(define-trait math-trait
+  (
+    (add (uint uint) (response uint uint))
+    (subtract (uint uint) (response uint uint))
+    (multiply (uint uint) (response uint uint))
+    (divide (uint uint) (response uint uint))
+    (square-root (uint) (response uint uint))
+    (power (uint uint) (response uint uint))
+    (sqrt (uint) (response uint uint))
+    (abs (uint) (response uint uint))
+    (min (uint uint) (response uint uint))
+    (max (uint uint) (response uint uint))
+  )
+)
+
+(define-trait flash-loan-receiver-trait
+  (
+    (execute-operation (principal uint principal (buff 256)) (response bool uint))
+    (on-flash-loan (principal uint principal (buff 256)) (response bool uint))
+  )
+)
+
+(define-trait position-nft-trait
+  (
+    (mint (principal (tuple (tick-lower int) (tick-upper int) (liquidity uint))) (response uint uint))
+    (burn (uint) (response bool uint))
+    (get-position (uint) (response (tuple (nonce uint) (operator principal) (token0 principal) (token1 principal) (tick-lower int) (tick-upper int) (liquidity uint) (fee-growth-inside0-last uint) (fee-growth-inside1-last uint) (tokens-owed0 uint) (tokens-owed1 uint)) uint))
+    (get-token-uri (uint) (response (optional (string-utf8 256)) uint))
+  )
+)
+
+(define-trait factory-trait
+  (
+    (create-pool (principal principal uint (buff 256)) (response principal uint))
+    (get-pool (principal principal) (response (optional principal) uint))
+    (get-pool-count () (response uint uint))
+    (register-pool-implementation (uint principal) (response bool uint))
+  )
+)
+
+(define-trait router-trait
+  (
+    (swap-exact-tokens-for-tokens (uint (list 10 principal) principal uint) (response (list 10 uint) uint))
+    (swap-tokens-for-exact-tokens (uint (list 10 principal) principal uint) (response (list 10 uint) uint))
+    (get-amounts-out (uint (list 10 principal)) (response (list 10 uint) uint))
+    (get-amounts-in (uint (list 10 principal)) (response (list 10 uint) uint))
+  )
+)
+
+(define-trait yield-optimizer-trait
+  (
+    (optimize-allocation (principal uint) (response (list 10 (tuple (strategy principal) (allocation uint))) uint))
+    (get-optimal-allocation (principal uint) (response (list 10 (tuple (strategy principal) (allocation uint))) uint))
+    (rebalance-portfolio (principal) (response bool uint))
   )
 )
