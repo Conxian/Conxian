@@ -27,7 +27,7 @@
   )
 )
 
-(define-trait sip-010-ft-trait
+(define-trait sip-010-ft-mintable-trait
   (
     (transfer (uint principal principal (optional (buff 34))) (response bool uint))
     (get-balance (principal) (response uint uint))
@@ -36,6 +36,7 @@
     (get-name () (response (string-ascii 32) uint))
     (get-symbol () (response (string-ascii 10) uint))
     (get-token-uri () (response (optional (string-utf8 256)) uint))
+    (mint (principal uint) (response bool uint))
   )
 )
 
@@ -561,12 +562,9 @@
   )
 )
 
-(define-trait position-nft-trait
+(define-trait pool-creation-trait
   (
-    (mint (principal (tuple (tick-lower int) (tick-upper int) (liquidity uint))) (response uint uint))
-    (burn (uint) (response bool uint))
-    (get-position (uint) (response (tuple (nonce uint) (operator principal) (token0 principal) (token1 principal) (tick-lower int) (tick-upper int) (liquidity uint) (fee-growth-inside0-last uint) (fee-growth-inside1-last uint) (tokens-owed0 uint) (tokens-owed1 uint)) uint))
-    (get-token-uri (uint) (response (optional (string-utf8 256)) uint))
+    (create-instance (principal principal (buff 256)) (response principal uint)) ;; token-a, token-b, params
   )
 )
 

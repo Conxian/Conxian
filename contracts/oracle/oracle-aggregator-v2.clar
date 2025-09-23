@@ -80,7 +80,7 @@
   (ok (fold (lambda (source acc)
     (match (contract-call? source get-price token-a token-b)
       (success price) (append acc (list price))
-      (error _) acc
+      (error error-code) acc
     )
   ) sources (list)))
 )

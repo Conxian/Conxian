@@ -121,8 +121,8 @@
   )
 )
 
-(define-private (update-circuit-state (stats {success-count: uint, failure-count: uint, last-updated: uint, 
-                                            is-open: bool, last-state-change: uint, rate-limit: uint, 
+(define-private (update-circuit-state (stats {success-count: uint, failure-count: uint, last-updated: uint,
+                                            is-open: bool, last-state-change: uint, rate-limit: uint,
                                             rate-window: uint, rate-count: uint, rate-window-start: uint}))
   (let ((current-open (get is-open stats)))
     (if current-open
@@ -143,6 +143,8 @@
         })
         stats)
     )
+  )
+)
 (define-private (get-default-stats (current-time uint))
   {
     success-count: u0,

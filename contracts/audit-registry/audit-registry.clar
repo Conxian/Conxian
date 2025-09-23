@@ -96,18 +96,12 @@
           (if approve
             (map-set audits { id: audit-id }
               (merge audit {
-                votes: merge votes {
-                  for: (+ (get for votes) voting-power),
-                  voters: (append voters (list caller))
-                }
+                status: { status: "approved", reason: none }
               })
             )
             (map-set audits { id: audit-id }
               (merge audit {
-                votes: merge votes {
-                  against: (+ (get against votes) voting-power),
-                  voters: (append voters (list caller))
-                }
+                status: { status: "rejected", reason: (some "Voting threshold not met") }
               })
             )
           )

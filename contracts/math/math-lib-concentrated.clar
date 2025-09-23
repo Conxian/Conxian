@@ -331,7 +331,7 @@
   ;; Calculate exponential using Taylor series approximation
   ;; This is a simplified version for small x values
   (if (< x u100000000) ;; ln(2) * 1e8
-      (+ u1000000000000000000000000000000 (* x u693147180559945309)) ;; e^x ≈ 1 + x + x^2/2 + ...
+      (+ u1000000000000000000000000000000 (* x u693147180559945309)) ;; e^x approx 1 + x + x^2/2 + ...
       (* u2718281828459045235 u1000000000000000000) ;; Maximum value
   )
 )

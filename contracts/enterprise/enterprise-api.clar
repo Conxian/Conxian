@@ -115,7 +115,7 @@
 (define-private (check-circuit-breaker)
     (match (var-get circuit-breaker)
         (some breaker) (let ((is-tripped (try! (contract-call? breaker is-tripped)))) (asserts! (not is-tripped) ERR_CIRCUIT_OPEN))
-        (none) (ok true) ;; No breaker, no check needed
+        none (ok true) ;; No breaker, no check needed
     )
 )
 

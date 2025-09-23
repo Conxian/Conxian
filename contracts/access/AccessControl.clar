@@ -131,9 +131,11 @@
   (not (is-eq account (as-contract tx-sender)))
 )
 
+(define-public (renounce-ownership)
   (begin
     (asserts! (has-role tx-sender ROLE_ADMIN) ERR_NOT_AUTHORIZED)
     ;; In a real implementation, you might want to set to a burn address
     (var-set admin tx-sender)
     (ok true)
   )
+)

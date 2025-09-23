@@ -179,11 +179,6 @@ plan:
             path: "contracts\\mocks\\mock-oracle.clar"
             clarity-version: 1
         - emulated-contract-publish:
-            contract-name: mock-token
-            emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            path: "contracts\\mocks\\mock-token.clar"
-            clarity-version: 1
-        - emulated-contract-publish:
             contract-name: monitoring-dashboard
             emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
             path: "contracts\\dex\\monitoring-dashboard.clar"
@@ -204,6 +199,11 @@ plan:
             path: "contracts\\dimensional\\position-nft.clar"
             clarity-version: 1
         - emulated-contract-publish:
+            contract-name: revenue-distributor
+            emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            path: "contracts\\revenue-distributor.clar"
+            clarity-version: 1
+        - emulated-contract-publish:
             contract-name: rewards-distributor
             emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
             path: "contracts\\rewards\\rewards-distributor.clar"
@@ -222,6 +222,11 @@ plan:
             contract-name: test-access
             emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
             path: "contracts\\test\\test-access.clar"
+            clarity-version: 1
+        - emulated-contract-publish:
+            contract-name: token-system-coordinator
+            emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            path: "contracts\\token-system-coordinator.clar"
             clarity-version: 1
         - emulated-contract-publish:
             contract-name: tokenized-bond
