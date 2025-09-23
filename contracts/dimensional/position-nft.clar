@@ -40,7 +40,7 @@
 
 ;; Get the token URI
 (define-read-only (get-token-uri (token-id uint))
-  (ok (some (concat "https://conxian.io/positions/" (uint-to-ascii token-id)))))
+  (ok (some "https://conxian.io/positions/")))
 
 ;; --- Internal Functions ---
 

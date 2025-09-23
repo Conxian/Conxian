@@ -96,7 +96,7 @@
 
 (define-private (get-amp-from-params (params (buff 256)))
   (if (>= (len params) u4)
-    (ok (buff-to-uint-be (slice params 0 4)))
+    (ok (to-uint params))
     (err u9998)
   )
 )

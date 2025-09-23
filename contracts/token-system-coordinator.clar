@@ -221,7 +221,7 @@
     (validate-token token)
 
     ;; Call revenue distributor
-    (try! (contract-call? .revenue-distributor distribute-revenue token amount))
+    (try! (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.revenue-distributor distribute-revenue token amount))
 
     ;; Update token activity
     (try! (update-token-activity token amount))

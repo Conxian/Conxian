@@ -5,8 +5,8 @@
 ;; Square root implementation using Newton's method (Babylonian method)
 
 ;; Standardized trait references
-(use-trait math-trait .all-traits.math-trait)
-(impl-trait .all-traits.math-trait)
+(use-trait math-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.math-trait)
+(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.math-trait)
 
 ;; Error codes
 (define-constant ERR_INVALID_INPUT (err u1001))
@@ -145,6 +145,21 @@
 (define-public (square-root (n uint))
   (sqrt n))
 
+(define-public (power (base uint) (exp uint))
+  (pow-fixed base exp))
+
+(define-public (sqrt (x uint))
+  (sqrt-fixed x))
+
+(define-public (abs (x uint))
+  (ok x))
+
+(define-public (min (a uint) (b uint))
+  (ok (if (< a b) a b))
+
+(define-public (max (a uint) (b uint))
+  (ok (if (> a b) a b)))
+
 ;; ======================
 ;; Exponential and Logarithmic Functions
 ;; ======================
@@ -157,18 +172,23 @@
            (integer (unwrap! (div-down x-abs PRECISION) (err ERR_UNDERFLOW)))
            (fractional (unwrap! (safe-mod x-abs PRECISION) (err ERR_UNDERFLOW)))
            (exp-int (exp-integer integer))
-           (exp-frac (exp-fractional fractional))
            (result (unwrap! (mul-down exp-int exp-frac) (err ERR_OVERFLOW))))
       (if negative
         (div-down PRECISION result)
         (ok result)))))
 
-(define-private (exp-integer (n uint))
-  (if (is-eq n u0)
-    (ok PRECISION)
-    (let* ((half (unwrap! (div-down n u2) (err ERR_UNDERFLOW)))
-           (half-exp (unwrap! (exp-integer half) (err ERR_OVERFLOW))))
-      (mul-down half-exp half-exp))))
+(define-read-only (pow-fixed (base uint) (exp uint))
+  (if (is-eq exp u0)
+    (ok PRECISION)  ;; any^0 = 1
+    (let ((half-exp (unwrap! (div-down exp u2) (err ERR_OVERFLOW))))
+      (let ((half-pow (unwrap! (pow-fixed base half-exp) (err ERR_OVERFLOW))))
+        (let ((result (unwrap! (mul-down half-pow half-pow) (err ERR_OVERFLOW))))
+          (if (is-eq (mod exp u2) u1)
+            (mul-down result base)
+            (ok result)))))))
+
+(define-read-only (pow (base uint) (exp uint))
+  (pow-fixed base exp))
 
 (define-private (exp-fractional (x uint))
   (let ((term PRECISION)
@@ -177,9 +197,7 @@
     (fold (range u1 u21) sum
       (let* ((term (unwrap! (div-down (unwrap! (mul-down term x) (err ERR_OVERFLOW)) i) (err ERR_UNDERFLOW)))
              (new-sum (unwrap! (safe-add sum term) (err ERR_OVERFLOW))))
-        (ok (tuple (new-sum) (unwrap! (safe-add i u1) (err ERR_OVERFLOW))))))))
-
-(define-read-only (ln-fixed (x uint))
+        (ok (tuple (new-sum) (unwrap! (safe-add i u1) (err ERR_OVERFLOW))))))
   (if (or (<= x u0))
     (err ERR_INVALID_INPUT)
     (if (is-eq x PRECISION)
@@ -221,20 +239,29 @@
 ;; Power Function
 ;; ======================
 
-(define-read-only (pow-fixed (base uint) (exp uint))
-  (if (is-eq exp u0)
-    (ok PRECISION) ;; x^0 = 1
-    (if (is-eq exp PRECISION)
-      (ok base)    ;; x^1 = x
-      (if (is-eq (mod exp u2) u0)
-        ;; Even exponent: x^2n = (x^2)^n
-        (let ((x-squared (unwrap! (mul-down base base) (err ERR_OVERFLOW))))
-          (pow-fixed x-squared (unwrap! (div-down exp u2) (err ERR_UNDERFLOW))))
-        ;; Odd exponent: x^(2n+1) = x * (x^2)^n
-        (let* ((x-squared (unwrap! (mul-down base base) (err ERR_OVERFLOW)))
-               (exp-half (unwrap! (div-down (unwrap! (safe-sub exp PRECISION) (err ERR_UNDERFLOW)) u2) (err ERR_UNDERFLOW)))
-               (pow-half (unwrap! (pow-fixed x-squared exp-half) (err ERR_OVERFLOW))))
-          (mul-down base pow-half))))))
+(define-read-only (add (a uint) (b uint))
+  (ok (+ a b))
+)
+
+(define-read-only (subtract (a uint) (b uint))
+  (if (>= a b)
+    (ok (- a b))
+    (err ERR_UNDERFLOW))
+)
+
+(define-read-only (multiply (a uint) (b uint))
+  (ok (* a b))
+)
+
+(define-read-only (divide (a uint) (b uint))
+  (if (is-eq b u0)
+    (err ERR_DIVISION_BY_ZERO)
+    (ok (/ a b)))
+)
+
+(define-read-only (abs (x uint))
+  (ok x)
+)
 
 
 

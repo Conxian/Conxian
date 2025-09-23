@@ -35,24 +35,24 @@
   (let ((path-buff (fold accumulate-path path (buff 0x))))
     (sha256 (concat
       path-buff
-      (to-consensus-buff amount-in)
+      (to-buff amount-in)
       (match min-amount-out
-        val (to-consensus-buff val)
+        val (to-buff val)
         (buff 0x00)
       )
-      (to-consensus-buff recipient)
+      (to-buff recipient)
       salt
     ))
   )
 )
 
 (define-private (accumulate-path (p principal) (acc (buff 800)))
-  (concat acc (to-consensus-buff p))
+  (concat acc (to-buff p))
 )
 
 (define-private (check-circuit-breaker)
   (match (var-get circuit-breaker)
-    (cb (let ((is-tripped (try! (contract-call? cb is-tripped))))
+    (cb (let ((is-tripped (try! (contract-call? cb is-circuit-open))))
           (if is-tripped (err ERR_CIRCUIT_OPEN) (ok true))))
     (ok true)
   )

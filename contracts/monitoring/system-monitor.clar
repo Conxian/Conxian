@@ -1,7 +1,7 @@
 ;; System Monitor
 ;; Implements monitoring and alerting for the Conxian protocol
 
-(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.monitoring-admin-trait)
+(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.monitoring-trait)
 (impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.ownable-trait)
 
 (define-constant ERR_NOT_AUTHORIZED (err u100))
@@ -96,7 +96,7 @@
                          (data (optional {})))
   (let (
       (event-id (var-get event-counter))
-      (current-block (block-height))
+      (current-block stacks-block-height)
     )
     ;; Validate severity level
     (asserts! (<= severity SEVERITY_CRITICAL) ERR_INVALID_SEVERITY)
@@ -230,7 +230,7 @@
     })
     (ok {
       status: STATUS_HEALTHY,
-      last-updated: block-height,
+      last-updated: stacks-block-height,
       uptime: u0,
       error-count: u0,
       warning-count: u0

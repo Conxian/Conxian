@@ -51,7 +51,7 @@
   true)
 
 ;; Constants
-(define-constant MAX_UINT (pow u2 u128))
+(define-constant MAX_UINT u340282366920938463463374607431768211455)
 (define-constant MAX_DECIMALS u18)
 (define-constant MIN_MATURITY_BLOCKS u1440)  ;; ~1 day at 1 block/60s
 (define-constant MAX_COUPON_RATE u1000000000000000000)  ;; 100%
@@ -176,8 +176,8 @@
     (var-set token-name name)
     (var-set token-symbol symbol)
     (var-set token-decimals decimals)
-    (var-set issue-block block-height)
-    (var-set maturity-block (safe-add block-height maturity-in-blocks))
+    (var-set issue-block stacks-block-height)
+    (var-set maturity-block (safe-add stacks-block-height maturity-in-blocks))
     (var-set coupon-rate coupon-rate-scaled)
     (var-set coupon-frequency frequency-in-blocks)
     (var-set face-value bond-face-value)
@@ -231,11 +231,11 @@
   (let (
       (user tx-sender)
       (last-period (default-to u0 (get period (map-get? last-claimed-coupon { user: user }))))
-      (current-period (unwrap! (safe-div (unwrap! (safe-sub block-height (var-get issue-block)) (err ERR_INVALID_AMOUNT)) (var-get coupon-frequency)) (err ERR_INVALID_AMOUNT)))
+      (current-period (unwrap! (safe-div (unwrap! (safe-sub stacks-block-height (var-get issue-block)) (err ERR_INVALID_AMOUNT)) (var-get coupon-frequency)) (err ERR_INVALID_AMOUNT)))
       (balance (unwrap-panic (ft-get-balance tokenized-bond user)))
     )
     (asserts! (var-get bond-issued) ERR_BOND_NOT_ISSUED)
-    (asserts! (< block-height (var-get maturity-block)) ERR_ALREADY_MATURED)
+    (asserts! (< stacks-block-height (var-get maturity-block)) ERR_ALREADY_MATURED)
     (asserts! (> current-period last-period) ERR_NO_COUPONS_DUE)
     (asserts! (is-eq payment-token (unwrap! (var-get payment-token-contract) ERR_INVALID_AMOUNT)) ERR_INVALID_AMOUNT)
 
@@ -278,7 +278,7 @@
       (maturity (var-get maturity-block))
     )
     (asserts! (var-get bond-issued) ERR_BOND_NOT_ISSUED)
-    (asserts! (>= block-height maturity) ERR_NOT_YET_MATURED)
+    (asserts! (>= stacks-block-height maturity) ERR_NOT_YET_MATURED)
     (asserts! (> balance u0) ERR_INVALID_AMOUNT)
     (asserts! (is-eq payment-token (unwrap! (var-get payment-token-contract) ERR_INVALID_AMOUNT)) ERR_INVALID_AMOUNT)
 
@@ -300,7 +300,7 @@
         (principal-payment (unwrap! (safe-mul balance (var-get face-value)) (err ERR_INVALID_AMOUNT)))
         (total-payment (unwrap! (safe-add final-coupon-payment principal-payment) (err ERR_INVALID_AMOUNT)))
       )
-      (match (contract-call? payment-token transfer total-payment tx-sender user none)
+      (match (as-contract (contract-call? payment-token transfer total-payment tx-sender user none))
         (ok true)
         (begin
           (try! (burn-internal balance user))

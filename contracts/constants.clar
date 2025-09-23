@@ -18,7 +18,6 @@
 
 ;; Traits are referenced directly using proper contract principals
 (define-constant TRAITS_CONTRACT 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits)
-(define-constant TRAIT_CONSTANTS 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.constants-trait)
 
 ;; ===========================================
 ;; COMMON CONSTANTS

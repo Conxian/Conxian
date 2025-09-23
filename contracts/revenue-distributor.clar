@@ -8,8 +8,8 @@
 ;; - 15% to treasury
 ;; - 5% to insurance reserve
 
-(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
-(use-trait access-control-trait .all-traits.access-control-trait)
+(use-trait sip-010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
+(use-trait access-control-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.access-control-trait)
 
 ;; Error codes
 (define-constant ERR_UNAUTHORIZED (err u100))
@@ -112,7 +112,7 @@
 
 (define-private (distribute-to-stakers (token principal) (amount uint))
   ;; Integration with CXD staking system
-  (try! (contract-call? .cxd-staking distribute-rewards amount))
+  (try! (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.cxd-staking distribute-rewards amount))
   (ok true)
 )
 
@@ -133,19 +133,18 @@
   (let (
     (current-revenue (get-token-revenue token))
     (distribution-amounts (calculate-distribution-amounts amount))
-    (distribution-id (+ block-height current-revenue))
+    (distribution-id (+ stacks-block-height current-revenue))
   )
     (begin
       (when-not-paused)
       (asserts! (> amount u0) ERR_INVALID_AMOUNT)
 
-      ;; Update revenue tracking
       (map-set token-revenue token (+ current-revenue amount))
 
       ;; Record distribution
       (map-set distribution-history distribution-id
         {
-          timestamp: block-height,
+          timestamp: stacks-block-height,
           total-amount: amount,
           stakers-amount: (get stakers distribution-amounts),
           treasury-amount: (get treasury distribution-amounts),
@@ -154,20 +153,17 @@
         }
       )
 
-      ;; Execute distributions
-      (try! (distribute-to-stakers token (get stakers distribution-amounts)))
       (try! (distribute-to-treasury token (get treasury distribution-amounts)))
       (try! (distribute-to-insurance token (get insurance distribution-amounts)))
 
       ;; Update global tracking
       (var-set total-revenue-distributed (+ (var-get total-revenue-distributed) amount))
-      (var-set last-distribution block-height)
+      (var-set last-distribution stacks-block-height)
 
       (ok distribution-id)
     )
   )
 )
-
 ;; Batch revenue distribution for multiple tokens
 (define-public (distribute-multi-token-revenue (distributions (list 10 (tuple (token principal) (amount uint)))))
   (let ((results (map distribute-single-revenue distributions)))
