@@ -31,7 +31,7 @@
 
 (define-private (accumulate-results (tx-info { to: principal, method: (string-ascii 256), args: (list 10 (buff 256)) })
                                    (results (list 100 (response bool uint))))
-  (let ((result (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dex-pool (get method tx-info) (get args tx-info))))
+  (let ((result (as-contract (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dex-pool (get method tx-info) (get args tx-info)))))
     (append results result)
   )
 )

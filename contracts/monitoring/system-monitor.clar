@@ -191,13 +191,13 @@
       (fold (component-events {component: component, index: 0} {component: component, index: u1000}) 
             (lambda (event-id events)
               (let ((event (unwrap-panic (map-get? events {id: event-id}))))
-                (if (>= (get block-height event) offset)
+                (if (>= (get stacks-block-height event) offset)
                   (cons {
                     id: event-id,
                     event-type: (get event-type event),
                     severity: (get severity event),
                     message: (get message event),
-                    block-height: (get block-height event),
+                    block-height: (get stacks-block-height event),
                     data: (get data event)
                   } events)
                   events

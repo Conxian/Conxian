@@ -81,7 +81,7 @@
     (asserts! (> amount u0) ERR_INVALID_AMOUNT)
     (asserts! (is-valid-principal recipient) ERR_INVALID_AMOUNT)
     (asserts! (<= (+ (ft-get-supply tokenized-bond) amount) MAX_UINT) ERR_INVALID_AMOUNT)
-    (ft-mint? tokenized-bond amount recipient)
+    (unwrap-panic (ft-mint? tokenized-bond amount recipient))
   )
 )
 
@@ -92,7 +92,7 @@
     (asserts! (> amount u0) ERR_INVALID_AMOUNT)
     (asserts! (is-valid-principal owner) ERR_INVALID_AMOUNT)
     (asserts! (>= (ft-get-balance tokenized-bond owner) amount) ERR_INSUFFICIENT_BALANCE)
-    (ft-burn? tokenized-bond amount owner)
+    (unwrap-panic (ft-burn? tokenized-bond amount owner))
   )
 )
 
