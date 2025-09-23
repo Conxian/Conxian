@@ -2,13 +2,13 @@
 ;; Refactored for clarity, security, and correctness.
 
 ;; --- Traits ---
-(use-trait oracle-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.oracle-trait)
-(use-trait lending-system-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.lending-system-trait)
-(use-trait sip-010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
-(use-trait access-control-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.access-control-trait)
-(use-trait pool-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.pool-trait)
-(use-trait flash-loan-receiver-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.flash-loan-receiver-trait)
-(use-trait circuit-breaker-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.circuit-breaker-trait)
+(use-trait 'oracle-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.oracle-trait)
+(use-trait 'lending-system-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.lending-system-trait)
+(use-trait 'sip-010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
+(use-trait 'access-control-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.access-control-trait)
+(use-trait 'pool-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.pool-trait)
+(use-trait 'flash-loan-receiver-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.flash-loan-receiver-trait)
+(use-trait 'circuit-breaker-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.circuit-breaker-trait)
 
 (impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.lending-system-trait)
 (impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.circuit-breaker-trait)
@@ -49,16 +49,11 @@
 (define-private (check-is-owner) (ok (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)))
 (define-private (check-not-paused) (ok (asserts! (not (var-get paused)) ERR_PAUSED)))
 
-(define-private (get-asset-price (asset principal))
-  (contract-call? (var-get oracle-contract) get-price-fresh asset)
+(define-read-only (get-asset-price (asset principal))
+  (contract-call? (var-get oracle-contract) 'get-price asset)
 )
 
-(define-private (accrue-interest (asset principal))
-  (contract-call? (var-get interest-rate-model-contract) 'accrue-interest (list asset))
-)
-
-;; Calculates the total value of a user's collateral, adjusted by collateral factors.
-(define-private (get-total-collateral-value-in-usd (user principal))
+(define-read-only (get-total-collateral-value-in-usd (user principal))
   (let ((supported-assets (map-keys user-collateral-assets)))
     (fold
       (lambda (asset-tuple total-value)
@@ -77,6 +72,27 @@
       u0
     )
   )
+)
+
+(define-read-only (get-total-borrow-value-in-usd (user principal))
+  (let ((borrowed-assets (map-keys user-borrow-balances)))
+     (fold
+      (lambda (asset-tuple total-value)
+        (let ((asset (get-in-tuple? asset-tuple { asset: principal })))
+          (let ((balance (default-to u0 (map-get? user-borrow-balances { user: user, asset: asset })))
+                (price (unwrap! (get-asset-price asset) (err u0))))
+            (+ total-value (/ (* balance price) PRECISION))
+          )
+        )
+      )
+      borrowed-assets
+      u0
+    )
+  )
+)
+
+(define-private (accrue-interest (asset principal))
+  (contract-call? (var-get interest-rate-model-contract) 'accrue-interest (list asset))
 )
 
 ;; Calculates the total value of a user's borrows.

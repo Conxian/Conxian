@@ -1,15 +1,15 @@
 ;; Conxian DEX Pool - Constant product AMM pool with enhanced tokenomics integration
 ;; Implements pool-trait with full system integration
 
-(use-trait pool-trait '.pool-trait)
-(use-trait sip10-trait '.sip-010-ft-trait)
+(use-trait 'pool-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.pool-trait)
+(use-trait 'sip10-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
+
+(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.pool-trait)
+(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
 
 (define-constant ONE u1)
 (define-constant TWO u2)
 (define-constant TEN u10)
-
-(impl-trait '.pool-trait)
-(impl-trait '.sip-010-ft-trait)
 
 ;; Private helper functions
 (define-private (min (a uint) (b uint))
@@ -122,11 +122,13 @@
         false)))
 
 ;; Update daily trading statistics
+(define-map daily-stats {day: (string-ascii 10)} {volume: uint, fees: uint, trades: uint})
+
 (define-private (update-daily-stats (volume uint) (fees uint))
-  (let ((today-key "current") ;; Simplified key for enhanced deployment
+  (let ((today-key "current")
         (current-stats (default-to (tuple (volume u0) (fees u0) (trades u0))
-                                  (map-get? daily-stats today-key))))
-    (map-set daily-stats today-key
+                                (map-get? daily-stats {day: today-key}))))
+    (map-set daily-stats {day: today-key}
              (tuple (volume (+ (get volume current-stats) volume))
                     (fees (+ (get fees current-stats) fees))
                     (trades (+ (get trades current-stats) u1))))))

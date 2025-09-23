@@ -146,37 +146,103 @@
   )
 )
 
+;; @title Enhanced Circuit Breaker Trait
+;; @notice Provides comprehensive circuit breaker functionality to protect against failures and attacks
+;; @dev Implements the circuit breaker pattern with operation-specific controls, rate limiting, and monitoring
 (define-trait circuit-breaker-trait
   (
-    ;; Check if the circuit is open for a given operation
+    ;; ===== Core Circuit Breaker Functions =====
+    
+    ;; @notice Check if the circuit is open for any operation
+    ;; @return (response bool uint) true if circuit is open, false otherwise
+    (is-circuit-open () (response bool uint))
+    
+    ;; @notice Check if the circuit is open for a specific operation
+    ;; @param operation The operation identifier (max 64 chars)
+    ;; @return (response bool uint) true if circuit is open for this operation
     (check-circuit-state (operation (string-ascii 64)) (response bool uint))
 
-    ;; Record a successful operation
+    ;; @notice Record a successful operation
     (record-success (operation (string-ascii 64)) (response bool uint))
 
-    ;; Record a failed operation
+    ;; @notice Record a failed operation
     (record-failure (operation (string-ascii 64)) (response bool uint))
 
-    ;; Get the failure rate for an operation
+    ;; @notice Get the failure rate for an operation
     (get-failure-rate (operation (string-ascii 64)) (response uint uint))
 
-    ;; Get the current state of the circuit
-    (get-circuit-state (operation (string-ascii 64)) (response (tuple (state uint) (last-checked uint) (failure-rate uint)) uint))
+    ;; @notice Get the current state of the circuit
+    (get-circuit-state (operation (string-ascii 64)) 
+      (response {
+        state: uint, 
+        last-checked: uint, 
+        failure-rate: uint,
+        failure-count: uint,
+        success-count: uint
+      } uint)
+    )
 
-    ;; Manually override the circuit state (admin only)
+    ;; ===== Admin Functions =====
+    
+    ;; @notice Manually override the circuit state (admin only)
     (set-circuit-state (operation (string-ascii 64)) (state bool) (response bool uint))
 
-    ;; Set the failure threshold (admin only)
+    ;; @notice Set the failure threshold (admin only)
     (set-failure-threshold (threshold uint) (response bool uint))
 
-    ;; Set the reset timeout (admin only)
+    ;; @notice Set the reset timeout (admin only)
     (set-reset-timeout (timeout uint) (response bool uint))
 
-    ;; Get the admin address
+    ;; @notice Get the admin address
     (get-admin () (response principal uint))
 
-    ;; Transfer admin rights
+    ;; @notice Transfer admin rights
     (set-admin (new-admin principal) (response bool uint))
+    
+    ;; ===== Enhanced Features =====
+    
+    ;; @notice Set rate limit for an operation
+    (set-rate-limit (operation (string-ascii 64)) (limit uint) (window uint) (response bool uint))
+    
+    ;; @notice Get rate limit for an operation
+    (get-rate-limit (operation (string-ascii 64)) 
+      (response {
+        limit: uint, 
+        window: uint, 
+        current: uint,
+        reset-time: uint
+      } uint)
+    )
+    
+    ;; @notice Batch record successes
+    (batch-record-success (operations (list 20 (string-ascii 64))) (response bool uint))
+    
+    ;; @notice Batch record failures
+    (batch-record-failure (operations (list 20 (string-ascii 64))) (response bool uint))
+    
+    ;; @notice Get health status
+    (get-health-status () 
+      (response {
+        is_operational: bool,
+        total_failure_rate: uint,
+        last_checked: uint,
+        uptime: uint,
+        total_operations: uint,
+        failed_operations: uint
+      } uint)
+    )
+    
+    ;; @notice Set circuit breaker mode
+    (set-circuit-mode (mode (optional bool)) (response bool uint))
+    
+    ;; @notice Get circuit breaker mode
+    (get-circuit-mode () (response (optional bool) uint))
+    
+    ;; @notice Emergency shutdown (multi-sig protected)
+    (emergency-shutdown () (response bool uint))
+    
+    ;; @notice Recover from emergency shutdown (multi-sig protected)
+    (recover-from-shutdown () (response bool uint))
   )
 )
 

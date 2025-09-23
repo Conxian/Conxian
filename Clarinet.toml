@@ -11,12 +11,12 @@ wallet_3 = { mnemonic = "cycle puppy glare enroll cost improve round trend wrist
 system = { mnemonic = "theme apart absurd gasp river used vessel screen fiction slice slab ice jar hurt slam puppy snake life radar sign ship list excuse trick", balance = 100_000_000_000_000 }
 
 [network]
-api_endpoint = "http://localhost:3999"
+api_endpoint = "https://api.hiro.so"
 delay_execution_start = false
 
-[network.testnet]
-stacks_node_rpc_address = "https://api.testnet.hiro.so"
-bitcoin_node_rpc_address = "https://blockstream.info/testnet/api"
+[network.devnet]
+stacks_node_rpc_address = "https://api.hiro.so"
+bitcoin_node_rpc_address = "https://mempool.space/testnet/api"
 
 [network.mainnet]
 stacks_node_rpc_address = "https://api.hiro.so"
