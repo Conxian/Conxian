@@ -10,36 +10,36 @@ plan:
       transactions:
         - contract-publish:
             contract-name: all-traits
-            expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            expected-sender: ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6
             cost: 197750
             path: "contracts\\traits\\all-traits.clar"
             anchor-block-only: true
             clarity-version: 1
         - contract-publish:
             contract-name: comprehensive-lending-system
-            expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            cost: 161680
+            expected-sender: ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6
+            cost: 157700
             path: "contracts\\dex\\comprehensive-lending-system.clar"
             anchor-block-only: true
             clarity-version: 1
         - contract-publish:
-            contract-name: dex-pool
-            expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            cost: 127980
-            path: "contracts\\dex\\dex-pool.clar"
-            anchor-block-only: true
-            clarity-version: 1
-        - contract-publish:
             contract-name: math-lib-advanced
-            expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            cost: 133420
+            expected-sender: ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6
+            cost: 83050
             path: "contracts\\lib\\math-lib-advanced.clar"
             anchor-block-only: true
             clarity-version: 1
         - contract-publish:
+            contract-name: dex-pool
+            expected-sender: ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6
+            cost: 124190
+            path: "contracts\\dex\\dex-pool.clar"
+            anchor-block-only: true
+            clarity-version: 1
+        - contract-publish:
             contract-name: tokenized-bond
-            expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            cost: 132320
+            expected-sender: ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6
+            cost: 132050
             path: "contracts\\dimensional\\tokenized-bond.clar"
             anchor-block-only: true
             clarity-version: 1

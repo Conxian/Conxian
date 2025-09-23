@@ -9,7 +9,7 @@
 ;; - Principal payout at maturity.
 
 ;; Import traits from the all-traits.clar file
-(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
+(use-trait sip10-trait .all-traits.sip-010-ft-trait)
 (use-trait bond-trait .all-traits.bond-trait)
 
 ;; Implement the traits for this contract
@@ -40,17 +40,15 @@
 (define-data-var locked bool false)
 (define-data-var paused bool false)
 
-(define-private (non-reentrant (action (func (uint) (response bool uint))))
+(define-private (non-reentrant)
   (let ((current-locked (var-get locked)))
     (asserts! (not current-locked) ERR_REENTRANCY)
     (var-set locked true)
-    (let ((result (try! (action u0))))
-      (var-set locked false)
-      (ok result))))
+    true))
 
-(define-private (when-not-paused (action (func (uint) (response bool uint))))
+(define-private (when-not-paused)
   (asserts! (not (var-get paused)) ERR_CONTRACT_PAUSED)
-  (action u0))
+  true)
 
 ;; Constants
 (define-constant MAX_UINT (pow u2 u128))
@@ -190,7 +188,7 @@
     (var-set bond-issued true)
     
     (print {
-      event: 'bond-issued',
+      event: "bond-issued",
       name: name,
       symbol: symbol,
       decimals: decimals,
@@ -213,24 +211,28 @@
   )
 )
 
+(define-private (safe-mul (a uint) (b uint))
+  (let ((product (* a b)))
+    (asserts! (or (is-eq a (/ product b)) (is-eq b u0)) (err ERR_INVALID_AMOUNT))
+    (ok product)
+  )
+)
+
 (define-private (safe-sub (a uint) (b uint))
   (asserts! (>= a b) (err ERR_INVALID_AMOUNT))
   (ok (- a b))
 )
 
-(define-private (safe-mul (a uint) (b uint))
-  (let ((product (* a b)))
-    (asserts! (or (eq a (div product b)) (eq b 0)) (err ERR_INVALID_AMOUNT))
-    (ok product)
-  )
-)
+(define-private (safe-div (a uint) (b uint))
+  (asserts! (> b u0) (err ERR_INVALID_AMOUNT))
+  (ok (/ a b)))
 
 (define-public (claim-coupons (payment-token principal))
   (let (
       (user tx-sender)
       (last-period (default-to u0 (get period (map-get? last-claimed-coupon { user: user }))))
       (current-period (unwrap! (safe-div (unwrap! (safe-sub block-height (var-get issue-block)) (err ERR_INVALID_AMOUNT)) (var-get coupon-frequency)) (err ERR_INVALID_AMOUNT)))
-      (balance (unwrap-panic (ft-get-balance user)))
+      (balance (unwrap-panic (ft-get-balance tokenized-bond user)))
     )
     (asserts! (var-get bond-issued) ERR_BOND_NOT_ISSUED)
     (asserts! (< block-height (var-get maturity-block)) ERR_ALREADY_MATURED)
@@ -255,7 +257,7 @@
         (begin 
           (map-set last-claimed-coupon { user: user } { period: current-period })
           (print {
-            event: 'coupons-claimed',
+            event: "coupons-claimed",
             user: user,
             amount: total-coupon-payment,
             periods: periods-to-claim,
@@ -272,7 +274,7 @@
  (define-public (redeem-at-maturity (payment-token principal))
   (let (
       (user tx-sender)
-      (balance (unwrap-panic (ft-get-balance user)))
+      (balance (unwrap-panic (ft-get-balance tokenized-bond user)))
       (maturity (var-get maturity-block))
     )
     (asserts! (var-get bond-issued) ERR_BOND_NOT_ISSUED)
@@ -306,7 +308,7 @@
           (map-set last-claimed-coupon { user: user } { period: maturity-period })
           
           (print {
-            event: 'bond-redeemed',
+            event: "bond-redeemed",
             user: user,
             principal: principal-payment,
             coupon: final-coupon-payment,
@@ -362,7 +364,7 @@
     (var-set token-uri value)
     
     (print {
-      event: 'token-uri-updated',
+      event: "token-uri-updated",
       by: tx-sender,
       new-uri: value
     })

@@ -27,10 +27,67 @@ bitcoin_node_rpc_address = "https://blockstream.info/api"
 tokenized-bond = { path = "contracts/dimensional/tokenized-bond.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.tokenized-bond" }
 all-traits = { path = "contracts/traits/all-traits.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits" }
 math-lib-advanced = { path = "contracts/lib/math-lib-advanced.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math-lib-advanced" }
+circuit-breaker = { path = "contracts/circuit-breaker.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.circuit-breaker" }
+constants = { path = "contracts/constants.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.constants" }
 
 # DEX Contracts
 dex-pool = { path = "contracts/dex/dex-pool.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dex-pool" }
 comprehensive-lending-system = { path = "contracts/dex/comprehensive-lending-system.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.comprehensive-lending-system" }
+dex-factory-v2 = { path = "contracts/dex/dex-factory-v2.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dex-factory-v2" }
+legacy-adapter = { path = "contracts/dex/legacy-adapter.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.legacy-adapter" }
+manipulation-detector = { path = "contracts/dex/manipulation-detector.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.manipulation-detector" }
+mev-protector = { path = "contracts/dex/mev-protector.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.mev-protector" }
+migration-manager = { path = "contracts/dex/migration-manager.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.migration-manager" }
+monitoring-dashboard = { path = "contracts/dex/monitoring-dashboard.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.monitoring-dashboard" }
+performance-optimizer = { path = "contracts/dex/performance-optimizer.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.performance-optimizer" }
+stable-swap-pool = { path = "contracts/dex/stable-swap-pool.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.stable-swap-pool" }
+
+# Dimensional Contracts
+concentrated-liquidity-pool-v2 = { path = "contracts/dimensional/concentrated-liquidity-pool-v2.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.concentrated-liquidity-pool-v2" }
+position-nft = { path = "contracts/dimensional/position-nft.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.position-nft" }
+
+# Math Libraries
+math-lib-concentrated = { path = "contracts/math/math-lib-concentrated.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math-lib-concentrated" }
+concentrated-math = { path = "contracts/libraries/concentrated-math.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.concentrated-math" }
+
+# Token Contracts
+cxd-token = { path = "contracts/tokens/cxd-token.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.cxd-token" }
+cxlp-token = { path = "contracts/tokens/cxlp-token.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.cxlp-token" }
+cxs-token = { path = "contracts/tokens/cxs-token.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.cxs-token" }
+cxtr-token = { path = "contracts/tokens/cxtr-token.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.cxtr-token" }
+cxvg-token = { path = "contracts/tokens/cxvg-token.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.cxvg-token" }
+
+# Access Control
+AccessControl = { path = "contracts/access/AccessControl.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.AccessControl" }
+
+# Audit Registry
+audit-badge-nft = { path = "contracts/audit-registry/audit-badge-nft.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.audit-badge-nft" }
+audit-registry = { path = "contracts/audit-registry/audit-registry.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.audit-registry" }
+
+# Enterprise
+compliance-hooks = { path = "contracts/enterprise/compliance-hooks.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.compliance-hooks" }
+enterprise-api = { path = "contracts/enterprise/enterprise-api.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.enterprise-api" }
+
+# Oracle
+dimensional-oracle = { path = "contracts/oracle/dimensional-oracle.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dimensional-oracle" }
+oracle-aggregator-v2 = { path = "contracts/oracle/oracle-aggregator-v2.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.oracle-aggregator-v2" }
+
+# Monitoring
+system-monitor = { path = "contracts/monitoring/system-monitor.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.system-monitor" }
+
+# Security
+Pausable = { path = "contracts/security/Pausable.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.Pausable" }
+
+# Rewards
+rewards-distributor = { path = "contracts/rewards/rewards-distributor.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.rewards-distributor" }
+
+# Test Contracts
+test-access = { path = "contracts/test/test-access.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.test-access" }
+
+# Mock Contracts
+mock-dao = { path = "contracts/mocks/mock-dao.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.mock-dao" }
+mock-oracle = { path = "contracts/mocks/mock-oracle.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.mock-oracle" }
+mock-token = { path = "contracts/mocks/mock-token.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.mock-token" }
 
 [repl.remappings]
 # Traits

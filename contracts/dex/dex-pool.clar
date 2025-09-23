@@ -1,11 +1,11 @@
 ;; Conxian DEX Pool - Constant product AMM pool with enhanced tokenomics integration
 ;; Implements pool-trait with full system integration
 
-(use-trait 'pool-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.pool-trait)
-(use-trait 'sip10-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
+(use-trait pool-trait .all-traits.pool-trait)
+(use-trait sip10-trait .all-traits.sip-010-ft-trait)
 
-(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.pool-trait)
-(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
+(impl-trait .all-traits.pool-trait)
+(impl-trait .all-traits.sip-010-ft-trait)
 
 (define-constant ONE u1)
 (define-constant TWO u2)
@@ -16,12 +16,12 @@
   (if (< a b) a b))
 
 ;; Use math library for square root
-(define-constant MATH_CONTRACT 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math-lib-advanced)
+(define-constant MATH_CONTRACT .math-lib-advanced)
 
 (define-private (sqrt (n uint))
   (match (contract-call? MATH_CONTRACT sqrt-fixed n)
     result (ok result)
-    error (err u0)  ;; Fallback to 0 on error
+    error (err u3008)  ;; Fallback to 0 on error
   ))
 
 ;; Constants
@@ -191,9 +191,8 @@
         (reserve-x (var-get reserve-a))
         (reserve-y (var-get reserve-b))
         (shares (if (is-eq current-supply u0)
-                    ;; First liquidity provision - use math library for square root
                     (let ((product (* dx dy)))
-                      (let ((sqrt-result (unwrap! (contract-call? MATH_CONTRACT sqrt product) (err u3008))))
+                      (let ((sqrt-result (unwrap! (contract-call? MATH_CONTRACT sqrt-fixed product) (err u3008))))
                         (if (< sqrt-result MIN_LIQUIDITY)
                           (err u3008) ;; ERR_INSUFFICIENT_LIQUIDITY
                           (- sqrt-result MIN_LIQUIDITY))))
