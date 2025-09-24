@@ -204,9 +204,9 @@ plan:
             path: "contracts\\dex\\distributed-cache-manager.clar"
             clarity-version: 1
         - emulated-contract-publish:
-            contract-name: enhanced-flash-loan-vault
+            contract-name: flash-loan-vault
             emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            path: "contracts\\dex\\enhanced-flash-loan-vault.clar"
+            path: "contracts\\dex\\flash-loan-vault.clar"
             clarity-version: 1
         - emulated-contract-publish:
             contract-name: enhanced-yield-strategy

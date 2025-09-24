@@ -92,77 +92,57 @@ This commitment to a trait-driven design is what allows for the protocol's excep
 |                                (Asset & Share Management)                                |
 |                                                                                          |
 +------------------------------------------------------------------------------------------+
-                                     |
-                                     v
-+------------------------------------------------------------------------------------------+
+             ^                                       |
+             | Deposits/Withdrawals                  | Rebalance Commands
+             |                                       v
++------------------------+      +----------------------------------------------------------+
+|                        |      |                                                          |
+|   User / Application   +----->+   Yield Optimizer (`yield-optimizer.clar`)               |
+|                        |      |                                                          |
++------------------------+      +----------------------------------------------------------+
+                                      |                      ^
+                                      | Metrics Data         | Strategy Performance
+                                      v                      |
++------------------------------------+-----------------------+-----------------------------+
 |                                                                                          |
-|                                Strategy Contracts (Yield)                                |
+|         Metrics Contract (`dim-metrics.clar`)         Strategy Contracts (e.g. dim-yield-stake) |
 |                                                                                          |
 +------------------------------------------------------------------------------------------+
 ```
 
-## 3. The Core Engine: The Vault (`vault.clar`)
+## 3. The Conxian Yield System
 
-The `vault.clar` contract is the foundational engine of the Conxian Protocol. It serves as a secure, general-purpose ledger for managing user deposits and is the primary mechanism through which yield is generated and distributed. Its design is intentionally minimal and robust, focusing on the core tasks of accounting, fee collection, and interfacing with external yield-generating strategies.
+The Conxian yield system is a sophisticated, multi-component architecture designed to dynamically optimize and distribute yield across the entire protocol. It is composed of three primary components: the Yield Optimizer, the Vault, and various Strategy Contracts. This separation of concerns creates a powerful, transparent, and highly flexible system for maximizing returns.
 
-### 3.1. Share-Based Accounting: The Core Mechanism
+### 3.1. The Brain: The Yield Optimizer (`yield-optimizer.clar`)
 
-The vault operates on a share-based accounting model, a common and battle-tested standard in DeFi. When a user deposits an asset into the vault, they are minted "shares" that represent their proportional ownership of the vault's total assets. The value of these shares fluctuates as the assets held by the vault increase (through yield from strategies) or decrease.
+The `yield-optimizer.clar` contract is the core intelligence of the yield system. It is a system-wide contract responsible for analyzing, comparing, and selecting the most profitable yield-generating strategies available to the protocol.
 
-This entire mechanism is governed by two key private functions within the `vault.clar` contract:
+Key functions of the optimizer include:
+*   **Strategy Registry:** The optimizer maintains a registry of all approved yield strategies, from simple staking contracts like `dim-yield-stake.clar` to more complex liquidity positions in the DEX.
+*   **Metrics-Driven Analysis:** Periodically, authorized keeper bots call the optimizer's `optimize-and-rebalance` function. This function queries the central `dim-metrics.clar` contract to gather real-time performance data (e.g., APY, risk scores, capacity) for all active strategies.
+*   **Automated Decision-Making:** The optimizer contains the core algorithm for weighing the "pros and cons" of each strategy. It uses the gathered metrics to identify which strategy, or combination of strategies, currently offers the best risk-adjusted return.
+*   **Rebalancing Commands:** Once the optimal allocation is determined, the optimizer issues a `rebalance` command to the main `vault.clar` contract, instructing it on how to move funds to capitalize on the best opportunities.
 
-*   **`calculate-shares`**: This function determines how many shares a user receives for a given deposit amount. The calculation is based on the ratio of the current total shares to the current total balance of the asset in the vault.
+### 3.2. The Treasury: The Vault (`vault.clar`)
 
-    ```clarity
-    (define-private (calculate-shares (asset principal) (amount uint))
-      (let ((total-balance (unwrap-panic (get-total-balance asset)))
-            (total-shares (unwrap-panic (get-total-shares asset))))
-        (if (is-eq total-shares u0)
-            amount ;; First deposit: 1 share = 1 unit of asset
-            (/ (* amount total-shares) total-balance))))
-    ```
+The `vault.clar` contract serves as the central treasury and accounting layer for the protocol's assets. It is a passive container for user funds, designed to be controlled by the `yield-optimizer`.
 
-*   **`calculate-amount`**: This function does the reverse, determining how much of the underlying asset a user is entitled to when they redeem a certain number of shares.
+The vault's primary responsibilities are:
+*   **Share-Based Accounting:** The vault uses a standard, battle-tested share accounting model. Users deposit assets and receive shares representing their proportional ownership of the vault's total assets. The value of these shares appreciates as the optimizer successfully generates yield.
+*   **Fund Custody:** The vault securely holds all user deposits that are not currently deployed in a strategy.
+*   **Executing Rebalances:** The vault exposes a `rebalance` function that can only be called by the authorized `yield-optimizer` contract. When called, this function executes the optimizer's commands, moving assets from the vault to the chosen strategy contracts.
 
-    ```clarity
-    (define-private (calculate-amount (asset principal) (shares uint))
-      (let ((total-balance (unwrap-panic (get-total-balance asset)))
-            (total-shares (unwrap-panic (get-total-shares asset))))
-        (if (is-eq total-shares u0)
-            u0
-            (/ (* shares total-balance) total-shares))))
-    ```
+This design cleanly separates the complex decision-making logic (in the optimizer) from the simple, secure asset management logic (in the vault).
 
-This elegant system ensures that all depositors share in the yield generated by the vault's strategies in a fair and mathematically precise manner.
+### 3.3. The Hands: Strategy Contracts
 
-### 3.2. Interaction with Yield Strategies
+Strategy contracts are where the assets are actually put to work. Any contract that adheres to the `strategy-trait` can be registered with the optimizer. This could include:
+*   **Staking Contracts:** Such as `dim-yield-stake.clar`, where assets are staked to earn rewards.
+*   **Lending Pools:** Supplying assets to the `comprehensive-lending-system.clar` to earn interest.
+*   **Liquidity Positions:** Providing liquidity to DEX pools to earn trading fees.
 
-The vault itself does not generate yield. Instead, it acts as a container for assets, which are then deployed to external "strategy" contracts to be put to work. This separation of the vault (the ledger) from the strategies (the business logic) is a critical design choice that enhances both security and flexibility.
-
-The relationship between the vault and its strategies is managed through the `asset-strategies` map:
-
-```clarity
-(define-map asset-strategies principal principal) ;; asset -> strategy contract
-```
-
-When a user deposits funds, the vault can (based on the logic in the strategy contract, which is called by the vault) deploy these funds to the registered strategy for that asset. Similarly, when a user wishes to withdraw, the vault can pull the necessary funds back from the strategy. This allows the Conxian Protocol to support a wide variety of yield-generating activities—from providing liquidity to the DEX to lending assets in the money market—without altering the core vault logic.
-
-### 3.3. Fees, Governance, and Security
-
-The `vault.clar` contract includes several features that ensure its sustainability and security:
-
-*   **Fee Structure:** The vault collects fees on deposits and withdrawals, which are directed to the protocol treasury. These fees are configurable by the administrator.
-
-    ```clarity
-    (define-data-var deposit-fee-bps uint u50) ;; 0.5% default
-    (define-data-var withdrawal-fee-bps uint u100) ;; 1% default
-    ```
-
-*   **Administrative Control:** A designated `admin` principal has the authority to manage the vault's parameters. This includes setting fees, pausing the contract in an emergency, adding new supported assets, and setting deposit caps (`vault-caps`). This provides a crucial layer of control for managing risk and responding to changing market conditions.
-
-*   **Security Measures:** The contract includes essential security checks, such as pausing functionality (`(var-get paused)`), input validation (`(asserts! (> amount u0) ...)`), and cap enforcement (`ERR_CAP_EXCEEDED`), to protect user funds.
-
-In summary, the `vault.clar` contract is a masterclass in secure, modular, and effective smart contract design. It provides the solid foundation upon which the entire Conxian ecosystem is built.
+This modular, open architecture allows the Conxian protocol to continuously adapt and integrate new yield-generating opportunities as they arise, ensuring the system remains competitive and efficient over the long term.
 
 ## 4. The Liquidity Hub: The Decentralized Exchange (DEX)
 

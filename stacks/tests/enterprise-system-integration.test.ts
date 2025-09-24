@@ -79,7 +79,7 @@ describe('Enterprise Loan System Integration Tests', () => {
       
       // Add supported asset to flash loan vault
       const setupResult = simnet.callPublicFn(
-        'enhanced-flash-loan-vault',
+        'flash-loan-vault',
         'add-supported-asset',
         [
           Cl.principal(testAsset),
@@ -92,7 +92,7 @@ describe('Enterprise Loan System Integration Tests', () => {
       
       // Check flash loan fee calculation
       const feeResult = simnet.callReadOnlyFn(
-        'enhanced-flash-loan-vault',
+        'flash-loan-vault',
         'get-flash-loan-fee',
         [
           Cl.principal(testAsset),
@@ -111,7 +111,7 @@ describe('Enterprise Loan System Integration Tests', () => {
       const testAsset = `${deployer}.mock-token`;
       
       const maxLoanResult = simnet.callReadOnlyFn(
-        'enhanced-flash-loan-vault',
+        'flash-loan-vault',
         'get-max-flash-loan',
         [Cl.principal(testAsset)],
         deployer

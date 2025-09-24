@@ -35,7 +35,7 @@ Conxian represents a **comprehensive DeFi ecosystem on Stacks** with **productio
 
 💰 COMPREHENSIVE LENDING SYSTEM (7)
 ├── comprehensive-lending-system.clar - Supply/borrow/liquidation protocol
-├── enhanced-flash-loan-vault.clar - ERC-3156 flash loans with reentrancy protection
+├── flash-loan-vault.clar - A specialized vault for executing ERC-3156 compatible flash loans.
 ├── interest-rate-model.clar - Dynamic utilization-based rates
 ├── loan-liquidation-manager.clar - Automated liquidation system
 ├── lending-protocol-governance.clar - Community parameter management
@@ -43,7 +43,7 @@ Conxian represents a **comprehensive DeFi ecosystem on Stacks** with **productio
 └── lending-system-trait.clar - Lending protocol interface definitions
 
 🏦 CORE INFRASTRUCTURE (15)
-├── vault.clar - Share-based accounting with precision integration
+├── vault.clar - Core user asset vault with an internal, metrics-driven yield engine.
 ├── cxd-staking.clar - Staking contract for CXD tokens
 ├── cxd-token.clar - Main CXD token contract
 ├── cxlp-migration-queue.clar - CXLP token migration management
