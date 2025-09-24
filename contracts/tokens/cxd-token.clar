@@ -24,18 +24,18 @@
 
 ;; --- Storage ---
 (define-data-var contract-owner principal tx-sender)
-(define-data-var total-supply uint u0)
 (define-data-var decimals uint u6)
 (define-data-var name (string-ascii 32) "Conxian Revenue Token")
 (define-data-var symbol (string-ascii 10) "CXD")
 (define-data-var token-uri (optional (string-utf8 256)) none)
 
-;; Integration contracts
+;;# Integration contracts
 (define-data-var staking-contract principal .cxd-staking)
 (define-data-var revenue-distributor-contract principal .revenue-distributor)
 (define-data-var emission-controller-contract principal .token-emission-controller)
 (define-data-var invariant-monitor-contract principal .protocol-invariant-monitor)
 (define-data-var system-coordinator-contract principal .token-system-coordinator)
+(define-data-var token-coordinator (optional principal) none)
 
 ;; Enhanced storage
 (define-map balances principal uint)
@@ -64,7 +64,7 @@
   "Check if system operations are paused"
   (if (var-get system-integration-enabled)
     (match (var-get protocol-monitor)
-      monitor (contract-call? monitor is-paused)
+      monitor (unwrap-panic (contract-call? monitor is-paused))
       false)
     false))
 
@@ -72,7 +72,7 @@
   "Check if token emission is allowed for the given amount"
   (if (var-get system-integration-enabled)
     (match (var-get emission-controller)
-      controller (contract-call? controller can-emit amount)
+      controller (unwrap-panic (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.emission-controller can-emit amount))
       true)
     true))
 
@@ -81,7 +81,7 @@
   (if (var-get system-integration-enabled)
     (begin
       (match (var-get token-coordinator)
-        coordinator (contract-call? coordinator on-transfer amount sender recipient)
+        coordinator (unwrap-panic (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.token-system-coordinator on-transfer amount sender recipient))
         true)
       true)
     true))
@@ -91,7 +91,7 @@
   (if (var-get system-integration-enabled)
     (begin
       (match (var-get token-coordinator)
-        coordinator (contract-call? coordinator on-mint amount recipient)
+        coordinator (unwrap-panic (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.token-system-coordinator on-mint amount recipient))
         true)
       true)
     true))
@@ -101,7 +101,7 @@
   (if (var-get system-integration-enabled)
     (begin
       (match (var-get token-coordinator)
-        coordinator (contract-call? coordinator on-burn amount sender)
+        coordinator (unwrap-panic (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.token-system-coordinator on-burn amount sender))
         true)
       true)
     true))
@@ -224,7 +224,7 @@
 (define-public (transfer (amount uint) (sender principal) (recipient principal) (memo (optional (buff 34))))
   (begin
     (asserts! (is-eq tx-sender sender) (err ERR_UNAUTHORIZED))
-    (asserts! (not (check-system-pause-status)) (err ERR_SYSTEM_PAUSED))
+    (asserts! (not (check-system-pause)) (err ERR_SYSTEM_PAUSED))
     
     (let ((sender-bal (default-to u0 (map-get? balances {who: sender}))))
       (asserts! (>= sender-bal amount) (err ERR_NOT_ENOUGH_BALANCE))
@@ -315,7 +315,7 @@
 (define-public (mint (recipient principal) (amount uint))
   (begin
     (asserts! (or (is-owner tx-sender) (is-minter tx-sender)) (err ERR_UNAUTHORIZED))
-    (asserts! (not (check-system-pause-status)) (err ERR_SYSTEM_PAUSED))
+    (asserts! (not (check-system-pause)) (err ERR_SYSTEM_PAUSED))
     
     ;; Check emission limits if emission controller is configured
     (let ((result 
@@ -354,7 +354,7 @@
 (define-public (burn (amount uint))
   (let ((bal (default-to u0 (map-get? balances tx-sender)))
         (supply (var-get total-supply)))
-    (asserts! (not (check-system-pause-status)) (err ERR_SYSTEM_PAUSED))
+    (asserts! (not (check-system-pause)) (err ERR_SYSTEM_PAUSED))
     
     (map-set balances tx-sender (unwrap! (safe-sub bal amount) (err ERR_NOT_ENOUGH_BALANCE)))
     (var-set total-supply (unwrap! (safe-sub supply amount) (err ERR_NOT_ENOUGH_BALANCE)))

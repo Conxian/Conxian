@@ -30,7 +30,7 @@
 )
 
 (define-read-only (get-owner (token-id uint))
-  (nft-get-owner? (as-contract tx-sender) token-id)
+  (ok (nft-get-owner? audit-badge-nft token-id))
 )
 
 (define-read-only (get-token-uri (token-id uint))

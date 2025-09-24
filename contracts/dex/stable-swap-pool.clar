@@ -35,8 +35,8 @@
         (current-balance-y (var-get balance-y)))
     (asserts! (and (> amount-x u0) (> amount-y u0)) ERR_INVALID_AMOUNTS)
     
-    (try! (contract-call? (var-get token-x-trait) transfer amount-x tx-sender (as-contract tx-sender) none))
-    (try! (contract-call? (var-get token-y-trait) transfer amount-y tx-sender (as-contract tx-sender) none))
+    (try! (as-contract (contract-call? (var-get token-x-trait) transfer amount-x tx-sender (as-contract tx-sender) none)))
+    (try! (as-contract (contract-call? (var-get token-y-trait) transfer amount-y tx-sender (as-contract tx-sender) none)))
     
     (var-set balance-x (+ current-balance-x amount-x))
     (var-set balance-y (+ current-balance-y amount-y))

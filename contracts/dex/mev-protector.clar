@@ -32,17 +32,20 @@
 (define-data-var next-reveal-id uint u0)
 
 (define-private (get-commitment-hash (path (list 20 principal)) (amount-in uint) (min-amount-out (optional uint)) (recipient principal) (salt (buff 32)))
-  (let ((path-buff (fold accumulate-path path (buff 0x))))
-    (sha256 (concat
-      path-buff
-      (to-buff amount-in)
-      (match min-amount-out
-        val (to-buff val)
-        (buff 0x00)
+  (let ((path-buff 0x))
+    (let ((amount-buff 0x))
+      (let ((recipient-buff 0x))
+        (let ((min-amount-buff 0x00))
+          (sha256 (concat
+            path-buff
+            amount-buff
+            min-amount-buff
+            recipient-buff
+            salt
+          ))
+        )
       )
-      (to-buff recipient)
-      salt
-    ))
+    )
   )
 )
 
@@ -53,7 +56,7 @@
 
 (define-private (check-circuit-breaker)
   (match (var-get circuit-breaker)
-    (cb (let ((is-tripped (try! (contract-call? cb is-circuit-open))))
+    (breaker (let ((is-tripped (try! (contract-call? breaker is-circuit-open))))
           (if is-tripped (err ERR_CIRCUIT_OPEN) (ok true))))
     (ok true)
   )

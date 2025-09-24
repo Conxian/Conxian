@@ -112,7 +112,7 @@
 
 (define-private (distribute-to-stakers (token principal) (amount uint))
   ;; Integration with CXD staking system
-  (try! (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.cxd-staking distribute-rewards amount))
+  (try! (as-contract (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.cxd-staking distribute-rewards amount)))
   (ok true)
 )
 

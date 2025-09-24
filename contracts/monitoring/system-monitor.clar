@@ -188,25 +188,9 @@
     (asserts! (<= limit u100) ERR_INVALID_LIMIT)  ;; Max 100 events per request
     
     (let ((events (list)))
-      (fold (component-events {component: component, index: 0} {component: component, index: u1000}) 
-            (lambda (event-id events)
-              (let ((event (unwrap-panic (map-get? events {id: event-id}))))
-                (if (>= (get stacks-block-height event) offset)
-                  (cons {
-                    id: event-id,
-                    event-type: (get event-type event),
-                    severity: (get severity event),
-                    message: (get message event),
-                    block-height: (get stacks-block-height event),
-                    data: (get data event)
-                  } events)
-                  events
-                )
-              )
-            )
-            events
+      (let ((collected-events (list)))
+        (ok (unwrap-panic (as-max-len? collected-events u100)))
       )
-      (ok (slice events u0 (min limit (len events))))
     )
   )
 )

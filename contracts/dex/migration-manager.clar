@@ -16,11 +16,11 @@
     (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
     (asserts! (not (default-to false (map-get? migrated-users user))) ERR_MIGRATION_ALREADY_PERFORMED)
 
-    (let ((lp-balance (try! (contract-call? (var-get old-dex-contract) get-lp-balance user))))
+    (let ((lp-balance (try! (as-contract (contract-call? (var-get old-dex-contract) get-lp-balance user)))))
       (if (> lp-balance u0)
         (begin
-          (try! (contract-call? (var-get old-dex-contract) transfer-lp-to-contract user lp-balance))
-          (try! (contract-call? (var-get new-dex-contract) mint-lp user lp-balance))
+          (try! (as-contract (contract-call? (var-get old-dex-contract) transfer-lp-to-contract user lp-balance)))
+          (try! (as-contract (contract-call? (var-get new-dex-contract) mint-lp user lp-balance)))
         )
         (ok true)
       )

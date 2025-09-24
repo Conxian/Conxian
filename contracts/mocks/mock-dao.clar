@@ -41,10 +41,7 @@
 )
 
 (define-read-only (get-total-voting-power)
-  (let ((total 0))
-    (map-fold (fn (user-entry total) 
-      (ok (+ total (get amount user-entry)))
-    ) 0 voting-powers)
+  (let ((total 0)) 0 voting-powers)
   )
 )
 

@@ -27,7 +27,7 @@
     (try! (check-circuit-breaker))
     (let ((ma (get-moving-average token-a token-b u10)))
       (if (is-some ma)
-        (let ((deviation (/ (* (abs (- (unwrap-panic ma) price)) u10000) (unwrap-panic ma))))
+        (let ((deviation (/ (* (if (< (unwrap-panic ma) price) (- price (unwrap-panic ma)) (- (unwrap-panic ma) price)) u10000) (unwrap-panic ma))))
           (if (> deviation u1000)
             (begin
               (try! (trip-circuit-breaker))
@@ -51,19 +51,16 @@
   (let ((prices (get-price-history token-a token-b period)))
     (if (> (len prices) u0)
       (some (/ (fold + prices u0) (len prices)))
-      (none)
+      none
     )
   )
 )
 
 (define-private (get-price-history (token-a principal) (token-b principal) (period uint))
   (let ((current-block stacks-block-height))
-    (fold (lambda (i acc)
-      (match (map-get? price-history { token-a: token-a, token-b: token-b, block: (- current-block i) })
-        (ok (> (- stacks-block-height last-updated) (var-get heartbeat-interval)))
-        (none) acc
-      )
-    ) (range period) (list))
+    (let ((prices (list)))
+      (ok (unwrap-panic (as-max-len? prices u100)))
+    )
   )
 )
 

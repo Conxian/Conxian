@@ -27,7 +27,7 @@
   )
 )
 
-(define-trait sip-010-ft-mintable-trait
+(define-trait sip-010-ft-trait
   (
     (transfer (uint principal principal (optional (buff 34))) (response bool uint))
     (get-balance (principal) (response uint uint))
@@ -36,7 +36,6 @@
     (get-name () (response (string-ascii 32) uint))
     (get-symbol () (response (string-ascii 10) uint))
     (get-token-uri () (response (optional (string-utf8 256)) uint))
-    (mint (principal uint) (response bool uint))
   )
 )
 
