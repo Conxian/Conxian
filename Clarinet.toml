@@ -24,6 +24,7 @@ bitcoin_node_rpc_address = "https://blockstream.info/api"
 
 [contracts]
 # Core Contracts
+vault = { path = "contracts/vault.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.vault" }
 tokenized-bond = { path = "contracts/dimensional/tokenized-bond.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.tokenized-bond" }
 all-traits = { path = "contracts/traits/all-traits.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits" }
 math-lib-advanced = { path = "contracts/lib/math-lib-advanced.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math-lib-advanced" }
@@ -42,7 +43,7 @@ cxvg-utility = { path = "contracts/dex/cxvg-utility.clar", address = "ST3PPMPR7S
 dex-factory = { path = "contracts/dex/dex-factory.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dex-factory" }
 dex-router = { path = "contracts/dex/dex-router.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dex-router" }
 distributed-cache-manager = { path = "contracts/dex/distributed-cache-manager.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.distributed-cache-manager" }
-enhanced-flash-loan-vault = { path = "contracts/dex/enhanced-flash-loan-vault.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.enhanced-flash-loan-vault" }
+flash-loan-vault = { path = "contracts/dex/flash-loan-vault.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.flash-loan-vault" }
 enhanced-yield-strategy = { path = "contracts/dex/enhanced-yield-strategy.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.enhanced-yield-strategy" }
 enterprise-loan-manager = { path = "contracts/dex/enterprise-loan-manager.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.enterprise-loan-manager" }
 interest-rate-model = { path = "contracts/dex/interest-rate-model.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.interest-rate-model" }
@@ -107,12 +108,17 @@ Pausable = { path = "contracts/security/Pausable.clar", address = "ST3PPMPR7SAY4
 
 # Rewards
 rewards-distributor = { path = "contracts/rewards/rewards-distributor.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.rewards-distributor" }
+yield-distributor = { path = "contracts/rewards/yield-distributor.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.yield-distributor" }
+yield-optimizer = { path = "contracts/rewards/yield-optimizer.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.yield-optimizer" }
 
 # Test Contracts
 test-access = { path = "contracts/test/test-access.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.test-access" }
 
 # Mock Contracts
 mock-token = { path = "contracts/mocks/mock-token.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.mock-token" }
+mock-metrics = { path = "contracts/mocks/mock-metrics.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.mock-metrics" }
+mock-strategy-a = { path = "contracts/mocks/mock-strategy-a.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.mock-strategy-a" }
+mock-strategy-b = { path = "contracts/mocks/mock-strategy-b.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.mock-strategy-b" }
 
 [repl.remappings]
 # Traits

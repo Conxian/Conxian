@@ -1,6 +1,5 @@
-;; enhanced-flash-loan-vault.clar
-;; Enhanced vault with comprehensive flash loan implementation
-;; Extends the basic vault with full flash loan functionality
+;; flash-loan-vault.clar
+;; A specialized vault for executing ERC-3156 compatible flash loans.
 
 ;; Import traits at the top
 (use-trait sip-010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)

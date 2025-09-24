@@ -89,17 +89,17 @@
     (print "=== PHASE 2: Flash Loan System Tests ===")
     
     ;; Setup flash loan vault with test asset
-    (let ((setup-result (contract-call? .enhanced-flash-loan-vault add-supported-asset 
+    (let ((setup-result (contract-call? .flash-loan-vault add-supported-asset
                                         TEST_LOAN_ASSET u1000000000000000000000000))) ;; 1M cap
       (record-test-result "flash-loan-setup" (is-ok setup-result) "Flash loan vault asset setup"))
     
     ;; Test flash loan fee calculation
-    (let ((fee-result (contract-call? .enhanced-flash-loan-vault get-flash-loan-fee 
+    (let ((fee-result (contract-call? .flash-loan-vault get-flash-loan-fee
                                       TEST_LOAN_ASSET SMALL_LOAN_AMOUNT)))
       (record-test-result "flash-loan-fee" (is-ok fee-result) "Flash loan fee calculation"))
     
     ;; Test max flash loan amount
-    (let ((max-result (contract-call? .enhanced-flash-loan-vault get-max-flash-loan TEST_LOAN_ASSET)))
+    (let ((max-result (contract-call? .flash-loan-vault get-max-flash-loan TEST_LOAN_ASSET)))
       (record-test-result "flash-loan-max" (is-ok max-result) "Max flash loan amount check"))
     
     (print "✅ Flash loan system tests completed")
@@ -367,7 +367,7 @@
     
     ;; Check all critical systems are deployed and functional
     (let ((math-check (is-ok (contract-call? .math-lib-advanced sqrt u1000000000000000000)))
-          (flash-check (is-ok (contract-call? .enhanced-flash-loan-vault get-deposit-fee)))
+          (flash-check (is-ok (contract-call? .flash-loan-vault get-deposit-fee)))
           (loan-check (is-ok (contract-call? .enterprise-loan-manager get-system-stats)))
           (bond-check (is-ok (contract-call? .bond-issuance-system get-system-overview)))
           (yield-check (is-ok (contract-call? .yield-distribution-engine get-system-overview)))

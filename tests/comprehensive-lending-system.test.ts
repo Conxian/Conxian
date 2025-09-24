@@ -183,7 +183,7 @@ describe('Comprehensive Lending System Tests', () => {
   describe('Enhanced Flash Loan Vault', () => {
     it('should track flash loan statistics', () => {
       const result = simnet.callReadOnlyFn(
-        'enhanced-flash-loan-vault',
+        'flash-loan-vault',
         'get-flash-loan-stats',
         [],
         user1
@@ -193,7 +193,7 @@ describe('Comprehensive Lending System Tests', () => {
 
     it('should calculate flash loan fees correctly', () => {
       const result = simnet.callReadOnlyFn(
-        'enhanced-flash-loan-vault',
+        'flash-loan-vault',
         'calculate-flash-loan-fee',
         [
           Cl.principal(mockToken),
@@ -206,7 +206,7 @@ describe('Comprehensive Lending System Tests', () => {
 
     it('should prevent reentrancy attacks', () => {
       const result = simnet.callPublicFn(
-        'enhanced-flash-loan-vault',
+        'flash-loan-vault',
         'flash-loan',
         [
           Cl.principal(mockToken),

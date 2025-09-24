@@ -14,14 +14,14 @@ For detailed product-level requirements, see `documentation/prd/` (e.g., `VAULT.
 ## Core Contracts (Framework Level)
 
 ### Foundation Layer
-- `vault.clar` – Share-based accounting, caps, dynamic fees, precision math integration
+- `vault.clar` – Core user asset vault with an internal, metrics-driven yield engine.
 - `math-lib-advanced.clar` – Advanced mathematical functions (sqrt, pow, ln, exp) using Newton-Raphson and Taylor series
 - `fixed-point-math.clar` – Precise arithmetic operations with proper rounding modes for 18-decimal precision
 - `precision-calculator.clar` – Validation and benchmarking tools for mathematical operations
 
 ### Lending & Flash Loan Framework
 - `comprehensive-lending-system.clar` – Framework lending protocol with supply, borrow, liquidation, and flash loans
-- `enhanced-flash-loan-vault.clar` – Basic ERC-3156 compatible flash loan framework with reentrancy protection
+- `flash-loan-vault.clar` – A specialized vault for executing ERC-3156 compatible flash loans.
 - `interest-rate-model.clar` – Dynamic interest rate calculation framework based on utilization curves
 - `loan-liquidation-manager.clar` – Basic liquidation framework with keeper incentive structure
 - `lending-protocol-governance.clar` – Community governance framework for protocol parameters
@@ -57,7 +57,7 @@ For detailed product-level requirements, see `documentation/prd/` (e.g., `VAULT.
 - `real-time-monitoring-dashboard.clar` – Monitoring framework structure
 - `transaction-batch-processor.clar` – Transaction batch processing framework
   
-Traits & Interfaces: `vault-trait`, `vault-admin-trait`, `strategy-trait`, `pool-trait`, `sip-010-trait`.
+Traits & Interfaces: `vault-trait`, `vault-admin-trait`, `pool-trait`, `sip-010-trait`.
 
 ## Differentiation via Bitcoin Layers (Planned / Partially Enabled)
 
