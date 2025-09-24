@@ -47,8 +47,8 @@
   ;; Compare principals directly instead of converting to uint
   (if (is-eq token-a token-b)
     (err ERR_INVALID_TOKENS)
-    (let ((token-a-str (unwrap! (as-max-len? (to-buff token-a) u20) token-a))
-          (token-b-str (unwrap! (as-max-len? (to-buff token-b) u20) token-b)))
+    (let ((token-a-str (unwrap! (as-max-len? (to-consensus-buff token-a) u20) token-a))
+          (token-b-str (unwrap! (as-max-len? (to-consensus-buff token-b) u20) token-b)))
       (if (< (buff-to-uint-be token-a-str) (buff-to-uint-be token-b-str))
         (ok { token-a: token-a, token-b: token-b })
         (ok { token-a: token-b, token-b: token-a })

@@ -39,15 +39,72 @@
   )
 )
 
+(define-trait sip-010-ft-mintable-trait
+  (
+    (mint (uint principal) (response bool uint))
+    (burn (uint principal) (response bool uint))
+    (get-token-uri () (response (optional (string-utf8 256)) uint))
+  )
+)
+
+(define-trait sip-009-nft-trait
+  (
+    (transfer (uint principal principal (optional (buff 34))) (response bool uint))
+    (get-owner (uint) (response (optional principal) uint))
+    (get-token-uri (uint) (response (optional (string-utf8 256)) uint))
+  )
+)
+
 (define-trait bond-trait
   (
-    (issue-bond (string-ascii 32) (string-ascii 10) uint uint uint uint uint principal) (response bool uint)
+    (issue-bond (string-ascii 32) (string-ascii 10) uint uint uint uint uint principal) (response bool uint))
     (claim-coupon () (response uint uint))
     (redeem-at-maturity (principal) (response uint uint))
     (get-maturity-block () (response uint uint))
     (get-coupon-rate () (response uint uint))
     (get-face-value () (response uint uint))
     (get-payment-token () (response principal uint))
+  )
+)
+
+(define-trait pausable-trait
+  (
+    (pause () (response bool uint))
+    (unpause () (response bool uint))
+    (is-paused () (response bool uint))
+  )
+)
+
+(define-trait access-control-trait
+  (
+    (has-role (principal (string-ascii 32)) (response bool uint))
+    (grant-role (principal (string-ascii 32)) (response bool uint))
+    (revoke-role (principal (string-ascii 32)) (response bool uint))
+  )
+)
+
+(define-trait oracle-trait
+  (
+    (get-price (principal) (response uint uint))
+    (update-price (principal uint) (response bool uint))
+  )
+)
+
+(define-trait dimensional-oracle-trait
+  (
+    (get-price (principal) (response uint uint))
+    (update-price (principal uint) (response bool uint))
+    (add-price-feed (principal principal) (response bool uint))
+    (remove-price-feed (principal) (response bool uint))
+  )
+)
+
+(define-trait compliance-hooks-trait
+  (
+    (before-transfer (principal principal uint (optional (buff 34))) (response bool uint))
+    (after-transfer (principal principal uint (optional (buff 34))) (response bool uint))
+  )
+)
     (is-matured () (response bool uint))
     (get-next-coupon-block (principal) (response (optional uint) uint))
   )
