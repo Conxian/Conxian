@@ -6,7 +6,7 @@
 (define-constant ERR_TOKEN_NOT_MAPPED (err u9202))
 
 (define-data-var contract-owner principal tx-sender)
-(define-data-var new-dex-contract principal .dex-v2)
+(define-data-var new-dex-contract principal 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dex-v2)
 
 (define-map token-map principal principal)
 
@@ -22,7 +22,7 @@
   (let ((new-token-in (unwrap! (map-get? token-map token-in) (err ERR_TOKEN_NOT_MAPPED)))
         (new-token-out (unwrap! (map-get? token-map token-out) (err ERR_TOKEN_NOT_MAPPED))))
     (print { message: "Legacy swap function called, forwarding to new DEX", token-in: new-token-in, token-out: new-token-out, amount-in: amount-in })
-    (contract-call? (var-get new-dex-contract) swap new-token-in new-token-out amount-in)
+    (as-contract (contract-call? (var-get new-dex-contract) swap new-token-in new-token-out amount-in))
   )
 )
 

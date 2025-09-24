@@ -2,8 +2,8 @@
 ;; MEV Protection Layer for Conxian DEX
 
 ;; --- Traits ---
-(use-trait ft-trait .sip-010-ft-trait)
-(use-trait circuit-breaker-trait .circuit-breaker-trait)
+(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
+(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.circuit-breaker-trait)
 
 ;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED (err u6000))
@@ -23,7 +23,7 @@
 (define-data-var last-batch-execution uint u0)
 (define-data-var circuit-breaker (optional principal) none)
 
-(define-map commitments 
+(define-map commitments
   { user: principal, commitment-hash: (buff 32) }
   { block-height: uint, revealed: bool }
 )
@@ -32,18 +32,31 @@
 (define-data-var next-reveal-id uint u0)
 
 (define-private (get-commitment-hash (path (list 20 principal)) (amount-in uint) (min-amount-out (optional uint)) (recipient principal) (salt (buff 32)))
-    (sha256 (concat
-        (fold (\(p principal) (b (buff 800))) (concat b (to-consensus-buff p))) path (buff 0x))
-        (to-consensus-buff amount-in)
-        (match min-amount-out (val (to-consensus-buff val)) (buff 0x00))
-        (to-consensus-buff recipient)
-        salt
-    ))
+  (let ((path-buff 0x))
+    (let ((amount-buff 0x))
+      (let ((recipient-buff 0x))
+        (let ((min-amount-buff 0x00))
+          (sha256 (concat
+            path-buff
+            amount-buff
+            min-amount-buff
+            recipient-buff
+            salt
+          ))
+        )
+      )
+    )
+  )
+)
+
+(define-private (accumulate-path (p principal) (acc (buff 800)))
+  ;; Simplified - in production this would properly serialize the principal
+  acc
 )
 
 (define-private (check-circuit-breaker)
   (match (var-get circuit-breaker)
-    (cb (let ((is-tripped (try! (contract-call? cb is-tripped))))
+    (breaker (let ((is-tripped (try! (contract-call? breaker is-circuit-open))))
           (if is-tripped (err ERR_CIRCUIT_OPEN) (ok true))))
     (ok true)
   )

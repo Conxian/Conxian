@@ -6,21 +6,33 @@
 (define-constant MIN_TICK (- MAX_TICK))
 (define-constant TICK_BASE u10000)  ;; 1.0001 in fixed-point with 4 decimals
 
+;; Math library contract (to be set by admin)
+(define-data-var math-contract principal 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math-lib-advanced)
+
 ;; Calculate sqrt price from tick using fixed-point arithmetic
 (define-read-only (tick-to-sqrt-price (tick int))
-  (if (>= tick 0)
-    (sqrt (pow TICK_BASE (to-uint tick)))
-    (div Q64 (sqrt (pow TICK_BASE (to-uint (- tick)))))
-  ))
+  (let ((math-addr (var-get math-contract)))
+    (if (>= tick 0)
+      (let ((base-power (try! (contract-call? math-addr pow TICK_BASE (to-uint tick)))))
+        (contract-call? math-addr sqrt base-power))
+      (let ((base-power (try! (contract-call? math-addr pow TICK_BASE (to-uint (- tick))))))
+        (let ((sqrt-result (try! (contract-call? math-addr sqrt base-power))))
+          (ok (/ Q64 sqrt-result))))
+    )
+  )
+)
 
 ;; Calculate tick from sqrt price using fixed-point arithmetic
 (define-read-only (sqrt-price-to-tick (sqrt-price uint))
-  (let (
-      (log-sqrt (log2 (div (* sqrt-price sqrt-price) Q64)))
-      (log-tick-base (log2 TICK_BASE))
+  (let ((math-addr (var-get math-contract)))
+    (let ((price-squared (try! (contract-call? math-addr multiply sqrt-price sqrt-price)))
+          (ratio (/ price-squared Q64))
+          (log-sqrt (try! (contract-call? math-addr log2 ratio)))
+          (log-tick-base (try! (contract-call? math-addr log2 TICK_BASE))))
+      (ok (to-int (/ (* log-sqrt Q64) log-tick-base)))
     )
-    (to-int (div (* log-sqrt Q64) log-tick-base))
-  ))
+  )
+)
 
 ;; Calculate liquidity amounts for given ticks
 (define-read-only (get-liquidity-for-amounts (sqrt-price-current uint) (sqrt-price-lower uint) (sqrt-price-upper uint) (amount-x uint) (amount-y uint))

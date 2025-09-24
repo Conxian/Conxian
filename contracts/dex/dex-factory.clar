@@ -5,9 +5,9 @@
 (use-trait access-control-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.access-control-trait)
 (use-trait sip-010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
 (use-trait factory-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.factory-trait)
-(use-trait circuit-breaker-trait .circuit-breaker-trait)
+(use-trait circuit-breaker-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.circuit-breaker-trait)
 
-(impl-trait .factory-trait)
+(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.factory-trait)
 
 ;; --- Constants ---
 (define-constant ACCESS_CONTROL 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.access-control)
@@ -47,8 +47,8 @@
   ;; Compare principals directly instead of converting to uint
   (if (is-eq token-a token-b)
     (err ERR_INVALID_TOKENS)
-    (let ((token-a-str (unwrap! (as-max-len? (to-buff token-a) u20) token-a))
-          (token-b-str (unwrap! (as-max-len? (to-buff token-b) u20) token-b)))
+    (let ((token-a-str (unwrap! (as-max-len? (to-consensus-buff token-a) u20) token-a))
+          (token-b-str (unwrap! (as-max-len? (to-consensus-buff token-b) u20) token-b)))
       (if (< (buff-to-uint-be token-a-str) (buff-to-uint-be token-b-str))
         (ok { token-a: token-a, token-b: token-b })
         (ok { token-a: token-b, token-b: token-a })

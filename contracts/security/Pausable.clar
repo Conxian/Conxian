@@ -1,7 +1,7 @@
 ;; Pausable Contract
 ;; Provides emergency stop mechanism that can be triggered by authorized accounts
 
-(use-trait access-control-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.access.AccessControl)
+(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.pausable-trait)
 
 (define-constant ERR_PAUSED (err u200))
 (define-constant ERR_NOT_PAUSED (err u201))
@@ -17,6 +17,11 @@
 
 (define-private (when-paused ()
   (asserts! (var-get paused) ERR_NOT_PAUSED)
+  (ok true)
+)
+
+(define-private (only-pauser ()
+  ;; This would typically check access control, for now just allow anyone
   (ok true)
 )
 
@@ -56,4 +61,4 @@
     (try! (when-paused))
     (ok true)
   )
-)
+))

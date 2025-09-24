@@ -189,12 +189,12 @@
       (let ((total-harvested (default-to u0 (map-get? harvested-rewards asset))))
         (asserts! (> total-harvested u0) ERR_INSUFFICIENT_FUNDS)
         
-        ;; Notify token system coordinator - simplified for enhanced deployment
-        ;; (try! (contract-call? .token-system-coordinator 
-        ;;                      distribute-strategy-rewards 
-        ;;                      (as-contract tx-sender)
-        ;;                      asset
-        ;;                      total-harvested))
+        ;; Notify token system coordinator - PRODUCTION IMPLEMENTATION
+        (try! (contract-call? .token-system-coordinator
+                             distribute-strategy-rewards
+                             (as-contract tx-sender)
+                             asset
+                             total-harvested))
         
         ;; Reset harvested rewards
         (map-set harvested-rewards asset u0)
@@ -211,12 +211,13 @@
               (performance-ratio (if (> deployed u0) (/ (* current-value PRECISION) deployed) PRECISION))
               (time-since-update (- block-height (var-get last-dimensional-update))))
           
-          ;; Update weights based on performance - simplified for enhanced deployment
-          (map-set dimensional-weights (as-contract tx-sender) performance-ratio)
-          (map-set dimensional-weights tx-sender
-                   (/ performance-ratio (var-get risk-level)))
-          (map-set dimensional-weights (var-get strategy-admin) time-since-update)
-          
+          ;; Update weights based on performance - PRODUCTION IMPLEMENTATION
+          (try! (contract-call? .token-system-coordinator
+                               update-dimensional-weights
+                               (as-contract tx-sender)
+                               performance-ratio
+                               (var-get risk-level)
+                               time-since-update))
           (var-set last-dimensional-update block-height)
           (ok true))
         (err u999)))

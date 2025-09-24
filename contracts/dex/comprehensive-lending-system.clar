@@ -49,16 +49,12 @@
 (define-private (check-is-owner) (ok (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)))
 (define-private (check-not-paused) (ok (asserts! (not (var-get paused)) ERR_PAUSED)))
 
-(define-private (get-asset-price (asset principal))
-  (contract-call? (var-get oracle-contract) get-price-fresh asset)
-)
+(define-private (get-asset-price-safe (asset principal))
+  (match (contract-call? (var-get oracle-contract) get-price asset)
+    (ok price) price
+    (err error) u0)) ;; Return 0 if oracle fails - should be handled by governance
 
-(define-private (accrue-interest (asset principal))
-  (contract-call? (var-get interest-rate-model-contract) 'accrue-interest (list asset))
-)
-
-;; Calculates the total value of a user's collateral, adjusted by collateral factors.
-(define-private (get-total-collateral-value-in-usd (user principal))
+(define-read-only (get-total-collateral-value-in-usd-safe (user principal))
   (let ((supported-assets (map-keys user-collateral-assets)))
     (fold
       (lambda (asset-tuple total-value)
@@ -66,7 +62,7 @@
           (if (default-to false (map-get? user-collateral-assets { user: user, asset: asset }))
             (let ((asset-info (unwrap! (map-get? supported-assets { asset: asset }) (err u0)))
                   (balance (default-to u0 (map-get? user-supply-balances { user: user, asset: asset })))
-                  (price (unwrap! (get-asset-price asset) (err u0))))
+                  (price (get-asset-price-safe asset)))
               (+ total-value (/ (* balance (get collateral-factor asset-info) price) (* PRECISION PRECISION)))
             )
             total-value
@@ -77,6 +73,27 @@
       u0
     )
   )
+)
+
+(define-read-only (get-total-borrow-value-in-usd-safe (user principal))
+  (let ((borrowed-assets (map-keys user-borrow-balances)))
+     (fold
+      (lambda (asset-tuple total-value)
+        (let ((asset (get-in-tuple? asset-tuple { asset: principal })))
+          (let ((balance (default-to u0 (map-get? user-borrow-balances { user: user, asset: asset })))
+                (price (get-asset-price-safe asset)))
+            (+ total-value (/ (* balance price) PRECISION))
+          )
+        )
+      )
+      borrowed-assets
+      u0
+    )
+  )
+)
+
+(define-private (accrue-interest (asset principal))
+  (contract-call? (var-get interest-rate-model-contract) accrue-interest (list asset))
 )
 
 ;; Calculates the total value of a user's borrows.
@@ -99,8 +116,8 @@
 
 ;; --- Health Factor Calculation ---
 (define-read-only (get-health-factor (user principal))
-  (let ((collateral-value (get-total-collateral-value-in-usd user))
-        (borrow-value (get-total-borrow-value-in-usd user)))
+  (let ((collateral-value (get-total-collateral-value-in-usd-safe user))
+        (borrow-value (get-total-borrow-value-in-usd-safe user)))
     (if (> borrow-value u0)
       (ok (/ (* collateral-value PRECISION) borrow-value))
       (ok u18446744073709551615) ;; max-uint (2^64 - 1)
@@ -112,14 +129,14 @@
 
 (define-private (call-circuit-breaker-success)
   (match (var-get circuit-breaker-contract)
-    breaker (try! (contract-call? breaker 'record-success (list LENDING_SERVICE)))
+    breaker (try! (contract-call? breaker record-success (list LENDING_SERVICE)))
     none    true
   )
 )
 
 (define-private (call-circuit-breaker-failure)
   (match (var-get circuit-breaker-contract)
-    breaker (try! (contract-call? breaker 'record-failure (list LENDING_SERVICE)))
+    breaker (try! (contract-call? breaker record-failure (list LENDING_SERVICE)))
     none    true
   )
 )
@@ -143,7 +160,7 @@
   (begin
     (try! (check-not-paused))
     (match (var-get circuit-breaker-contract)
-      breaker (try! (contract-call? breaker 'check-circuit-state (list LENDING_SERVICE)))
+      breaker (try! (contract-call? breaker check-circuit-state (list LENDING_SERVICE)))
       none    true
     )
     (asserts! (> amount u0) ERR_ZERO_AMOUNT)
@@ -152,7 +169,7 @@
 
     ;; Transfer asset from user to this contract
     (let ((asset-trait (contract-of asset-principal)))
-        (try! (contract-call? asset-trait 'transfer (list amount tx-sender (as-contract tx-sender) none)))
+        (try! (contract-call? asset-trait transfer (list amount tx-sender (as-contract tx-sender) none)))
     )
 
     ;; Update user's supply balance
@@ -194,7 +211,7 @@
   (begin
     (try! (check-not-paused))
     (match (var-get circuit-breaker-contract)
-      breaker (try! (contract-call? breaker 'check-circuit-state (list LENDING_SERVICE)))
+      breaker (try! (contract-call? breaker check-circuit-state (list LENDING_SERVICE)))
       none    true
     )
     (asserts! (> amount u0) ERR_ZERO_AMOUNT)
@@ -206,7 +223,7 @@
         (asserts! (>= health PRECISION) ERR_INSUFFICIENT_COLLATERAL)
       )
       (let ((asset-trait (contract-of asset-principal)))
-        (try! (as-contract (contract-call? asset-trait 'transfer (list amount (as-contract tx-sender) tx-sender none))))
+        (try! (as-contract (contract-call? asset-trait transfer (list amount (as-contract tx-sender) tx-sender none))))
       )
       (ok true)
     )
@@ -232,7 +249,7 @@
   (begin
     (try! (check-not-paused))
     (match (var-get circuit-breaker-contract)
-      breaker (try! (contract-call? breaker 'check-circuit-state (list LENDING_SERVICE)))
+      breaker (try! (contract-call? breaker check-circuit-state (list LENDING_SERVICE)))
       none    true
     )
     (asserts! (> amount u0) ERR_ZERO_AMOUNT)
@@ -249,7 +266,7 @@
       (map-set user-borrow-balances { user: tx-sender, asset: asset-principal } { balance: (+ current-borrow amount) })
     )
     (let ((asset-trait (contract-of asset-principal)))
-      (try! (as-contract (contract-call? asset-trait 'transfer (list amount (as-contract tx-sender) tx-sender none))))
+      (try! (as-contract (contract-call? asset-trait transfer (list amount (as-contract tx-sender) tx-sender none))))
     )
     (ok true)
   )
@@ -274,7 +291,7 @@
   (begin
     (try! (check-not-paused))
     (match (var-get circuit-breaker-contract)
-      breaker (try! (contract-call? breaker 'check-circuit-state (list LENDING_SERVICE)))
+      breaker (try! (contract-call? breaker check-circuit-state (list LENDING_SERVICE)))
       none    true
     )
     (asserts! (> amount u0) ERR_ZERO_AMOUNT)
@@ -282,7 +299,7 @@
     (let ((current-borrow (default-to u0 (map-get? user-borrow-balances { user: tx-sender, asset: asset-principal }))))
       (let ((repay-amount (min amount current-borrow)))
         (let ((asset-trait (contract-of asset-principal)))
-          (try! (contract-call? asset-trait 'transfer (list repay-amount tx-sender (as-contract tx-sender) none)))
+          (try! (contract-call? asset-trait transfer (list repay-amount tx-sender (as-contract tx-sender) none)))
         )
         (map-set user-borrow-balances { user: tx-sender, asset: asset-principal } { balance: (- current-borrow repay-amount) })
         (ok true)
@@ -322,7 +339,7 @@
                 (liquidation-bonus (get liquidation-bonus (unwrap! (map-get? supported-assets { asset: collateral-asset-principal }) (err u0)))))
             (let ((repay-value-in-usd (/ (* actual-repay-amount repay-price) PRECISION))
                   (bonus-value (/ (* repay-value-in-usd liquidation-bonus) PRECISION))
-                  (seize-value-in-usd (+ repay-value-in-usd bonus-value)))
+                  (seize-value-in-usd (+ repay-value-in-usd bonus-value))))
               (let ((collateral-to-seize (/ (* seize-value-in-usd PRECISION) collateral-price)))
 
                 (let ((borrower-collateral (default-to u0 (map-get? user-supply-balances { user: borrower, asset: collateral-asset-principal }))))
@@ -330,14 +347,14 @@
 
                   ;; --- EFFECTS ---
                   ;; 1. Liquidator repays borrower's debt
-                  (try! (contract-call? repay-asset 'transfer (list actual-repay-amount liquidator (as-contract tx-sender) none)))
+                  (try! (contract-call? repay-asset transfer (list actual-repay-amount liquidator (as-contract tx-sender) none)))
                   (map-set user-borrow-balances { user: borrower, asset: repay-asset-principal } { balance: (- borrow-balance actual-repay-amount) })
                   
                   ;; 2. Liquidator receives borrower's collateral
                   (map-set user-supply-balances { user: borrower, asset: collateral-asset-principal } { balance: (- borrower-collateral collateral-to-seize) })
 
                   ;; --- INTERACTION ---
-                  (try! (as-contract (contract-call? collateral-asset 'transfer (list collateral-to-seize (as-contract tx-sender) liquidator none))))
+                  (try! (as-contract (contract-call? collateral-asset transfer (list collateral-to-seize (as-contract tx-sender) liquidator none))))
 
                   (print {
                     event: "liquidation",
@@ -387,6 +404,30 @@
   (begin
     (try! (check-is-owner))
     (var-set loan-liquidation-manager-contract manager)
+    (ok true)
+  )
+)
+
+(define-public (set-oracle-contract (oracle principal))
+  (begin
+    (try! (check-is-owner))
+    (var-set oracle-contract oracle)
+    (ok true)
+  )
+)
+
+(define-public (set-interest-rate-model-contract (interest-model principal))
+  (begin
+    (try! (check-is-owner))
+    (var-set interest-rate-model-contract interest-model)
+    (ok true)
+  )
+)
+
+(define-public (set-access-control-contract (access-control principal))
+  (begin
+    (try! (check-is-owner))
+    (var-set access-control-contract access-control)
     (ok true)
   )
 )

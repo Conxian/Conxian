@@ -6,9 +6,9 @@
 (use-trait sip-010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
 (use-trait factory-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.factory-trait)
 (use-trait pool-creation-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.pool-creation-trait)
-(use-trait circuit-breaker-trait .circuit-breaker-trait.circuit-breaker-trait)
+(use-trait circuit-breaker-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.circuit-breaker-trait)
 
-(impl-trait .factory-trait)
+(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.factory-trait)
 
 ;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED (err u1003))
@@ -37,12 +37,9 @@
 (define-private (normalize-token-pair (token-a principal) (token-b principal))
   (if (is-eq token-a token-b)
     (err ERR_INVALID_TOKENS)
-    (let ((token-a-str (unwrap! (as-max-len? (to-buff token-a) u20) token-a))
-          (token-b-str (unwrap! (as-max-len? (to-buff token-b) u20) token-b)))
-      (if (< (buff-to-uint-be token-a-str) (buff-to-uint-be token-b-str))
-        (ok { token-a: token-a, token-b: token-b })
-        (ok { token-a: token-b, token-b: token-a })
-      )
+    (if (< (to-uint token-a) (to-uint token-b))
+      (ok { token-a: token-a, token-b: token-b })
+      (ok { token-a: token-b, token-b: token-a })
     )
   )
 )
@@ -53,12 +50,12 @@
 
 (define-private (check-pool-manager)
   (let ((access-control (var-get access-control-contract)))
-    (ok (asserts! (unwrap! (contract-call? access-control has-role tx-sender 'pool-manager') (err ERR_UNAUTHORIZED)) ERR_UNAUTHORIZED))
+    (ok (asserts! (unwrap! (contract-call? access-control has-role tx-sender u2) (err ERR_UNAUTHORIZED)) ERR_UNAUTHORIZED))
   )
 )
 
 (define-private (check-circuit-breaker)
-  (contract-call? (var-get circuit-breaker) is-circuit-open)
+  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.circuit-breaker is-circuit-open)
 )
 
 ;; --- Public Functions ---

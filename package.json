@@ -29,23 +29,17 @@
     "update-autonomics": "tsx scripts/sdk_update_autonomics.ts"
   },
   "dependencies": {
-    "@clarigen/core": "^0.9.2",
-    "@hirosystems/clarinet-sdk": "3.5.0",
-    "@scure/base": "2.0.0",
-    "@scure/btc-signer": "2.0.1",
-    "@stacks/blockchain-api-client": "8.12.1",
+    "@hirosystems/clarinet-sdk": "3.7.0",
+    "@stacks/blockchain-api-client": "8.13.1",
     "@stacks/network": "7.2.0",
-    "@stacks/stacking": "7.2.0",
     "@stacks/transactions": "7.2.0",
     "bignumber.js": "^9.1.2",
-    "clarigen": "^0.9.2",
     "clarinet": "^0.12.6",
     "dotenv": "17.2.2",
     "node-fetch": "^3.3.2"
   },
   "devDependencies": {
-    "@jest/globals": "^29.7.0",
-    "@types/node": "^24.3.1",
+    "@types/node": "24.5.2",
     "@vitest/coverage-v8": "3.2.4",
     "tsx": "^4.7.1",
     "typescript": "^5.4.5",

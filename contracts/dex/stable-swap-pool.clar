@@ -4,7 +4,7 @@
 (use-trait sip-010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
 (use-trait pool-creation-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.pool-creation-trait)
 
-(impl-trait .pool-creation-trait)
+(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.pool-creation-trait)
 
 ;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED (err u1003))
@@ -35,8 +35,8 @@
         (current-balance-y (var-get balance-y)))
     (asserts! (and (> amount-x u0) (> amount-y u0)) ERR_INVALID_AMOUNTS)
     
-    (try! (contract-call? (var-get token-x-trait) transfer amount-x tx-sender (as-contract tx-sender) none))
-    (try! (contract-call? (var-get token-y-trait) transfer amount-y tx-sender (as-contract tx-sender) none))
+    (try! (as-contract (contract-call? (var-get token-x-trait) transfer amount-x tx-sender (as-contract tx-sender) none)))
+    (try! (as-contract (contract-call? (var-get token-y-trait) transfer amount-y tx-sender (as-contract tx-sender) none)))
     
     (var-set balance-x (+ current-balance-x amount-x))
     (var-set balance-y (+ current-balance-y amount-y))
@@ -96,7 +96,7 @@
 
 (define-private (get-amp-from-params (params (buff 256)))
   (if (>= (len params) u4)
-    (ok (buff-to-uint-be (slice params 0 4)))
+    (ok (to-uint params))
     (err u9998)
   )
 )

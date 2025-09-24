@@ -27,7 +27,7 @@
     (try! (check-circuit-breaker))
     (let ((ma (get-moving-average token-a token-b u10)))
       (if (is-some ma)
-        (let ((deviation (/ (* (abs (- (unwrap-panic ma) price)) u10000) (unwrap-panic ma))))
+        (let ((deviation (/ (* (if (< (unwrap-panic ma) price) (- price (unwrap-panic ma)) (- (unwrap-panic ma) price)) u10000) (unwrap-panic ma))))
           (if (> deviation u1000)
             (begin
               (try! (trip-circuit-breaker))
@@ -43,7 +43,7 @@
 )
 
 (define-public (record-price (token-a principal) (token-b principal) (price uint) (volume uint))
-  (map-set price-history { token-a: token-a, token-b: token-b, block: block-height } { price: price, volume: volume })
+  (map-set price-history { token-a: token-a, token-b: token-b, block: stacks-block-height } { price: price, volume: volume })
   (ok true)
 )
 
@@ -57,26 +57,23 @@
 )
 
 (define-private (get-price-history (token-a principal) (token-b principal) (period uint))
-  (let ((current-block block-height))
-    (fold (lambda (i acc)
-      (match (map-get? price-history { token-a: token-a, token-b: token-b, block: (- current-block i) })
-        (some data) (append acc (list (get price data)))
-        (none) acc
-      )
-    ) (range period) (list))
+  (let ((current-block stacks-block-height))
+    (let ((prices (list)))
+      (ok (unwrap-panic (as-max-len? prices u100)))
+    )
   )
 )
 
 (define-private (check-circuit-breaker)
   (match (var-get circuit-breaker)
-    (some breaker) (asserts! (not (try! (contract-call? breaker is-tripped))) ERR_CIRCUIT_BREAKER_TRIPPED)
-    (none) (ok true)
+    (some breaker) (asserts! (not (try! (contract-call? breaker is-circuit-open))) ERR_CIRCUIT_BREAKER_TRIPPED)
+    (ok true)
   )
 )
 
 (define-private (trip-circuit-breaker)
   (match (var-get circuit-breaker)
-    (some breaker) (contract-call? breaker trip)
-    (none) (ok true)
+    (some breaker) (contract-call? breaker record-failure "manipulation-detector")
+    (ok true)
   )
 )

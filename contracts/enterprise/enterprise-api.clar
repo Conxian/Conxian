@@ -108,14 +108,14 @@
 (define-private (check-verification (account principal))
     (match (var-get compliance-hook)
         (some hook) (contract-call? hook is-verified account)
-        (none) (ok true) ;; No hook, no verification needed
+        (ok true) ;; No hook, no verification needed
     )
 )
 
 (define-private (check-circuit-breaker)
     (match (var-get circuit-breaker)
-        (some breaker) (let ((is-tripped (try! (contract-call? breaker is-tripped)))) (asserts! (not is-tripped) ERR_CIRCUIT_OPEN))
-        (none) (ok true) ;; No breaker, no check needed
+        (some breaker) (let ((is-tripped (try! (contract-call? breaker is-circuit-open)))) (asserts! (not is-tripped) ERR_CIRCUIT_OPEN))
+        (ok true) ;; No breaker, no check needed
     )
 )
 

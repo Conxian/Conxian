@@ -5,7 +5,7 @@
 (use-trait access-control-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.access-control-trait)
 (use-trait ownable-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.ownable-trait)
 (use-trait standard-constants-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.standard-constants-trait)
-(use-trait circuit-breaker-trait .circuit-breaker-trait.circuit-breaker-trait)
+(use-trait circuit-breaker-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.circuit-breaker-trait)
 
 (impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.access-control-trait)
 (impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.ownable-trait)
@@ -245,7 +245,147 @@
   )
 )
 
-;; ===== Helper Functions =====
+;; ===== Time-Delayed Operations =====
+
+(define-map delayed-operations {
+  operation-id: uint,
+} {
+  proposer: principal,
+  target: principal,
+  function-name: (string-ascii 64),
+  parameters: (buff 1024),
+  delay-blocks: uint,
+  created-at: uint,
+  executed: bool,
+  approvals: (list principal)
+})
+
+(define-data-var next-operation-id uint u1)
+(define-data-var default-delay-blocks uint u144) ;; ~24 hours at 10 min blocks
+
+;; Propose a time-delayed operation
+(define-public (propose-delayed-operation (target principal) (function-name (string-ascii 64)) (parameters (buff 1024)) (delay-blocks uint))
+  (begin
+    (asserts! (not (try! (check-circuit-breaker))) ERR_CIRCUIT_OPEN)
+    (asserts! (is-admin tx-sender) (err u1001))
+
+    (let ((operation-id (var-get next-operation-id))
+          (operation {
+            proposer: tx-sender,
+            target: target,
+            function-name: function-name,
+            parameters: parameters,
+            delay-blocks: (if (> delay-blocks u0) delay-blocks (var-get default-delay-blocks)),
+            created-at: block-height,
+            executed: false,
+            approvals: (list tx-sender)
+          }))
+
+      (map-set delayed-operations {operation-id: operation-id} operation)
+      (var-set next-operation-id (+ operation-id u1))
+
+      (print {
+        event: "delayed-operation-proposed",
+        id: operation-id,
+        proposer: tx-sender,
+        target: target,
+        function: function-name,
+        delay: delay-blocks
+      })
+
+      (ok operation-id)
+    )
+  )
+)
+
+;; Approve a delayed operation (multi-sig)
+(define-public (approve-delayed-operation (operation-id uint))
+  (begin
+    (asserts! (not (try! (check-circuit-breaker))) ERR_CIRCUIT_OPEN)
+    (let ((operation (unwrap! (map-get? delayed-operations {operation-id: operation-id}) (err u1004))))
+      (asserts! (not (contains? tx-sender (get approvals operation))) (err u1005))
+      (asserts! (not (get executed operation)) (err u1006))
+
+      (map-set delayed-operations {operation-id: operation-id}
+        (merge operation {
+          approvals: (append (get approvals operation) (list tx-sender))
+        }))
+
+      (print {
+        event: "delayed-operation-approved",
+        id: operation-id,
+        approver: tx-sender,
+        total-approvals: (len (get approvals operation))
+      })
+
+      (ok true)
+    )
+  )
+)
+
+;; Execute a delayed operation after delay period and sufficient approvals
+(define-public (execute-delayed-operation (operation-id uint))
+  (begin
+    (asserts! (not (try! (check-circuit-breaker))) ERR_CIRCUIT_OPEN)
+    (let ((operation (unwrap! (map-get? delayed-operations {operation-id: operation-id}) (err u1004))))
+      (asserts! (not (get executed operation)) (err u1006))
+      (asserts! (>= (len (get approvals operation)) PROPOSAL_THRESHOLD) (err u1007))
+
+      ;; Check if delay period has passed
+      (asserts! (>= (- block-height (get created-at operation)) (get delay-blocks operation)) (err u1008))
+
+      ;; Mark as executed
+      (map-set delayed-operations {operation-id: operation-id}
+        (merge operation {executed: true}))
+
+      ;; Execute the operation
+      (let ((result (contract-call?
+        (get target operation)
+        (get function-name operation)
+        (get parameters operation)
+      )))
+        (match result
+          (ok success) (begin
+            (print {
+              event: "delayed-operation-executed",
+              id: operation-id,
+              executor: tx-sender,
+              target: (get target operation),
+              function: (get function-name operation)
+            })
+            (ok success)
+          )
+          (err error) (begin
+            ;; Revert execution status on failure
+            (map-set delayed-operations {operation-id: operation-id}
+              (merge operation {executed: false}))
+            (err error)
+          )
+        )
+      )
+    )
+  )
+)
+
+;; Get operation details
+(define-read-only (get-delayed-operation (operation-id uint))
+  (map-get? delayed-operations {operation-id: operation-id})
+)
+
+;; Check if operation can be executed
+(define-read-only (can-execute-delayed-operation (operation-id uint))
+  (let ((operation (unwrap! (map-get? delayed-operations {operation-id: operation-id}) false)))
+    (if operation
+      (let ((blocks-passed (- block-height (get created-at operation)))
+            (has-enough-approvals (>= (len (get approvals operation)) PROPOSAL_THRESHOLD))
+            (delay-passed (>= blocks-passed (get delay-blocks operation)))
+            (not-executed (not (get executed operation))))
+        (and has-enough-approvals delay-passed not-executed)
+      )
+      false
+    )
+  )
+);; ===== Helper Functions =====
 
 (define-private (is-admin (who principal))
   (or
@@ -258,7 +398,7 @@
   (any (lambda ((item (string-ascii 32))) (is-eq item needle)) haystack)
 )
 
-
-
-
+(define-private (contains-principal? (needle principal) (haystack (list principal)))
+  (any (lambda ((item principal)) (is-eq item needle)) haystack)
+)
 

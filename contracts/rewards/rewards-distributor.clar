@@ -1,8 +1,8 @@
 ;; rewards-distributor.clar
 ;; Distributes rewards to users based on their holdings or activities
 
-(use-trait sip-010-ft-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.sip-010-trait-ft-standard.sip-010-trait)
-(use-trait circuit-breaker-trait .circuit-breaker-trait.circuit-breaker-trait)
+(use-trait sip-010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
+(use-trait circuit-breaker-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.circuit-breaker-trait)
 
 ;; =============================================================================
 ;; CONSTANTS AND ERROR CODES
@@ -17,8 +17,8 @@
 ;; DATA STRUCTURES
 ;; =============================================================================
 
-(define-data-var reward-token principal 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.age000-governance-token)
-(define-data-var circuit-breaker principal .circuit-breaker)
+(define-data-var reward-token principal 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.age000-governance-token)
+(define-data-var circuit-breaker principal 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.circuit-breaker)
 
 (define-map rewards-balance { user: principal } { balance: uint })
 (define-map total-rewards-claimed { user: principal } { amount: uint })
@@ -27,8 +27,8 @@
 ;; PRIVATE FUNCTIONS
 ;; =============================================================================
 
-(define-private (check-circuit-breaker) 
-  (contract-call? (var-get circuit-breaker) is-circuit-open)
+(define-private (check-circuit-breaker)
+  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.circuit-breaker is-circuit-open)
 )
 
 ;; =============================================================================

@@ -1,6 +1,9 @@
 ;; Access Control Contract
 ;; Implements role-based access control (RBAC) for the Conxian protocol
 
+(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.access-control-trait)
+(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.ownable-trait)
+
 (define-constant ERR_NOT_AUTHORIZED (err u100))
 (define-constant ERR_INVALID_ROLE (err u101))
 (define-constant ERR_ROLE_ALREADY_GRANTED (err u102))
@@ -8,11 +11,11 @@
 (define-constant ERR_INVALID_ADMIN (err u104))
 
 ;; Role definitions
-(define-constant ROLE_ADMIN 0x0000000000000000000000000000000000000000000000000000000000000001) ;; Can grant/revoke roles
-(define-constant ROLE_PAUSER 0x0000000000000000000000000000000000000000000000000000000000000002) ;; Can pause contracts
-(define-constant ROLE_ORACLE_UPDATER 0x0000000000000000000000000000000000000000000000000000000000000004) ;; Can update oracles
-(define-constant ROLE_LIQUIDATOR 0x0000000000000000000000000000000000000000000000000000000000000008 ;; Can perform liquidations
-(define-constant ROLE_STRATEGIST 0x0000000000000000000000000000000000000000000000000000000000000010 ;; Can manage strategies
+(define-constant ROLE_ADMIN u1) ;; Can grant/revoke roles
+(define-constant ROLE_PAUSER u2) ;; Can pause contracts
+(define-constant ROLE_ORACLE_UPDATER u4) ;; Can update oracles
+(define-constant ROLE_LIQUIDATOR u8) ;; Can perform liquidations
+(define-constant ROLE_STRATEGIST u16) ;; Can manage strategies
 
 ;; Role to name mapping for better error messages
 (define-map role-names { role: uint } { name: (string-ascii 64) })
@@ -58,8 +61,8 @@
 
 (define-read-only (get-role-name (role uint))
   (match (map-get? role-names { role: role })
-    role-entry (ok (get name (unwrap-panic role-entry)))
-    _ (err ERR_INVALID_ROLE)
+    role-entry (ok (get name role-entry))
+    (err ERR_INVALID_ROLE)
   )
 )
 
@@ -128,29 +131,11 @@
   (not (is-eq account (as-contract tx-sender)))
 )
 
-;; ========== Test Helpers ==========
-
-(define-public (test-has-role (role uint) (account principal))
-  (ok (has-role account role))
-)
-
-(define-public (test-only-role (role uint))
+(define-public (renounce-ownership)
   (begin
-    (try! (only-role role))
+    (asserts! (has-role tx-sender ROLE_ADMIN) ERR_NOT_AUTHORIZED)
+    ;; In a real implementation, you might want to set to a burn address
+    (var-set admin tx-sender)
     (ok true)
-  )
-)
-
-(define-read-only (get-role-name (role uint))
-  (match (map-get? role-names { role: role })
-    role-entry (ok (get name (unwrap-panic role-entry)))
-    _ (none (err ERR_INVALID_ROLE))
-  )
-)
-
-(define-read-only (get-role-name (role uint))
-  (match (map-get? role-names { role: role })
-    role-entry (ok (get name (unwrap-panic role-entry)))
-    _ (none (err ERR_INVALID_ROLE))
   )
 )

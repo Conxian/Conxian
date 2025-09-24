@@ -145,10 +145,47 @@ security:
   emergency_contacts:
     - "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"  # Dev admin
   
+# Security Parameters
+security:
+  # Contract deployment settings
+  require_timelock: false  # Enable in production
+  max_gas_price: 1000  # STX per micro-STX
+  min_confirmations: 3  # Blocks to wait for confirmation
+  
+  # Access control
+  admin_multisig: "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+  emergency_pause_role: "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+  
+  # Rate limiting (per block)
+  max_operations_per_block: 100
+  max_token_transfers_per_tx: 50
+
+# Monitoring & Alerting
 monitoring:
   health_check_frequency: 144  # Every 2 hours (dev)
   max_violation_count: 5
   auto_pause_threshold: 3
+  
+  # Alert thresholds
+  balance_threshold: 1000000  # STX
+  gas_price_threshold: 10  # STX per micro-STX
+  error_rate_threshold: 5  # % of failed transactions
+  
+  # Notification settings
+  email_alerts: "dev-alerts@conxian.finance"
+  slack_webhook: "https://hooks.slack.com/..."
+  
+  # Performance monitoring
+  enable_performance_metrics: true
+  metrics_interval: 60  # seconds
+  
+  # Security monitoring
+  enable_security_scan: true
+  scan_interval: 3600  # 1 hour
+  
+  # Logging
+  log_level: "debug"
+  log_retention_days: 30
 
 # =============================================================================
 # DIMENSIONAL INTEGRATION

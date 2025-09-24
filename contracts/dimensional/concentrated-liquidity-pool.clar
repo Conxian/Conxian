@@ -23,10 +23,10 @@
 ;; --- Traits ---
 (use-trait pool-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.pool-trait)
 (use-trait sip-010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
-(use-trait position-nft-trait .position-nft.concentrated-liquidity-positions-trait)
+(use-trait position-nft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.position-nft-trait)
 
 ;; Implement the standard pool trait
-(impl-trait .pool-trait)
+(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.pool-trait)
 
 ;; --- Contract State ---
 (define-data-var contract-owner principal tx-sender)

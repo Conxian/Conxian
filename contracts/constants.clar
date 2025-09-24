@@ -5,30 +5,19 @@
 ;; CORE ADDRESSES
 ;; ===========================================
 
-;; Main contract owner - STP3 Address
+;; Main contract owner - ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6
 (define-constant CONTRACT_OWNER 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6)
 
-;; Core contract addresses
-(define-constant ACCESS_CONTROL (concat CONTRACT_OWNER '.access-control))
-(define-constant AUDIT_REGISTRY (concat CONTRACT_OWNER '.audit-registry))
+;; Core contract addresses - using proper contract principals
+(define-constant ACCESS_CONTROL 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.access-control)
+(define-constant AUDIT_REGISTRY 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.audit-registry)
 
 ;; ===========================================
 ;; TRAIT REFERENCES
 ;; ===========================================
 
-(define-constant TRAITS_CONTRACT (concat CONTRACT_OWNER '.traits.all-traits))
-(define-constant TRAITS_PREFIX (concat TRAITS_CONTRACT '.'))
-
-;; Core trait references
-(define-constant TRAIT_SIP010 (concat TRAITS_PREFIX 'sip-010-ft-trait))
-(define-constant TRAIT_ACCESS_CONTROL (concat TRAITS_PREFIX 'access-control-trait))
-(define-constant TRAIT_POOL (concat TRAITS_PREFIX 'pool-trait))
-(define-constant TRAIT_FACTORY (concat TRAITS_PREFIX 'factory-trait))
-(define-constant TRAIT_ROUTER (concat TRAITS_PREFIX 'router-trait))
-(define-constant TRAIT_OWNABLE (concat TRAITS_PREFIX 'ownable-trait))
-(define-constant TRAIT_PAUSABLE (concat TRAITS_PREFIX 'pausable-trait))
-(define-constant TRAIT_ERROR_CODES (concat TRAITS_PREFIX 'error-codes-trait))
-(define-constant TRAIT_CONSTANTS (concat TRAITS_PREFIX 'constants-trait))
+;; Traits are referenced directly using proper contract principals
+(define-constant TRAITS_CONTRACT 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits)
 
 ;; ===========================================
 ;; COMMON CONSTANTS

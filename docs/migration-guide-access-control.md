@@ -5,6 +5,7 @@ This guide explains how to update your existing contracts to use the new AccessC
 ## Overview
 
 The new AccessControl system provides:
+
 - Role-based access control (RBAC)
 - Time-delayed execution of sensitive operations
 - Emergency pause functionality
@@ -29,7 +30,7 @@ The new AccessControl system provides:
 
 ## Step 2: Replace Ownable with AccessControl
 
-### Before:
+### Before
 
 ```clarity
 (define-constant contract-owner tx-sender)
@@ -40,7 +41,7 @@ The new AccessControl system provides:
 )
 ```
 
-### After:
+### After
 
 ```clarity
 (impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.access-control.access-control-trait)
@@ -53,7 +54,7 @@ The new AccessControl system provides:
 
 ## Step 3: Update Function Access Control
 
-### Before:
+### Before
 
 ```clarity
 (define-public (set-parameter (new-value uint))
@@ -65,7 +66,7 @@ The new AccessControl system provides:
 )
 ```
 
-### After:
+### After
 
 ```clarity
 (define-public (set-parameter (new-value uint))
@@ -184,10 +185,13 @@ describe('Admin functions', () => {
 ## Troubleshooting
 
 ### Error: "Missing role"
+
 Ensure the caller has been granted the appropriate role before calling restricted functions.
 
 ### Error: "Contract call not allowed"
+
 Verify that the contract calling the access control functions is properly whitelisted if using call restrictions.
 
 ### Error: "Operation not ready"
+
 Check that the time delay has passed before executing time-delayed operations.

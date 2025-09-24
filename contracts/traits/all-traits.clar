@@ -39,15 +39,72 @@
   )
 )
 
+(define-trait sip-010-ft-mintable-trait
+  (
+    (mint (uint principal) (response bool uint))
+    (burn (uint principal) (response bool uint))
+    (get-token-uri () (response (optional (string-utf8 256)) uint))
+  )
+)
+
+(define-trait sip-009-nft-trait
+  (
+    (transfer (uint principal principal (optional (buff 34))) (response bool uint))
+    (get-owner (uint) (response (optional principal) uint))
+    (get-token-uri (uint) (response (optional (string-utf8 256)) uint))
+  )
+)
+
 (define-trait bond-trait
   (
-    (issue-bond (string-ascii 32) (string-ascii 10) uint uint uint uint uint principal) (response bool uint)
+    (issue-bond (string-ascii 32) (string-ascii 10) uint uint uint uint uint principal) (response bool uint))
     (claim-coupon () (response uint uint))
     (redeem-at-maturity (principal) (response uint uint))
     (get-maturity-block () (response uint uint))
     (get-coupon-rate () (response uint uint))
     (get-face-value () (response uint uint))
     (get-payment-token () (response principal uint))
+  )
+)
+
+(define-trait pausable-trait
+  (
+    (pause () (response bool uint))
+    (unpause () (response bool uint))
+    (is-paused () (response bool uint))
+  )
+)
+
+(define-trait access-control-trait
+  (
+    (has-role (principal (string-ascii 32)) (response bool uint))
+    (grant-role (principal (string-ascii 32)) (response bool uint))
+    (revoke-role (principal (string-ascii 32)) (response bool uint))
+  )
+)
+
+(define-trait oracle-trait
+  (
+    (get-price (principal) (response uint uint))
+    (update-price (principal uint) (response bool uint))
+  )
+)
+
+(define-trait dimensional-oracle-trait
+  (
+    (get-price (principal) (response uint uint))
+    (update-price (principal uint) (response bool uint))
+    (add-price-feed (principal principal) (response bool uint))
+    (remove-price-feed (principal) (response bool uint))
+  )
+)
+
+(define-trait compliance-hooks-trait
+  (
+    (before-transfer (principal principal uint (optional (buff 34))) (response bool uint))
+    (after-transfer (principal principal uint (optional (buff 34))) (response bool uint))
+  )
+)
     (is-matured () (response bool uint))
     (get-next-coupon-block (principal) (response (optional uint) uint))
   )
@@ -146,37 +203,103 @@
   )
 )
 
+;; @title Enhanced Circuit Breaker Trait
+;; @notice Provides comprehensive circuit breaker functionality to protect against failures and attacks
+;; @dev Implements the circuit breaker pattern with operation-specific controls, rate limiting, and monitoring
 (define-trait circuit-breaker-trait
   (
-    ;; Check if the circuit is open for a given operation
+    ;; ===== Core Circuit Breaker Functions =====
+    
+    ;; @notice Check if the circuit is open for any operation
+    ;; @return (response bool uint) true if circuit is open, false otherwise
+    (is-circuit-open () (response bool uint))
+    
+    ;; @notice Check if the circuit is open for a specific operation
+    ;; @param operation The operation identifier (max 64 chars)
+    ;; @return (response bool uint) true if circuit is open for this operation
     (check-circuit-state (operation (string-ascii 64)) (response bool uint))
 
-    ;; Record a successful operation
+    ;; @notice Record a successful operation
     (record-success (operation (string-ascii 64)) (response bool uint))
 
-    ;; Record a failed operation
+    ;; @notice Record a failed operation
     (record-failure (operation (string-ascii 64)) (response bool uint))
 
-    ;; Get the failure rate for an operation
+    ;; @notice Get the failure rate for an operation
     (get-failure-rate (operation (string-ascii 64)) (response uint uint))
 
-    ;; Get the current state of the circuit
-    (get-circuit-state (operation (string-ascii 64)) (response (tuple (state uint) (last-checked uint) (failure-rate uint)) uint))
+    ;; @notice Get the current state of the circuit
+    (get-circuit-state (operation (string-ascii 64)) 
+      (response {
+        state: uint, 
+        last-checked: uint, 
+        failure-rate: uint,
+        failure-count: uint,
+        success-count: uint
+      } uint)
+    )
 
-    ;; Manually override the circuit state (admin only)
+    ;; ===== Admin Functions =====
+    
+    ;; @notice Manually override the circuit state (admin only)
     (set-circuit-state (operation (string-ascii 64)) (state bool) (response bool uint))
 
-    ;; Set the failure threshold (admin only)
+    ;; @notice Set the failure threshold (admin only)
     (set-failure-threshold (threshold uint) (response bool uint))
 
-    ;; Set the reset timeout (admin only)
+    ;; @notice Set the reset timeout (admin only)
     (set-reset-timeout (timeout uint) (response bool uint))
 
-    ;; Get the admin address
+    ;; @notice Get the admin address
     (get-admin () (response principal uint))
 
-    ;; Transfer admin rights
+    ;; @notice Transfer admin rights
     (set-admin (new-admin principal) (response bool uint))
+    
+    ;; ===== Enhanced Features =====
+    
+    ;; @notice Set rate limit for an operation
+    (set-rate-limit (operation (string-ascii 64)) (limit uint) (window uint) (response bool uint))
+    
+    ;; @notice Get rate limit for an operation
+    (get-rate-limit (operation (string-ascii 64)) 
+      (response {
+        limit: uint, 
+        window: uint, 
+        current: uint,
+        reset-time: uint
+      } uint)
+    )
+    
+    ;; @notice Batch record successes
+    (batch-record-success (operations (list 20 (string-ascii 64))) (response bool uint))
+    
+    ;; @notice Batch record failures
+    (batch-record-failure (operations (list 20 (string-ascii 64))) (response bool uint))
+    
+    ;; @notice Get health status
+    (get-health-status () 
+      (response {
+        is_operational: bool,
+        total_failure_rate: uint,
+        last_checked: uint,
+        uptime: uint,
+        total_operations: uint,
+        failed_operations: uint
+      } uint)
+    )
+    
+    ;; @notice Set circuit breaker mode
+    (set-circuit-mode (mode (optional bool)) (response bool uint))
+    
+    ;; @notice Get circuit breaker mode
+    (get-circuit-mode () (response (optional bool) uint))
+    
+    ;; @notice Emergency shutdown (multi-sig protected)
+    (emergency-shutdown () (response bool uint))
+    
+    ;; @notice Recover from emergency shutdown (multi-sig protected)
+    (recover-from-shutdown () (response bool uint))
   )
 )
 
@@ -462,49 +585,67 @@
   )
 )
 
-(define-trait audit-registry-trait
+(define-trait compliance-hooks-trait
   (
-    (submit-audit
-      (contract-address principal)
-      (audit-hash (string-ascii 64))
-      (report-uri (string-utf8 256))
-      (response uint uint)
-    )
-    (vote (audit-id uint) (approve bool) (response bool uint))
-    (finalize-audit (audit-id uint) (response bool uint))
-    (get-audit (audit-id uint)
-      (response {
-        contract-address: principal,
-        audit-hash: (string-ascii 64),
-        auditor: principal,
-        report-uri: (string-utf8 256),
-        timestamp: uint,
-        status: {
-          status: (string-ascii 20),
-          reason: (optional (string-utf8 500))
-        },
-        votes: {
-          for: uint,
-          against: uint,
-          voters: (list 100 principal)
-        },
-        voting-ends: uint
-      } uint)
-    )
-    (get-audit-status (audit-id uint)
-      (response {
-        status: (string-ascii 20),
-        reason: (optional (string-utf8 500))
-      } uint)
-    )
-    (get-audit-votes (audit-id uint)
-      (response {
-        for: uint,
-        against: uint,
-        voters: (list 100 principal)
-      } uint)
-    )
-    (set-voting-period (blocks uint) (response bool uint))
-    (emergency-pause-audit (audit-id uint) (reason (string-utf8 500)) (response bool uint))
+    (pre-transfer-hook (uint principal principal) (response bool uint))
+    (post-transfer-hook (uint principal principal) (response bool uint))
+    (pre-mint-hook (uint principal) (response bool uint))
+    (post-mint-hook (uint principal) (response bool uint))
+    (pre-burn-hook (uint principal) (response bool uint))
+    (post-burn-hook (uint principal) (response bool uint))
+  )
+)
+
+(define-trait math-trait
+  (
+    (add (uint uint) (response uint uint))
+    (subtract (uint uint) (response uint uint))
+    (multiply (uint uint) (response uint uint))
+    (divide (uint uint) (response uint uint))
+    (square-root (uint) (response uint uint))
+    (power (uint uint) (response uint uint))
+    (sqrt (uint) (response uint uint))
+    (abs (uint) (response uint uint))
+    (min (uint uint) (response uint uint))
+    (max (uint uint) (response uint uint))
+  )
+)
+
+(define-trait flash-loan-receiver-trait
+  (
+    (execute-operation (principal uint principal (buff 256)) (response bool uint))
+    (on-flash-loan (principal uint principal (buff 256)) (response bool uint))
+  )
+)
+
+(define-trait pool-creation-trait
+  (
+    (create-instance (principal principal (buff 256)) (response principal uint)) ;; token-a, token-b, params
+  )
+)
+
+(define-trait factory-trait
+  (
+    (create-pool (principal principal uint (buff 256)) (response principal uint))
+    (get-pool (principal principal) (response (optional principal) uint))
+    (get-pool-count () (response uint uint))
+    (register-pool-implementation (uint principal) (response bool uint))
+  )
+)
+
+(define-trait router-trait
+  (
+    (swap-exact-tokens-for-tokens (uint (list 10 principal) principal uint) (response (list 10 uint) uint))
+    (swap-tokens-for-exact-tokens (uint (list 10 principal) principal uint) (response (list 10 uint) uint))
+    (get-amounts-out (uint (list 10 principal)) (response (list 10 uint) uint))
+    (get-amounts-in (uint (list 10 principal)) (response (list 10 uint) uint))
+  )
+)
+
+(define-trait yield-optimizer-trait
+  (
+    (optimize-allocation (principal uint) (response (list 10 (tuple (strategy principal) (allocation uint))) uint))
+    (get-optimal-allocation (principal uint) (response (list 10 (tuple (strategy principal) (allocation uint))) uint))
+    (rebalance-portfolio (principal) (response bool uint))
   )
 )

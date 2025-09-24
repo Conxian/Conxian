@@ -20,14 +20,19 @@
 (define-public (batch-execute (txs (list 100 { to: principal, method: (string-ascii 256), args: (list 10 (buff 256)) })))
   (begin
     (asserts! (> (len txs) u0) ERR_INVALID_BATCH)
-    (fold (lambda (tx-info prev-result)
-      (match prev-result
-        ok-val (let ((result (contract-call? (get to tx-info) (get method tx-info) (get args tx-info))))
-                 (match result
-                   succ (ok (append ok-val succ))
-                   err (err (list err))))
-        err-val (err err-val)))
-    txs (ok []))
+    (let ((results (list)))
+      (fold accumulate-results
+        txs
+        results
+      )
+    )
+  )
+)
+
+(define-private (accumulate-results (tx-info { to: principal, method: (string-ascii 256), args: (list 10 (buff 256)) })
+                                   (results (list 100 (response bool uint))))
+  (let ((result (as-contract (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dex-pool (get method tx-info) (get args tx-info)))))
+    (append results result)
   )
 )
 
