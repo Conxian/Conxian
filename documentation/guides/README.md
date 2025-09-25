@@ -219,3 +219,6 @@ For detailed implementation guides and advanced usage patterns, see the [System 
 
 4.  **[Tokenomics Guide (`04-tokens.md`)](./04-tokens.md)**
     -   An overview of the various SIP-010 tokens used in the protocol, including the governance, liquidity, and creator tokens.
+
+5.  **[Revenue Distributor Guide (`05-revenue-distributor.md`)](./05-revenue-distributor.md)**
+    -   A guide to the `revenue-distributor.clar` contract, which handles the automated distribution of protocol fees.
