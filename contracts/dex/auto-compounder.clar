@@ -22,8 +22,9 @@
 
 (define-private (check-circuit-breaker)
   (match (var-get circuit-breaker)
-    (cb (contract-call? cb is-tripped))
-    (ok false)
+    cb
+    (asserts! (not (unwrap-panic (contract-call? cb is-tripped))) ERR_CIRCUIT_OPEN)
+    (ok true)
   )
 )
 

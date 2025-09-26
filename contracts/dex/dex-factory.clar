@@ -205,8 +205,6 @@
 
 ;; --- Read-Only Functions ---
 
-;; --- Read-Only Functions ---
-
 ;; Gets the pool principal for a given pair of tokens and pool type
 (define-read-only (get-pool-by-type (token-a principal) (token-b principal) (pool-type uint))
   (let ((normalized-pair (unwrap-panic (normalize-token-pair token-a token-b))))

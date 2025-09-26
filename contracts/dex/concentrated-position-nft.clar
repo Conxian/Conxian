@@ -27,14 +27,25 @@
 
 ;; NFT Maps
 (define-map token-metadata
-  uint ;; token ID
-  {
-    name: (string-ascii 256),
-    description: (string-ascii 1024),
-    image: (string-utf8 256),
-    attributes: (list 20 (tuple (trait_type (string-ascii 64)) (value (string-ascii 256)))),
-    properties: (tuple (pool (string-ascii 256)) (tick-lower int) (tick-upper int) (liquidity uint))
-  }
+    uint
+    {
+        token-uri: (string-ascii 256),
+        extension: {
+            name: (string-ascii 256),
+            description: (string-ascii 256),
+            image: (string-ascii 256),
+            properties: {
+                pool: principal, ;; Changed from (string-ascii 256) to principal
+                "tick-lower": int,
+                "tick-upper": int,
+                "liquidity-amount": uint,
+                "asset-x-amount": uint,
+                "asset-y-amount": uint,
+                "creation-block": uint,
+                "last-updated-block": uint
+            }
+        }
+    }
 )
 
 (define-map token-owners
@@ -107,16 +118,20 @@
         description: (concat "Concentrated liquidity position from tick " (to-ascii tick-lower) " to " (to-ascii tick-upper)),
         image: (concat "https://conxian.io/positions/" (to-ascii token-id) ".png"),
         attributes: (list
-          { trait_type: "Pool", value: (to-ascii pool-contract) }
+          { trait_type: "Pool", value: (contract-of pool-contract) }
           { trait_type: "Tick Lower", value: (to-ascii tick-lower) }
           { trait_type: "Tick Upper", value: (to-ascii tick-upper) }
           { trait_type: "Liquidity", value: (to-ascii liquidity) }
         ),
         properties: {
-          pool: (to-ascii pool-contract),
-          tick-lower: tick-lower,
-          tick-upper: tick-upper,
-          liquidity: liquidity
+          pool: pool-contract,
+          "tick-lower": tick-lower,
+          "tick-upper": tick-upper,
+          "liquidity-amount": liquidity,
+          "asset-x-amount": u0, ;; Placeholder, actual value to be calculated
+          "asset-y-amount": u0, ;; Placeholder, actual value to be calculated
+          "creation-block": (unwrap-panic (get-block-info? height)),
+          "last-updated-block": (unwrap-panic (get-block-info? height))
         }
       }
     )
