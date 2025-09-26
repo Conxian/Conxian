@@ -1,7 +1,7 @@
 ;; Conxian Enterprise API - Institutional features
-(use-trait sip-010-ft-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.all-traits.sip-010-ft-trait)
-(use-trait compliance-hooks-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.compliance-hooks-trait)
-(use-trait circuit-breaker-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.circuit-breaker-trait)
+(use-trait sip-010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
+(use-trait compliance-hooks-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.compliance-hooks-trait)
+(use-trait circuit-breaker-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.circuit-breaker-trait)
 
 ;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED (err u401))
