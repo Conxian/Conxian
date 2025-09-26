@@ -51,7 +51,7 @@
     severity: uint,
     message: (string-ascii 256),
     block-height: uint,
-    data: (optional {})
+    data: (optional (string-utf8 256))
   }
 )
 

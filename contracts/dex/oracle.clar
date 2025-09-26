@@ -40,7 +40,10 @@
   (let ((caller tx-sender))
     (asserts! (or 
                 (is-eq caller (var-get admin))
-                (is-eq (some? caller) (var-get oracle-contract))
+                (match (var-get oracle-contract)
+                  (some contract-principal) (is-eq caller contract-principal)
+                  none false
+                )
               ) 
       ERR_UNAUTHORIZED)
       

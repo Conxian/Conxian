@@ -4,12 +4,12 @@
 
 ;; Constants - using valid uint values instead of hex buffers
 (define-constant Q96 u79228162514264337593543950336) ;; 2^96 as uint
-(define-constant Q128 u340282366920938463463374607431768211456) ;; 2^128 as uint
+(define-constant Q128 u340282366920938463463374607431768211455) ;; 2^128 - 1 as uint
 
 (define-constant MIN_TICK -887272)
 (define-constant MAX_TICK 887272)
 (define-constant MIN_SQRT_RATIO u4295128739) ;; sqrt(0.000000000000000001)
-(define-constant MAX_SQRT_RATIO u1461446703485210103287273052203988822378723970341) ;; sqrt(340282366920938463463374607431768211456) - 1
+(define-constant MAX_SQRT_RATIO u18446744073709551615) ;; sqrt(2^128 - 1) - 1, approximately 2^64 - 1
 
 ;; Error constants
 (define-constant ERR_INVALID_INPUT (err u4001))

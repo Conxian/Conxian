@@ -8,7 +8,7 @@
 (use-trait sip-010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.sip-010-ft-trait)
 (use-trait pool-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.pool-trait)
 
-(impl-trait .router-trait)
+(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.router-trait)
 
 ;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED (err u4000))
@@ -252,71 +252,53 @@
     (deadline uint)
     (recipient principal)
   )
-  (let (
-      (current-token token-in)
-      (current-amount amount-in)
-      (remaining-path path)
-    )
-    ;; Process each hop in the path
-    (fold (lambda (hop result)
-      (if (is-err result)
-        result
-        (let* (
-            (hop-result (unwrap-panic result))
-            (current-token (get current-token hop-result))
-            (current-amount (get current-amount hop-result))
-            (remaining-path (get remaining-path hop-result))
-            (path-length (len remaining-path))
-          )
-          (if (<= path-length u1)
-            (ok {
-              current-token: current-token,
-              current-amount: current-amount,
-              remaining-path: remaining-path
-            })
-            (let* (
-                (token-out (unwrap! (element-at remaining-path u1) ERR_INVALID_PATH))
-                (pool (unwrap! (get-pool current-token token-out) ERR_POOL_NOT_FOUND))
-                (is-final-hop (is-eq path-length u2))
-                (amount-out (if is-final-hop
-                  min-amount-out
-                  (unwrap! (contract-call? pool get-amount-out current-amount current-token token-out) 
-                          ERR_INSUFFICIENT_LIQUIDITY)
-                ))
-                (swap-result (contract-call? pool swap 
-                  current-token 
-                  token-out 
-                  current-amount 
-                  amount-out 
-                  (if is-final-hop recipient (as-contract tx-sender))
-                ))
-              )
-              (if (is-ok swap-result)
-                (ok {
-                  current-token: token-out,
-                  current-amount: amount-out,
-                  remaining-path: (slice remaining-path u1 u5)
-                })
-                (err (unwrap-err swap-result))
-              )
+  (fold (lambda (hop-index (acc (response { current-token: principal, current-amount: uint, remaining-path: (list 5 principal) } uint) uint)))
+    (match acc
+      (ok current-state)
+      (let* (
+          (current-token (get current-token current-state))
+          (current-amount (get current-amount current-state))
+          (remaining-path (get remaining-path current-state))
+          (path-length (len remaining-path))
+        )
+        (if (<= path-length u1)
+          (ok current-state) ;; No more hops to process
+          (let* (
+              (token-out (unwrap! (element-at remaining-path u1) ERR_INVALID_PATH))
+              (pool (unwrap! (get-pool current-token token-out) ERR_POOL_NOT_FOUND))
+              (is-final-hop (is-eq path-length u2))
+              (amount-out (if is-final-hop
+                min-amount-out
+                (unwrap! (contract-call? pool get-amount-out current-amount current-token token-out) 
+                        ERR_INSUFFICIENT_LIQUIDITY)
+              ))
+              (swap-result (contract-call? pool swap 
+                current-token 
+                token-out 
+                current-amount 
+                amount-out 
+                (if is-final-hop recipient (as-contract tx-sender))
+              ))
+            )
+            (if (is-ok swap-result)
+              (ok {
+                current-token: token-out,
+                current-amount: amount-out,
+                remaining-path: (slice remaining-path u1 u5)
+              })
+              (err (unwrap-err swap-result))
             )
           )
         )
       )
-    ) (ok {
+      err
+    )
+    (ok {
       current-token: token-in,
       current-amount: amount-in,
       remaining-path: path
-    }) (list u0 u1 u2 u3 u4))  ;; Max 5 hops
-    
-    ;; Check if we completed all hops successfully
-    (match result
-      (ok hop-result) (if (<= (len (get remaining-path hop-result)) u1)
-        (ok true)
-        (err ERR_INSUFFICIENT_LIQUIDITY)
-      )
-      err (err (unwrap-err result))
-    )
+    })
+    (range u0 (len path))
   )
 )
 
