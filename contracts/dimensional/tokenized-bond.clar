@@ -9,7 +9,7 @@
 ;; - Principal payout at maturity.
 
 ;; Import traits from the all-traits.clar file
-(use-trait sip10-trait .all-traits.sip-010-ft-trait)
+(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
 (use-trait bond-trait .all-traits.bond-trait)
 
 ;; Implement the traits for this contract

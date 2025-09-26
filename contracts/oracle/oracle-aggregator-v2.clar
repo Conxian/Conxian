@@ -1,8 +1,8 @@
 ;; Oracle Aggregator V2
 ;; This contract aggregates prices from multiple oracle sources, calculates TWAP, and detects manipulation.
 
-(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.oracle-trait)
-(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.circuit-breaker-trait)
+(impl-trait .all-traits.oracle-trait)
+(impl-trait .all-traits.circuit-breaker-trait)
 
 ;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED (err u1003))
@@ -92,19 +92,22 @@
         (ok (unwrap-panic (element-at sorted (/ (- len u1) u2))))
         (ok (/ (+ (unwrap-panic (element-at sorted (/ len u2))) (unwrap-panic (element-at sorted (- (/ len u2) u1)))) u2))
       )
+    )
+  )
 )
 
 (define-private (check-deviation (new-price uint) (token-a principal) (token-b principal))
   (match (map-get? prices { token-a: token-a, token-b: token-b })
     (some price-data) (let ((old-price (get price price-data)))
       (let ((deviation 
-        (* (/ (if (< old-price new-price) (- new-price old-price) (- old-price new-price)) old-price) u10000)))  ;; In basis points
+        (/ (* (if (< old-price new-price) (- new-price old-price) (- old-price new-price)) u10000) old-price)))  ;; In basis points
         (asserts! (< deviation u500) ERR_DEVIATION_TOO_HIGH)
         (ok true)
       )
     )
     (none) (ok true)
-
+  )
+)
 (define-private (update-twap (new-price uint) (token-a principal) (token-b principal))
   (let ((current-twap (map-get? twap { token-a: token-a, token-b: token-b })))
     (if (is-some current-twap)

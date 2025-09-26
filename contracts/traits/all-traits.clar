@@ -47,13 +47,6 @@
   )
 )
 
-(define-trait sip-009-nft-trait
-  (
-    (transfer (uint principal principal (optional (buff 34))) (response bool uint))
-    (get-owner (uint) (response (optional principal) uint))
-    (get-token-uri (uint) (response (optional (string-utf8 256)) uint))
-  )
-)
 
 (define-trait bond-trait
   (
@@ -66,24 +59,10 @@
     (get-payment-token () (response principal uint))
     (is-matured () (response bool uint))
     (get-next-coupon-block (principal) (response (optional uint) uint))
-  )
-)
+  ))
 
-(define-trait pausable-trait
-  (
-    (pause () (response bool uint))
-    (unpause () (response bool uint))
-    (is-paused () (response bool uint))
-  )
-)
 
-(define-trait access-control-trait
-  (
-    (has-role (principal (string-ascii 32)) (response bool uint))
-    (grant-role (principal (string-ascii 32)) (response bool uint))
-    (revoke-role (principal (string-ascii 32)) (response bool uint))
-  )
-)
+
 
 (define-trait oracle-trait
   (
@@ -118,15 +97,6 @@
   )
 )
 
-(define-trait sip-009-nft-trait
-  (
-    (transfer (principal principal uint (optional (buff 34))) (response bool uint))
-    (get-owner (uint) (response (optional principal) uint))
-    (get-token-uri (uint) (response (optional (string-utf8 256)) uint))
-    (get-last-token-id () (response uint uint))
-    (get-token-by-index (principal uint) (response (optional uint) uint))
-  )
-)
 
 (define-trait access-control-trait
   (

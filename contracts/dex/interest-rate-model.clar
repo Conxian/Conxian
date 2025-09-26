@@ -30,6 +30,7 @@
   (try! (check-is-owner))
   (var-set contract-owner new-owner)
   (ok true))
+)
 
 (define-public (set-lending-system-contract (lending-system principal))
   (try! (check-is-owner))

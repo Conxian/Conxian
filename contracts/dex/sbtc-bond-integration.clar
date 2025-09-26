@@ -2,7 +2,7 @@
 ;; sBTC Bond Integration - Advanced bond issuance with sBTC collateral and yields
 ;; Provides enterprise bond structuring, sBTC yield distribution, and risk management
 
-(use-trait ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
+(use-trait ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.sip-010-ft-trait)
 
 ;; =============================================================================
 ;; CONSTANTS AND ERROR CODES

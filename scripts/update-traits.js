@@ -59,8 +59,8 @@ function updateTraitFiles() {
   console.log('\nTrait files update complete!');
   console.log('Please ensure all contracts use the traits from all-traits.clar');
   console.log('Example usage:');
-  console.log('(use-trait my-trait \'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.my-trait)');
-  console.log('(impl-trait \'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.my-trait)');
+  console.log('(use-trait my-trait \'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.my-trait)');
+  console.log('(impl-trait \'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.my-trait)');
 }
 
 // Run the update

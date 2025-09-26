@@ -4,8 +4,8 @@
 ;; Refactored for real functionality.
 
 ;; --- Traits ---
-(use-trait sip-010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
-(use-trait staking-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.staking-trait)
+(use-trait sip-010-ft-trait 'all-traits.sip-010-ft-trait)
+(use-trait staking-trait 'all-traits.staking-trait)
 
 ;; --- Constants ---
 (define-constant CONTRACT_OWNER tx-sender)
@@ -38,6 +38,13 @@
 (define-data-var next-violation-id uint u1)
 
 ;; --- Admin Functions ---
+(define-private (only-admin)
+  (only-role ROLE_ADMIN)
+)
+
+(define-private (only-pauser)
+  (only-role ROLE_PAUSER)
+)
 (define-public (set-emergency-operator (operator principal))
   (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
   (var-set emergency-operator operator)

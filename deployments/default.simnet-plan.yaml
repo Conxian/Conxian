@@ -96,6 +96,11 @@ plan:
             path: "contracts\\dex\\concentrated-liquidity-pool.clar"
             clarity-version: 1
         - emulated-contract-publish:
+            contract-name: concentrated-liquidity-pool-v2
+            emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            path: "contracts\\dimensional\\concentrated-liquidity-pool-v2.clar"
+            clarity-version: 1
+        - emulated-contract-publish:
             contract-name: concentrated-math
             emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
             path: "contracts\\libraries\\concentrated-math.clar"
@@ -155,14 +160,14 @@ plan:
             emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
             path: "contracts\\dex\\dex-factory.clar"
             clarity-version: 1
+      epoch: "2.05"
+    - id: 1
+      transactions:
         - emulated-contract-publish:
             contract-name: dex-router
             emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
             path: "contracts\\dex\\dex-router.clar"
             clarity-version: 1
-      epoch: "2.05"
-    - id: 1
-      transactions:
         - emulated-contract-publish:
             contract-name: dim-graph
             emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
@@ -174,14 +179,14 @@ plan:
             path: "contracts\\dimensional\\dim-metrics.clar"
             clarity-version: 1
         - emulated-contract-publish:
-            contract-name: dim-registry
-            emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            path: "contracts\\dimensional\\dim-registry.clar"
-            clarity-version: 1
-        - emulated-contract-publish:
             contract-name: dim-oracle-automation
             emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
             path: "contracts\\dimensional\\dim-oracle-automation.clar"
+            clarity-version: 1
+        - emulated-contract-publish:
+            contract-name: dim-registry
+            emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            path: "contracts\\dimensional\\dim-registry.clar"
             clarity-version: 1
         - emulated-contract-publish:
             contract-name: dim-revenue-adapter
@@ -204,11 +209,6 @@ plan:
             path: "contracts\\dex\\distributed-cache-manager.clar"
             clarity-version: 1
         - emulated-contract-publish:
-            contract-name: flash-loan-vault
-            emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            path: "contracts\\dex\\flash-loan-vault.clar"
-            clarity-version: 1
-        - emulated-contract-publish:
             contract-name: enhanced-yield-strategy
             emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
             path: "contracts\\dex\\enhanced-yield-strategy.clar"
@@ -222,6 +222,11 @@ plan:
             contract-name: enterprise-loan-manager
             emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
             path: "contracts\\dex\\enterprise-loan-manager.clar"
+            clarity-version: 1
+        - emulated-contract-publish:
+            contract-name: flash-loan-vault
+            emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            path: "contracts\\dex\\flash-loan-vault.clar"
             clarity-version: 1
         - emulated-contract-publish:
             contract-name: lending-protocol-governance
@@ -274,6 +279,24 @@ plan:
             path: "contracts\\dex\\memory-pool-management.clar"
             clarity-version: 1
         - emulated-contract-publish:
+            contract-name: mock-metrics
+            emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            path: "contracts\\mocks\\mock-metrics.clar"
+            clarity-version: 1
+        - emulated-contract-publish:
+            contract-name: mock-strategy-a
+            emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            path: "contracts\\mocks\\mock-strategy-a.clar"
+            clarity-version: 1
+      epoch: "2.05"
+    - id: 2
+      transactions:
+        - emulated-contract-publish:
+            contract-name: mock-strategy-b
+            emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            path: "contracts\\mocks\\mock-strategy-b.clar"
+            clarity-version: 1
+        - emulated-contract-publish:
             contract-name: mock-token
             emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
             path: "contracts\\mocks\\mock-token.clar"
@@ -288,9 +311,6 @@ plan:
             emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
             path: "contracts\\dex\\nakamoto-compatibility.clar"
             clarity-version: 1
-      epoch: "2.05"
-    - id: 2
-      transactions:
         - emulated-contract-publish:
             contract-name: oracle
             emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
@@ -345,5 +365,15 @@ plan:
             contract-name: tokenized-bond
             emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
             path: "contracts\\dimensional\\tokenized-bond.clar"
+            clarity-version: 1
+        - emulated-contract-publish:
+            contract-name: vault
+            emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            path: "contracts\\vault.clar"
+            clarity-version: 1
+        - emulated-contract-publish:
+            contract-name: yield-optimizer
+            emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            path: "contracts\\rewards\\yield-optimizer.clar"
             clarity-version: 1
       epoch: "2.05"

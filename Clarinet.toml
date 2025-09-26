@@ -36,6 +36,7 @@ auto-compounder = { path = "contracts/dex/auto-compounder.clar", address = "ST3P
 bond-factory = { path = "contracts/dex/bond-factory.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.bond-factory" }
 bond-issuance-system = { path = "contracts/dex/bond-issuance-system.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.bond-issuance-system" }
 concentrated-liquidity-pool = { path = "contracts/dex/concentrated-liquidity-pool.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.concentrated-liquidity-pool" }
+concentrated-liquidity-pool-v2 = { path = "contracts/dimensional/concentrated-liquidity-pool-v2.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.concentrated-liquidity-pool-v2" }
 concentrated-position-nft = { path = "contracts/dex/concentrated-position-nft.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.concentrated-position-nft" }
 cxd-staking = { path = "contracts/dex/cxd-staking.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.cxd-staking" }
 cxlp-migration-queue = { path = "contracts/dex/cxlp-migration-queue.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.cxlp-migration-queue" }
@@ -108,8 +109,8 @@ Pausable = { path = "contracts/security/Pausable.clar", address = "ST3PPMPR7SAY4
 
 # Rewards
 rewards-distributor = { path = "contracts/rewards/rewards-distributor.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.rewards-distributor" }
-yield-distributor = { path = "contracts/rewards/yield-distributor.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.yield-distributor" }
 yield-optimizer = { path = "contracts/rewards/yield-optimizer.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.yield-optimizer" }
+
 
 # Test Contracts
 test-access = { path = "contracts/test/test-access.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.test-access" }
@@ -138,7 +139,7 @@ lending-system-trait = ".lending-system-trait"
 flash-loan-receiver-trait = ".flash-loan-receiver-trait"
 trait-registry = ".trait-registry"
 traits-manifest = ".traits-manifest"
-all-traits = ".all-traits"
+all-traits = "all-traits"
 
 # Tokens
 cxd-token = ".cxd-token"
