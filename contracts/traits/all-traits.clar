@@ -64,6 +64,8 @@
     (get-coupon-rate () (response uint uint))
     (get-face-value () (response uint uint))
     (get-payment-token () (response principal uint))
+    (is-matured () (response bool uint))
+    (get-next-coupon-block (principal) (response (optional uint) uint))
   )
 )
 
@@ -103,10 +105,6 @@
   (
     (before-transfer (principal principal uint (optional (buff 34))) (response bool uint))
     (after-transfer (principal principal uint (optional (buff 34))) (response bool uint))
-  )
-)
-    (is-matured () (response bool uint))
-    (get-next-coupon-block (principal) (response (optional uint) uint))
   )
 )
 
@@ -530,71 +528,8 @@
   )
 )
 
-(define-trait oracle-trait
-  (
-    ;; Get the current price of an asset
-    (get-price (token principal) (response uint uint))
+;; Remove duplicate oracle-trait definition (keeping the enhanced version)
 
-    ;; Update the price of an asset (restricted to oracle admin)
-    (update-price (token principal) (price uint) (response bool uint))
-
-    ;; Get the last update time for an asset
-    (get-last-updated (token principal) (response uint uint))
-
-    ;; Add a new price feed (admin only)
-    (add-price-feed (token principal) (feed principal) (response bool uint))
-
-    ;; Remove a price feed (admin only)
-    (remove-price-feed (token principal) (response bool uint))
-
-    ;; Set the heartbeat interval (admin only)
-    (set-heartbeat (token principal) (interval uint) (response bool uint))
-
-    ;; Set the maximum price deviation (admin only)
-    (set-max-deviation (token principal) (deviation uint) (response bool uint))
-
-    ;; Get the current deviation threshold for a token
-    (get-deviation-threshold (token principal) (response uint uint))
-
-    ;; Emergency price override (admin only)
-    (emergency-price-override (token principal) (price uint) (response bool uint))
-
-    ;; Check if a price is stale
-    (is-price-stale (token principal) (response bool uint))
-
-    ;; Get the number of feeds for a token
-    (get-feed-count (token principal) (response uint uint))
-
-    ;; Get the admin address
-    (get-admin () (response principal uint))
-
-    ;; Transfer admin rights
-    (set-admin (new-admin principal) (response bool uint))
-  )
-)
-
-(define-trait dim-registry-trait
-  (
-    (update-weight (uint uint) (response uint uint))
-  )
-)
-
-(define-trait dimensional-oracle-trait
-  (
-    (update-weights ((list 10 {dim-id: uint, new-wt: uint})) (response bool uint))
-  )
-)
-
-(define-trait compliance-hooks-trait
-  (
-    (pre-transfer-hook (uint principal principal) (response bool uint))
-    (post-transfer-hook (uint principal principal) (response bool uint))
-    (pre-mint-hook (uint principal) (response bool uint))
-    (post-mint-hook (uint principal) (response bool uint))
-    (pre-burn-hook (uint principal) (response bool uint))
-    (post-burn-hook (uint principal) (response bool uint))
-  )
-)
 
 (define-trait math-trait
   (
