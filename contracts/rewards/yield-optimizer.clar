@@ -4,9 +4,9 @@
 ;; strategies to maximize returns for the protocol.
 
 ;; --- Traits ---
-(use-trait sip-010-ft-trait .sip-010-trait)
-(use-trait vault-trait .vault-trait)
-(use-trait strategy-trait .strategy-trait)
+(use-trait sip-010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
+(use-trait vault-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.vault-trait)
+(use-trait strategy-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.strategy-trait)
 
 ;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED (err u8001))

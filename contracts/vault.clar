@@ -3,13 +3,13 @@
 ;; It is controlled by the yield-optimizer contract.
 
 ;; --- Traits ---
-(use-trait sip-010-ft-trait .sip-010-trait)
-(use-trait vault-trait .vault-trait)
-(use-trait vault-admin-trait .vault-admin-trait)
-(use-trait strategy-trait .strategy-trait)
+(use-trait sip-010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
+(use-trait vault-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.vault-trait)
+(use-trait vault-admin-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.vault-admin-trait)
+(use-trait strategy-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.strategy-trait)
 
-(impl-trait .vault-trait)
-(impl-trait .vault-admin-trait)
+(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.vault-trait)
+(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.vault-admin-trait)
 
 ;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED (err u6001))
