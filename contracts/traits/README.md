@@ -44,7 +44,7 @@ The Conxian protocol uses a centralized trait system for consistency and maintai
 
 ### Import Traits
 ```clarity
-(use-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.<trait-name>)
+(use-trait <trait-name> .all-traits.<trait-name>)
 ```
 
 ### Example Contract Implementation

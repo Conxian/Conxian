@@ -7,11 +7,8 @@
 ;; This contract implements the dimensional-oracle-trait and is designed
 ;; to be called by a whitelisted keeper principal.
 
-(use-trait dimensional-oracle-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.dimensional-oracle-trait)
-(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.dimensional-oracle-trait)
-
-(use-trait dimensional-oracle-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.all-traits.dimensional-oracle-trait)
-(impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.all-traits.dimensional-oracle-trait)
+(use-trait dimensional-oracle-trait .all-traits.dimensional-oracle-trait)
+(impl-trait .all-traits.dimensional-oracle-trait)
 
 (define-constant ERR_UNAUTHORIZED u101)
 
@@ -44,7 +41,7 @@
 (define-private (update-weight-iter (update {dim-id: uint, new-wt: uint}) (prev-result (response bool uint)))
   (begin
     (try! prev-result)
-    (match (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dim-registry update-weight (get dim-id update) (get new-wt update))
+    (match (contract-call? .dim-registry update-weight (get dim-id update) (get new-wt update))
       success-val (ok true)
       error-val (err error-val)
     )
