@@ -15,10 +15,6 @@
 (define-data-var reserve-b uint u0)
 (define-data-var total-supply uint u0)
 
-;; --- Events ---
-(define-event Swap (sender principal) (amount-in uint) (amount-out uint) (token-in principal) (token-out principal))
-(define-event AddLiquidity (provider principal) (amount-a uint) (amount-b uint) (shares uint))
-(define-event RemoveLiquidity (provider principal) (amount-a uint) (amount-b uint) (shares uint))
 
 ;; --- Initialization ---
 (define-public (initialize (a principal) (b principal) (fee uint) (admin-principal principal))
@@ -80,7 +76,7 @@
         )
         
         ;; Emit event
-        (emit-event Swap tx-sender amount-in amount-out token-in token-out)
+        (print { event: "Swap", sender: tx-sender, "amount-in": amount-in, "amount-out": amount-out, "token-in": token-in, "token-out": token-out })
         (ok {
           amount-out: amount-out,
           fee: (- amount-in amount-in-with-fee)

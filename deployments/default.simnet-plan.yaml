@@ -126,14 +126,14 @@ plan:
             path: "contracts\\tokens\\cxd-token.clar"
             clarity-version: 1
         - emulated-contract-publish:
-            contract-name: cxlp-token
-            emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            path: "contracts\\tokens\\cxlp-token.clar"
-            clarity-version: 1
-        - emulated-contract-publish:
             contract-name: cxlp-migration-queue
             emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
             path: "contracts\\dex\\cxlp-migration-queue.clar"
+            clarity-version: 1
+        - emulated-contract-publish:
+            contract-name: cxlp-token
+            emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            path: "contracts\\tokens\\cxlp-token.clar"
             clarity-version: 1
         - emulated-contract-publish:
             contract-name: cxs-token
@@ -179,14 +179,14 @@ plan:
             path: "contracts\\dimensional\\dim-metrics.clar"
             clarity-version: 1
         - emulated-contract-publish:
-            contract-name: dim-oracle-automation
-            emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            path: "contracts\\dimensional\\dim-oracle-automation.clar"
-            clarity-version: 1
-        - emulated-contract-publish:
             contract-name: dim-registry
             emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
             path: "contracts\\dimensional\\dim-registry.clar"
+            clarity-version: 1
+        - emulated-contract-publish:
+            contract-name: dim-oracle-automation
+            emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            path: "contracts\\dimensional\\dim-oracle-automation.clar"
             clarity-version: 1
         - emulated-contract-publish:
             contract-name: dim-revenue-adapter

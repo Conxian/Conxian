@@ -57,7 +57,7 @@
 (define-constant MAX_COUPON_RATE u1000000000000000000)  ;; 100%
 (define-constant MIN_COUPON_FREQUENCY u144)  ;; ~1 day at 1 block/10min
 
-(define-fungible-token tokenized-bond)
+(define-fungible-token tokenized-bond u6)
 
 ;; --- SIP-010 Token Functions ---
 

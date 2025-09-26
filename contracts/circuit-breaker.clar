@@ -1,6 +1,9 @@
 ;; circuit-breaker.clar
 ;; Implements the enhanced circuit breaker pattern
 
+(use-trait circuit-breaker-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.circuit-breaker-trait)
+(use-trait ownable-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.ownable-trait)
+
 (impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.circuit-breaker-trait)
 (impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.ownable-trait)
 
@@ -86,8 +89,8 @@
   )
 )
 
-(define-private (update-rate-limit (stats {success-count: uint, failure-count: uint, last-updated: uint, 
-                                         is-open: bool, last-state-change: uint, rate-limit: uint, 
+(define-private (update-rate-limit (stats {success-count: uint, failure-count: uint, last-updated: uint,
+                                         is-open: bool, last-state-change: uint, rate-limit: uint,
                                          rate-window: uint, rate-count: uint, rate-window-start: uint}) 
                                  (is-success bool))
   (let ((current-time stacks-block-height)

@@ -7,11 +7,11 @@
 (define-constant TICK_BASE u10000)  ;; 1.0001 in fixed-point with 4 decimals
 
 ;; Math library contract (to be set by admin)
-(define-data-var math-contract principal 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math-lib-advanced)
+(define-constant MATH_CONTRACT 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.math-lib-advanced)
 
 ;; Calculate sqrt price from tick using fixed-point arithmetic
 (define-read-only (tick-to-sqrt-price (tick int))
-  (let ((math-addr (var-get math-contract)))
+  (let ((math-addr MATH_CONTRACT))
     (if (>= tick 0)
       (let ((base-power (try! (contract-call? math-addr pow TICK_BASE (to-uint tick)))))
         (contract-call? math-addr sqrt base-power))
