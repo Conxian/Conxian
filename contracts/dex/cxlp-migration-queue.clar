@@ -291,7 +291,3 @@
     cxd-contract: (var-get cxd-contract)
   })
 
-
-
-
-

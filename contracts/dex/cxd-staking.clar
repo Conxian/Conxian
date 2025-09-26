@@ -76,7 +76,7 @@
 
 ;; --- Private Functions ---
 (define-private (check-circuit-breaker) 
-  (contract-call? (var-get circuit-breaker) is-circuit-open)
+  (contract-call? (unwrap-panic (var-get circuit-breaker)) is-circuit-open)
 )
 
 ;; --- Helpers ---

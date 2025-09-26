@@ -42,8 +42,8 @@
 (define-public (set-contracts (vault principal) (metrics principal))
   (begin
     (asserts! (is-eq tx-sender (var-get admin)) ERR_UNAUTHORIZED)
-    (asserts! (is-contract? vault) ERR_INVALID_CONTRACT)
-    (asserts! (is-contract? metrics) ERR_INVALID_CONTRACT)
+    (asserts! (is-some (contract-of? vault)) ERR_INVALID_CONTRACT)
+    (asserts! (is-some (contract-of? metrics)) ERR_INVALID_CONTRACT)
     (var-set vault-contract vault)
     (var-set metrics-contract metrics)
     (ok true)))

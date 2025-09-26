@@ -258,7 +258,7 @@
       
       (print (tuple (event "optimization-executed") (strategy-id strategy-id) (result optimization-result)))
       
-      (ok optimization-result))))
+      (ok optimization-result)))))
 
 ;; === OPTIMIZATION ALGORITHMS ===
 (define-private (optimize-for-yield (pools (list 10 {pool-id: uint, asset: principal})))
@@ -286,7 +286,7 @@
   (target-pools (list 5 {pool-id: uint, asset: principal, weight: uint}))
   (trigger-condition (string-ascii 30))
   (trigger-threshold uint)
-  (max-rebalance-amount uint))
+  (max-rebalance-amount uint)))
   
   (let ((rule-id (var-get next-rule-id)))
     (asserts! (is-admin) ERR_UNAUTHORIZED)
@@ -313,7 +313,7 @@
     
     (ok rule-id)))
 
-(define-private (internal-check-rebalance-triggers (pool-id uint) (asset principal))
+(define-private (internal-check-rebalance-triggers (pool-id uint) (asset principal)))
   ;; Check if any rebalancing rules should be triggered
   (let ((pool (unwrap! (map-get? liquidity-pools {pool-id: pool-id, asset: asset}) ERR_POOL_NOT_FOUND)))
     
@@ -343,7 +343,7 @@
 (define-public (check-rebalance-triggers (pool-id uint) (asset principal))
   (internal-check-rebalance-triggers pool-id asset))
 
-(define-private (trigger-emergency-mode (pool-id uint) (asset principal))
+(define-private (trigger-emergency-mode (pool-id uint) (asset principal)))
   (let ((pool (unwrap! (map-get? liquidity-pools {pool-id: pool-id, asset: asset}) ERR_POOL_NOT_FOUND)))
     ;; Enable emergency mode
     (map-set liquidity-pools {pool-id: pool-id, asset: asset}
@@ -355,7 +355,7 @@
     (print (tuple (event "emergency-mode-activated") (pool-id pool-id)))
     (ok true)))
 
-(define-private (execute-pool-rebalance (pool-id uint) (asset principal))
+(define-private (execute-pool-rebalance (pool-id uint) (asset principal)))
   (let ((pool (unwrap! (map-get? liquidity-pools {pool-id: pool-id, asset: asset}) ERR_POOL_NOT_FOUND)))
     
     ;; Calculate optimal rebalance amount
@@ -367,7 +367,7 @@
                              ;; Need to reduce utilization - add liquidity
                              true
                              ;; Need to increase utilization - move liquidity elsewhere
-                             false)))
+                             false))))
       
       ;; Execute rebalancing
       (begin
@@ -381,20 +381,20 @@
         
         (ok true)))))
 
-(define-private (add-liquidity-to-pool (pool-id uint) (asset principal))
+(define-private (add-liquidity-to-pool (pool-id uint) (asset principal)))
   (begin
     ;; Find liquidity from other pools or external sources
     (print (tuple (rebalance "add-liquidity") (pool-id pool-id)))
     (ok true))) ;; Simplified
 
-(define-private (remove-excess-liquidity (pool-id uint) (asset principal))
+(define-private (remove-excess-liquidity (pool-id uint) (asset principal)))
   (begin
     ;; Move excess liquidity to better opportunities
     (print (tuple (rebalance "remove-excess") (pool-id pool-id)))
     (ok true))) ;; Simplified
 
 ;; === ARBITRAGE DETECTION ===
-(define-public (scan-arbitrage-opportunities)
+(define-public (scan-arbitrage-opportunities))
   ;; Scan for cross-pool arbitrage opportunities
   (let ((opportunity-id (var-get next-opportunity-id)))
     (asserts! (is-admin) ERR_UNAUTHORIZED)
@@ -411,7 +411,7 @@
   (pool-id uint) 
   (asset principal) 
   (amount uint)
-  (tier uint))
+  (tier uint)))
   
   (begin
     (asserts! (is-admin) ERR_UNAUTHORIZED)
@@ -438,19 +438,19 @@
       (ok true))))
 
 ;; === READ-ONLY FUNCTIONS ===
-(define-read-only (get-liquidity-pool (pool-id uint) (asset principal))
+(define-read-only (get-liquidity-pool (pool-id uint) (asset principal)))
   (map-get? liquidity-pools {pool-id: pool-id, asset: asset}))
 
-(define-read-only (get-optimization-strategy (strategy-id uint))
+(define-read-only (get-optimization-strategy (strategy-id uint)))
   (map-get? optimization-strategies strategy-id))
 
-(define-read-only (get-rebalancing-rule (rule-id uint))
+(define-read-only (get-rebalancing-rule (rule-id uint)))
   (map-get? rebalancing-rules rule-id))
 
-(define-read-only (get-liquidity-provider-info (provider principal) (pool-id uint) (asset principal))
+(define-read-only (get-liquidity-provider-info (provider principal) (pool-id uint) (asset principal)))
   (map-get? liquidity-providers {provider: provider, pool-id: pool-id, asset: asset}))
 
-(define-read-only (calculate-pool-efficiency (pool-id uint) (asset principal))
+(define-read-only (calculate-pool-efficiency (pool-id uint) (asset principal)))
   (match (map-get? liquidity-pools {pool-id: pool-id, asset: asset})
     pool
       (let ((utilization (if (> (get total-liquidity pool) u0)
@@ -461,9 +461,9 @@
                           (/ (* (if (< utilization target) utilization target) BASIS_POINTS) target)
                           u0)))
         (ok (tuple (utilization utilization) (efficiency efficiency))))
-    ERR_POOL_NOT_FOUND))
+    ERR_POOL_NOT_FOUND)))
 
-(define-read-only (get-system-health)
+(define-read-only (get-system-health))
   (ok (tuple
     (total-pools-managed (var-get next-pool-counter))
     (total-liquidity (var-get total-liquidity-managed))
@@ -472,7 +472,7 @@
     (failed-optimizations (var-get failed-optimizations))
     (system-paused (var-get system-paused)))))
 
-(define-read-only (get-optimization-recommendations (pool-id uint) (asset principal))
+(define-read-only (get-optimization-recommendations (pool-id uint) (asset principal)))
   (match (map-get? liquidity-pools {pool-id: pool-id, asset: asset})
     pool
       (let ((utilization (if (> (get total-liquidity pool) u0)
@@ -487,19 +487,18 @@
               "REDUCE_UTILIZATION"
               (if (< utilization (- target REBALANCE_THRESHOLD))
                 "INCREASE_UTILIZATION"
-                "OPTIMAL")))
-          (priority (if (get emergency-mode pool) "HIGH" "MEDIUM")))))
-    ERR_POOL_NOT_FOUND))
+                "OPTIMAL"))))))
+    ERR_POOL_NOT_FOUND)))
 
 ;; === EMERGENCY FUNCTIONS ===
-(define-public (emergency-pause)
+(define-public (emergency-pause))
   (begin
     (asserts! (is-admin) ERR_UNAUTHORIZED)
     (var-set system-paused true)
     (print (tuple (event "system-emergency-pause") (block block-height)))
     (ok true)))
 
-(define-public (emergency-unpause)
+(define-public (emergency-unpause))
   (begin
     (asserts! (is-admin) ERR_UNAUTHORIZED)
     (var-set system-paused false)
@@ -507,16 +506,16 @@
     (ok true)))
 
 ;; Bulk operations for efficiency
-(define-public (batch-update-pools (updates (list 10 {pool-id: uint, asset: principal, total: uint, available: uint})))
+(define-public (batch-update-pools (updates (list 10 {pool-id: uint, asset: principal, total: uint, available: uint}))))
   (let ((results (map update-single-pool updates)))
     (print (tuple (event "batch-pool-update") (count (len updates))))
     (ok results)))
 
-(define-private (update-single-pool (update {pool-id: uint, asset: principal, total: uint, available: uint}))
+(define-private (update-single-pool (update {pool-id: uint, asset: principal, total: uint, available: uint})))
   (update-pool-liquidity (get pool-id update) (get asset update) (get total update) (get available update)))
 
 ;; Performance analytics
-(define-read-only (calculate-system-performance)
+(define-read-only (calculate-system-performance))
   (let ((total-success (var-get successful-optimizations))
         (total-failure (var-get failed-optimizations))
         (total-operations (+ total-success total-failure)))
