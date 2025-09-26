@@ -1,8 +1,8 @@
 ;; Oracle Aggregator V2
 ;; This contract aggregates prices from multiple oracle sources, calculates TWAP, and detects manipulation.
 
-(impl-trait .all-traits.oracle-trait)
-(impl-trait .all-traits.circuit-breaker-trait)
+(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.oracle-trait)
+(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.circuit-breaker-trait)
 
 ;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED (err u1003))
@@ -73,7 +73,10 @@
 ;; --- Private Helper Functions ---
 
 (define-private (check-circuit-breaker)
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.circuit-breaker is-circuit-open)
+  (match (var-get circuit-breaker)
+    (cb (contract-call? cb .circuit-breaker is-tripped))
+    (ok false)
+  )
 )
 
 (define-private (get-prices-from-sources (sources (list 20 principal)) (token-a principal) (token-b principal))

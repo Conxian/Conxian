@@ -3,7 +3,7 @@
 ;; Handles proposal signing and verification for governance operations
 
 ;; --- Traits ---
-(use-trait sip018-trait .sip-018-trait)
+(use-trait sip018-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.sip-018-trait)
 (impl-trait .sip018-trait)
 
 ;; Constants

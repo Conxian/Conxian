@@ -9,12 +9,12 @@
 ;; - Principal payout at maturity.
 
 ;; Import traits from the all-traits.clar file
-(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
+(use-trait sip-010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
 (use-trait bond-trait .all-traits.bond-trait)
 
 ;; Implement the traits for this contract
 (impl-trait .all-traits.bond-trait)
-(impl-trait .all-traits.sip-010-ft-trait)
+(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
 
 ;; Error codes
 (define-constant ERR_UNAUTHORIZED (err u100))
