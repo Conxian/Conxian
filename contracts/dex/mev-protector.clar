@@ -1,3 +1,5 @@
+(use-trait utils-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.utils.utils-trait)
+
 ;; mev-protector.clar
 ;; MEV Protection Layer for Conxian DEX
 
@@ -32,13 +34,11 @@
 (define-data-var next-reveal-id uint u0)
 
 ;; Helper to serialize a principal to a 32-byte buffer (hash of the principal)
-(define-private (principal-to-buff (p principal))
-  (sha256 (as-max-buff (tuple (p p))))
-)
+
 
 ;; Helper to serialize a list of principals to a concatenated buffer
 (define-private (serialize-principal-list (principal-list (list 20 principal)))
-  (fold (lambda (p acc) (concat acc (principal-to-buff p))) principal-list 0x)
+  (fold (lambda (p acc) (concat acc (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.utils principal-to-buff p))) principal-list 0x)
 )
 
 (define-private (get-commitment-hash (path (list 20 principal)) (amount-in uint) (min-amount-out (optional uint)) (recipient principal) (salt (buff 32)))
@@ -46,7 +46,7 @@
       (path-serialized (serialize-principal-list path))
       (amount-serialized (to-consensus-buff amount-in))
       (min-amount-serialized (match min-amount-out (some u) (to-consensus-buff u) 0x))
-      (recipient-serialized (principal-to-buff recipient))
+      (recipient-serialized (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.utils principal-to-buff recipient))
     )
     (sha256 (concat
       path-serialized

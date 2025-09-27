@@ -13,6 +13,12 @@
 ;; CORE TRAITS
 ;; ===========================================
 
+(define-trait utils-trait
+  (
+    (principal-to-buff (principal) (response (buff 32) uint))
+  )
+)
+
 (define-trait lending-system-trait
   (
     (deposit (principal uint) (response bool uint))
