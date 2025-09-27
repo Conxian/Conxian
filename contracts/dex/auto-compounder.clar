@@ -13,7 +13,7 @@
 (define-constant ERR_CIRCUIT_OPEN (err u8004))
 
 (define-data-var contract-owner principal tx-sender)
-(define-data-var yield-optimizer-contract principal .yield-optimizer)
+(define-data-var yield-optimizer-contract principal ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.yield-optimizer)
 (define-data-var compounding-fee-bps uint u10) ;; 0.1% fee
 (define-data-var circuit-breaker (optional principal) none)
 

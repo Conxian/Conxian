@@ -239,9 +239,7 @@
 
 (define-private (detect-front-running (caller principal))
   "Detect potential front-running patterns"
-  (let ((current-block-data (default-to 
-                            { transaction-count: u0, first-tx-timestamp: u0, suspicious-pattern: false }
-                            (map-get? transaction-timing { stacks-block-height: stacks-block-height }))))
+  (let ((current-block-data (default-to { transaction-count: u0, first-tx-timestamp: u0, suspicious-pattern: false } (map-get? transaction-timing { stacks-block-height: stacks-block-height }))))
     (let ((tx-count (+ (get transaction-count current-block-data) u1))
           (suspicious (> tx-count u10)))  ;; Flag if >10 txs from same caller in block
       (map-set transaction-timing { stacks-block-height: stacks-block-height }

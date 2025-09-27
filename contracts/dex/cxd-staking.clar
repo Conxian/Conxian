@@ -3,15 +3,16 @@
 ;; Implements buyback-and-make mechanism for revenue sharing
 
 ;; Constants
-(define-constant TRAIT_REGISTRY 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.trait-registry)
+(define-constant TRAIT_REGISTRY .all-traits)
 
 ;; Resolve traits using the trait registry
-(use-trait sip-010-ft-trait ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
-(use-trait staking-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.staking-trait)
-(use-trait circuit-breaker-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.circuit-breaker-trait)
+(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
+(use-trait access-control-trait .all-traits.access-control-trait)
+(use-trait staking-trait .all-traits.staking-trait)
+(use-trait circuit-breaker-trait .all-traits.circuit-breaker-trait)
 
 ;; Implement the staking trait
-(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.staking-trait)
+(impl-trait .all-traits.staking-trait)
 
 ;; --- Constants ---
 (define-constant CONTRACT_OWNER tx-sender)
@@ -43,10 +44,10 @@
 (define-data-var symbol (string-ascii 10) "xCXD")
 (define-data-var token-uri (optional (string-utf8 256)) none)
 (define-data-var paused bool false)
-(define-data-var circuit-breaker principal 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.circuit-breaker)
+(define-data-var circuit-breaker principal .all-traits.circuit-breaker)
 
 ;; CXD token contract
-(define-data-var cxd-token-contract principal 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.cxd-token)
+(define-data-var cxd-token-contract principal .all-traits.cxd-token)
 
 ;; --- User State ---
 (define-map user-balances principal uint) ;; xCXD balances

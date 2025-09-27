@@ -1,14 +1,14 @@
-(use-trait utils-trait ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.utils-trait)
+(use-trait utils-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.utils-trait)
 (use-trait access-control-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.access-control-trait)
-(use-trait sip-010-ft-trait ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
-(use-trait factory-trait ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.factory-trait)
-(use-trait circuit-breaker-trait ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.circuit-breaker-trait)
-(use-trait pool-trait ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.pool-trait)
+(use-trait sip-010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
+(use-trait factory-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.factory-trait)
+(use-trait circuit-breaker-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.circuit-breaker-trait)
+(use-trait pool-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.pool-trait)
 
-(impl-trait ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.factory-trait)
+(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.factory-trait)
 
 ;; --- Constants ---
-(define-constant ACCESS_CONTROL 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.access-control)
+(define-constant ACCESS_CONTROL .access-control)
 
 ;; Pool Types
 (define-constant POOL_TYPE_CONSTANT_PRODUCT u1)
@@ -18,8 +18,8 @@
 (define-constant POOL_TYPE_LIQUIDITY_BOOTSTRAP u5)
 
 ;; Default implementations
-(define-constant DEFAULT_CONSTANT_PRODUCT_POOL 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.constant-product-pool)
-(define-constant DEFAULT_CONCENTRATED_LIQUIDITY_POOL 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.concentrated-liquidity-pool)
+(define-constant DEFAULT_CONSTANT_PRODUCT_POOL .constant-product-pool)
+(define-constant DEFAULT_CONCENTRATED_LIQUIDITY_POOL .concentrated-liquidity-pool)
 
 ;; Role constants
 (define-constant ROLE_POOL_MANAGER "pool-manager")
@@ -36,7 +36,7 @@
 
 ;; --- Data Variables ---
 (define-data-var contract-owner principal tx-sender)
-(define-data-var access-control-contract principal 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.access-control) ;; The main access control contract
+(define-data-var access-control-contract principal ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.access-control) ;; The main access control contract
 (define-data-var pool-count uint u0)
 (define-data-var circuit-breaker (optional principal) none)
 (define-data-var default-pool-type uint POOL_TYPE_CONSTANT_PRODUCT)

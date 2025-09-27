@@ -8,7 +8,7 @@
 ;; - 15% to treasury
 ;; - 5% to insurance reserve
 
-(use-trait sip-010-ft-trait ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
+(use-trait sip-010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
 (use-trait access-control-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.access-control-trait)
 
 ;; Error codes
@@ -113,7 +113,7 @@
 (define-private (distribute-to-stakers (token principal) (amount uint))
   ;; Integration with CXD staking system
   (try! (as-contract (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.cxd-staking distribute-rewards amount)))
-  (ok true)
+  (ok true))
 )
 
 (define-private (distribute-to-treasury (token principal) (amount uint))
