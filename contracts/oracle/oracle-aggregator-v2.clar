@@ -73,10 +73,7 @@
 ;; --- Private Helper Functions ---
 
 (define-private (check-circuit-breaker)
-  (match (var-get circuit-breaker)
-    (cb (contract-call? cb .circuit-breaker is-tripped))
-    (ok false)
-  )
+  (contract-call? .circuit-breaker-v1 is-circuit-open)
 )
 
 (define-private (get-prices-from-sources (sources (list 20 principal)) (token-a principal) (token-b principal))

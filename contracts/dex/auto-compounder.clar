@@ -1,4 +1,4 @@
-;; auto-compounder.clar
+; auto-compounder.clar
 ;; This contract automatically compounds rewards for users.
 
 (use-trait sip-010-ft-trait ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
@@ -123,7 +123,7 @@
   (map-get? user-positions { user: user, token: token })
 )
 
-(define-private (get-total-deployed)
+(define-private (get-total-deployed))
     (let ((total-deployed u0))
         ;; This is a placeholder. In a real implementation, you would iterate over all users and sum their positions.
         ;; Iterating over a map is not directly possible in Clarity, so you would need to maintain a separate list of users.

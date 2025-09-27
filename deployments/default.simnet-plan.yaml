@@ -13,11 +13,11 @@ genesis:
       balance: "100000000000000"
       sbtc-balance: "1000000000"
     - name: wallet_2
-      address: ST2CY5V39NHDPWSXMW9QDT3HC3GD6Q6XX4CFRK9AG
+      address: ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6
       balance: "100000000000000"
       sbtc-balance: "1000000000"
     - name: wallet_3
-      address: ST2JHG361ZXG51QTKY2NQCVBPPRRE2KZB1HR05NNC
+      address: ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6
       balance: "100000000000000"
       sbtc-balance: "1000000000"
   contracts:
@@ -37,8 +37,8 @@ plan:
       transactions:
         - emulated-contract-publish:
             contract-name: AccessControl
+
             emulated-sender: ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6
-            path: "contracts\\access\\AccessControl.clar"
             clarity-version: 1
         - emulated-contract-publish:
             contract-name: Pausable
