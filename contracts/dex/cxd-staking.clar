@@ -43,7 +43,7 @@
 (define-data-var symbol (string-ascii 10) "xCXD")
 (define-data-var token-uri (optional (string-utf8 256)) none)
 (define-data-var paused bool false)
-(define-data-var circuit-breaker principal .circuit-breaker)
+(define-data-var circuit-breaker principal 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.circuit-breaker)
 
 ;; CXD token contract
 (define-data-var cxd-token-contract principal 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.cxd-token)

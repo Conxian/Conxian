@@ -223,7 +223,7 @@
         (err u999)))
 )
 
-(define-data-var token-system-coordinator principal .token-system-coordinator)
+(define-data-var token-system-coordinator principal ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.token-system-coordinator)
 
 (define-public (set-token-system-coordinator (new-coordinator principal))
   (begin
