@@ -43,20 +43,17 @@
 ;; The current implementation is a placeholder and needs to be replaced with a precise and efficient calculation,
 ;; potentially using bit manipulation or lookup tables for optimal performance.
 (define-read-only (get-sqrt-ratio-at-tick (tick int))
-  (ok (if (>= tick u0)
-    (let ((ratio (pow u10001 u10000 tick)))
-      (if (>= ratio MAX_SQRT_RATIO)
-        MAX_SQRT_RATIO
-        ratio
+  (ok
+    (let (
+      (abs-tick (abs tick))
+      (ratio-q96 (exp-fixed (* abs-tick (log-base-sqrt Q96)))) ;; Placeholder for actual calculation
+      )
+      (if (>= tick u0)
+        ratio-q96
+        (/ Q96 ratio-q96)
       )
     )
-    (let ((ratio (/ Q128 (pow u10001 u10000 (- u0 tick)))))
-      (if (<= ratio MIN_SQRT_RATIO)
-        MIN_SQRT_RATIO
-        ratio
-      )
-    )
-  ))
+  )
 )
 
 ;; @desc Get the tick for a given sqrt-ratio
