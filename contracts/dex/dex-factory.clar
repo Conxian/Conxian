@@ -11,11 +11,11 @@
 (define-constant ACCESS_CONTROL .access-control)
 
 ;; Pool Types
-(define-constant POOL_TYPE_CONSTANT_PRODUCT u1)
-(define-constant POOL_TYPE_STABLE u2)
-(define-constant POOL_TYPE_WEIGHTED u3)
-(define-constant POOL_TYPE_CONCENTRATED_LIQUIDITY u4)
-(define-constant POOL_TYPE_LIQUIDITY_BOOTSTRAP u5)
+(define-constant POOL_TYPE_CONSTANT_PRODUCT "constant-product")
+(define-constant POOL_TYPE_STABLE "stable")
+(define-constant POOL_TYPE_WEIGHTED "weighted")
+(define-constant POOL_TYPE_CONCENTRATED_LIQUIDITY "concentrated-liquidity")
+(define-constant POOL_TYPE_LIQUIDITY_BOOTSTRAP "liquidity-bootstrap")
 
 ;; Default implementations
 (define-constant DEFAULT_CONSTANT_PRODUCT_POOL .constant-product-pool)
@@ -33,6 +33,7 @@
 (define-constant ERR_CIRCUIT_OPEN (err u2005))
 (define-constant ERR_INVALID_POOL_TYPE (err u2006))
 (define-constant ERR_IMPLEMENTATION_NOT_FOUND (err u2007))
+(define-constant ERR_POOL_DEPLOY_FAILED (err u2008))
 
 ;; --- Data Variables ---
 (define-data-var contract-owner principal tx-sender)
@@ -43,25 +44,25 @@
 
 ;; --- Maps ---
 ;; Maps a pair of tokens to the principal of their pool contract.
-(define-map pools { token-a: principal, token-b: principal, pool-type: uint } principal)
+(define-map pools { token-a: principal, token-b: principal, pool-type: (string-ascii 64) } principal)
 
 ;; Maps a pool principal to its information.
 (define-map pool-info principal { 
   token-a: principal, 
   token-b: principal, 
   fee-bps: uint, 
-  pool-type: uint,
+  pool-type: (string-ascii 64),
   created-at: uint 
 })
 
 ;; Stores the implementation contract for each pool type
-(define-map pool-implementations uint principal)
+(define-map pool-implementations (string-ascii 64) principal)
 
 ;; Stores the type of each pool
-(define-map pool-types principal uint)
+(define-map pool-types principal (string-ascii 64))
 
 ;; Stores pool type metadata
-(define-map pool-type-info uint {
+(define-map pool-type-info (string-ascii 64) {
   name: (string-ascii 32),
   description: (string-ascii 128),
   is-active: bool
@@ -101,7 +102,7 @@
   )
 )
 
-(define-private (validate-pool-type (pool-type uint))
+(define-private (validate-pool-type (pool-type (string-ascii 64)))
   (let ((pool-type-data (map-get? pool-type-info pool-type)))
     (asserts! (is-some pool-type-data) (err ERR_INVALID_POOL_TYPE))
     (asserts! (get is-active (unwrap-panic pool-type-data)) (err ERR_INVALID_POOL_TYPE))
@@ -109,7 +110,7 @@
   )
 )
 
-(define-private (get-pool-implementation (pool-type uint))
+(define-private (get-pool-implementation (pool-type (string-ascii 64)))
   (let ((implementation (map-get? pool-implementations pool-type)))
     (asserts! (is-some implementation) (err ERR_IMPLEMENTATION_NOT_FOUND))
     (ok (unwrap-panic implementation))
@@ -119,7 +120,7 @@
 ;; --- Public Functions ---
 
 ;; Creates a new DEX pool by deploying a new contract
-(define-public (create-pool (token-a principal) (token-b principal) (fee-bps uint) (pool-type uint))
+(define-public (create-pool (token-a <sip-010-ft-trait>) (token-b <sip-010-ft-trait>) (pool-type (string-ascii 64)) (fee-bps uint))
   (begin
     (try! (check-circuit-breaker))
     (try! (check-pool-manager))
@@ -179,7 +180,7 @@
 )
 
 ;; Creates a new DEX pool with default pool type
-(define-public (create-default-pool (token-a principal) (token-b principal) (fee-bps uint))
+(define-public (create-default-pool (token-a <sip-010-ft-trait>) (token-b <sip-010-ft-trait>) (fee-bps uint))
   (create-pool token-a token-b fee-bps (var-get default-pool-type))
 )
 
@@ -203,7 +204,7 @@
 ;; --- Read-Only Functions ---
 
 ;; Gets the pool principal for a given pair of tokens and pool type
-(define-read-only (get-pool-by-type (token-a principal) (token-b principal) (pool-type uint))
+(define-read-only (get-pool-by-type (token-a principal) (token-b principal) (pool-type (string-ascii 64)))
   (let ((normalized-pair (unwrap-panic (normalize-token-pair token-a token-b))))
     (map-get? pools { 
       token-a: (get token-a normalized-pair), 
@@ -349,54 +350,14 @@
 )
 
 ;; Gets the information for a given pool principal.
-(define-read-only (get-pool-info (pool principal))
-  (map-get? pool-info pool)
-)
-
-(define-read-only (get-pool-count)
-  (ok (var-get pool-count))
-)
+// ... existing code ...
 
 (define-read-only (get-owner)
   (ok (var-get contract-owner))
 )
 
 
-(define-public (create-pool (
-  token-a principal)
-  (token-b principal)
-  (fee-bps uint)
-  (pool-type uint)
-)
-  (let (
-    (sorted-tokens (unwrap! (normalize-token-pair token-a token-b) (err ERR_INVALID_TOKENS)))
-    (normalized-token-a (get token-a sorted-tokens))
-    (normalized-token-b (get token-b sorted-tokens))
-    (pool-key { token-a: normalized-token-a, token-b: normalized-token-b, pool-type: pool-type })
-  )
-    (asserts! (is-none (map-get? pools pool-key)) ERR_POOL_EXISTS)
-    (asserts! (not (is-err (check-circuit-breaker))) ERR_CIRCUIT_OPEN)
-
-    (let (
-      (pool-implementation (unwrap! (map-get? pool-implementations pool-type) ERR_IMPLEMENTATION_NOT_FOUND))
-      (new-pool-id (+ (var-get pool-count) u1))
-      (deploy-result (as-contract (contract-call? pool-implementation deploy-pool normalized-token-a normalized-token-b fee-bps new-pool-id)))
-      (new-pool-address (unwrap! deploy-result ERR_SWAP_FAILED)) ;; Assuming deploy-pool returns the new pool principal
-    )
-      (map-set pools pool-key new-pool-address)
-      (map-set pool-info new-pool-address {
-        token-a: normalized-token-a,
-        token-b: normalized-token-b,
-        fee-bps: fee-bps,
-        pool-type: pool-type,
-        created-at: block-height
-      })
-      (var-set pool-count new-pool-id)
-      (ok new-pool-address)
-    )
-  )
-)
-
+// ... existing code ...
 (define-public (set-pool-implementation (pool-type uint) (implementation-contract principal))
   (begin
     (unwrap! (check-is-owner) (err ERR_UNAUTHORIZED))

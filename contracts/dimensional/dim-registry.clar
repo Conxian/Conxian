@@ -7,7 +7,7 @@
 ;; --- Traits ---
 (use-trait dim-registry-trait .dim-registry-trait)
 (use-trait ownable-trait .ownable-trait)
-(use-trait all-traits .all-traits)
+
 
 (impl-trait .dim-registry-trait)
 (impl-trait .ownable-trait)

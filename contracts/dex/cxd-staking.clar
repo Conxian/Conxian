@@ -7,9 +7,9 @@
 
 ;; Resolve traits using the trait registry
 (use-trait sip-010-ft-trait '.all-traits.sip-010-ft-trait)
-(use-trait access-control-trait .traits.access-control-trait)
-(use-trait staking-trait .traits.staking-trait)
-(use-trait circuit-breaker-trait .traits.circuit-breaker-trait)
+(use-trait access-control-trait .all-traits.access-control-trait)
+(use-trait staking-trait .all-traits.staking-trait)
+(use-trait circuit-breaker-trait .all-traits.circuit-breaker-trait)
 
 ;; Implement the staking trait
 (impl-trait .traits.staking-trait)

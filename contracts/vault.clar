@@ -135,5 +135,3 @@
 ;; === READ-ONLY FUNCTIONS ===
 (define-read-only (get-total-balance (asset principal))
   (ok (default-to u0 (map-get? total-balances asset))))
-
-(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)

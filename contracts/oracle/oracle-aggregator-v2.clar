@@ -146,3 +146,24 @@
       )
     )
   )
+
+(define-constant MANIPULATION_DEVIATION_THRESHOLD u1000) ;; 10% deviation threshold for manipulation
+
+(define-private (check-manipulation (new-price uint) (token-a principal) (token-b principal))
+  (let (
+    (history (default-to (list) (map-get? price-history { token-a: token-a, token-b: token-b })))
+  )
+    (if (>= (len history) u5) ;; Only check if enough history is available
+      (let (
+        (sum (fold + history u0))
+        (average (/ sum (len history)))
+        (deviation (abs (- (to-int new-price) (to-int average))))
+        (threshold (/ (* average MANIPULATION_DEVIATION_THRESHOLD) u10000))
+      )
+        (asserts! (<= deviation threshold) ERR_PRICE_MANIPULATION)
+        (ok true)
+      )
+      (ok true) ;; Not enough history to check for manipulation
+    )
+  )
+)

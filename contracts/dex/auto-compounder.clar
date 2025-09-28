@@ -77,6 +77,15 @@
   )
 )
 
+(define-public (auto-compound (user principal) (token principal))
+  (begin
+    (asserts! (is-eq tx-sender (var-get vault-admin)) ERR_UNAUTHORIZED)
+    (ok (print (merge-map
+                {event: "auto-compound", user: user, token: token}
+                (try! (contract-call? (var-get yield-optimizer-contract) auto-compound user token)))))
+  )
+)
+
 (define-public (compound (user principal) (token principal))
   (begin
     (try! (check-circuit-breaker))
@@ -124,6 +133,14 @@
 
 (define-read-only (get-position (user principal) (token principal))
   (map-get? user-positions { user: user, token: token })
+)
+
+(define-public (set-yield-optimizer-contract (new-optimizer principal))
+  (begin
+    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
+    (var-set yield-optimizer-contract new-optimizer)
+    (ok true)
+  )
 )
 
 (define-read-only (get-total-deployed)

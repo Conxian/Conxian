@@ -15,91 +15,82 @@
 
 (define-trait utils-trait
   (
-    (principal-to-buff (principal) (response (buff 32) uint))
+    (principal-to-buff (principal) (response (buff 32) (err uint)))
   )
 )
 
 (define-trait lending-system-trait
   (
-    (deposit (principal uint) (response bool uint))
-    (withdraw (principal uint) (response bool uint))
-    (borrow (principal uint) (response bool uint))
-    (repay (principal uint) (response bool uint))
-    (liquidate (principal principal principal principal uint) (response bool uint))
-    (get-account-liquidity (principal) (response (tuple (liquidity uint) (shortfall uint)) uint))
-    (get-asset-price (principal) (response uint uint))
-    (get-borrow-rate (principal) (response uint uint))
-    (get-supply-rate (principal) (response uint uint))
+    (deposit (principal uint) (response bool (err uint)))
+    (withdraw (principal uint) (response bool (err uint)))
+    (borrow (principal uint) (response bool (err uint)))
+    (repay (principal uint) (response bool (err uint)))
+    (liquidate (principal principal principal principal uint) (response bool (err uint)))
+    (get-account-liquidity (principal) (response (tuple (liquidity uint) (shortfall uint)) (err uint)))
+    (get-asset-price (principal) (response uint (err uint)))
+    (get-borrow-rate (principal) (response uint (err uint)))
+    (get-supply-rate (principal) (response uint (err uint)))
   )
 )
 
 (define-trait sip-010-ft-trait
   (
-    (transfer (uint principal principal (optional (buff 34))) (response bool uint))
-    (get-balance (principal) (response uint uint))
-    (get-total-supply () (response uint uint))
-    (get-decimals () (response uint uint))
-    (get-name () (response (string-ascii 32) uint))
-    (get-symbol () (response (string-ascii 10) uint))
-    (get-token-uri () (response (optional (string-utf8 256)) uint))
+    (transfer (uint principal principal (optional (buff 34))) (response bool (err uint)))
+    (get-balance (principal) (response uint (err uint)))
+    (get-total-supply () (response uint (err uint)))
+    (get-decimals () (response uint (err uint)))
+    (get-name () (response (string-ascii 32) (err uint)))
+    (get-symbol () (response (string-ascii 10) (err uint)))
+    (get-token-uri () (response (optional (string-utf8 256)) (err uint)))
   )
 )
 
 (define-trait sip-010-ft-mintable-trait
   (
-    (mint (uint principal) (response bool uint))
-    (burn (uint principal) (response bool uint))
-    (get-token-uri () (response (optional (string-utf8 256)) uint))
+    (mint (uint principal) (response bool (err uint)))
+    (burn (uint principal) (response bool (err uint)))
+    (get-token-uri () (response (optional (string-utf8 256)) (err uint)))
   )
 )
 
 
 (define-trait bond-trait
   (
-    (issue-bond (string-ascii 32) (string-ascii 10) uint uint uint uint uint principal) (response bool uint))
-    (claim-coupon () (response uint uint))
-    (redeem-at-maturity (principal) (response uint uint))
-    (get-maturity-block () (response uint uint))
-    (get-coupon-rate () (response uint uint))
-    (get-face-value () (response uint uint))
-    (get-payment-token () (response principal uint))
-    (is-matured () (response bool uint))
-    (get-next-coupon-block (principal) (response (optional uint) uint))
+    (issue-bond (string-ascii 32) (string-ascii 10) uint uint uint uint uint principal) (response bool (err uint)))
+    (claim-coupon () (response uint (err uint)))
+    (redeem-at-maturity (principal) (response uint (err uint)))
+    (get-maturity-block () (response uint (err uint)))
+    (get-coupon-rate () (response uint (err uint)))
+    (get-face-value () (response uint (err uint)))
+    (get-payment-token () (response principal (err uint)))
+    (is-matured () (response bool (err uint)))
+    (get-next-coupon-block (principal) (response (optional uint) (err uint)))
   ))
 
 
-
-
-(define-trait oracle-trait
-  (
-    (get-price (principal) (response uint uint))
-    (update-price (principal uint) (response bool uint))
-  )
-)
-
 (define-trait dimensional-oracle-trait
   (
-    (get-price (principal) (response uint uint))
-    (update-price (principal uint) (response bool uint))
-    (add-price-feed (principal principal) (response bool uint))
-    (remove-price-feed (principal) (response bool uint))
+    (get-price (principal) (response uint (err uint)))
+    (update-price (principal uint) (response bool (err uint)))
+    (add-price-feed (principal principal) (response bool (err uint)))
+    (remove-price-feed (principal) (response bool (err uint)))
   )
 )
 
 (define-trait compliance-hooks-trait
   (
-    (before-transfer (principal principal uint (optional (buff 34))) (response bool uint))
-    (after-transfer (principal principal uint (optional (buff 34))) (response bool uint))
+    (before-transfer (principal principal uint (optional (buff 34))) (response bool (err uint)))
+    (after-transfer (principal principal uint (optional (buff 34))) (response bool (err uint)))
   )
 )
 
 (define-trait pool-trait
   (
-    (add-liquidity (uint uint principal) (response (tuple (tokens-minted uint) (token-a-used uint) (token-b-used uint)) uint))
-    (remove-liquidity (uint principal) (response (tuple (token-a-returned uint) (token-b-returned uint)) uint))
-    (swap (principal uint principal) (response uint uint))
-    (get-reserves () (response (tuple (reserve-a uint) (reserve-b uint)) uint))
-    (get-total-supply () (response uint uint))
+    (add-liquidity (uint uint principal) (response (tuple (tokens-minted uint) (token-a-used uint) (token-b-used uint)) (err uint)))
+    (remove-liquidity (uint principal) (response (tuple (token-a-returned uint) (token-b-returned uint)) (err uint)))
+    (swap (principal uint principal) (response uint (err uint)))
+    (get-reserves () (response (tuple (reserve-a uint) (reserve-b uint)) (err uint)))
+    (get-total-supply () (response uint (err uint)))
   )
 )
 
@@ -107,28 +98,28 @@
 (define-trait access-control-trait
   (
     ;; Check if an account has a specific role
-    (has-role (account principal) (role uint) (response bool uint))
+    (has-role (account principal) (role uint) (response bool (err uint)))
 
     ;; Get the admin address
-    (get-admin () (response principal uint))
+    (get-admin () (response principal (err uint)))
 
     ;; Transfer admin rights
-    (set-admin (new-admin principal) (response bool uint))
+    (set-admin (new-admin principal) (response bool (err uint)))
 
     ;; Grant a role to an account
-    (grant-role (role uint) (account principal) (response bool uint))
+    (grant-role (role uint) (account principal) (response bool (err uint)))
 
     ;; Revoke a role from an account
-    (revoke-role (role uint) (account principal) (response bool uint))
+    (revoke-role (role uint) (account principal) (response bool (err uint)))
 
     ;; Renounce a role (callable by role holder only)
-    (renounce-role (role uint) (response bool uint))
+    (renounce-role (role uint) (response bool (err uint)))
 
     ;; Get role name by ID
-    (get-role-name (role uint) (response (string-ascii 64) uint))
+    (get-role-name (role uint) (response (string-ascii 64) (err uint)))
 
     ;; Check if caller has admin role (convenience function)
-    (is-admin (caller principal) (response bool uint))
+    (is-admin (caller principal) (response bool (err uint)))
   )
 )
 
@@ -149,19 +140,19 @@
 (define-trait pausable-trait
   (
     ;; Pause the contract (only callable by pauser role)
-    (pause () (response bool uint))
+    (pause () (response bool (err uint)))
 
     ;; Unpause the contract (only callable by pauser role)
-    (unpause () (response bool uint))
+    (unpause () (response bool (err uint)))
 
     ;; Check if the contract is paused
-    (is-paused () (response bool uint))
+    (is-paused () (response bool (err uint)))
 
     ;; Require that the contract is not paused
-    (when-not-paused () (response bool uint))
+    (when-not-paused () (response bool (err uint)))
 
     ;; Require that the contract is paused
-    (when-paused () (response bool uint))
+    (when-paused () (response bool (err uint)))
   )
 )
 
@@ -171,9 +162,9 @@
 
 (define-trait ownable-trait
   (
-    (get-owner () (response principal uint))
-    (transfer-ownership (principal) (response bool uint))
-    (renounce-ownership () (response bool uint))
+    (get-owner () (response principal (err uint)))
+    (transfer-ownership (principal) (response bool (err uint)))
+    (renounce-ownership () (response bool (err uint)))
   )
 )
 
@@ -186,21 +177,21 @@
     
     ;; @notice Check if the circuit is open for any operation
     ;; @return (response bool uint) true if circuit is open, false otherwise
-    (is-circuit-open () (response bool uint))
+    (is-circuit-open () (response bool (err uint)))
     
     ;; @notice Check if the circuit is open for a specific operation
     ;; @param operation The operation identifier (max 64 chars)
     ;; @return (response bool uint) true if circuit is open for this operation
-    (check-circuit-state (operation (string-ascii 64)) (response bool uint))
+    (check-circuit-state (operation (string-ascii 64)) (response bool (err uint)))
 
     ;; @notice Record a successful operation
-    (record-success (operation (string-ascii 64)) (response bool uint))
+    (record-success (operation (string-ascii 64)) (response bool (err uint)))
 
     ;; @notice Record a failed operation
-    (record-failure (operation (string-ascii 64)) (response bool uint))
+    (record-failure (operation (string-ascii 64)) (response bool (err uint)))
 
     ;; @notice Get the failure rate for an operation
-    (get-failure-rate (operation (string-ascii 64)) (response uint uint))
+    (get-failure-rate (operation (string-ascii 64)) (response uint (err uint)))
 
     ;; @notice Get the current state of the circuit
     (get-circuit-state (operation (string-ascii 64)) 
@@ -210,30 +201,30 @@
         failure-rate: uint,
         failure-count: uint,
         success-count: uint
-      } uint)
+      } (err uint))
     )
 
     ;; ===== Admin Functions =====
     
     ;; @notice Manually override the circuit state (admin only)
-    (set-circuit-state (operation (string-ascii 64)) (state bool) (response bool uint))
+    (set-circuit-state (operation (string-ascii 64)) (state bool) (response bool (err uint)))
 
     ;; @notice Set the failure threshold (admin only)
-    (set-failure-threshold (threshold uint) (response bool uint))
+    (set-failure-threshold (threshold uint) (response bool (err uint)))
 
     ;; @notice Set the reset timeout (admin only)
-    (set-reset-timeout (timeout uint) (response bool uint))
+    (set-reset-timeout (timeout uint) (response bool (err uint)))
 
     ;; @notice Get the admin address
-    (get-admin () (response principal uint))
+    (get-admin () (response principal (err uint)))
 
     ;; @notice Transfer admin rights
-    (set-admin (new-admin principal) (response bool uint))
+    (set-admin (new-admin principal) (response bool (err uint)))
     
     ;; ===== Enhanced Features =====
     
     ;; @notice Set rate limit for an operation
-    (set-rate-limit (operation (string-ascii 64)) (limit uint) (window uint) (response bool uint))
+    (set-rate-limit (operation (string-ascii 64)) (limit uint) (window uint) (response bool (err uint)))
     
     ;; @notice Get rate limit for an operation
     (get-rate-limit (operation (string-ascii 64)) 
@@ -242,14 +233,14 @@
         window: uint, 
         current: uint,
         reset-time: uint
-      } uint)
+      } (err uint))
     )
     
     ;; @notice Batch record successes
-    (batch-record-success (operations (list 20 (string-ascii 64))) (response bool uint))
+    (batch-record-success (operations (list 20 (string-ascii 64))) (response bool (err uint)))
     
     ;; @notice Batch record failures
-    (batch-record-failure (operations (list 20 (string-ascii 64))) (response bool uint))
+    (batch-record-failure (operations (list 20 (string-ascii 64))) (response bool (err uint)))
     
     ;; @notice Get health status
     (get-health-status () 
@@ -260,166 +251,193 @@
         uptime: uint,
         total_operations: uint,
         failed_operations: uint
-      } uint)
+      } (err uint))
     )
     
     ;; @notice Set circuit breaker mode
-    (set-circuit-mode (mode (optional bool)) (response bool uint))
+    (set-circuit-mode (mode (optional bool)) (response bool (err uint)))
     
     ;; @notice Get circuit breaker mode
-    (get-circuit-mode () (response (optional bool) uint))
+    (get-circuit-mode () (response (optional bool) (err uint)))
     
     ;; @notice Emergency shutdown (multi-sig protected)
-    (emergency-shutdown () (response bool uint))
+    (emergency-shutdown () (response bool (err uint)))
     
     ;; @notice Recover from emergency shutdown (multi-sig protected)
-    (recover-from-shutdown () (response bool uint))
+    (recover-from-shutdown () (response bool (err uint)))
   )
 )
 
 (define-trait standard-constants-trait
   (
     ;; Precision and mathematical constants (18 decimals)
-    (get-precision) (response uint uint)
-    (get-basis-points) (response uint uint)
+    (get-precision) (response uint (err uint))
+    (get-basis-points) (response uint (err uint))
 
     ;; Common time constants (in blocks, assuming ~1 block per minute)
-    (get-blocks-per-minute) (response uint uint)
-    (get-blocks-per-hour) (response uint uint)
-    (get-blocks-per-day) (response uint uint)
-    (get-blocks-per-week) (response uint uint)
-    (get-blocks-per-year) (response uint uint)
+    (get-blocks-per-minute) (response uint (err uint))
+    (get-blocks-per-hour) (response uint (err uint))
+    (get-blocks-per-day) (response uint (err uint))
+    (get-blocks-per-week) (response uint (err uint))
+    (get-blocks-per-year) (response uint (err uint))
 
     ;; Common percentage values (in basis points)
-    (get-max-bps) (response uint uint)
-    (get-one-hundred-percent) (response uint uint)
-    (get-fifty-percent) (response uint uint)
-    (get-zero) (response uint uint)
+    (get-max-bps) (response uint (err uint))
+    (get-one-hundred-percent) (response uint (err uint))
+    (get-fifty-percent) (response uint (err uint))
+    (get-zero) (response uint (err uint))
 
     ;; Common precision values
-    (get-precision-18) (response uint uint)
-    (get-precision-8) (response uint uint)
-    (get-precision-6) (response uint uint)
+    (get-precision-18) (response uint (err uint))
+    (get-precision-8) (response uint (err uint))
+    (get-precision-6) (response uint (err uint))
   )
 )
 
 (define-trait vault-trait
   (
-    ;; Core vault operations
-    (deposit (principal uint) (response (tuple (shares uint) (fee uint)) uint))
-    (withdraw (principal uint) (response (tuple (amount uint) (fee uint)) uint))
-    (flash-loan (uint principal) (response bool uint))
+    ;; @notice Deposit funds into the vault
+    (deposit (token-contract <sip-010-ft-trait>) (amount uint)) (response uint (err uint))
 
-    ;; Asset management
-    (get-total-balance (principal) (response uint uint))
-    (get-total-shares (principal) (response uint uint))
-    (get-user-shares (principal principal) (response uint uint))
+    ;; @notice Withdraw funds from the vault
+    (withdraw (token-contract <sip-010-ft-trait>) (amount uint)) (response uint (err uint))
 
-    ;; Vault configuration
-    (get-deposit-fee () (response uint uint))
-    (get-withdrawal-fee () (response uint uint))
-    (get-vault-cap (principal) (response uint uint))
-    (is-paused () (response bool uint))
+    ;; @notice Get the current total supply of shares for a token
+    (get-total-shares (token-contract <sip-010-ft-trait>)) (response uint (err uint))
 
-    ;; Enhanced tokenomics integration
-    (get-revenue-share () (response uint uint))
-    (collect-protocol-fees (principal) (response uint uint))
+    ;; @notice Get the amount of underlying tokens for a given amount of shares
+    (get-amount-out-from-shares (token-contract <sip-010-ft-trait>) (shares uint)) (response uint (err uint))
+
+    ;; @notice Get the amount of shares for a given amount of underlying tokens
+    (get-shares-from-amount-in (token-contract <sip-010-ft-trait>) (amount uint)) (response uint (err uint))
+
+    ;; @notice Harvest rewards (admin only)
+    (harvest (token-contract <sip-010-ft-trait>)) (response bool (err uint))
+
+    ;; @notice Set the strategy for a given token (admin only)
+    (set-strategy (token-contract <sip-010-ft-trait>) (strategy-contract principal)) (response bool (err uint))
+
+    ;; @notice Get the current strategy for a given token
+    (get-strategy (token-contract <sip-010-ft-trait>)) (response (optional principal) (err uint))
+
+    ;; @notice Get the current APY for a given token
+    (get-apy (token-contract <sip-010-ft-trait>)) (response uint (err uint))
+
+    ;; @notice Get the total value locked (TVL) for a given token
+    (get-tvl (token-contract <sip-010-ft-trait>)) (response uint (err uint))
   )
 )
 
 (define-trait vault-admin-trait
   (
     ;; Administrative controls
-    (set-deposit-fee (uint) (response bool uint))
-    (set-withdrawal-fee (uint) (response bool uint))
-    (set-vault-cap (principal uint) (response bool uint))
-    (set-paused (bool) (response bool uint))
+    (set-deposit-fee (uint) (response bool (err uint)))
+    (set-withdrawal-fee (uint) (response bool (err uint)))
+    (set-vault-cap (principal uint) (response bool (err uint)))
+    (set-paused (bool) (response bool (err uint)))
 
     ;; Asset management
-    (emergency-withdraw (principal uint principal) (response uint uint))
-    (rebalance-vault (principal) (response bool uint))
+    (emergency-withdraw (principal uint principal) (response uint (err uint)))
+    (rebalance-vault (principal) (response bool (err uint)))
 
     ;; Enhanced tokenomics integration
-    (set-revenue-share (uint) (response bool uint))
-    (update-integration-settings ((tuple (monitor-enabled bool) (emission-enabled bool))) (response bool uint))
+    (set-revenue-share (uint) (response bool (err uint)))
+    (update-integration-settings ((tuple (monitor-enabled bool) (emission-enabled bool))) (response bool (err uint)))
 
     ;; Governance
-    (transfer-admin (principal) (response bool uint))
-    (get-admin () (response principal uint))
+    (transfer-admin (principal) (response bool (err uint)))
+    (get-admin () (response principal (err uint)))
   )
 )
 
 (define-trait strategy-trait
   (
-    ;; Core strategy operations
-    (deploy-funds (uint) (response uint uint))
-    (withdraw-funds (uint) (response uint uint))
-    (harvest-rewards () (response uint uint))
+    ;; @notice Deposit funds into the strategy
+    (deposit (token-contract <sip-010-ft-trait>) (amount uint)) (response uint (err uint))
 
-    ;; Strategy information
-    (get-total-deployed () (response uint uint))
-    (get-current-value () (response uint uint))
-    (get-expected-apy () (response uint uint))
-    (get-strategy-risk-level () (response uint uint))
+    ;; @notice Withdraw funds from the strategy
+    (withdraw (token-contract <sip-010-ft-trait>) (amount uint)) (response uint (err uint))
 
-    ;; Asset management
-    (get-underlying-asset () (response principal uint))
-    (emergency-exit () (response uint uint))
+    ;; @notice Harvest rewards from the strategy
+    (harvest ()) (response bool (err uint))
 
-    ;; Enhanced tokenomics integration
-    (distribute-rewards () (response uint uint))
-    (get-performance-fee () (response uint uint))
-    (update-dimensional-weights () (response bool uint))
+    ;; @notice Rebalance the strategy
+    (rebalance ()) (response bool (err uint))
+
+    ;; @notice Get the current APY of the strategy
+    (get-apy ()) (response uint (err uint))
+
+    ;; @notice Get the total value locked (TVL) in the strategy
+    (get-tvl ()) (response uint (err uint))
+
+    ;; @notice Get the underlying token of the strategy
+    (get-underlying-token ()) (response principal (err uint))
+
+    ;; @notice Get the vault associated with this strategy
+    (get-vault ()) (response principal (err uint))
   )
 )
 
 (define-trait staking-trait
   (
-    (stake (uint) (response uint uint))
-    (unstake (uint) (response uint uint))
-    (get-staked-balance (principal) (response uint uint))
-    (get-total-staked () (response uint uint))
+    ;; @notice Stake tokens
+    (stake (token-contract <sip-010-ft-trait>) (amount uint)) (response uint (err uint))
+
+    ;; @notice Unstake tokens
+    (unstake (token-contract <sip-010-ft-trait>) (amount uint)) (response uint (err uint))
+
+    ;; @notice Claim rewards
+    (claim-rewards (token-contract <sip-010-ft-trait>)) (response uint (err uint))
+
+    ;; @notice Get the amount of staked tokens for a user
+    (get-staked-balance (token-contract <sip-010-ft-trait>) (user principal)) (response uint (err uint))
+
+    ;; @notice Get the amount of available rewards for a user
+    (get-available-rewards (token-contract <sip-010-ft-trait>) (user principal)) (response uint (err uint))
+
+    ;; @notice Get the total staked supply of a token
+    (get-total-staked (token-contract <sip-010-ft-trait>)) (response uint (err uint))
+
+    ;; @notice Set the reward rate (admin only)
+    (set-reward-rate (token-contract <sip-010-ft-trait>) (rate uint)) (response bool (err uint))
+
+    ;; @notice Get the reward rate
+    (get-reward-rate (token-contract <sip-010-ft-trait>)) (response uint (err uint))
   )
 )
 
 (define-trait dao-trait
   (
-    (has-voting-power (principal) (response bool uint))
-    (get-voting-power (principal) (response uint uint))
-    (get-total-voting-power () (response uint uint))
-    (delegate (delegatee principal) (response bool uint))
-    (undelegate () (response bool uint))
-    (execute-proposal (proposal-id uint) (response bool uint))
-    (vote (proposal-id uint) (support bool) (response bool uint))
+    (has-voting-power (principal) (response bool (err uint)))
+    (get-voting-power (principal) (response uint (err uint)))
+    (get-total-voting-power () (response uint (err uint)))
+    (delegate (delegatee principal) (response bool (err uint)))
+    (undelegate () (response bool (err uint)))
+    (execute-proposal (proposal-id uint) (response bool (err uint)))
+    (vote (proposal-id uint) (support bool) (response bool (err uint)))
     (get-proposal (proposal-id uint)
       (response {
-        id: uint,
         proposer: principal,
         start-block: uint,
         end-block: uint,
-        for-votes: uint,
-        against-votes: uint,
+        votes-for: uint,
+        votes-against: uint,
         executed: bool,
         canceled: bool
-      } uint)
-    )
+      } (err uint)))
   )
 )
 
 (define-trait liquidation-trait
   (
-    (can-liquidate-position
-      (borrower principal)
-      (debt-asset principal)
-      (collateral-asset principal)
-    ) (response bool uint)
+    (is-liquidatable (debt-asset principal) (collateral-asset principal) (response bool (err uint)))
     (liquidate-position
       (borrower principal)
       (debt-asset principal)
       (collateral-asset principal)
       (debt-amount uint)
       (max-collateral-amount uint)
-    ) (response (tuple (debt-repaid uint) (collateral-seized uint)) uint)
+    ) (response (tuple (debt-repaid uint) (collateral-seized uint)) (err uint))
     (liquidate-multiple-positions
       (positions (list 10 (tuple
         (borrower principal)
@@ -427,24 +445,20 @@
         (collateral-asset principal)
         (debt-amount uint)
       )))
-    ) (response (tuple (success-count uint) (total-debt-repaid uint) (total-collateral-seized uint)) uint)
+    ) (response (tuple (success-count uint) (total-debt-repaid uint) (total-collateral-seized uint)) (err uint))
     (calculate-liquidation-amounts
       (borrower principal)
       (debt-asset principal)
       (collateral-asset principal)
-      (debt-amount uint)
     ) (response (tuple
-        (max-debt-repayable uint)
-        (collateral-to-seize uint)
-        (liquidation-incentive uint)
         (debt-value uint)
         (collateral-value uint)
-      ) uint))
+      ) (err uint)))
     (emergency-liquidate
       (borrower principal)
       (debt-asset principal)
       (collateral-asset principal)
-    ) (response bool uint)
+    ) (response bool (err uint))
   )
 )
 
@@ -468,7 +482,7 @@
       (severity uint)
       (message (string-ascii 256))
       (data (optional {}))
-    ) (response bool uint)
+    ) (response bool (err uint)))
     (get-events (component (string-ascii 32))
                 (limit uint)
                 (offset uint)
@@ -478,7 +492,7 @@
                                          (message (string-ascii 256))
                                          (block-height uint)
                                          (data (optional {}))))
-                         uint))
+                          (err uint)))
     (get-event (event-id uint)
                (response (tuple (id uint)
                               (component (string-ascii 32))
@@ -487,20 +501,20 @@
                               (message (string-ascii 256))
                               (block-height uint)
                               (data (optional {})))
-                        uint))
+                        (err uint)))
     (get-health-status (component (string-ascii 32))
                       (response (tuple (status uint)
                                      (last-updated uint)
                                      (uptime uint)
                                      (error-count uint)
                                      (warning-count uint))
-                               uint))
+                                (err uint)))
     (set-alert-threshold (component (string-ascii 32))
                          (alert-type (string-ascii 32))
                          (threshold uint)
-                         (response bool uint))
-    (get-admin () (response principal uint))
-    (set-admin (new-admin principal) (response bool uint))
+                         (response bool (err uint)))
+    (get-admin () (response principal (err uint)))
+    (set-admin (new-admin principal) (response bool (err uint)))
   )
 )
 
@@ -509,54 +523,134 @@
 
 (define-trait math-trait
   (
-    (add (uint uint) (response uint uint))
-    (subtract (uint uint) (response uint uint))
-    (multiply (uint uint) (response uint uint))
-    (divide (uint uint) (response uint uint))
-    (square-root (uint) (response uint uint))
-    (power (uint uint) (response uint uint))
-    (sqrt (uint) (response uint uint))
-    (abs (uint) (response uint uint))
-    (min (uint uint) (response uint uint))
-    (max (uint uint) (response uint uint))
+    ;; Basic arithmetic operations
+    (add (a uint) (b uint)) (response uint (err uint))
+    (sub (a uint) (b uint)) (response uint (err uint))
+    (mul (a uint) (b uint)) (response uint (err uint))
+    (div (a uint) (b uint)) (response uint (err uint))
+    (pow (base uint) (exp uint)) (response uint (err uint))
+    (sqrt (a uint)) (response uint (err uint))
+
+    ;; Percentage and ratio calculations
+    (get-percentage (value uint) (percentage uint)) (response uint (err uint))
+    (get-ratio (numerator uint) (denominator uint)) (response uint (err uint))
+
+    ;; Min/Max functions
+    (min (a uint) (b uint)) (response uint (err uint))
+    (max (a uint) (b uint)) (response uint (err uint))
+
+    ;; Absolute value (for int)
+    (abs (a int)) (response uint (err uint))
+
+    ;; Rounding functions
+    (ceil (a uint) (b uint)) (response uint (err uint))
+    (floor (a uint) (b uint)) (response uint (err uint))
+
+    ;; Logarithms
+    (log2 (a uint)) (response uint (err uint))
+    (log10 (a uint)) (response uint (err uint))
+    (ln (a uint)) (response uint (err uint))
+
+    ;; Exponentials
+    (exp (a uint)) (response uint (err uint))
+
+    ;; Average
+    (average (a uint) (b uint)) (response uint (err uint))
+
+    ;; Weighted Average
+    (weighted-average (value1 uint) (weight1 uint) (value2 uint) (weight2 uint)) (response uint (err uint))
+
+    ;; Geometric Mean
+    (geometric-mean (a uint) (b uint)) (response uint (err uint))
+
+    ;; Standard Deviation
+    (std-dev (values (list 100 uint))) (response uint (err uint))
+
+    ;; Interpolation
+    (linear-interpolate (x uint) (x0 uint) (y0 uint) (x1 uint) (y1 uint)) (response uint (err uint))
+
+    ;; Fixed-point arithmetic (assuming 1e8 or 1e18 precision)
+    (fpow (base uint) (exp uint) (precision uint)) (response uint (err uint))
+    (fsqrt (a uint) (precision uint)) (response uint (err uint))
+    (fmul (a uint) (b uint) (precision uint)) (response uint (err uint))
+    (fdiv (a uint) (b uint) (precision uint)) (response uint (err uint))
   )
 )
 
 (define-trait flash-loan-receiver-trait
   (
-    (execute-operation (principal uint principal (buff 256)) (response bool uint))
-    (on-flash-loan (principal uint principal (buff 256)) (response bool uint))
+    ;; @notice Execute a flash loan
+    (execute-flash-loan (token-contract <sip-010-ft-trait>) (amount uint) (initiator principal) (data (optional (buff 256)))) (response bool (err uint))
   )
 )
 
 (define-trait pool-creation-trait
   (
-    (create-instance (principal principal (buff 256)) (response principal uint)) ;; token-a, token-b, params
+    ;; @notice Create a new pool
+    (create-pool (token-a <sip-010-ft-trait>) (token-b <sip-010-ft-trait>) (fee-bps uint) (pool-type (string-ascii 64))) (response principal (err uint))
+
+    ;; @notice Get a pool address by its tokens and fee
+    (get-pool (token-a <sip-010-ft-trait>) (token-b <sip-010-ft-trait>) (fee-bps uint)) (response (optional principal) (err uint))
+
+    ;; @notice Get all pools created by the factory
+    (get-all-pools () (response (list 100 {token-a: principal, token-b: principal, fee-bps: uint, pool-address: principal, pool-type: (string-ascii 64)}) (err uint)))
+
+    ;; @notice Set a new pool implementation for a given pool type
+    (set-pool-implementation (pool-type (string-ascii 64)) (implementation-contract principal)) (response bool (err uint))
+
+    ;; @notice Get the pool implementation for a given pool type
+    (get-pool-implementation (pool-type (string-ascii 64))) (response (optional principal) (err uint))
   )
 )
 
 (define-trait factory-trait
   (
-    (create-pool (principal principal uint (buff 256)) (response principal uint))
-    (get-pool (principal principal) (response (optional principal) uint))
-    (get-pool-count () (response uint uint))
-    (register-pool-implementation (uint principal) (response bool uint))
+    (create-pool (token-a <sip-010-ft-trait>) (token-b <sip-010-ft-trait>) (fee-bps uint) (pool-type (string-ascii 64))) (response principal (err uint))
+    (get-pool (token-a <sip-010-ft-trait>) (token-b <sip-010-ft-trait>) (fee-bps uint)) (response (optional principal) (err uint))
+    (get-pool-count () (response uint (err uint)))
+    (register-pool-implementation (pool-type (string-ascii 64)) (implementation-contract principal)) (response bool (err uint))
   )
 )
 
 (define-trait router-trait
   (
-    (swap-exact-tokens-for-tokens (uint (list 10 principal) principal uint) (response (list 10 uint) uint))
-    (swap-tokens-for-exact-tokens (uint (list 10 principal) principal uint) (response (list 10 uint) uint))
-    (get-amounts-out (uint (list 10 principal)) (response (list 10 uint) uint))
-    (get-amounts-in (uint (list 10 principal)) (response (list 10 uint) uint))
+    (swap-exact-tokens-for-tokens (uint (list 10 principal) principal uint) (response (list 10 uint) (err uint)))
+    (swap-tokens-for-exact-tokens (uint (list 10 principal) principal uint) (response (list 10 uint) (err uint)))
+    (get-amounts-out (uint (list 10 principal)) (response (list 10 uint) (err uint)))
+    (get-amounts-in (uint (list 10 principal)) (response (list 10 uint) (err uint)))
   )
 )
 
 (define-trait yield-optimizer-trait
   (
-    (optimize-allocation (principal uint) (response (list 10 (tuple (strategy principal) (allocation uint))) uint))
-    (get-optimal-allocation (principal uint) (response (list 10 (tuple (strategy principal) (allocation uint))) uint))
-    (rebalance-portfolio (principal) (response bool uint))
+    ;; @notice Deposit funds into the yield optimizer
+    (deposit (token-contract <sip-010-ft-trait>) (amount uint)) (response uint (err uint))
+
+    ;; @notice Withdraw funds from the yield optimizer
+    (withdraw (token-contract <sip-010-ft-trait>) (amount uint)) (response uint (err uint))
+
+    ;; @notice Get the current total supply of shares for a token
+    (get-total-shares (token-contract <sip-010-ft-trait>)) (response uint (err uint))
+
+    ;; @notice Get the amount of underlying tokens for a given amount of shares
+    (get-amount-out-from-shares (token-contract <sip-010-ft-trait>) (shares uint)) (response uint (err uint))
+
+    ;; @notice Get the amount of shares for a given amount of underlying tokens
+    (get-shares-from-amount-in (token-contract <sip-010-ft-trait>) (amount uint)) (response uint (err uint))
+
+    ;; @notice Rebalance the strategy (admin only)
+    (rebalance-strategy (token-contract <sip-010-ft-trait>)) (response bool (err uint))
+
+    ;; @notice Set the strategy for a given token (admin only)
+    (set-strategy (token-contract <sip-010-ft-trait>) (strategy-contract principal)) (response bool (err uint))
+
+    ;; @notice Get the current strategy for a given token
+    (get-strategy (token-contract <sip-010-ft-trait>)) (response (optional principal) (err uint))
+
+    ;; @notice Get the current APY for a given token
+    (get-apy (token-contract <sip-010-ft-trait>)) (response uint (err uint))
+
+    ;; @notice Get the total value locked (TVL) for a given token
+    (get-tvl (token-contract <sip-010-ft-trait>)) (response uint (err uint))
   )
 )

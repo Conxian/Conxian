@@ -2,9 +2,9 @@
 ;; Intent queue system for CXLP to CXD migration with pro-rata settlement
 ;; Prevents FCFS races and enables fair distribution based on duration-weighted requests
 (use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
-(use-trait access-control-trait .access-control-trait)
+(use-trait access-control-trait .all-traits.access-control-trait)
 (use-trait cxlp-migration-queue-trait .cxlp-migration-queue-trait)
-(use-trait ft-mintable .ft-mintable-trait)
+(use-trait ft-mintable .all-traits.ft-mintable-trait)
 
 (impl-trait .cxlp-migration-queue-trait)
 

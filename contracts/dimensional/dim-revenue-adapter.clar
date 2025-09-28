@@ -4,7 +4,7 @@
 
 ;; --- Traits ---
 (use-trait sip-010-ft-trait '.all-traits.sip-010-ft-trait)
-(use-trait ownable-trait .ownable-trait)
+(use-trait ownable-trait .all-traits.ownable-trait)
 
 (impl-trait .ownable-trait)
 

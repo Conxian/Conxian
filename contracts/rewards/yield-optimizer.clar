@@ -4,9 +4,9 @@
 ;; strategies to maximize returns for the protocol.
 
 ;; --- Traits ---
-(use-trait sip-010-ft-trait '.all-traits.sip-010-ft-trait)
-(use-trait vault-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.vault-trait)
-(use-trait strategy-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.strategy-trait)
+(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
+(use-trait vault-trait .all-traits.vault-trait)
+(use-trait strategy-trait .all-traits.strategy-trait)
 
 ;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED (err u8001))
@@ -14,6 +14,7 @@
 (define-constant ERR_STRATEGY_NOT_FOUND (err u8003))
 (define-constant ERR_REBALANCE_FAILED (err u8006))
 (define-constant ERR_INVALID_CONTRACT (err u8007))
+(define-constant ERR_METRICS_CALL_FAILED (err u8008))
 
 ;; --- Data Variables ---
 (define-data-var admin principal tx-sender)
@@ -105,13 +106,12 @@
 (define-private (find-best-strategy)
   (let ((metrics (var-get metrics-contract))
         (count (var-get strategy-count)))
-    ;; This is a simplified loop. A real contract would need a more robust way to iterate.
     (fold
       (lambda (id memo)
         (match (map-get? strategies id)
           strategy-data
           (if (get is-active strategy-data)
-            (let ((apy (unwrap! (get-metric-value (contract-call? metrics get-metric (get contract strategy-data) u0)) (err u0))))
+            (let ((apy (unwrap! (contract-call? metrics get-apy (get contract strategy-data)) ERR_METRICS_CALL_FAILED)))
               (if (> apy (get apy memo))
                 { contract: (get contract strategy-data), apy: apy }
                 memo
@@ -126,8 +126,4 @@
       { contract: (as-contract tx-sender), apy: u0 }
     )
   )
-)
-
-(define-read-only (get-metric-value (metric-resp (response (optional {value: uint, last-updated: uint}) uint)))
-  (ok (get value (unwrap-panic metric-resp)))
 )
