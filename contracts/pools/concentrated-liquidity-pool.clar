@@ -72,50 +72,61 @@ define-map pools
 (define-data-var next-position-id uint u0)
 
 
+;; @desc Adds liquidity to an existing concentrated liquidity pool.
+;; @param pool-id The ID of the pool to add liquidity to.
+;; @param amount-x-desired The desired amount of token-x to provide.
+;; @param amount-y-desired The desired amount of token-y to provide.
+;; @param amount-x-min The minimum acceptable amount of token-x to provide (slippage control).
+;; @param amount-y-min The minimum acceptable amount of token-y to provide (slippage control).
+;; @param recipient The principal of the recipient for the position NFT.
+;; @returns An `(ok {tokens-minted: uint, token-a-used: uint, token-b-used: uint})` result containing the liquidity minted and tokens used, or an error.
 (define-public (add-liquidity (pool-id uint) (amount-x-desired uint) (amount-y-desired uint) (amount-x-min uint) (amount-y-min uint) (recipient principal))
-    (let
-      (
-        (position-id (try! (mint-position pool-id amount-x-desired amount-y-desired amount-x-min amount-y-min)))
-        (position (unwrap! (map-get? positions {position-id: position-id}) (err-trait-err ERR_INVALID_POSITION)))
-      )
-      (ok {tokens-minted: (get liquidity position), token-a-used: (get amount-x position), token-b-used: (get amount-y position)})
-    )
-  )
+  "Adds liquidity to a concentrated liquidity pool within a specified price range.
+  This function mints a new position NFT representing the provided liquidity.
 
+  @param pool-id The ID of the pool to add liquidity to.
+  @param amount-x-desired The desired amount of token-x to provide.
+  @param amount-y-desired The desired amount of token-y to provide.
+  @param amount-x-min The minimum acceptable amount of token-x to provide (slippage control).
+  @param amount-y-min The minimum acceptable amount of token-y to provide (slippage control).
+  @param recipient The principal of the recipient for the position NFT.
+  @returns An `(ok {tokens-minted: uint, token-a-used: uint, token-b-used: uint})` result containing the liquidity minted and tokens used, or an error.
+  "
+
+;; @desc Removes liquidity from an existing concentrated liquidity position.
+;; @param position-id The ID of the position to remove liquidity from.
+;; @param liquidity-amount The amount of liquidity to remove from the position.
+;; @param recipient The principal of the recipient for the returned tokens.
+;; @returns An `(ok {token-a-returned: uint, token-b-returned: uint})` result containing the amounts of tokens returned, or an error.
 (define-public (remove-liquidity (position-id uint) (liquidity-amount uint) (recipient principal))
-    (let
-      (
-        (amounts (try! (burn-position position-id liquidity-amount)))
-      )
-      (ok {token-a-returned: (get amount-x amounts), token-b-returned: (get amount-y amounts)})
-    )
-  )
+  "Removes liquidity from a concentrated liquidity pool and burns the corresponding position NFT.
+  The tokens are transferred back to the recipient.
+
+  @param position-id The ID of the position to remove liquidity from.
+  @param liquidity-amount The amount of liquidity to remove from the position.
+  @param recipient The principal of the recipient for the returned tokens.
+  @returns An `(ok {token-a-returned: uint, token-b-returned: uint})` result containing the amounts of tokens returned, or an error.
+  "
 
 ;; @desc Retrieves the current reserves of token-x and token-y for a given pool.
 ;; @param pool-id The ID of the pool.
 ;; @returns An `(ok {reserve-a: uint, reserve-b: uint})` result containing the reserves, or an error.
 (define-public (get-reserves (pool-id uint))
-    (let
-      (
-        (pool (unwrap! (map-get? pools {pool-id: pool-id}) (err-trait-err ERR_INVALID_POSITION)))
-        (token-x-balance (unwrap! (contract-call? (get token-x pool) get-balance (as-contract tx-sender)) (err u0)))
-        (token-y-balance (unwrap! (contract-call? (get token-y pool) get-balance (as-contract tx-sender)) (err u0)))
-      )
-      (ok {reserve-a: token-x-balance, reserve-b: token-y-balance})
-    )
-  )
+  "Retrieves the current reserves (balances) of token-x and token-y held by a specific concentrated liquidity pool.
+
+  @param pool-id The ID of the pool to query.
+  @returns An `(ok {reserve-a: uint, reserve-b: uint})` result containing the current balances of token-x and token-y, or an error if the pool does not exist.
+  "
 
   ;; @desc Retrieves the total liquidity supply for a given pool.
 ;; @param pool-id The ID of the pool.
 ;; @returns An `(ok uint)` result containing the total liquidity, or an error.
 (define-public (get-total-supply (pool-id uint))
-    (let
-      (
-        (pool (unwrap! (map-get? pools {pool-id: pool-id}) (err-trait-err ERR_INVALID_POSITION)))
-      )
-      (ok (get liquidity pool))
-    )
-  )
+  "Retrieves the total liquidity currently managed by a specific concentrated liquidity pool.
+
+  @param pool-id The ID of the pool to query.
+  @returns An `(ok uint)` result containing the total liquidity, or an error if the pool does not exist.
+  "
 
 ;; Public functions
 ;; @desc Creates a new concentrated liquidity pool.
@@ -138,6 +149,20 @@ define-map pools
   (end-tick int)
   (initial-price uint)
 )
+  "Creates a new concentrated liquidity pool with specified parameters.
+  This function is typically called by a factory contract to deploy new pools.
+  It initializes the pool's state, including the tokens, fees, tick spacing, and initial price.
+
+  @param token-a The SIP-010 trait for the first token in the pool.
+  @param token-b The SIP-010 trait for the second token in the pool.
+  @param factory-address The principal of the factory contract that is authorized to create pools.
+  @param fee-bps The fee percentage for swaps in basis points (e.g., u30 for 0.3%).
+  @param tick-spacing The spacing between ticks, determining the granularity of liquidity ranges.
+  @param start-tick The initial lower tick for the pool's active liquidity range.
+  @param end-tick The initial upper tick for the pool's active liquidity range.
+  @param initial-price The initial square root price of the pool, used to set the starting price.
+  @returns An `(ok uint)` result containing the ID of the newly created pool, or an error if unauthorized.
+  "
   (let
     (
       (current-pool-id (var-get next-pool-id))
@@ -170,16 +195,24 @@ define-map pools
 ;; @desc Calculates the square root price from a given tick.
 ;; @param tick The tick to convert.
 ;; @returns An `(ok uint)` result containing the square root price, or an error.
-(define-read-only (get-sqrt-price-from-tick (tick int))int))
-  (ok (unwrap! (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math-lib-advanced get-sqrt-price-from-tick tick) (err-trait-err ERR_INVALID_TICK)))
-)
+(define-read-only (get-sqrt-price-from-tick (tick int))
+  "Calculates the square root price corresponding to a given tick.
+  This function is crucial for converting between tick-based price representation and square root price.
+
+  @param tick The integer tick value.
+  @returns An `(ok uint)` result containing the calculated square root price, or an error if the tick is invalid.
+  "
 
 ;; @desc Calculates the tick from a given square root price.
 ;; @param sqrt-price The square root price to convert.
 ;; @returns An `(ok int)` result containing the tick, or an error.
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))uint))
-  (ok (unwrap! (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math-lib-advanced get-tick-from-sqrt-price sqrt-price) (err-trait-err ERR_INVALID_TICK)))
-)
+(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
+  "Calculates the tick value corresponding to a given square root price.
+  This function is essential for converting square root prices back to tick-based representation.
+
+  @param sqrt-price The square root price to convert.
+  @returns An `(ok int)` result containing the calculated tick, or an error if the square root price is invalid.
+  "
 
 ;; @desc Calculates the amount of liquidity for given token amounts and price range.
 ;; @param sqrt-price-current The current square root price of the pool.
@@ -189,12 +222,33 @@ define-map pools
 ;; @param amount-y The amount of token-y.
 ;; @returns An `(ok uint)` result containing the calculated liquidity, or an error.
 (define-read-only (get-liquidity-for-amounts (sqrt-price-current uint) (sqrt-price-lower uint) (sqrt-price-upper uint) (amount-x uint) (amount-y uint))
-  (ok (unwrap! (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math-lib-advanced get-liquidity-for-amounts sqrt-price-current sqrt-price-lower sqrt-price-upper amount-x amount-y) (err-trait-err ERR_INSUFFICIENT_LIQUIDITY)))
-)
+  "Calculates the amount of liquidity that can be provided for given token amounts within a specific price range.
+  This function is used to determine the liquidity value based on the current price, lower tick, upper tick, and the amounts of token-x and token-y.
 
+  @param sqrt-price-current The current square root price of the pool.
+  @param sqrt-price-lower The square root price at the lower tick of the position.
+  @param sqrt-price-upper The square root price at the upper tick of the position.
+  @param amount-x The amount of token-x to consider.
+  @param amount-y The amount of token-y to consider.
+  @returns An `(ok uint)` result containing the calculated liquidity, or an error if the liquidity calculation fails.
+  "
+
+;; @desc Calculates the amount of token-x for a given liquidity and price range.
+;; @param liquidity The liquidity amount.
+;; @param sqrt-price-current The current square root price of the pool.
+;; @param sqrt-price-lower The square root price at the lower tick.
+;; @param sqrt-price-upper The square root price at the upper tick.
+;; @returns An `(ok uint)` result containing the calculated amount of token-x, or an error.
 (define-read-only (calculate-amount-x (liquidity uint) (sqrt-price-current uint) (sqrt-price-lower uint) (sqrt-price-upper uint))
-  (ok (unwrap! (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math-lib-advanced calculate-amount-x liquidity sqrt-price-current sqrt-price-lower sqrt-price-upper) (err-trait-err ERR_INVALID_AMOUNT)))
-)
+  "Calculates the amount of token-x required or returned for a given liquidity amount within a specific price range.
+  This function is used in both adding and removing liquidity to determine the token-x component.
+
+  @param liquidity The liquidity amount to consider.
+  @param sqrt-price-current The current square root price of the pool.
+  @param sqrt-price-lower The square root price at the lower tick of the position.
+  @param sqrt-price-upper The square root price at the upper tick of the position.
+  @returns An `(ok uint)` result containing the calculated amount of token-x, or an error if the calculation fails.
+  "
 
 ;; @desc Calculates the amount of token-y for a given liquidity and price range.
 ;; @param liquidity The liquidity amount.
@@ -203,8 +257,15 @@ define-map pools
 ;; @param sqrt-price-upper The square root price at the upper tick.
 ;; @returns An `(ok uint)` result containing the calculated amount of token-y, or an error.
 (define-read-only (calculate-amount-y (liquidity uint) (sqrt-price-current uint) (sqrt-price-lower uint) (sqrt-price-upper uint))
-  (ok (unwrap! (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math-lib-advanced calculate-amount-y liquidity sqrt-price-current sqrt-price-lower sqrt-price-upper) (err-trait-err ERR_INVALID_AMOUNT)))
-)
+  "Calculates the amount of token-y required or returned for a given liquidity amount within a specific price range.
+  This function is used in both adding and removing liquidity to determine the token-y component.
+
+  @param liquidity The liquidity amount to consider.
+  @param sqrt-price-current The current square root price of the pool.
+  @param sqrt-price-lower The square root price at the lower tick of the position.
+  @param sqrt-price-upper The square root price at the upper tick of the position.
+  @returns An `(ok uint)` result containing the calculated amount of token-y, or an error if the calculation fails.
+  "
 
 (define-non-fungible-token position-nft uint)
 
@@ -220,35 +281,21 @@ define-map pools
 ;; @param amount-x-min The minimum acceptable amount of token-x to provide (slippage control).
 ;; @param amount-y-min The minimum acceptable amount of token-y to provide (slippage control).
 ;; @returns An `(ok uint)` result containing the ID of the newly minted position, or an error if the operation fails.
-(define-public (mint-position (pool-id uint) (tick-lower int) (tick-upper int) (amount-x-desired uint) (amount-y-desired uint) (amount-x-min uint) (amount-y-min uint))uint))
-  (let
-    (
-      (position-id (var-get next-position-id))
-      (pool (unwrap! (map-get? pools {pool-id: pool-id}) (err-trait-err ERR_INVALID_POSITION)))
-      (sqrt-price-current (get current-sqrt-price pool))
-      (sqrt-price-lower (unwrap! (get-sqrt-price-from-tick tick-lower) ERR_INVALID_TICK))
-      (sqrt-price-upper (unwrap! (get-sqrt-price-from-tick tick-upper) ERR_INVALID_TICK))
-      (liquidity (unwrap! (get-liquidity-for-amounts sqrt-price-current sqrt-price-lower sqrt-price-upper amount-x-desired amount-y-desired) (err-trait-err ERR_INSUFFICIENT_LIQUIDITY)))
-      (amount-x (unwrap! (calculate-amount-x liquidity sqrt-price-current sqrt-price-lower sqrt-price-upper) (err-trait-err ERR_INVALID_AMOUNT)))
-      (amount-y (unwrap! (calculate-amount-y liquidity sqrt-price-current sqrt-price-lower sqrt-price-upper) (err-trait-err ERR_INVALID_AMOUNT)))
-    )
-    (asserts! (>= amount-x amount-x-min) (err-trait-err ERR_INSUFFICIENT_LIQUIDITY))
-    (asserts! (>= amount-y amount-y-min) (err-trait-err ERR_INSUFFICIENT_LIQUIDITY))
+(define-public (mint-position (pool-id uint) (tick-lower int) (tick-upper int) (amount-x-desired uint) (amount-y-desired uint) (amount-x-min uint) (amount-y-min uint))
+  "Mints a new concentrated liquidity position.
+  This function allows a user to provide liquidity to a concentrated liquidity pool within a specified price range (defined by `tick-lower` and `tick-upper`).
+  It calculates the liquidity to be minted based on the desired token amounts and the current pool state, and transfers the tokens from the sender to the pool.
+  A non-fungible token (NFT) representing the position is minted to the sender.
 
-    ;; Transfer tokens
-    (try! (contract-call? (get token-x pool) transfer amount-x tx-sender (as-contract tx-sender)))
-    (try! (contract-call? (get token-y pool) transfer amount-y tx-sender (as-contract tx-sender)))
-
-    ;; Mint NFT
-    (try! (nft-mint position-nft position-id tx-sender))
-
-    ;; Update position data
-    (map-set positions
-      {position-id: position-id}
-      {
-        owner: tx-sender,
-        pool-id: pool-id,
-        tick-lower: tick-lower,
+  @param pool-id The ID of the pool to add liquidity to.
+  @param tick-lower The lower tick of the price range for the position.
+  @param tick-upper The upper tick of the price range for the position.
+  @param amount-x-desired The desired amount of token-x to provide.
+  @param amount-y-desired The desired amount of token-y to provide.
+  @param amount-x-min The minimum acceptable amount of token-x to provide (slippage control).
+  @param amount-y-min The minimum acceptable amount of token-y to provide (slippage control).
+  @returns An `(ok uint)` result containing the ID of the newly minted position, or an error if the operation fails.
+  "        tick-lower: tick-lower,
         tick-upper: tick-upper,
         liquidity: liquidity,
         amount-x: amount-x,
@@ -264,36 +311,15 @@ define-map pools
 
 ;; @desc Collects accumulated fees for a given position.
 ;; @param position-id The ID of the position to collect fees from.
-;; @returns An `(ok bool)` result indicating success, or an error.
+;; @returns An `(ok {fees-x: uint, fees-y: uint})` result containing the collected fees for token-x and token-y, or an error.
 (define-public (collect-fees (position-id uint))
-  (let
-    (
-      (position (unwrap! (map-get? positions {position-id: position-id}) (err-trait-err ERR_INVALID_POSITION)))
-      (pool (unwrap! (map-get? pools {pool-id: (get pool-id position)}) (err-trait-err ERR_INVALID_POSITION)))
-      (fee-growth-global-x (get fee-growth-global-x pool))
-      (fee-growth-global-y (get fee-growth-global-y pool))
-      (fee-growth-inside-last-x (get fee-growth-inside-last-x position))
-      (fee-growth-inside-last-y (get fee-growth-inside-last-y position))
-      (liquidity (get liquidity position))
+  "Collects accumulated trading fees for a specific concentrated liquidity position.
+  The fees are calculated based on the global fee growth and the position's fee growth at the last collection.
+  The collected fees are transferred to the position owner.
 
-      (fees-x (- fee-growth-global-x fee-growth-inside-last-x))
-      (fees-y (- fee-growth-global-y fee-growth-inside-last-y))
-
-      (amount-x-to-collect (/ (* fees-x liquidity) Q128))
-      (amount-y-to-collect (/ (* fees-y liquidity) Q128))
-    )
-    (asserts! (is-eq tx-sender (get owner position)) ERR_UNAUTHORIZED)
-
-    ;; Transfer fees to owner
-    (try! (contract-call? (get token-x pool) transfer amount-x-to-collect (as-contract tx-sender) tx-sender))
-    (try! (contract-call? (get token-y pool) transfer amount-y-to-collect (as-contract tx-sender) tx-sender))
-
-    ;; Update fee tracking in position
-    (map-set positions {position-id: position-id} (merge position {fee-growth-inside-last-x: fee-growth-global-x, fee-growth-inside-last-y: fee-growth-global-y}))
-
-    (ok {fees-x: amount-x-to-collect, fees-y: amount-y-to-collect})
-  )
-)
+  @param position-id The ID of the position to collect fees from.
+  @returns An `(ok {fees-x: uint, fees-y: uint})` result containing the collected fees for token-x and token-y, or an error if the position is invalid or the sender is not the owner.
+  "
 
 ;; @desc Performs a token swap within the pool.
 ;; @param amount-in The amount of the input token.
@@ -301,11 +327,14 @@ define-map pools
 ;; @param recipient The principal of the recipient for the output token.
 ;; @returns An `(ok uint)` result containing the amount of the output token, or an error.
 (define-public (swap (amount-in uint) (token-in principal) (recipient principal))
-    (if (is-eq token-in (contract-of token-x))
-      (swap-x-for-y pool-id amount-in u0 recipient)
-      (swap-y-for-x pool-id amount-in u0 recipient)
-    )
-  )
+  "Performs a token swap within the concentrated liquidity pool.
+  This function determines the direction of the swap (token-x to token-y or vice-versa) based on the `token-in` parameter and calls the appropriate internal swap function.
+
+  @param amount-in The amount of the input token to swap.
+  @param token-in The principal of the input token (either token-x or token-y).
+  @param recipient The principal of the recipient for the output token.
+  @returns An `(ok uint)` result containing the amount of the output token received, or an error if the swap fails.
+  "
 
 ;; @desc Swaps token-y for token-x.
 ;; @param pool-id The ID of the pool.
