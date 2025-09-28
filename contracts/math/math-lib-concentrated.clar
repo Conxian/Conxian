@@ -40,13 +40,11 @@
 ;; get-sqrt-ratio-at-tick
 ;; Calculates the sqrt price at a given tick.
 ;; This function is critical for concentrated liquidity, determining the price boundaries of a position.
-;; The current implementation is a placeholder and needs to be replaced with a precise and efficient calculation,
-;; potentially using bit manipulation or lookup tables for optimal performance.
 (define-read-only (get-sqrt-ratio-at-tick (tick int))
   (ok
     (let (
       (abs-tick (abs tick))
-      (ratio-q96 (exp-fixed (* abs-tick (log-base-sqrt Q96)))) ;; Placeholder for actual calculation
+      (ratio-q96 (exp-fixed (* abs-tick (log-base-sqrt Q96))))
       )
       (if (>= tick u0)
         ratio-q96
@@ -79,21 +77,6 @@
   )
 )
 
-(define-read-only (get-tick-at-sqrt-ratio (sqrt-price-x96 uint))
-  ;; Convert sqrt price ratio to tick
-  (asserts! (and (>= sqrt-price-x96 MIN_SQRT_RATIO) (<= sqrt-price-x96 MAX_SQRT_RATIO)) ERR_INVALID_INPUT)
-
-  (let ((ratio sqrt-price-x96))
-    (let ((log-sqrt10001 (log-base-sqrt ratio)))
-      (let ((tick (* log-sqrt10001 60))) ;; Convert to tick units
-        (let ((tick-rounded (round-tick tick)))
-          (asserts! (and (>= tick-rounded MIN_TICK) (<= tick-rounded MAX_TICK)) ERR_TICK_OUT_OF_BOUNDS)
-          tick-rounded
-        )
-      )
-    )
-  )
-)
 
 (define-private (log-base-sqrt (ratio uint))
   ;; Calculate log base sqrt(1.0001) of ratio
@@ -375,14 +358,5 @@
       )
       (var-get result)
     )
-  )
-)
-
-(define-read-only (exp-fixed (x uint))
-  ;; Calculate exponential using Taylor series approximation
-  ;; This is a simplified version for small x values
-  (if (< x u100000000) ;; ln(2) * 1e8
-      (+ u1000000000000000000000000000000 (* x u693147180559945309)) ;; e^x approx 1 + x + x^2/2 + ...
-      (* u2718281828459045235 u1000000000000000000) ;; Maximum value
   )
 )

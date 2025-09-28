@@ -9,3 +9,5 @@
 (define-constant ERR_BURN_FAILED (err u106))
 (define-constant ERR_INVALID_POSITION (err u107))
 (define-constant ERR_INSUFFICIENT_OUTPUT (err u108))
+(define-constant ERR_POOL_NOT_FOUND (err u109))
+(define-constant ERR_PRICE_LIMIT_REACHED (err u110))

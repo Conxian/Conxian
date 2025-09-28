@@ -7,6 +7,7 @@
 (use-trait sip-010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
 (use-trait vault-trait .all-traits.vault-trait)
 (use-trait strategy-trait .all-traits.strategy-trait)
+(use-trait metrics-trait .all-traits.metrics-trait)
 
 ;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED (err u8001))
@@ -19,7 +20,7 @@
 ;; --- Data Variables ---
 (define-data-var admin principal tx-sender)
 (define-data-var vault-contract principal tx-sender)
-(define-data-var metrics-contract principal tx-sender)
+(define-data-var metrics-contract <metrics-trait> (as-contract tx-sender))
 (define-data-var strategy-count uint u0)
 
 ;; --- Maps ---
@@ -47,11 +48,10 @@
 ;; @param vault The principal of the vault contract.
 ;; @param metrics The principal of the metrics contract.
 ;; @returns An `(ok bool)` result indicating success, or an error.
-(define-public (set-contracts (vault principal) (metrics principal))
+(define-public (set-contracts (vault principal) (metrics <metrics-trait>))
   (begin
     (asserts! (is-eq tx-sender (var-get admin)) ERR_UNAUTHORIZED)
     (asserts! (is-some (contract-of? vault)) ERR_INVALID_CONTRACT)
-    (asserts! (is-some (contract-of? metrics)) ERR_INVALID_CONTRACT)
     (var-set vault-contract vault)
     (var-set metrics-contract metrics)
     (ok true)))
@@ -127,10 +127,15 @@
         (match (map-get? strategies id)
           strategy-data
           (if (get is-active strategy-data)
-            ;; Assuming get-apy is a call to get-metric with a specific metric-id for APY
-            (let ((apy (unwrap! (contract-call? metrics get-apy (get contract strategy-data)) ERR_METRICS_CALL_FAILED)))
-              (if (> apy (get apy memo))
-                { contract: (get contract strategy-data), apy: apy }
+            (let (
+              (apy (unwrap! (contract-call? metrics get-apy (get contract strategy-data)) ERR_METRICS_CALL_FAILED))
+              (yield-efficiency (unwrap! (contract-call? metrics get-yield-efficiency (get contract strategy-data)) ERR_METRICS_CALL_FAILED))
+              (vault-performance (unwrap! (contract-call? metrics get-vault-performance (get contract strategy-data)) ERR_METRICS_CALL_FAILED))
+              (current-score (+ apy yield-efficiency vault-performance))
+              (memo-score (+ (get apy memo) (get yield-efficiency memo) (get vault-performance memo)))
+            )
+              (if (> current-score memo-score)
+                { contract: (get contract strategy-data), apy: apy, yield-efficiency: yield-efficiency, vault-performance: vault-performance }
                 memo
               )
             )
@@ -140,7 +145,7 @@
         )
       )
       (range u0 count)
-      { contract: (as-contract tx-sender), apy: u0 }
+      { contract: (as-contract tx-sender), apy: u0, yield-efficiency: u0, vault-performance: u0 }
     )
   )
 )

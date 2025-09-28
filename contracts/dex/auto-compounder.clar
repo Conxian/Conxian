@@ -5,6 +5,7 @@
 (use-trait yield-optimizer-trait .all-traits.yield-optimizer-trait)
 (use-trait strategy-trait .all-traits.strategy-trait)
 (use-trait circuit-breaker-trait .all-traits.circuit-breaker-trait)
+(use-trait metrics-trait .all-traits.metrics-trait)
 
 (define-constant ERR_UNAUTHORIZED (err u8000))
 (define-constant ERR_NOTHING_TO_COMPOUND (err u8001))
@@ -13,7 +14,8 @@
 (define-constant ERR_CIRCUIT_OPEN (err u8004))
 
 (define-data-var contract-owner principal tx-sender)
-(define-data-var yield-optimizer-contract principal .yield-optimizer)
+(define-data-var yield-optimizer <yield-optimizer-trait> (as-contract tx-sender))
+(define-data-var metrics-contract <metrics-trait> (as-contract tx-sender))
 (define-data-var compounding-fee-bps uint u10) ;; 0.1% fee
 (define-data-var circuit-breaker (optional principal) none)
 (define-data-var total-deposited uint u0)
@@ -77,36 +79,20 @@
   )
 )
 
-(define-public (auto-compound (user principal) (token principal))
+(define-public (auto-compound (token-a <sip-010-ft-trait>) (token-b <sip-010-ft-trait>))
   (begin
-    (asserts! (is-eq tx-sender (var-get vault-admin)) ERR_UNAUTHORIZED)
-    (ok (print (merge-map
-                {event: "auto-compound", user: user, token: token}
-                (try! (contract-call? (var-get yield-optimizer-contract) auto-compound user token)))))
-  )
-)
-
-(define-public (compound (user principal) (token principal))
-  (begin
-    (try! (check-circuit-breaker))
-    (let ((strategy (unwrap! (map-get? strategies token) (err ERR_STRATEGY_NOT_FOUND))))
-      (let ((position (unwrap! (map-get? user-positions { user: user, token: token }) (err ERR_NOTHING_TO_COMPOUND))))
-        (let ((rewards (try! (contract-call? strategy harvest-rewards))))
-          (asserts! (> rewards u0) ERR_NOTHING_TO_COMPOUND)
-          (let ((fee (* rewards (var-get compounding-fee-bps) u10000)))
-            (try! (as-contract (contract-call? token transfer fee tx-sender)))
-            (let ((net-rewards (- rewards fee)))
-              (let ((new-amount (+ (get amount position) net-rewards)))
-                (map-set user-positions { user: user, token: token } { amount: new-amount, last-compounded: block-height })
-                (ok new-amount)
-              )
-            )
-          )
-        )
-      )
-    )
-  )
-)
+    (asserts! (is-none (var-get circuit-breaker)) ERR_CIRCUIT_BREAKER_ACTIVE)
+    (let
+      ((best-strategy (contract-call? (var-get yield-optimizer) find-best-strategy token-a token-b))
+       (current-strategy (get-strategy-for-pair token-a token-b)))
+      (asserts! (is-ok best-strategy) (unwrap-err best-strategy))
+      (asserts! (is-some current-strategy) ERR_NO_STRATEGY_FOR_PAIR)
+      (if (is-eq (unwrap-panic best-strategy) (unwrap-panic current-strategy))
+        (ok (print "Already on best strategy"))
+        (begin
+          ;; Rebalance to the best strategy
+          (try! (contract-call? (var-get yield-optimizer) optimize-and-rebalance token-a token-b (unwrap-panic best-strategy)))
+          (ok (print "Rebalanced to new best strategy"))))))
 
 (define-public (compound-all (users (list 100 principal)) (token principal))
     (let ((strategy (unwrap! (map-get? strategies token) (err ERR_STRATEGY_NOT_FOUND))))
@@ -131,15 +117,36 @@
     )
 )
 
+(define-public (compound (user principal) (token <sip-010-ft-trait>))
+  (begin
+    (try! (check-circuit-breaker))
+    ;; Delegate compounding logic to yield-optimizer
+    (let ((compounded-amount (try! (contract-call? (var-get yield-optimizer) compound-user-rewards user token))))
+      ;; Log metrics
+      (try! (contract-call? (var-get metrics-contract) log-compounding-event user token compounded-amount))
+      (ok compounded-amount))))
+
+(define-public (compound-all (users (list 100 principal)) (token <sip-010-ft-trait>))
+  (begin
+    (try! (check-circuit-breaker))
+    (map iter compound users)
+    (ok true)))
+
 (define-read-only (get-position (user principal) (token principal))
   (map-get? user-positions { user: user, token: token })
 )
 
-(define-public (set-yield-optimizer-contract (new-optimizer principal))
+(define-public (set-yield-optimizer-contract (optimizer <yield-optimizer-trait>))
   (begin
     (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
-    (var-set yield-optimizer-contract new-optimizer)
-    (ok true)
+    (var-set yield-optimizer optimizer)
+    (ok true)))
+
+(define-public (set-metrics-contract (metrics <metrics-trait>))
+  (begin
+    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
+    (var-set metrics-contract metrics)
+    (ok true)))
   )
 )
 

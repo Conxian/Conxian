@@ -137,6 +137,19 @@
 (define-constant ERR_ROLE_NOT_GRANTED (err u103))
 (define-constant ERR_INVALID_ADMIN (err u104))
 
+;; ----------------------------------------------------------------------------------------------------
+;; metrics-trait
+;; ----------------------------------------------------------------------------------------------------
+(define-trait metrics-trait
+  (
+    (get-apy (strategy principal)) (response uint uint)
+    (get-yield-efficiency (strategy principal)) (response uint uint)
+    (get-vault-performance (strategy principal)) (response uint uint)
+  )
+)
+
+;; ----------------------------------------------------------------------------------------------------
+;; pausable-trait
 (define-trait pausable-trait
   (
     ;; Pause the contract (only callable by pauser role)
