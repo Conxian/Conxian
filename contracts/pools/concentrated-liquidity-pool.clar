@@ -884,44 +884,4 @@ define-map pools
   (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
 )
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
-
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
-
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
-
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
-
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
-
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
-
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
-
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
-
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
-
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
-
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint
+>>>>>>> 691ee6a4f2c3061a5257ef6a4aee949c84034a52

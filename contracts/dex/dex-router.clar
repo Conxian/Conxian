@@ -3,10 +3,11 @@
 ;; Non-custodial, immutable design with bond trading support
 
 ;; --- Traits ---
-(use-trait bond-trait .bond-trait)
-(use-trait router-trait .router-trait)
+(use-trait bond-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.bond-trait)
+(use-trait router-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.router-trait)
 (use-trait sip-010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
-(use-trait pool-trait .pool-trait)
+(use-trait pool-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.pool-trait)
+(use-trait factory-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.factory-trait)
 
 (impl-trait .router-trait)
 

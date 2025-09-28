@@ -171,3 +171,4 @@ btc-wallet*
 .kiro/specs/
 .secrets/
 clarinet-windows-x64.msi
+clarinet_check_output.txt
