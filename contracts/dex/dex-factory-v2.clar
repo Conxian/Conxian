@@ -2,12 +2,11 @@
 ;; This contract is responsible for creating and registering new DEX pools.
 
 ;; --- Traits ---
-(use-trait access-control-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.access-control-trait)
-(use-trait access-control-trait .all-traits.access-control-trait)
-(use-trait factory-trait .all-traits.factory-trait)
-(use-trait pool-creation-trait .all-traits.pool-creation-trait)
-(use-trait circuit-breaker-trait .all-traits.circuit-breaker-trait)
-(impl-trait .all-traits.factory-trait)
+(use-trait access-control-trait .access-control-trait)
+(use-trait factory-trait .factory-trait)
+(use-trait pool-creation-trait .pool-creation-trait)
+(use-trait circuit-breaker-trait .circuit-breaker-trait)
+(impl-trait .factory-trait)
 
 ;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED (err u1003))
@@ -20,7 +19,7 @@
 
 ;; --- Data Variables ---
 (define-data-var contract-owner principal tx-sender)
-(define-data-var access-control-contract principal 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.access-control)
+(define-data-var access-control-contract principal .access-control)
 (define-data-var pool-count uint u0)
 (define-data-var circuit-breaker principal .circuit-breaker)
 
@@ -54,7 +53,7 @@
 )
 
 (define-private (check-circuit-breaker)
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.circuit-breaker is-circuit-open)
+  (contract-call? .circuit-breaker is-circuit-open))
 )
 
 ;; --- Public Functions ---

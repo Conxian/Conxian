@@ -2,12 +2,12 @@
 ;; DAO-based contract security audit registry
 ;; Handles audit submissions, DAO voting, and NFT badge issuance
 
-(use-trait sip-009-nft-trait ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-009-nft-trait)
-(use-trait dao-trait ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.dao-trait)
+(use-trait sip-009-nft-trait .traits.sip-009-nft-trait)
+(use-trait dao-trait .traits.dao-trait)
 
 ;; --- Traits ---
-(impl-trait ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-009-nft-trait)
-(impl-trait ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.dao-trait)
+(impl-trait .traits.sip-009-nft-trait)
+(impl-trait .traits.dao-trait)
 
 ;; --- Constants ---
 (define-constant CONTRACT_OWNER tx-sender)
@@ -132,7 +132,7 @@
           })
         )
         ;; Mint NFT for successful audit
-        (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.audit-badge-nft mint 
+        (contract-call? .audit-badge-nft mint 
           audit-id
           (get report-uri audit)
           (get auditor audit)

@@ -1,4 +1,4 @@
-(use-trait ft-trait ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
+(use-trait ft-trait .all-traits.sip-010-ft-trait)
 (use-trait nft-trait .all-traits.sip-009-nft-trait)
 
 ;; Pool Template - Basic DEX Pool Implementation
@@ -10,8 +10,8 @@
 (define-constant ERR_INVALID_INPUT (err u1003))
 
 ;; --- Data Variables ---
-(define-data-var token-a principal 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.cxd-token)
-(define-data-var token-b principal 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.cxvg-token)
+(define-data-var token-a principal .cxd-token)
+(define-data-var token-b principal .cxvg-token)
 (define-data-var fee-bps uint u30) ;; 0.3% default fee (30 bps)
 (define-data-var admin principal tx-sender)
 (define-data-var reserve-a uint u0)

@@ -2,14 +2,14 @@
 ;; sBTC Lending Integration - extends comprehensive lending system
 ;; Provides sBTC-specific lending, borrowing, and collateral management
 
-(use-trait ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.sip-010-ft-trait)
+(use-trait ft-trait .sip-010-ft-trait)
 
 ;; =============================================================================
 ;; CONSTANTS AND ERROR CODES
 ;; =============================================================================
 
 (define-constant CONTRACT_OWNER tx-sender)
-(define-constant sbtc-integration 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.sbtc-integration)
+(define-constant sbtc-integration .sbtc-integration)
 (define-constant ERR_NOT_AUTHORIZED (err u2000))
 (define-constant ERR_INSUFFICIENT_COLLATERAL (err u2001))
 (define-constant ERR_LIQUIDATION_THRESHOLD_REACHED (err u2002))

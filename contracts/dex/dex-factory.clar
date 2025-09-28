@@ -1,11 +1,11 @@
-(use-trait utils-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.utils-trait)
-(use-trait access-control-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.access-control-trait)
-(use-trait sip-010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
-(use-trait factory-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.factory-trait)
-(use-trait circuit-breaker-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.circuit-breaker-trait)
-(use-trait pool-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.pool-trait)
+(use-trait utils-trait .utils-trait)
+(use-trait access-control-trait .access-control-trait)
+(use-trait sip-010-ft-trait .sip-010-ft-trait)
+(use-trait factory-trait .factory-trait)
+(use-trait circuit-breaker-trait .circuit-breaker-trait)
+(use-trait pool-trait .pool-trait)
 
-(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.factory-trait)
+(impl-trait .factory-trait)
 
 ;; --- Constants ---
 (define-constant ACCESS_CONTROL .access-control)
@@ -36,7 +36,7 @@
 
 ;; --- Data Variables ---
 (define-data-var contract-owner principal tx-sender)
-(define-data-var access-control-contract principal ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.access-control) ;; The main access control contract
+(define-data-var access-control-contract principal .access-control) ;; The main access control contract
 (define-data-var pool-count uint u0)
 (define-data-var circuit-breaker (optional principal) none)
 (define-data-var default-pool-type uint POOL_TYPE_CONSTANT_PRODUCT)
@@ -74,8 +74,8 @@
   ;; Compare principals directly instead of converting to uint
   (if (is-eq token-a token-b)
     (err ERR_INVALID_TOKENS)
-    (let ((token-a-str (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.utils principal-to-buff token-a))
-          (token-b-str (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.utils principal-to-buff token-b)))
+    (let ((token-a-str (contract-call? .utils principal-to-buff token-a))
+          (token-b-str (contract-call? .utils principal-to-buff token-b)))
       (if (< (buff-to-uint-be token-a-str) (buff-to-uint-be token-b-str))
         (ok { token-a: token-a, token-b: token-b })
         (ok { token-a: token-b, token-b: token-a })

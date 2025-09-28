@@ -8,7 +8,7 @@
 (use-trait position-nft-trait .all-traits.position-nft-trait)
 
 ;; Implementation
-(impl-trait .all-traits.pool-trait)
+(impl-trait .pool-trait)
 
 ;; Constants
 (define-constant CONTRACT_OWNER tx-sender)
@@ -124,13 +124,13 @@
 (define-private (get-tick-at-sqrt-ratio (sqrt-price-x96 uint))
   ;; Convert sqrt price to tick using advanced math
   ;; This is a simplified version - full implementation would use bit manipulation
-  (ok (unwrap-panic (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math-lib-concentrated.get-tick-at-sqrt-ratio sqrt-price-x96)))
+  (ok (unwrap-panic (contract-call? .math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price-x96)))
 )
 
 (define-private (get-sqrt-ratio-at-tick (tick int))
   ;; Convert tick to sqrt price ratio
   ;; This is a simplified version - full implementation would use complex math
-  (ok (unwrap-panic (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math-lib-concentrated.get-sqrt-ratio-at-tick tick)))
+  (ok (unwrap-panic (contract-call? .math-lib-concentrated get-sqrt-ratio-at-tick tick)))
 )
 
 (define-private (validate-tick (tick int))
@@ -178,7 +178,7 @@
       (asserts! (>= amount1-desired amount1-min) ERR_SLIPPAGE_TOO_HIGH)
 
       (let (
-        (liquidity-calculated (unwrap-panic (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math-lib-concentrated.get-liquidity-for-amounts
+        (liquidity-calculated (unwrap-panic (contract-call? .math-lib-concentrated get-liquidity-for-amounts
           sqrt-price-x96
           (unwrap-panic (get-sqrt-ratio-at-tick tick-lower))
           (unwrap-panic (get-sqrt-ratio-at-tick tick-upper))
@@ -262,7 +262,7 @@
           (sqrt-price-x96 (get sqrt-price-x96 slot0-data))
           (tick-lower (get tick-lower p))
           (tick-upper (get tick-upper p))
-          (amounts (unwrap-panic (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math-lib-concentrated.get-amounts-for-liquidity
+          (amounts (unwrap-panic (contract-call? .math-lib-concentrated get-amounts-for-liquidity
             sqrt-price-x96
             (unwrap-panic (get-sqrt-ratio-at-tick tick-lower))
             (unwrap-panic (get-sqrt-ratio-at-tick tick-upper))
@@ -340,7 +340,7 @@
     (asserts! (> liquidity-val u0) ERR_INSUFFICIENT_LIQUIDITY)
 
     (let (
-        (result (unwrap-panic (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math-lib-concentrated.swap-x-for-y
+        (result (unwrap-panic (contract-call? .math-lib-concentrated.swap-x-for-y
           sqrt-price-x96
           liquidity-val
           amount-in
@@ -388,7 +388,7 @@
     (asserts! (> liquidity-val u0) ERR_NO_LIQUIDITY)
 
     (let (
-        (result (unwrap-panic (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math-lib-concentrated.swap-y-for-x
+        (result (unwrap-panic (contract-call? .math-lib-concentrated.swap-y-for-x
           sqrt-price-x96
           liquidity-val
           amount-in

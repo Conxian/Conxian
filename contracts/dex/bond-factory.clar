@@ -1,9 +1,9 @@
 ;; bond-factory.clar
 ;; Factory contract for creating and managing bond tokens
 
-(use-trait standard-constants-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.standard-constants-trait)
-(use-trait bond-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.bond-trait)
-(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.traits.bond-factory-trait)
+(use-trait standard-constants-trait .standard-constants-trait)
+(use-trait bond-trait .bond-trait)
+(impl-trait .bond-factory-trait)
 
 ;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED (err u5000))

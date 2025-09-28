@@ -1,7 +1,7 @@
 ;; Manipulation Detector
 ;; This contract detects price manipulation attempts using statistical analysis.
 
-(use-trait circuit-breaker-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.circuit-breaker-trait)
+(use-trait circuit-breaker-trait .all-traits.circuit-breaker-trait)
 
 (define-constant ERR_UNAUTHORIZED (err u1003))
 (define-constant ERR_INVALID_PRICE (err u7001))

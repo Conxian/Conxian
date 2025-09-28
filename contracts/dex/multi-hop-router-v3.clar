@@ -3,12 +3,12 @@
 ;; Supports multiple pool types and complex multi-hop swaps
 
 ;; Traits
-(use-trait sip-010-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
-(use-trait pool-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.pool-trait)
-(use-trait factory-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.factory-trait)
+(use-trait sip-010-trait .sip-010-ft-trait)
+(use-trait pool-trait .all-traits.pool-trait)
+(use-trait factory-trait .all-traits.factory-trait)
 
 ;; Implementation
-(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.router-trait)
+(impl-trait .all-traits.router-trait)
 
 ;; Constants
 (define-constant CONTRACT_OWNER tx-sender)
@@ -146,8 +146,8 @@
         (list (list from-token to-token))
         ;; Multi-hop required - find intermediate tokens
         (let ((intermediate-tokens (list
-          'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.CX-token ;; CX token as intermediate
-          'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.CXVG-token ;; CXVG token as intermediate
+          .CX-token ;; CX token as intermediate
+          .CXVG-token ;; CXVG token as intermediate
         )))
           (find-multi-hop-path from-token to-token intermediate-tokens amount-in)
         )

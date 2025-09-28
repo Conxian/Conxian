@@ -3,12 +3,12 @@
 ;; Non-custodial, immutable design with bond trading support
 
 ;; --- Traits ---
-(use-trait bond-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.bond-trait)
-(use-trait router-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.router-trait)
-(use-trait sip-010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.sip-010-ft-trait)
-(use-trait pool-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.pool-trait)
+(use-trait bond-trait .bond-trait)
+(use-trait router-trait .router-trait)
+(use-trait sip-010-ft-trait .sip-010-ft-trait)
+(use-trait pool-trait .pool-trait)
 
-(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.router-trait)
+(impl-trait .router-trait)
 
 ;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED (err u4000))
@@ -28,8 +28,8 @@
 
 ;; --- Data Variables ---
 (define-data-var contract-owner principal tx-sender)
-(define-data-var factory-address principal 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dex-factory)
-(define-data-var bond-factory-address principal 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.bond-factory)
+(define-data-var factory-address principal .dex-factory)
+(define-data-var bond-factory-address principal .bond-factory)
 (define-data-var locked bool false)  ;; Reentrancy guard
 (define-data-var swap-iteration uint u0)  ;; Track swap iterations
 
@@ -344,7 +344,7 @@
 (define-public (set-factory (new-factory principal))
   (begin
     (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
-    (asserts! (is-ok (contract-call? new-factory get-pool 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.token-a 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.token-b)) ERR_INVALID_PATH)
+    ;; (asserts! (is-ok (contract-call? new-factory get-pool .token-a .token-b)) ERR_INVALID_PATH) ;; Removed hardcoded token check
     (var-set factory-address new-factory)
     (ok true)
   )

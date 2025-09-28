@@ -5,9 +5,10 @@ clarinet_version = "3.5.0"
 
 [accounts]
 deployer = { mnemonic = "twice kind fence tip hidden tilt action fragile skin nothing glory cousin green tomorrow spring wrist shed math olympic multiply hip blue scout claw", balance = 100_000_000_000_000 }
-wallet_1 = { mnemonic = "sell invite acquire kitten bamboo drastic jelly vivid peace spawn twice guilt pave pen trash pretty park cube fragile unaware remain midnight betray rebuild", balance = 100_000_000_000_000 }
-wallet_2 = { mnemonic = "hold excess usual excess ring elephant install account glad dry fragile donkey gaze humble truck breeze nation gasp vacuum limb head keep delay hospital", balance = 100_000_000_000_000 }
-wallet_3 = { mnemonic = "cycle puppy glare enroll cost improve round trend wrist mushroom scorpion tower claim oppose clever elephant dinosaur eight problem before frozen dune wagon high", balance = 100_000_000_000_000 }
+wallet_1 = { address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6" }
+wallet_2 = { address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6" }
+[accounts.wallet_3]
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 system = { mnemonic = "theme apart absurd gasp river used vessel screen fiction slice slab ice jar hurt slam puppy snake life radar sign ship list excuse trick", balance = 100_000_000_000_000 }
 
 [network]

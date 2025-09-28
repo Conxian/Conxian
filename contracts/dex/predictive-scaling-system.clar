@@ -127,7 +127,7 @@
 
 (define-public (record-transaction-pattern (time-window uint) (pattern-id uint) (tps uint) (peak-tps uint) (tx-count uint) (gas-usage uint) (error-rate uint))
   (let (
-    (current-time (unwrap-panic (get-block-info? time (- block-height u1))))
+    (current-time (get-block-info? time (- block-height u1)))
   )
     (if (var-get prediction-enabled)
       (begin
