@@ -43,6 +43,9 @@
     executed: bool
 })
 
+;; @desc Sets the compliance hook contract.
+;; @param hook (principal) The principal of the compliance hook contract.
+;; @return (response bool) An (ok true) response if the compliance hook was successfully set, or an error if unauthorized.
 (define-public (set-compliance-hook (hook principal))
     (begin
         (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
@@ -51,6 +54,9 @@
     )
 )
 
+;; @desc Sets the circuit breaker contract.
+;; @param breaker (principal) The principal of the circuit breaker contract.
+;; @return (response bool) An (ok true) response if the circuit breaker was successfully set, or an error if unauthorized.
 (define-public (set-circuit-breaker (breaker principal))
     (begin
         (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
@@ -59,7 +65,11 @@
     )
 )
 
-(define-public (create-institutional-account (owner principal) (tier uint))
+;; @desc Creates a new institutional account.
+;; @param owner (principal) The owner of the new account.
+;; @param tier (uint) The tier level for the new account.
+;; @return (response uint) An (ok account-id) response if the account was successfully created, or an error if unauthorized or the tier is invalid.
+(define-public (create-institutional-account (owner principal) (tier uint)))
     (begin
         (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
         (let (
@@ -79,7 +89,11 @@
     )
 )
 
-(define-public (update-account-tier (account-id uint) (new-tier uint))
+;; @desc Updates the tier of an existing institutional account.
+;; @param account-id (uint) The ID of the account to update.
+;; @param new-tier (uint) The new tier level for the account.
+;; @return (response bool) An (ok true) response if the account tier was successfully updated, or an error if unauthorized, the account is not found, or the new tier is invalid.
+(define-public (update-account-tier (account-id uint) (new-tier uint)))
     (begin
         (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
         (let (
@@ -96,7 +110,12 @@
     )
 )
 
-(define-public (set-tier-config (tier uint) (fee-discount-rate uint) (trading-privileges uint))
+;; @desc Sets the configuration for a specific tier.
+;; @param tier (uint) The tier level to configure.
+;; @param fee-discount-rate (uint) The fee discount rate for this tier (e.g., u100 for 1%).
+;; @param trading-privileges (uint) A bitmask representing the trading privileges for this tier.
+;; @return (response bool) An (ok true) response if the tier configuration was successfully set, or an error if unauthorized or the fee discount rate is invalid.
+(define-public (set-tier-config (tier uint) (fee-discount-rate uint) (trading-privileges uint)))
     (begin
         (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
         (asserts! (<= fee-discount-rate u10000) ERR_INVALID_FEE_DISCOUNT) ;; Max 100% discount (10000 basis points)
@@ -108,7 +127,16 @@
     )
 )
 
-(define-public (create-twap-order (account-id uint) (token-in principal) (token-out principal) (amount-in uint) (min-amount-out uint) (start-time uint) (end-time uint))
+;; @desc Creates a new Time-Weighted Average Price (TWAP) order.
+;; @param account-id (uint) The ID of the institutional account placing the order.
+;; @param token-in (principal) The principal of the token to sell.
+;; @param token-out (principal) The principal of the token to buy.
+;; @param amount-in (uint) The total amount of `token-in` to sell.
+;; @param min-amount-out (uint) The minimum amount of `token-out` expected.
+;; @param start-time (uint) The block height at which the order becomes active.
+;; @param end-time (uint) The block height at which the order expires.
+;; @return (response uint) An (ok order-id) response if the TWAP order was successfully created, or an error if a circuit breaker is open, the account is not found, unauthorized, not verified, invalid privilege, or invalid order times.
+(define-public (create-twap-order (account-id uint) (token-in principal) (token-out principal) (amount-in uint) (min-amount-out uint) (start-time uint) (end-time uint)))uint))
     (begin
         (try! (check-circuit-breaker))
         (let ((account (unwrap! (map-get? institutional-accounts account-id) ERR_ACCOUNT_NOT_FOUND)))
@@ -134,6 +162,9 @@
     )
 )
 
+;; @desc Checks if an account is verified through the compliance hook.
+;; @param account (principal) The principal of the account to check.
+;; @return (response bool) An (ok true) response if the account is verified or no compliance hook is set, or an error otherwise.
 (define-private (check-verification (account principal))
     (match (var-get compliance-hook)
         (some hook) (contract-call? hook is-verified account)
@@ -141,6 +172,8 @@
     )
 )
 
+;; @desc Checks if the circuit breaker is tripped.
+;; @return (response bool) An (ok true) response if the circuit breaker is not tripped, or an error if it is tripped.
 (define-private (check-circuit-breaker)
     (match (var-get circuit-breaker)
         (breaker (let ((is-tripped (try! (contract-call? breaker is-circuit-open))))
@@ -149,10 +182,17 @@
     )
 )
 
-(define-private (has-privilege (privileges uint) (privilege-flag uint))
+;; @desc Checks if a given set of privileges includes a specific privilege flag.
+;; @param privileges (uint) The bitmask of privileges.
+;; @param privilege-flag (uint) The specific privilege flag to check for.
+;; @return (bool) True if the privilege is present, false otherwise.
+(define-private (has-privilege (privileges uint) (privilege-flag uint)))
     (> (and privileges privilege-flag) u0)
 )
 
+;; @desc Checks the KYC status of an account owner through the compliance hook.
+;; @param account-owner (principal) The principal of the account owner to check.
+;; @return (response bool) An (ok true) response if the KYC status is satisfactory or no compliance hook is set, or an error otherwise.
 (define-private (check-verification (account-owner principal))
     (match (var-get compliance-hook)
         (hook (contract-call? hook check-kyc-status account-owner))
@@ -219,11 +259,34 @@
 )
 
 ;; --- Read-Only Functions ---
-(define-read-only (get-account-details (account-id uint))
+;; @desc Retrieves the details of an institutional account.
+;; @param account-id (uint) The ID of the institutional account.
+;; @return (response {owner: principal, tier: uint, kyc-verified: bool}) An (ok) response containing the account details, or an error if the account does not exist.
+(define-read-only (get-institutional-account (account-id uint))
   (map-get? institutional-accounts account-id)
 )
 
-(define-read-only (get-twap-order-details (order-id uint))
+;; @desc Retrieves the configuration for a specific tier.
+;; @param tier (uint) The tier level.
+;; @return (response {fee-discount-rate: uint, trading-privileges: uint}) An (ok) response containing the tier configuration, or an error if the tier does not exist.
+(define-read-only (get-tier-config (tier uint)))
+    (map-get? tier-configs tier)
+)
+
+;; @desc Retrieves the principal of the currently set compliance hook contract.
+;; @return (response principal) An (ok) response containing the principal of the compliance hook, or an error if not set.
+(define-read-only (get-compliance-hook)
+  (ok (unwrap! (var-get compliance-hook) (err u400))) ;; Return u400 if hook is not set
+)
+
+;; @desc Retrieves the principal of the currently set circuit breaker contract.
+;; @return (response principal) An (ok) response containing the principal of the circuit breaker, or an error if not set.
+(define-read-only (get-circuit-breaker))
+
+;; @desc Retrieves the details of a TWAP order.
+;; @param order-id (uint) The ID of the TWAP order.
+;; @return (response {account-id: uint, token-in: principal, token-out: principal, amount-in: uint, min-amount-out: uint, start-time: uint, end-time: uint, filled-amount: uint}) An (ok) response containing the order details, or an error if the order does not exist.
+(define-read-only (get-twap-order-details (order-id uint)))uint))
     (map-get? twap-orders order-id)
 )
 

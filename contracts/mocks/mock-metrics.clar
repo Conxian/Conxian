@@ -4,7 +4,12 @@
 
 (define-map metric-store { strategy: principal, metric-id: uint } { value: uint, last-updated: uint })
 
-(define-public (set-metric (strategy principal) (metric-id uint) (value uint))
+;; @desc Sets a specific metric for a given strategy.
+;; @param strategy (principal) The principal of the strategy.
+;; @param metric-id (uint) The ID of the metric to set (e.g., u0 for APY).
+;; @param value (uint) The value of the metric.
+;; @return (response bool) An (ok true) response if the metric was successfully set.
+(define-public (set-metric (strategy principal) (metric-id uint) (value uint)))
   (begin
     (map-set metric-store
       { strategy: strategy, metric-id: metric-id }
@@ -17,6 +22,10 @@
 ;; The yield-optimizer will call this function.
 ;; The `asset` parameter is part of a potential generic metrics-trait,
 ;; but in this mock, we only care about the strategy.
-(define-read-only (get-metric (strategy principal) (metric-id uint))
+;; @desc Retrieves a specific metric for a given strategy.
+;; @param strategy (principal) The principal of the strategy.
+;; @param metric-id (uint) The ID of the metric to retrieve (e.g., u0 for APY).
+;; @return (response (optional { value: uint, last-updated: uint })) An optional response containing the metric's value and last updated block height.
+(define-read-only (get-metric (strategy principal) (metric-id uint)))
   (map-get? metric-store { strategy: strategy, metric-id: metric-id })
 )

@@ -12,7 +12,11 @@
 (define-map kyc-audit-trail uint { account: principal, action: uint, old-tier: uint, new-tier: uint, timestamp: uint })
 (define-data-var audit-event-counter uint u0)
 
-(define-public (set-kyc-tier (account principal) (kyc-tier uint))
+;; @desc Sets the KYC tier for a given account.
+;; @param account (principal) The principal of the account to set the KYC tier for.
+;; @param kyc-tier (uint) The new KYC tier for the account (e.g., u1 for basic, u2 for intermediate, u3 for advanced).
+;; @return (response bool) An (ok true) response if the KYC tier is successfully set, or an error if unauthorized or the tier is invalid.
+(define-public (set-kyc-tier (account principal) (kyc-tier uint)))
   (begin
     (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
     (asserts! (<= kyc-tier u3) ERR_INVALID_KYC_TIER) ;; Assuming max tier is u3
@@ -35,7 +39,13 @@
   )
 )
 
-(define-public (verify-account (account principal))
+;; @desc Verifies an account by setting its KYC tier to a basic level (u1).
+;; @param account (principal) The principal of the account to verify.
+;; @return (response bool) An (ok true) response if the account is successfully verified, or an error if unauthorized.
+;; @desc Unverifies an account by removing its KYC tier and deleting it from verified accounts.
+;; @param account (principal) The principal of the account to unverify.
+;; @return (response bool) An (ok true) response if the account is successfully unverified, or an error if unauthorized.
+(define-public (unverify-account (account principal)))
   (begin
     (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
     (let (
@@ -77,18 +87,29 @@
   )
 )
 
+;; @desc Checks if an account is currently verified.
+;; @param account (principal) The principal of the account to check.
+;; @return (bool) True if the account is verified, false otherwise.
 (define-read-only (is-verified (account principal))
   (is-some (map-get? verified-accounts account))
 )
 
+;; @desc Retrieves the KYC tier of an account.
+;; @param account (principal) The principal of the account to retrieve the KYC tier for.
+;; @return (uint) The KYC tier of the account (u0 if not verified or no tier set).
 (define-read-only (get-kyc-tier (account principal))
   (default-to u0 (get kyc-tier (map-get? verified-accounts account)))
 )
 
-(define-read-only (get-audit-event (event-id uint))
+;; @desc Retrieves a specific KYC audit event by its ID.
+;; @param event-id (uint) The ID of the audit event to retrieve.
+;; @return (response {account: principal, action: uint, old-tier: uint, new-tier: uint, timestamp: uint}) An (ok) response containing the audit event details, or an error if the event does not exist.
+(define-read-only (get-audit-event (event-id uint)))uint))
   (map-get? kyc-audit-trail event-id)
 )
 
+;; @desc Retrieves the total number of KYC audit events recorded.
+;; @return (response uint) An (ok) response containing the total count of audit events.
 (define-read-only (get-audit-event-count)
   (ok (var-get audit-event-counter))
 )

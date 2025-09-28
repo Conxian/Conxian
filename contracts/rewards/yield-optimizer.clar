@@ -34,12 +34,19 @@
 })
 
 ;; === ADMIN FUNCTIONS ===
+;; @desc Sets the contract administrator.
+;; @param new-admin The principal of the new administrator.
+;; @returns An `(ok bool)` result indicating success, or an error.
 (define-public (set-admin (new-admin principal))
   (begin
     (asserts! (is-eq tx-sender (var-get admin)) ERR_UNAUTHORIZED)
     (var-set admin new-admin)
     (ok true)))
 
+;; @desc Sets the vault and metrics contracts.
+;; @param vault The principal of the vault contract.
+;; @param metrics The principal of the metrics contract.
+;; @returns An `(ok bool)` result indicating success, or an error.
 (define-public (set-contracts (vault principal) (metrics principal))
   (begin
     (asserts! (is-eq tx-sender (var-get admin)) ERR_UNAUTHORIZED)
@@ -60,7 +67,11 @@
       (var-set strategy-count (+ id u1))
       (ok id))))
 
-(define-public (toggle-strategy-status (id uint) (is-active bool))
+;; @desc Toggles the active status of a registered strategy.
+;; @param id (uint) The ID of the strategy to toggle.
+;; @param is-active (bool) The new active status (true for active, false for inactive).
+;; @return (response bool) An (ok true) response if the status was successfully toggled, or an error if unauthorized or the strategy is not found.
+(define-public (toggle-strategy-status (id uint) (is-active bool)))
   (begin
     (asserts! (is-eq tx-sender (var-get admin)) ERR_UNAUTHORIZED)
     (let ((strategy-data (unwrap! (map-get? strategies id) (err ERR_STRATEGY_NOT_FOUND))))
@@ -68,7 +79,10 @@
       (ok true))))
 
 ;; === CORE OPTIMIZER LOGIC ===
-(define-public (optimize-and-rebalance (asset <sip-010-ft-trait>))
+;; @desc Optimizes and rebalances the allocation of a specific asset across strategies.
+;; @param asset (<sip-010-ft-trait>) The asset trait to optimize.
+;; @return (response bool) An (ok true) response if the optimization and rebalancing was successful, or an error otherwise.
+(define-public (optimize-and-rebalance (asset <sip-010-ft-trait>)))
   (let ((current-allocation (default-to { strategy: (as-contract tx-sender), amount: u0 } (map-get? asset-allocation (contract-of asset))))
         (current-strategy (get strategy current-allocation))
         (best-strategy-info (find-best-strategy)))
@@ -103,6 +117,8 @@
 )
 
 ;; === PRIVATE HELPERS ===
+;; @desc Finds the best active strategy based on APY.
+;; @return (response { contract: principal, apy: uint }) A response containing the contract principal of the best strategy and its APY.
 (define-private (find-best-strategy)
   (let ((metrics (var-get metrics-contract))
         (count (var-get strategy-count)))
@@ -111,6 +127,7 @@
         (match (map-get? strategies id)
           strategy-data
           (if (get is-active strategy-data)
+            ;; Assuming get-apy is a call to get-metric with a specific metric-id for APY
             (let ((apy (unwrap! (contract-call? metrics get-apy (get contract strategy-data)) ERR_METRICS_CALL_FAILED)))
               (if (> apy (get apy memo))
                 { contract: (get contract strategy-data), apy: apy }

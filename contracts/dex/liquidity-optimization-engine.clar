@@ -280,6 +280,14 @@
     (ok u3))) ;; Simplified implementation
 
 ;; === AUTOMATED REBALANCING ===
+;; @desc Creates a new automated rebalancing rule.
+;; @param rule-name The name of the rebalancing rule.
+;; @param source-pool The source pool from which liquidity will be rebalanced.
+;; @param target-pools A list of target pools to which liquidity can be moved, along with their weights.
+;; @param trigger-condition The condition that triggers the rebalancing (e.g., "UTILIZATION_DEVIATION").
+;; @param trigger-threshold The threshold value for the trigger condition.
+;; @param max-rebalance-amount The maximum amount of liquidity that can be rebalanced in a single execution.
+;; @returns An `(ok uint)` result containing the ID of the newly created rule, or an error.
 (define-public (create-rebalancing-rule
   (rule-name (string-ascii 50))
   (source-pool {pool-id: uint, asset: principal})
@@ -313,6 +321,10 @@
     
     (ok rule-id)))
 
+;; @desc Internal function to check if any rebalancing rules should be triggered for a given pool.
+;; @param pool-id The ID of the pool to check.
+;; @param asset The asset of the pool to check.
+;; @returns An `(ok bool)` result indicating if rebalancing was triggered, or an error.
 (define-private (internal-check-rebalance-triggers (pool-id uint) (asset principal))
   ;; Check if any rebalancing rules should be triggered
   (let ((pool (unwrap! (map-get? liquidity-pools {pool-id: pool-id, asset: asset}) ERR_POOL_NOT_FOUND)))
@@ -340,9 +352,17 @@
             (ok true)))))))
 
 ;; Public wrapper to align expected two-argument usage across contracts
+;; @desc Public wrapper to align expected two-argument usage across contracts for checking rebalance triggers.
+;; @param pool-id The ID of the pool to check.
+;; @param asset The asset of the pool to check.
+;; @returns An `(ok bool)` result indicating if rebalancing was triggered, or an error.
 (define-public (check-rebalance-triggers (pool-id uint) (asset principal))
   (internal-check-rebalance-triggers pool-id asset))
 
+;; @desc Triggers emergency mode for a given pool, typically due to critically low liquidity.
+;; @param pool-id The ID of the pool to put into emergency mode.
+;; @param asset The asset of the pool.
+;; @returns An `(ok bool)` result indicating success, or an error.
 (define-private (trigger-emergency-mode (pool-id uint) (asset principal))
   (let ((pool (unwrap! (map-get? liquidity-pools {pool-id: pool-id, asset: asset}) ERR_POOL_NOT_FOUND)))
     ;; Enable emergency mode
@@ -355,6 +375,10 @@
     (print (tuple (event "emergency-mode-activated") (pool-id pool-id)))
     (ok true)))
 
+;; @desc Executes the rebalancing of a pool based on its current utilization and target utilization.
+;; @param pool-id The ID of the pool to rebalance.
+;; @param asset The asset of the pool to rebalance.
+;; @returns An `(ok bool)` result indicating success, or an error.
 (define-private (execute-pool-rebalance (pool-id uint) (asset principal))
   (let ((pool (unwrap! (map-get? liquidity-pools {pool-id: pool-id, asset: asset}) ERR_POOL_NOT_FOUND)))
     

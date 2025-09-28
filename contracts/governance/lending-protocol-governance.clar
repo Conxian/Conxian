@@ -191,6 +191,12 @@
     (ok proposal-id)))
 
 ;; Treasury spending proposal
+;; @desc Proposes a treasury spending action.
+;; @param recipient The principal address to receive the funds.
+;; @param amount The amount of tokens to be transferred.
+;; @param token The principal address of the token contract.
+;; @param purpose A description of the purpose for the spending.
+;; @return (response uint uint) A response tuple indicating success or failure, with the proposal ID on success.
 (define-public (propose-treasury-spending
   (recipient principal)
   (amount uint)
@@ -213,6 +219,11 @@
       (ok proposal-id))))
 
 ;; Vote on a proposal
+;; @desc Allows a user to cast a vote on an active proposal.
+;; @param proposal-id The ID of the proposal to vote on.
+;; @param support A uint representing the vote: u1 for 'for', u0 for 'against', u2 for 'abstain'.
+;; @param reason An optional string providing a reason for the vote.
+;; @return (response uint uint) A response tuple indicating success or failure, with the voting power used on success.
 (define-public (vote (proposal-id uint) (support uint) (reason (optional (string-utf8 200))))
   (let ((proposal (unwrap! (map-get? proposals proposal-id) ERR_PROPOSAL_NOT_FOUND))
         (voter tx-sender)
@@ -260,6 +271,9 @@
           (ok voting-power))))))
 
 ;; Queue a successful proposal for execution
+;; @desc Queues a successful proposal for execution after a defined timelock.
+;; @param proposal-id The ID of the proposal to queue.
+;; @return (response uint uint) A response tuple indicating success or failure, with the block number when the proposal will be queued on success.
 (define-public (queue-proposal (proposal-id uint))
   (let ((proposal (unwrap! (map-get? proposals proposal-id) ERR_PROPOSAL_NOT_FOUND))))
     
@@ -288,6 +302,9 @@
           (ok queue-block))))))
 
 ;; Execute a queued proposal
+;; @desc Executes a queued proposal.
+;; @param proposal-id The ID of the proposal to execute.
+;; @return (response bool bool) A response tuple indicating success or failure.
 (define-public (execute-proposal (proposal-id uint))
   (let ((proposal (unwrap! (map-get? proposals proposal-id) ERR_PROPOSAL_NOT_FOUND))))
     
@@ -316,6 +333,10 @@
           
           (ok true))))))
 
+;; @desc Executes a parameter change proposal.
+;; @param proposal-id The ID of the parameter change proposal.
+;; @param proposal A tuple containing the details of the proposal.
+;; @return (response bool bool) A response tuple indicating success or failure.
 (define-private (execute-parameter-change (proposal-id uint) (proposal (tuple
     (proposer principal) (title (string-ascii 100)) (description (string-utf8 500))
     (proposal-type uint) (target-contract (optional principal)) (function-name (optional (string-ascii 50)))
@@ -330,6 +351,9 @@
     (as-contract (contract-call? target-contract function-name params))
   ))
 
+;; @desc Executes a treasury spending proposal.
+;; @param proposal-id The ID of the treasury spending proposal.
+;; @return (response bool bool) A response tuple indicating success or failure.
 (define-private (execute-treasury-proposal (proposal-id uint))
   (let ((treasury-info (unwrap! (map-get? treasury-proposals proposal-id) ERR_INVALID_PARAMETERS))))
     (let ((token-contract (get token treasury-info))
@@ -344,6 +368,9 @@
 ;; Note: True delegation logic should be handled within the cxvg-utility contract
 ;; to keep vote-escrow logic self-contained. This function can be a placeholder
 ;; or a trigger if the utility contract requires it.
+;; @desc Delegates voting power to another principal.
+;; @param delegatee The principal address to delegate voting power to.
+;; @return (response bool bool) A response tuple indicating success or failure.
 (define-public (delegate (delegatee principal))
   (let ((utility-contract (var-get cxvg-utility-contract))))
     ;; This call assumes the utility contract has a `delegate` function.
@@ -352,11 +379,18 @@
   ))
 
 ;; === VOTING POWER ===
+;; @desc Retrieves the current voting power of a user.
+;; @param user The principal address of the user.
+;; @return (response uint uint) The voting power of the user.
 (define-read-only (get-voting-power (user principal))
   (get-voting-power-at user stacks-block-height))
 
 ;; Fetches the voting power of a user at a specific block height
 ;; by calling the cxvg-utility contract.
+;; @desc Fetches the voting power of a user at a specific block height.
+;; @param user The principal address of the user.
+;; @param at-height The block height at which to retrieve the voting power.
+;; @return (response uint uint) The voting power of the user at the specified block height.
 (define-read-only (get-voting-power-at (user principal) (at-height uint))
   (let ((utility-contract (var-get cxvg-utility-contract))))
     (unwrap-panic (contract-call? utility-contract get-voting-power-at user at-height))
@@ -364,6 +398,10 @@
 
 ;; Takes a snapshot of a user\'s current voting power for a given block height.
 ;; This is crucial for proposals to use the voting power from when the proposal was created.
+;; @desc Takes a snapshot of a user's current voting power for a given block height.
+;; @param user The principal address of the user.
+;; @param at-height The block height at which to take the snapshot.
+;; @return (response bool bool) A response tuple indicating success or failure.
 (define-private (snapshot-voting-power (user principal) (at-height uint))
   (let ((voting-power (get-voting-power-at user at-height))))
     (map-set voting-power-snapshots { user: user, stacks-block-height: at-height } voting-power)
@@ -371,6 +409,13 @@
   ))
 
 ;; === ADMIN FUNCTIONS ===
+;; @desc Updates the governance parameters of the protocol.
+;; @param voting-delay The number of blocks before voting begins.
+;; @param voting-period The number of blocks for which voting is open.
+;; @param quorum-threshold The minimum total votes required for a proposal to pass.
+;; @param proposal-threshold The minimum voting power required to create a proposal.
+;; @param execution-delay The number of blocks a successful proposal is queued before execution.
+;; @return (response bool bool) A response tuple indicating success or failure.
 (define-public (update-governance-params 
   (voting-delay uint) 
   (voting-period uint) 
@@ -397,6 +442,10 @@
     (ok true)
   ))
 
+;; @desc Initializes the governance contract with the governance token and timelock address.
+;; @param gov-token The principal address of the governance token.
+;; @param timelock The principal address of the timelock contract.
+;; @return (response bool bool) A response tuple indicating success or failure.
 (define-public (initialize (gov-token principal) (timelock principal))
   (begin
     (asserts! (contract-call? .access-control has-role ROLE_GOVERNOR (as-contract tx-sender)) ERR_UNAUTHORIZED)
@@ -405,6 +454,9 @@
     (ok true)
   ))
 
+;; @desc Cancels an active or pending proposal.
+;; @param proposal-id The ID of the proposal to cancel.
+;; @return (response bool bool) A response tuple indicating success or failure.
 (define-public (cancel-proposal (proposal-id uint))
   (let ((proposal (unwrap! (map-get? proposals proposal-id) ERR_PROPOSAL_NOT_FOUND))))
     (begin
@@ -428,6 +480,9 @@
       (ok true))))
 
 ;; Emergency functions
+;; @desc Allows a guardian to emergency cancel a proposal.
+;; @param proposal-id The ID of the proposal to emergency cancel.
+;; @return (response bool bool) A response tuple indicating success or failure.
 (define-public (emergency-cancel (proposal-id uint))
   (let ((proposal (unwrap! (map-get? proposals proposal-id) ERR_PROPOSAL_NOT_FOUND))))
     (asserts! (contract-call? .access-control has-role ROLE_GUARDIAN tx-sender) ERR_UNAUTHORIZED)
@@ -437,6 +492,10 @@
     (ok true)
   ))
 
+;; @desc Allows a guardian to emergency execute a function on a target contract.
+;; @param target-contract The principal address of the target contract.
+;; @param function-name The name of the function to execute.
+;; @return (response bool bool) A response tuple indicating success or failure.
 (define-public (emergency-execute (target-contract principal) (function-name (string-ascii 50)))
   (begin
     (asserts! (contract-call? .access-control has-role ROLE_GUARDIAN tx-sender) ERR_UNAUTHORIZED)

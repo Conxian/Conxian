@@ -215,8 +215,14 @@
 )
 
 ;; Gets the default pool for a given pair of tokens
-(define-read-only (get-pool (token-a principal) (token-b principal))
-  (get-pool-by-type token-a token-b (var-get default-pool-type))
+(define-public (get-pool (token-a <sip-010-ft-trait>) (token-b <sip-010-ft-trait>) (pool-type (string-ascii 64)))
+  (let ((normalized-pair (unwrap-panic (normalize-token-pair token-a token-b))))
+    (ok (map-get? pools { 
+      token-a: (get token-a normalized-pair), 
+      token-b: (get token-b normalized-pair),
+      pool-type: pool-type
+    }))
+  )
 )
 
 ;; Gets all pools for a given pair of tokens
@@ -296,7 +302,7 @@
 )
 
 ;; Register a pool implementation for a specific pool type
-(define-public (register-pool-implementation (pool-type uint) (implementation principal))
+(define-public (register-pool-implementation (pool-type (string-ascii 64)) (implementation principal))
   (begin
     (try! (check-is-owner))
     (map-set pool-implementations pool-type implementation)
