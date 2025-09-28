@@ -41,3 +41,21 @@
     (contract-call? (var-get new-dex-contract) remove-liquidity new-token-a new-token-b percentage)
   )
 )
+
+(define-public (set-new-dex-contract (new-contract principal))
+  (begin
+    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
+    (var-set new-dex-contract new-contract)
+    (ok true)
+  )
+)
+
+(define-public (migrate-liquidity (old-pool-token principal) (new-pool-token principal) (amount uint))
+  (begin
+    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
+    ;; Placeholder for actual migration logic
+    ;; This would involve burning old LP tokens and minting new ones in the new pool
+    (print { message: "Migrating liquidity", old-pool: old-pool-token, new-pool: new-pool-token, amount: amount })
+    (ok true)
+  )
+)

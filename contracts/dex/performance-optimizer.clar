@@ -49,3 +49,22 @@
     ) txs total-gas)
   )
 )
+
+(define-public (optimize-gas-usage (method (string-ascii 256)) (optimization-strategy (string-ascii 256)))
+  (begin
+    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
+    ;; Placeholder for gas optimization logic
+    ;; This could involve reordering operations, using more efficient Clarity functions,
+    ;; or suggesting alternative contract calls.
+    (print { method: method, strategy: optimization-strategy, status: "optimization-suggested" })
+    (ok true)
+  )
+)
+
+(define-read-only (get-system-health)
+  (ok { block-time: u5000, ;; Placeholder: average block time in ms
+        tx-throughput: u100, ;; Placeholder: transactions per block
+        system-health: "green", ;; Placeholder: overall system health status
+        gas-usage-average: u1000 ;; Placeholder: average gas usage per transaction
+      })
+)

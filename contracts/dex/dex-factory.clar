@@ -1,9 +1,9 @@
-(use-trait utils-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.utils-trait)
-(use-trait access-control-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.access-control-trait)
-(use-trait sip-010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
-(use-trait factory-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.factory-trait)
-(use-trait circuit-breaker-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.circuit-breaker-trait)
-(use-trait pool-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.pool-trait)
+(use-trait utils-trait .all-traits.utils-trait)
+(use-trait access-control-trait .all-traits.access-control-trait)
+(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
+(use-trait factory-trait .all-traits.factory-trait)
+(use-trait circuit-breaker-trait .all-traits.circuit-breaker-trait)
+(use-trait pool-trait .all-traits.pool-trait)
 
 (impl-trait .factory-trait)
 
@@ -359,4 +359,64 @@
 
 (define-read-only (get-owner)
   (ok (var-get contract-owner))
+)
+
+
+(define-public (create-pool (
+  token-a principal)
+  (token-b principal)
+  (fee-bps uint)
+  (pool-type uint)
+)
+  (let (
+    (sorted-tokens (unwrap! (normalize-token-pair token-a token-b) (err ERR_INVALID_TOKENS)))
+    (normalized-token-a (get token-a sorted-tokens))
+    (normalized-token-b (get token-b sorted-tokens))
+    (pool-key { token-a: normalized-token-a, token-b: normalized-token-b, pool-type: pool-type })
+  )
+    (asserts! (is-none (map-get? pools pool-key)) ERR_POOL_EXISTS)
+    (asserts! (not (is-err (check-circuit-breaker))) ERR_CIRCUIT_OPEN)
+
+    (let (
+      (pool-implementation (unwrap! (map-get? pool-implementations pool-type) ERR_IMPLEMENTATION_NOT_FOUND))
+      (new-pool-id (+ (var-get pool-count) u1))
+      (deploy-result (as-contract (contract-call? pool-implementation deploy-pool normalized-token-a normalized-token-b fee-bps new-pool-id)))
+      (new-pool-address (unwrap! deploy-result ERR_SWAP_FAILED)) ;; Assuming deploy-pool returns the new pool principal
+    )
+      (map-set pools pool-key new-pool-address)
+      (map-set pool-info new-pool-address {
+        token-a: normalized-token-a,
+        token-b: normalized-token-b,
+        fee-bps: fee-bps,
+        pool-type: pool-type,
+        created-at: block-height
+      })
+      (var-set pool-count new-pool-id)
+      (ok new-pool-address)
+    )
+  )
+)
+
+(define-public (set-pool-implementation (pool-type uint) (implementation-contract principal))
+  (begin
+    (unwrap! (check-is-owner) (err ERR_UNAUTHORIZED))
+    (map-set pool-implementations pool-type implementation-contract)
+    (ok true)
+  )
+)
+
+(define-public (set-pool-type-info (pool-type uint) (name (string-ascii 32)) (description (string-ascii 128)) (is-active bool))
+  (begin
+    (unwrap! (check-is-owner) (err ERR_UNAUTHORIZED))
+    (map-set pool-type-info pool-type { name: name, description: description, is-active: is-active })
+    (ok true)
+  )
+)
+
+(define-read-only (get-pool-implementation (pool-type uint))
+  (ok (map-get? pool-implementations pool-type))
+)
+
+(define-read-only (get-pool-type-info (pool-type uint))
+  (ok (map-get? pool-type-info pool-type))
 )

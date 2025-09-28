@@ -3,17 +3,17 @@
 ;; It is controlled by the yield-optimizer contract.
 
 ;; --- Traits ---
-(use-trait sip-010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
-(use-trait vault-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.vault-trait)
-(use-trait vault-admin-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.vault-admin-trait)
-(use-trait strategy-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.strategy-trait)
-(use-trait lending-system-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.lending-system-trait)
-(use-trait ownable-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.ownable-trait)
-(use-trait pausable-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.pausable-trait)
-(use-trait circuit-breaker-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.circuit-breaker-trait)
-(use-trait oracle-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.oracle-trait)
-(use-trait dimensional-oracle-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.dimensional-oracle-trait)
-(use-trait all-traits 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.all-traits)
+(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
+(use-trait vault-trait .all-traits.vault-trait)
+(use-trait vault-admin-trait .all-traits.vault-admin-trait)
+(use-trait strategy-trait .all-traits.strategy-trait)
+(use-trait lending-system-trait .all-traits.lending-system-trait)
+(use-trait ownable-trait .all-traits.ownable-trait)
+(use-trait pausable-trait .all-traits.pausable-trait)
+(use-trait circuit-breaker-trait .all-traits.circuit-breaker-trait)
+(use-trait oracle-trait .all-traits.oracle-trait)
+(use-trait dimensional-oracle-trait .all-traits.dimensional-oracle-trait)
+(use-trait all-traits .all-traits.all-traits)
 
 (impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.vault-trait)
 (impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.vault-admin-trait)
@@ -135,3 +135,5 @@
 ;; === READ-ONLY FUNCTIONS ===
 (define-read-only (get-total-balance (asset principal))
   (ok (default-to u0 (map-get? total-balances asset))))
+
+(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)

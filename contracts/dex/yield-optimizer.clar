@@ -1,5 +1,5 @@
 ;; Conxian Yield Optimizer - Automated yield strategies
-(use-trait sip-010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
+(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
 (use-trait strategy-trait .traits.strategy-trait)
 (use-trait circuit-breaker-trait .traits.circuit-breaker-trait)
 
@@ -29,8 +29,43 @@
 
 (define-private (check-circuit-breaker)
   (match (var-get circuit-breaker)
-    (cb (contract-call? cb is-tripped))
-    (ok false)
+    (cb (let ((is-tripped (try! (contract-call? cb is-circuit-open))))
+          (if is-tripped (err ERR_CIRCUIT_OPEN) (ok true))))
+    (ok true)
+  )
+)
+
+(define-public (auto-compound (strategy-id uint) (token principal))
+  (begin
+    (try! (check-circuit-breaker))
+    (let ((strategy (unwrap! (map-get? strategies strategy-id) ERR_STRATEGY_NOT_FOUND)))
+      ;; In a real scenario, this would claim rewards and re-deposit them.
+      ;; For now, we'll just print a notification.
+      (print { notification: "Auto-compounding rewards", strategy-id: strategy-id, token: token })
+      (ok true)
+    )
+  )
+)
+
+(define-public (rebalance (strategy-id uint))
+  (begin
+    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
+    (let ((strategy (unwrap! (map-get? strategies strategy-id) ERR_STRATEGY_NOT_FOUND)))
+      ;; Placeholder for advanced rebalancing logic:
+      ;; 1. Evaluate current yield and risk of the strategy.
+      ;; 2. Compare with other available strategies.
+      ;; 3. If necessary, withdraw from current strategy and deposit into a new one.
+      (print { notification: "Rebalancing strategy", strategy-id: strategy-id, current-risk: (get risk-level strategy), current-yield: (get yield-target strategy) })
+      (try! (as-contract (contract-call? (get contract strategy) rebalance)))
+      (ok true)
+    )
+  )
+)
+
+(define-public (get-strategy-performance (strategy-id uint))
+  (let ((strategy (unwrap! (map-get? strategies strategy-id) ERR_STRATEGY_NOT_FOUND)))
+    ;; Placeholder for actual performance metrics
+    (ok { yield: (get yield-target strategy), risk: (get risk-level strategy), uptime: u9999, aum: u1000000 })
   )
 )
 

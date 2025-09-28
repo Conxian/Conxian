@@ -3,7 +3,7 @@
 ;; Provides ERC-721 style functionality for position management
 
 ;; Traits
-(use-trait sip-010-ft-trait .sip-010-ft-trait)
+(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
 (use-trait position-nft-trait .position-nft-trait)
 
 ;; Implementation

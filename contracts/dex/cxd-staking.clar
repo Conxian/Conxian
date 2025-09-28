@@ -6,7 +6,7 @@
 (define-constant TRAIT_REGISTRY .all-traits)
 
 ;; Resolve traits using the trait registry
-(use-trait sip-010-ft-trait .traits.sip-010-ft-trait)
+(use-trait sip-010-ft-trait '.all-traits.sip-010-ft-trait)
 (use-trait access-control-trait .traits.access-control-trait)
 (use-trait staking-trait .traits.staking-trait)
 (use-trait circuit-breaker-trait .traits.circuit-breaker-trait)

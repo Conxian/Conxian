@@ -114,22 +114,46 @@
 
 (define-private (check-circuit-breaker)
     (match (var-get circuit-breaker)
-        (some breaker) (let ((is-tripped (try! (contract-call? breaker is-circuit-open)))) (asserts! (not is-tripped) ERR_CIRCUIT_OPEN))
-        (ok true) ;; No breaker, no check needed
+        (breaker (let ((is-tripped (try! (contract-call? breaker is-circuit-open))))
+              (if is-tripped (err ERR_CIRCUIT_OPEN) (ok true))))
+        (ok true)
+    )
+)
+
+(define-private (check-verification (account-owner principal))
+    (match (var-get compliance-hook)
+        (hook (contract-call? hook check-kyc-status account-owner))
+        (ok true)
     )
 )
 
 (define-public (execute-twap-order (order-id uint))
     (begin
         (try! (check-circuit-breaker))
-        (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
-        (let ((order (unwrap! (map-get? twap-orders order-id) ERR_ORDER_NOT_FOUND)))
-            (asserts! (not (get executed order)) ERR_INVALID_ORDER)
-            (asserts! (and (>= block-height (get start-time order)) (<= block-height (get end-time order))) ERR_INVALID_ORDER)
-            ;; In a real implementation, this would interact with the DEX router to execute a portion of the swap
-            ;; For now, we'll just mark it as executed
-            (map-set twap-orders order-id (merge order { executed: true }))
+        (let (
+          (order (unwrap! (map-get? twap-orders order-id) ERR_ORDER_NOT_FOUND))
+          (account (unwrap! (map-get? institutional-accounts (get account-id order)) ERR_ACCOUNT_NOT_FOUND))
+        )
+          (asserts! (not (get executed order)) ERR_ORDER_NOT_FOUND) ;; Assuming executed means fully processed
+          (asserts! (is-eq tx-sender (get owner account)) ERR_UNAUTHORIZED)
+          (try! (check-verification (get owner account)))
+    
+          (let (
+            (duration (- (get end-time order) (get start-time order)))
+            (elapsed (- block-height (get start-time order)))
+            (amount-to-execute (/ (get amount-in order) duration))
+          )
+            (asserts! (>= elapsed u0) ERR_INVALID_ORDER)
+            (asserts! (<= elapsed duration) ERR_INVALID_ORDER)
+    
+            ;; Execute a portion of the swap
+            ;; This is a simplified execution. In a real scenario, this would interact with a DEX router.
+            (print { notification: "TWAP order executed", order-id: order-id, amount: amount-to-execute })
+    
+            ;; Update the order (e.g., remaining amount, mark as executed if fully done)
+            (map-set twap-orders order-id (merge order { executed: (if (>= elapsed duration) true false) }))
             (ok true)
+          )
         )
     )
 )

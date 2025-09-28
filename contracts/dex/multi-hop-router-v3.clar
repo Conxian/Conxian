@@ -3,7 +3,7 @@
 ;; Supports multiple pool types and complex multi-hop swaps
 
 ;; Traits
-(use-trait sip-010-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
+(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
 (use-trait pool-trait .all-traits.pool-trait)
 (use-trait factory-trait .all-traits.factory-trait)
 
@@ -597,4 +597,145 @@
 )
   ;; Quote exact output for multi-hop (no execution)
   (unwrap-panic (element-at (get-amounts-in amount-out path) u0))
+)
+
+(define-public (swap-exact-in (
+  token-in <sip-010-trait>)
+  (amount-in uint)
+  (token-out <sip-010-trait>)
+  (amount-out-min uint)
+  (path (list 20 {pool-id uint, token-in principal, token-out principal}))
+)
+  (let (
+    (current-amount amount-in)
+    (last-token (contract-of token-in))
+    (final-amount-out u0)
+  )
+    (asserts! (<= (len path) MAX_HOPS) ERR_EXCESSIVE_HOPS)
+
+    (map iter-path path
+      (match (get-pool-details (get pool-id iter-path))
+        (some pool-data
+          (let (
+            (pool-contract (get pool-address pool-data))
+            (input-token (get token-in iter-path))
+            (output-token (get token-out iter-path))
+          )
+            (asserts! (is-eq last-token input-token) ERR_INVALID_PATH)
+
+            ;; Transfer token-in to the pool
+            (unwrap! (contract-call? input-token transfer current-amount tx-sender pool-contract) ERR_SWAP-FAILED)
+
+            ;; Perform swap in the pool
+            (let (
+              (swap-result (contract-call? pool-contract swap input-token output-token current-amount))
+            )
+              (asserts! (is-ok swap-result) ERR_SWAP-FAILED)
+              (let ((amount-received (unwrap-panic swap-result)))
+                (asserts! (> amount-received u0) ERR_INSUFFICIENT_OUTPUT)
+                (var-set current-amount amount-received)
+                (var-set last-token output-token)
+              )
+            )
+          )
+        )
+        (none (asserts! false ERR_POOL_NOT_FOUND))
+      )
+    )
+
+    (var-set final-amount-out current-amount)
+    (asserts! (is-eq last-token (contract-of token-out)) ERR_INVALID_PATH)
+    (asserts! (>= final-amount-out amount-out-min) ERR_INSUFFICIENT_OUTPUT)
+
+    ;; Transfer final token-out to tx-sender
+    (unwrap! (contract-call? token-out transfer final-amount-out (contract-of token-out) tx-sender) ERR_SWAP-FAILED)
+
+    (ok final-amount-out)
+  )
+)
+
+(define-public (swap-exact-out (
+  token-in <sip-010-trait>)
+  (amount-in-max uint)
+  (token-out <sip-010-trait>)
+  (amount-out uint)
+  (path (list 20 {pool-id uint, token-in principal, token-out principal}))
+)
+  (let (
+    (current-amount-out amount-out)
+    (last-token (contract-of token-out))
+    (total-amount-in u0)
+  )
+    (asserts! (<= (len path) MAX_HOPS) ERR_EXCESSIVE_HOPS)
+
+    ;; Iterate through the path in reverse for swap-exact-out
+    (map iter-path (reverse path)
+      (match (get-pool-details (get pool-id iter-path))
+        (some pool-data
+          (let (
+            (pool-contract (get pool-address pool-data))
+            (input-token (get token-in iter-path))
+            (output-token (get token-out iter-path))
+          )
+            (asserts! (is-eq last-token output-token) ERR_INVALID_PATH)
+
+            ;; Calculate amount-in required for current_amount_out
+            (let (
+              (swap-result (contract-call? pool-contract get-amount-in input-token output-token current-amount-out))
+            )
+              (asserts! (is-ok swap-result) ERR_SWAP-FAILED)
+              (let ((amount-needed (unwrap-panic swap-result)))
+                (asserts! (> amount-needed u0) ERR_INSUFFICIENT_OUTPUT)
+                (var-set total-amount-in (+ total-amount-in amount-needed))
+                (var-set current-amount-out amount-needed)
+                (var-set last-token input-token)
+              )
+            )
+          )
+        )
+        (none (asserts! false ERR_POOL_NOT_FOUND))
+      )
+    )
+
+    (asserts! (is-eq last-token (contract-of token-in)) ERR_INVALID_PATH)
+    (asserts! (<= total-amount-in amount-in-max) ERR_INSUFFICIENT_OUTPUT)
+
+    ;; Transfer token-in from tx-sender to the first pool
+    (unwrap! (contract-call? token-in transfer total-amount-in tx-sender (contract-of (element-at path u0))) ERR_SWAP-FAILED)
+
+    ;; Execute the swaps
+    (var-set current-amount-out amount-out)
+    (var-set last-token (contract-of token-out))
+    (map iter-path (reverse path)
+      (match (get-pool-details (get pool-id iter-path))
+        (some pool-data
+          (let (
+            (pool-contract (get pool-address pool-data))
+            (input-token (get token-in iter-path))
+            (output-token (get token-out iter-path))
+          )
+            (asserts! (is-eq last-token output-token) ERR_INVALID_PATH)
+
+            ;; Perform swap in the pool
+            (let (
+              (swap-result (contract-call? pool-contract swap-exact-out input-token output-token current-amount-out))
+            )
+              (asserts! (is-ok swap-result) ERR_SWAP-FAILED)
+              (let ((amount-received (unwrap-panic swap-result)))
+                (asserts! (> amount-received u0) ERR_INSUFFICIENT_OUTPUT)
+                (var-set current-amount-out amount-received)
+                (var-set last-token input-token)
+              )
+            )
+          )
+        )
+        (none (asserts! false ERR_POOL_NOT_FOUND))
+      )
+    )
+
+    ;; Transfer final token-out to tx-sender
+    (unwrap! (contract-call? token-out transfer amount-out (contract-of token-out) tx-sender) ERR_SWAP-FAILED)
+
+    (ok total-amount-in)
+  )
 )

@@ -63,3 +63,102 @@
 
 (define-public (validate-mathematical-constants)
 )
+
+
+;; ======================
+;; Square Root Function
+;; ======================
+
+(define-read-only (sqrt (n uint))
+  (if (is-eq n u0)
+    (ok u0)
+    (let (
+      (x (var-init n))
+      (y (var-init (div (+ n u1) u2)))
+    )
+      (while (> (var-get y) (var-get x))
+        (var-set x (var-get y))
+        (var-set y (div (+ (div n (var-get y)) (var-get y)) u2))
+      )
+      (ok (var-get x))
+    )
+  )
+)
+
+;; ======================
+;; Log2 Function
+;; ======================
+
+(define-read-only (log2 (n uint))
+  (if (is-eq n u0)
+    (err ERR_DIVISION_BY_ZERO) ;; Or another appropriate error
+    (let ((result u0))
+      (let ((temp n))
+        (while (> temp u1)
+          (var-set temp (div temp u2))
+          (var-set result (+ result u1))
+        )
+        (ok result)
+      )
+    )
+  )
+)
+
+;; ======================
+;; Swap Calculation Functions
+;; ======================
+
+(define-read-only (calculate-swap-amount-out-x-to-y (sqrt-price-current uint) (liquidity uint) (amount-in uint))
+  (let (
+    (numerator (* liquidity sqrt-price-current))
+    (denominator (+ numerator (* amount-in Q64)))
+    (new-sqrt-price (div numerator denominator))
+  )
+    (ok (div (* liquidity (- sqrt-price-current new-sqrt-price)) new-sqrt-price))
+  )
+)
+
+(define-read-only (calculate-new-sqrt-price-x-to-y (sqrt-price-current uint) (liquidity uint) (amount-in uint))
+  (let (
+    (numerator (* liquidity sqrt-price-current))
+    (denominator (+ numerator (* amount-in Q64)))
+  )
+    (ok (div numerator denominator))
+  )
+)
+
+(define-read-only (calculate-swap-amount-out-y-to-x (sqrt-price-current uint) (liquidity uint) (amount-in uint))
+  (let (
+    (numerator (* liquidity sqrt-price-current))
+    (denominator (+ numerator (* amount-in Q64)))
+    (new-sqrt-price (div numerator denominator))
+  )
+    (ok (div (* liquidity (- sqrt-price-current new-sqrt-price)) new-sqrt-price))
+  )
+)
+
+(define-read-only (calculate-new-sqrt-price-y-to-x (sqrt-price-current uint) (liquidity uint) (amount-in uint))
+  (let (
+    (numerator (* liquidity sqrt-price-current))
+    (denominator (+ numerator (* amount-in Q64)))
+  )
+    (ok (div numerator denominator))
+  )
+)
+
+(define-read-only (abs (x uint))
+  (ok x))
+
+
+
+
+;; ======================
+;; Constants
+;; ======================
+
+(define-constant E_FIXED 2718281828459045235)  ;; e * 1e18
+
+(define-constant AUDIT_REGISTRY (concat CONTRACT_OWNER .audit-registry))
+
+(define-public (validate-mathematical-constants)
+)

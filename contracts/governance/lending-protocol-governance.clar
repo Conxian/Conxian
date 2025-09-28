@@ -4,6 +4,7 @@
 
 ;; --- Traits ---
 (use-trait access-control-trait .all-traits.access-control-trait)
+(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
 (impl-trait .all-traits.access-control-trait)
 (define-constant TRAIT_REGISTRY .trait-registry)
 

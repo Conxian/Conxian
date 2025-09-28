@@ -4,7 +4,7 @@
 ;; --- Traits ---
 (use-trait oracle-trait .all-traits.oracle-trait)
 (use-trait lending-system-trait .all-traits.lending-system-trait)
-(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
+(use-trait sip-010-ft-trait '.all-traits.sip-010-ft-trait)
 (use-trait access-control-trait .all-traits.access-control-trait)
 (use-trait pool-trait .all-traits.pool-trait)
 (use-trait flash-loan-receiver-trait .all-traits.flash-loan-receiver-trait)

@@ -3,7 +3,7 @@
 ;; Enhanced with integration hooks for staking, revenue distribution, and system monitoring
 
 ;; --- Traits ---
-(use-trait sip-010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
+(use-trait sip-010-ft-trait '.all-traits.sip-010-ft-trait)
 (use-trait ownable-trait ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.ownable-trait)
 
 ;; Implement required traits
@@ -381,3 +381,4 @@
     revenue-distributor: (var-get revenue-distributor-contract),
     emission-controller: (var-get emission-controller-contract)
   })
+
