@@ -5,7 +5,7 @@
 (use-trait sip-010-ft-trait '.all-traits.sip-010-ft-trait)
 
 ;; --- Traits ---
-(use-trait lending-system-trait .all-traits.lending-system-trait)
+(use-trait lending-system-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.lending-system-trait)
 
 ;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED (err u2001))
