@@ -473,7 +473,7 @@ plan:
             contract-name: vault
             expected-sender: ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6
             cost: 65890
-            path: "contracts\\vault.clar"
+            path: "contracts\\dex\\vault.clar"
             anchor-block-only: true
             clarity-version: 1
         - contract-publish:

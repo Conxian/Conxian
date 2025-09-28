@@ -277,4 +277,3 @@
     protocol-monitor: (var-get protocol-monitor)
   }
 )
-(use-trait sip-010-ft-trait '.all-traits.sip-010-ft-trait)
