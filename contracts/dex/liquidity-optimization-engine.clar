@@ -258,7 +258,7 @@
       
       (print (tuple (event "optimization-executed") (strategy-id strategy-id) (result optimization-result)))
       
-      (ok optimization-result)))))
+      (ok optimization-result))))
 
 ;; === OPTIMIZATION ALGORITHMS ===
 (define-private (optimize-for-yield (pools (list 10 {pool-id: uint, asset: principal})))
@@ -286,7 +286,7 @@
   (target-pools (list 5 {pool-id: uint, asset: principal, weight: uint}))
   (trigger-condition (string-ascii 30))
   (trigger-threshold uint)
-  (max-rebalance-amount uint)))
+  (max-rebalance-amount uint))
   
   (let ((rule-id (var-get next-rule-id)))
     (asserts! (is-admin) ERR_UNAUTHORIZED)
@@ -313,7 +313,7 @@
     
     (ok rule-id)))
 
-(define-private (internal-check-rebalance-triggers (pool-id uint) (asset principal)))
+(define-private (internal-check-rebalance-triggers (pool-id uint) (asset principal))
   ;; Check if any rebalancing rules should be triggered
   (let ((pool (unwrap! (map-get? liquidity-pools {pool-id: pool-id, asset: asset}) ERR_POOL_NOT_FOUND)))
     
@@ -402,7 +402,7 @@
     ;; This would compare prices/yields across pools to find arbitrage
 
     (print (tuple (event "arbitrage-scan-completed") (opportunities-found u0)))
-    (ok u0))) ;; Return number of opportunities found
+    (ok u0)))
 
 ;; === LIQUIDITY PROVIDER FUNCTIONS ===
 (define-public (add-liquidity-provider
@@ -498,11 +498,11 @@
     (print (tuple (event "system-emergency-pause") (block block-height)))
     (ok true)))
 
-(define-public (emergency-unpause)
+(define-public (emergency-resume)
   (begin
     (asserts! (is-admin) ERR_UNAUTHORIZED)
     (var-set system-paused false)
-    (print (tuple (event "system-emergency-unpause") (block block-height)))
+    (print (tuple (event "system-emergency-resume") (block block-height)))
     (ok true)))
 
 ;; Bulk operations for efficiency

@@ -259,7 +259,7 @@
           (ok voting-power))))))
 
 ;; Queue a successful proposal for execution
-(define-public (queue-proposal (proposal-id uint)))
+(define-public (queue-proposal (proposal-id uint))
   (let ((proposal (unwrap! (map-get? proposals proposal-id) ERR_PROPOSAL_NOT_FOUND))))
     
     (begin
@@ -287,7 +287,7 @@
           (ok queue-block))))))
 
 ;; Execute a queued proposal
-(define-public (execute-proposal (proposal-id uint)))
+(define-public (execute-proposal (proposal-id uint))
   (let ((proposal (unwrap! (map-get? proposals proposal-id) ERR_PROPOSAL_NOT_FOUND))))
     
     (begin
@@ -320,16 +320,16 @@
     (proposal-type uint) (target-contract (optional principal)) (function-name (optional (string-ascii 50)))
     (parameters (optional (list 10 uint))) (for-votes uint) (against-votes uint) (abstain-votes uint)
     (start-block uint) (end-block uint) (queue-block (optional uint)) (execution-block (optional uint))
-    (state uint) (created-at uint)))))
+    (state uint) (created-at uint)))
   (let ((target-contract (unwrap! (get target-contract proposal) (err ERR_INVALID_PARAMETERS)))
         (function-name (unwrap! (get function-name proposal) (err ERR_INVALID_PARAMETERS)))
-        (params (unwrap! (get parameters proposal) (err ERR_INVALID_PARAMETERS)))))
+        (params (unwrap! (get parameters proposal) (err ERR_INVALID_PARAMETERS))))
     ;; This is a generic execution call. It is powerful and requires that the
     ;; target function has appropriate access control (i.e., only callable by this governance contract).
     (as-contract (contract-call? target-contract function-name params))
   ))
 
-(define-private (execute-treasury-proposal (proposal-id uint)))
+(define-private (execute-treasury-proposal (proposal-id uint))
   (let ((treasury-info (unwrap! (map-get? treasury-proposals proposal-id) ERR_INVALID_PARAMETERS))))
     (let ((token-contract (get token treasury-info))
           (amount (get amount treasury-info))
@@ -343,7 +343,7 @@
 ;; Note: True delegation logic should be handled within the cxvg-utility contract
 ;; to keep vote-escrow logic self-contained. This function can be a placeholder
 ;; or a trigger if the utility contract requires it.
-(define-public (delegate (delegatee principal)))
+(define-public (delegate (delegatee principal))
   (let ((utility-contract (var-get cxvg-utility-contract))))
     ;; This call assumes the utility contract has a `delegate` function.
     ;; If not, this function is a NO-OP.
@@ -351,20 +351,19 @@
   ))
 
 ;; === VOTING POWER ===
-(define-read-only (get-voting-power (user principal)))
-  (get-voting-power-at user stacks-block-height)
-)
+(define-read-only (get-voting-power (user principal))
+  (get-voting-power-at user stacks-block-height))
 
 ;; Fetches the voting power of a user at a specific block height
 ;; by calling the cxvg-utility contract.
-(define-read-only (get-voting-power-at (user principal) (at-height uint)))
+(define-read-only (get-voting-power-at (user principal) (at-height uint))
   (let ((utility-contract (var-get cxvg-utility-contract))))
     (unwrap-panic (contract-call? utility-contract get-voting-power-at user at-height))
   ))
 
 ;; Takes a snapshot of a user\'s current voting power for a given block height.
 ;; This is crucial for proposals to use the voting power from when the proposal was created.
-(define-private (snapshot-voting-power (user principal) (at-height uint)))
+(define-private (snapshot-voting-power (user principal) (at-height uint))
   (let ((voting-power (get-voting-power-at user at-height))))
     (map-set voting-power-snapshots { user: user, stacks-block-height: at-height } voting-power)
     (ok true)
@@ -376,7 +375,7 @@
   (voting-period uint) 
   (quorum-threshold uint) 
   (proposal-threshold uint)
-  (execution-delay uint))))
+  (execution-delay uint))
   (begin
     (asserts! (or 
       (contract-call? .access-control has-role ROLE_GOVERNOR (as-contract tx-sender))
@@ -397,7 +396,7 @@
     (ok true)
   ))
 
-(define-public (initialize (gov-token principal) (timelock principal))))
+(define-public (initialize (gov-token principal) (timelock principal))
   (begin
     (asserts! (contract-call? .access-control has-role ROLE_GOVERNOR (as-contract tx-sender)) ERR_UNAUTHORIZED)
     (var-set governance-token gov-token)
@@ -405,7 +404,7 @@
     (ok true)
   ))
 
-(define-public (cancel-proposal (proposal-id uint))))
+(define-public (cancel-proposal (proposal-id uint))
   (let ((proposal (unwrap! (map-get? proposals proposal-id) ERR_PROPOSAL_NOT_FOUND))))
     (begin
       ;; Only proposer or admin can cancel
@@ -428,7 +427,7 @@
       (ok true))))
 
 ;; Emergency functions
-(define-public (emergency-cancel (proposal-id uint))))
+(define-public (emergency-cancel (proposal-id uint))
   (let ((proposal (unwrap! (map-get? proposals proposal-id) ERR_PROPOSAL_NOT_FOUND))))
     (asserts! (contract-call? .access-control has-role ROLE_GUARDIAN tx-sender) ERR_UNAUTHORIZED)
     (map-set proposals proposal-id (merge proposal {
@@ -437,7 +436,7 @@
     (ok true)
   ))
 
-(define-public (emergency-execute (target-contract principal) (function-name (string-ascii 50))))
+(define-public (emergency-execute (target-contract principal) (function-name (string-ascii 50)))
   (begin
     (asserts! (contract-call? .access-control has-role ROLE_GUARDIAN tx-sender) ERR_UNAUTHORIZED)
     ;; Emergency execution without governance - should be very restricted

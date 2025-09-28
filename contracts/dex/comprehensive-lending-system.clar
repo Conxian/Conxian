@@ -60,17 +60,14 @@
   (let ((supported-assets (map-keys user-collateral-assets)))
     (fold
       (lambda (asset-tuple total-value)
-        (let ((asset (get asset asset-tuple))))
+        (let ((asset (get asset asset-tuple)))
           (if (default-to false (map-get? user-collateral-assets { user: user, asset: asset }))
             (let ((asset-info (unwrap! (map-get? supported-assets { asset: asset }) (err u0)))
                   (balance (default-to u0 (map-get? user-supply-balances { user: user, asset: asset })))
                   (price (get-asset-price-safe asset)))
-              (+ total-value (/ (* balance (get collateral-factor asset-info) price) (* PRECISION PRECISION)))
-            )
-            total-value
-          )
+              (+ total-value (/ (* balance (get collateral-factor asset-info) price) (* PRECISION PRECISION))))
+            total-value))
         )
-      )
       supported-assets
       u0
     )
@@ -84,10 +81,8 @@
         (let ((asset (get-in-tuple? asset-tuple { asset: principal })))
           (let ((balance (default-to u0 (map-get? user-borrow-balances { user: user, asset: asset })))
                 (price (get-asset-price-safe asset)))
-            (+ total-value (/ (* balance price) PRECISION))
-          )
+            (+ total-value (/ (* balance price) PRECISION))))
         )
-      )
       borrowed-assets
       u0
     )
@@ -106,10 +101,8 @@
         (let ((asset (get-in-tuple? asset-tuple { asset: principal })))
           (let ((balance (default-to u0 (map-get? user-borrow-balances { user: user, asset: asset })))
                 (price (get-asset-price-safe asset)))
-            (+ total-value (/ (* balance price) PRECISION))
-          )
+            (+ total-value (/ (* balance price) PRECISION))))
         )
-      )
       borrowed-assets
       u0
     )
@@ -131,17 +124,10 @@
                 (let ((collateral-value (/ (* balance (get collateral-factor asset-info) price) (* PRECISION PRECISION))))
                   (merge accumulator {
                     total-collateral-value: (+ (get total-collateral-value accumulator) collateral-value),
-                    total-threshold-value: (+ (get total-threshold-value accumulator) (/ (* collateral-value (get liquidation-threshold asset-info)) PRECISION))
-                  })
-                )
-              )
-              accumulator
-            )
-          )
-        )
+                    total-threshold-value: (+ (get total-threshold-value accumulator) (/ (* collateral-value (get liquidation-threshold asset-info)) PRECISION))})))
+              accumulator)))
         supported-assets
-        { total-collateral-value: u0, total-threshold-value: u0 }
-      )
+        { total-collateral-value: u0, total-threshold-value: u0 })
     )
   )
   (let ((collateral-value (get total-collateral-value accumulator))

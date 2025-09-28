@@ -2,7 +2,7 @@
 ;; Enterprise Loan Manager - Advanced loan management with bond issuance
 ;; Supports institutional borrowing, risk-based pricing, and automated bond creation
 
-(use-trait ft-trait .sip-010-ft-trait)
+(use-trait ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
 (use-trait lending-trait .lending-system-trait)
 
 ;; Import mathematical libraries for enterprise calculations (removed unresolved trait import)

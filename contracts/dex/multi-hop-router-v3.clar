@@ -3,7 +3,7 @@
 ;; Supports multiple pool types and complex multi-hop swaps
 
 ;; Traits
-(use-trait sip-010-trait .sip-010-ft-trait)
+(use-trait sip-010-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
 (use-trait pool-trait .all-traits.pool-trait)
 (use-trait factory-trait .all-traits.factory-trait)
 

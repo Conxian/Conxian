@@ -124,7 +124,7 @@
   (only-role ROLE_PAUSER)
 )
 
-(define-private (only-oracle-updater ()
+(define-private (only-oracle-updater)
   (only-role ROLE_ORACLE_UPDATER)
 )
 

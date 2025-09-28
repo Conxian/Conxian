@@ -107,7 +107,6 @@
   (tick-lower int)
   (tick-upper int)
   (liquidity uint)
-)
   (let ((token-id (var-get token-id-nonce)))
     (asserts! (<= token-id (var-get max-supply)) ERR_MAX_SUPPLY_REACHED)
 

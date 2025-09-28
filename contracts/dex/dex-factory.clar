@@ -1,9 +1,9 @@
-(use-trait utils-trait .utils-trait)
-(use-trait access-control-trait .access-control-trait)
-(use-trait sip-010-ft-trait .sip-010-ft-trait)
-(use-trait factory-trait .factory-trait)
-(use-trait circuit-breaker-trait .circuit-breaker-trait)
-(use-trait pool-trait .pool-trait)
+(use-trait utils-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.utils-trait)
+(use-trait access-control-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.access-control-trait)
+(use-trait sip-010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
+(use-trait factory-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.factory-trait)
+(use-trait circuit-breaker-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.circuit-breaker-trait)
+(use-trait pool-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.pool-trait)
 
 (impl-trait .factory-trait)
 
