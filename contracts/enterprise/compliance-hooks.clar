@@ -5,26 +5,90 @@
 
 (define-constant ERR_UNAUTHORIZED (err u401))
 (define-constant ERR_ACCOUNT_NOT_VERIFIED (err u403))
+(define-constant ERR_INVALID_KYC_TIER (err u404))
 
 (define-data-var contract-owner principal tx-sender)
-(define-map verified-accounts principal bool)
+(define-map verified-accounts principal { kyc-tier: uint, last-updated: uint })
+(define-map kyc-audit-trail uint { account: principal, action: uint, old-tier: uint, new-tier: uint, timestamp: uint })
+(define-data-var audit-event-counter uint u0)
+
+(define-public (set-kyc-tier (account principal) (kyc-tier uint))
+  (begin
+    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
+    (asserts! (<= kyc-tier u3) ERR_INVALID_KYC_TIER) ;; Assuming max tier is u3
+
+    (let (
+      (old-kyc-tier (default-to u0 (get kyc-tier (map-get? verified-accounts account))))
+      (event-id (+ u1 (var-get audit-event-counter)))
+    )
+      (map-set verified-accounts account { kyc-tier: kyc-tier, last-updated: block-height })
+      (map-set kyc-audit-trail event-id {
+        account: account,
+        action: u3, ;; u3 for tier update
+        old-tier: old-kyc-tier,
+        new-tier: kyc-tier,
+        timestamp: block-height
+      })
+      (var-set audit-event-counter event-id)
+      (ok true)
+    )
+  )
+)
 
 (define-public (verify-account (account principal))
   (begin
     (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
-    (map-set verified-accounts account true)
-    (ok true)
+    (let (
+      (old-kyc-tier (default-to u0 (get kyc-tier (map-get? verified-accounts account))))
+      (event-id (+ u1 (var-get audit-event-counter)))
+    )
+      (map-set verified-accounts account { kyc-tier: u1, last-updated: block-height }) ;; Default to basic tier u1 on verification
+      (map-set kyc-audit-trail event-id {
+        account: account,
+        action: u1, ;; u1 for verification
+        old-tier: old-kyc-tier,
+        new-tier: u1,
+        timestamp: block-height
+      })
+      (var-set audit-event-counter event-id)
+      (ok true)
+    )
   )
 )
 
 (define-public (unverify-account (account principal))
   (begin
     (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
-    (map-delete verified-accounts account)
-    (ok true)
+    (let (
+      (old-kyc-tier (default-to u0 (get kyc-tier (map-get? verified-accounts account))))
+      (event-id (+ u1 (var-get audit-event-counter)))
+    )
+      (map-delete verified-accounts account)
+      (map-set kyc-audit-trail event-id {
+        account: account,
+        action: u2, ;; u2 for unverification
+        old-tier: old-kyc-tier,
+        new-tier: u0,
+        timestamp: block-height
+      })
+      (var-set audit-event-counter event-id)
+      (ok true)
+    )
   )
 )
 
 (define-read-only (is-verified (account principal))
   (is-some (map-get? verified-accounts account))
+)
+
+(define-read-only (get-kyc-tier (account principal))
+  (default-to u0 (get kyc-tier (map-get? verified-accounts account)))
+)
+
+(define-read-only (get-audit-event (event-id uint))
+  (map-get? kyc-audit-trail event-id)
+)
+
+(define-read-only (get-audit-event-count)
+  (ok (var-get audit-event-counter))
 )

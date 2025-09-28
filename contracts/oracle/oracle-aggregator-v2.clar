@@ -12,6 +12,7 @@
 (define-constant ERR_INVALID_PRICE (err u6003))
 (define-constant ERR_DEVIATION_TOO_HIGH (err u6004))
 (define-constant ERR_CIRCUIT_OPEN (err u5000))
+(define-constant ERR_PRICE_MANIPULATION (err u6005))
 
 (define-constant ONE_HOUR_IN_BLOCKS u6)
 
@@ -21,6 +22,7 @@
 (define-map oracle-sources (list 20 principal) bool)
 (define-map prices { token-a: principal, token-b: principal } { price: uint, last-updated: uint })
 (define-map twap { token-a: principal, token-b: principal } { price: uint, last-updated: uint })
+(define-map price-history { token-a: principal, token-b: principal } (list 100 uint)) ;; Stores last 100 prices
 
 ;; --- Public Functions ---
 
@@ -56,7 +58,9 @@
     (asserts! (not (try! (check-circuit-breaker))) ERR_CIRCUIT_OPEN)
     (asserts! (is-some sources) ERR_NO_SOURCES)
     (try! (check-deviation median-price token-a token-b))
+    (try! (check-manipulation median-price token-a token-b))
     (map-set prices { token-a: token-a, token-b: token-b } { price: median-price, last-updated: block-height })
+    (map-set price-history { token-a: token-a, token-b: token-b } (unwrap-panic (as-max-len? (append (default-to (list) (map-get? price-history { token-a: token-a, token-b: token-b })) median-price) u100)))
     (try! (update-twap median-price token-a token-b))
     (ok median-price)
   )

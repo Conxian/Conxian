@@ -21,7 +21,10 @@
   contract: principal,
   risk-level: uint,
   yield-target: uint,
-  created-at: uint
+  created-at: uint,
+  last-rebalanced: uint,
+  total-compounded-rewards: uint,
+  total-gas-cost: uint
 })
 
 ;; Maps a user and strategy ID to their deposit information
@@ -39,10 +42,15 @@
   (begin
     (try! (check-circuit-breaker))
     (let ((strategy (unwrap! (map-get? strategies strategy-id) ERR_STRATEGY_NOT_FOUND)))
-      ;; In a real scenario, this would claim rewards and re-deposit them.
-      ;; For now, we'll just print a notification.
-      (print { notification: "Auto-compounding rewards", strategy-id: strategy-id, token: token })
-      (ok true)
+      (let ((rewards (try! (contract-call? (get contract strategy) harvest-rewards))))
+        (asserts! (> rewards u0) (err u0))
+        (try! (contract-call? token transfer rewards (get contract strategy) (as-contract tx-sender)))
+        (map-set strategies strategy-id (merge strategy {
+          total-compounded-rewards: (+ (get total-compounded-rewards strategy) rewards),
+          total-gas-cost: (+ (get total-gas-cost strategy) u100) ;; Placeholder for actual gas cost calculation
+        }))
+        (ok true)
+      )
     )
   )
 )
@@ -51,12 +59,9 @@
   (begin
     (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
     (let ((strategy (unwrap! (map-get? strategies strategy-id) ERR_STRATEGY_NOT_FOUND)))
-      ;; Placeholder for advanced rebalancing logic:
-      ;; 1. Evaluate current yield and risk of the strategy.
-      ;; 2. Compare with other available strategies.
-      ;; 3. If necessary, withdraw from current strategy and deposit into a new one.
       (print { notification: "Rebalancing strategy", strategy-id: strategy-id, current-risk: (get risk-level strategy), current-yield: (get yield-target strategy) })
       (try! (as-contract (contract-call? (get contract strategy) rebalance)))
+      (map-set strategies strategy-id (merge strategy { last-rebalanced: block-height }))
       (ok true)
     )
   )
@@ -64,8 +69,15 @@
 
 (define-public (get-strategy-performance (strategy-id uint))
   (let ((strategy (unwrap! (map-get? strategies strategy-id) ERR_STRATEGY_NOT_FOUND)))
-    ;; Placeholder for actual performance metrics
-    (ok { yield: (get yield-target strategy), risk: (get risk-level strategy), uptime: u9999, aum: u1000000 })
+    (ok {
+      yield: (get yield-target strategy),
+      risk: (get risk-level strategy),
+      uptime: (- block-height (get created-at strategy)),
+      aum: u1000000, ;; Placeholder for actual AUM calculation
+      last-rebalanced: (get last-rebalanced strategy),
+      total-compounded-rewards: (get total-compounded-rewards strategy),
+      total-gas-cost: (get total-gas-cost strategy)
+    })
   )
 )
 
@@ -78,7 +90,10 @@
                 contract: contract,
                 risk-level: risk-level,
                 yield-target: yield-target,
-                created-at: block-height
+                created-at: block-height,
+                last-rebalanced: block-height,
+                total-compounded-rewards: u0,
+                total-gas-cost: u0
             })
             (var-set strategy-counter strategy-id)
             (ok strategy-id)

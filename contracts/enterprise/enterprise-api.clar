@@ -11,6 +11,8 @@
 (define-constant ERR_ORDER_NOT_FOUND (err u407))
 (define-constant ERR_ACCOUNT_NOT_VERIFIED (err u408))
 (define-constant ERR_CIRCUIT_OPEN (err u409))
+(define-constant ERR_INVALID_FEE_DISCOUNT (err u410))
+(define-constant ERR_INVALID_PRIVILEGE (err u411))
 
 ;; --- Data Variables ---
 (define-data-var contract-owner principal tx-sender)
@@ -24,7 +26,9 @@
 (define-map institutional-accounts uint {
   owner: principal,
   tier: uint,
-  created-at: uint
+  created-at: uint,
+  fee-discount-rate: uint, ;; e.g., u100 for 1% discount
+  trading-privileges: uint ;; bitmask for different privileges
 })
 
 ;; Maps a TWAP order ID to its details
@@ -58,11 +62,16 @@
 (define-public (create-institutional-account (owner principal) (tier uint))
     (begin
         (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
-        (let ((account-id (+ u1 (var-get account-counter))))
+        (let (
+            (account-id (+ u1 (var-get account-counter)))
+            (tier-config (unwrap! (map-get? tier-configs tier) ERR_INVALID_TIER))
+        )
             (map-set institutional-accounts account-id {
                 owner: owner,
                 tier: tier,
-                created-at: block-height
+                created-at: block-height,
+                fee-discount-rate: (get fee-discount-rate tier-config),
+                trading-privileges: (get trading-privileges tier-config)
             })
             (var-set account-counter account-id)
             (ok account-id)
@@ -73,10 +82,29 @@
 (define-public (update-account-tier (account-id uint) (new-tier uint))
     (begin
         (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
-        (let ((account (unwrap! (map-get? institutional-accounts account-id) ERR_ACCOUNT_NOT_FOUND)))
-            (map-set institutional-accounts account-id (merge account { tier: new-tier }))
+        (let (
+            (account (unwrap! (map-get? institutional-accounts account-id) ERR_ACCOUNT_NOT_FOUND))
+            (tier-config (unwrap! (map-get? tier-configs new-tier) ERR_INVALID_TIER))
+        )
+            (map-set institutional-accounts account-id (merge account {
+                tier: new-tier,
+                fee-discount-rate: (get fee-discount-rate tier-config),
+                trading-privileges: (get trading-privileges tier-config)
+            }))
             (ok true)
         )
+    )
+)
+
+(define-public (set-tier-config (tier uint) (fee-discount-rate uint) (trading-privileges uint))
+    (begin
+        (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
+        (asserts! (<= fee-discount-rate u10000) ERR_INVALID_FEE_DISCOUNT) ;; Max 100% discount (10000 basis points)
+        (map-set tier-configs tier {
+            fee-discount-rate: fee-discount-rate,
+            trading-privileges: trading-privileges
+        })
+        (ok true)
     )
 )
 
@@ -86,6 +114,7 @@
         (let ((account (unwrap! (map-get? institutional-accounts account-id) ERR_ACCOUNT_NOT_FOUND)))
             (asserts! (is-eq tx-sender (get owner account)) ERR_UNAUTHORIZED)
             (try! (check-verification (get owner account)))
+            (asserts! (has-privilege (get trading-privileges account) u2) ERR_INVALID_PRIVILEGE) ;; u2 could represent TWAP_ORDER_PRIVILEGE
             (asserts! (> end-time start-time) ERR_INVALID_ORDER)
             (let ((order-id (+ u1 (var-get twap-order-counter))))
                 (map-set twap-orders order-id {
@@ -118,6 +147,10 @@
               (if is-tripped (err ERR_CIRCUIT_OPEN) (ok true))))
         (ok true)
     )
+)
+
+(define-private (has-privilege (privileges uint) (privilege-flag uint))
+    (> (and privileges privilege-flag) u0)
 )
 
 (define-private (check-verification (account-owner principal))
@@ -154,6 +187,24 @@
             (map-set twap-orders order-id (merge order { executed: (if (>= elapsed duration) true false) }))
             (ok true)
           )
+        )
+    )
+)
+
+(define-public (execute-block-trade (account-id uint) (token-in principal) (token-out principal) (amount-in uint) (min-amount-out uint) (recipient principal))
+    (begin
+        (try! (check-circuit-breaker))
+        (let ((account (unwrap! (map-get? institutional-accounts account-id) ERR_ACCOUNT_NOT_FOUND)))
+            (asserts! (is-eq tx-sender (get owner account)) ERR_UNAUTHORIZED)
+            (try! (check-verification (get owner account)))
+            (asserts! (has-privilege (get trading-privileges account) u1) ERR_INVALID_PRIVILEGE) ;; u1 could represent BLOCK_TRADE_PRIVILEGE
+
+            ;; This is a placeholder for actual swap execution via a DEX router
+            ;; In a real scenario, this would involve calling a DEX router contract
+            (print { notification: "Block trade executed", account-id: account-id, token-in: token-in, token-out: token-out, amount-in: amount-in, min-amount-out: min-amount-out, recipient: recipient })
+
+            ;; Assuming successful execution, return amount out
+            (ok min-amount-out) ;; Simplified, actual amount-out would come from DEX
         )
     )
 )
