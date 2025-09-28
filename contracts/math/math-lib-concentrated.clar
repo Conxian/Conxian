@@ -37,79 +37,46 @@
   )
 )
 
+;; get-sqrt-ratio-at-tick
+;; Calculates the sqrt price at a given tick.
+;; This function is critical for concentrated liquidity, determining the price boundaries of a position.
+;; The current implementation is a placeholder and needs to be replaced with a precise and efficient calculation,
+;; potentially using bit manipulation or lookup tables for optimal performance.
 (define-read-only (get-sqrt-ratio-at-tick (tick int))
-  ;; Convert tick to sqrt price ratio (Q96.96 format)
-  (asserts! (and (>= tick MIN_TICK) (<= tick MAX_TICK)) ERR_TICK_OUT_OF_BOUNDS)
+  (ok (if (>= tick u0)
+    (let ((ratio (pow u10001 u10000 tick)))
+      (if (>= ratio MAX_SQRT_RATIO)
+        MAX_SQRT_RATIO
+        ratio
+      )
+    )
+    (let ((ratio (/ Q128 (pow u10001 u10000 (- u0 tick)))))
+      (if (<= ratio MIN_SQRT_RATIO)
+        MIN_SQRT_RATIO
+        ratio
+      )
+    )
+  ))
+)
 
-  (let ((abs-tick (abs tick)))
-    (let ((ratio
-      (if (<= abs-tick 0)
-          Q96
-          (if (<= abs-tick 1)
-              u112045541949572279837463876925233
-              (if (<= abs-tick 2)
-                  u112045541949572279837463876925233
-                  (if (<= abs-tick 3)
-                      u139007148438381923076149565744295
-                      (if (<= abs-tick 4)
-                          u154565007309853945966720149109336
-                          (if (<= abs-tick 5)
-                              u171117536768576565065809275647745
-                              (if (<= abs-tick 6)
-                                  u189047401038942640401911122697372
-                                  (if (<= abs-tick 7)
-                                      u208470682471078850157170867032843
-                                      (if (<= abs-tick 8)
-                                          u229916333986069483502313373649777
-                                          (if (<= abs-tick 9)
-                                              u253063268311025259999609173964062
-                                              (if (<= abs-tick 10)
-                                                  u278781933567080617255787334449658
-                                                  (if (<= abs-tick 11)
-                                                      u307177332762419870641053447903006
-                                                      (if (<= abs-tick 12)
-                                                          u338551859518983673744143094775216
-                                                          (if (<= abs-tick 13)
-                                                              u373025274039969580378501070262928
-                                                              (if (<= abs-tick 14)
-                                                                  u410888462275736559825006613831532
-                                                                  (if (<= abs-tick 15)
-                                                                      u452468285492777807200000000000000
-                                                                      (if (<= abs-tick 16)
-                                                                          u498180863924600000000000000000000
-                                                                          (if (<= abs-tick 17)
-                                                                              u548577123200000000000000000000000
-                                                                              (if (<= abs-tick 18)
-                                                                                  u603692648533333333333333333333333
-                                                                                  (if (<= abs-tick 19)
-                                                                                      u664115977289600000000000000000000
-                                                                                      (if (<= abs-tick 20)
-                                                                                          u730460617600000000000000000000000
-                                                                                          Q96
-                                                                                      )
-                                                                                  )
-                                                                              )
-                                                                          )
-                                                                      )
-                                                                  )
-                                                              )
-                                                          )
-                                                      )
-                                                  )
-                                              )
-                                          ))))))))
-                                      )
-                                  )
-                              )
-                          )
-                      )
-                  )
-              )
+;; @desc Get the tick for a given sqrt-ratio
+;; @param sqrt-ratio The sqrt-ratio to convert to a tick
+;; @returns (response (int) (err uint))
+(define-read-only (get-tick-at-sqrt-ratio (sqrt-ratio uint))
+  (ok
+    (if (<= sqrt-ratio MIN_SQRT_RATIO)
+      MIN_TICK
+      (if (>= sqrt-ratio MAX_SQRT_RATIO)
+        MAX_TICK
+        (begin
+          (let
+            (
+              (ratio-q96 (div-u128 (mul-u128 sqrt-ratio sqrt-ratio) Q96))
+              (log-ratio (log-base-sqrt ratio-q96))
+            )
+            (div-u128 log-ratio (log-base-sqrt Q96))
           )
-        ))
-      (if (< tick 0)
-          (/ Q128 ratio) ;; Negative tick: 1/ratio
-          ratio
+        )
       )
     )
   )
@@ -133,19 +100,35 @@
 
 (define-private (log-base-sqrt (ratio uint))
   ;; Calculate log base sqrt(1.0001) of ratio
-  ;; This is a simplified version - full implementation would use bit manipulation
-  (let ((msb 128))
-    (let ((f msb))
-      (let ((loop-count u0))
-        (while (< loop-count u8)
+  ;; This is a more precise implementation using an iterative approach
+  (let
+    (
+      (result u0)
+      (current-ratio Q96)
+      (tick-spacing u60) ;; Assuming a tick spacing of 60 for now
+    )
+    (asserts! (> ratio u0) ERR_INVALID_INPUT)
+
+    (if (>= ratio Q96)
+      (begin
+        (while (and (>= ratio current-ratio) (< result MAX_TICK))
           (begin
-            (set f (if (> (pow Q96 f) ratio) (- f u1) f))
-            (set loop-count (+ loop-count u1))
+            (set current-ratio (mul-div-rounding-up current-ratio (pow u10001 u10000 tick-spacing) Q96))
+            (set result (+ result tick-spacing))
           )
         )
-        f
+        (set result (- result tick-spacing)) ;; Adjust for overshooting
+      )
+      (begin
+        (while (and (< ratio current-ratio) (> result MIN_TICK))
+          (begin
+            (set current-ratio (mul-div-rounding-up current-ratio Q96 (pow u10001 u10000 tick-spacing)))
+            (set result (- result tick-spacing))
+          )
+        )
       )
     )
+    result
   )
 )
 
@@ -299,31 +282,102 @@
   )
 )
 
-(define-private (get-fee-growth-below (tick int) (fee-growth-global uint))
-  ;; Calculate fee growth below a tick
-  ;; This is a simplified version - full implementation would use tick data
-  u0
+;; Helper functions for fee growth calculations
+(define-private (get-lower-tick (tick int) (tick-spacing uint))
+    (* (div tick (to-int tick-spacing)) (to-int tick-spacing))
 )
 
-(define-private (get-fee-growth-above (tick int) (fee-growth-global uint))
-  ;; Calculate fee growth above a tick
-  ;; This is a simplified version - full implementation would use tick data
-  u0
+(define-private (get-upper-tick (tick int) (tick-spacing uint))
+    (* (+ (div tick (to-int tick-spacing)) u1) (to-int tick-spacing))
+)
+
+(define-private (get-fee-growth-outside (tick int))
+    ;; Placeholder for actual implementation to retrieve fee growth outside a tick
+    ;; This would typically involve reading from a map in the concentrated liquidity pool contract
+    u0
+)
+
+(define-private (get-current-tick)
+    ;; Placeholder for actual implementation to retrieve the current tick
+    ;; This would typically involve reading from the concentrated liquidity pool contract
+    u0
+)
+
+;; @desc Get the fee growth below a tick
+;; @param tick The tick to calculate fee growth below
+;; @param fee-growth-global The global fee growth
+;; @param tick-spacing The tick spacing
+;; @returns (uint) The fee growth below the tick
+(define-read-only (get-fee-growth-below (tick int) (fee-growth-global uint) (tick-spacing uint))
+    (let (
+            (lower-tick (get-lower-tick tick tick-spacing))
+            (fee-growth-outside (get-fee-growth-outside lower-tick))
+        )
+        (if (>= tick (get-current-tick))
+            (- fee-growth-global fee-growth-outside)
+            fee-growth-outside
+        )
+    )
+)
+
+;; @desc Get the fee growth above a tick
+;; @param tick The tick to calculate fee growth above
+;; @param fee-growth-global The global fee growth
+;; @param tick-spacing The tick spacing
+;; @returns (uint) The fee growth above the tick
+(define-read-only (get-fee-growth-above (tick int) (fee-growth-global uint) (tick-spacing uint))
+    (let (
+            (upper-tick (get-upper-tick tick tick-spacing))
+            (fee-growth-outside (get-fee-growth-outside upper-tick))
+        )
+        (if (< tick (get-current-tick))
+            (- fee-growth-global fee-growth-outside)
+            fee-growth-outside
+        )
+    )
 )
 
 ;; Export functions for external contracts
-(define-read-only (sqrt-fixed (x uint))
-  ;; Calculate square root using Newton's method
-  (if (is-eq x u0)
+;; @desc Calculates the square root of a fixed-point number (u128) using an iterative approach.
+;; @param x The fixed-point number to calculate the square root of.
+;; @returns (ok u128) The square root of x, or (err u128) if x is negative.
+(define-public (sqrt-fixed (x uint)) 
+  (ok
+    (if (is-eq x u0)
       u0
-      (let ((z (x u1)))
-        (let ((z-next (/ (+ z (/ x z)) u2)))
-          (if (is-eq z z-next)
-              z
-              (sqrt-fixed x)
+      (begin
+        (var (z uint) u0)
+        (var (y uint) (div (+ x u1) u2))
+        (while (and (not (is-eq (var-get y) u0)) (< (var-get y) (var-get z)))
+          (begin
+            (var-set z (var-get y))
+            (var-set y (div (+ (div x (var-get y)) (var-get y)) u2))
           )
         )
+        (var-get z)
       )
+    )
+  )
+)
+
+;; @desc Calculates the exponential of a fixed-point number (e^x) using a Taylor series approximation.
+;; @param x The fixed-point number to calculate the exponential of.
+;; @returns (ok u128) The exponential of x.
+(define-public (exp-fixed (x uint))
+  (ok
+    (begin
+      (var (result uint) Q96)
+      (var (term uint) Q96)
+      (var (i uint) u1)
+      (while (not (is-eq (var-get term) u0))
+        (begin
+          (var-set term (div (mul (var-get term) x) (var-get i)))
+          (var-set result (+ (var-get result) (var-get term)))
+          (var-set i (+ (var-get i) u1))
+        )
+      )
+      (var-get result)
+    )
   )
 )
 

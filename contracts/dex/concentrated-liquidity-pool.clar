@@ -27,6 +27,8 @@
 (define-constant ERR_SLIPPAGE_TOO_HIGH (err u3005))
 (define-constant ERR_POSITION_NOT_FOUND (err u3006))
 (define-constant ERR_TICK_OUT_OF_BOUNDS (err u3007))
+(define-constant ERR_INVALID_POSITION (err u3008))
+(define-constant ERR_NO_LIQUIDITY (err u3009))
 
 ;; Data Variables
 (define-data-var token0 principal tx-sender)
@@ -310,20 +312,79 @@
   (let ((slot0-data (var-get slot0)))
     (asserts! (get unlocked slot0-data) ERR_UNAUTHORIZED)
 
-    ;; Simplified swap logic - full implementation would include:
-    ;; 1. Price impact calculations
-    ;; 2. Fee calculations
-    ;; 3. Tick crossing logic
-    ;; 4. Oracle updates
+    (let (
+      (current-sqrt-price-x96 (get sqrt-price-x96 slot0-data))
+      (current-tick (get tick slot0-data))
+      (current-liquidity (var-get liquidity))
+      (amount-in u0)
+      (amount-out u0)
+      (fee-amount u0)
+      (next-sqrt-price-x96 u0)
+      (next-tick u0)
+    )
+      (if zero-for-one
+        (begin
+          ;; Swap token0 for token1
+          (let ((swap-result (unwrap-panic (contract-call? .math-lib-concentrated swap-x-for-y
+            current-sqrt-price-x96
+            current-liquidity
+            amount-specified
+            (get fee-protocol slot0-data)
+            (var-get fee)
+          ))))
+            (var-set amount-in (get amount-in swap-result))
+            (var-set amount-out (get amount-out swap-result))
+            (var-set fee-amount (get fee-amount swap-result))
+            (var-set next-sqrt-price-x96 (get sqrt-price-x96-next swap-result))
+            (var-set next-tick (get tick-next swap-result))
 
-    (print {
-      event: "swap",
-      recipient: recipient,
-      zero-for-one: zero-for-one,
-      amount-specified: amount-specified
-    })
+            (asserts! (>= next-sqrt-price-x96 sqrt-price-limit-x96) ERR_SLIPPAGE_TOO_HIGH)
 
-    (ok (tuple (amount0 u0) (amount1 u0)))
+            (try! (contract-call? (var-get token0) transfer amount-in tx-sender (as-contract tx-sender)))
+            (try! (contract-call? (var-get token1) transfer amount-out (as-contract tx-sender) recipient))
+
+            (var-set fee-growth-global0 (+ (var-get fee-growth-global0) fee-amount))
+          )
+        )
+        (begin
+          ;; Swap token1 for token0
+          (let ((swap-result (unwrap-panic (contract-call? .math-lib-concentrated swap-y-for-x
+            current-sqrt-price-x96
+            current-liquidity
+            amount-specified
+            (get fee-protocol slot0-data)
+            (var-get fee)
+          ))))
+            (var-set amount-in (get amount-in swap-result))
+            (var-set amount-out (get amount-out swap-result))
+            (var-set fee-amount (get fee-amount swap-result))
+            (var-set next-sqrt-price-x96 (get sqrt-price-x96-next swap-result))
+            (var-set next-tick (get tick-next swap-result))
+
+            (asserts! (<= next-sqrt-price-x96 sqrt-price-limit-x96) ERR_SLIPPAGE_TOO_HIGH)
+
+            (try! (contract-call? (var-get token1) transfer amount-in tx-sender (as-contract tx-sender)))
+            (try! (contract-call? (var-get token0) transfer amount-out (as-contract tx-sender) recipient))
+
+            (var-set fee-growth-global1 (+ (var-get fee-growth-global1) fee-amount))
+          )
+        )
+      )
+
+      (var-set slot0 (merge slot0-data {sqrt-price-x96: next-sqrt-price-x96, tick: next-tick}))
+
+      (print {
+        event: "swap",
+        recipient: recipient,
+        zero-for-one: zero-for-one,
+        amount-specified: amount-specified,
+        amount-in: amount-in,
+        amount-out: amount-out,
+        fee-amount: fee-amount
+      })
+
+      (ok (tuple (amount0 amount-in) (amount1 amount-out)))
+    )
   )
 )
 
@@ -340,7 +401,7 @@
     (asserts! (> liquidity-val u0) ERR_INSUFFICIENT_LIQUIDITY)
 
     (let (
-        (result (unwrap-panic (contract-call? .math-lib-concentrated.swap-x-for-y
+        (result (unwrap-panic (contract-call? .math-lib-concentrated swap-x-for-y
           sqrt-price-x96
           liquidity-val
           amount-in
@@ -375,6 +436,11 @@
         token-out: token1-contract
       })
 
+      (ok amount-out)
+    )
+  )
+)
+
 (define-public (swap-y-for-x (amount-in uint) (amount-out-min uint) (recipient principal))
   (let (
       (slot0-data (var-get slot0))
@@ -388,7 +454,7 @@
     (asserts! (> liquidity-val u0) ERR_NO_LIQUIDITY)
 
     (let (
-        (result (unwrap-panic (contract-call? .math-lib-concentrated.swap-y-for-x
+        (result (unwrap-panic (contract-call? .math-lib-concentrated swap-y-for-x
           sqrt-price-x96
           liquidity-val
           amount-in

@@ -6,6 +6,7 @@
 (use-trait pool-trait .all-traits.pool-trait)
 (use-trait math-trait .all-traits.math-trait)
 (use-trait error-codes-trait .all-traits.error-codes-trait)
+(use-trait sip-010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
 
 (define-constant Q64 u18446744073709551616)  ;; 2^64
 (define-constant MAX_TICK 776363)  ;; Corresponds to sqrt(2^128)

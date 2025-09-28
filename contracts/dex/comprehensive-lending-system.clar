@@ -25,6 +25,8 @@
 (define-constant ERR_HEALTH_CHECK_FAILED (err u1013))
 (define-constant ERR_INSUFFICIENT_LIQUIDITY (err u1014))
 (define-constant ERR_ALREADY_SET (err u1015))
+(define-constant ERR_POSITION_HEALTHY (err u1017))
+(define-constant ERR_LIQUIDATION_THRESHOLD_NOT_FOUND (err u1018))
 
 (define-constant PRECISION u1000000000000000000) ;; 1e18
 
@@ -58,7 +60,7 @@
   (let ((supported-assets (map-keys user-collateral-assets)))
     (fold
       (lambda (asset-tuple total-value)
-        (let ((asset (get-in-tuple? asset-tuple { asset: principal })))
+        (let ((asset (get asset asset-tuple))))
           (if (default-to false (map-get? user-collateral-assets { user: user, asset: asset }))
             (let ((asset-info (unwrap! (map-get? supported-assets { asset: asset }) (err u0)))
                   (balance (default-to u0 (map-get? user-supply-balances { user: user, asset: asset })))
@@ -103,7 +105,7 @@
       (lambda (asset-tuple total-value)
         (let ((asset (get-in-tuple? asset-tuple { asset: principal })))
           (let ((balance (default-to u0 (map-get? user-borrow-balances { user: user, asset: asset })))
-                (price (unwrap! (get-asset-price asset) (err u0))))
+                (price (get-asset-price-safe asset)))
             (+ total-value (/ (* balance price) PRECISION))
           )
         )
@@ -116,10 +118,39 @@
 
 ;; --- Health Factor Calculation ---
 (define-read-only (get-health-factor (user principal))
-  (let ((collateral-value (get-total-collateral-value-in-usd-safe user))
+  (let ((total-collateral-value u0)
+        (total-threshold-value u0))
+    (let ((supported-assets (map-keys user-collateral-assets)))
+      (fold
+        (lambda (asset-tuple accumulator)
+          (let ((asset (get asset asset-tuple)))
+            (if (default-to false (map-get? user-collateral-assets { user: user, asset: asset }))
+              (let ((asset-info (unwrap! (map-get? supported-assets { asset: asset }) (err u0)))
+                    (balance (default-to u0 (map-get? user-supply-balances { user: user, asset: asset })))
+                    (price (get-asset-price-safe asset)))
+                (let ((collateral-value (/ (* balance (get collateral-factor asset-info) price) (* PRECISION PRECISION))))
+                  (merge accumulator {
+                    total-collateral-value: (+ (get total-collateral-value accumulator) collateral-value),
+                    total-threshold-value: (+ (get total-threshold-value accumulator) (/ (* collateral-value (get liquidation-threshold asset-info)) PRECISION))
+                  })
+                )
+              )
+              accumulator
+            )
+          )
+        )
+        supported-assets
+        { total-collateral-value: u0, total-threshold-value: u0 }
+      )
+    )
+  )
+  (let ((collateral-value (get total-collateral-value accumulator))
+        (weighted-liquidation-threshold (if (> (get total-collateral-value accumulator) u0)
+                                          (/ (get total-threshold-value accumulator) (get total-collateral-value accumulator))
+                                          u0))
         (borrow-value (get-total-borrow-value-in-usd-safe user)))
     (if (> borrow-value u0)
-      (ok (/ (* collateral-value PRECISION) borrow-value))
+      (ok (/ (* collateral-value weighted-liquidation-threshold) borrow-value))
       (ok u18446744073709551615) ;; max-uint (2^64 - 1)
     )
   )
@@ -168,9 +199,8 @@
     (try! (accrue-interest asset-principal))
 
     ;; Transfer asset from user to this contract
-    (let ((asset-trait (contract-of asset-principal)))
-        (try! (contract-call? asset-trait transfer (list amount tx-sender (as-contract tx-sender) none)))
-    )
+    (let ((asset-trait asset-principal))
+        (try! (contract-call? asset-trait transfer (list amount tx-sender (as-contract tx-sender) none))))
 
     ;; Update user's supply balance
     (let ((current-balance (default-to u0 (map-get? user-supply-balances { user: tx-sender, asset: asset-principal }))))
@@ -222,7 +252,7 @@
       (let ((health (unwrap! (get-health-factor tx-sender) ERR_HEALTH_CHECK_FAILED)))
         (asserts! (>= health PRECISION) ERR_INSUFFICIENT_COLLATERAL)
       )
-      (let ((asset-trait (contract-of asset-principal)))
+      (let ((asset-trait asset-principal))
         (try! (as-contract (contract-call? asset-trait transfer (list amount (as-contract tx-sender) tx-sender none))))
       )
       (ok true)
@@ -265,7 +295,7 @@
     (let ((current-borrow (default-to u0 (map-get? user-borrow-balances { user: tx-sender, asset: asset-principal }))))
       (map-set user-borrow-balances { user: tx-sender, asset: asset-principal } { balance: (+ current-borrow amount) })
     )
-    (let ((asset-trait (contract-of asset-principal)))
+    (let ((asset-trait asset-principal))
       (try! (as-contract (contract-call? asset-trait transfer (list amount (as-contract tx-sender) tx-sender none))))
     )
     (ok true)
@@ -298,7 +328,7 @@
     (try! (accrue-interest asset-principal))
     (let ((current-borrow (default-to u0 (map-get? user-borrow-balances { user: tx-sender, asset: asset-principal }))))
       (let ((repay-amount (min amount current-borrow)))
-        (let ((asset-trait (contract-of asset-principal)))
+        (let ((asset-trait asset-principal))
           (try! (contract-call? asset-trait transfer (list repay-amount tx-sender (as-contract tx-sender) none)))
         )
         (map-set user-borrow-balances { user: tx-sender, asset: asset-principal } { balance: (- current-borrow repay-amount) })
