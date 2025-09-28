@@ -88,7 +88,7 @@ cxtr-token = { path = "contracts/tokens/cxtr-token.clar", address = "ST3PPMPR7SA
 cxvg-token = { path = "contracts/tokens/cxvg-token.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.cxvg-token" }
 
 # Access Control
-AccessControl = { path = "contracts/access/AccessControl.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.AccessControl" }
+AccessControl = { path = "contracts/governance/access-control.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.AccessControl" }
 
 # Audit Registry
 audit-badge-nft = { path = "contracts/audit-registry/audit-badge-nft.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.audit-badge-nft" }
