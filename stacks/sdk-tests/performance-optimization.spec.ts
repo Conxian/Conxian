@@ -47,7 +47,7 @@ describe('Performance Optimization - Load Testing & Gas Efficiency', () => {
 
       // Perform 50 concurrent staking operations
       for (let i = 0; i < 50; i++) {
-        const user = `wallet_${(i % 3) + 1}` as keyof typeof simnet.getAccounts;
+        const user = `wallet_${(i % 3) + 1}`;
         const userAddr = simnet.getAccounts().get(user)!;
 
         const operation = simnet.callPublicFn('cxd-staking', 'initiate-stake', [Cl.uint(1000000)], userAddr);
@@ -74,7 +74,7 @@ describe('Performance Optimization - Load Testing & Gas Efficiency', () => {
 
       // Perform 100 concurrent token operations
       for (let i = 0; i < 100; i++) {
-        const user = `wallet_${(i % 3) + 1}` as keyof typeof simnet.getAccounts;
+        const user = `wallet_${(i % 3) + 1}`;
         const userAddr = simnet.getAccounts().get(user)!;
 
         const operation = simnet.callPublicFn('token-system-coordinator', 'coordinate-multi-token-operation', [
@@ -167,7 +167,7 @@ describe('Performance Optimization - Load Testing & Gas Efficiency', () => {
       // Batch multiple operations
       const operations = [];
       for (let i = 0; i < 10; i++) {
-        const user = `wallet_${(i % 3) + 1}` as keyof typeof simnet.getAccounts;
+        const user = `wallet_${(i % 3) + 1}`;
         const userAddr = simnet.getAccounts().get(user)!;
 
         const operation = simnet.callPublicFn('token-system-coordinator', 'coordinate-multi-token-operation', [
@@ -224,7 +224,7 @@ describe('Performance Optimization - Load Testing & Gas Efficiency', () => {
 
       // Simulate maximum user load
       for (let user = 1; user <= maxUsers; user++) {
-        const userAddr = simnet.getAccounts().get(`wallet_${user}` as keyof typeof simnet.getAccounts())!;
+        const userAddr = simnet.getAccounts().get(`wallet_${user}`)!;
 
         for (let op = 0; op < operationsPerUser; op++) {
           const operation = simnet.callPublicFn('token-system-coordinator', 'coordinate-multi-token-operation', [

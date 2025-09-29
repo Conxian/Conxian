@@ -30,7 +30,6 @@ tokenized-bond = { path = "contracts/dimensional/tokenized-bond.clar", address =
 all-traits = { path = "contracts/traits/all-traits.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits" }
 math-lib-advanced = { path = "contracts/lib/math-lib-advanced.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math-lib-advanced" }
 circuit-breaker = { path = "contracts/circuit-breaker.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.circuit-breaker" }
-constants = { path = "contracts/constants.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.constants" }
 
 # Additional DEX Core Contracts
 auto-compounder = { path = "contracts/dex/auto-compounder.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.auto-compounder" }
@@ -38,7 +37,7 @@ bond-factory = { path = "contracts/dex/bond-factory.clar", address = "ST3PPMPR7S
 bond-issuance-system = { path = "contracts/dex/bond-issuance-system.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.bond-issuance-system" }
 concentrated-liquidity-pool = { path = "contracts/dex/concentrated-liquidity-pool.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.concentrated-liquidity-pool" }
 concentrated-liquidity-pool-v2 = { path = "contracts/dimensional/concentrated-liquidity-pool-v2.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.concentrated-liquidity-pool-v2" }
-concentrated-position-nft = { path = "contracts/dex/concentrated-position-nft.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.concentrated-position-nft" }
+position-nft = { path = "contracts/dimensional/position-nft.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.position-nft" }
 cxd-staking = { path = "contracts/dex/cxd-staking.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.cxd-staking" }
 cxlp-migration-queue = { path = "contracts/dex/cxlp-migration-queue.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.cxlp-migration-queue" }
 cxvg-utility = { path = "contracts/dex/cxvg-utility.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.cxvg-utility" }
@@ -207,7 +206,7 @@ dim-registry = ".dim-registry"
 dim-metrics = ".dim-metrics"
 concentrated-liquidity-pool = ".concentrated-liquidity-pool"
 tokenized-bond-adapter = ".tokenized-bond-adapter"
-concentrated-position-nft = ".concentrated-position-nft"
+position-nft = ".position-nft"
 dim-graph = ".dim-graph"
 dim-oracle-automation = ".dim-oracle-automation"
 dim-revenue-adapter = ".dim-revenue-adapter"

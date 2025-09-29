@@ -65,7 +65,8 @@
     (get-payment-token () (response principal (err uint)))
     (is-matured () (response bool (err uint)))
     (get-next-coupon-block (principal) (response (optional uint) (err uint)))
-  ))
+  )
+)
 
 
 (define-trait dimensional-oracle-trait
