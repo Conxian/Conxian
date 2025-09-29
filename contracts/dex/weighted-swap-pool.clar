@@ -2,9 +2,9 @@
 ;; This contract implements a weighted swap pool for assets with different weights.
 
 (use-trait sip-010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
-(use-trait pool-creation-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.pool-creation-trait)
+(use-trait pool-creation-trait .all-traits.pool-creation-trait)
 
-(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.pool-creation-trait)
+(impl-trait .all-traits.pool-creation-trait)
 
 ;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED (err u1003))

@@ -1,3 +1,6 @@
+(use-trait ft-trait .all-traits.sip-010-ft-trait)
+(use-trait nft-trait .all-traits.sip-009-nft-trait)
+
 ;; Pool Template - Basic DEX Pool Implementation
 ;; This contract serves as a template for creating new DEX pools
 
@@ -7,18 +10,14 @@
 (define-constant ERR_INVALID_INPUT (err u1003))
 
 ;; --- Data Variables ---
-(define-data-var token-a principal 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.cxd-token)
-(define-data-var token-b principal 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.cxvg-token)
+(define-data-var token-a principal .cxd-token)
+(define-data-var token-b principal .cxvg-token)
 (define-data-var fee-bps uint u30) ;; 0.3% default fee (30 bps)
 (define-data-var admin principal tx-sender)
 (define-data-var reserve-a uint u0)
 (define-data-var reserve-b uint u0)
 (define-data-var total-supply uint u0)
 
-;; --- Events ---
-(define-event Swap (sender principal) (amount-in uint) (amount-out uint) (token-in principal) (token-out principal))
-(define-event AddLiquidity (provider principal) (amount-a uint) (amount-b uint) (shares uint))
-(define-event RemoveLiquidity (provider principal) (amount-a uint) (amount-b uint) (shares uint))
 
 ;; --- Initialization ---
 (define-public (initialize (a principal) (b principal) (fee uint) (admin-principal principal))
@@ -80,7 +79,7 @@
         )
         
         ;; Emit event
-        (emit-event Swap tx-sender amount-in amount-out token-in token-out)
+        (print { event: "Swap", sender: tx-sender, "amount-in": amount-in, "amount-out": amount-out, "token-in": token-in, "token-out": token-out })
         (ok {
           amount-out: amount-out,
           fee: (- amount-in amount-in-with-fee)

@@ -2,10 +2,10 @@
 ;; Implements pool-trait with full system integration
 
 (use-trait pool-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.pool-trait)
-(use-trait sip10-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
+(use-trait sip-010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
 
-(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.pool-trait)
-(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
+(impl-trait .pool-trait)
+(impl-trait .sip-010-ft-trait)
 
 (define-constant ONE u1)
 (define-constant TWO u2)
@@ -44,8 +44,8 @@
 (define-data-var reserve-a uint u0)
 (define-data-var reserve-b uint u0)
 (define-data-var total-supply uint u0)
-(define-data-var lp-fee-bps uint u30) ;; 0.3%
-(define-data-var protocol-fee-bps uint u5) ;; 0.05%
+(define-data-var default-lp-fee-bps uint u30) ;; 0.3%
+(define-data-var default-protocol-fee-bps uint u5) ;; 0.05%
 (define-data-var paused bool false)
 (define-data-var factory principal tx-sender)
 
@@ -54,6 +54,7 @@
 (define-map collected-protocol-fees principal uint) ;; token -> collected fees
 (define-map cumulative-prices (string-ascii 16) uint) ;; "price-a" or "price-b" -> cumulative price
 (define-map last-update-time (string-ascii 16) uint)
+(define-map fee-tiers uint { lp-fee-bps: uint, protocol-fee-bps: uint })
 
 ;; Pool performance tracking
 (define-map daily-stats (string-ascii 32) (tuple (volume uint) (fees uint) (trades uint)))
@@ -64,8 +65,11 @@
              (reserve-b (var-get reserve-b)))))
 
 (define-read-only (get-fee-info)
-  (ok (tuple (lp-fee-bps (var-get lp-fee-bps)) 
-             (protocol-fee-bps (var-get protocol-fee-bps)))))
+  (ok (tuple (lp-fee-bps (var-get default-lp-fee-bps)) 
+             (protocol-fee-bps (var-get default-protocol-fee-bps)))))
+
+(define-read-only (get-fee-tier (tier-id uint))
+  (ok (map-get? fee-tiers tier-id)))
 
 (define-read-only (get-price)
   (let ((reserve-a-val (var-get reserve-a))
@@ -94,6 +98,274 @@
 (define-read-only (get-pool-performance)
   (let ((today (/ block-height u144))) ;; Approximate daily blocks
     (ok (tuple (volume-24h u0) (fees-24h u0)))))  ;; Simplified for enhanced deployment
+
+;; Private functions
+;; Calculate output amount for constant product formula with fees
+(define-private (calculate-swap-amount (amount-in uint) (reserve-in uint) (reserve-out uint) (tier-id uint))
+  (let (
+    (fees (unwrap! (map-get? fee-tiers tier-id) (err ERR_INVALID_FEE)))
+    (lp-fee-bps (get lp-fee-bps fees))
+    (protocol-fee-bps (get protocol-fee-bps fees))
+    (amount-in-with-lp-fee (- amount-in (/ (* amount-in lp-fee-bps) u10000)))
+    (amount-in-with-protocol-fee (- amount-in (/ (* amount-in protocol-fee-bps) u10000)))
+    (numerator (* amount-in-with-lp-fee reserve-out))
+    (denominator (+ reserve-in amount-in-with-protocol-fee))
+  )
+  (if (is-eq denominator u0)
+    u0
+    (/ numerator denominator)
+  )
+)
+
+(define-private (get-lp-fee-bps (tier-id uint))
+  (let ((fees (unwrap! (map-get? fee-tiers tier-id) (err ERR_INVALID_FEE))))
+    (get lp-fee-bps fees)
+  )
+)
+
+(define-private (get-protocol-fee-bps (tier-id uint))
+  (let ((fees (unwrap! (map-get? fee-tiers tier-id) (err ERR_INVALID_FEE))))
+    (get protocol-fee-bps fees)
+  )
+)
+
+(define-public (swap-exact-in (token-in principal) (amount-in uint) (min-amount-out uint) (recipient principal) (deadline uint) (tier-id uint))
+  (begin
+    (asserts! (not (var-get paused)) (err ERR_PAUSED))
+    (asserts! (>= block-height deadline) (err ERR_DEADLINE_PASSED))
+    (asserts! (> amount-in u0) (err ERR_INVALID_AMOUNT))
+
+    (let (
+      (token-x (unwrap! (var-get token-a) (err ERR_NOT_INITIALIZED)))
+      (token-y (unwrap! (var-get token-b) (err ERR_NOT_INITIALIZED)))
+      (reserve-x (var-get reserve-a))
+      (reserve-y (var-get reserve-b))
+      (amount-out u0)
+      (lp-fee-bps (get-lp-fee-bps tier-id))
+      (protocol-fee-bps (get-protocol-fee-bps tier-id))
+    )
+
+    (if (is-eq token-in token-x)
+      (begin
+        (asserts! (> reserve-x u0) (err ERR_ZERO_LIQUIDITY))
+        (asserts! (> reserve-y u0) (err ERR_ZERO_LIQUIDITY))
+        (var-set reserve-a (+ reserve-x amount-in))
+        (var-set reserve-b (- reserve-y amount-out))
+        (try! (contract-call? token-x transfer amount-in tx-sender (as-contract tx-sender)))
+        (try! (contract-call? token-y transfer amount-out (as-contract tx-sender) recipient))
+        (var-set reserve-a (+ reserve-x amount-in))
+        (var-set reserve-b (- reserve-y amount-out))
+        (ok amount-out)
+      )
+      (begin
+        (asserts! (> reserve-x u0) (err ERR_ZERO_LIQUIDITY))
+        (asserts! (> reserve-y u0) (err ERR_ZERO_LIQUIDITY))
+        (var-set reserve-b (+ reserve-y amount-in))
+        (var-set reserve-a (- reserve-x amount-out))
+        (try! (contract-call? token-y transfer amount-in tx-sender (as-contract tx-sender)))
+        (try! (contract-call? token-x transfer amount-out (as-contract tx-sender) recipient))
+        (var-set reserve-b (+ reserve-y amount-in))
+        (var-set reserve-a (- reserve-x amount-out))
+        (ok amount-out)
+      )
+    )
+  )
+)
+
+(define-public (swap-exact-out (token-out principal) (amount-out uint) (max-amount-in uint) (recipient principal) (deadline uint) (tier-id uint))
+  (begin
+    (asserts! (not (var-get paused)) (err ERR_PAUSED))
+    (asserts! (>= block-height deadline) (err ERR_DEADLINE_PASSED))
+    (asserts! (> amount-out u0) (err ERR_INVALID_AMOUNT))
+
+    (let (
+      (token-x (unwrap! (var-get token-a) (err ERR_NOT_INITIALIZED)))
+      (token-y (unwrap! (var-get token-b) (err ERR_NOT_INITIALIZED)))
+      (reserve-x (var-get reserve-a))
+      (reserve-y (var-get reserve-b))
+      (amount-in u0)
+      (lp-fee-bps (get-lp-fee-bps tier-id))
+      (protocol-fee-bps (get-protocol-fee-bps tier-id))
+    )
+
+    (if (is-eq token-out token-x)
+      (begin
+        (asserts! (> reserve-x u0) (err ERR_ZERO_LIQUIDITY))
+        (asserts! (> reserve-y u0) (err ERR_ZERO_LIQUIDITY))
+        (var-set reserve-x (- reserve-x amount-out))
+        (var-set reserve-y (+ reserve-y amount-in))
+        (try! (contract-call? token-x transfer amount-in tx-sender (as-contract tx-sender)))
+        (try! (contract-call? token-y transfer amount-out (as-contract tx-sender) recipient))
+        (var-set reserve-x (- reserve-x amount-out))
+        (var-set reserve-y (+ reserve-y amount-in))
+        (ok amount-in)
+      )
+      (begin
+        (asserts! (> reserve-x u0) (err ERR_ZERO_LIQUIDITY))
+        (asserts! (> reserve-y u0) (err ERR_ZERO_LIQUIDITY))
+        (var-set reserve-y (- reserve-y amount-out))
+        (var-set reserve-x (+ reserve-x amount-in))
+        (try! (contract-call? token-y transfer amount-in tx-sender (as-contract tx-sender)))
+        (try! (contract-call? token-x transfer amount-out (as-contract tx-sender) recipient))
+        (var-set reserve-y (- reserve-y amount-out))
+        (var-set reserve-x (+ reserve-x amount-in))
+        (ok amount-in)
+      )
+    )
+  )
+)
+
+
+(define-public (set-fee-tier (tier-id uint) (lp-fee-bps uint) (protocol-fee-bps uint))
+  (begin
+    (asserts! (is-eq tx-sender (var-get factory)) (err ERR_UNAUTHORIZED))
+    (map-set fee-tiers tier-id { lp-fee-bps: lp-fee-bps, protocol-fee-bps: protocol-fee-bps })
+    (ok true)
+  )
+)
+
+(define-public (set-default-fee-tier (lp-fee-bps uint) (protocol-fee-bps uint))
+  (begin
+    (asserts! (is-eq tx-sender (var-get factory)) (err ERR_UNAUTHORIZED))
+    (var-set default-lp-fee-bps lp-fee-bps)
+    (var-set default-protocol-fee-bps protocol-fee-bps)
+    (ok true)
+  )
+)
+
+;; Private functions
+;; Calculate output amount for constant product formula with fees
+(define-private (calculate-swap-amount (amount-in uint) (reserve-in uint) (reserve-out uint) (tier-id uint))
+  (let (
+    (fees (unwrap! (map-get? fee-tiers tier-id) (err ERR_INVALID_FEE)))
+    (lp-fee-bps (get lp-fee-bps fees))
+    (protocol-fee-bps (get protocol-fee-bps fees))
+    (amount-in-with-lp-fee (- amount-in (/ (* amount-in lp-fee-bps) u10000)))
+    (amount-in-with-protocol-fee (- amount-in (/ (* amount-in protocol-fee-bps) u10000)))
+    (numerator (* amount-in-with-lp-fee reserve-out))
+    (denominator (+ reserve-in amount-in-with-protocol-fee))
+  )
+  (if (is-eq denominator u0)
+    u0
+    (/ numerator denominator)
+  )
+)
+
+(define-private (get-lp-fee-bps (tier-id uint))
+  (let ((fees (unwrap! (map-get? fee-tiers tier-id) (err ERR_INVALID_FEE))))
+    (get lp-fee-bps fees)
+  )
+)
+
+(define-private (get-protocol-fee-bps (tier-id uint))
+  (let ((fees (unwrap! (map-get? fee-tiers tier-id) (err ERR_INVALID_FEE))))
+    (get protocol-fee-bps fees)
+  )
+)
+
+(define-public (swap-exact-in (token-in principal) (amount-in uint) (min-amount-out uint) (recipient principal) (deadline uint) (tier-id uint))
+  (begin
+    (asserts! (not (var-get paused)) (err ERR_PAUSED))
+    (asserts! (>= block-height deadline) (err ERR_DEADLINE_PASSED))
+    (asserts! (> amount-in u0) (err ERR_INVALID_AMOUNT))
+
+    (let (
+      (token-x (unwrap! (var-get token-a) (err ERR_NOT_INITIALIZED)))
+      (token-y (unwrap! (var-get token-b) (err ERR_NOT_INITIALIZED)))
+      (reserve-x (var-get reserve-a))
+      (reserve-y (var-get reserve-b))
+      (amount-out u0)
+      (lp-fee-bps (get-lp-fee-bps tier-id))
+      (protocol-fee-bps (get-protocol-fee-bps tier-id))
+    )
+
+    (if (is-eq token-in token-x)
+      (begin
+        (asserts! (> reserve-x u0) (err ERR_ZERO_LIQUIDITY))
+        (asserts! (> reserve-y u0) (err ERR_ZERO_LIQUIDITY))
+        (var-set reserve-a (+ reserve-x amount-in))
+        (var-set reserve-b (- reserve-y amount-out))
+        (try! (contract-call? token-x transfer amount-in tx-sender (as-contract tx-sender)))
+        (try! (contract-call? token-y transfer amount-out (as-contract tx-sender) recipient))
+        (var-set reserve-a (+ reserve-x amount-in))
+        (var-set reserve-b (- reserve-y amount-out))
+        (ok amount-out)
+      )
+      (begin
+        (asserts! (> reserve-x u0) (err ERR_ZERO_LIQUIDITY))
+        (asserts! (> reserve-y u0) (err ERR_ZERO_LIQUIDITY))
+        (var-set reserve-b (+ reserve-y amount-in))
+        (var-set reserve-a (- reserve-x amount-out))
+        (try! (contract-call? token-y transfer amount-in tx-sender (as-contract tx-sender)))
+        (try! (contract-call? token-x transfer amount-out (as-contract tx-sender) recipient))
+        (var-set reserve-b (+ reserve-y amount-in))
+        (var-set reserve-a (- reserve-x amount-out))
+        (ok amount-out)
+      )
+    )
+  )
+)
+
+(define-public (swap-exact-out (token-out principal) (amount-out uint) (max-amount-in uint) (recipient principal) (deadline uint) (tier-id uint))
+  (begin
+    (asserts! (not (var-get paused)) (err ERR_PAUSED))
+    (asserts! (>= block-height deadline) (err ERR_DEADLINE_PASSED))
+    (asserts! (> amount-out u0) (err ERR_INVALID_AMOUNT))
+
+    (let (
+      (token-x (unwrap! (var-get token-a) (err ERR_NOT_INITIALIZED)))
+      (token-y (unwrap! (var-get token-b) (err ERR_NOT_INITIALIZED)))
+      (reserve-x (var-get reserve-a))
+      (reserve-y (var-get reserve-b))
+      (amount-in u0)
+      (lp-fee-bps (get-lp-fee-bps tier-id))
+      (protocol-fee-bps (get-protocol-fee-bps tier-id))
+    )
+
+    (if (is-eq token-out token-x)
+      (begin
+        (asserts! (> reserve-x u0) (err ERR_ZERO_LIQUIDITY))
+        (asserts! (> reserve-y u0) (err ERR_ZERO_LIQUIDITY))
+        (var-set reserve-x (- reserve-x amount-out))
+        (var-set reserve-y (+ reserve-y amount-in))
+        (try! (contract-call? token-x transfer amount-in tx-sender (as-contract tx-sender)))
+        (try! (contract-call? token-y transfer amount-out (as-contract tx-sender) recipient))
+        (var-set reserve-x (- reserve-x amount-out))
+        (var-set reserve-y (+ reserve-y amount-in))
+        (ok amount-in)
+      )
+      (begin
+        (asserts! (> reserve-x u0) (err ERR_ZERO_LIQUIDITY))
+        (asserts! (> reserve-y u0) (err ERR_ZERO_LIQUIDITY))
+        (var-set reserve-y (- reserve-y amount-out))
+        (var-set reserve-x (+ reserve-x amount-in))
+        (try! (contract-call? token-y transfer amount-in tx-sender (as-contract tx-sender)))
+        (try! (contract-call? token-x transfer amount-out (as-contract tx-sender) recipient))
+        (var-set reserve-y (- reserve-y amount-out))
+        (var-set reserve-x (+ reserve-x amount-in))
+        (ok amount-in)
+      )
+    )
+  )
+)
+
+
+(define-public (set-fee-tier (tier-id uint) (lp-fee-bps uint) (protocol-fee-bps uint))
+  (begin
+    (asserts! (is-eq tx-sender (var-get factory)) (err ERR_UNAUTHORIZED))
+    (map-set fee-tiers tier-id { lp-fee-bps: lp-fee-bps, protocol-fee-bps: protocol-fee-bps })
+    (ok true)
+  )
+)
+
+(define-public (set-default-fee-tier (lp-fee-bps uint) (protocol-fee-bps uint))
+  (begin
+    (asserts! (is-eq tx-sender (var-get factory)) (err ERR_UNAUTHORIZED))
+    (var-set default-lp-fee-bps lp-fee-bps)
+    (var-set default-protocol-fee-bps protocol-fee-bps)
+    (ok true)
+  )
+)
 
 ;; Private functions
 ;; Calculate output amount for constant product formula with fees

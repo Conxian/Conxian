@@ -329,7 +329,7 @@
 )
 
 ;; --- Migration: CXLP -> CXD ---
-(use-trait sip-010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.sip-010-ft-trait)
+(use-trait sip-010-ft-trait '.all-traits.sip-010-ft-trait)
 (define-public (migrate-to-cxd (amount uint) (recipient principal) (cxd <sip-010-ft-trait>))
   (let (
       (start (unwrap! (var-get migration-start-height) (err ERR_MIGRATION_NOT_SET)))

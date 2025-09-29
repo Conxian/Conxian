@@ -2,7 +2,7 @@
 ;; Advanced liquidity management and optimization system for enterprise operations
 ;; Handles automated liquidity balancing, capital efficiency, and risk management
 
-(use-trait sip-010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
+(use-trait sip-010-ft-trait '.all-traits.sip-010-ft-trait)
 
 ;; Constants
 (define-constant ERR_UNAUTHORIZED (err u10001))
@@ -280,6 +280,14 @@
     (ok u3))) ;; Simplified implementation
 
 ;; === AUTOMATED REBALANCING ===
+;; @desc Creates a new automated rebalancing rule.
+;; @param rule-name The name of the rebalancing rule.
+;; @param source-pool The source pool from which liquidity will be rebalanced.
+;; @param target-pools A list of target pools to which liquidity can be moved, along with their weights.
+;; @param trigger-condition The condition that triggers the rebalancing (e.g., "UTILIZATION_DEVIATION").
+;; @param trigger-threshold The threshold value for the trigger condition.
+;; @param max-rebalance-amount The maximum amount of liquidity that can be rebalanced in a single execution.
+;; @returns An `(ok uint)` result containing the ID of the newly created rule, or an error.
 (define-public (create-rebalancing-rule
   (rule-name (string-ascii 50))
   (source-pool {pool-id: uint, asset: principal})
@@ -313,6 +321,10 @@
     
     (ok rule-id)))
 
+;; @desc Internal function to check if any rebalancing rules should be triggered for a given pool.
+;; @param pool-id The ID of the pool to check.
+;; @param asset The asset of the pool to check.
+;; @returns An `(ok bool)` result indicating if rebalancing was triggered, or an error.
 (define-private (internal-check-rebalance-triggers (pool-id uint) (asset principal))
   ;; Check if any rebalancing rules should be triggered
   (let ((pool (unwrap! (map-get? liquidity-pools {pool-id: pool-id, asset: asset}) ERR_POOL_NOT_FOUND)))
@@ -340,9 +352,17 @@
             (ok true)))))))
 
 ;; Public wrapper to align expected two-argument usage across contracts
+;; @desc Public wrapper to align expected two-argument usage across contracts for checking rebalance triggers.
+;; @param pool-id The ID of the pool to check.
+;; @param asset The asset of the pool to check.
+;; @returns An `(ok bool)` result indicating if rebalancing was triggered, or an error.
 (define-public (check-rebalance-triggers (pool-id uint) (asset principal))
   (internal-check-rebalance-triggers pool-id asset))
 
+;; @desc Triggers emergency mode for a given pool, typically due to critically low liquidity.
+;; @param pool-id The ID of the pool to put into emergency mode.
+;; @param asset The asset of the pool.
+;; @returns An `(ok bool)` result indicating success, or an error.
 (define-private (trigger-emergency-mode (pool-id uint) (asset principal))
   (let ((pool (unwrap! (map-get? liquidity-pools {pool-id: pool-id, asset: asset}) ERR_POOL_NOT_FOUND)))
     ;; Enable emergency mode
@@ -355,6 +375,10 @@
     (print (tuple (event "emergency-mode-activated") (pool-id pool-id)))
     (ok true)))
 
+;; @desc Executes the rebalancing of a pool based on its current utilization and target utilization.
+;; @param pool-id The ID of the pool to rebalance.
+;; @param asset The asset of the pool to rebalance.
+;; @returns An `(ok bool)` result indicating success, or an error.
 (define-private (execute-pool-rebalance (pool-id uint) (asset principal))
   (let ((pool (unwrap! (map-get? liquidity-pools {pool-id: pool-id, asset: asset}) ERR_POOL_NOT_FOUND)))
     
@@ -367,7 +391,7 @@
                              ;; Need to reduce utilization - add liquidity
                              true
                              ;; Need to increase utilization - move liquidity elsewhere
-                             false)))
+                             false))))
       
       ;; Execute rebalancing
       (begin
@@ -375,7 +399,6 @@
                         (add-liquidity-to-pool pool-id asset)
                         (remove-excess-liquidity pool-id asset)))
         
-        ;; Update last rebalance time
         (map-set liquidity-pools {pool-id: pool-id, asset: asset}
           (merge pool {last-rebalance: block-height}))
         
@@ -398,43 +421,43 @@
   ;; Scan for cross-pool arbitrage opportunities
   (let ((opportunity-id (var-get next-opportunity-id)))
     (asserts! (is-admin) ERR_UNAUTHORIZED)
-    
+
     ;; TODO: Implement cross-pool price scanning
     ;; This would compare prices/yields across pools to find arbitrage
-    
+
     (print (tuple (event "arbitrage-scan-completed") (opportunities-found u0)))
-    (ok u0))) ;; Return number of opportunities found
+    (ok u0)))
 
 ;; === LIQUIDITY PROVIDER FUNCTIONS ===
-(define-public (add-liquidity-provider 
-  (provider principal) 
-  (pool-id uint) 
-  (asset principal) 
+(define-public (add-liquidity-provider
+  (provider principal)
+  (pool-id uint)
+  (asset principal)
   (amount uint)
   (tier uint))
-  
+
   (begin
     (asserts! (is-admin) ERR_UNAUTHORIZED)
     (asserts! (> amount u0) ERR_INVALID_AMOUNT)
     (asserts! (<= tier u3) ERR_INVALID_AMOUNT) ;; Max tier 3
-    
+
     ;; Update provider record
     (let ((current-provision (default-to
-                               {provided-amount: u0, share-percentage: u0, rewards-earned: u0, 
+                               {provided-amount: u0, share-percentage: u0, rewards-earned: u0,
                                 last-provision: u0, provider-tier: u1}
                                (map-get? liquidity-providers {provider: provider, pool-id: pool-id, asset: asset}))))
-      
+
       (map-set liquidity-providers {provider: provider, pool-id: pool-id, asset: asset}
-        (merge current-provision 
+        (merge current-provision
                {provided-amount: (+ (get provided-amount current-provision) amount),
                 last-provision: block-height,
                 provider-tier: tier}))
-      
+
       ;; Update global tracking
       (var-set total-liquidity-managed (+ (var-get total-liquidity-managed) amount))
-      
+
       (print (tuple (event "liquidity-provider-added") (provider provider) (amount amount)))
-      
+
       (ok true))))
 
 ;; === READ-ONLY FUNCTIONS ===
@@ -472,6 +495,7 @@
     (failed-optimizations (var-get failed-optimizations))
     (system-paused (var-get system-paused)))))
 
+
 (define-read-only (get-optimization-recommendations (pool-id uint) (asset principal))
   (match (map-get? liquidity-pools {pool-id: pool-id, asset: asset})
     pool
@@ -482,13 +506,12 @@
         (ok (tuple
           (current-utilization utilization)
           (target-utilization target)
-          (recommendation 
+          (recommendation
             (if (> utilization (+ target REBALANCE_THRESHOLD))
               "REDUCE_UTILIZATION"
               (if (< utilization (- target REBALANCE_THRESHOLD))
                 "INCREASE_UTILIZATION"
-                "OPTIMAL")))
-          (priority (if (get emergency-mode pool) "HIGH" "MEDIUM")))))
+                "OPTIMAL"))))))
     ERR_POOL_NOT_FOUND))
 
 ;; === EMERGENCY FUNCTIONS ===
@@ -499,11 +522,11 @@
     (print (tuple (event "system-emergency-pause") (block block-height)))
     (ok true)))
 
-(define-public (emergency-unpause)
+(define-public (emergency-resume)
   (begin
     (asserts! (is-admin) ERR_UNAUTHORIZED)
     (var-set system-paused false)
-    (print (tuple (event "system-emergency-unpause") (block block-height)))
+    (print (tuple (event "system-emergency-resume") (block block-height)))
     (ok true)))
 
 ;; Bulk operations for efficiency

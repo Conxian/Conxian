@@ -2,7 +2,7 @@
 ;; sBTC Bond Integration - Advanced bond issuance with sBTC collateral and yields
 ;; Provides enterprise bond structuring, sBTC yield distribution, and risk management
 
-(use-trait ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
+(use-trait ft-trait .all-traits.sip-010-ft-trait)
 
 ;; =============================================================================
 ;; CONSTANTS AND ERROR CODES
@@ -128,7 +128,7 @@
           (asserts! (>= collateral-value required-collateral) ERR_INSUFFICIENT_COLLATERAL)
           
           ;; Transfer collateral to contract
-          (try! (contract-call? 'SP3K8BC0PPEVCV7NZ6QSRWPQ2JE9E5B6N3PA0KBR9.sbtc-token transfer collateral-amount tx-sender (as-contract tx-sender) none))
+          (try! (contract-call? .sbtc-token transfer collateral-amount tx-sender (as-contract tx-sender) none))
           
           ;; Create bond
           (map-set sbtc-bonds 
@@ -178,7 +178,7 @@
       (let ((purchase-price amount))
         
         ;; Transfer payment to bond issuer
-        (try! (contract-call? 'SP3K8BC0PPEVCV7NZ6QSRWPQ2JE9E5B6N3PA0KBR9.sbtc-token transfer purchase-price tx-sender (get issuer bond) none))
+        (try! (contract-call? .sbtc-token transfer purchase-price tx-sender (get issuer bond) none))
         
         ;; Record bond holding
         (let ((existing-holding (default-to 
@@ -215,7 +215,7 @@
       (asserts! (> initial-sbtc-amount u0) ERR_INVALID_YIELD_DISTRIBUTION)
       
       ;; Transfer sBTC to contract for yield generation
-      (try! (contract-call? 'SP3K8BC0PPEVCV7NZ6QSRWPQ2JE9E5B6N3PA0KBR9.sbtc-token transfer initial-sbtc-amount tx-sender (as-contract tx-sender) none))
+      (try! (contract-call? .sbtc-token transfer initial-sbtc-amount tx-sender (as-contract tx-sender) none))
       
       ;; Create yield pool
       (map-set yield-distribution-pools 
@@ -345,7 +345,7 @@
                  (interest-amount (/ (* (get amount-held holding) (get coupon-rate bond) blocks-since-claim) (* annual-blocks u1000000))))
         
         ;; Transfer interest to bond holder
-        (try! (as-contract (contract-call? 'SP3K8BC0PPEVCV7NZ6QSRWPQ2JE9E5B6N3PA0KBR9.sbtc-token transfer interest-amount tx-sender tx-sender none)))
+        (try! (as-contract (contract-call? .sbtc-token transfer interest-amount tx-sender tx-sender none)))
         
         ;; Update holding record
         (map-set bond-holders 
@@ -377,7 +377,7 @@
         (let ((redemption-amount (get amount-held holding)))
           
           ;; Transfer redemption amount to holder
-          (try! (as-contract (contract-call? 'SP3K8BC0PPEVCV7NZ6QSRWPQ2JE9E5B6N3PA0KBR9.sbtc-token transfer redemption-amount tx-sender tx-sender none)))
+          (try! (as-contract (contract-call? .sbtc-token transfer redemption-amount tx-sender tx-sender none)))
           
           ;; Mark bond portion as redeemed
           (map-delete bond-holders { bond-id: bond-id, holder: tx-sender })
@@ -465,7 +465,7 @@
       bond (begin
         ;; Transfer collateral to liquidator at discount
         (let ((liquidation-amount (/ (* (get collateral-amount bond) u950000) u1000000))) ;; 5% discount
-          (try! (as-contract (contract-call? 'SP3K8BC0PPEVCV7NZ6QSRWPQ2JE9E5B6N3PA0KBR9.sbtc-token transfer liquidation-amount tx-sender tx-sender none)))
+          (try! (as-contract (contract-call? .sbtc-token transfer liquidation-amount tx-sender tx-sender none)))
           
           ;; Mark bond as defaulted
           (map-set sbtc-bonds 

@@ -5,10 +5,13 @@
 (define-constant ERR_DIVISION_BY_ZERO (err u2002))
 (define-constant ERR_INVALID_PRECISION (err u2003))
 
+(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.fixed-point-math-trait)
+
 ;; Precision constants
 (define-constant ONE_18 u1000000000000000000) ;; 18 decimals
 (define-constant ONE_8 u100000000) ;; 8 decimals
 (define-constant ONE_6 u1000000) ;; 6 decimals
+
 
 ;; === MULTIPLICATION FUNCTIONS ===
 (define-read-only (mul-down (a uint) (b uint))

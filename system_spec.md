@@ -41,7 +41,7 @@ Conxian is a comprehensive DeFi protocol built on Stacks blockchain, featuring a
 
 - **Type**: SIP-010 Fungible Token
 - **Purpose**: Primary protocol revenue token with staking rewards
-- **Contract**: `cxd-token.clar` (258 lines)
+- **Contract**: `cxd-token.clar` (384 lines)
 - **Features**:
   - Revenue distribution integration
   - Transfer hooks for system notifications
@@ -51,7 +51,7 @@ Conxian is a comprehensive DeFi protocol built on Stacks blockchain, featuring a
 
 #### CXD Staking System
 
-- **Contract**: `cxd-staking.clar` (343 lines)
+- **Contract**: `cxd-staking.clar` (382 lines)
 - **Token**: xCXD (Staked CXD representation)
 - **Features**:
   - Warm-up period: 1440 blocks (~1 day)
@@ -64,7 +64,7 @@ Conxian is a comprehensive DeFi protocol built on Stacks blockchain, featuring a
 
 - **Type**: SIP-010 Fungible Token  
 - **Purpose**: Governance participation and utility
-- **Contract**: `cxvg-token.clar` (148 lines)
+- **Contract**: `cxvg-token.clar` (280 lines)
 - **Supply**: 100M tokens
 - **Features**:
   - Time-weighted voting power (up to 4x)
@@ -74,7 +74,7 @@ Conxian is a comprehensive DeFi protocol built on Stacks blockchain, featuring a
 
 #### CXVG Utility System
 
-- **Contract**: `cxvg-utility.clar` (280 lines)
+- **Contract**: `cxvg-utility.clar` (360 lines)
 - **Features**:
   - Fee discount calculations
   - Governance power boosts
@@ -85,7 +85,7 @@ Conxian is a comprehensive DeFi protocol built on Stacks blockchain, featuring a
 
 - **Type**: SIP-010 Fungible Token
 - **Purpose**: Liquidity provision and migration
-- **Contract**: `cxlp-token.clar` (194 lines)
+- **Contract**: `cxlp-token.clar` (373 lines)
 - **Supply**: 50M tokens
 - **Features**:
   - 4-year financial cycles
@@ -94,8 +94,7 @@ Conxian is a comprehensive DeFi protocol built on Stacks blockchain, featuring a
 
 #### CXLP Migration System
 
-- **Contract**: `cxlp-migration-queue.clar` (245 lines)
-- **Features**:
+- **Contract**:- `cxlp-migration-queue.clar` (301 lines) **Features**:
   - Intent-based migration queue
   - Anti-gaming mechanisms
   - Pro-rata settlement
@@ -106,7 +105,7 @@ Conxian is a comprehensive DeFi protocol built on Stacks blockchain, featuring a
 
 - **Type**: SIP-010 Fungible Token
 - **Purpose**: Creator economy and merit-based rewards
-- **Contract**: `cxtr-token.clar` (328 lines)
+- **Contract**: `cxtr-token.clar` (440 lines)
 - **Features**:
   - Merit-based distribution
   - Creator governance council
@@ -116,14 +115,14 @@ Conxian is a comprehensive DeFi protocol built on Stacks blockchain, featuring a
 ### 5. CXS Token (System/Utility)
 
 - **Type**: SIP-010 Fungible Token
-- **Contract**: `cxs-token.clar` (91 lines)
+- **Contract**: `cxs-token.clar` (93 lines)
 - **Purpose**: System utility and specialized functions
 
 ## Core System Components
 
 ### Token System Coordination
 
-- **Contract**: `token-system-coordinator.clar` (388 lines)
+- **Contract**: `token-system-coordinator.clar` (428 lines)
 - **Purpose**: Unified interface for all token operations
 - **Features**:
   - Cross-system operation tracking
@@ -133,7 +132,7 @@ Conxian is a comprehensive DeFi protocol built on Stacks blockchain, featuring a
 
 ### Revenue Distribution System
 
-- **Contract**: `revenue-distributor.clar` (402 lines)
+- **Contract**: `revenue-distributor.clar` (354 lines)
 - **Revenue Split**:
   - 80% to xCXD stakers
   - 15% to treasury
@@ -146,7 +145,7 @@ Conxian is a comprehensive DeFi protocol built on Stacks blockchain, featuring a
 
 ### Protocol Security & Monitoring
 
-- **Contract**: `protocol-invariant-monitor.clar` (358 lines)
+- **Contract**: `protocol-invariant-monitor.clar` (137 lines)
 - **Features**:
   - Real-time invariant checking
   - Circuit breaker triggers
@@ -155,7 +154,7 @@ Conxian is a comprehensive DeFi protocol built on Stacks blockchain, featuring a
 
 ### Token Emission Control
 
-- **Contract**: `token-emission-controller.clar` (287 lines)
+- **Contract**: `token-emission-controller.clar` (321 lines)
 - **Features**:
   - Hard-coded emission limits
   - Supermajority voting (67%+)
@@ -166,7 +165,7 @@ Conxian is a comprehensive DeFi protocol built on Stacks blockchain, featuring a
 
 ### Registry System
 
-- **Contract**: `dim-registry.clar` (89 lines)
+- **Contract**: `dim-registry.clar` (51 lines)
 - **Purpose**: Dimension registration and weight management
 - **Features**:
   - Contract discovery
@@ -175,13 +174,13 @@ Conxian is a comprehensive DeFi protocol built on Stacks blockchain, featuring a
 
 ### Metrics & Analytics
 
-- **Contract**: `dim-metrics.clar` (71 lines)
+- **Contract**: `dim-metrics.clar` (38 lines)
 - **Purpose**: KPI aggregation and performance tracking
 - **Integration**: Real-time data for automation decisions
 
 ### Oracle Automation
 
-- **Contract**: `dim-oracle-automation.clar` (92 lines)
+- **Contract**: `dim-oracle-automation.clar` (48 lines)
 - **Purpose**: Automated weight updates based on market conditions
 - **Features**:
   - Price feed integration
@@ -190,7 +189,7 @@ Conxian is a comprehensive DeFi protocol built on Stacks blockchain, featuring a
 
 ### Yield Staking
 
-- **Contract**: `dim-yield-stake.clar` (217 lines)
+- **Contract**: `dim-yield-stake.clar` (111 lines)
 - **Purpose**: Dimensional yield strategy coordination
 - **Features**:
   - Strategy selection
@@ -199,7 +198,7 @@ Conxian is a comprehensive DeFi protocol built on Stacks blockchain, featuring a
 
 ### Tokenized Bonds
 
-- **Contract**: `tokenized-bond.clar` (229 lines)
+- **Contract**: `tokenized-bond.clar` (334 lines)
 - **Purpose**: SIP-010 bond instruments
 - **Features**:
   - Dynamic SIP-010 dispatch
@@ -208,7 +207,7 @@ Conxian is a comprehensive DeFi protocol built on Stacks blockchain, featuring a
 
 ### Graph System
 
-- **Contract**: `dim-graph.clar` (64 lines)
+- **Contract**: `dim-graph.clar` (32 lines)
 - **Purpose**: Dimensional relationship mapping
 - **Use Cases**: Dependency tracking, optimization paths
 
@@ -216,7 +215,7 @@ Conxian is a comprehensive DeFi protocol built on Stacks blockchain, featuring a
 
 ### Vault System
 
-- **Main Contract**: `vault.clar` (388 lines)
+- **Main Contract**: `vault.clar` (112 lines)
 - **Purpose**: Multi-strategy yield optimization
 - **Features**:
   - Strategy allocation
@@ -226,15 +225,15 @@ Conxian is a comprehensive DeFi protocol built on Stacks blockchain, featuring a
 
 #### Enhanced Vault Features
 
-- **Flash Loan Integration**: `enhanced-flash-loan-vault.clar` (573 lines)
+- **Flash Loan Integration**: `enhanced-flash-loan-vault.clar` (MISSING)
 - **sBTC Integration**: Multiple sBTC-specific contracts
 - **Lending Integration**: Enterprise-grade lending protocols
 
 ### DEX Infrastructure
 
-- **Factory**: `dex-factory.clar` (309 lines)
-- **Pool**: `dex-pool.clar` (279 lines)  
-- **Router**: `dex-router.clar` (158 lines)
+- **Factory**: `dex-factory.clar` (MISSING)
+- **Pool**: `dex-pool.clar` (MISSING)  
+- **Router**: `dex-router.clar` (336 lines)
 - **Features**:
   - Multiple pool types
   - Automated market making
@@ -243,9 +242,9 @@ Conxian is a comprehensive DeFi protocol built on Stacks blockchain, featuring a
 
 ### Lending Protocol
 
-- **Main System**: `comprehensive-lending-system.clar` (485 lines)
-- **Governance**: `lending-protocol-governance.clar` (322 lines)
-- **Liquidation**: `loan-liquidation-manager.clar` (331 lines)
+- **Main System**: `comprehensive-lending-system.clar` (405 lines)
+- **Governance**: `lending-protocol-governance.clar` (471 lines)
+- **Liquidation**: `loan-liquidation-manager.clar` (51 lines)
 - **Features**:
   - Multi-collateral lending
   - Dynamic interest rates
@@ -255,7 +254,7 @@ Conxian is a comprehensive DeFi protocol built on Stacks blockchain, featuring a
 ### Flash Loan System
 
 - **Core**: `enhanced-flash-loan-vault.clar` (573 lines)
-- **sBTC Extension**: `sbtc-flash-loan-extension.clar` (299 lines)
+- **sBTC Extension**: `sbtc-flash-loan-extension.clar` (470 lines)
 - **Features**:
   - Uncollateralized loans
   - Atomic execution
@@ -266,7 +265,7 @@ Conxian is a comprehensive DeFi protocol built on Stacks blockchain, featuring a
 
 ### Advanced Math Library
 
-- **Contract**: `fixed-point-math.clar` (428 lines)
+- **Contract**: `fixed-point-math.clar` (209 lines)
 - **Functions**:
   - Precision arithmetic
   - Square root calculations
@@ -275,12 +274,12 @@ Conxian is a comprehensive DeFi protocol built on Stacks blockchain, featuring a
 
 ### Precision Calculator
 
-- **Contract**: `precision-calculator.clar` (172 lines)
+- **Contract**: `precision-calculator.clar` (213 lines)
 - **Purpose**: High-precision calculations for financial operations
 
 ### Math Library Advanced
 
-- **Contract**: `math-lib-advanced.clar` (199 lines)
+- **Contract**: `math-lib-advanced.clar` (164 lines)
 - **Features**:
   - Advanced mathematical operations
   - Optimization algorithms
@@ -290,7 +289,7 @@ Conxian is a comprehensive DeFi protocol built on Stacks blockchain, featuring a
 
 ### Transaction Processing
 
-- **Contract**: `transaction-batch-processor.clar` (237 lines)
+- **Contract**: `transaction-batch-processor.clar` (301 lines)
 - **Features**:
   - Batch transaction processing
   - Gas optimization
@@ -298,7 +297,7 @@ Conxian is a comprehensive DeFi protocol built on Stacks blockchain, featuring a
 
 ### Caching System
 
-- **Contract**: `distributed-cache-manager.clar` (221 lines)
+- **Contract**: `distributed-cache-manager.clar` (364 lines)
 - **Features**:
   - Distributed caching
   - Performance optimization
@@ -306,8 +305,8 @@ Conxian is a comprehensive DeFi protocol built on Stacks blockchain, featuring a
 
 ### Monitoring & Analytics
 
-- **Dashboard**: `real-time-monitoring-dashboard.clar` (331 lines)
-- **Predictive Scaling**: `predictive-scaling-system.clar` (301 lines)
+- **Dashboard**: `real-time-monitoring-dashboard.clar` (405 lines)
+- **Predictive Scaling**: `predictive-scaling-system.clar` (415 lines)
 - **Features**:
   - Real-time metrics
   - Performance prediction
@@ -317,7 +316,7 @@ Conxian is a comprehensive DeFi protocol built on Stacks blockchain, featuring a
 
 ### Circuit Breaker System
 
-- **Contract**: `automated-circuit-breaker.clar` (235 lines)
+- **Contract**: `circuit-breaker.clar` (412 lines)
 - **Features**:
   - Automated threat detection
   - Graduated response protocols
@@ -325,17 +324,42 @@ Conxian is a comprehensive DeFi protocol built on Stacks blockchain, featuring a
 
 ### Security Integrations
 
-- **sBTC Security**: Multiple sBTC-specific security contracts
-- **Oracle Security**: Price feed manipulation detection
-- **Access Control**: Role-based permissions with multi-sig
+### sBTC Security
+
+#### sBTC Security Contracts
+
+- `sbtc-integration.clar` (571 lines): Manages sBTC peg-in/peg-out, asset configuration, and risk parameters.
+- `sbtc-flash-loan-vault.clar` (523 lines): Provides secure flash loans with sBTC collateral.
+- `sbtc-bond-integration.clar` (580 lines): Handles sBTC-backed bond issuance and yield distribution.
+- `sbtc-lending-system.clar` (695 lines): Implements sBTC lending/borrowing with collateral management.
+- `sbtc-oracle-adapter.clar` (536 lines): Integrates sBTC price feeds with circuit breaker functionality.
+- `sbtc-flash-loan-extension.clar` (512 lines): Extends flash loan capabilities with sBTC support.
+- `sbtc-lending-integration.clar` (527 lines): Provides sBTC-specific lending and collateral management.
+
+### Oracle Security
+
+#### Oracle Security Contracts
+
+- `oracle-aggregator-v2.clar` (169 lines): Aggregates prices from multiple sources, calculates TWAP, and detects manipulation.
+- `dimensional-oracle.clar` (313 lines): Implements a robust price oracle with multiple data sources and deviation checks.
+- `oracle.clar` (160 lines): Standard price oracle implementation for the Conxian protocol.
+- `sbtc-oracle-adapter.clar` (536 lines): Handles sBTC price feeds with circuit breaker integration.
+- `mock-oracle.clar` (251 lines): Mock oracle for testing price feed manipulation detection.
+- `dim-oracle-automation.clar` (64 lines): Automates oracle data fetching and dimension weight adjustments.
+
+### Access Control
+
+#### Access Control Contracts
+
+- `access-control.clar` (439 lines): Implements role-based access control, multi-sig operations, and time-delayed execution.
 
 ## Integration & Interoperability
 
 ### sBTC Integration
 
-- **Core**: `sbtc-integration.clar` (318 lines)
-- **Lending**: `sbtc-lending-system.clar` (361 lines)
-- **Oracle**: `sbtc-oracle-adapter.clar` (397 lines)
+- **Core**: `sbtc-integration.clar` (571 lines)
+- **Lending**: `sbtc-lending-system.clar` (695 lines)
+- **Oracle**: `sbtc-oracle-adapter.clar` (536 lines)
 - **Features**:
   - Bitcoin yield strategies
   - Cross-chain composability
@@ -343,7 +367,7 @@ Conxian is a comprehensive DeFi protocol built on Stacks blockchain, featuring a
 
 ### Bond Issuance
 
-- **Contract**: `bond-issuance-system.clar` (455 lines)
+- **Contract**: `bond-issuance-system.clar` (390 lines)
 - **Features**:
   - Automated bond creation
   - Yield curve management
@@ -351,7 +375,7 @@ Conxian is a comprehensive DeFi protocol built on Stacks blockchain, featuring a
 
 ### Liquidity Optimization
 
-- **Contract**: `liquidity-optimization-engine.clar` (463 lines)
+- **Contract**: `liquidity-optimization-engine.clar` (557 lines)
 - **Features**:
   - Dynamic liquidity allocation
   - MEV protection
@@ -361,21 +385,39 @@ Conxian is a comprehensive DeFi protocol built on Stacks blockchain, featuring a
 
 ### DAO Governance
 
-- **Features**: Time-weighted voting, proposal systems
+- **Contract**: `lending-protocol-governance.clar` (505 lines)
+- **Features**: Time-weighted voting, proposal systems, execution timelocks, role-based access control.
 - **Integration**: CXVG utility system
 - **Controls**: Multi-signature requirements, timelock mechanisms
 
 ### Parameter Management
 
-- **Emission Controls**: Token supply management
-- **Fee Management**: Dynamic fee structures
-- **Risk Parameters**: Automated risk adjustment
+      - Emission Controls:
+        - token-emission-controller.clar (363 lines): Implements supply discipline across all 4 tokens with governance guards, hard-coded emission rails, and supermajority + timelock requirements.
+        - cxd-token.clar (384 lines): Integrates with the emission controller for enhanced mint/burn operations.
+        - token-system-coordinator.clar (473 lines): Manages the setting of the emission controller contract.
+      - Fee Management:
+        - revenue-distributor.clar (408 lines): Manages comprehensive revenue distribution, including protocol fees and tracking various fee types.
+        - enterprise-api.clar (295 lines): Supports tiered fee discounts for institutional accounts.
+        - concentrated-liquidity-pool.clar (474 lines) and concentrated-liquidity-pool.clar (585 lines): Implement customizable fee tiers (low, medium, high) for liquidity pools.
+        - cxvg-utility.clar (360 lines): Provides fee discounts based on CXVG staking tiers.
+        - yield-distribution-engine.clar (494 lines): Defines fee structures for yield distribution.
+        - dex-pool.clar (598 lines): Allows for dynamic adjustment of LP and protocol fees within DEX pools.
+      - Risk Parameters:
+        - `sbtc-lending-system.clar` (695 lines): Defines collateral factors, liquidation thresholds, and penalties. Tracks enterprise positions with risk ratings and manages liquidation history.
+        - `sbtc-lending-integration.clar` (527 lines): Calculates health factors for borrowers and determines maximum borrow amounts.
+        - `liquidation-manager.clar` (219 lines): Manages liquidation processes for undercollateralized loans, including single and multiple position liquidations, and emergency liquidations.
+        - `sbtc-bond-integration.clar` (580 lines): Checks and updates bond collateralization ratios, triggering alerts if liquidation thresholds are breached.
+        - `all-traits.clar` (656 lines): Defines the `liquidation-trait` for standardized liquidation operations.
+        - `comprehensive-lending-system.clar` (449 lines): Calculates borrower health factors and sets asset-specific collateral factors, liquidation thresholds, and bonuses.
+        - `loan-liquidation-manager.clar` (65 lines): Manages the overall liquidation process and integrates with the lending system.
+        - `enterprise-loan-manager.clar` (565 lines): Includes loan liquidation functionality and checks for under-collateralization.
 
 ## Development & Testing
 
 ### Test Infrastructure
 
-- **Clarinet Configuration**: `Clarinet.toml` (377 lines)
+- **Clarinet Configuration**: `Clarinet.toml` (226 lines)
 - **Test Suite**: Comprehensive testing framework
 - **Mock Contracts**: Testing utilities
 

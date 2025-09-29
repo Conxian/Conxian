@@ -1,9 +1,6 @@
-;; mev-protector.clar
-;; MEV Protection Layer for Conxian DEX
-
-;; --- Traits ---
-(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
-(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.circuit-breaker-trait)
+(use-trait utils-trait .utils.utils-trait)
+(impl-trait .sip-010-ft-trait)
+(impl-trait .circuit-breaker-trait)
 
 ;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED (err u6000))
@@ -31,21 +28,28 @@
 (define-map pending-reveals uint { user: principal, path: (list 20 principal), amount-in: uint, min-amount-out: (optional uint), recipient: principal, salt: (buff 32) })
 (define-data-var next-reveal-id uint u0)
 
+;; Helper to serialize a principal to a 32-byte buffer (hash of the principal)
+
+
+;; Helper to serialize a list of principals to a concatenated buffer
+(define-private (serialize-principal-list (principal-list (list 20 principal)))
+  (fold (lambda (p acc) (concat acc (contract-call? .utils principal-to-buff p))) principal-list 0x)
+)
+
 (define-private (get-commitment-hash (path (list 20 principal)) (amount-in uint) (min-amount-out (optional uint)) (recipient principal) (salt (buff 32)))
-  (let ((path-buff 0x))
-    (let ((amount-buff 0x))
-      (let ((recipient-buff 0x))
-        (let ((min-amount-buff 0x00))
-          (sha256 (concat
-            path-buff
-            amount-buff
-            min-amount-buff
-            recipient-buff
-            salt
-          ))
-        )
-      )
+  (let (
+      (path-serialized (serialize-principal-list path))
+      (amount-serialized (to-consensus-buff amount-in))
+      (min-amount-serialized (match min-amount-out (some u) (to-consensus-buff u) 0x))
+      (recipient-serialized (contract-call? .utils principal-to-buff recipient))
     )
+    (sha256 (concat
+      path-serialized
+      amount-serialized
+      min-amount-serialized
+      recipient-serialized
+      salt
+    ))
   )
 )
 
@@ -100,21 +104,26 @@
 )
 
 (define-public (reveal (path (list 20 principal)) (amount-in uint) (min-amount-out (optional uint)) (recipient principal) (salt (buff 32)))
-  (begin
-    (try! (check-circuit-breaker))
-    (let ((commitment-hash (get-commitment-hash path amount-in min-amount-out recipient salt)))
-      (let ((commitment-entry (unwrap! (map-get? commitments { user: tx-sender, commitment-hash: commitment-hash }) ERR_COMMITMENT_NOT_FOUND)))
-        (asserts! (not (get revealed commitment-entry)) ERR_ALREADY_REVEALED)
-        (asserts! (<= (- block-height (get block-height commitment-entry)) (var-get reveal-period)) ERR_REVEAL_PERIOD_EXPIRED)
-        
-        (map-set commitments { user: tx-sender, commitment-hash: commitment-hash } (merge commitment-entry {revealed: true}))
-        (let ((reveal-id (var-get next-reveal-id)))
-          (map-set pending-reveals reveal-id { user: tx-sender, path: path, amount-in: amount-in, min-amount-out: min-amount-out, recipient: recipient, salt: salt })
-          (var-set next-reveal-id (+ reveal-id u1))
-          (ok reveal-id)
-        )
-      )
+  (let (
+    (calculated-hash (get-commitment-hash path amount-in min-amount-out recipient salt))
+    (commitment-key { user: tx-sender, commitment-hash: calculated-hash })
+    (commitment (map-get? commitments commitment-key))
+  )
+    (asserts! (is-some commitment) ERR_COMMITMENT_NOT_FOUND)
+    (asserts! (not (get revealed (unwrap-panic commitment))) ERR_ALREADY_REVEALED)
+    (asserts! (>= block-height (+ (get block-height (unwrap-panic commitment)) (var-get reveal-period))) ERR_REVEAL_PERIOD_NOT_EXPIRED)
+
+    ;; Mark as revealed
+    (map-set commitments commitment-key (merge (unwrap-panic commitment) { revealed: true }))
+
+    ;; Store for batch auction
+    (let (
+      (next-id (var-get next-reveal-id))
     )
+      (map-set pending-reveals next-id { user: tx-sender, path: path, amount-in: amount-in, min-amount-out: min-amount-out, recipient: recipient, salt: salt })
+      (var-set next-reveal-id (+ next-id u1))
+    )
+    (ok true)
   )
 )
 
@@ -138,13 +147,14 @@
 (define-private (detect-sandwich-attack (path (list 20 principal)) (amount-in uint))
   ;; Basic sandwich detection: check for significant price changes before and after the transaction
   ;; This is a simplified implementation. A more robust solution would involve more sophisticated analysis.
-  (let ((price-before (try! (get-price path amount-in))))
-    (let ((price-after (try! (get-price path amount-in))))
-      (let ((deviation (/ (* (abs (- price-after price-before)) u10000) price-before)))
-        (if (> deviation u500) ;; 5% deviation
-          (err ERR_SANDWICH_ATTACK_DETECTED)
-          (ok true)
-        )
+  (let (
+    (price-before (try! (get-price path amount-in)))
+    (price-after (try! (get-price path amount-in))) ;; This should ideally be a simulated price after the transaction
+  )
+    (let ((deviation (/ (* (abs (- price-after price-before)) u10000) price-before)))
+      (if (> deviation u500) ;; 5% deviation
+        (err ERR_SANDWICH_ATTACK_DETECTED)
+        (ok true)
       )
     )
   )

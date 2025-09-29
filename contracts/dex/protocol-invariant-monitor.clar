@@ -38,6 +38,13 @@
 (define-data-var next-violation-id uint u1)
 
 ;; --- Admin Functions ---
+(define-private (only-admin)
+  (only-role ROLE_ADMIN)
+)
+
+(define-private (only-pauser)
+  (only-role ROLE_PAUSER)
+)
 (define-public (set-emergency-operator (operator principal))
   (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
   (var-set emergency-operator operator)

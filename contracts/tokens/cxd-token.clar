@@ -381,3 +381,4 @@
     revenue-distributor: (var-get revenue-distributor-contract),
     emission-controller: (var-get emission-controller-contract)
   })
+

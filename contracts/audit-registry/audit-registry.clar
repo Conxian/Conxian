@@ -2,9 +2,12 @@
 ;; DAO-based contract security audit registry
 ;; Handles audit submissions, DAO voting, and NFT badge issuance
 
+(use-trait sip-009-nft-trait .traits.sip-009-nft-trait)
+(use-trait dao-trait .traits.dao-trait)
+
 ;; --- Traits ---
-(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-009-nft-trait)
-(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.dao-trait)
+(impl-trait .traits.sip-009-nft-trait)
+(impl-trait .traits.dao-trait)
 
 ;; --- Constants ---
 (define-constant CONTRACT_OWNER tx-sender)
@@ -60,7 +63,7 @@
       (audit-id (var-get next-audit-id))
       (caller tx-sender)
     )
-    (asserts! (is-eq (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits has-voting-power caller) (ok true)) ERR_UNAUTHORIZED)
+    (asserts! (is-eq (contract-call? .all-traits has-voting-power caller) (ok true)) ERR_UNAUTHORIZED)
     
     (map-set audits { id: audit-id }
       { 
@@ -90,7 +93,7 @@
     (asserts! (<= stacks-block-height (get voting-ends audit)) ERR_VOTING_CLOSED)
     (asserts! (not (contains? voters caller)) ERR_ALREADY_VOTED)
     
-    (match (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits get-voting-power caller)
+    (match (contract-call? .all-traits get-voting-power caller)
       voting-power
         (let ((votes (get votes audit)))
           (if approve
@@ -129,7 +132,7 @@
           })
         )
         ;; Mint NFT for successful audit
-        (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.audit-badge-nft mint 
+        (contract-call? .audit-badge-nft mint 
           audit-id
           (get report-uri audit)
           (get auditor audit)

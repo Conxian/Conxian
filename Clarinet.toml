@@ -5,9 +5,10 @@ clarinet_version = "3.5.0"
 
 [accounts]
 deployer = { mnemonic = "twice kind fence tip hidden tilt action fragile skin nothing glory cousin green tomorrow spring wrist shed math olympic multiply hip blue scout claw", balance = 100_000_000_000_000 }
-wallet_1 = { mnemonic = "sell invite acquire kitten bamboo drastic jelly vivid peace spawn twice guilt pave pen trash pretty park cube fragile unaware remain midnight betray rebuild", balance = 100_000_000_000_000 }
-wallet_2 = { mnemonic = "hold excess usual excess ring elephant install account glad dry fragile donkey gaze humble truck breeze nation gasp vacuum limb head keep delay hospital", balance = 100_000_000_000_000 }
-wallet_3 = { mnemonic = "cycle puppy glare enroll cost improve round trend wrist mushroom scorpion tower claim oppose clever elephant dinosaur eight problem before frozen dune wagon high", balance = 100_000_000_000_000 }
+wallet_1 = { address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6" }
+wallet_2 = { address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6" }
+[accounts.wallet_3]
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 system = { mnemonic = "theme apart absurd gasp river used vessel screen fiction slice slab ice jar hurt slam puppy snake life radar sign ship list excuse trick", balance = 100_000_000_000_000 }
 
 [network]
@@ -24,7 +25,7 @@ bitcoin_node_rpc_address = "https://blockstream.info/api"
 
 [contracts]
 # Core Contracts
-vault = { path = "contracts/vault.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.vault" }
+vault = { path = "contracts/dex/vault.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.vault" }
 tokenized-bond = { path = "contracts/dimensional/tokenized-bond.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.tokenized-bond" }
 all-traits = { path = "contracts/traits/all-traits.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits" }
 math-lib-advanced = { path = "contracts/lib/math-lib-advanced.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math-lib-advanced" }
@@ -36,6 +37,7 @@ auto-compounder = { path = "contracts/dex/auto-compounder.clar", address = "ST3P
 bond-factory = { path = "contracts/dex/bond-factory.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.bond-factory" }
 bond-issuance-system = { path = "contracts/dex/bond-issuance-system.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.bond-issuance-system" }
 concentrated-liquidity-pool = { path = "contracts/dex/concentrated-liquidity-pool.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.concentrated-liquidity-pool" }
+concentrated-liquidity-pool-v2 = { path = "contracts/dimensional/concentrated-liquidity-pool-v2.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.concentrated-liquidity-pool-v2" }
 concentrated-position-nft = { path = "contracts/dex/concentrated-position-nft.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.concentrated-position-nft" }
 cxd-staking = { path = "contracts/dex/cxd-staking.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.cxd-staking" }
 cxlp-migration-queue = { path = "contracts/dex/cxlp-migration-queue.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.cxlp-migration-queue" }
@@ -86,7 +88,7 @@ cxtr-token = { path = "contracts/tokens/cxtr-token.clar", address = "ST3PPMPR7SA
 cxvg-token = { path = "contracts/tokens/cxvg-token.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.cxvg-token" }
 
 # Access Control
-AccessControl = { path = "contracts/access/AccessControl.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.AccessControl" }
+AccessControl = { path = "contracts/governance/access-control.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.AccessControl" }
 
 # Audit Registry
 audit-badge-nft = { path = "contracts/audit-registry/audit-badge-nft.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.audit-badge-nft" }
@@ -108,8 +110,8 @@ Pausable = { path = "contracts/security/Pausable.clar", address = "ST3PPMPR7SAY4
 
 # Rewards
 rewards-distributor = { path = "contracts/rewards/rewards-distributor.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.rewards-distributor" }
-yield-distributor = { path = "contracts/rewards/yield-distributor.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.yield-distributor" }
 yield-optimizer = { path = "contracts/rewards/yield-optimizer.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.yield-optimizer" }
+
 
 # Test Contracts
 test-access = { path = "contracts/test/test-access.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.test-access" }
@@ -138,7 +140,7 @@ lending-system-trait = ".lending-system-trait"
 flash-loan-receiver-trait = ".flash-loan-receiver-trait"
 trait-registry = ".trait-registry"
 traits-manifest = ".traits-manifest"
-all-traits = ".all-traits"
+all-traits = "all-traits"
 
 # Tokens
 cxd-token = ".cxd-token"

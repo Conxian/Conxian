@@ -2,10 +2,10 @@
 ;; Standard price oracle implementation for the Conxian protocol
 
 ;; Constants
-(define-constant TRAIT_REGISTRY 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.trait-registry)
+(define-constant TRAIT_REGISTRY .trait-registry)
 
-(use-trait oracle-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.oracle-trait)
-(impl-trait .oracle-trait)
+(use-trait oracle-trait .all-traits.oracle-trait)
+(impl-trait .all-traits.oracle-trait)
 
 ;; Error codes
 (define-constant ERR_UNAUTHORIZED (err u1001))
@@ -40,7 +40,10 @@
   (let ((caller tx-sender))
     (asserts! (or 
                 (is-eq caller (var-get admin))
-                (is-eq (some? caller) (var-get oracle-contract))
+                (match (var-get oracle-contract)
+                  (some contract-principal) (is-eq caller contract-principal)
+                  none false
+                )
               ) 
       ERR_UNAUTHORIZED)
       

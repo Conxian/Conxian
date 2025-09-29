@@ -3,6 +3,10 @@
 
 (impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.oracle-trait)
 (impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.circuit-breaker-trait)
+(use-trait oracle-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.oracle-trait)
+(use-trait access-control-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.access-control-trait)
+(use-trait circuit-breaker-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.circuit-breaker-trait)
+(use-trait sip-010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
 
 ;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED (err u1003))
@@ -11,6 +15,7 @@
 (define-constant ERR_INVALID_PRICE (err u6003))
 (define-constant ERR_DEVIATION_TOO_HIGH (err u6004))
 (define-constant ERR_CIRCUIT_OPEN (err u5000))
+(define-constant ERR_PRICE_MANIPULATION (err u6005))
 
 (define-constant ONE_HOUR_IN_BLOCKS u6)
 
@@ -20,6 +25,7 @@
 (define-map oracle-sources (list 20 principal) bool)
 (define-map prices { token-a: principal, token-b: principal } { price: uint, last-updated: uint })
 (define-map twap { token-a: principal, token-b: principal } { price: uint, last-updated: uint })
+(define-map price-history { token-a: principal, token-b: principal } (list 100 uint)) ;; Stores last 100 prices
 
 ;; --- Public Functions ---
 
@@ -48,17 +54,18 @@
 )
 
 (define-public (update-price (token-a principal) (token-b principal))
-  (let ((sources (map-get? oracle-sources)))
+  (let (
+    (sources (map-get? oracle-sources))
+    (median-price (try! (calculate-median (try! (get-prices-from-sources (unwrap-panic (map-get? oracle-sources (list tx-sender))) token-a token-b)))))
+  )
     (asserts! (not (try! (check-circuit-breaker))) ERR_CIRCUIT_OPEN)
     (asserts! (is-some sources) ERR_NO_SOURCES)
-    (let ((prices (try! (get-prices-from-sources (unwrap-panic sources) token-a token-b))))
-      (let ((median-price (try! (calculate-median prices))))
-        (try! (check-deviation median-price token-a token-b))
-        (map-set prices { token-a: token-a, token-b: token-b } { price: median-price, last-updated: block-height })
-        (try! (update-twap median-price token-a token-b))
-        (ok median-price)
-      )
-    )
+    (try! (check-deviation median-price token-a token-b))
+    (try! (check-manipulation median-price token-a token-b))
+    (map-set prices { token-a: token-a, token-b: token-b } { price: median-price, last-updated: block-height })
+    (map-set price-history { token-a: token-a, token-b: token-b } (unwrap-panic (as-max-len? (append (default-to (list) (map-get? price-history { token-a: token-a, token-b: token-b })) median-price) u100)))
+    (try! (update-twap median-price token-a token-b))
+    (ok median-price)
   )
 )
 
@@ -73,7 +80,7 @@
 ;; --- Private Helper Functions ---
 
 (define-private (check-circuit-breaker)
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.circuit-breaker is-circuit-open)
+  (contract-call? .circuit-breaker-v1 is-circuit-open)
 )
 
 (define-private (get-prices-from-sources (sources (list 20 principal)) (token-a principal) (token-b principal))
@@ -92,35 +99,74 @@
         (ok (unwrap-panic (element-at sorted (/ (- len u1) u2))))
         (ok (/ (+ (unwrap-panic (element-at sorted (/ len u2))) (unwrap-panic (element-at sorted (- (/ len u2) u1)))) u2))
       )
+    )
+  )
 )
 
 (define-private (check-deviation (new-price uint) (token-a principal) (token-b principal))
   (match (map-get? prices { token-a: token-a, token-b: token-b })
-    (some price-data) (let ((old-price (get price price-data)))
-      (let ((deviation 
-        (* (/ (if (< old-price new-price) (- new-price old-price) (- old-price new-price)) old-price) u10000)))  ;; In basis points
-        (asserts! (< deviation u500) ERR_DEVIATION_TOO_HIGH)
+    (some old-price-data
+      (let (
+        (old-price (get price old-price-data))
+        (deviation (abs (- (to-int new-price) (to-int old-price))))
+        (threshold (/ (* old-price u500) u10000)) ;; 5% deviation threshold
+      )
+        (asserts! (<= deviation threshold) ERR_DEVIATION_TOO_HIGH)
         (ok true)
       )
     )
-    (none) (ok true)
+    (none (ok true)) ;; No previous price to compare, so no deviation
+  )
+)
 
 (define-private (update-twap (new-price uint) (token-a principal) (token-b principal))
-  (let ((current-twap (map-get? twap { token-a: token-a, token-b: token-b })))
-    (if (is-some current-twap)
-      (let ((old-twap (get price (unwrap-panic current-twap)))
-            (last-updated (get last-updated (unwrap-panic current-twap))))
-        (let ((time-diff (- block-height last-updated)))
-          (if (> time-diff ONE_HOUR_IN_BLOCKS)
-            (map-set twap { token-a: token-a, token-b: token-b } { price: new-price, last-updated: block-height })
-            (let ((new-twap (/ (+ (* old-twap (- ONE_HOUR_IN_BLOCKS time-diff)) (* new-price time-diff)) ONE_HOUR_IN_BLOCKS)))
-              (map-set twap { token-a: token-a, token-b: token-b } { price: new-twap, last-updated: block-height })
+  (let (
+    (current-block block-height)
+    (twap-period ONE_HOUR_IN_BLOCKS)
+  )
+    (match (map-get? twap { token-a: token-a, token-b: token-b })
+      (some old-twap-data
+        (let (
+          (old-twap (get price old-twap-data))
+          (last-updated (get last-updated old-twap-data))
+          (blocks-since-update (- current-block last-updated))
+        )
+          (if (> blocks-since-update u0)
+            (let (
+              (new-twap (/ (+ (* old-twap (- twap-period blocks-since-update)) (* new-price blocks-since-update)) twap-period))
             )
+              (map-set twap { token-a: token-a, token-b: token-b } { price: new-twap, last-updated: current-block })
+              (ok true)
+            )
+            (ok true) ;; No block passed, no TWAP update needed
           )
         )
       )
-      (map-set twap { token-a: token-a, token-b: token-b } { price: new-price, last-updated: block-height })
+      (none
+        ;; First TWAP update
+        (map-set twap { token-a: token-a, token-b: token-b } { price: new-price, last-updated: current-block })
+        (ok true)
+      )
     )
-    (ok true)
+  )
+
+(define-constant MANIPULATION_DEVIATION_THRESHOLD u1000) ;; 10% deviation threshold for manipulation
+
+(define-private (check-manipulation (new-price uint) (token-a principal) (token-b principal))
+  (let (
+    (history (default-to (list) (map-get? price-history { token-a: token-a, token-b: token-b })))
+  )
+    (if (>= (len history) u5) ;; Only check if enough history is available
+      (let (
+        (sum (fold + history u0))
+        (average (/ sum (len history)))
+        (deviation (abs (- (to-int new-price) (to-int average))))
+        (threshold (/ (* average MANIPULATION_DEVIATION_THRESHOLD) u10000))
+      )
+        (asserts! (<= deviation threshold) ERR_PRICE_MANIPULATION)
+        (ok true)
+      )
+      (ok true) ;; Not enough history to check for manipulation
+    )
   )
 )

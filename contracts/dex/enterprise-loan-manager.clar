@@ -3,7 +3,7 @@
 ;; Supports institutional borrowing, risk-based pricing, and automated bond creation
 
 (use-trait ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
-(use-trait lending-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.lending-system-trait)
+(use-trait lending-trait .lending-system-trait)
 
 ;; Import mathematical libraries for enterprise calculations (removed unresolved trait import)
 ;; (use-trait math-precision 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.precision-calculator)
@@ -379,7 +379,7 @@
       (begin
         ;; Distribute yield to bond holders if this is a bond-backed loan
         (if (is-some bond-token)
-          (match (contract-call? (unwrap-panic (var-get bond-issuance-system)) distribute-yield (unwrap-panic bond-token) u0)
+          (match (contract-call? bond-issuance-system distribute-yield (unwrap-panic bond-token) u0)
             (ok result) true
             (err error) (begin 
               (print (tuple (event "yield-distribution-failed") (error error) (message (some "Failed to distribute yield to bond holders"))))
@@ -400,7 +400,7 @@
 
         ;; If this was a bond-backed loan, mark the bond as matured
         (if (is-some bond-token)
-          (match (contract-call? (unwrap-panic (var-get bond-issuance-system)) mature-bond (unwrap-panic bond-token))
+          (match (contract-call? bond-issuance-system mature-bond (unwrap-panic bond-token))
             (ok result) true
             (err error) (err ERR_BOND_MATURATION_FAILED))
           true)

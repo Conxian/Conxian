@@ -31,7 +31,7 @@
 
 (define-private (accumulate-results (tx-info { to: principal, method: (string-ascii 256), args: (list 10 (buff 256)) })
                                    (results (list 100 (response bool uint))))
-  (let ((result (as-contract (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dex-pool (get method tx-info) (get args tx-info)))))
+  (let ((result (as-contract (contract-call? .dex-pool (get method tx-info) (get args tx-info)))))
     (append results result)
   )
 )
@@ -48,4 +48,23 @@
       )
     ) txs total-gas)
   )
+)
+
+(define-public (optimize-gas-usage (method (string-ascii 256)) (optimization-strategy (string-ascii 256)))
+  (begin
+    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
+    ;; Placeholder for gas optimization logic
+    ;; This could involve reordering operations, using more efficient Clarity functions,
+    ;; or suggesting alternative contract calls.
+    (print { method: method, strategy: optimization-strategy, status: "optimization-suggested" })
+    (ok true)
+  )
+)
+
+(define-read-only (get-system-health)
+  (ok { block-time: u5000, ;; Placeholder: average block time in ms
+        tx-throughput: u100, ;; Placeholder: transactions per block
+        system-health: "green", ;; Placeholder: overall system health status
+        gas-usage-average: u1000 ;; Placeholder: average gas usage per transaction
+      })
 )

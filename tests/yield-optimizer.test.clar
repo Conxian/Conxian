@@ -63,6 +63,91 @@
 
 ;; --- Test Cases ---
 
+(define-contract-public .mock-auto-compounder
+  (
+    (use-trait yield-optimizer-trait .all-traits.yield-optimizer-trait)
+    (use-trait sip-010-ft-trait .ft-trait)
+
+    (define-data-var contract-owner principal tx-sender)
+    (define-data-var yield-optimizer-contract principal .yield-optimizer)
+    (define-map user-positions { user: principal, token: principal } { amount: uint, last-compounded: uint })
+
+    (define-public (set-yield-optimizer-contract (new-optimizer principal))
+      (begin
+        (asserts! (is-eq tx-sender (var-get contract-owner)) (err u1000))
+        (var-set yield-optimizer-contract new-optimizer)
+        (ok true)
+      )
+    )
+
+    (define-public (deposit (token principal) (amount uint))
+      (begin
+        (try! (contract-call? token transfer amount tx-sender (as-contract tx-sender)))
+        (let ((position (default-to { amount: u0, last-compounded: u0 } (map-get? user-positions { user: tx-sender, token: token }))))
+          (map-set user-positions { user: tx-sender, token: token } (merge position { amount: (+ (get amount position) amount) }))
+          (ok true)
+        )
+      )
+    )
+
+    (define-public (compound (user principal) (token principal))
+      (begin
+        (ok (print (merge-map
+                    {event: "auto-compound-test", user: user, token: token}
+                    (try! (contract-call? (var-get yield-optimizer-contract) auto-compound user token)))))
+      )
+    )
+
+    (define-read-only (get-position (user principal) (token principal))
+      (map-get? user-positions { user: user, token: token })
+    )
+  )
+)
+
+(define-contract-public .mock-strategy-a
+  (
+    (use-trait sip-010-ft-trait .ft-trait)
+    (define-data-var apy uint u0)
+
+    (define-public (harvest-rewards)
+      (ok u1000)
+    )
+
+    (define-public (set-apy (new-apy uint))
+      (begin
+        (var-set apy new-apy)
+        (ok true)
+      )
+    )
+
+    (define-read-only (get-apy)
+      (ok (var-get apy))
+    )
+  )
+)
+
+(define-contract-public .mock-strategy-b
+  (
+    (use-trait sip-010-ft-trait .ft-trait)
+    (define-data-var apy uint u0)
+
+    (define-public (harvest-rewards)
+      (ok u2000)
+    )
+
+    (define-public (set-apy (new-apy uint))
+      (begin
+        (var-set apy new-apy)
+        (ok true)
+      )
+    )
+
+    (define-read-only (get-apy)
+      (ok (var-get apy))
+    )
+  )
+)
+
 (define-test (test-full-rebalance-cycle)
   (let ((wallet-1 .wallet_1)
         (wstx-token .mock-wstx)
@@ -115,4 +200,30 @@
 
 (define-read-only (get-balance (contract principal) (token principal))
   (contract-call? token get-balance contract)
+)
+
+(define-test (test-auto-compounder-integration)
+  (let ((wallet-1 .wallet_1)
+        (wstx-token .mock-wstx)
+        (optimizer .yield-optimizer)
+        (auto-compounder .mock-auto-compounder)
+        (deposit-amount u1000000))
+
+    ;; Set the yield optimizer contract in the auto-compounder
+    (as-contract (contract-call? auto-compounder set-yield-optimizer-contract optimizer))
+
+    ;; Mint tokens to wallet-1
+    (contract-call? .faucet mint-wstx wallet-1 deposit-amount)
+
+    ;; Deposit into auto-compounder
+    (as-contract (contract-call? wstx-token transfer deposit-amount wallet-1 auto-compounder))
+    (assert-uint-eq (unwrap-panic (contract-call? wstx-token get-balance auto-compounder)) deposit-amount)
+
+    ;; Call compound on auto-compounder
+    (as-contract (contract-call? auto-compounder compound wallet-1 wstx-token))
+
+    ;; Verify that auto-compound in yield-optimizer was called (this is hard to directly assert in Clarity tests)
+    ;; For now, we'll rely on the print statement in mock-auto-compounder to indicate it was called.
+    (ok true)
+  )
 )

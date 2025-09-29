@@ -3,12 +3,12 @@
 ;; Implements tick-based liquidity management with NFT position representation
 
 ;; Traits
-(use-trait sip-010-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
+(use-trait sip-010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
 (use-trait pool-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.pool-trait)
 (use-trait position-nft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.position-nft-trait)
 
 ;; Implementation
-(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.pool-trait)
+(impl-trait .pool-trait)
 
 ;; Constants
 (define-constant CONTRACT_OWNER tx-sender)
@@ -27,6 +27,8 @@
 (define-constant ERR_SLIPPAGE_TOO_HIGH (err u3005))
 (define-constant ERR_POSITION_NOT_FOUND (err u3006))
 (define-constant ERR_TICK_OUT_OF_BOUNDS (err u3007))
+(define-constant ERR_INVALID_POSITION (err u3008))
+(define-constant ERR_NO_LIQUIDITY (err u3009))
 
 ;; Data Variables
 (define-data-var token0 principal tx-sender)
@@ -124,21 +126,13 @@
 (define-private (get-tick-at-sqrt-ratio (sqrt-price-x96 uint))
   ;; Convert sqrt price to tick using advanced math
   ;; This is a simplified version - full implementation would use bit manipulation
-  (if (< sqrt-price-x96 u5602277097478614198912276234240) ;; sqrt(1.0001^-887272)
-      MIN_TICK
-      (if (> sqrt-price-x96 u281474976710655929084022779723) ;; sqrt(1.0001^887272)
-          MAX_TICK
-          0 ;; Simplified - would calculate actual tick
-      )
-  )
+  (ok (unwrap-panic (contract-call? .math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price-x96)))
 )
 
 (define-private (get-sqrt-ratio-at-tick (tick int))
   ;; Convert tick to sqrt price ratio
   ;; This is a simplified version - full implementation would use complex math
-  (asserts! (and (>= tick MIN_TICK) (<= tick MAX_TICK)) ERR_TICK_OUT_OF_BOUNDS)
-  ;; Simplified calculation - would use actual tick math
-  u79228162514264337593543950336 ;; sqrt(1) * 2^96
+  (ok (unwrap-panic (contract-call? .math-lib-concentrated get-sqrt-ratio-at-tick tick)))
 )
 
 (define-private (validate-tick (tick int))
@@ -178,29 +172,23 @@
     (try! (validate-tick tick-upper))
     (asserts! (< tick-lower tick-upper) ERR_INVALID_TICK)
 
-    (let ((amount0 uint 0)
-          (amount1 uint 0))
+    (let (
+      (sqrt-price-x96 (get sqrt-price-x96 slot0-data))
+      (current-tick (get tick slot0-data))
+    )
+      (asserts! (>= amount0-desired amount0-min) ERR_SLIPPAGE_TOO_HIGH)
+      (asserts! (>= amount1-desired amount1-min) ERR_SLIPPAGE_TOO_HIGH)
 
-      ;; Calculate amounts based on current price and tick range
-      ;; This is simplified - full implementation would use complex tick math
-      (if (and (>= (get tick slot0-data) tick-lower) (<= (get tick slot0-data) tick-upper))
-          ;; Current tick is within range
-          (begin
-            (set amount0 amount0-desired)
-            (set amount1 amount1-desired)
-          )
-          ;; Current tick is outside range - provide liquidity for one side
-          (if (< (get tick slot0-data) tick-lower)
-              (set amount0 amount0-desired)
-              (set amount1 amount1-desired)
-          )
+      (let (
+        (liquidity-calculated (unwrap-panic (contract-call? .math-lib-concentrated get-liquidity-for-amounts
+          sqrt-price-x96
+          (unwrap-panic (get-sqrt-ratio-at-tick tick-lower))
+          (unwrap-panic (get-sqrt-ratio-at-tick tick-upper))
+          amount0-desired
+          amount1-desired
+        )))
+        (token-id (var-get next-position-id))
       )
-
-      (asserts! (>= amount0 amount0-min) ERR_SLIPPAGE_TOO_HIGH)
-      (asserts! (>= amount1 amount1-min) ERR_SLIPPAGE_TOO_HIGH)
-
-      ;; Create new position
-      (let ((token-id (var-get next-position-id)))
         (map-set positions token-id
           {
             nonce: u0,
@@ -209,7 +197,7 @@
             token1: (var-get token1),
             tick-lower: tick-lower,
             tick-upper: tick-upper,
-            liquidity: amount0, ;; Simplified
+            liquidity: liquidity-calculated,
             fee-growth-inside0-last: u0,
             fee-growth-inside1-last: u0,
             tokens-owed0: u0,
@@ -220,11 +208,11 @@
         (var-set next-position-id (+ token-id u1))
 
         ;; Update ticks
-        (try! (update-tick tick-lower liquidity-delta amount0 amount1))
-        (try! (update-tick tick-upper (- liquidity-delta) amount0 amount1))
+        (try! (update-tick tick-lower (int liquidity-calculated) amount0-desired amount1-desired))
+        (try! (update-tick tick-upper (int (- liquidity-calculated)) amount0-desired amount1-desired))
 
         ;; Update global liquidity
-        (var-set liquidity (+ (var-get liquidity) amount0))
+        (var-set liquidity (+ (var-get liquidity) liquidity-calculated))
 
         (print {
           event: "mint",
@@ -232,12 +220,11 @@
           recipient: recipient,
           tick-lower: tick-lower,
           tick-upper: tick-upper,
-          amount0: amount0,
-          amount1: amount1
+          amount0: amount0-desired,
+          amount1: amount1-desired
         })
 
-        (ok (tuple (token-id token-id) (liquidity amount0) (amount0 amount0) (amount1 amount1)))
-      )
+        (ok (tuple (token-id token-id) (liquidity liquidity-calculated) (amount0 amount0-desired) (amount1 amount1-desired))))
     )
   )
 )
@@ -257,29 +244,61 @@
   )
 )
 
-(define-public (burn (token-id uint) (amount uint))
-  (let ((position (get-position token-id)))
-    (asserts! (> (get liquidity position) amount) ERR_INSUFFICIENT_LIQUIDITY)
-
-    ;; Update position
-    (map-set positions token-id
-      (merge position { liquidity: (- (get liquidity position) amount) })
+(define-public (burn (token-id uint) (liquidity-amount uint) (amount0-min uint) (amount1-min uint) (recipient principal))
+  (let (
+      (position (map-get? positions token-id))
     )
+    (asserts! (is-some position) ERR_INVALID_POSITION)
+    (let (
+        (p (unwrap-panic position))
+        (current-liquidity (get liquidity p))
+        (new-liquidity (- current-liquidity liquidity-amount))
+      )
+      (asserts! (>= current-liquidity liquidity-amount) ERR_INSUFFICIENT_LIQUIDITY)
 
-    ;; Update ticks
-    (try! (update-tick (get tick-lower position) (- amount) u0 u0))
-    (try! (update-tick (get tick-upper position) amount u0 u0))
+      (map-set positions token-id (merge p { liquidity: new-liquidity }))
 
-    ;; Update global liquidity
-    (var-set liquidity (- (var-get liquidity) amount))
+      ;; Calculate amounts to send back
+      (let (
+          (slot0-data (var-get slot0))
+          (sqrt-price-x96 (get sqrt-price-x96 slot0-data))
+          (tick-lower (get tick-lower p))
+          (tick-upper (get tick-upper p))
+          (amounts (unwrap-panic (contract-call? .math-lib-concentrated get-amounts-for-liquidity
+            sqrt-price-x96
+            (unwrap-panic (get-sqrt-ratio-at-tick tick-lower))
+            (unwrap-panic (get-sqrt-ratio-at-tick tick-upper))
+            liquidity-amount
+          )))
+          (amount0-to-send (get amount0 amounts))
+          (amount1-to-send (get amount1 amounts))
+        )
+        (asserts! (>= amount0-to-send amount0-min) ERR_SLIPPAGE_TOO_HIGH)
+        (asserts! (>= amount1-to-send amount1-min) ERR_SLIPPAGE_TOO_HIGH)
 
-    (print {
-      event: "burn",
-      token-id: token-id,
-      amount: amount
-    })
+        ;; Transfer tokens
+        (try! (contract-call? (var-get token0) transfer amount0-to-send tx-sender recipient))
+        (try! (contract-call? (var-get token1) transfer amount1-to-send tx-sender recipient))
 
-    (ok (tuple (amount0 u0) (amount1 u0)))
+        ;; Update ticks
+        (try! (update-tick tick-lower (int (- liquidity-amount)) amount0-to-send amount1-to-send))
+        (try! (update-tick tick-upper (int liquidity-amount) amount0-to-send amount1-to-send))
+
+        ;; Update global liquidity
+        (var-set liquidity (- (var-get liquidity) liquidity-amount))
+
+        (print {
+          event: "burn",
+          token-id: token-id,
+          recipient: recipient,
+          tick-lower: tick-lower,
+          tick-upper: tick-upper,
+          amount0: amount0-to-send,
+          amount1: amount1-to-send
+        })
+
+        (ok (tuple (amount0 amount0-to-send) (amount1 amount1-to-send))))
+    )
   )
 )
 
@@ -293,26 +312,202 @@
   (let ((slot0-data (var-get slot0)))
     (asserts! (get unlocked slot0-data) ERR_UNAUTHORIZED)
 
-    ;; Simplified swap logic - full implementation would include:
-    ;; 1. Price impact calculations
-    ;; 2. Fee calculations
-    ;; 3. Tick crossing logic
-    ;; 4. Oracle updates
+    (let (
+      (current-sqrt-price-x96 (get sqrt-price-x96 slot0-data))
+      (current-tick (get tick slot0-data))
+      (current-liquidity (var-get liquidity))
+      (amount-in u0)
+      (amount-out u0)
+      (fee-amount u0)
+      (next-sqrt-price-x96 u0)
+      (next-tick u0)
+    )
+      (if zero-for-one
+        (begin
+          ;; Swap token0 for token1
+          (let ((swap-result (unwrap-panic (contract-call? .math-lib-concentrated swap-x-for-y
+            current-sqrt-price-x96
+            current-liquidity
+            amount-specified
+            (get fee-protocol slot0-data)
+            (var-get fee)
+          ))))
+            (var-set amount-in (get amount-in swap-result))
+            (var-set amount-out (get amount-out swap-result))
+            (var-set fee-amount (get fee-amount swap-result))
+            (var-set next-sqrt-price-x96 (get sqrt-price-x96-next swap-result))
+            (var-set next-tick (get tick-next swap-result))
 
-    (print {
-      event: "swap",
-      recipient: recipient,
-      zero-for-one: zero-for-one,
-      amount-specified: amount-specified
-    })
+            (asserts! (>= next-sqrt-price-x96 sqrt-price-limit-x96) ERR_SLIPPAGE_TOO_HIGH)
 
-    (ok (tuple (amount0 u0) (amount1 u0)))
+            (try! (contract-call? (var-get token0) transfer amount-in tx-sender (as-contract tx-sender)))
+            (try! (contract-call? (var-get token1) transfer amount-out (as-contract tx-sender) recipient))
+
+            (var-set fee-growth-global0 (+ (var-get fee-growth-global0) fee-amount))
+          )
+        )
+        (begin
+          ;; Swap token1 for token0
+          (let ((swap-result (unwrap-panic (contract-call? .math-lib-concentrated swap-y-for-x
+            current-sqrt-price-x96
+            current-liquidity
+            amount-specified
+            (get fee-protocol slot0-data)
+            (var-get fee)
+          ))))
+            (var-set amount-in (get amount-in swap-result))
+            (var-set amount-out (get amount-out swap-result))
+            (var-set fee-amount (get fee-amount swap-result))
+            (var-set next-sqrt-price-x96 (get sqrt-price-x96-next swap-result))
+            (var-set next-tick (get tick-next swap-result))
+
+            (asserts! (<= next-sqrt-price-x96 sqrt-price-limit-x96) ERR_SLIPPAGE_TOO_HIGH)
+
+            (try! (contract-call? (var-get token1) transfer amount-in tx-sender (as-contract tx-sender)))
+            (try! (contract-call? (var-get token0) transfer amount-out (as-contract tx-sender) recipient))
+
+            (var-set fee-growth-global1 (+ (var-get fee-growth-global1) fee-amount))
+          )
+        )
+      )
+
+      (var-set slot0 (merge slot0-data {sqrt-price-x96: next-sqrt-price-x96, tick: next-tick}))
+
+      (print {
+        event: "swap",
+        recipient: recipient,
+        zero-for-one: zero-for-one,
+        amount-specified: amount-specified,
+        amount-in: amount-in,
+        amount-out: amount-out,
+        fee-amount: fee-amount
+      })
+
+      (ok (tuple (amount0 amount-in) (amount1 amount-out)))
+    )
+  )
+)
+
+(define-public (swap-x-for-y (amount-in uint) (amount-out-min uint) (recipient principal))
+  (let (
+      (slot0-data (var-get slot0))
+      (sqrt-price-x96 (get sqrt-price-x96 slot0-data))
+      (liquidity-val (var-get liquidity))
+      (current-fee-protocol (get fee-protocol slot0-data))
+      (current-fee-tier (var-get fee))
+      (token0-contract (var-get token0))
+      (token1-contract (var-get token1))
+    )
+    (asserts! (> liquidity-val u0) ERR_INSUFFICIENT_LIQUIDITY)
+
+    (let (
+        (result (unwrap-panic (contract-call? .math-lib-concentrated swap-x-for-y
+          sqrt-price-x96
+          liquidity-val
+          amount-in
+          current-fee-protocol
+          current-fee-tier
+        )))
+        (amount-out (get amount-out result))
+        (amount-in-actual (get amount-in result))
+        (sqrt-price-x96-next (get sqrt-price-x96-next result))
+        (tick-next (get tick-next result))
+        (fee-amount (get fee-amount result))
+      )
+      (asserts! (>= amount-out amount-out-min) ERR_SLIPPAGE_TOO_HIGH)
+
+      ;; Transfer tokens
+      (try! (contract-call? token0-contract transfer amount-in-actual tx-sender (as-contract tx-sender)))
+      (try! (contract-call? token1-contract transfer amount-out (as-contract tx-sender) recipient))
+
+      ;; Update slot0
+      (var-set slot0 (merge slot0-data {sqrt-price-x96: sqrt-price-x96-next, tick: tick-next}))
+
+      ;; Update fee growth
+      (var-set fee-growth-global0 (+ (var-get fee-growth-global0) fee-amount))
+
+      (print {
+        event: "swap",
+        sender: tx-sender,
+        recipient: recipient,
+        amount-in: amount-in-actual,
+        amount-out: amount-out,
+        token-in: token0-contract,
+        token-out: token1-contract
+      })
+
+      (ok amount-out)
+    )
+  )
+)
+
+(define-public (swap-y-for-x (amount-in uint) (amount-out-min uint) (recipient principal))
+  (let (
+      (slot0-data (var-get slot0))
+      (sqrt-price-x96 (get sqrt-price-x96 slot0-data))
+      (liquidity-val (var-get liquidity))
+      (fee-protocol (get fee-protocol slot0-data))
+      (fee-tier (var-get fee))
+      (token0-contract (var-get token0))
+      (token1-contract (var-get token1))
+    )
+    (asserts! (> liquidity-val u0) ERR_NO_LIQUIDITY)
+
+    (let (
+        (result (unwrap-panic (contract-call? .math-lib-concentrated swap-y-for-x
+          sqrt-price-x96
+          liquidity-val
+          amount-in
+          fee-protocol
+          fee-tier
+        )))
+        (amount-out (get amount-out result))
+        (amount-in-actual (get amount-in result))
+        (sqrt-price-x96-next (get sqrt-price-x96-next result))
+        (tick-next (get tick-next result))
+        (fee-amount (get fee-amount result))
+      )
+      (asserts! (>= amount-out amount-out-min) ERR_SLIPPAGE_TOO_HIGH)
+
+      ;; Transfer tokens
+      (try! (contract-call? token1-contract transfer amount-in-actual tx-sender (as-contract tx-sender)))
+      (try! (contract-call? token0-contract transfer amount-out (as-contract tx-sender) recipient))
+
+      ;; Update slot0
+      (var-set slot0 (merge slot0-data {sqrt-price-x96: sqrt-price-x96-next, tick: tick-next}))
+
+      ;; Update fee growth
+      (var-set fee-growth-global1 (+ (var-get fee-growth-global1) fee-amount))
+
+      (print {
+        event: "swap",
+        sender: tx-sender,
+        recipient: recipient,
+        amount-in: amount-in-actual,
+        amount-out: amount-out,
+        token-in: token1-contract,
+        token-out: token0-contract
+      })
+
+      (ok amount-out))
   )
 )
 
 (define-public (flash (recipient principal) (amount0 uint) (amount1 uint) (data (buff 256)))
   (begin
-    ;; Simplified flash loan - full implementation would include:
+    (asserts! (is-eq tx-sender (var-get factory)) ERR_UNAUTHORIZED)
+
+    ;; Transfer tokens to recipient
+    (try! (contract-call? (var-get token0) transfer amount0 (as-contract tx-sender) recipient))
+    (try! (contract-call? (var-get token1) transfer amount1 (as-contract tx-sender) recipient))
+
+    ;; Execute callback
+    (try! (contract-call? recipient flash-callback amount0 amount1 data))
+
+    ;; Transfer tokens back from recipient
+    (try! (contract-call? (var-get token0) transfer amount0 recipient (as-contract tx-sender)))
+    (try! (contract-call? (var-get token1) transfer amount1 recipient (as-contract tx-sender)))
+
     ;; 1. Fee calculations
     ;; 2. Callback validation
     ;; 3. Balance checks
@@ -347,6 +542,10 @@
       (var-set protocol-fees-token0 (- protocol-fees0 amount0))
       (var-set protocol-fees-token1 (- protocol-fees1 amount1))
 
+      ;; Transfer tokens
+      (try! (contract-call? (var-get token0) transfer amount0 (as-contract tx-sender) recipient))
+      (try! (contract-call? (var-get token1) transfer amount1 (as-contract tx-sender) recipient))
+
       (print {
         event: "collect-protocol",
         recipient: recipient,
@@ -362,9 +561,9 @@
 (define-public (initialize (sqrt-price-x96 uint))
   (begin
     (asserts! (is-eq tx-sender (var-get factory)) ERR_UNAUTHORIZED)
-    (asserts! (is-eq (get tick (var-get slot0)) 0) ERR_UNAUTHORIZED)
+    (asserts! (is-eq (get tick (var-get slot0)) u0) ERR_ALREADY_INITIALIZED)
 
-    (let ((tick (get-tick-at-sqrt-ratio sqrt-price-x96)))
+    (let ((tick (unwrap-panic (get-tick-at-sqrt-ratio sqrt-price-x96))))
       (var-set slot0
         (merge (var-get slot0)
           {

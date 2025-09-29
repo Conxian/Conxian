@@ -9,12 +9,12 @@
 ;; - Principal payout at maturity.
 
 ;; Import traits from the all-traits.clar file
-(use-trait sip10-trait .all-traits.sip-010-ft-trait)
-(use-trait bond-trait .all-traits.bond-trait)
+(use-trait sip-010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
+(use-trait bond-trait .bond-trait)
 
 ;; Implement the traits for this contract
-(impl-trait .all-traits.bond-trait)
-(impl-trait .all-traits.sip-010-ft-trait)
+(impl-trait .bond-trait)
+(impl-trait .sip-010-ft-trait)
 
 ;; Error codes
 (define-constant ERR_UNAUTHORIZED (err u100))
@@ -57,7 +57,7 @@
 (define-constant MAX_COUPON_RATE u1000000000000000000)  ;; 100%
 (define-constant MIN_COUPON_FREQUENCY u144)  ;; ~1 day at 1 block/10min
 
-(define-fungible-token tokenized-bond)
+(define-fungible-token tokenized-bond u6)
 
 ;; --- SIP-010 Token Functions ---
 

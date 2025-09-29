@@ -1,8 +1,12 @@
 ;; cxlp-migration-queue.clar
 ;; Intent queue system for CXLP to CXD migration with pro-rata settlement
 ;; Prevents FCFS races and enables fair distribution based on duration-weighted requests
+(use-trait sip-010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
+(use-trait access-control-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.access-control-trait)
+(use-trait cxlp-migration-queue-trait .cxlp-migration-queue-trait)
+(use-trait ft-mintable 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.ft-mintable-trait)
 
-(use-trait ft-mintable 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.ft-mintable-trait.ft-mintable-trait)
+(impl-trait .cxlp-migration-queue-trait)
 
 ;; --- Constants ---
 (define-constant CONTRACT_OWNER tx-sender)
@@ -29,8 +33,8 @@
 
 ;; --- Storage ---
 (define-data-var contract-owner principal CONTRACT_OWNER)
-(define-data-var cxlp-contract principal .cxlp-token)
-(define-data-var cxd-contract principal .cxd-token)
+(define-data-var cxlp-contract principal 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.cxlp-token')
+(define-data-var cxd-contract principal 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.cxd-token')
 
 ;; Migration configuration
 (define-data-var migration-start-height uint u0)
@@ -144,7 +148,7 @@
         (asserts! (<= block-height intent-deadline) (err ERR_EPOCH_NOT_ACTIVE))
         
         ;; Check user has sufficient CXLP balance
-        (let ((user-balance (unwrap! (contract-call? .cxlp-token get-balance tx-sender) (err ERR_INSUFFICIENT_BALANCE))))
+        (let ((user-balance (unwrap! (contract-call? (var-get cxlp-contract) get-balance tx-sender) (err ERR_INSUFFICIENT_BALANCE))))
             (asserts! (>= user-balance cxlp-amount) (err ERR_INSUFFICIENT_BALANCE))
             
             ;; Calculate weight for this intent
@@ -223,8 +227,8 @@
                 (pro-rata-cxd (/ (* user-weight total-cxd) total-weight)))
             
             ;; Burn CXLP from user
-            (try! (contract-call? .cxlp-token transfer user-cxlp tx-sender (as-contract tx-sender) none))
-            (try! (as-contract (contract-call? .cxlp-token burn user-cxlp)))
+            (try! (contract-call? (var-get cxlp-contract) transfer user-cxlp tx-sender (as-contract tx-sender) none))
+            (try! (as-contract (contract-call? (var-get cxlp-contract) burn user-cxlp)))
             
             ;; Mint CXD to user
             (try! (as-contract (contract-call? cxd-token mint tx-sender pro-rata-cxd)))

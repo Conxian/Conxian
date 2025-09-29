@@ -2,13 +2,13 @@
 ;; Implements the access control functionality specified in AIP-7
 
 ;; --- Traits ---
-(use-trait access-control-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.access-control-trait)
-(use-trait ownable-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.ownable-trait)
-(use-trait standard-constants-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.standard-constants-trait)
-(use-trait circuit-breaker-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.circuit-breaker-trait)
+(use-trait access-control-trait .all-traits.access-control-trait)
+(use-trait ownable-trait .all-traits.ownable-trait)
+(use-trait standard-constants-trait .all-traits.standard-constants-trait)
+(impl-trait .all-traits.circuit-breaker-trait)
 
-(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.access-control-trait)
-(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.ownable-trait)
+(impl-trait .all-traits.access-control-trait)
+(impl-trait .all-traits.ownable-trait)
 
 ;; Constants
 (define-constant TRAIT_REGISTRY 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.trait-registry)
@@ -23,7 +23,7 @@
 (define-data-var owner principal tx-sender)
 (define-data-var roles (map principal (list (string-ascii 32))) (map))
 (define-data-var paused bool false)
-(define-data-var circuit-breaker principal .circuit-breaker)
+(define-data-var circuit-breaker principal 'circuit-breaker)
 (define-data-var proposals (map uint {
   id: uint,
   proposer: principal,
@@ -42,7 +42,7 @@
   (contract-call? (var-get circuit-breaker) is-circuit-open)
 )
 
-(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.access-control-trait)
+(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.access-control-trait)
 
 ;; ===== Role Management =====
 
@@ -156,6 +156,12 @@
 
 ;; ===== Multi-sig Operations =====
 
+;; @desc Proposes a new multi-sig operation that requires approvals before execution.
+;; @param target The principal of the contract to call.
+;; @param value The STX amount to send with the call (if any).
+;; @param data The data buffer to pass to the target contract function.
+;; @param description A description of the proposal.
+;; @return (response uint uint) A response tuple indicating success or failure, with the proposal ID on success.
 (define-public (propose (target principal) (value uint) (data (buff 1024)) (description (string-utf8 500)))
   (begin
     (asserts! (not (try! (check-circuit-breaker))) ERR_CIRCUIT_OPEN)
@@ -187,6 +193,9 @@
   )
 )
 
+;; @desc Approves a multi-sig proposal, adding the sender to the list of approvers.
+;; @param proposal-id The ID of the proposal to approve.
+;; @return (response bool bool) A response tuple indicating success or failure.
 (define-public (approve (proposal-id uint))
   (begin
     (asserts! (not (try! (check-circuit-breaker))) ERR_CIRCUIT_OPEN)
@@ -209,7 +218,10 @@
   )
 )
 
-(define-public (execute-proposal (proposal-id uint))
+;; @desc Executes a multi-sig proposal after it has received sufficient approvals and the circuit breaker is not open.
+;; @param proposal-id The ID of the proposal to execute.
+;; @return (response bool bool) A response tuple indicating success or failure.
+(define-public (execute-proposal (proposal-id uint)))uint))
   (begin
     (asserts! (not (try! (check-circuit-breaker))) ERR_CIRCUIT_OPEN)
     (let ((proposal (unwrap! (map-get? proposals proposal-id) (err u1004))))  ;; ERR_PROPOSAL_NOT_FOUND
@@ -264,7 +276,13 @@
 (define-data-var default-delay-blocks uint u144) ;; ~24 hours at 10 min blocks
 
 ;; Propose a time-delayed operation
-(define-public (propose-delayed-operation (target principal) (function-name (string-ascii 64)) (parameters (buff 1024)) (delay-blocks uint))
+;; @desc Proposes a time-delayed operation that requires admin privileges and approvals.
+;; @param target The principal of the contract to call.
+;; @param function-name The name of the function to execute on the target contract.
+;; @param parameters The data buffer containing the parameters for the function call.
+;; @param delay-blocks The number of blocks to delay the execution.
+;; @return (response uint uint) A response tuple indicating success or failure, with the operation ID on success.
+(define-public (propose-delayed-operation (target principal) (function-name (string-ascii 64)) (parameters (buff 1024)) (delay-blocks uint)))
   (begin
     (asserts! (not (try! (check-circuit-breaker))) ERR_CIRCUIT_OPEN)
     (asserts! (is-admin tx-sender) (err u1001))
@@ -299,7 +317,10 @@
 )
 
 ;; Approve a delayed operation (multi-sig)
-(define-public (approve-delayed-operation (operation-id uint))
+;; @desc Approves a time-delayed operation, adding the sender to the list of approvers.
+;; @param operation-id The ID of the delayed operation to approve.
+;; @return (response bool bool) A response tuple indicating success or failure.
+(define-public (approve-delayed-operation (operation-id uint)))uint))
   (begin
     (asserts! (not (try! (check-circuit-breaker))) ERR_CIRCUIT_OPEN)
     (let ((operation (unwrap! (map-get? delayed-operations {operation-id: operation-id}) (err u1004))))
@@ -324,7 +345,10 @@
 )
 
 ;; Execute a delayed operation after delay period and sufficient approvals
-(define-public (execute-delayed-operation (operation-id uint))
+;; @desc Executes a time-delayed operation after the delay period has passed and sufficient approvals have been gathered.
+;; @param operation-id The ID of the delayed operation to execute.
+;; @return (response bool bool) A response tuple indicating success or failure.
+(define-public (execute-delayed-operation (operation-id uint)))uint))
   (begin
     (asserts! (not (try! (check-circuit-breaker))) ERR_CIRCUIT_OPEN)
     (let ((operation (unwrap! (map-get? delayed-operations {operation-id: operation-id}) (err u1004))))
@@ -368,12 +392,18 @@
 )
 
 ;; Get operation details
-(define-read-only (get-delayed-operation (operation-id uint))
+;; @desc Retrieves the details of a specific delayed operation.
+;; @param operation-id The ID of the delayed operation to retrieve.
+;; @return (response (optional {proposer: principal, target: principal, function-name: (string-ascii 64), parameters: (buff 1024), delay-blocks: uint, created-at: uint, executed: bool, approvals: (list principal)}) bool) A response tuple containing the operation details or an error if not found.
+(define-read-only (get-delayed-operation (operation-id uint)))uint))
   (map-get? delayed-operations {operation-id: operation-id})
 )
 
 ;; Check if operation can be executed
-(define-read-only (can-execute-delayed-operation (operation-id uint))
+;; @desc Checks if a delayed operation can be executed based on approvals, delay period, and execution status.
+;; @param operation-id The ID of the delayed operation to check.
+;; @return (response bool bool) A response tuple indicating whether the operation can be executed.
+(define-read-only (can-execute-delayed-operation (operation-id uint)))uint))
   (let ((operation (unwrap! (map-get? delayed-operations {operation-id: operation-id}) false)))
     (if operation
       (let ((blocks-passed (- block-height (get created-at operation)))
@@ -401,4 +431,9 @@
 (define-private (contains-principal? (needle principal) (haystack (list principal)))
   (any (lambda ((item principal)) (is-eq item needle)) haystack)
 )
+
+
+
+(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.standard-constants-trait)
+
 

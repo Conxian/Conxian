@@ -2,7 +2,7 @@
 ;; sBTC Oracle Adapter - Advanced price feeds and circuit breaker integration
 ;; Handles multiple oracle sources, price validation, and emergency controls
 
-(use-trait oracle-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.oracle-trait)
+(use-trait oracle-trait .oracle-trait)
 (use-trait circuit-breaker-trait .circuit-breaker-trait.circuit-breaker-trait)
 
 ;; =============================================================================
@@ -233,7 +233,7 @@
       { oracle: oracle, asset: asset }
       {
         price: price,
-        timestamp: (unwrap-panic (get-stacks-block-info? time block-height)),
+        timestamp: (get-stacks-block-info? time block-height)),
         confidence: confidence,
         volume: volume,
         block-height: block-height

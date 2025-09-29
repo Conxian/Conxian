@@ -2,7 +2,7 @@
 ;; Implements strategy-trait for vault integration
 
 (use-trait sip-010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
-(use-trait strategy-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.strategy-trait)
+(use-trait strategy-trait .strategy-trait)
 
 (impl-trait .strategy-trait)
 
@@ -221,6 +221,20 @@
           (var-set last-dimensional-update block-height)
           (ok true))
         (err u999)))
+)
+
+(define-data-var token-system-coordinator principal ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.token-system-coordinator)
+
+(define-public (set-token-system-coordinator (new-coordinator principal))
+  (begin
+    (asserts! (is-eq tx-sender (var-get strategy-admin)) ERR_UNAUTHORIZED)
+    (var-set token-system-coordinator new-coordinator)
+    (ok true)
+  )
+)
+
+(define-read-only (get-token-system-coordinator)
+  (ok (var-get token-system-coordinator))
 )
 
 ;; Administrative functions
