@@ -6,3 +6,4 @@
 (define-public (create-pool-internal (token-a <ft-trait>) (token-b <ft-trait>) (token-a-amount uint) (token-b-amount uint) (factory-contract <dex-factory-trait>))
   (contract-call? factory-contract create-pool-internal token-a token-b token-a-amount token-b-amount)
 )
+

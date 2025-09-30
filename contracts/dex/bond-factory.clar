@@ -3,7 +3,7 @@
 
 (use-trait standard-constants-trait .all-traits.standard-constants-trait)
 (use-trait bond-trait .all-traits.bond-trait)
-(impl-trait .bond-factory-trait)
+(impl-trait bond-factory-trait)
 
 ;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED (err u5000))
@@ -82,7 +82,7 @@
       event: event-type,
       data: event-data,
       nonce: nonce,
-      block: stacks-block-height
+      block: block-height
     })
   )
 )
@@ -127,8 +127,8 @@
   (let (
       (issuer tx-sender)
       (bond-id (var-get next-bond-id))
-      (issue-block stacks-block-height)
-      (maturity-block (unwrap! (safe-add stacks-block-height maturity-blocks) (err ERR_OVERFLOW)))
+      (issue-block block-height)
+      (maturity-block (unwrap! (safe-add block-height maturity-blocks) (err ERR_OVERFLOW)))
       (bond-status BOND_STATUS_ACTIVE)
     )
     ;; Input validation with safe math
@@ -182,7 +182,7 @@
         issuer: issuer,
         bond-id: bond-id,
         amount: principal-amount,
-        timestamp: stacks-block-height
+        timestamp: block-height
       })
       
       (ok {
@@ -198,7 +198,7 @@
 (define-read-only (get-accrued-interest (bond-id uint))
   (let (
       (bond (unwrap! (map-get? bonds bond-id) ERR_BOND_NOT_FOUND))
-      (current-block stacks-block-height)
+      (current-block block-height)
       (issue-block (get issue-block bond))
       (maturity-block (get maturity-block bond))
     )
@@ -229,7 +229,7 @@
   (let (
       (caller tx-sender)
       (bond (unwrap! (map-get? bonds bond-id) ERR_BOND_NOT_FOUND))
-      (current-block stacks-block-height)
+      (current-block block-height)
     )
     ;; Check bond status and maturity
     (asserts! (is-eq (get status bond) BOND_STATUS_ACTIVE) (err u"Bond not active"))
@@ -268,7 +268,7 @@
               issuer: caller,
               bond-id: bond-id,
               amount: payout,
-              timestamp: stacks-block-height
+              timestamp: block-height
             })
             
             (ok {
@@ -292,7 +292,7 @@
   (let (
       (caller tx-sender)
       (bond (unwrap! (map-get? bonds bond-id) ERR_BOND_NOT_FOUND))
-      (current-block stacks-block-height)
+      (current-block block-height)
     )
     ;; Validate bond is active and not matured
     (asserts! (is-eq (get status bond) BOND_STATUS_ACTIVE) (err u"Bond not active"))
@@ -321,7 +321,7 @@
         issuer: caller,
         bond-id: bond-id,
         amount: payment-amount,
-        timestamp: stacks-block-height
+        timestamp: block-height
       })
       (ok true)
     )
@@ -333,9 +333,9 @@
     (ok {
       bond-id: bond-id,
       status: (get status bond),
-      is-mature: (>= stacks-block-height (get maturity-block bond)),
-      blocks-until-maturity: (unwrap! (safe-sub (get maturity-block bond) stacks-block-height) (err ERR_UNDERFLOW)),
-      current-block: stacks-block-height,
+      is-mature: (>= block-height (get maturity-block bond)),
+      blocks-until-maturity: (unwrap! (safe-sub (get maturity-block bond) block-height) (err ERR_UNDERFLOW)),
+      current-block: block-height,
       maturity-block: (get maturity-block bond)
     })
   )
@@ -374,3 +374,4 @@
     ))
   )
 )
+

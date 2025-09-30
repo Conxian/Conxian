@@ -6,8 +6,8 @@
 (use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
 (use-trait strategy-trait .all-traits.strategy-trait)
 
-(impl-trait .vault-trait)
-(impl-trait .vault-admin-trait)
+(impl-trait vault-trait)
+(impl-trait vault-admin-trait)
 
 ;; Constants
 (define-constant ERR_UNAUTHORIZED (err u1001))
@@ -29,6 +29,9 @@
 (define-data-var revenue-share-bps uint u2000) ;; 20% to protocol
 (define-data-var monitor-enabled bool true)
 (define-data-var emission-enabled bool true)
+
+;; Integration: token system coordinator contract
+(define-data-var token-system-coordinator principal 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.token-system-coordinator)
 
 ;; Maps
 (define-map vault-balances principal uint) ;; asset -> total balance
@@ -129,7 +132,7 @@
           (map-set collected-fees asset 
                    (+ (default-to u0 (map-get? collected-fees asset)) fee))
           ;; Notify revenue distributor - PRODUCTION IMPLEMENTATION
-          (try! (contract-call? .token-system-coordinator
+          (try! (contract-call? (var-get token-system-coordinator)
                                trigger-revenue-distribution
                                asset
                                fee))
@@ -193,7 +196,7 @@
           (map-set collected-fees asset 
                    (+ (default-to u0 (map-get? collected-fees asset)) fee))
           ;; Notify revenue distributor - PRODUCTION IMPLEMENTATION
-          (try! (contract-call? .token-system-coordinator
+          (try! (contract-call? (var-get token-system-coordinator)
                                trigger-revenue-distribution
                                asset
                                fee))
@@ -234,7 +237,7 @@
     (map-set collected-fees asset u0)
     
     ;; Notify revenue distributor - PRODUCTION IMPLEMENTATION
-    (try! (contract-call? .token-system-coordinator
+    (try! (contract-call? (var-get token-system-coordinator)
                          trigger-revenue-distribution
                          asset
                          collected))
@@ -311,6 +314,7 @@
 
 ;; Initialize default supported asset (STX)
 (map-set supported-assets SP000000000000000000002Q6VF78 true)
+
 
 
 

@@ -1,7 +1,9 @@
 ;; compliance-hooks.clar
 ;; Implementation of compliance hooks for the enterprise API
 
-(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.compliance-hooks-trait.compliance-hooks-trait)
+(use-trait compliance-hooks-trait .all-traits.compliance-hooks-trait)
+
+(impl-trait compliance-hooks-trait)
 
 (define-constant ERR_UNAUTHORIZED (err u401))
 (define-constant ERR_ACCOUNT_NOT_VERIFIED (err u403))
@@ -16,7 +18,7 @@
 ;; @param account (principal) The principal of the account to set the KYC tier for.
 ;; @param kyc-tier (uint) The new KYC tier for the account (e.g., u1 for basic, u2 for intermediate, u3 for advanced).
 ;; @return (response bool) An (ok true) response if the KYC tier is successfully set, or an error if unauthorized or the tier is invalid.
-(define-public (set-kyc-tier (account principal) (kyc-tier uint)))
+(define-public (set-kyc-tier (account principal) (kyc-tier uint))
   (begin
     (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
     (asserts! (<= kyc-tier u3) ERR_INVALID_KYC_TIER) ;; Assuming max tier is u3
@@ -42,10 +44,7 @@
 ;; @desc Verifies an account by setting its KYC tier to a basic level (u1).
 ;; @param account (principal) The principal of the account to verify.
 ;; @return (response bool) An (ok true) response if the account is successfully verified, or an error if unauthorized.
-;; @desc Unverifies an account by removing its KYC tier and deleting it from verified accounts.
-;; @param account (principal) The principal of the account to unverify.
-;; @return (response bool) An (ok true) response if the account is successfully unverified, or an error if unauthorized.
-(define-public (unverify-account (account principal)))
+(define-public (verify-account (account principal))
   (begin
     (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
     (let (
@@ -104,7 +103,7 @@
 ;; @desc Retrieves a specific KYC audit event by its ID.
 ;; @param event-id (uint) The ID of the audit event to retrieve.
 ;; @return (response {account: principal, action: uint, old-tier: uint, new-tier: uint, timestamp: uint}) An (ok) response containing the audit event details, or an error if the event does not exist.
-(define-read-only (get-audit-event (event-id uint)))uint))
+(define-read-only (get-audit-event (event-id uint))
   (map-get? kyc-audit-trail event-id)
 )
 

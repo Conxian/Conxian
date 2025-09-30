@@ -1,17 +1,17 @@
 ;; circuit-breaker.clar
 ;; Implements the enhanced circuit breaker pattern
 
- (use-trait .circuit-breaker-trait)
- (use-trait .ownable-trait)
+ (use-trait circuit-breaker-trait .all-traits.circuit-breaker-trait)
+ (use-trait ownable-trait .all-traits.ownable-trait)
 
- (impl-trait .circuit-breaker-trait)
- (impl-trait .ownable-trait)
+ (impl-trait circuit-breaker-trait)
+ (impl-trait ownable-trait)
 
 ;; ===== Constants =====
 (define-constant ERR_UNAUTHORIZED (err u1001))
 (define-constant ERR_CIRCUIT_OPEN (err u1002))
 (define-constant ERR_INVALID_OPERATION (err u1003))
-{{ ... }}
+ 
         })
         stats)
     )
@@ -22,9 +22,9 @@
   (ok (var-get emergency-shutdown-active))
 )
 
-{{ ... }}
+
 (define-read-only (check-circuit-state (operation (string-ascii 64)))
-  (let ((current-time stacks-block-height))
+  (let ((current-time block-height))
     (match (map-get? operation-stats {operation: operation})
       stats
       (let ((state stats))
@@ -40,7 +40,7 @@
 
 (define-public (record-success (operation (string-ascii 64)))
   (begin
-    (let ((current-time stacks-block-height)
+    (let ((current-time block-height)
           (stats (default-to 
             { 
               success-count: u0, 
@@ -69,7 +69,7 @@
 
 (define-public (record-failure (operation (string-ascii 64)))
   (begin
-    (let ((current-time stacks-block-height)
+    (let ((current-time block-height)
           (stats (default-to 
             { 
               success-count: u0, 
@@ -112,7 +112,7 @@
 )
 
 (define-read-only (get-circuit-state (operation (string-ascii 64)))
-  (let ((stats (default-to (get-default-stats stacks-block-height) 
+  (let ((stats (default-to (get-default-stats block-height) 
                           (map-get? operation-stats {operation: operation})))
         (failure-rate (calculate-failure-rate (get success-count stats) (get failure-count stats))))
     
@@ -132,13 +132,13 @@
   (begin
     (asserts! (is-eq tx-sender (var-get admin)) ERR_UNAUTHORIZED)
     
-    (let ((stats (default-to (get-default-stats stacks-block-height) 
+    (let ((stats (default-to (get-default-stats block-height) 
                             (map-get? operation-stats {operation: operation}))))
       
       (map-set operation-stats {operation: operation} 
         (merge stats {
           is-open: state,
-          last-state-change: stacks-block-height
+          last-state-change: block-height
         }))
       
       (ok true)
@@ -170,7 +170,7 @@
     (asserts! (> limit u0) ERR_INVALID_RATE_LIMIT)
     (asserts! (and (> window u0) (<= window MAX_RATE_WINDOW)) ERR_INVALID_RATE_WINDOW)
     
-    (let ((stats (default-to (get-default-stats stacks-block-height) 
+    (let ((stats (default-to (get-default-stats block-height) 
                             (map-get? operation-stats {operation: operation}))))
       
       (map-set operation-stats {operation: operation} 
@@ -178,7 +178,7 @@
           rate-limit: limit,
           rate-window: window,
           rate-count: u0,
-          rate-window-start: stacks-block-height
+          rate-window-start: block-height
         }))
       
       (ok true)
@@ -213,7 +213,7 @@
 ;; ===== Read-Only Functions =====
 
 (define-read-only (get-rate-limit (operation (string-ascii 64)))
-  (let ((stats (default-to (get-default-stats stacks-block-height) 
+  (let ((stats (default-to (get-default-stats block-height) 
                           (map-get? operation-stats {operation: operation})))
         (window-end (+ (get rate-window-start stats) (get rate-window stats))))
     
@@ -233,18 +233,16 @@
 (define-read-only (get-admin)
   (ok (var-get admin))
 )
-
 (define-read-only (get-health-status)
   (ok {
     is_operational: (not (var-get emergency-shutdown-active)),
-    total_failure_rate: u0,  ;; Would need aggregation across all operations
-    last_checked: stacks-block-height,
-    uptime: u100,  ;; Would need actual uptime tracking
-    total_operations: u0,  ;; Would need global counter
-    failed_operations: u0   ;; Would need global counter
+    total_failure_rate: u0,
+    last_checked: block-height,
+    uptime: u100,
+    total_operations: u0,
+    failed_operations: u0
   })
 )
-
 ;; ===== Ownable Trait Implementation =====
 
 (define-read-only (get-owner)
@@ -267,3 +265,4 @@
     (ok true)
   )
 )
+

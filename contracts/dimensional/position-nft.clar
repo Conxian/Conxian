@@ -1,7 +1,7 @@
 ;; SIP-009 Non-Fungible Token for Concentrated Liquidity Positions
 
 (use-trait sip-009-nft-trait .all-traits.sip-009-nft-trait)
-(impl-trait .sip-009-nft-trait)
+(impl-trait sip-009-nft-trait)
 
 (define-non-fungible-token concentrated-liquidity-positions uint)
 

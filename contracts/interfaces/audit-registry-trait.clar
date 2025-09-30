@@ -60,3 +60,4 @@
   ;; Admin: Emergency pause an audit
   (emergency-pause-audit (audit-id uint) (reason (string-utf8 500)) (response bool uint))
 )
+

@@ -3,9 +3,9 @@
 ;; Routes protocol fees: 80% to xCXD stakers, 20% to treasury/reserves
 
 (use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
-(impl-trait .sip-010-ft-trait)
+(impl-trait sip-010-ft-trait)
 (use-trait staking-trait .all-traits.staking-trait)
-(impl-trait .staking-trait)
+(impl-trait staking-trait)
 
 ;; --- Constants ---
 (define-constant CONTRACT_OWNER tx-sender)
@@ -401,6 +401,7 @@
         (total-recent-revenue u0)) ;; TODO: Calculate from recent epochs
     ;; Placeholder calculation - requires historical analysis
     (ok u500))) ;; 5% placeholder APY
+
 
 
 

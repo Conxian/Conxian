@@ -5,7 +5,7 @@
 (use-trait pool-trait .all-traits.pool-trait)
 (use-trait fee-manager-trait .all-traits.fee-manager-trait)
 
-(impl-trait .pool-trait)
+(impl-trait pool-trait)
 
 ;; ===== Constants =====
 (define-constant ERR_UNAUTHORIZED (err u100))

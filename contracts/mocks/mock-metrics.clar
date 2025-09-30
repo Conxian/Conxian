@@ -29,3 +29,4 @@
 (define-read-only (get-metric (strategy principal) (metric-id uint)))
   (map-get? metric-store { strategy: strategy, metric-id: metric-id })
 )
+

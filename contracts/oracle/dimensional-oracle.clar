@@ -1,9 +1,13 @@
 ;; Dimensional Oracle
 ;; Implements a robust price oracle with multiple data sources and deviation checks
 
-(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.oracle-trait)
-(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.access-control-trait)
-(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.pausable-trait)
+(use-trait oracle-trait .all-traits.oracle-trait)
+(use-trait access-control-trait .all-traits.access-control-trait)
+(use-trait pausable-trait .all-traits.pausable-trait)
+
+(impl-trait oracle-trait)
+(impl-trait access-control-trait)
+(impl-trait pausable-trait)
 
 (define-constant ERR_NOT_AUTHORIZED (err u100))
 (define-constant ERR_INVALID_PRICE (err u101))
@@ -61,7 +65,7 @@
   (begin
     (try! (only-admin))
     
-    (let ((current-block (block-height)))
+    (let ((current-block block-height))
       ;; Update the price directly
       (map-set price-data 
         {token: token}
@@ -73,19 +77,13 @@
       )
       
       ;; Log the emergency override
-      (try! (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.monitoring.system-monitor 
-        log-event 
-        (as-contract tx-sender)
-        (print "Oracle event")
-        (print "Emergency override event")
-        (as-contract u3)  ;; WARNING level
-        (as-contract "Emergency price override executed")
-        (some {
-          token: token,
-          price: price,
-          block: current-block,
-          caller: tx-sender
-        })))
+      (try! (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.monitoring.system-monitor
+        log-event
+        "oracle"
+        "emergency-override"
+        u3
+        "Emergency price override executed"
+        (some { token: token, price: price, block: current-block, caller: tx-sender })))
       
       (ok true)
     )
@@ -142,22 +140,18 @@
       (current-feeds (default-to (list) (map-get? price-feeds {token: token})))
     )
     (try! (only-admin))
-    
+    (let ((new-feeds (filter (lambda ((f principal)) (not (is-eq f feed))) current-feeds)))
       (asserts! (> (len new-feeds) u0) (err u109))  ;; At least one feed required
-      
       (map-set price-feeds {token: token} new-feeds)
-      
       ;; Log the feed removal
       (try! (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.monitoring.system-monitor
         log-event
-        (as-contract tx-sender)
+        "oracle"
+        "feed-removed"
+        u2
         "Oracle feed removed"
-        u2  ;; INFO level
-        (concat "Feed removed for token " (to-ascii (unwrap-panic (principal-to-ascii token))))
-        (some {
-          feed: feed,
-          token: token
-        })))
+        (some { feed: feed, token: token })))
+      (ok true)
     )
   )
 )
@@ -168,75 +162,39 @@
   (begin
     (try! (when-not-paused))
     (try! (only-oracle-updater))
-    
-    (let (
-        (current-block (block-height))
-        (feeds (default-to (list) (map-get? price-feeds {token: token})))
-      )
-      ;; Verify sender is an authorized feed
+    (let ((current-block block-height)
+          (feeds (default-to (list) (map-get? price-feeds {token: token}))))
       (asserts! (contains (map (lambda (f) (is-eq tx-sender f)) feeds)) ERR_NOT_AUTHORIZED)
-      
-      ;; Update feed's price
-          token: token,
-          price: price,
-          block: current-block
-        })))
+      (map-set feed-prices {feed: tx-sender, token: token} { price: price, last-updated: current-block })
+      (try! (update-aggregate-price token))
+      (ok true)
     )
   )
 )
-
 (define-private (update-aggregate-price (token principal))
-  (let (
-      (feeds (default-to (list) (map-get? price-feeds {token: token})))
-      (current-block (block-height))
-      (heartbeat (var-get heartbeat-interval))
-      (prices (list))
-    )
-    ;; Get all valid prices from feeds
-    (let ((valid-prices 
-      (filter some? 
-        (map (lambda (feed)
-          (let ((feed-data (map-get? feed-prices {feed: feed, token: token})))
-            (if (and feed-data 
-                    (>= current-block 
-                        (- (get last-updated (unwrap-panic feed-data)) 
-                           heartbeat)))
-                (some (get price (unwrap-panic feed-data)))
-                none
-            )
-          )
-        ) feeds)
-      ))
-    )
-    (asserts! (> (len valid-prices) 0) ERR_STALE_PRICE)
-    
-    ;; Calculate median price
-    (let ((median-price (get-median valid-prices)))
-      ;; Check deviation if price exists
-      (match (map-get? price-data {token: token})
-        existing-data
-        (begin
-          (let ((current-price (get price existing-data)))
-            (if (not (is-price-deviation-valid? current-price median-price))
-              ERR_DEVIATION_TOO_HIGH
-              (ok true)
-            )
-          )
-        )
-        (ok true)  ;; First price update
+  (let ((feeds (default-to (list) (map-get? price-feeds {token: token})))
+        (current-block block-height)
+        (heartbeat (var-get heartbeat-interval)))
+    (let ((valid-prices
+            (filter some?
+              (map (lambda (feed)
+                     (let ((fd (map-get? feed-prices {feed: feed, token: token})))
+                       (if (and fd (>= current-block (- (get last-updated (unwrap-panic fd)) heartbeat)))
+                           (some (get price (unwrap-panic fd)))
+                           none)))
+                   feeds))))
+      (asserts! (> (len valid-prices) u0) ERR_STALE_PRICE)
+      (let ((median-price (get-median valid-prices)))
+        (match (map-get? price-data {token: token})
+          existing-data (let ((current-price (get price existing-data)))
+                          (asserts! (is-price-deviation-valid? current-price median-price) ERR_DEVIATION_TOO_HIGH)
+                          (ok true))
+          (ok true))
+        (map-set price-data {token: token}
+          { price: median-price, last-updated: current-block, deviation-threshold: (var-get max-deviation) })
+        (ok true)
       )
-      
-      ;; Update price data
-      (map-set price-data 
-        {token: token} 
-        {
-          price: median-price,
-          last-updated: current-block,
-          deviation-threshold: (var-get max-deviation)
-        }
-      )
-      (ok true)
-    )))
+    )
   )
 )
 
@@ -306,3 +264,4 @@
 (define-read-only (get-admin)
   (ok (var-get admin))
 )
+

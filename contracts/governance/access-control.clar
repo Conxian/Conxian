@@ -6,8 +6,8 @@
 (use-trait ownable-trait .all-traits.ownable-trait)
 (use-trait standard-constants-trait .all-traits.standard-constants-trait)
 
-(impl-trait .access-control-trait)
-(impl-trait .ownable-trait)
+(impl-trait access-control-trait)
+(impl-trait ownable-trait)
 
 ;; Constants
 (define-constant TRAIT_REGISTRY 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.trait-registry)
@@ -43,7 +43,7 @@
   (contract-call? (var-get circuit-breaker) is-circuit-open)
 )
 
-(impl-trait .access-control-trait)
+(impl-trait access-control-trait)
 
 ;; ===== Role Management =====
 
@@ -390,9 +390,3 @@
 (define-private (contains-principal? (needle principal) (haystack (list principal)))
   (any (lambda ((item principal)) (is-eq item needle)) haystack)
 )
-
-
-
-(impl-trait .standard-constants-trait)
-
-

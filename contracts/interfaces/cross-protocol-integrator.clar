@@ -4,7 +4,7 @@
 (use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
 (use-trait cross-protocol-trait .all-traits.cross-protocol-trait)
 
-(impl-trait .cross-protocol-trait)
+(impl-trait cross-protocol-trait)
 
 ;; ===== Constants =====
 (define-constant ERR_UNAUTHORIZED (err u100))

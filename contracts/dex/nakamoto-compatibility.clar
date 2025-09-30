@@ -50,7 +50,7 @@
 (define-data-var mev-protection-enabled bool true)
 
 (define-map bitcoin-finality-cache
-  { stacks-block-height: uint }
+  { block-height: uint }
   { 
     burn-block-at-height: uint,
     is-finalized: bool,
@@ -68,7 +68,7 @@
 )
 
 (define-map transaction-timing
-  { stacks-block-height: uint }
+  { block-height: uint }
   {
     transaction-count: uint,
     first-tx-timestamp: uint,
@@ -148,28 +148,28 @@
   BITCOIN_FINALITY_DEPTH
 )
 
-(define-private (cache-bitcoin-finality (stacks-block-height uint))
+(define-private (cache-bitcoin-finality (block-height uint))
   "Cache Bitcoin finality status for performance"
-  (let ((current-burn-block burn-stacks-block-height)
-        (is-final (>= (- burn-stacks-block-height stacks-block-height) BITCOIN_FINALITY_DEPTH)))
-    (map-set bitcoin-finality-cache { stacks-block-height: stacks-block-height }
+  (let ((current-burn-block burn-block-height)
+        (is-final (>= (- burn-block-height block-height) BITCOIN_FINALITY_DEPTH)))
+    (map-set bitcoin-finality-cache { block-height: block-height }
       {
         burn-block-at-height: current-burn-block,
         is-finalized: is-final,
-        cached-at-block: stacks-block-height
+        cached-at-block: block-height
       }
     )
     is-final
   )
 )
 
-(define-read-only (is-bitcoin-finalized (stacks-block-height uint))
+(define-read-only (is-bitcoin-finalized (block-height uint))
   "Check if a Stacks block is Bitcoin-finalized"
   (if (var-get bitcoin-finality-enabled)
-    (match (map-get? bitcoin-finality-cache { stacks-block-height: stacks-block-height })
+    (match (map-get? bitcoin-finality-cache { block-height: block-height })
       cached-result (get is-finalized cached-result)
       ;; Not cached, calculate and cache
-      (cache-bitcoin-finality stacks-block-height)
+      (cache-bitcoin-finality block-height)
     )
     true  ;; Skip finality check if disabled
   )
@@ -178,14 +178,14 @@
 (define-read-only (get-last-finalized-block)
   "Get the last Bitcoin-finalized Stacks block height"
   (if (var-get bitcoin-finality-enabled)
-    (- stacks-block-height BITCOIN_FINALITY_DEPTH)
-    stacks-block-height  ;; Return current if finality disabled
+    (- block-height BITCOIN_FINALITY_DEPTH)
+    block-height  ;; Return current if finality disabled
   )
 )
 
-(define-read-only (check-bitcoin-reorg-risk (stacks-block-height uint))
+(define-read-only (check-bitcoin-reorg-risk (block-height uint))
   "Assess Bitcoin reorganization risk for given block"
-  (let ((finality-depth (- burn-stacks-block-height stacks-block-height)))
+  (let ((finality-depth (- burn-block-height block-height)))
     (cond
       ((< finality-depth u1) { risk-level: u5, description: "Unconfirmed" })
       ((< finality-depth u6) { risk-level: u4, description: "Low confirmation" })
@@ -205,18 +205,18 @@
   ;; Simplified hash generation - in production use proper cryptographic hash
   (keccak256 (concat (concat (unwrap-panic (principal-to-buff caller)) 
                             (unwrap-panic (string-to-buff function-name)))
-                    (unwrap-panic (buff-to-uint-be (int-to-buff stacks-block-height)))))
+                    (unwrap-panic (buff-to-uint-be (int-to-buff block-height)))))
 )
 
 (define-public (register-mev-protection (function-name (string-ascii 50)))
   "Register transaction for MEV protection"
   (let ((tx-hash (generate-tx-hash tx-sender function-name))
-        (protection-expires (+ stacks-block-height MEV_PROTECTION_WINDOW)))
+        (protection-expires (+ block-height MEV_PROTECTION_WINDOW)))
     (if (var-get mev-protection-enabled)
       (begin
         (map-set mev-protection-state { tx-hash: tx-hash }
           {
-            submitted-block: stacks-block-height,
+            submitted-block: block-height,
             protection-expires: protection-expires,
             is-protected: true
           }
@@ -232,21 +232,21 @@
   "Check if transaction has active MEV protection"
   (match (map-get? mev-protection-state { tx-hash: tx-hash })
     protection (and (get is-protected protection)
-                   (< stacks-block-height (get protection-expires protection)))
+                   (< block-height (get protection-expires protection)))
     false
   )
 )
 
 (define-private (detect-front-running (caller principal))
   "Detect potential front-running patterns"
-  (let ((current-block-data (default-to { transaction-count: u0, first-tx-timestamp: u0, suspicious-pattern: false } (map-get? transaction-timing { stacks-block-height: stacks-block-height }))))
+  (let ((current-block-data (default-to { transaction-count: u0, first-tx-timestamp: u0, suspicious-pattern: false } (map-get? transaction-timing { block-height: block-height }))))
     (let ((tx-count (+ (get transaction-count current-block-data) u1))
           (suspicious (> tx-count u10)))  ;; Flag if >10 txs from same caller in block
-      (map-set transaction-timing { stacks-block-height: stacks-block-height }
+      (map-set transaction-timing { block-height: block-height }
         {
           transaction-count: tx-count,
           first-tx-timestamp: (if (is-eq (get first-tx-timestamp current-block-data) u0)
-                              stacks-block-height
+                              block-height
                               (get first-tx-timestamp current-block-data)),
           suspicious-pattern: suspicious
         }
@@ -272,7 +272,7 @@
 
 (define-read-only (get-current-migration-band (migration-start-block uint))
   "Determine current migration band"
-  (let ((blocks-elapsed (- stacks-block-height migration-start-block)))
+  (let ((blocks-elapsed (- block-height migration-start-block)))
     (cond
       ((<= blocks-elapsed NAKAMOTO_MIGRATION_BAND_1_END) u1)
       ((<= blocks-elapsed NAKAMOTO_MIGRATION_BAND_2_END) u2)
@@ -291,7 +291,7 @@
   (begin
     (asserts! (is-eq tx-sender CONTRACT_OWNER) ERR_NOT_AUTHORIZED)
     (var-set nakamoto-activated true)
-    (print { event: "nakamoto-activated", stacks-block-height: stacks-block-height })
+    (print { event: "nakamoto-activated", block-height: block-height })
     (ok true)
   )
 )
@@ -325,7 +325,7 @@
   (begin
     ;; Check Bitcoin finality if required
     (if required-finality
-      (asserts! (is-bitcoin-finalized (- stacks-block-height u1)) ERR_INSUFFICIENT_FINALITY)
+      (asserts! (is-bitcoin-finalized (- block-height u1)) ERR_INSUFFICIENT_FINALITY)
       true
     )
     
@@ -341,7 +341,7 @@
 
 (define-public (validate-price-update-timing (last-update-block uint))
   "Validate oracle price update timing"
-  (let ((blocks-since-update (- stacks-block-height last-update-block)))
+  (let ((blocks-since-update (- block-height last-update-block)))
     (if (is-nakamoto-active)
       (asserts! (>= blocks-since-update NAKAMOTO_PRICE_UPDATE_MIN_INTERVAL) 
                (err u2005)) ;; ERR_UPDATE_TOO_FREQUENT
@@ -381,6 +381,7 @@
   (var-set mev-protection-enabled true)    ;; Enable MEV protection
   (print { event: "nakamoto-compatibility-deployed", version: "1.0.0" })
 )
+
 
 
 

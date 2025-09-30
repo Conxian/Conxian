@@ -6,8 +6,8 @@
 (use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
 (use-trait sip-010-ft-mintable-trait .all-traits.sip-010-ft-mintable-trait)
 
-(impl-trait .sip-010-ft-trait)
-(impl-trait .sip-010-ft-mintable-trait)
+(impl-trait sip-010-ft-trait)
+(impl-trait sip-010-ft-mintable-trait)
 
 ;; Constants
 (define-constant TRAIT_REGISTRY 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.trait-registry)
@@ -73,7 +73,7 @@
 ;; @param who (principal) The principal to set as minter.
 ;; @param enabled (bool) True to enable minter, false to disable.
 ;; @return (response bool) An (ok true) response if the minter is successfully set, or an error if unauthorized.
-(define-public (set-minter (who principal) (enabled bool)))
+(define-public (set-minter (who principal) (enabled bool))
   (begin
     (asserts! (is-owner tx-sender) (err ERR_UNAUTHORIZED))
     (if enabled
@@ -93,7 +93,7 @@
 (define-public (enable-system-integration 
     (coordinator-contract principal)
     (emission-contract principal) 
-    (monitor-contract principal)))
+    (monitor-contract principal))
   (begin
     (asserts! (is-owner tx-sender) (err ERR_UNAUTHORIZED))
     (var-set token-coordinator (some coordinator-contract))
@@ -110,7 +110,7 @@
 ;; @return (response bool) An (ok true) response if the creator economy is successfully enabled, or an error if unauthorized.
 (define-public (enable-creator-economy
     (council-contract principal)
-    (bounty-contract principal)))
+    (bounty-contract principal))
   (begin
     (asserts! (is-owner tx-sender) (err ERR_UNAUTHORIZED))
     (var-set creator-council (some council-contract))
@@ -293,33 +293,32 @@
 ;; @param base-amount (uint) The base amount of tokens to mint.
 ;; @param merit-score (uint) The merit score of the recipient, used to calculate the bonus.
 ;; @return (response uint) An (ok total-amount) response if tokens are successfully minted, or an error if unauthorized, system paused, or emission denied.
-(define-public (mint-merit-reward (recipient principal) (base-amount uint) (merit-score uint)))
+(define-public (mint-merit-reward (recipient principal) (base-amount uint) (merit-score uint))
   (let ((merit-bonus (/ (* base-amount merit-score (var-get merit-multiplier)) (* u1000 u100)))
         (total-amount (+ base-amount merit-bonus)))
-    
     (asserts! (or (is-owner tx-sender) (is-minter tx-sender)) (err ERR_UNAUTHORIZED))
     (asserts! (check-system-pause) (err ERR_SYSTEM_PAUSED))
     (asserts! (check-emission-allowed total-amount) (err ERR_EMISSION_DENIED))
-    
+
     ;; Update merit scores
     (map-set merit-scores recipient merit-score)
-    
+
     ;; Mint tokens
     (var-set total-supply (+ (var-get total-supply) total-amount))
-    (let ((current-bal (default-to u0 (get bal (map-get? balances { who: recipient })))))
+    (let ((current-bal (default-to u0 (get bal (map-get? balances { who: recipient })))) )
       (map-set balances { who: recipient } { bal: (+ current-bal total-amount) }))
-    
+
     ;; Update creator contributions
     (let ((contributions (default-to (tuple (total-bounties u0) (successful-proposals u0) (reputation u0))
                                     (map-get? creator-contributions recipient))))
       (map-set creator-contributions recipient
                (merge contributions { reputation: merit-score })))
-    
+
     ;; Check governance eligibility
     (if (>= merit-score (var-get reputation-threshold))
         (map-set governance-eligibility recipient true)
         true)
-    
+
     ;; Notify system coordinator
     (notify-mint total-amount recipient)
     (ok total-amount)))
@@ -331,7 +330,7 @@
 ;; @param bounties (uint) The total number of bounties completed by the creator.
 ;; @param proposals (uint) The total number of successful proposals by the creator.
 ;; @return (response bool) An (ok true) response if the creator's information is successfully updated, or an error if unauthorized.
-(define-public (update-creator-reputation (creator principal) (reputation uint) (bounties uint) (proposals uint)))
+(define-public (update-creator-reputation (creator principal) (reputation uint) (bounties uint) (proposals uint))
   (begin
     (asserts! (or (is-owner tx-sender) 
                  (is-eq tx-sender (unwrap! (var-get creator-council) (err ERR_UNAUTHORIZED)))
@@ -348,14 +347,14 @@
     ;; Update governance eligibility
     (map-set governance-eligibility creator (>= reputation (var-get reputation-threshold)))
     
-    (ok true)))
+    (ok true))
 
 ;; Distribute seasonal bonuses to active creators
 ;; @desc Distributes seasonal bonuses to a list of recipients.
 ;; @param recipients (list 100 principal) A list of principals to receive bonuses.
 ;; @param amounts (list 100 uint) A list of corresponding bonus amounts.
 ;; @return (response uint) An (ok total-bonus) response if bonuses are successfully distributed, or an error if unauthorized or emission denied.
-(define-public (distribute-seasonal-bonus (recipients (list 100 principal)) (amounts (list 100 uint))))
+(define-public (distribute-seasonal-bonus (recipients (list 100 principal)) (amounts (list 100 uint)))
   (begin
     (asserts! (is-owner tx-sender) (err ERR_UNAUTHORIZED))
     (asserts! (is-eq (len recipients) (len amounts)) (err ERR_UNAUTHORIZED))
@@ -365,12 +364,12 @@
     (let ((total-bonus (fold + amounts u0)))
       (asserts! (check-emission-allowed total-bonus) (err ERR_EMISSION_DENIED))
       (var-set total-supply (+ (var-get total-supply) total-bonus))
-      (ok total-bonus))))
+      (ok total-bonus)))
 
 ;; @desc Retrieves comprehensive information about a creator.
 ;; @param creator (principal) The principal of the creator.
 ;; @return (response (tuple (reputation uint) (merit-score uint) (governance-eligible bool) (contributions (tuple (total-bounties uint) (successful-proposals uint) (reputation uint))) (seasonal-bonus uint))) An (ok) response containing the creator's information.
-(define-read-only (get-creator-info (creator principal)))
+(define-read-only (get-creator-info (creator principal))
   (ok (tuple (reputation (default-to u0 (map-get? creator-reputation creator)))
              (merit-score (default-to u0 (map-get? merit-scores creator)))
              (governance-eligible (default-to false (map-get? governance-eligibility creator)))
@@ -387,7 +386,7 @@
 ;; @desc Sets the minimum reputation threshold required for governance participation.
 ;; @param new-threshold (uint) The new minimum reputation threshold.
 ;; @return (response bool) An (ok true) response if the threshold is successfully set, or an error if unauthorized.
-(define-public (set-reputation-threshold (new-threshold uint)))uint))
+(define-public (set-reputation-threshold (new-threshold uint))
   ;; Set minimum reputation threshold for governance participation
   (begin
     (asserts! (is-owner tx-sender) (err ERR_UNAUTHORIZED))
@@ -397,7 +396,7 @@
 ;; @desc Sets the merit bonus multiplier for token minting.
 ;; @param new-multiplier (uint) The new merit multiplier.
 ;; @return (response bool) An (ok true) response if the multiplier is successfully set, or an error if unauthorized or if the multiplier exceeds the maximum allowed.
-(define-public (set-merit-multiplier (new-multiplier uint)))uint))
+(define-public (set-merit-multiplier (new-multiplier uint))
   (begin
     (asserts! (is-owner tx-sender) (err ERR_UNAUTHORIZED))
     (asserts! (<= new-multiplier u300) (err ERR_UNAUTHORIZED)) ;; Max 3x multiplier
@@ -438,3 +437,4 @@
                   (support support)))
     
     (ok true)))
+

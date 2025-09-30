@@ -149,7 +149,7 @@
                           borrowed: u0,
                           supply-index: u1000000,
                           borrow-index: u1000000,
-                          last-interaction-block: stacks-block-height,
+                          last-interaction-block: block-height,
                           collateral-enabled: false,
                           enterprise-bond-eligible: false
                         } (map-get? user-positions { user: tx-sender, asset: asset-contract }))))
@@ -158,7 +158,7 @@
             { user: tx-sender, asset: asset-contract }
             (merge user-pos {
               supplied: (+ (get supplied user-pos) amount),
-              last-interaction-block: stacks-block-height
+              last-interaction-block: block-height
             })))
         
         ;; Update market state
@@ -205,7 +205,7 @@
           { user: tx-sender, asset: asset-contract }
           (merge user-pos {
             supplied: (- (get supplied user-pos) amount),
-            last-interaction-block: stacks-block-height
+            last-interaction-block: block-height
           }))
         
         ;; Update market state
@@ -269,7 +269,7 @@
                           borrowed: u0,
                           supply-index: u1000000,
                           borrow-index: u1000000,
-                          last-interaction-block: stacks-block-height,
+                          last-interaction-block: block-height,
                           collateral-enabled: false,
                           enterprise-bond-eligible: false
                         } (map-get? user-positions { user: tx-sender, asset: asset-contract }))))
@@ -278,7 +278,7 @@
             { user: tx-sender, asset: asset-contract }
             (merge user-pos {
               borrowed: (+ (get borrowed user-pos) amount),
-              last-interaction-block: stacks-block-height,
+              last-interaction-block: block-height,
               enterprise-bond-eligible: (>= total-borrow-value ENTERPRISE_LOAN_THRESHOLD)
             })))
         
@@ -321,7 +321,7 @@
             { user: tx-sender, asset: asset-contract }
             (merge user-pos {
               borrowed: (- (get borrowed user-pos) repay-amount),
-              last-interaction-block: stacks-block-height
+              last-interaction-block: block-height
             }))
           
           ;; Update market state
@@ -358,7 +358,7 @@
           { user: tx-sender, asset: asset-contract }
           (merge user-pos {
             collateral-enabled: true,
-            last-interaction-block: stacks-block-height
+            last-interaction-block: block-height
           }))
         
         (print {
@@ -382,7 +382,7 @@
           { user: tx-sender, asset: asset-contract }
           (merge user-pos {
             collateral-enabled: false,
-            last-interaction-block: stacks-block-height
+            last-interaction-block: block-height
           }))
         
         (print {
@@ -448,7 +448,7 @@
               
               ;; Record liquidation
               (map-set liquidation-history
-                { liquidator: tx-sender, borrower: borrower, asset: repay-contract, block: stacks-block-height }
+                { liquidator: tx-sender, borrower: borrower, asset: repay-contract, block: block-height }
                 {
                   collateral-seized: collateral-to-seize,
                   debt-repaid: actual-repay,
@@ -482,7 +482,7 @@
                             bond-series-count: u0,
                             bond-eligible: true,
                             risk-rating: "AAA",
-                            last-assessment: stacks-block-height
+                            last-assessment: block-height
                           } (map-get? enterprise-positions { user: borrower }))))
       
       (map-set enterprise-positions
@@ -490,7 +490,7 @@
         (merge enterprise-pos {
           total-borrowed: (+ (get total-borrowed enterprise-pos) amount),
           bond-series-count: (+ (get bond-series-count enterprise-pos) u1),
-          last-assessment: stacks-block-height
+          last-assessment: block-height
         }))
       
       ;; Trigger bond issuance (would call bond-issuance-system.clar)
@@ -511,7 +511,7 @@
 (define-public (accrue-interest (asset-contract principal))
   "Accrue interest for market"
   (match (map-get? market-state { asset: asset-contract })
-    market-data (let ((blocks-elapsed (- stacks-block-height (get last-accrual-block market-data))))
+    market-data (let ((blocks-elapsed (- block-height (get last-accrual-block market-data))))
       (if (> blocks-elapsed u0)
         (let ((utilization (calculate-utilization-rate asset-contract))
               (borrow-rate (calculate-borrow-rate utilization))
@@ -527,7 +527,7 @@
               borrow-rate: borrow-rate,
               supply-rate: supply-rate,
               utilization-rate: utilization,
-              last-accrual-block: stacks-block-height
+              last-accrual-block: block-height
             }))
           
           (ok interest-accumulated))
@@ -670,7 +670,7 @@
         borrow-index: u1000000,
         supply-rate: u0,
         borrow-rate: u0,
-        last-accrual-block: stacks-block-height,
+        last-accrual-block: block-height,
         utilization-rate: u0
       })
     
@@ -688,6 +688,7 @@
   owner: CONTRACT_OWNER,
   version: "1.0.0"
 })
+
 
 
 

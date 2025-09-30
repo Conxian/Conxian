@@ -7,8 +7,8 @@
 (use-trait ownable-trait .all-traits.ownable-trait)
 
 ;; Implement required traits
-(impl-trait .sip-010-ft-trait)
-(impl-trait .ownable-trait)
+(impl-trait sip-010-ft-trait)
+(impl-trait ownable-trait)
 
 ;; Constants
 (define-constant TRAIT_REGISTRY 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.trait-registry)
@@ -381,4 +381,5 @@
     revenue-distributor: (var-get revenue-distributor-contract),
     emission-controller: (var-get emission-controller-contract)
   })
+
 

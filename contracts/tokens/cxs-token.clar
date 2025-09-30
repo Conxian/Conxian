@@ -7,10 +7,10 @@
 (use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
 
 ;; Implement the standard trait
-(impl-trait .sip-009-nft-trait)
+(impl-trait sip-009-nft-trait)
 
 ;; Constants
-(define-constant TRAIT_REGISTRY .trait-registry)
+(define-constant TRAIT_REGISTRY 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.trait-registry)
 
 ;; --- Errors ---
 (define-constant ERR_UNAUTHORIZED u100)
@@ -88,6 +88,7 @@
 (define-read-only (get-token-uri (id uint))
   (ok (default-to none (get uri (map-get? token-uris { id: id }))))
 )
+
 
 
 

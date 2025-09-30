@@ -27,8 +27,8 @@
 (use-trait pool-creation-trait .all-traits.pool-creation-trait)
 
 ;; Implement the standard pool trait
-(impl-trait .pool-trait)
-(impl-trait .pool-creation-trait)
+(impl-trait pool-trait)
+(impl-trait pool-creation-trait)
 
 ;; --- Contract State ---
 (define-data-var contract-owner principal tx-sender)

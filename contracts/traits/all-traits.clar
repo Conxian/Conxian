@@ -101,6 +101,13 @@
   )
 )
 
+;; Backward-compatible simple oracle trait (single-asset price)
+(define-trait oracle-trait
+  (
+    (get-price (principal) (response uint (err uint)))
+  )
+)
+
 (define-trait compliance-hooks-trait
   (
     (before-transfer (principal principal uint (optional (buff 34))) (response bool (err uint)))
@@ -379,7 +386,7 @@
 
     ;; Enhanced tokenomics integration
     (set-revenue-share (uint) (response bool (err uint)))
-    (update-integration-settings ((tuple (monitor-enabled bool) (emission-enabled bool))) (response bool (err uint)))
+    (update-integration-settings (settings (tuple (monitor-enabled bool) (emission-enabled bool))) (response bool (err uint)))
 
     ;; Governance
     (transfer-admin (principal) (response bool (err uint)))
@@ -832,3 +839,4 @@
     (sqrt-fixed (a uint) (precision uint)) (response uint (err uint)))
   )
 )
+

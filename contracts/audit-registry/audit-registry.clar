@@ -75,10 +75,10 @@
         audit-hash: audit-hash,
         auditor: caller,
         report-uri: report-uri,
-        timestamp: stacks-block-height,
+        timestamp: block-height,
         status: { status: "pending", reason: none },
         votes: { for: u0, against: u0, voters: (list) },
-        voting-ends: (+ stacks-block-height (var-get voting-period))
+        voting-ends: (+ block-height (var-get voting-period))
       }
     )
     
@@ -94,7 +94,7 @@
       (audit (unwrap! (map-get? audits { id: audit-id }) ERR_AUDIT_NOT_FOUND))
       (voters (get voters (get votes audit)))
     )
-    (asserts! (<= stacks-block-height (get voting-ends audit)) ERR_VOTING_CLOSED)
+    (asserts! (<= block-height (get voting-ends audit)) ERR_VOTING_CLOSED)
     ;; Ensure caller hasn't already voted
     (let ((already-voted (fold (lambda (v acc) (or acc (is-eq v caller))) voters false)))
       (asserts! (not already-voted) ERR_ALREADY_VOTED))
@@ -116,7 +116,7 @@
       (votes (get votes audit))
       (total-votes (+ (get for votes) (get against votes)))
     )
-    (asserts! (> stacks-block-height (get voting-ends audit)) ERR_VOTING_CLOSED)
+    (asserts! (> block-height (get voting-ends audit)) ERR_VOTING_CLOSED)
     
     (if (>= (get for votes) (get against votes))
       (begin
@@ -199,3 +199,4 @@
     (ok true)
   )
 )
+

@@ -6,7 +6,7 @@
 (define-constant FEE_TIER_LOW u3000)   ;; 0.3%
 (define-constant FEE_TIER_MEDIUM u10000) ;; 1.0%
 (define-constant FEE_TIER_HIGH u30000)  ;; 3.0%
-(define-constant TRAIT_REGISTRY .trait-registry)
+(define-constant TRAIT_REGISTRY 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.trait-registry)
 (define-constant ERR_UNAUTHORIZED (err u100))
 (define-constant ERR_INVALID_FEE_TIER (err u101))
 (define-constant ERR_INVALID_TICK_RANGE (err u102))
@@ -26,7 +26,7 @@
 (use-trait position-nft-trait .all-traits.position-nft-trait)
 
 ;; Implement the standard pool trait
-(impl-trait .pool-trait)
+(impl-trait pool-trait)
 
 ;; --- Contract State ---
 (define-data-var contract-owner principal tx-sender)
@@ -471,4 +471,5 @@
       (ok (get amount-out result)))))
 
 ;; Additional pool-trait variants are implemented by the canonical pool trait file.
+
 

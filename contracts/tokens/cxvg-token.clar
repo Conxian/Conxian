@@ -8,12 +8,12 @@
 (use-trait monitoring-trait .all-traits.monitoring-trait)
 
 ;; Implement the standard traits
-(impl-trait .sip-010-ft-trait)
-(impl-trait .sip-010-ft-mintable-trait)
-(impl-trait .monitoring-trait)
+(impl-trait sip-010-ft-trait)
+(impl-trait sip-010-ft-mintable-trait)
+(impl-trait monitoring-trait)
 
 ;; Constants
-(define-constant TRAIT_REGISTRY ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.trait-registry)
+(define-constant TRAIT_REGISTRY 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.trait-registry)
 
 ;; --- Errors ---
 (define-constant ERR_UNAUTHORIZED u100)
@@ -277,3 +277,4 @@
     protocol-monitor: (var-get protocol-monitor)
   }
 )
+

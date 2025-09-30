@@ -7,8 +7,8 @@
 (use-trait ownable-trait .all-traits.ownable-trait)
 
 ;; Implement the standard traits
-(impl-trait .sip-010-ft-trait)
-(impl-trait .ownable-trait)
+(impl-trait sip-010-ft-trait)
+(impl-trait ownable-trait)
 
 ;; Constants
 (define-constant TRAIT_REGISTRY 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.trait-registry)
@@ -21,8 +21,8 @@
     )
     (begin
       (asserts! (> len u0) (err ERR_MIGRATION_NOT_SET))
-      (asserts! (>= stacks-block-height start) (err ERR_MIGRATION_NOT_STARTED))
-      (ok (/ (- stacks-block-height start) len))
+      (asserts! (>= block-height start) (err ERR_MIGRATION_NOT_STARTED))
+      (ok (/ (- block-height start) len))
     )
   )
 )
@@ -111,9 +111,9 @@
     )
     (begin
       (asserts! (> len u0) (err ERR_MIGRATION_NOT_SET))
-      (asserts! (>= stacks-block-height start) (err ERR_MIGRATION_NOT_STARTED))
-      (let ((delta (- stacks-block-height start))
-            (band (/ (- stacks-block-height start) len))
+      (asserts! (>= block-height start) (err ERR_MIGRATION_NOT_STARTED))
+      (let ((delta (- block-height start))
+            (band (/ (- block-height start) len))
           )
         (ok (if (>= band u3) u3 band))
       )
@@ -146,7 +146,7 @@
       (maybe-since (get since (map-get? balance-since { who: who })))
       (start (var-get migration-start-height))
     )
-    (default-to (default-to stacks-block-height start) maybe-since)
+    (default-to (default-to block-height start) maybe-since)
   )
 )
 
@@ -156,7 +156,7 @@
       (factor (var-get user-duration-factor))
       (max-cap (var-get user-max-cap-cxd))
       (since (get-balance-since who))
-      (duration (- stacks-block-height since))
+      (duration (- block-height since))
       (calc (+ base (* factor duration)))
     )
     (ok (if (> calc max-cap) max-cap calc))
@@ -170,10 +170,10 @@
       (last (var-get last-midyear-adjustment))
       (override (var-get epoch-override))
     )
-    (if (and (> mb u0) (> bps u0) (is-eq override false) (>= (- stacks-block-height last) mb))
+    (if (and (> mb u0) (> bps u0) (is-eq override false) (>= (- block-height last) mb))
       (begin
         (var-set epoch-cap-cxd (/ (* (var-get epoch-cap-cxd) bps) u10000))
-        (var-set last-midyear-adjustment stacks-block-height)
+        (var-set last-midyear-adjustment block-height)
         true
       )
       false
@@ -255,7 +255,7 @@
       (map-set balances { who: sender } { bal: (- sender-bal amount) })
       (let ((rec-bal (default-to u0 (get bal (map-get? balances { who: recipient })))) )
         (map-set balances { who: recipient } { bal: (+ rec-bal amount) })
-        (map-set balance-since { who: recipient } { since: stacks-block-height })
+        (map-set balance-since { who: recipient } { since: block-height })
       )
     )
     ;; --- HOOK FOR MIGRATION QUEUE ---
@@ -308,7 +308,7 @@
     (var-set total-supply (+ (var-get total-supply) amount))
     (let ((bal (default-to u0 (get bal (map-get? balances { who: recipient })))) )
       (map-set balances { who: recipient } { bal: (+ bal amount) })
-      (map-set balance-since { who: recipient } { since: stacks-block-height })
+      (map-set balance-since { who: recipient } { since: block-height })
     )
     ;; --- HOOK FOR MIGRATION QUEUE ---
     (match (var-get migration-queue-contract)
@@ -340,7 +340,7 @@
     (begin
       (maybe-auto-adjust)
       (asserts! (> len u0) (err ERR_MIGRATION_NOT_SET))
-      (asserts! (>= stacks-block-height start) (err ERR_MIGRATION_NOT_STARTED))
+      (asserts! (>= block-height start) (err ERR_MIGRATION_NOT_STARTED))
       (asserts! (is-eq cxd-stored (contract-of cxd)) (err ERR_CXD_MISMATCH))
       (asserts! (>= sender-bal amount) (err ERR_NOT_ENOUGH_BALANCE))
       ;; burn CXLP from sender
@@ -371,3 +371,4 @@
     )
   )
 )
+

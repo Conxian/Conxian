@@ -43,7 +43,7 @@
 )
 
 (define-public (record-price (token-a principal) (token-b principal) (price uint) (volume uint))
-  (map-set price-history { token-a: token-a, token-b: token-b, block: stacks-block-height } { price: price, volume: volume })
+  (map-set price-history { token-a: token-a, token-b: token-b, block: block-height } { price: price, volume: volume })
   (ok true)
 )
 
@@ -57,7 +57,7 @@
 )
 
 (define-private (get-price-history (token-a principal) (token-b principal) (period uint))
-  (let ((current-block stacks-block-height))
+  (let ((current-block block-height))
     (let ((prices (list)))
       (ok (unwrap-panic (as-max-len? prices u100)))
     )

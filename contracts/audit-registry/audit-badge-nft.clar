@@ -2,7 +2,7 @@
 ;; SIP-009 compliant NFT contract for audit badges
 
 (use-trait sip-009-nft-trait .all-traits.sip-009-nft-trait)
-(impl-trait .sip-009-nft-trait)
+(impl-trait sip-009-nft-trait)
 (define-non-fungible-token audit-badge-nft uint)
 (define-constant CONTRACT_OWNER tx-sender)
 (define-constant ERR_UNAUTHORIZED (err u100))
@@ -60,7 +60,7 @@
     ;; Log memo presence consistently without type mismatch
     (match memo
       some-memo (print true)
-      none      (print false))
+      (print false))
     (ok true)
   )
 )
@@ -127,3 +127,4 @@
     )
   )
 )
+

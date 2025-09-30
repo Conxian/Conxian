@@ -43,6 +43,12 @@
     executed: bool
 })
 
+;; Tier configurations: per-tier fee discount and privileges
+(define-map tier-configs uint {
+  fee-discount-rate: uint,
+  trading-privileges: uint
+})
+
 ;; @desc Sets the compliance hook contract.
 ;; @param hook (principal) The principal of the compliance hook contract.
 ;; @return (response bool) An (ok true) response if the compliance hook was successfully set, or an error if unauthorized.
@@ -69,7 +75,7 @@
 ;; @param owner (principal) The owner of the new account.
 ;; @param tier (uint) The tier level for the new account.
 ;; @return (response uint) An (ok account-id) response if the account was successfully created, or an error if unauthorized or the tier is invalid.
-(define-public (create-institutional-account (owner principal) (tier uint)))
+(define-public (create-institutional-account (owner principal) (tier uint))
     (begin
         (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
         (let (
@@ -93,7 +99,7 @@
 ;; @param account-id (uint) The ID of the account to update.
 ;; @param new-tier (uint) The new tier level for the account.
 ;; @return (response bool) An (ok true) response if the account tier was successfully updated, or an error if unauthorized, the account is not found, or the new tier is invalid.
-(define-public (update-account-tier (account-id uint) (new-tier uint)))
+(define-public (update-account-tier (account-id uint) (new-tier uint))
     (begin
         (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
         (let (
@@ -115,7 +121,7 @@
 ;; @param fee-discount-rate (uint) The fee discount rate for this tier (e.g., u100 for 1%).
 ;; @param trading-privileges (uint) A bitmask representing the trading privileges for this tier.
 ;; @return (response bool) An (ok true) response if the tier configuration was successfully set, or an error if unauthorized or the fee discount rate is invalid.
-(define-public (set-tier-config (tier uint) (fee-discount-rate uint) (trading-privileges uint)))
+(define-public (set-tier-config (tier uint) (fee-discount-rate uint) (trading-privileges uint))
     (begin
         (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
         (asserts! (<= fee-discount-rate u10000) ERR_INVALID_FEE_DISCOUNT) ;; Max 100% discount (10000 basis points)
@@ -136,7 +142,7 @@
 ;; @param start-time (uint) The block height at which the order becomes active.
 ;; @param end-time (uint) The block height at which the order expires.
 ;; @return (response uint) An (ok order-id) response if the TWAP order was successfully created, or an error if a circuit breaker is open, the account is not found, unauthorized, not verified, invalid privilege, or invalid order times.
-(define-public (create-twap-order (account-id uint) (token-in principal) (token-out principal) (amount-in uint) (min-amount-out uint) (start-time uint) (end-time uint)))uint))
+(define-public (create-twap-order (account-id uint) (token-in principal) (token-out principal) (amount-in uint) (min-amount-out uint) (start-time uint) (end-time uint))
     (begin
         (try! (check-circuit-breaker))
         (let ((account (unwrap! (map-get? institutional-accounts account-id) ERR_ACCOUNT_NOT_FOUND)))
@@ -186,19 +192,12 @@
 ;; @param privileges (uint) The bitmask of privileges.
 ;; @param privilege-flag (uint) The specific privilege flag to check for.
 ;; @return (bool) True if the privilege is present, false otherwise.
-(define-private (has-privilege (privileges uint) (privilege-flag uint)))
-    (> (and privileges privilege-flag) u0)
+(define-private (has-privilege (privileges uint) (privilege-flag uint))
+  ;; Treat privilege-flag as a power-of-two bitmask. Check if the bit is set using arithmetic.
+  (>= (mod privileges (* privilege-flag u2)) privilege-flag)
 )
 
-;; @desc Checks the KYC status of an account owner through the compliance hook.
-;; @param account-owner (principal) The principal of the account owner to check.
-;; @return (response bool) An (ok true) response if the KYC status is satisfactory or no compliance hook is set, or an error otherwise.
-(define-private (check-verification (account-owner principal))
-    (match (var-get compliance-hook)
-        (hook (contract-call? hook check-kyc-status account-owner))
-        (ok true)
-    )
-)
+;; Duplicate check-verification removed (handled by the earlier function)
 
 (define-public (execute-twap-order (order-id uint))
     (begin
@@ -281,12 +280,14 @@
 
 ;; @desc Retrieves the principal of the currently set circuit breaker contract.
 ;; @return (response principal) An (ok) response containing the principal of the circuit breaker, or an error if not set.
-(define-read-only (get-circuit-breaker))
+(define-read-only (get-circuit-breaker)
+  (ok (unwrap! (var-get circuit-breaker) (err u400)))
+)
 
 ;; @desc Retrieves the details of a TWAP order.
 ;; @param order-id (uint) The ID of the TWAP order.
 ;; @return (response {account-id: uint, token-in: principal, token-out: principal, amount-in: uint, min-amount-out: uint, start-time: uint, end-time: uint, filled-amount: uint}) An (ok) response containing the order details, or an error if the order does not exist.
-(define-read-only (get-twap-order-details (order-id uint)))uint))
+(define-read-only (get-twap-order-details (order-id uint))
     (map-get? twap-orders order-id)
 )
 

@@ -146,3 +146,4 @@
 (define-read-only (get-total-deployed)
   (ok (var-get total-deposited))
 )
+

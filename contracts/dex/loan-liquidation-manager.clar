@@ -63,3 +63,4 @@
 (define-read-only (get-owner)
   (ok (var-get contract-owner))
 )
+

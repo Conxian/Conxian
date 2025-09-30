@@ -521,3 +521,4 @@
   owner: CONTRACT_OWNER,
   version: "1.0.0"
 })
+

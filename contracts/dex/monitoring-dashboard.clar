@@ -12,7 +12,7 @@
   (begin
     (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
     (let ((event-id (+ (var-get event-counter) u1)))
-      (map-set events event-id { component: component, event-type: event-type, severity: severity, message: message, block-height: stacks-block-height, data: data })
+      (map-set events event-id { component: component, event-type: event-type, severity: severity, message: message, block-height: block-height, data: data })
       (var-set event-counter event-id)
       (ok event-id)
     )

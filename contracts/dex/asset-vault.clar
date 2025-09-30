@@ -2,7 +2,8 @@
 ;; Implements a simple asset vault for the Conxian protocol
 
 (use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
-(impl-trait .asset-vault-trait)
+(use-trait asset-vault-trait .all-traits.asset-vault-trait)
+(impl-trait asset-vault-trait)
 
 (define-constant ERR-NOT-AUTHORIZED (err u100))
 (define-constant ERR-INVALID-TOKEN (err u101))
@@ -50,9 +51,9 @@
 (define-public (deposit (token principal) (amount uint))
   (begin
     (asserts! (not (var-get paused)) ERR-VAULT-PAUSED)
-    (asserts! (map-get? allowed-tokens token) ERR-INVALID_TOKEN)
+    (asserts! (map-get? allowed-tokens token) ERR-INVALID-TOKEN)
     (asserts! (> amount u0) ERR-ZERO-AMOUNT)
-    (try! (contract-call? token transfer amount tx-sender (as-contract tx-sender)))
+    (try! (contract-call? token transfer amount tx-sender (as-contract tx-sender) none))
     (ok true)
   )
 )
@@ -60,10 +61,10 @@
 (define-public (withdraw (token principal) (amount uint))
   (begin
     (asserts! (not (var-get paused)) ERR-VAULT-PAUSED)
-    (asserts! (map-get? allowed-tokens token) ERR-INVALID_TOKEN)
+    (asserts! (map-get? allowed-tokens token) ERR-INVALID-TOKEN)
     (asserts! (> amount u0) ERR-ZERO-AMOUNT)
     (asserts! (>= (get-balance token (as-contract tx-sender)) amount) ERR-INSUFFICIENT-BALANCE)
-    (try! (contract-call? token transfer amount (as-contract tx-sender) tx-sender))
+    (try! (contract-call? token transfer amount (as-contract tx-sender) tx-sender none))
     (ok true)
   )
 )

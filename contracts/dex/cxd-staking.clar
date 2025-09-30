@@ -12,7 +12,7 @@
 (use-trait circuit-breaker-trait .all-traits.circuit-breaker-trait)
 
 ;; Implement the staking trait
-(impl-trait .staking-trait)
+(impl-trait staking-trait)
 
 ;; --- Constants ---
 (define-constant CONTRACT_OWNER tx-sender)
@@ -375,6 +375,7 @@
     paused: (var-get paused),
     kill-switch: (var-get kill-switch)
   })
+
 
 
 

@@ -78,3 +78,4 @@
         (asserts! (is-eq tx-sender (contract-call? .access-control has-admin tx-sender)) ERR_INVALID_SIGNER)
         (var-set domain-separator new-separator)
         (ok true)))
+

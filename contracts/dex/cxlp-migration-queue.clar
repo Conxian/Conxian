@@ -4,9 +4,9 @@
 (use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
 (use-trait access-control-trait .all-traits.access-control-trait)
 (use-trait cxlp-migration-queue-trait .all-traits.cxlp-migration-queue-trait)
-(use-trait ft-mintable .all-traits.ft-mintable-trait)
+(use-trait ft-mintable .all-traits.sip-010-ft-mintable-trait)
 
-(impl-trait .cxlp-migration-queue-trait)
+(impl-trait cxlp-migration-queue-trait)
 
 ;; --- Constants ---
 (define-constant CONTRACT_OWNER tx-sender)
@@ -231,7 +231,7 @@
             (try! (as-contract (contract-call? (var-get cxlp-contract) burn user-cxlp)))
             
             ;; Mint CXD to user
-            (try! (as-contract (contract-call? cxd-token mint tx-sender pro-rata-cxd)))
+            (try! (as-contract (contract-call? cxd-token mint pro-rata-cxd tx-sender)))
             
             ;; Mark as claimed
             (map-set user-intents
@@ -294,6 +294,7 @@
     cxlp-contract: (var-get cxlp-contract),
     cxd-contract: (var-get cxd-contract)
   })
+
 
 
 

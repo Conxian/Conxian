@@ -155,3 +155,4 @@
 (define-read-only (get-violation (violation-id uint))
   (map-get? invariant-violations violation-id)
 )
+

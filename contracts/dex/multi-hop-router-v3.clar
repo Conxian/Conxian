@@ -9,7 +9,7 @@
 (use-trait factory-v2-trait .all-traits.dex-factory-v2)
 
 ;; Implementation
-;; (impl-trait .router-trait) ;; removed until router-trait is defined in all-traits
+;; (impl-trait router-trait) ;; removed until router-trait is defined in all-traits
 
 ;; Constants
 (define-constant CONTRACT_OWNER tx-sender)

@@ -4,7 +4,7 @@
 (use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
 (use-trait monitoring-trait .all-traits.monitoring-trait)
 
-(impl-trait .monitoring-trait)
+(impl-trait monitoring-trait)
 
 ;; ===== Constants =====
 (define-constant ERR_UNAUTHORIZED (err u100))
@@ -17,8 +17,8 @@
 (define-read-only (get-system-health)
   (ok {
     status: "operational",
-    block-height: stacks-block-height,
-    last-checked: stacks-block-height,
+    block-height: block-height,
+    last-checked: block-height,
     uptime: u100, ;; Placeholder, would require more complex tracking
     total-transactions: u0, ;; Placeholder, would require global counter
     failed-transactions: u0 ;; Placeholder, would require global counter

@@ -5,7 +5,7 @@
 (use-trait circuit-breaker-trait .all-traits.circuit-breaker-trait)
 (use-trait pool-trait .all-traits.pool-trait)
 
-(impl-trait .factory-trait)
+(impl-trait factory-trait)
 
 ;; --- Constants ---
 (define-constant ACCESS_CONTROL .access-control)
@@ -40,7 +40,7 @@
 (define-data-var access-control-contract principal .access-control) ;; The main access control contract
 (define-data-var pool-count uint u0)
 (define-data-var circuit-breaker (optional principal) none)
-(define-data-var default-pool-type uint POOL_TYPE_CONSTANT_PRODUCT)
+(define-data-var default-pool-type (string-ascii 64) POOL_TYPE_CONSTANT_PRODUCT)
 
 ;; --- Maps ---
 ;; Maps a pair of tokens to the principal of their pool contract.
@@ -97,7 +97,7 @@
 
 (define-private (check-circuit-breaker)
   (match (var-get circuit-breaker)
-    (cb (contract-call? cb is-tripped))
+    (cb (contract-call? cb is-circuit-open))
     (ok false)
   )
 )
@@ -120,7 +120,7 @@
 ;; --- Public Functions ---
 
 ;; Creates a new DEX pool by deploying a new contract
-(define-public (create-pool (token-a <sip-010-ft-trait>) (token-b <sip-010-ft-trait>) (pool-type (string-ascii 64)) (fee-bps uint))
+(define-public (create-pool (token-a <sip-010-ft-trait>) (token-b <sip-010-ft-trait>) (fee-bps uint) (pool-type (string-ascii 64)))
   (begin
     (try! (check-circuit-breaker))
     (try! (check-pool-manager))
@@ -143,7 +143,8 @@
       (let ((pool-principal (unwrap! (contract-call? pool-impl create-pool 
                                       (get token-a normalized-pair) 
                                       (get token-b normalized-pair) 
-                                      fee-bps) 
+                                      fee-bps
+                                      pool-type) 
                             (err u9999))))
         
         (map-set pools { 
@@ -269,12 +270,12 @@
 )
 
 ;; Gets the pool type information
-(define-read-only (get-pool-type-info (pool-type uint))
+(define-read-only (get-pool-type-info (pool-type (string-ascii 64)))
   (map-get? pool-type-info pool-type)
 )
 
 ;; Gets the implementation contract for a pool type
-(define-read-only (get-pool-implementation-contract (pool-type uint))
+(define-read-only (get-pool-implementation-contract (pool-type (string-ascii 64)))
   (map-get? pool-implementations pool-type)
 )
 
@@ -356,34 +357,5 @@
 )
 
 ;; Gets the information for a given pool principal.
-// ... existing code ...
+;; (function already defined above)
 
-(define-read-only (get-owner)
-  (ok (var-get contract-owner))
-)
-
-
-// ... existing code ...
-(define-public (set-pool-implementation (pool-type uint) (implementation-contract principal))
-  (begin
-    (unwrap! (check-is-owner) (err ERR_UNAUTHORIZED))
-    (map-set pool-implementations pool-type implementation-contract)
-    (ok true)
-  )
-)
-
-(define-public (set-pool-type-info (pool-type uint) (name (string-ascii 32)) (description (string-ascii 128)) (is-active bool))
-  (begin
-    (unwrap! (check-is-owner) (err ERR_UNAUTHORIZED))
-    (map-set pool-type-info pool-type { name: name, description: description, is-active: is-active })
-    (ok true)
-  )
-)
-
-(define-read-only (get-pool-implementation (pool-type uint))
-  (ok (map-get? pool-implementations pool-type))
-)
-
-(define-read-only (get-pool-type-info (pool-type uint))
-  (ok (map-get? pool-type-info pool-type))
-)

@@ -3,7 +3,7 @@
 ;; Handles multiple oracle sources, price validation, and emergency controls
 
 (use-trait oracle-trait .all-traits.oracle-trait)
-(use-trait circuit-breaker-trait .all-traits.circuit-breaker-trait.circuit-breaker-trait)
+(use-trait circuit-breaker-trait .all-traits.circuit-breaker-trait)
 
 ;; =============================================================================
 ;; CONSTANTS AND ERROR CODES
@@ -233,7 +233,7 @@
       { oracle: oracle, asset: asset }
       {
         price: price,
-        timestamp: (get-stacks-block-info? time block-height)),
+        timestamp: (unwrap-panic (get-block-info? time block-height)),
         confidence: confidence,
         volume: volume,
         block-height: block-height
@@ -529,6 +529,7 @@
     (ok true)
   )
 )
+
 
 
 

@@ -8,7 +8,7 @@
 (use-trait circuit-breaker-trait .all-traits.circuit-breaker-trait)
 (use-trait oracle-aggregator-trait .all-traits.oracle-aggregator-trait)
 
-(impl-trait .oracle-aggregator-trait)
+(impl-trait oracle-aggregator-trait)
 
 ;; Constants
 (define-constant ERR_UNAUTHORIZED (err u100))

@@ -1,12 +1,12 @@
-; lending-protocol-governance.clar
+;; lending-protocol-governance.clar
 ;; Governance contract for the Conxian lending protocol
 ;; Integrates with AccessControl for role-based access
 
 ;; --- Traits ---
 (use-trait access-control-trait .all-traits.access-control-trait)
 (use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
-(impl-trait .access-control-trait)
-(define-constant TRAIT_REGISTRY .trait-registry)
+(impl-trait access-control-trait)
+(define-constant TRAIT_REGISTRY 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.trait-registry)
 
 (define-constant ERR_UNAUTHORIZED (err u8001))
 (define-constant ERR_PROPOSAL_NOT_FOUND (err u8002))
@@ -82,7 +82,7 @@
 
 ;; Voting power snapshots
 (define-map voting-power-snapshots
-  { user: principal, stacks-block-height: uint }
+  { user: principal, block-height: uint }
   uint)
 
 ;; Parameter change proposals
@@ -125,7 +125,7 @@
   (parameters (optional (list 10 uint))))
   (let ((proposal-id (var-get next-proposal-id))
         (proposer tx-sender)
-        (voting-power (get-voting-power-at proposer (- stacks-block-height u1))))
+        (voting-power (get-voting-power-at proposer (- block-height u1))))
     
     (begin
       ;; Check proposal threshold
@@ -144,12 +144,12 @@
           for-votes: u0,
           against-votes: u0,
           abstain-votes: u0,
-          start-block: (+ stacks-block-height (var-get voting-delay)),
-          end-block: (+ stacks-block-height (var-get voting-delay) (var-get voting-period)),
+          start-block: (+ block-height (var-get voting-delay)),
+          end-block: (+ block-height (var-get voting-delay) (var-get voting-period)),
           queue-block: none,
           execution-block: none,
           state: PROPOSAL_PENDING,
-          created-at: (unwrap-panic (get-block-info? time stacks-block-height))
+          created-at: (unwrap-panic (get-block-info? time block-height))
         })
       
       ;; Update counters
@@ -157,7 +157,7 @@
       (var-set total-proposals (+ (var-get total-proposals) u1))
       
       ;; Take snapshot of proposers voting power
-      (snapshot-voting-power proposer stacks-block-height)
+      (snapshot-voting-power proposer block-height)
       
       ;; Emit proposal event
       (print (tuple 
@@ -165,8 +165,8 @@
         (proposal-id proposal-id)
         (proposer proposer)
         (title title)
-        (start-block (+ stacks-block-height (var-get voting-delay)))
-        (end-block (+ stacks-block-height (var-get voting-delay) (var-get voting-period))))))
+        (start-block (+ block-height (var-get voting-delay)))
+        (end-block (+ block-height (var-get voting-delay) (var-get voting-period))))))
       
       (ok proposal-id))))
 
@@ -227,7 +227,7 @@
 (define-public (vote (proposal-id uint) (support uint) (reason (optional (string-utf8 200))))
   (let ((proposal (unwrap! (map-get? proposals proposal-id) ERR_PROPOSAL_NOT_FOUND))
         (voter tx-sender)
-        (current-block stacks-block-height)))
+        (current-block block-height)))
     
     (begin
       ;; Check proposal is active
@@ -279,7 +279,7 @@
     
     (begin
       ;; Check proposal has ended and succeeded
-      (asserts! (> stacks-block-height (get end-block proposal)) ERR_PROPOSAL_NOT_ACTIVE)
+      (asserts! (> block-height (get end-block proposal)) ERR_PROPOSAL_NOT_ACTIVE)
       
       ;; Check if proposal passed
       (let ((total-votes (+ (+ (get for-votes proposal) (get against-votes proposal)) (get abstain-votes proposal)))
@@ -289,7 +289,7 @@
         (asserts! (and quorum-met majority-for) ERR_PROPOSAL_NOT_PASSED)
         
         ;; Queue proposal
-        (let ((queue-block (+ stacks-block-height (var-get execution-delay)))))
+        (let ((queue-block (+ block-height (var-get execution-delay)))))
           (map-set proposals proposal-id
             (merge proposal 
               { state: PROPOSAL_QUEUED, queue-block: (some queue-block) }))
@@ -311,7 +311,7 @@
     (begin
       ;; Check proposal is queued and ready
       (asserts! (is-eq (get state proposal) PROPOSAL_QUEUED) ERR_PROPOSAL_NOT_ACTIVE)
-      (asserts! (>= stacks-block-height (unwrap! (get queue-block proposal) ERR_PROPOSAL_NOT_ACTIVE)) ERR_PROPOSAL_NOT_ACTIVE)
+      (asserts! (>= block-height (unwrap! (get queue-block proposal) ERR_PROPOSAL_NOT_ACTIVE)) ERR_PROPOSAL_NOT_ACTIVE)
       
       ;; Execute based on proposal type
       (let ((execution-result 
@@ -324,12 +324,12 @@
         ;; Unwrap result or fail
         (let ((executed (unwrap! execution-result ERR_EXECUTION_FAILED))))
           (map-set proposals proposal-id
-            (merge proposal { state: PROPOSAL_EXECUTED, execution-block: (some stacks-block-height) }))
+            (merge proposal { state: PROPOSAL_EXECUTED, execution-block: (some block-height) }))
           
           (print (tuple 
             (event "proposal-executed")
             (proposal-id proposal-id)
-            (execution-block stacks-block-height))))
+            (execution-block block-height))))
           
           (ok true))))))
 
@@ -383,7 +383,7 @@
 ;; @param user The principal address of the user.
 ;; @return (response uint uint) The voting power of the user.
 (define-read-only (get-voting-power (user principal))
-  (get-voting-power-at user stacks-block-height))
+  (get-voting-power-at user block-height))
 
 ;; Fetches the voting power of a user at a specific block height
 ;; by calling the cxvg-utility contract.
@@ -404,7 +404,7 @@
 ;; @return (response bool bool) A response tuple indicating success or failure.
 (define-private (snapshot-voting-power (user principal) (at-height uint))
   (let ((voting-power (get-voting-power-at user at-height))))
-    (map-set voting-power-snapshots { user: user, stacks-block-height: at-height } voting-power)
+    (map-set voting-power-snapshots { user: user, block-height: at-height } voting-power)
     (ok true)
   ))
 
@@ -424,8 +424,8 @@
   (execution-delay uint))
   (begin
     (asserts! (or 
-      (contract-call? .access-control has-role ROLE_GOVERNOR (as-contract tx-sender))
-      (contract-call? .access-control has-role ROLE_GUARDIAN (as-contract tx-sender))
+      (contract-call? .access-control has-role (as-contract tx-sender) ROLE_GOVERNOR)
+      (contract-call? .access-control has-role (as-contract tx-sender) ROLE_GUARDIAN)
     ) ERR_UNAUTHORIZED)
     
     (asserts! (>= voting-delay u144) (err u8009)) ;; At least 1 hour
@@ -448,7 +448,7 @@
 ;; @return (response bool bool) A response tuple indicating success or failure.
 (define-public (initialize (gov-token principal) (timelock principal))
   (begin
-    (asserts! (contract-call? .access-control has-role ROLE_GOVERNOR (as-contract tx-sender)) ERR_UNAUTHORIZED)
+    (asserts! (contract-call? .access-control has-role (as-contract tx-sender) ROLE_GOVERNOR) ERR_UNAUTHORIZED)
     (var-set governance-token gov-token)
     (var-set timelock-address (some timelock))
     (ok true)
@@ -503,3 +503,4 @@
     (ok true)
   ))
 )
+

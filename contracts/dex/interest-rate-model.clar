@@ -141,3 +141,4 @@
 ;; --- View Functions ---
 (define-read-only (get-market-info (asset principal))
   (map-get? market-state { asset: asset }))
+

@@ -113,7 +113,7 @@
 
 (define-private (check-deviation (new-price uint) (token-a principal) (token-b principal))
   (match (map-get? prices { token-a: token-a, token-b: token-b })
-    (some old-price-data
+    old-price-data
       (let (
         (old-price (get price old-price-data))
         (deviation (abs (- (to-int new-price) (to-int old-price))))
@@ -122,8 +122,7 @@
         (asserts! (<= deviation threshold) ERR_DEVIATION_TOO_HIGH)
         (ok true)
       )
-    )
-    (none (ok true)) ;; No previous price to compare, so no deviation
+    (ok true) ;; No previous price to compare, so no deviation
   )
 )
 
@@ -133,7 +132,7 @@
     (twap-period ONE_HOUR_IN_BLOCKS)
   )
     (match (map-get? twap { token-a: token-a, token-b: token-b })
-      (some old-twap-data
+      old-twap-data
         (let (
           (old-twap (get price old-twap-data))
           (last-updated (get last-updated old-twap-data))
@@ -149,14 +148,14 @@
             (ok true) ;; No block passed, no TWAP update needed
           )
         )
-      )
-      (none
+      (begin
         ;; First TWAP update
         (map-set twap { token-a: token-a, token-b: token-b } { price: new-price, last-updated: current-block })
         (ok true)
       )
     )
   )
+)
 
 (define-constant MANIPULATION_DEVIATION_THRESHOLD u1000) ;; 10% deviation threshold for manipulation
 
