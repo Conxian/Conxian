@@ -1,7 +1,7 @@
 ;; Conxian Cross-Protocol Integrator
 (use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
-(use-trait dex-router-trait .all-traits.traits.dex-router-trait)
-(use-trait oracle-trait .all-traits.traits.oracle-trait)
+(use-trait dex-router-trait .all-traits.dex-router-trait)
+(use-trait oracle-trait .all-traits.oracle-trait)
 
 ;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED (err u701))
@@ -37,7 +37,7 @@
   (begin
     (let ((protocol-contract (unwrap! (map-get? registered-protocols protocol-name) ERR_INVALID_PROTOCOL)))
       ;; Transfer tokens to the external protocol
-      (try! (contract-call? token-in transfer amount-in tx-sender protocol-contract))
+      (try! (contract-call? token-in transfer amount-in tx-sender protocol-contract none))
 
       ;; Call the external protocol's swap function
       ;; This is a placeholder. Actual implementation would involve specific trait calls.

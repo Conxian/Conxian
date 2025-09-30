@@ -9,7 +9,7 @@
 (use-trait factory-v2-trait .all-traits.dex-factory-v2)
 
 ;; Implementation
-(impl-trait .all-traits.router-trait)
+;; (impl-trait .router-trait) ;; removed until router-trait is defined in all-traits
 
 ;; Constants
 (define-constant CONTRACT_OWNER tx-sender)
@@ -84,10 +84,10 @@
             (let ((token-out (unwrap-panic (element-at path (+ i u1)))))
               (let ((pool (unwrap-panic (get-pair-address token-in token-out))))
                 (let ((amount-out (unwrap-panic (element-at amounts (+ i u1)))))
-                  (try! (contract-call? pool 'swap-exact-in
+                  (try! (contract-call? pool swap-exact-in
                     (unwrap-panic (element-at amounts i))
                     (if (is-eq i (- (len path) u2)) amount-out-min u0)
-                    (is-eq token-in (get token0 (contract-call? pool 'get-reserves)))
+                    (is-eq token-in (get token0 (contract-call? pool get-reserves)))
                     u340282366920938463463374607431768211455 ;; Far future deadline
                   ))
                   (set i (+ i u1))
@@ -234,10 +234,10 @@
             (let ((token-out (unwrap-panic (element-at path (+ i u1)))))
               (let ((pool (unwrap-panic (get-pair-address token-in token-out))))
                 (let ((amount-out (unwrap-panic (element-at amounts (+ i u1)))))
-                  (try! (contract-call? pool 'swap-exact-in
+                  (try! (contract-call? pool swap-exact-in
                     (unwrap-panic (element-at amounts i))
                     (if (is-eq i (- (len path) u2)) amount-out-min u0)
-                    (is-eq token-in (get token0 (contract-call? pool 'get-reserves)))
+                    (is-eq token-in (get token0 (contract-call? pool get-reserves)))
                     u340282366920938463463374607431768211455 ;; Far future deadline
                   ))
                   (set i (+ i u1))
@@ -283,7 +283,7 @@
 
     (let ((pool (unwrap-panic (get-pair-address token-in token-out))))
       ;; Execute swap
-      (try! (contract-call? pool 'swap-exact-out amount-out amount-in-max true deadline))
+      (try! (contract-call? pool swap-exact-out amount-out amount-in-max true deadline))
 
       (print {
         event: "exact-output-single",
@@ -303,7 +303,7 @@
   ;; Calculate input amount for single hop
   (let ((pool (get-pair-address token-in token-out)))
     (if (is-some pool)
-        (let ((pool-data (contract-call? pool 'get-reserves)))
+        (let ((pool-data (contract-call? pool get-reserves)))
           (match pool-data
             reserves
             (let ((reserve-in (if (is-eq token-in (get token0 reserves)) (get reserve0 reserves) (get reserve1 reserves))))
@@ -383,10 +383,10 @@
           (let ((token-in (unwrap-panic (element-at path i))))
             (let ((token-out (unwrap-panic (element-at path (+ i u1)))))
               (let ((pool (unwrap-panic (get-pair-address token-in token-out))))
-                (try! (contract-call? pool 'swap-exact-out
+                (try! (contract-call? pool swap-exact-out
                   (if (is-eq i (- (len path) u2)) amount-out u0)
                   (unwrap-panic (element-at amounts i))
-                  (is-eq token-in (get token0 (contract-call? pool 'get-reserves)))
+                  (is-eq token-in (get token0 (contract-call? pool get-reserves)))
                   u340282366920938463463374607431768211455 ;; Far future deadline
                 ))
                 (set i (- i u1))
@@ -458,9 +458,9 @@
 )
 
 (define-public (swap-exact-in (
-  token-in <sip-010-trait>)
+  token-in <sip-010-ft-trait>)
   (amount-in uint)
-  (token-out <sip-010-trait>)
+  (token-out <sip-010-ft-trait>)
   (amount-out-min uint)
   (path (list 20 {pool-id uint, token-in principal, token-out principal}))
 )
@@ -482,7 +482,7 @@
             (asserts! (is-eq last-token input-token) ERR_INVALID_PATH)
 
             ;; Transfer token-in to the pool
-            (unwrap! (contract-call? input-token transfer current-amount tx-sender pool-contract) ERR_SWAP-FAILED)
+            (unwrap! (contract-call? input-token transfer current-amount tx-sender pool-contract none) ERR_SWAP-FAILED)
 
             ;; Perform swap in the pool
             (let (
@@ -506,16 +506,16 @@
     (asserts! (>= final-amount-out amount-out-min) ERR_INSUFFICIENT_OUTPUT)
 
     ;; Transfer final token-out to tx-sender
-    (unwrap! (contract-call? token-out transfer final-amount-out (contract-of token-out) tx-sender) ERR_SWAP-FAILED)
+    (unwrap! (contract-call? token-out transfer final-amount-out (contract-of token-out) tx-sender none) ERR_SWAP-FAILED)
 
     (ok final-amount-out)
   )
 )
 
 (define-public (swap-exact-out (
-  token-in <sip-010-trait>)
+  token-in <sip-010-ft-trait>)
   (amount-in-max uint)
-  (token-out <sip-010-trait>)
+  (token-out <sip-010-ft-trait>)
   (amount-out uint)
   (path (list 20 {pool-id uint, token-in principal, token-out principal}))
 )
@@ -559,7 +559,7 @@
     (asserts! (<= total-amount-in amount-in-max) ERR_INSUFFICIENT_OUTPUT)
 
     ;; Transfer token-in from tx-sender to the first pool
-    (unwrap! (contract-call? token-in transfer total-amount-in tx-sender (contract-of (element-at path u0))) ERR_SWAP-FAILED)
+    (unwrap! (contract-call? token-in transfer total-amount-in tx-sender (contract-of (element-at path u0)) none) ERR_SWAP-FAILED)
 
     ;; Execute the swaps
     (var-set current-amount-out amount-out)
@@ -592,7 +592,7 @@
     )
 
     ;; Transfer final token-out to tx-sender
-    (unwrap! (contract-call? token-out transfer amount-out (contract-of token-out) tx-sender) ERR_SWAP-FAILED)
+    (unwrap! (contract-call? token-out transfer amount-out (contract-of token-out) tx-sender none) ERR_SWAP-FAILED)
 
     (ok total-amount-in)
   )
@@ -734,10 +734,10 @@
             (let ((token-out (unwrap-panic (element-at path (+ i u1)))))
               (let ((pool (unwrap-panic (get-pair-address token-in token-out))))
                 (let ((amount-out (unwrap-panic (element-at amounts (+ i u1)))))
-                  (try! (contract-call? pool 'swap-exact-in
+                  (try! (contract-call? pool swap-exact-in
                     (unwrap-panic (element-at amounts i))
                     (if (is-eq i (- (len path) u2)) amount-out-min u0)
-                    (is-eq token-in (get token0 (contract-call? pool 'get-reserves)))
+                    (is-eq token-in (get token0 (contract-call? pool get-reserves)))
                     u340282366920938463463374607431768211455 ;; Far future deadline
                   ))
                   (set i (+ i u1))
@@ -783,7 +783,7 @@
 
     (let ((pool (unwrap-panic (get-pair-address token-in token-out))))
       ;; Execute swap
-      (try! (contract-call? pool 'swap-exact-out amount-out amount-in-max true deadline))
+      (try! (contract-call? pool swap-exact-out amount-out amount-in-max true deadline))
 
       (print {
         event: "exact-output-single",
@@ -803,7 +803,7 @@
   ;; Calculate input amount for single hop
   (let ((pool (get-pair-address token-in token-out)))
     (if (is-some pool)
-        (let ((pool-data (contract-call? pool 'get-reserves)))
+        (let ((pool-data (contract-call? pool get-reserves)))
           (match pool-data
             reserves
             (let ((reserve-in (if (is-eq token-in (get token0 reserves)) (get reserve0 reserves) (get reserve1 reserves))))
@@ -883,10 +883,10 @@
           (let ((token-in (unwrap-panic (element-at path i))))
             (let ((token-out (unwrap-panic (element-at path (+ i u1)))))
               (let ((pool (unwrap-panic (get-pair-address token-in token-out))))
-                (try! (contract-call? pool 'swap-exact-out
+                (try! (contract-call? pool swap-exact-out
                   (if (is-eq i (- (len path) u2)) amount-out u0)
                   (unwrap-panic (element-at amounts i))
-                  (is-eq token-in (get token0 (contract-call? pool 'get-reserves)))
+                  (is-eq token-in (get token0 (contract-call? pool get-reserves)))
                   u340282366920938463463374607431768211455 ;; Far future deadline
                 ))
                 (set i (- i u1))
@@ -958,9 +958,9 @@
 )
 
 (define-public (swap-exact-in (
-  token-in <sip-010-trait>)
+  token-in <sip-010-ft-trait>)
   (amount-in uint)
-  (token-out <sip-010-trait>)
+  (token-out <sip-010-ft-trait>)
   (amount-out-min uint)
   (path (list 20 {pool-id uint, token-in principal, token-out principal}))
 )
@@ -982,7 +982,7 @@
             (asserts! (is-eq last-token input-token) ERR_INVALID_PATH)
 
             ;; Transfer token-in to the pool
-            (unwrap! (contract-call? input-token transfer current-amount tx-sender pool-contract) ERR_SWAP-FAILED)
+            (unwrap! (contract-call? input-token transfer current-amount tx-sender pool-contract none) ERR_SWAP-FAILED)
 
             ;; Perform swap in the pool
             (let (
@@ -1006,16 +1006,16 @@
     (asserts! (>= final-amount-out amount-out-min) ERR_INSUFFICIENT_OUTPUT)
 
     ;; Transfer final token-out to tx-sender
-    (unwrap! (contract-call? token-out transfer final-amount-out (contract-of token-out) tx-sender) ERR_SWAP-FAILED)
+    (unwrap! (contract-call? token-out transfer final-amount-out (contract-of token-out) tx-sender none) ERR_SWAP-FAILED)
 
     (ok final-amount-out)
   )
 )
 
 (define-public (swap-exact-out (
-  token-in <sip-010-trait>)
+  token-in <sip-010-ft-trait>)
   (amount-in-max uint)
-  (token-out <sip-010-trait>)
+  (token-out <sip-010-ft-trait>)
   (amount-out uint)
   (path (list 20 {pool-id uint, token-in principal, token-out principal}))
 )
@@ -1059,7 +1059,7 @@
     (asserts! (<= total-amount-in amount-in-max) ERR_INSUFFICIENT_OUTPUT)
 
     ;; Transfer token-in from tx-sender to the first pool
-    (unwrap! (contract-call? token-in transfer total-amount-in tx-sender (contract-of (element-at path u0))) ERR_SWAP-FAILED)
+    (unwrap! (contract-call? token-in transfer total-amount-in tx-sender (contract-of (element-at path u0)) none) ERR_SWAP-FAILED)
 
     ;; Execute the swaps
     (var-set current-amount-out amount-out)
@@ -1092,7 +1092,7 @@
     )
 
     ;; Transfer final token-out to tx-sender
-    (unwrap! (contract-call? token-out transfer amount-out (contract-of token-out) tx-sender) ERR_SWAP-FAILED)
+    (unwrap! (contract-call? token-out transfer amount-out (contract-of token-out) tx-sender none) ERR_SWAP-FAILED)
 
     (ok total-amount-in)
   )

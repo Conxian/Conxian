@@ -4,7 +4,7 @@
 
 ;; Import the SIP-010 FT trait
 (use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
-(impl-trait .all-traits.sip-010-ft-trait)
+(impl-trait .sip-010-ft-trait)
 
 ;; Constants
 (define-constant ERR_UNAUTHORIZED (err u9001))

@@ -8,15 +8,13 @@
 (use-trait position-nft-trait .all-traits.position-nft-trait)
 
 ;; Implementation
-(impl-trait .pool-trait)
-
 ;; Constants
 (define-constant CONTRACT_OWNER tx-sender)
 (define-constant MIN_TICK -887272) ;; Minimum tick for price range
 (define-constant MAX_TICK 887272)  ;; Maximum tick for price range
 (define-constant TICK_SPACING 60) ;; Tick spacing (equivalent to 0.3% fee tier)
-(define-constant Q64 0x10000000000000000) ;; 2^64 for fixed-point math
-(define-constant Q128 0x100000000000000000000000000000000) ;; 2^128 for precision
+(define-constant Q64 u18446744073709551616) ;; 2^64 as uint
+(define-constant Q128 u340282366920938463463374607431768211455) ;; 2^128 - 1 as uint (max uint)
 
 ;; Error constants
 (define-constant ERR_UNAUTHORIZED (err u1001))

@@ -4,9 +4,6 @@
 (use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
 (use-trait circuit-breaker-trait .all-traits.circuit-breaker-trait)
 
-(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
-(use-trait circuit-breaker-trait .all-traits.circuit-breaker-trait)
-
 ;; =============================================================================
 ;; CONSTANTS AND ERROR CODES
 ;; =============================================================================
@@ -76,7 +73,7 @@
           (map-set total-rewards-claimed { user: user } { amount: (+ total-claimed amount-to-claim) })
         )
 
-        (as-contract (try! (contract-call? (var-get reward-token) transfer amount-to-claim user (some 0x))))
+        (as-contract (try! (contract-call? (var-get reward-token) transfer amount-to-claim user none)))
         
         (print { event: "rewards-claimed", user: user, amount: amount-to-claim })
         (ok amount-to-claim)

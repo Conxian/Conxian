@@ -5,7 +5,7 @@
 (define-constant TRAIT_REGISTRY .trait-registry)
 
 (use-trait oracle-trait .all-traits.oracle-trait)
-(impl-trait .all-traits.oracle-trait)
+(impl-trait .oracle-trait)
 
 ;; Error codes
 (define-constant ERR_UNAUTHORIZED (err u1001))

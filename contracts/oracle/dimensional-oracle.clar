@@ -127,16 +127,11 @@
     ;; Log the feed addition
     (try! (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.monitoring.system-monitor 
       log-event 
-      (as-contract tx-sender)
-      (as-contract 'oracle)
-      (as-contract 'feed-added)
-      (as-contract u1)  ;; INFO level
-      (as-contract "Price feed added")
-      (some {
-        token: token,
-        feed: feed,
-        block: block-height
-      })))
+      "oracle"
+      "feed-added"
+      u1  ;; INFO level
+      "Price feed added"
+      none))
       
     (ok true)
   )

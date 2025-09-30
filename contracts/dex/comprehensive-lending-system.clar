@@ -10,8 +10,8 @@
 (use-trait flash-loan-receiver-trait .all-traits.flash-loan-receiver-trait)
 (use-trait circuit-breaker-trait .all-traits.circuit-breaker-trait)
 
-(impl-trait .all-traits.lending-system-trait)
-(impl-trait .all-traits.circuit-breaker-trait)
+(impl-trait .lending-system-trait)
+(impl-trait .circuit-breaker-trait)
 
 ;; --- Constants ---
 (define-constant LENDING_SERVICE "lending-service")

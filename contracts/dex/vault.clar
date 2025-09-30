@@ -133,6 +133,7 @@
                                trigger-revenue-distribution
                                asset
                                fee))
+          true)
         true)
     
 ;; Deploy funds to strategy if available - PRODUCTION IMPLEMENTATION
@@ -196,6 +197,7 @@
                                trigger-revenue-distribution
                                asset
                                fee))
+          true)
         true)
     
     ;; Transfer tokens to user - PRODUCTION IMPLEMENTATION

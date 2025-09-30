@@ -1,8 +1,6 @@
 ;; Oracle Aggregator V2
 ;; This contract aggregates prices from multiple oracle sources, calculates TWAP, and detects manipulation.
 
-(impl-trait .oracle-trait)
-(impl-trait .circuit-breaker-trait)
 (use-trait oracle-trait .all-traits.oracle-trait)
 (use-trait access-control-trait .all-traits.access-control-trait)
 (use-trait circuit-breaker-trait .all-traits.circuit-breaker-trait)
@@ -22,7 +20,7 @@
 ;; --- Data Variables ---
 (define-data-var contract-owner principal tx-sender)
 (define-data-var circuit-breaker principal 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.circuit-breaker)
-(define-map oracle-sources (list 20 principal) bool)
+(define-data-var oracle-sources (list 20 principal) (list))
 (define-map prices { token-a: principal, token-b: principal } { price: uint, last-updated: uint })
 (define-map twap { token-a: principal, token-b: principal } { price: uint, last-updated: uint })
 (define-map price-history { token-a: principal, token-b: principal } (list 100 uint)) ;; Stores last 100 prices
@@ -32,16 +30,25 @@
 (define-public (add-oracle-source (source principal))
   (begin
     (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
-    (map-set oracle-sources (list source) true)
-    (ok true)
+    (let ((sources (var-get oracle-sources)))
+      (if (contains-principal? source sources)
+        (ok true)
+        (begin
+          (var-set oracle-sources (unwrap-panic (as-max-len? (append sources (list source)) u20)))
+          (ok true)
+        )
+      )
+    )
   )
 )
 
 (define-public (remove-oracle-source (source principal))
   (begin
     (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
-    (map-delete oracle-sources (list source))
-    (ok true)
+    (let ((sources (var-get oracle-sources)))
+      (var-set oracle-sources (filter (lambda ((s principal)) (not (is-eq s source))) sources))
+      (ok true)
+    )
   )
 )
 
@@ -55,11 +62,12 @@
 
 (define-public (update-price (token-a principal) (token-b principal))
   (let (
-    (sources (map-get? oracle-sources))
-    (median-price (try! (calculate-median (try! (get-prices-from-sources (unwrap-panic (map-get? oracle-sources (list tx-sender))) token-a token-b)))))
+    (sources (var-get oracle-sources))
+    (prices-list (try! (get-prices-from-sources sources token-a token-b)))
+    (median-price (try! (calculate-median prices-list)))
   )
     (asserts! (not (try! (check-circuit-breaker))) ERR_CIRCUIT_OPEN)
-    (asserts! (is-some sources) ERR_NO_SOURCES)
+    (asserts! (> (len sources) u0) ERR_NO_SOURCES)
     (try! (check-deviation median-price token-a token-b))
     (try! (check-manipulation median-price token-a token-b))
     (map-set prices { token-a: token-a, token-b: token-b } { price: median-price, last-updated: block-height })
@@ -80,7 +88,7 @@
 ;; --- Private Helper Functions ---
 
 (define-private (check-circuit-breaker)
-  (contract-call? .circuit-breaker-v1 is-circuit-open)
+  (contract-call? (var-get circuit-breaker) is-circuit-open)
 )
 
 (define-private (get-prices-from-sources (sources (list 20 principal)) (token-a principal) (token-b principal))

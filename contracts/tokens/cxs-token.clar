@@ -7,7 +7,7 @@
 (use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
 
 ;; Implement the standard trait
-(impl-trait .all-traits.sip-009-nft-trait)
+(impl-trait .sip-009-nft-trait)
 
 ;; Constants
 (define-constant TRAIT_REGISTRY .trait-registry)

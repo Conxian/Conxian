@@ -3,7 +3,7 @@
 (use-trait standard-constants-trait .all-traits.standard-constants-trait)
 (use-trait liquidation-interface .all-traits.liquidation-trait)
 
-(impl-trait .all-traits.liquidation-interface)
+(impl-trait .liquidation-interface)
 
 ;; Constants
 (define-constant CONTRACT_OWNER tx-sender)
