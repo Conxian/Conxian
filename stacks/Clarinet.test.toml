@@ -1,76 +1,73 @@
 [project]
 name = "conxian-tests"
 description = "Test configuration for Conxian DeFi protocol"
-clarinet_version = "3.5.0"
+clarinet_version = "3.7.0"
 
 [accounts]
 deployer = { mnemonic = "twice kind fence tip hidden tilt action fragile skin nothing glory cousin green tomorrow spring wrist shed math olympic multiply hip blue scout claw", balance = 100_000_000_000_000 }
 wallet_1 = { mnemonic = "sell invite acquire kitten bamboo drastic jelly vivid peace spawn twice guilt pave pen trash pretty park cube fragile unaware remain midnight betray rebuild", balance = 100_000_000_000_000 }
 wallet_2 = { mnemonic = "hold excess usual excess ring elephant install account glad dry fragile donkey gaze humble truck breeze nation gasp vacuum limb head keep delay hospital", balance = 100_000_000_000_000 }
 
-# Core Traits
-[contracts.sip-010-trait]
-path = "contracts/traits/sip-010-trait.clar"
+# Core Traits - Centralized
+[contracts.all-traits]
+path = "contracts/traits/all-traits.clar"
 clarity_version = 3
 epoch = "2.4"
 
-[contracts.pool-trait]
-path = "contracts/traits/pool-trait.clar"
+# Mock Contracts for Testing
+[contracts.mock-token]
+path = "contracts/mocks/mock-token.clar"
 clarity_version = 3
 epoch = "2.4"
-
-[contracts.standard-constants-trait]
-path = "contracts/traits/standard-constants-trait.clar"
-clarity_version = 3
-epoch = "2.4"
+depends_on = ["all-traits"]
 
 # Core Contracts
 [contracts.dex-factory]
 path = "contracts/dex/dex-factory.clar"
 clarity_version = 3
 epoch = "2.4"
-depends_on = ["sip-010-trait"]
+depends_on = ["all-traits"]
 
 [contracts.dex-pool]
 path = "contracts/dex/dex-pool.clar"
 clarity_version = 3
 epoch = "2.4"
-depends_on = ["pool-trait", "sip-010-trait"]
+depends_on = ["all-traits"]
 
 [contracts.dex-router]
 path = "contracts/dex/dex-router.clar"
 clarity_version = 3
 epoch = "2.4"
-depends_on = ["dex-factory", "dex-pool"]
+depends_on = ["all-traits", "dex-factory", "dex-pool"]
 
 # Tokens
 [contracts.cxd-token]
 path = "contracts/tokens/cxd-token.clar"
 clarity_version = 3
 epoch = "2.4"
-depends_on = ["sip-010-trait"]
+depends_on = ["all-traits"]
 
 [contracts.cxvg-token]
 path = "contracts/tokens/cxvg-token.clar"
 clarity_version = 3
 epoch = "2.4"
-depends_on = ["sip-010-trait"]
+depends_on = ["all-traits"]
 
 [contracts.cxlp-token]
 path = "contracts/tokens/cxlp-token.clar"
 clarity_version = 3
 epoch = "2.4"
-depends_on = ["sip-010-trait"]
+depends_on = ["all-traits"]
 
 # Dimensional Contracts
 [contracts.tokenized-bond]
 path = "contracts/dimensional/tokenized-bond.clar"
 clarity_version = 3
 epoch = "2.4"
-depends_on = ["sip-010-trait"]
+depends_on = ["all-traits"]
 
 [contracts.tokenized-bond-adapter]
 path = "contracts/dimensional/tokenized-bond-adapter.clar"
 clarity_version = 3
 epoch = "2.4"
-depends_on = ["tokenized-bond"]
+depends_on = ["all-traits", "tokenized-bond"]
