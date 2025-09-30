@@ -1,5 +1,5 @@
 ;; ===========================================
-;; CONXIAN PROTOCOL - CENTRALIZED TRAIT DEFINITIONS
+;; Conxian Protocol - Centralized Trait Definitions
 ;; ===========================================
 ;;
 ;; This file serves as the single source of truth for all trait definitions
@@ -53,6 +53,29 @@
   )
 )
 
+;; SIP-009 NFT Standard
+(define-trait sip-009-nft-trait
+  (
+    (get-last-token-id () (response uint (err uint)))
+    (get-token-uri (uint) (response (optional (string-utf8 256)) (err uint)))
+    (get-owner (uint) (response (optional principal) (err uint)))
+    (transfer (uint principal principal) (response bool (err uint)))
+  )
+)
+
+;; SIP-018 Semi-Fungible Token Standard  
+(define-trait sip-018-trait
+  (
+    (transfer (uint uint principal principal) (response bool (err uint)))
+    (transfer-memo (uint uint principal principal (buff 34)) (response bool (err uint)))
+    (get-balance (uint principal) (response uint (err uint)))
+    (get-overall-balance (principal) (response uint (err uint)))
+    (get-total-supply (uint) (response uint (err uint)))
+    (get-overall-supply () (response uint (err uint)))
+    (get-decimals (uint) (response uint (err uint)))
+    (get-token-uri (uint) (response (optional (string-utf8 256)) (err uint)))
+  )
+)
 
 (define-trait bond-trait
   (
@@ -666,5 +689,146 @@
 
     ;; @notice Get the total value locked (TVL) for a given token
     (get-tvl (token-contract <sip-010-ft-trait>)) (response uint (err uint))
+  )
+)
+
+;; ===========================================
+;; DIMENSIONAL & SPECIALIZED TRAITS
+;; ===========================================
+
+(define-trait dim-registry-trait
+  (
+    (register-dimension (name (string-ascii 64)) (description (string-utf8 256))) (response uint (err uint)))
+    (get-dimension (dim-id uint) (response {name: (string-ascii 64), description: (string-utf8 256), active: bool} (err uint)))
+    (update-dimension-status (dim-id uint) (active bool)) (response bool (err uint))
+    (get-dimension-count () (response uint (err uint)))
+  )
+)
+
+(define-trait position-nft-trait
+  (
+    (mint (recipient principal) (liquidity uint) (tick-lower int) (tick-upper int)) (response uint (err uint)))
+    (burn (token-id uint)) (response bool (err uint))
+    (get-position (token-id uint)) (response {owner: principal, liquidity: uint, tick-lower: int, tick-upper: int} (err uint))
+    (transfer (token-id uint) (sender principal) (recipient principal)) (response bool (err uint))
+  )
+)
+
+(define-trait migration-manager-trait
+  (
+    (initiate-migration (from-token <sip-010-ft-trait>) (to-token <sip-010-ft-trait>) (amount uint)) (response bool (err uint)))
+    (complete-migration (migration-id uint)) (response bool (err uint))
+    (get-migration-status (migration-id uint)) (response {status: (string-ascii 32), from-amount: uint, to-amount: uint} (err uint))
+  )
+)
+
+(define-trait error-codes-trait
+  (
+    (get-error-message (error-code uint)) (response (string-ascii 256) (err uint)))
+    (is-valid-error (error-code uint)) (response bool (err uint)))
+  )
+)
+
+(define-trait fee-manager-trait
+  (
+    (get-fee-rate (pool principal) (tier uint)) (response uint (err uint)))
+    (set-fee-rate (pool principal) (tier uint) (rate uint)) (response bool (err uint)))
+    (collect-fees (pool principal)) (response uint (err uint)))
+    (distribute-fees (pool principal) (amount uint)) (response bool (err uint)))
+  )
+)
+
+(define-trait mev-protector-trait
+  (
+    (check-front-running (tx-hash (buff 32)) (block-height uint)) (response bool (err uint)))
+    (record-transaction (tx-hash (buff 32)) (block-height uint) (amount uint)) (response bool (err uint)))
+    (is-protected (user principal)) (response bool (err uint)))
+  )
+)
+
+(define-trait governance-token-trait
+  (
+    (delegate (delegatee principal)) (response bool (err uint)))
+    (get-voting-power (account principal)) (response uint (err uint)))
+    (get-prior-votes (account principal) (block-height uint)) (response uint (err uint)))
+  )
+)
+
+(define-trait cxlp-migration-queue-trait
+  (
+    (enqueue-migration (user principal) (amount uint)) (response uint (err uint)))
+    (process-migration (queue-id uint)) (response bool (err uint)))
+    (get-queue-position (queue-id uint)) (response uint (err uint)))
+    (cancel-migration (queue-id uint)) (response bool (err uint)))
+  )
+)
+
+;; ===========================================
+;; PROTOCOL-SPECIFIC TRAITS
+;; ===========================================
+
+(define-trait oracle-aggregator-trait
+  (
+    (add-oracle-feed (token principal) (feed principal)) (response bool (err uint)))
+    (remove-oracle-feed (token principal) (feed principal)) (response bool (err uint)))
+    (get-aggregated-price (token principal)) (response uint (err uint)))
+    (get-feed-count (token principal)) (response uint (err uint)))
+  )
+)
+
+(define-trait asset-vault-trait
+  (
+    (deposit (token <sip-010-ft-trait>) (amount uint)) (response uint (err uint)))
+    (withdraw (token <sip-010-ft-trait>) (amount uint)) (response uint (err uint)))
+    (get-balance (token <sip-010-ft-trait>) (user principal)) (response uint (err uint)))
+    (get-total-assets (token <sip-010-ft-trait>)) (response uint (err uint)))
+  )
+)
+
+(define-trait performance-optimizer-trait
+  (
+    (optimize-strategy (strategy principal)) (response bool (err uint)))
+    (get-performance-metrics (strategy principal)) (response {apy: uint, tvl: uint, efficiency: uint} (err uint)))
+    (rebalance (strategy principal)) (response bool (err uint)))
+  )
+)
+
+(define-trait cross-protocol-trait
+  (
+    (bridge-assets (from-token <sip-010-ft-trait>) (to-protocol (string-ascii 64)) (amount uint)) (response uint (err uint)))
+    (get-bridge-status (tx-id (buff 32))) (response {status: (string-ascii 32), amount: uint} (err uint)))
+  )
+)
+
+(define-trait legacy-adapter-trait
+  (
+    (migrate-from-legacy (legacy-contract principal) (amount uint)) (response bool (err uint)))
+    (get-legacy-balance (user principal) (legacy-contract principal)) (response uint (err uint)))
+  )
+)
+
+(define-trait btc-adapter-trait
+  (
+    (wrap-btc (amount uint) (btc-tx-id (buff 32))) (response uint (err uint)))
+    (unwrap-btc (amount uint) (btc-address (buff 64))) (response bool (err uint)))
+    (get-wrapped-balance (user principal)) (response uint (err uint)))
+  )
+)
+
+(define-trait batch-auction-trait
+  (
+    (create-auction (token-sell <sip-010-ft-trait>) (token-buy <sip-010-ft-trait>) (amount uint) (duration uint)) (response uint (err uint)))
+    (place-bid (auction-id uint) (amount uint)) (response bool (err uint)))
+    (settle-auction (auction-id uint)) (response bool (err uint)))
+    (get-auction-status (auction-id uint)) (response {status: (string-ascii 32), total-bids: uint} (err uint)))
+  )
+)
+
+(define-trait fixed-point-math-trait
+  (
+    (mul-fixed (a uint) (b uint) (precision uint)) (response uint (err uint)))
+    (div-fixed (a uint) (b uint) (precision uint)) (response uint (err uint)))
+    (pow-fixed (base uint) (exp uint) (precision uint)) (response uint (err uint)))
+    (sqrt-fixed (a uint) (precision uint)) (response uint (err uint)))
   )
 )

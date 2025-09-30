@@ -1,9 +1,9 @@
 ;; mock-strategy-b.clar
 ;; A simple mock strategy contract for testing the yield optimizer.
 
-(use-trait sip-010-ft-trait '.all-traits.sip-010-ft-trait')
-(use-trait strategy-trait all-traits.strategy-trait)
-(impl-trait all-traits.strategy-trait)
+(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
+(use-trait strategy-trait .all-traits.strategy-trait)
+(impl-trait .all-traits.strategy-trait)
 
 (define-public (deposit (asset principal) (amount uint))
   ;; This function is called when the vault transfers funds to this strategy.

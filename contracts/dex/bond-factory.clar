@@ -1,8 +1,8 @@
 ;; bond-factory.clar
 ;; Factory contract for creating and managing bond tokens
 
-(use-trait standard-constants-trait .standard-constants-trait)
-(use-trait bond-trait .bond-trait)
+(use-trait standard-constants-trait .all-traits.standard-constants-trait)
+(use-trait bond-trait .all-traits.bond-trait)
 (impl-trait .bond-factory-trait)
 
 ;; --- Constants ---

@@ -4,7 +4,7 @@
 
 ;; --- Traits ---
 (use-trait sip-009-nft-trait .all-traits.sip-009-nft-trait)
-(use-trait sip-010-ft-trait '.all-traits.sip-010-ft-trait')
+(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
 
 ;; Implement the standard trait
 (impl-trait .all-traits.sip-009-nft-trait)

@@ -2,8 +2,8 @@
 ;; sBTC Flash Loan Extension - Advanced flash loan functionality with sBTC support
 ;; Provides flash loans with enhanced security, multi-asset support, and bond integration
 
-(use-trait sip-010-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
-(use-trait flash-loan-receiver-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.flash-loan-receiver-trait)
+(use-trait sip-010-trait .all-traits.sip-010-ft-trait)
+(use-trait flash-loan-receiver-trait .all-traits.flash-loan-receiver-trait)
 (impl-trait .all-traits.flash-loan-receiver-trait)
 
 ;; =============================================================================

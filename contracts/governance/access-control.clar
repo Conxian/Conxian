@@ -42,7 +42,7 @@
   (contract-call? (var-get circuit-breaker) is-circuit-open)
 )
 
-(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.access-control-trait)
+(impl-trait .access-control-trait)
 
 ;; ===== Role Management =====
 
@@ -434,6 +434,6 @@
 
 
 
-(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.standard-constants-trait)
+(impl-trait .standard-constants-trait)
 
 

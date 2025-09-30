@@ -2,8 +2,8 @@
 ;; sBTC Oracle Adapter - Advanced price feeds and circuit breaker integration
 ;; Handles multiple oracle sources, price validation, and emergency controls
 
-(use-trait oracle-trait .oracle-trait)
-(use-trait circuit-breaker-trait .circuit-breaker-trait.circuit-breaker-trait)
+(use-trait oracle-trait .all-traits.oracle-trait)
+(use-trait circuit-breaker-trait .all-traits.circuit-breaker-trait.circuit-breaker-trait)
 
 ;; =============================================================================
 ;; CONSTANTS AND ERROR CODES

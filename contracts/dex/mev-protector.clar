@@ -1,4 +1,4 @@
-(use-trait utils-trait .utils.utils-trait)
+(use-trait utils-trait .all-traits.utils.utils-trait)
 (impl-trait .sip-010-ft-trait)
 (impl-trait .circuit-breaker-trait)
 

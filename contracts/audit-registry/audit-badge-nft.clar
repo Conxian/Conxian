@@ -1,7 +1,8 @@
 ;; audit-badge-nft.clar
 ;; SIP-009 compliant NFT contract for audit badges
 
-(impl-trait .traits.sip-009-nft-trait)
+(use-trait sip-009-nft-trait .all-traits.sip-009-nft-trait)
+(impl-trait .sip-009-nft-trait)
 (define-non-fungible-token audit-badge-nft uint)
 (define-constant CONTRACT_OWNER tx-sender)
 (define-constant ERR_UNAUTHORIZED (err u100))
@@ -56,9 +57,10 @@
   (begin
     (asserts! (is-eq tx-sender sender) ERR_UNAUTHORIZED)
     (try! (nft-transfer? audit-badge-nft token-id sender recipient))
+    ;; Log memo presence consistently without type mismatch
     (match memo
-      some-memo (print memo)
-      none      false)
+      some-memo (print true)
+      none      (print false))
     (ok true)
   )
 )
@@ -73,7 +75,7 @@
     (asserts! (is-none (map-get? audit-to-token { audit-id: audit-id })) ERR_ALREADY_CLAIMED)
     
     (let ((token-id (var-get next-token-id)))
-      (try! (nft-mint? .audit-badge-nft token-id recipient))
+      (try! (nft-mint? audit-badge-nft token-id recipient))
       
       (map-set tokens { token-id: token-id } 
         { audit-id: audit-id, metadata: metadata })

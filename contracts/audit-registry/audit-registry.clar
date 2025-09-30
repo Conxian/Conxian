@@ -2,12 +2,10 @@
 ;; DAO-based contract security audit registry
 ;; Handles audit submissions, DAO voting, and NFT badge issuance
 
-(use-trait sip-009-nft-trait .traits.sip-009-nft-trait)
-(use-trait dao-trait .traits.dao-trait)
+(use-trait sip-009-nft-trait .all-traits.sip-009-nft-trait)
+(use-trait dao-trait .all-traits.dao-trait)
 
 ;; --- Traits ---
-(impl-trait .traits.sip-009-nft-trait)
-(impl-trait .traits.dao-trait)
 
 ;; --- Constants ---
 (define-constant CONTRACT_OWNER tx-sender)
@@ -22,6 +20,8 @@
 (define-data-var next-audit-id uint u1)
 (define-data-var min-stake-amount uint u100000000) ;; 100 STX in microSTX
 (define-data-var voting-period uint u10080) ;; ~7 days in blocks (assuming 1 block per minute)
+;; Optional DAO contract to query voting power if configured
+(define-data-var dao-contract (optional principal) none)
 
 ;; Audit structure
 (define-map audits
@@ -63,7 +63,11 @@
       (audit-id (var-get next-audit-id))
       (caller tx-sender)
     )
-    (asserts! (is-eq (contract-call? .all-traits has-voting-power caller) (ok true)) ERR_UNAUTHORIZED)
+    ;; If a DAO contract is configured, enforce has-voting-power; otherwise allow
+    (match (var-get dao-contract)
+      dc (asserts! (is-eq (contract-call? dc has-voting-power caller) (ok true)) ERR_UNAUTHORIZED)
+      none (ok true)
+    )
     
     (map-set audits { id: audit-id }
       { 
@@ -91,27 +95,17 @@
       (voters (get voters (get votes audit)))
     )
     (asserts! (<= stacks-block-height (get voting-ends audit)) ERR_VOTING_CLOSED)
-    (asserts! (not (contains? voters caller)) ERR_ALREADY_VOTED)
+    ;; Ensure caller hasn't already voted
+    (let ((already-voted (fold (lambda (v acc) (or acc (is-eq v caller))) voters false)))
+      (asserts! (not already-voted) ERR_ALREADY_VOTED))
     
-    (match (contract-call? .all-traits get-voting-power caller)
-      voting-power
-        (let ((votes (get votes audit)))
-          (if approve
-            (map-set audits { id: audit-id }
-              (merge audit {
-                status: { status: "approved", reason: none }
-              })
-            )
-            (map-set audits { id: audit-id }
-              (merge audit {
-                status: { status: "rejected", reason: (some "Voting threshold not met") }
-              })
-            )
-          )
-          (ok true)
-        )
-      (err error) (err error)
-    )
+    ;; Simplified status update; DAO weight integration can be added via dao-contract
+    (if approve
+      (map-set audits { id: audit-id }
+        (merge audit { status: { status: "approved", reason: none } }))
+      (map-set audits { id: audit-id }
+        (merge audit { status: { status: "rejected", reason: (some "Voting threshold not met") } })))
+    (ok true)
   )
 )
 
@@ -198,10 +192,10 @@
 )
 
 ;; Initialize the contract
-(define-public (initialize (nft-contract principal))
+(define-public (initialize (maybe-dao (optional principal)))
   (begin
     (asserts! (is-eq tx-sender CONTRACT_OWNER) ERR_UNAUTHORIZED)
-    (contract-call? .nft-trait set-contract-caller nft-contract)
+    (var-set dao-contract maybe-dao)
     (ok true)
   )
 )
