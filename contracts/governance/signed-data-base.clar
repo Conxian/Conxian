@@ -2,7 +2,9 @@
 ;; Base implementation of SIP-018 Signed Structured Data standard
 ;; Provides reusable functionality for contracts needing signature verification
 
-(impl-trait sip-018-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.sip-018-trait)
+;; Centralized traits
+(use-trait sip-018-trait .all-traits.sip-018-trait)
+(impl-trait sip-018-trait)
 
 ;; Constants
 (define-constant ERR_INVALID_SIGNATURE (err u6300))
@@ -15,6 +17,7 @@
 (define-constant STRUCTURED_DATA_VERSION "1")
 
 ;; Storage
+(define-data-var admin principal tx-sender)
 (define-data-var domain-separator (buff 32) 0x0000000000000000000000000000000000000000000000000000000000000000)
 (define-map used-signatures { signature: (buff 65) } { used: bool })
 
@@ -75,7 +78,7 @@
 
 (define-public (initialize-domain-separator (new-separator (buff 32)))
     (begin
-        (asserts! (is-eq tx-sender (contract-call? .access-control has-admin tx-sender)) ERR_INVALID_SIGNER)
+        (asserts! (is-eq tx-sender (var-get admin)) ERR_INVALID_SIGNER)
         (var-set domain-separator new-separator)
         (ok true)))
 

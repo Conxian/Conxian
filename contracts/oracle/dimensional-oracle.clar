@@ -6,8 +6,7 @@
 (use-trait pausable-trait .all-traits.pausable-trait)
 
 (impl-trait oracle-trait)
-(impl-trait access-control-trait)
-(impl-trait pausable-trait)
+
 
 (define-constant ERR_NOT_AUTHORIZED (err u100))
 (define-constant ERR_INVALID_PRICE (err u101))
@@ -22,6 +21,9 @@
 (define-constant DEFAULT_HEARTBEAT u1440)  ;; ~1 day in blocks
 (define-constant DEFAULT_MAX_DEVIATION u500)  ;; 5% in basis points
 (define-constant MAX_FEEDS u10)  ;; Maximum number of feeds per token
+
+(define-data-var admin principal tx-sender)
+(define-data-var paused bool false)
 
 (define-data-var heartbeat-interval uint DEFAULT_HEARTBEAT)
 (define-data-var max-deviation uint DEFAULT_MAX_DEVIATION)
@@ -51,12 +53,28 @@
   }
 )
 
+;; Guards
+(define-private (only-admin)
+  (begin
+    (asserts! (is-eq tx-sender (var-get admin)) ERR_NOT_AUTHORIZED)
+    (ok true)))
+
+(define-private (when-not-paused)
+  (begin
+    (asserts! (not (var-get paused)) ERR_CONTRACT_PAUSED)
+    (ok true)))
+
+(define-private (only-oracle-updater)
+  (begin
+    (asserts! (is-eq tx-sender (var-get admin)) ERR_NOT_AUTHORIZED)
+    (ok true)))
+
 ;; ========== Admin Functions ==========
 
 (define-public (set-admin (new-admin principal))
   (begin
     (try! (only-admin))
-    (try! (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.access.AccessControl set-admin new-admin))
+    (var-set admin new-admin)
     (ok true)
   )
 )
@@ -77,7 +95,7 @@
       )
       
       ;; Log the emergency override
-      (try! (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.monitoring.system-monitor
+      (try! (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.system-monitor
         log-event
         "oracle"
         "emergency-override"
@@ -117,13 +135,12 @@
     (asserts! (< (len current-feeds) MAX_FEEDS) (err u108))  ;; Max feeds reached
     
     ;; Check if feed already exists
-    (asserts! (not (contains (map (lambda (f) (is-eq f feed)) current-feeds)))
-      ERR_FEED_EXISTS)
+    (asserts! (not (any (lambda ((f principal)) (is-eq f feed)) current-feeds)) ERR_FEED_EXISTS)
       
     (map-set price-feeds {token: token} (append current-feeds (list feed)))
     
     ;; Log the feed addition
-    (try! (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.monitoring.system-monitor 
+    (try! (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.system-monitor 
       log-event 
       "oracle"
       "feed-added"
@@ -144,7 +161,7 @@
       (asserts! (> (len new-feeds) u0) (err u109))  ;; At least one feed required
       (map-set price-feeds {token: token} new-feeds)
       ;; Log the feed removal
-      (try! (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.monitoring.system-monitor
+      (try! (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.system-monitor
         log-event
         "oracle"
         "feed-removed"
@@ -164,7 +181,7 @@
     (try! (only-oracle-updater))
     (let ((current-block block-height)
           (feeds (default-to (list) (map-get? price-feeds {token: token}))))
-      (asserts! (contains (map (lambda (f) (is-eq tx-sender f)) feeds)) ERR_NOT_AUTHORIZED)
+      (asserts! (any (lambda ((f principal)) (is-eq tx-sender f)) feeds) ERR_NOT_AUTHORIZED)
       (map-set feed-prices {feed: tx-sender, token: token} { price: price, last-updated: current-block })
       (try! (update-aggregate-price token))
       (ok true)
@@ -175,14 +192,13 @@
   (let ((feeds (default-to (list) (map-get? price-feeds {token: token})))
         (current-block block-height)
         (heartbeat (var-get heartbeat-interval)))
-    (let ((valid-prices
-            (filter some?
-              (map (lambda (feed)
-                     (let ((fd (map-get? feed-prices {feed: feed, token: token})))
-                       (if (and fd (>= current-block (- (get last-updated (unwrap-panic fd)) heartbeat)))
-                           (some (get price (unwrap-panic fd)))
-                           none)))
-                   feeds))))
+    (let ((valid-prices (fold (lambda ((feed principal) (acc (list 10 uint)))
+                                (let ((fd (map-get? feed-prices {feed: feed, token: token})))
+                                  (if (and fd (>= current-block (- (get last-updated (unwrap-panic fd)) heartbeat)))
+                                      (append acc (list (get price (unwrap-panic fd))))
+                                      acc)))
+                              feeds
+                              (list))))
       (asserts! (> (len valid-prices) u0) ERR_STALE_PRICE)
       (let ((median-price (get-median valid-prices)))
         (match (map-get? price-data {token: token})

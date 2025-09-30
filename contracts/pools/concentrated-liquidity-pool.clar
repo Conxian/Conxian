@@ -35,8 +35,7 @@
 (define-constant Q128 u340282366920938463463374607431768211456)
 
 ;; Data Maps
-(
-define-map pools
+ (define-map pools
   {pool-id: uint}
   {
     token-x: <sip-010-ft-trait>,
@@ -1172,5 +1171,5 @@ define-map pools
   (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
 )
 
->>>>>>> 691ee6a4f2c3061a5257ef6a4aee949c84034a52
+ 
 

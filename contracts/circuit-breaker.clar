@@ -11,6 +11,133 @@
 (define-constant ERR_UNAUTHORIZED (err u1001))
 (define-constant ERR_CIRCUIT_OPEN (err u1002))
 (define-constant ERR_INVALID_OPERATION (err u1003))
+ (define-constant ERR_INVALID_THRESHOLD (err u1004))
+ (define-constant ERR_INVALID_TIMEOUT (err u1005))
+ (define-constant ERR_EMERGENCY_SHUTDOWN (err u1006))
+ (define-constant ERR_RATE_LIMIT_EXCEEDED (err u1007))
+ (define-constant ERR_INVALID_RATE_LIMIT (err u1008))
+ (define-constant ERR_INVALID_RATE_WINDOW (err u1009))
+ 
+ ;; Defaults and limits
+ (define-constant DEFAULT_THRESHOLD u5000)
+ (define-constant DEFAULT_TIMEOUT u144)
+ (define-constant MAX_RATE_WINDOW u10080)
+ (define-constant MAX_THRESHOLD u10000)
+ 
+ ;; ===== State =====
+ (define-data-var admin principal tx-sender)
+ (define-data-var global-failure-threshold uint DEFAULT_THRESHOLD)
+ (define-data-var global-reset-timeout uint DEFAULT_TIMEOUT)
+ (define-data-var emergency-shutdown-active bool false)
+ (define-data-var circuit-mode (optional bool) none)
+ 
+ (define-map operation-stats {
+   operation: (string-ascii 64)
+ } {
+   success-count: uint,
+   failure-count: uint,
+   last-updated: uint,
+   is-open: bool,
+   last-state-change: uint,
+   rate-limit: uint,
+   rate-window: uint,
+   rate-count: uint,
+   rate-window-start: uint
+ })
+ 
+ ;; ===== Helpers =====
+ (define-private (get-default-stats (current-time uint))
+   {
+     success-count: u0,
+     failure-count: u0,
+     last-updated: current-time,
+     is-open: false,
+     last-state-change: current-time,
+     rate-limit: u0,
+     rate-window: u0,
+     rate-count: u0,
+     rate-window-start: current-time
+   }
+ )
+ 
+ (define-private (calculate-failure-rate (success-count uint) (failure-count uint))
+   (let ((total (+ success-count failure-count)))
+     (if (is-eq total u0)
+       u0
+       (/ (* failure-count u10000) total)
+     )
+   )
+ )
+ 
+ (define-private (should-circuit-open (stats {success-count: uint, failure-count: uint, last-updated: uint,
+                                             is-open: bool, last-state-change: uint, rate-limit: uint,
+                                             rate-window: uint, rate-count: uint, rate-window-start: uint}))
+   (let ((failure-rate (calculate-failure-rate (get success-count stats) (get failure-count stats)))
+         (threshold (var-get global-failure-threshold)))
+     (>= failure-rate threshold)
+   )
+ )
+ 
+ (define-private (should-circuit-close (stats {success-count: uint, failure-count: uint, last-updated: uint,
+                                              is-open: bool, last-state-change: uint, rate-limit: uint,
+                                              rate-window: uint, rate-count: uint, rate-window-start: uint}))
+   (let ((timeout (var-get global-reset-timeout))
+         (time-since-change (- block-height (get last-state-change stats))))
+     (>= time-since-change timeout)
+   )
+ )
+ 
+ (define-private (update-rate-limit (stats {success-count: uint, failure-count: uint, last-updated: uint,
+                                          is-open: bool, last-state-change: uint, rate-limit: uint,
+                                          rate-window: uint, rate-count: uint, rate-window-start: uint}) 
+                                   (is-success bool))
+   (let ((current-time block-height)
+         (window-start (get rate-window-start stats))
+         (window (get rate-window stats)))
+     (if (and (> window u0) (> (- current-time window-start) window))
+       (merge stats {
+         rate-count: u1,
+         rate-window-start: current-time,
+         success-count: (if is-success (+ (get success-count stats) u1) (get success-count stats)),
+         failure-count: (if is-success (get failure-count stats) (+ (get failure-count stats) u1)),
+         last-updated: current-time
+       })
+       (let ((new-count (+ (get rate-count stats) u1))
+             (rate-limit (get rate-limit stats)))
+         (asserts! (or (is-eq rate-limit u0) (<= new-count rate-limit)) ERR_RATE_LIMIT_EXCEEDED)
+         (merge stats {
+           rate-count: new-count,
+           success-count: (if is-success (+ (get success-count stats) u1) (get success-count stats)),
+           failure-count: (if is-success (get failure-count stats) (+ (get failure-count stats) u1)),
+           last-updated: current-time
+         })
+       )
+     )
+   )
+ )
+ 
+ (define-private (update-circuit-state (stats {success-count: uint, failure-count: uint, last-updated: uint,
+                                             is-open: bool, last-state-change: uint, rate-limit: uint,
+                                             rate-window: uint, rate-count: uint, rate-window-start: uint}))
+   (let ((current-open (get is-open stats)))
+     (if current-open
+       (if (should-circuit-close stats)
+         (merge stats {
+           is-open: false,
+           last-state-change: block-height,
+           success-count: u0,
+           failure-count: u0
+         })
+         stats)
+       (if (should-circuit-open stats)
+         (merge stats {
+           is-open: true,
+           last-state-change: block-height
+         })
+         stats)
+     )
+   )
+ )
  
 
 (define-read-only (is-circuit-open)

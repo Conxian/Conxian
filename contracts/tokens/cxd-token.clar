@@ -72,7 +72,7 @@
   "Check if token emission is allowed for the given amount"
   (if (var-get system-integration-enabled)
     (match (var-get emission-controller)
-      controller (unwrap-panic (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.emission-controller can-emit amount))
+      controller (unwrap-panic (contract-call? controller can-emit amount))
       true)
     true))
 
@@ -81,7 +81,7 @@
   (if (var-get system-integration-enabled)
     (begin
       (match (var-get token-coordinator)
-        coordinator (unwrap-panic (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.token-system-coordinator on-transfer amount sender recipient))
+        coordinator (unwrap-panic (contract-call? coordinator on-transfer amount sender recipient))
         true)
       true)
     true))
@@ -91,7 +91,7 @@
   (if (var-get system-integration-enabled)
     (begin
       (match (var-get token-coordinator)
-        coordinator (unwrap-panic (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.token-system-coordinator on-mint amount recipient))
+        coordinator (unwrap-panic (contract-call? coordinator on-mint amount recipient))
         true)
       true)
     true))
@@ -101,7 +101,7 @@
   (if (var-get system-integration-enabled)
     (begin
       (match (var-get token-coordinator)
-        coordinator (unwrap-panic (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.token-system-coordinator on-burn amount sender))
+        coordinator (unwrap-panic (contract-call? coordinator on-burn amount sender))
         true)
       true)
     true))

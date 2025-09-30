@@ -2,7 +2,18 @@
 
 ## Executive Summary
 
-Conxian is a comprehensive DeFi protocol built on Stacks blockchain, featuring a sophisticated 4-token ecosystem with dimensional metrics-driven automation, advanced yield strategies, and institutional-grade security. The system comprises 50+ smart contracts implementing yield vaults, DEX functionality, lending protocols, flash loans, and automated governance.
+Conxian is a comprehensive DeFi protocol built on Stacks blockchain,
+featuring a sophisticated 4-token ecosystem with:
+dimensional metrics-driven automation,
+advanced yield strategies, and
+institutional-grade security.
+
+The system comprises 50+ smart contracts implementing:
+Yield vaults,
+DEX functionality,
+lending protocols,
+flash loans, and
+automated governance.
 
 ## System Architecture Overview
 
@@ -15,7 +26,7 @@ Conxian is a comprehensive DeFi protocol built on Stacks blockchain, featuring a
 
 ### System Layers
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────┐
 │                   User Interface Layer                      │
 ├─────────────────────────────────────────────────────────────┤
@@ -34,6 +45,12 @@ Conxian is a comprehensive DeFi protocol built on Stacks blockchain, featuring a
 │  Circuit Breakers │ Monitoring │ Math Libraries             │
 └─────────────────────────────────────────────────────────────┘
 ```
+
+### Trait Management
+
+- All contract traits are centralized in `contracts/traits/all-traits.clar`.
+- Contracts reference traits via `use-trait alias .all-traits.<trait-name>` and implement with `(impl-trait alias)`.
+- This standardization eliminates path drift and ensures consistent interfaces across the system.
 
 ## Token Ecosystem Specification
 
@@ -225,15 +242,15 @@ Conxian is a comprehensive DeFi protocol built on Stacks blockchain, featuring a
 
 #### Enhanced Vault Features
 
-- **Flash Loan Integration**: `enhanced-flash-loan-vault.clar` (MISSING)
+- **Flash Loan Vaults**: `contracts/dex/flash-loan-vault.clar`, `contracts/dex/sbtc-flash-loan-extension.clar`
 - **sBTC Integration**: Multiple sBTC-specific contracts
 - **Lending Integration**: Enterprise-grade lending protocols
 
 ### DEX Infrastructure
 
-- **Factory**: `dex-factory.clar` (MISSING)
-- **Pool**: `dex-pool.clar` (MISSING)  
-- **Router**: `dex-router.clar` (336 lines)
+- **Factory**: `contracts/dex/dex-factory.clar`
+- **Pools**: `contracts/dex/stable-swap-pool.clar`, `contracts/dex/weighted-swap-pool.clar`, `contracts/dimensional/concentrated-liquidity-pool.clar`
+- **Router**: `contracts/dex/dex-router.clar`
 - **Features**:
   - Multiple pool types
   - Automated market making
@@ -285,19 +302,19 @@ Conxian is a comprehensive DeFi protocol built on Stacks blockchain, featuring a
   - Optimization algorithms
   - Statistical functions
 
-## Performance & Scalability
+### Performance & Scalability
 
 ### Transaction Processing
 
-- **Contract**: `transaction-batch-processor.clar` (301 lines)
+- Planned: `transaction-batch-processor.clar`
 - **Features**:
   - Batch transaction processing
   - Gas optimization
   - Throughput enhancement
 
-### Caching System
+{{ ... }}
 
-- **Contract**: `distributed-cache-manager.clar` (364 lines)
+- Planned: `distributed-cache-manager.clar`
 - **Features**:
   - Distributed caching
   - Performance optimization
@@ -305,8 +322,8 @@ Conxian is a comprehensive DeFi protocol built on Stacks blockchain, featuring a
 
 ### Monitoring & Analytics
 
-- **Dashboard**: `real-time-monitoring-dashboard.clar` (405 lines)
-- **Predictive Scaling**: `predictive-scaling-system.clar` (415 lines)
+- **Dashboard**: `contracts/monitoring/monitoring-dashboard.clar`
+- Planned: Predictive scaling (`predictive-scaling-system.clar`)
 - **Features**:
   - Real-time metrics
   - Performance prediction
@@ -393,9 +410,17 @@ Conxian is a comprehensive DeFi protocol built on Stacks blockchain, featuring a
 ### Parameter Management
 
       - Emission Controls:
-        - token-emission-controller.clar (363 lines): Implements supply discipline across all 4 tokens with governance guards, hard-coded emission rails, and supermajority + timelock requirements.
-        - cxd-token.clar (384 lines): Integrates with the emission controller for enhanced mint/burn operations.
-        - token-system-coordinator.clar (473 lines): Manages the setting of the emission controller contract.
+
+        - token-emission-controller.clar (363 lines): 
+        Implements supply discipline across all 4 tokens with:
+         governance guards, 
+         hard-coded emission rails
+         supermajority and,
+         timelock requirements.
+        - cxd-token.clar (384 lines): Integrates with the emission controller,
+                                      enhanced mint/burn operations.
+        - token-system-coordinator.clar (473 lines): Manages settings -
+                                                     emission controller contract.
       - Fee Management:
         - revenue-distributor.clar (408 lines): Manages comprehensive revenue distribution, including protocol fees and tracking various fee types.
         - enterprise-api.clar (295 lines): Supports tiered fee discounts for institutional accounts.
@@ -432,7 +457,7 @@ Conxian is a comprehensive DeFi protocol built on Stacks blockchain, featuring a
 
 ### Contract Dependencies
 
-```
+```text
 Traits → Dimensional Foundation → Tokens → DeFi Protocols → Coordination Layer
 ```
 

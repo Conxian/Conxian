@@ -57,10 +57,6 @@
   (begin
     (asserts! (is-eq tx-sender sender) ERR_UNAUTHORIZED)
     (try! (nft-transfer? audit-badge-nft token-id sender recipient))
-    ;; Log memo presence consistently without type mismatch
-    (match memo
-      some-memo (print true)
-      (print false))
     (ok true)
   )
 )

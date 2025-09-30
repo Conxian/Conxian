@@ -48,19 +48,7 @@
 
 ;; ===== Helper Functions =====
 
-(define-private (get-default-stats (current-time uint))
-  {
-    success-count: u0,
-    failure-count: u0,
-    last-updated: current-time,
-    is-open: false,
-    last-state-change: current-time,
-    rate-limit: u0,
-    rate-window: u0,
-    rate-count: u0,
-    rate-window-start: current-time
-  }
-)
+ 
 
 (define-private (calculate-failure-rate (success-count uint) (failure-count uint))
   (let ((total (+ success-count failure-count)))

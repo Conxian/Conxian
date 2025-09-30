@@ -11,7 +11,6 @@
 (use-trait circuit-breaker-trait .all-traits.circuit-breaker-trait)
 
 (impl-trait lending-system-trait)
-(impl-trait circuit-breaker-trait)
 
 ;; --- Constants ---
 (define-constant LENDING_SERVICE "lending-service")
@@ -72,13 +71,11 @@
       u0
     )
   )
-)
-
 (define-read-only (get-total-borrow-value-in-usd-safe (user principal))
   (let ((borrowed-assets (map-keys user-borrow-balances)))
      (fold
       (lambda (asset-tuple total-value)
-        (let ((asset (get-in-tuple? asset-tuple { asset: principal })))
+        (let ((asset (get asset asset-tuple)))
           (let ((balance (default-to u0 (map-get? user-borrow-balances { user: user, asset: asset })))
                 (price (get-asset-price-safe asset)))
             (+ total-value (/ (* balance price) PRECISION))))
@@ -90,7 +87,7 @@
 )
 
 (define-private (accrue-interest (asset principal))
-  (contract-call? (var-get interest-rate-model-contract) accrue-interest (list asset))
+  (contract-call? (var-get interest-rate-model-contract) accrue-interest asset)
 )
 
 ;; Calculates the total value of a user's borrows.
@@ -227,7 +224,7 @@
   (begin
     (try! (check-not-paused))
     (match (var-get circuit-breaker-contract)
-      breaker (try! (contract-call? breaker check-circuit-state (list LENDING_SERVICE)))
+      breaker (try! (contract-call? breaker check-circuit-state LENDING_SERVICE))
       none    true
     )
     (asserts! (> amount u0) ERR_ZERO_AMOUNT)
@@ -265,13 +262,13 @@
   (begin
     (try! (check-not-paused))
     (match (var-get circuit-breaker-contract)
-      breaker (try! (contract-call? breaker check-circuit-state (list LENDING_SERVICE)))
+      breaker (try! (contract-call? breaker check-circuit-state LENDING_SERVICE))
       none    true
     )
     (asserts! (> amount u0) ERR_ZERO_AMOUNT)
     (try! (accrue-interest asset-principal))
     (let ((current-borrow-value (get-total-borrow-value-in-usd tx-sender))
-          (price (unwrap! (get-asset-price asset-principal) (err u0)))
+          (price (get-asset-price-safe asset-principal))
           (additional-borrow-value (/ (* amount price) PRECISION)))
       (let ((new-borrow-value (+ current-borrow-value additional-borrow-value))
             (collateral-value (get-total-collateral-value-in-usd tx-sender)))
@@ -350,8 +347,8 @@
         (let ((actual-repay-amount (min repay-amount max-repayable)))
           
           ;; Calculate collateral to seize
-          (let ((repay-price (unwrap! (get-asset-price repay-asset-principal) (err u0)))
-                (collateral-price (unwrap! (get-asset-price collateral-asset-principal) (err u0)))
+          (let ((repay-price (get-asset-price-safe repay-asset-principal))
+                (collateral-price (get-asset-price-safe collateral-asset-principal))
                 (liquidation-bonus (get liquidation-bonus (unwrap! (map-get? supported-assets { asset: collateral-asset-principal }) (err u0)))))
             (let ((repay-value-in-usd (/ (* actual-repay-amount repay-price) PRECISION))
                   (bonus-value (/ (* repay-value-in-usd liquidation-bonus) PRECISION))
