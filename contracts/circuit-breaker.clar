@@ -12,11 +12,6 @@
 (define-constant ERR_CIRCUIT_OPEN (err u1002))
 (define-constant ERR_INVALID_OPERATION (err u1003))
  
-        })
-        stats)
-    )
-  )
-)
 
 (define-read-only (is-circuit-open)
   (ok (var-get emergency-shutdown-active))
