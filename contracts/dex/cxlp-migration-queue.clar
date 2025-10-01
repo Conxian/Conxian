@@ -33,8 +33,8 @@
 
 ;; --- Storage ---
 (define-data-var contract-owner principal CONTRACT_OWNER)
-(define-data-var cxlp-contract principal 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.cxlp-token')
-(define-data-var cxd-contract principal 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.cxd-token')
+(define-data-var cxlp-contract principal .cxlp-token)
+(define-data-var cxd-contract principal .cxd-token)
 
 ;; Migration configuration
 (define-data-var migration-start-height uint u0)

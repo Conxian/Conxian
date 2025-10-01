@@ -2,7 +2,7 @@
 ;; SIP-009 compliant NFT contract for audit badges
 
 (use-trait sip-009-nft-trait .all-traits.sip-009-nft-trait)
-(impl-trait sip-009-nft-trait)
+(impl-trait .all-traits.sip-009-nft-trait)
 (define-non-fungible-token audit-badge-nft uint)
 (define-constant CONTRACT_OWNER tx-sender)
 (define-constant ERR_UNAUTHORIZED (err u100))
@@ -14,16 +14,10 @@
 (define-data-var base-token-uri (optional (string-utf8 256)) none)
 
 ;; Maps token ID to audit ID
-(define-map tokens
-  { token-id: uint }
-  { audit-id: uint, metadata: (string-utf8 256) }
-)
+(define-map tokens uint (tuple (audit-id uint) (metadata (string-utf8 256))))
 
 ;; Maps audit ID to token ID
-(define-map audit-to-token
-  { audit-id: uint }
-  { token-id: uint }
-)
+(define-map audit-to-token uint (tuple (token-id uint)))
 
 ;; --- SIP-009 Required Functions ---
 
@@ -36,8 +30,8 @@
 )
 
 (define-read-only (get-token-uri (token-id uint))
-  (match (map-get? tokens { token-id: token-id })
-    token 
+  (match (map-get? tokens token-id)
+    token
       (match (var-get base-token-uri)
         base-uri (ok (some base-uri))
         (ok none)
@@ -47,13 +41,13 @@
 )
 
 (define-read-only (get-token-uri-raw (token-id uint))
-  (match (map-get? tokens { token-id: token-id })
+  (match (map-get? tokens token-id)
     token (ok (some (get metadata token)))
     (ok none)
   )
 )
 
-(define-public (transfer (token-id uint) (sender principal) (recipient principal) (memo (optional (buff 34))))
+(define-public (transfer (token-id uint) (sender principal) (recipient principal))
   (begin
     (asserts! (is-eq tx-sender sender) ERR_UNAUTHORIZED)
     (try! (nft-transfer? audit-badge-nft token-id sender recipient))
@@ -68,16 +62,16 @@
     (asserts! (is-eq caller .audit-registry) ERR_UNAUTHORIZED)
     
     ;; Check if audit already has a token
-    (asserts! (is-none (map-get? audit-to-token { audit-id: audit-id })) ERR_ALREADY_CLAIMED)
+    (asserts! (is-none (map-get? audit-to-token audit-id)) ERR_ALREADY_CLAIMED)
     
     (let ((token-id (var-get next-token-id)))
       (try! (nft-mint? audit-badge-nft token-id recipient))
       
-      (map-set tokens { token-id: token-id } 
-        { audit-id: audit-id, metadata: metadata })
+      (map-set tokens token-id
+        (tuple (audit-id audit-id) (metadata metadata)))
       
-      (map-set audit-to-token { audit-id: audit-id }
-        { token-id: token-id })
+      (map-set audit-to-token audit-id
+        (tuple (token-id token-id)))
       
       (var-set next-token-id (+ token-id u1))
       (ok token-id)
@@ -86,14 +80,14 @@
 )
 
 (define-read-only (get-token-by-audit (audit-id uint))
-  (match (map-get? audit-to-token { audit-id: audit-id })
+  (match (map-get? audit-to-token audit-id)
     entry (ok (some (get token-id entry)))
     (ok none)
   )
 )
 
 (define-read-only (get-audit-by-token (token-id uint))
-  (match (map-get? tokens { token-id: token-id })
+  (match (map-get? tokens token-id)
     token (ok (some (get audit-id token)))
     (ok none)
   )
@@ -112,11 +106,11 @@
 (define-public (update-metadata (token-id uint) (metadata (string-utf8 256)))
   (begin
     (asserts! (is-eq tx-sender CONTRACT_OWNER) ERR_UNAUTHORIZED)
-    (match (map-get? tokens { token-id: token-id })
-      token 
+    (match (map-get? tokens token-id)
+      token
         (begin
-          (map-set tokens { token-id: token-id }
-            (merge token { metadata: metadata }))
+          (map-set tokens token-id
+            (merge token (tuple (metadata metadata))))
           (ok true)
         )
       (err ERR_NONEXISTENT_TOKEN)

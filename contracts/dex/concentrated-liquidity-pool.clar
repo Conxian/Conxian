@@ -135,7 +135,7 @@
 
 (define-private (validate-tick (tick int))
   (asserts! (and (>= tick MIN_TICK) (<= tick MAX_TICK)) ERR_INVALID_TICK)
-  (asserts! (= (mod tick (var-get tick-spacing)) 0) ERR_TICK_SPACING)
+  (asserts! (is-eq (mod tick (var-get tick-spacing)) i0) ERR_TICK_SPACING)
   (ok true)
 )
 

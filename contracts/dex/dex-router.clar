@@ -119,25 +119,27 @@
           (fee (/ (* price (get trading-fee (unwrap! (map-get? bond-markets bond-in) (err ERR_INVALID_BOND)))) u10000))
           (amount-out (- price fee))
         )
-        (asserts! (>= amount-out min-amount-out) ERR_INSUFFICIENT_OUTPUT)
-        
-        ;; Transfer bonds and update state
-        (try! (contract-call? bond-in transfer amount-in tx-sender (as-contract tx-sender) none))
-        (try! (contract-call? bond-out transfer amount-out (as-contract tx-sender) tx-sender none))
-        
-        ;; Update market data
-        (try! (update-bond-volume bond-in amount-in))
-        (try! (update-bond-volume bond-out amount-out))
-        
-        (ok {
-          amount-in: amount-in,
-          amount-out: amount-out,
-          fee: fee,
-          price: price
-        })
+        (begin
+            (asserts! (>= amount-out min-amount-out) ERR_INSUFFICIENT_OUTPUT)
+
+            ;; Transfer bonds and update state
+            (try! (contract-call? bond-in transfer amount-in tx-sender (as-contract tx-sender) none))
+            (try! (contract-call? bond-out transfer amount-out (as-contract tx-sender) tx-sender none))
+
+            ;; Update market data
+            (try! (update-bond-volume bond-in amount-in))
+            (try! (update-bond-volume bond-out amount-out))
+
+            (ok (tuple
+              (amount-in amount-in)
+              (amount-out amount-out)
+              (fee fee)
+              (price price)
+            ))
+        )
       )
     )
-  ))))
+  )))
 )
 
 (define-public (add-bond-liquidity
@@ -163,30 +165,30 @@
           pool-principal (begin
             ;; Add liquidity to existing pool
             (let ((lp-tokens (try! (contract-call? pool-principal add-liquidity bond-amount token-amount min-lp-tokens))))
-              (ok {
-                lp-tokens: lp-tokens,
-                bond-amount: bond-amount,
-                token-amount: token-amount
-              })
+              (ok (tuple
+                (lp-tokens lp-tokens)
+                (bond-amount bond-amount)
+                (token-amount token-amount)
+              ))
             )
           )
           (err e) (begin
             ;; Create new pool and add initial liquidity
             (let ((new-pool (try! (contract-call? factory create-pool bond-contract token-contract))))
               (let ((lp-tokens (try! (contract-call? new-pool add-liquidity bond-amount token-amount min-lp-tokens))))
-                (ok {
-                  pool: new-pool,
-                  lp-tokens: lp-tokens,
-                  bond-amount: bond-amount,
-                  token-amount: token-amount
-                })
+                (ok (tuple
+                  (pool new-pool)
+                  (lp-tokens lp-tokens)
+                  (bond-amount bond-amount)
+                  (token-amount token-amount)
+                ))
               )
             )
           )
         )
       )
     )
-  ))))
+  )))
 )
 
 ;; --- Admin Functions ---
@@ -206,15 +208,15 @@
   )
   (begin
     (try! (only-owner))
-    (map-set bond-markets bond-contract {
-      is-active: true,
-      min-trade-amount: min-trade-amount,
-      max-trade-amount: max-trade-amount,
-      trading-fee: trading-fee,
-      last-price: u0,
-      volume-24h: u0,
-      last-updated: block-height
-    })
+    (map-set bond-markets bond-contract (tuple
+      (is-active true)
+      (min-trade-amount min-trade-amount)
+      (max-trade-amount max-trade-amount)
+      (trading-fee trading-fee)
+      (last-price u0)
+      (volume-24h u0)
+      (last-updated block-height)
+    ))
     (ok true)
   )
 )
@@ -224,9 +226,9 @@
     (try! (only-owner))
     (match (map-get? bond-markets bond-contract)
       market (begin
-        (map-set bond-markets bond-contract (merge market {
-          is-active: false
-        }))
+        (map-set bond-markets bond-contract (merge market (tuple
+          (is-active false)
+        )))
         (ok true)
       )
       (err e) (err ERR_INVALID_BOND)
@@ -253,52 +255,51 @@
     (deadline uint)
     (recipient principal)
   )
-  (fold (lambda (hop-index (acc (response { current-token: principal, current-amount: uint, remaining-path: (list 5 principal) } uint) uint)))
+  (fold (lambda (hop-index acc)
     (match acc
-      (ok current-state)
-      (let* (
-          (current-token (get current-token current-state))
-          (current-amount (get current-amount current-state))
-          (remaining-path (get remaining-path current-state))
-          (path-length (len remaining-path))
-        )
-        (if (<= path-length u1)
-          (ok current-state) ;; No more hops to process
-          (let* (
-              (token-out (unwrap! (element-at remaining-path u1) ERR_INVALID_PATH))
-              (pool (unwrap! (get-pool current-token token-out) ERR_POOL_NOT_FOUND))
-              (is-final-hop (is-eq path-length u2))
-              (amount-out (if is-final-hop
-                min-amount-out
-                (unwrap! (contract-call? pool get-amount-out current-amount current-token token-out) 
-                        ERR_INSUFFICIENT_LIQUIDITY)
-              ))
-              (swap-result (contract-call? pool swap 
-                current-token 
-                token-out 
-                current-amount 
-                amount-out 
-                (if is-final-hop recipient (as-contract tx-sender))
-              ))
-            )
-            (if (is-ok swap-result)
-              (ok {
-                current-token: token-out,
-                current-amount: amount-out,
-                remaining-path: (slice remaining-path u1 u5)
-              })
-              (err (unwrap-err swap-result))
+      ((ok current-state)
+        (let ((current-token (get current-token current-state))
+              (current-amount (get current-amount current-state))
+              (remaining-path (get remaining-path current-state))
+              (path-length (len remaining-path)))
+          (if (<= path-length u1)
+            (ok current-state) ;; No more hops to process
+            (let ((token-out (unwrap! (element-at remaining-path u1) ERR_INVALID_PATH))
+                  (pool (unwrap! (contract-call? (var-get factory-address) get-pool current-token token-out) ERR_POOL_NOT_FOUND))
+                  (is-final-hop (is-eq path-length u2)))
+              (let ((amount-out (if is-final-hop
+                    min-amount-out
+                    (unwrap! (contract-call? pool get-amount-out current-amount current-token token-out)
+                            ERR_INSUFFICIENT_LIQUIDITY)
+                  )))
+                (let ((swap-result (contract-call? pool swap
+                      current-token
+                      token-out
+                      current-amount
+                      amount-out
+                      (if is-final-hop recipient (as-contract tx-sender))
+                    )))
+                  (if (is-ok swap-result)
+                    (ok (tuple
+                      (current-token token-out)
+                      (current-amount (unwrap-panic swap-result))
+                      (remaining-path (slice remaining-path u1 u5))
+                    ))
+                    (err (unwrap-err swap-result))
+                  )
+                )
+              )
             )
           )
         )
       )
-      err
-    )
-    (ok {
-      current-token: token-in,
-      current-amount: amount-in,
-      remaining-path: path
-    })
+      ((err e) (err e))
+    ))
+    (ok (tuple
+      (current-token token-in)
+      (current-amount amount-in)
+      (remaining-path path)
+    ))
     (range u0 (len path))
   )
 )
@@ -319,23 +320,23 @@
     (err ERR_DEADLINE_PASSED)
     (if (or (is-eq (len path) u0) (> (len path) u5))
       (err ERR_INVALID_PATH)
-      (let (
-          (token-in (unwrap! (element-at path u0) ERR_INVALID_PATH))
-          (balance-before (contract-call? token-in balance-of tx-sender))
+      (let ((token-in (unwrap! (element-at path u0) ERR_INVALID_PATH)))
+      (let ((balance-before (contract-call? token-in balance-of tx-sender)))
+        (begin
+            ;; Transfer tokens to contract
+            (try! (contract-call? token-in transfer amount-in tx-sender (as-contract tx-sender) none))
+
+            ;; Process the swap through all hops
+            (match (process-multi-hop token-in path amount-in min-amount-out deadline to)
+              success (ok true)
+              error (begin
+                ;; On error, refund any tokens
+                (try! (contract-call? token-in transfer amount-in (as-contract tx-sender) tx-sender none))
+                (err ERR_TRANSFER_FAILED)
+              )
+            )
         )
-        ;; Transfer tokens to contract
-        (try! (contract-call? token-in transfer amount-in tx-sender (as-contract tx-sender) none))
-        
-        ;; Process the swap through all hops
-        (match (process-multi-hop token-in path amount-in min-amount-out deadline to)
-          success (ok true)
-          error (begin
-            ;; On error, refund any tokens
-            (try! (contract-call? token-in transfer amount-in (as-contract tx-sender) tx-sender none))
-            (err ERR_TRANSFER_FAILED)
-          )
-        )
-      )
+      ))
     )
   )
 )

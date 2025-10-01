@@ -23,31 +23,31 @@
 
 ;; --- Maps ---
 ;; Maps an institutional account ID to its details
-(define-map institutional-accounts uint {
-  owner: principal,
-  tier: uint,
-  created-at: uint,
-  fee-discount-rate: uint, ;; e.g., u100 for 1% discount
-  trading-privileges: uint ;; bitmask for different privileges
-})
+(define-map institutional-accounts uint (tuple
+  (owner principal)
+  (tier uint)
+  (created-at uint)
+  (fee-discount-rate uint) ;; e.g., u100 for 1% discount
+  (trading-privileges uint) ;; bitmask for different privileges
+))
 
 ;; Maps a TWAP order ID to its details
-(define-map twap-orders uint {
-    account-id: uint,
-    token-in: principal,
-    token-out: principal,
-    amount-in: uint,
-    min-amount-out: uint,
-    start-time: uint,
-    end-time: uint,
-    executed: bool
-})
+(define-map twap-orders uint (tuple
+    (account-id uint)
+    (token-in principal)
+    (token-out principal)
+    (amount-in uint)
+    (min-amount-out uint)
+    (start-time uint)
+    (end-time uint)
+    (executed bool)
+))
 
 ;; Tier configurations: per-tier fee discount and privileges
-(define-map tier-configs uint {
-  fee-discount-rate: uint,
-  trading-privileges: uint
-})
+(define-map tier-configs uint (tuple
+  (fee-discount-rate uint)
+  (trading-privileges uint)
+))
 
 ;; @desc Sets the compliance hook contract.
 ;; @param hook (principal) The principal of the compliance hook contract.
@@ -82,13 +82,13 @@
             (account-id (+ u1 (var-get account-counter)))
             (tier-config (unwrap! (map-get? tier-configs tier) ERR_INVALID_TIER))
         )
-            (map-set institutional-accounts account-id {
-                owner: owner,
-                tier: tier,
-                created-at: block-height,
-                fee-discount-rate: (get fee-discount-rate tier-config),
-                trading-privileges: (get trading-privileges tier-config)
-            })
+            (map-set institutional-accounts account-id (tuple
+                (owner owner)
+                (tier tier)
+                (created-at block-height)
+                (fee-discount-rate (get fee-discount-rate tier-config))
+                (trading-privileges (get trading-privileges tier-config))
+            ))
             (var-set account-counter account-id)
             (ok account-id)
         )
@@ -106,11 +106,11 @@
             (account (unwrap! (map-get? institutional-accounts account-id) ERR_ACCOUNT_NOT_FOUND))
             (tier-config (unwrap! (map-get? tier-configs new-tier) ERR_INVALID_TIER))
         )
-            (map-set institutional-accounts account-id (merge account {
-                tier: new-tier,
-                fee-discount-rate: (get fee-discount-rate tier-config),
-                trading-privileges: (get trading-privileges tier-config)
-            }))
+            (map-set institutional-accounts account-id (merge account (tuple
+                (tier new-tier)
+                (fee-discount-rate (get fee-discount-rate tier-config))
+                (trading-privileges (get trading-privileges tier-config))
+            )))
             (ok true)
         )
     )
@@ -125,10 +125,10 @@
     (begin
         (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
         (asserts! (<= fee-discount-rate u10000) ERR_INVALID_FEE_DISCOUNT) ;; Max 100% discount (10000 basis points)
-        (map-set tier-configs tier {
-            fee-discount-rate: fee-discount-rate,
-            trading-privileges: trading-privileges
-        })
+        (map-set tier-configs tier (tuple
+            (fee-discount-rate fee-discount-rate)
+            (trading-privileges trading-privileges)
+        ))
         (ok true)
     )
 )
@@ -151,16 +151,16 @@
             (asserts! (has-privilege (get trading-privileges account) u2) ERR_INVALID_PRIVILEGE) ;; u2 could represent TWAP_ORDER_PRIVILEGE
             (asserts! (> end-time start-time) ERR_INVALID_ORDER)
             (let ((order-id (+ u1 (var-get twap-order-counter))))
-                (map-set twap-orders order-id {
-                    account-id: account-id,
-                    token-in: token-in,
-                    token-out: token-out,
-                    amount-in: amount-in,
-                    min-amount-out: min-amount-out,
-                    start-time: start-time,
-                    end-time: end-time,
-                    executed: false
-                })
+                (map-set twap-orders order-id (tuple
+                    (account-id account-id)
+                    (token-in token-in)
+                    (token-out token-out)
+                    (amount-in amount-in)
+                    (min-amount-out min-amount-out)
+                    (start-time start-time)
+                    (end-time end-time)
+                    (executed false)
+                ))
                 (var-set twap-order-counter order-id)
                 (ok order-id)
             )
@@ -174,7 +174,7 @@
 (define-private (check-verification (account principal))
     (match (var-get compliance-hook)
         (some hook) (contract-call? hook is-verified account)
-        (ok true) ;; No hook, no verification needed
+        none (ok true) ;; No hook, no verification needed
     )
 )
 
@@ -182,9 +182,9 @@
 ;; @return (response bool) An (ok true) response if the circuit breaker is not tripped, or an error if it is tripped.
 (define-private (check-circuit-breaker)
     (match (var-get circuit-breaker)
-        (breaker (let ((is-tripped (try! (contract-call? breaker is-circuit-open))))
-              (if is-tripped (err ERR_CIRCUIT_OPEN) (ok true))))
-        (ok true)
+        (some breaker) (let ((is-tripped (try! (contract-call? breaker is-circuit-open))))
+              (if is-tripped (err ERR_CIRCUIT_OPEN) (ok true)))
+        none (ok true)
     )
 )
 
@@ -193,11 +193,8 @@
 ;; @param privilege-flag (uint) The specific privilege flag to check for.
 ;; @return (bool) True if the privilege is present, false otherwise.
 (define-private (has-privilege (privileges uint) (privilege-flag uint))
-  ;; Treat privilege-flag as a power-of-two bitmask. Check if the bit is set using arithmetic.
-  (>= (mod privileges (* privilege-flag u2)) privilege-flag)
+  (is-eq (and privileges privilege-flag) privilege-flag)
 )
-
-;; Duplicate check-verification removed (handled by the earlier function)
 
 (define-public (execute-twap-order (order-id uint))
     (begin
@@ -220,10 +217,10 @@
     
             ;; Execute a portion of the swap
             ;; This is a simplified execution. In a real scenario, this would interact with a DEX router.
-            (print { notification: "TWAP order executed", order-id: order-id, amount: amount-to-execute })
+            (print (tuple (notification "TWAP order executed") (order-id order-id) (amount amount-to-execute)))
     
             ;; Update the order (e.g., remaining amount, mark as executed if fully done)
-            (map-set twap-orders order-id (merge order { executed: (if (>= elapsed duration) true false) }))
+            (map-set twap-orders order-id (merge order (tuple (executed (if (>= elapsed duration) true false)))))
             (ok true)
           )
         )
@@ -240,7 +237,7 @@
 
             ;; This is a placeholder for actual swap execution via a DEX router
             ;; In a real scenario, this would involve calling a DEX router contract
-            (print { notification: "Block trade executed", account-id: account-id, token-in: token-in, token-out: token-out, amount-in: amount-in, min-amount-out: min-amount-out, recipient: recipient })
+            (print (tuple (notification "Block trade executed") (account-id account-id) (token-in token-in) (token-out token-out) (amount-in amount-in) (min-amount-out min-amount-out) (recipient recipient)))
 
             ;; Assuming successful execution, return amount out
             (ok min-amount-out) ;; Simplified, actual amount-out would come from DEX
@@ -268,7 +265,7 @@
 ;; @desc Retrieves the configuration for a specific tier.
 ;; @param tier (uint) The tier level.
 ;; @return (response {fee-discount-rate: uint, trading-privileges: uint}) An (ok) response containing the tier configuration, or an error if the tier does not exist.
-(define-read-only (get-tier-config (tier uint)))
+(define-read-only (get-tier-config (tier uint))
     (map-get? tier-configs tier)
 )
 

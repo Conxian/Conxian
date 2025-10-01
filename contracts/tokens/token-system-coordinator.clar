@@ -29,39 +29,42 @@
 (define-data-var paused bool false)
 (define-data-var emergency-mode bool false)
 (define-data-var revenue-distributor principal .revenue-distributor)
+(define-data-var last-operation-id uint u0)
+(define-data-var total-registered-tokens uint u0)
+(define-data-var total-users uint u0)
 
 ;; Maps for token tracking
 (define-map registered-tokens principal bool)
 (define-map token-metadata principal
-  {
-    symbol: (string-ascii 10),
-    decimals: uint,
-    total-supply: uint,
-    is-active: bool,
-    last-activity: uint
-  }
+  (tuple
+    (symbol (string-ascii 10))
+    (decimals uint)
+    (total-supply uint)
+    (is-active bool)
+    (last-activity uint)
+  )
 )
 
 ;; User activity tracking
 (define-map user-activity principal
-  {
-    last-interaction: uint,
-    total-volume: uint,
-    token-count: uint,
-    reputation-score: uint
-  }
+  (tuple
+    (last-interaction uint)
+    (total-volume uint)
+    (token-count uint)
+    (reputation-score uint)
+  )
 )
 
 ;; Cross-token operation tracking
 (define-map cross-token-operations uint
-  {
-    user: principal,
-    tokens: (list 5 principal),
-    operation-type: (string-ascii 32),
-    timestamp: uint,
-    total-value: uint,
-    status: (string-ascii 16)
-  }
+  (tuple
+    (user principal)
+    (tokens (list 5 principal))
+    (operation-type (string-ascii 32))
+    (timestamp uint)
+    (total-value uint)
+    (status (string-ascii 16))
+  )
 )
 
 ;; Token addresses (hardcoded for production)
@@ -115,21 +118,25 @@
 
 (define-private (update-user-activity (user principal) (volume uint))
   (let ((current-activity (default-to
-    {
-      last-interaction: block-height,
-      total-volume: u0,
-      token-count: u0,
-      reputation-score: u1000
-    }
+    (tuple
+      (last-interaction block-height)
+      (total-volume u0)
+      (token-count u0)
+      (reputation-score u1000)
+    )
     (map-get? user-activity user)
   )))
+    (if (is-none (map-get? user-activity user))
+        (var-set total-users (+ (var-get total-users) u1))
+        true
+    )
     (map-set user-activity user
-      {
-        last-interaction: block-height,
-        total-volume: (+ (get total-volume current-activity) volume),
-        token-count: (get token-count current-activity),
-        reputation-score: (get reputation-score current-activity)
-      }
+      (tuple
+        (last-interaction block-height)
+        (total-volume (+ (get total-volume current-activity) volume))
+        (token-count (get token-count current-activity))
+        (reputation-score (get reputation-score current-activity))
+      )
     )
   )
 )
@@ -140,15 +147,19 @@
     (asserts! is-owner ERR_UNAUTHORIZED)
     (asserts! (not (var-get paused)) ERR_SYSTEM_PAUSED)
 
+    (if (is-none (map-get? registered-tokens token))
+        (var-set total-registered-tokens (+ (var-get total-registered-tokens) u1))
+        true
+    )
     (map-set registered-tokens token true)
     (map-set token-metadata token
-      {
-        symbol: symbol,
-        decimals: decimals,
-        total-supply: u0,
-        is-active: true,
-        last-activity: block-height
-      }
+      (tuple
+        (symbol symbol)
+        (decimals decimals)
+        (total-supply u0)
+        (is-active true)
+        (last-activity block-height)
+      )
     )
     (ok true)
   )
@@ -162,10 +173,10 @@
     (map-set token-metadata token
       (merge
         (unwrap-panic (map-get? token-metadata token))
-        {
-          total-supply: supply,
-          last-activity: block-height
-        }
+        (tuple
+          (total-supply supply)
+          (last-activity block-height)
+        )
       )
     )
     (ok true)
@@ -179,7 +190,7 @@
     (operation-type (string-ascii 32))
     (total-value uint)
   )
-  (let ((operation-id (+ block-height (unwrap-panic (get-user-activity user)))))
+  (let ((new-op-id (+ (var-get last-operation-id) u1)))
     (begin
       (when-not-paused)
       (when-not-emergency)
@@ -189,16 +200,17 @@
       (asserts! (<= (len tokens) MAX_TOKENS) ERR_INVALID_AMOUNT)
 
       ;; Record the operation
-      (map-set cross-token-operations operation-id
-        {
-          user: user,
-          tokens: tokens,
-          operation-type: operation-type,
-          timestamp: block-height,
-          total-value: total-value,
-          status: "initiated"
-        }
+      (map-set cross-token-operations new-op-id
+        (tuple
+          (user user)
+          (tokens tokens)
+          (operation-type operation-type)
+          (timestamp block-height)
+          (total-value total-value)
+          (status "initiated")
+        )
       )
+      (var-set last-operation-id new-op-id)
 
       ;; Update user activity
       (update-user-activity user total-value)
@@ -209,7 +221,7 @@
           true
       )
 
-      (ok operation-id)
+      (ok new-op-id)
     )
   )
 )
@@ -265,13 +277,13 @@
 
 ;; System health check
 (define-read-only (get-system-health)
-  {
-    is-paused: (var-get paused),
-    emergency-mode: (var-get emergency-mode),
-    total-registered-tokens: (len (map registered-tokens)),
-    total-users: (len (map user-activity)),
-    coordinator-version: COORDINATOR_VERSION
-  }
+  (tuple
+    (is-paused (var-get paused))
+    (emergency-mode (var-get emergency-mode))
+    (total-registered-tokens (var-get total-registered-tokens))
+    (total-users (var-get total-users))
+    (coordinator-version COORDINATOR_VERSION)
+  )
 )
 
 ;; Initialize system with core tokens

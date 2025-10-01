@@ -4,8 +4,8 @@
  (use-trait circuit-breaker-trait .all-traits.circuit-breaker-trait)
  (use-trait ownable-trait .all-traits.ownable-trait)
 
- (impl-trait circuit-breaker-trait)
- (impl-trait ownable-trait)
+ (impl-trait .all-traits.circuit-breaker-trait)
+ (impl-trait .all-traits.ownable-trait)
 
 ;; ===== Constants =====
 (define-constant ERR_UNAUTHORIZED (err u1001))
@@ -31,33 +31,33 @@
  (define-data-var emergency-shutdown-active bool false)
  (define-data-var circuit-mode (optional bool) none)
  
- (define-map operation-stats {
-   operation: (string-ascii 64)
- } {
-   success-count: uint,
-   failure-count: uint,
-   last-updated: uint,
-   is-open: bool,
-   last-state-change: uint,
-   rate-limit: uint,
-   rate-window: uint,
-   rate-count: uint,
-   rate-window-start: uint
- })
+ (define-map operation-stats (string-ascii 64)
+  (tuple
+    (success-count uint)
+    (failure-count uint)
+    (last-updated uint)
+    (is-open bool)
+    (last-state-change uint)
+    (rate-limit uint)
+    (rate-window uint)
+    (rate-count uint)
+    (rate-window-start uint)
+  )
+)
  
  ;; ===== Helpers =====
  (define-private (get-default-stats (current-time uint))
-   {
-     success-count: u0,
-     failure-count: u0,
-     last-updated: current-time,
-     is-open: false,
-     last-state-change: current-time,
-     rate-limit: u0,
-     rate-window: u0,
-     rate-count: u0,
-     rate-window-start: current-time
-   }
+   (tuple
+     (success-count u0)
+     (failure-count u0)
+     (last-updated current-time)
+     (is-open false)
+     (last-state-change current-time)
+     (rate-limit u0)
+     (rate-window u0)
+     (rate-count u0)
+     (rate-window-start current-time)
+   )
  )
  
  (define-private (calculate-failure-rate (success-count uint) (failure-count uint))
@@ -69,71 +69,62 @@
    )
  )
  
- (define-private (should-circuit-open (stats {success-count: uint, failure-count: uint, last-updated: uint,
-                                             is-open: bool, last-state-change: uint, rate-limit: uint,
-                                             rate-window: uint, rate-count: uint, rate-window-start: uint}))
+ (define-private (should-circuit-open (stats (tuple (success-count uint) (failure-count uint) (last-updated uint) (is-open bool) (last-state-change uint) (rate-limit uint) (rate-window uint) (rate-count uint) (rate-window-start uint))))
    (let ((failure-rate (calculate-failure-rate (get success-count stats) (get failure-count stats)))
          (threshold (var-get global-failure-threshold)))
      (>= failure-rate threshold)
    )
  )
  
- (define-private (should-circuit-close (stats {success-count: uint, failure-count: uint, last-updated: uint,
-                                              is-open: bool, last-state-change: uint, rate-limit: uint,
-                                              rate-window: uint, rate-count: uint, rate-window-start: uint}))
+ (define-private (should-circuit-close (stats (tuple (success-count uint) (failure-count uint) (last-updated uint) (is-open bool) (last-state-change uint) (rate-limit uint) (rate-window uint) (rate-count uint) (rate-window-start uint))))
    (let ((timeout (var-get global-reset-timeout))
          (time-since-change (- block-height (get last-state-change stats))))
      (>= time-since-change timeout)
    )
  )
  
- (define-private (update-rate-limit (stats {success-count: uint, failure-count: uint, last-updated: uint,
-                                          is-open: bool, last-state-change: uint, rate-limit: uint,
-                                          rate-window: uint, rate-count: uint, rate-window-start: uint}) 
-                                   (is-success bool))
+ (define-private (update-rate-limit (stats (tuple (success-count uint) (failure-count uint) (last-updated uint) (is-open bool) (last-state-change uint) (rate-limit uint) (rate-window uint) (rate-count uint) (rate-window-start uint))) (is-success bool))
    (let ((current-time block-height)
          (window-start (get rate-window-start stats))
          (window (get rate-window stats)))
      (if (and (> window u0) (> (- current-time window-start) window))
-       (merge stats {
-         rate-count: u1,
-         rate-window-start: current-time,
-         success-count: (if is-success (+ (get success-count stats) u1) (get success-count stats)),
-         failure-count: (if is-success (get failure-count stats) (+ (get failure-count stats) u1)),
-         last-updated: current-time
-       })
+       (merge stats (tuple
+         (rate-count u1)
+         (rate-window-start current-time)
+         (success-count (if is-success (+ (get success-count stats) u1) (get success-count stats)))
+         (failure-count (if is-success (get failure-count stats) (+ (get failure-count stats) u1)))
+         (last-updated current-time)
+       ))
        (let ((new-count (+ (get rate-count stats) u1))
              (rate-limit (get rate-limit stats)))
          (asserts! (or (is-eq rate-limit u0) (<= new-count rate-limit)) ERR_RATE_LIMIT_EXCEEDED)
-         (merge stats {
-           rate-count: new-count,
-           success-count: (if is-success (+ (get success-count stats) u1) (get success-count stats)),
-           failure-count: (if is-success (get failure-count stats) (+ (get failure-count stats) u1)),
-           last-updated: current-time
-         })
+         (merge stats (tuple
+           (rate-count new-count)
+           (success-count (if is-success (+ (get success-count stats) u1) (get success-count stats)))
+           (failure-count (if is-success (get failure-count stats) (+ (get failure-count stats) u1)))
+           (last-updated current-time)
+         ))
        )
      )
    )
  )
  
- (define-private (update-circuit-state (stats {success-count: uint, failure-count: uint, last-updated: uint,
-                                             is-open: bool, last-state-change: uint, rate-limit: uint,
-                                             rate-window: uint, rate-count: uint, rate-window-start: uint}))
+ (define-private (update-circuit-state (stats (tuple (success-count uint) (failure-count uint) (last-updated uint) (is-open bool) (last-state-change uint) (rate-limit uint) (rate-window uint) (rate-count uint) (rate-window-start uint))))
    (let ((current-open (get is-open stats)))
      (if current-open
        (if (should-circuit-close stats)
-         (merge stats {
-           is-open: false,
-           last-state-change: block-height,
-           success-count: u0,
-           failure-count: u0
-         })
+         (merge stats (tuple
+           (is-open false)
+           (last-state-change block-height)
+           (success-count u0)
+           (failure-count u0)
+         ))
          stats)
        (if (should-circuit-open stats)
-         (merge stats {
-           is-open: true,
-           last-state-change: block-height
-         })
+         (merge stats (tuple
+           (is-open true)
+           (last-state-change block-height)
+         ))
          stats)
      )
    )
@@ -147,7 +138,7 @@
 
 (define-read-only (check-circuit-state (operation (string-ascii 64)))
   (let ((current-time block-height))
-    (match (map-get? operation-stats {operation: operation})
+    (match (map-get? operation-stats operation)
       stats
       (let ((state stats))
         (if (get is-open state)
@@ -164,25 +155,25 @@
   (begin
     (let ((current-time block-height)
           (stats (default-to 
-            { 
-              success-count: u0, 
-              failure-count: u0, 
-              last-updated: current-time,
-              is-open: false,
-              last-state-change: current-time,
-              rate-limit: u0,
-              rate-window: u0,
-              rate-count: u0,
-              rate-window-start: current-time
-            } 
-            (map-get? operation-stats {operation: operation}))))
+            (tuple
+              (success-count u0)
+              (failure-count u0)
+              (last-updated current-time)
+              (is-open false)
+              (last-state-change current-time)
+              (rate-limit u0)
+              (rate-window u0)
+              (rate-count u0)
+              (rate-window-start current-time)
+            )
+            (map-get? operation-stats operation))))
       
-      (let ((new-stats (merge stats {
-        success-count: (+ (get success-count stats) u1),
-        last-updated: current-time
-      })))
+      (let ((new-stats (merge stats (tuple
+        (success-count (+ (get success-count stats) u1))
+        (last-updated current-time)
+      ))))
         
-        (map-set operation-stats {operation: operation} new-stats)
+        (map-set operation-stats operation new-stats)
         (ok true)
       )
     )
@@ -193,25 +184,25 @@
   (begin
     (let ((current-time block-height)
           (stats (default-to 
-            { 
-              success-count: u0, 
-              failure-count: u0, 
-              last-updated: current-time,
-              is-open: false,
-              last-state-change: current-time,
-              rate-limit: u0,
-              rate-window: u0,
-              rate-count: u0,
-              rate-window-start: current-time
-            } 
-            (map-get? operation-stats {operation: operation}))))
+            (tuple
+              (success-count u0)
+              (failure-count u0)
+              (last-updated current-time)
+              (is-open false)
+              (last-state-change current-time)
+              (rate-limit u0)
+              (rate-window u0)
+              (rate-count u0)
+              (rate-window-start current-time)
+            )
+            (map-get? operation-stats operation))))
       
-      (let ((new-stats (merge stats {
-        failure-count: (+ (get failure-count stats) u1),
-        last-updated: current-time
-      })))
+      (let ((new-stats (merge stats (tuple
+        (failure-count (+ (get failure-count stats) u1))
+        (last-updated current-time)
+      ))))
         
-        (map-set operation-stats {operation: operation} new-stats)
+        (map-set operation-stats operation new-stats)
         (ok true)
       )
     )
@@ -219,7 +210,7 @@
 )
 
 (define-read-only (get-failure-rate (operation (string-ascii 64)))
-  (match (map-get? operation-stats {operation: operation})
+  (match (map-get? operation-stats operation)
     stats
     (let ((state stats))
       (let ((total (+ (get success-count state) (get failure-count state))))
@@ -235,16 +226,16 @@
 
 (define-read-only (get-circuit-state (operation (string-ascii 64)))
   (let ((stats (default-to (get-default-stats block-height) 
-                          (map-get? operation-stats {operation: operation})))
+                          (map-get? operation-stats operation)))
         (failure-rate (calculate-failure-rate (get success-count stats) (get failure-count stats))))
     
-    (ok {
-      state: (if (get is-open stats) u1 u0),
-      last-checked: (get last-updated stats),
-      failure-rate: failure-rate,
-      failure-count: (get failure-count stats),
-      success-count: (get success-count stats)
-    })
+    (ok (tuple
+      (state (if (get is-open stats) u1 u0))
+      (last-checked (get last-updated stats))
+      (failure-rate failure-rate)
+      (failure-count (get failure-count stats))
+      (success-count (get success-count stats))
+    ))
   )
 )
 
@@ -255,13 +246,13 @@
     (asserts! (is-eq tx-sender (var-get admin)) ERR_UNAUTHORIZED)
     
     (let ((stats (default-to (get-default-stats block-height) 
-                            (map-get? operation-stats {operation: operation}))))
+                            (map-get? operation-stats operation))))
       
-      (map-set operation-stats {operation: operation} 
-        (merge stats {
-          is-open: state,
-          last-state-change: block-height
-        }))
+      (map-set operation-stats operation
+        (merge stats (tuple
+          (is-open state)
+          (last-state-change block-height)
+        )))
       
       (ok true)
     )
@@ -293,15 +284,15 @@
     (asserts! (and (> window u0) (<= window MAX_RATE_WINDOW)) ERR_INVALID_RATE_WINDOW)
     
     (let ((stats (default-to (get-default-stats block-height) 
-                            (map-get? operation-stats {operation: operation}))))
+                            (map-get? operation-stats operation))))
       
-      (map-set operation-stats {operation: operation} 
-        (merge stats {
-          rate-limit: limit,
-          rate-window: window,
-          rate-count: u0,
-          rate-window-start: block-height
-        }))
+      (map-set operation-stats operation
+        (merge stats (tuple
+          (rate-limit limit)
+          (rate-window window)
+          (rate-count u0)
+          (rate-window-start block-height)
+        )))
       
       (ok true)
     )
@@ -336,15 +327,15 @@
 
 (define-read-only (get-rate-limit (operation (string-ascii 64)))
   (let ((stats (default-to (get-default-stats block-height) 
-                          (map-get? operation-stats {operation: operation})))
+                          (map-get? operation-stats operation)))
         (window-end (+ (get rate-window-start stats) (get rate-window stats))))
     
-    (ok {
-      limit: (get rate-limit stats),
-      window: (get rate-window stats),
-      current: (get rate-count stats),
-      reset-time: window-end
-    })
+    (ok (tuple
+      (limit (get rate-limit stats))
+      (window (get rate-window stats))
+      (current (get rate-count stats))
+      (reset-time window-end)
+    ))
   )
 )
 
@@ -356,14 +347,14 @@
   (ok (var-get admin))
 )
 (define-read-only (get-health-status)
-  (ok {
-    is_operational: (not (var-get emergency-shutdown-active)),
-    total_failure_rate: u0,
-    last_checked: block-height,
-    uptime: u100,
-    total_operations: u0,
-    failed_operations: u0
-  })
+  (ok (tuple
+    (is_operational (not (var-get emergency-shutdown-active)))
+    (total_failure_rate u0)
+    (last_checked block-height)
+    (uptime u100)
+    (total_operations u0)
+    (failed_operations u0)
+  ))
 )
 ;; ===== Ownable Trait Implementation =====
 

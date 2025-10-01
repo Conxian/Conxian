@@ -5,7 +5,6 @@
 ;; --- Traits ---
 (use-trait access-control-trait .all-traits.access-control-trait)
 (use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
-(impl-trait access-control-trait)
 (define-constant TRAIT_REGISTRY 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.trait-registry)
 
 (define-constant ERR_UNAUTHORIZED (err u8001))
@@ -168,7 +167,7 @@
         (start-block (+ block-height (var-get voting-delay)))
         (end-block (+ block-height (var-get voting-delay) (var-get voting-period))))))
       
-      (ok proposal-id))))
+      (ok proposal-id)))
 
 ;; Specialized parameter change proposal
 (define-public (propose-parameter-change
@@ -216,7 +215,7 @@
           purpose: purpose
         })
       
-      (ok proposal-id))))
+      (ok proposal-id)))
 
 ;; Vote on a proposal
 ;; @desc Allows a user to cast a vote on an active proposal.
@@ -268,7 +267,7 @@
             (votes voting-power)
             (reason reason))))
           
-          (ok voting-power))))))
+          (ok voting-power)))
 
 ;; Queue a successful proposal for execution
 ;; @desc Queues a successful proposal for execution after a defined timelock.
@@ -299,7 +298,7 @@
             (proposal-id proposal-id)
             (queue-block queue-block))))
           
-          (ok queue-block))))))
+          (ok queue-block))
 
 ;; Execute a queued proposal
 ;; @desc Executes a queued proposal.
@@ -331,7 +330,7 @@
             (proposal-id proposal-id)
             (execution-block block-height))))
           
-          (ok true))))))
+          (ok true))
 
 ;; @desc Executes a parameter change proposal.
 ;; @param proposal-id The ID of the parameter change proposal.
@@ -348,21 +347,18 @@
         (params (unwrap! (get parameters proposal) (err ERR_INVALID_PARAMETERS))))
     ;; This is a generic execution call. It is powerful and requires that the
     ;; target function has appropriate access control (i.e., only callable by this governance contract).
-    (as-contract (contract-call? target-contract function-name params))
-  ))
+    (as-contract (contract-call? target-contract function-name params))))
 
 ;; @desc Executes a treasury spending proposal.
 ;; @param proposal-id The ID of the treasury spending proposal.
 ;; @return (response bool bool) A response tuple indicating success or failure.
 (define-private (execute-treasury-proposal (proposal-id uint))
-  (let ((treasury-info (unwrap! (map-get? treasury-proposals proposal-id) ERR_INVALID_PARAMETERS))))
+  (let ((treasury-info (unwrap! (map-get? treasury-proposals proposal-id) ERR_INVALID_PARAMETERS)))
     (let ((token-contract (get token treasury-info))
           (amount (get amount treasury-info))
-          (recipient (get recipient treasury-info))))
+          (recipient (get recipient treasury-info)))
       ;; The governance contract itself acts as the treasury and calls the transfer.
-      (as-contract (contract-call? token-contract transfer amount (as-contract tx-sender) recipient none))
-    ))
-  ))
+      (as-contract (contract-call? token-contract transfer amount tx-sender recipient none)))))
 
 ;; === DELEGATION ===
 ;; Note: True delegation logic should be handled within the cxvg-utility contract
@@ -375,8 +371,7 @@
   (let ((utility-contract (var-get cxvg-utility-contract))))
     ;; This call assumes the utility contract has a `delegate` function.
     ;; If not, this function is a NO-OP.
-    (contract-call? utility-contract delegate delegatee)
-  ))
+    (contract-call? utility-contract delegate delegatee)))
 
 ;; === VOTING POWER ===
 ;; @desc Retrieves the current voting power of a user.
@@ -392,9 +387,8 @@
 ;; @param at-height The block height at which to retrieve the voting power.
 ;; @return (response uint uint) The voting power of the user at the specified block height.
 (define-read-only (get-voting-power-at (user principal) (at-height uint))
-  (let ((utility-contract (var-get cxvg-utility-contract))))
-    (unwrap-panic (contract-call? utility-contract get-voting-power-at user at-height))
-  ))
+  (let ((utility-contract (var-get cxvg-utility-contract)))
+    (unwrap-panic (contract-call? utility-contract get-voting-power-at user at-height))))
 
 ;; Takes a snapshot of a user\'s current voting power for a given block height.
 ;; This is crucial for proposals to use the voting power from when the proposal was created.
@@ -403,10 +397,9 @@
 ;; @param at-height The block height at which to take the snapshot.
 ;; @return (response bool bool) A response tuple indicating success or failure.
 (define-private (snapshot-voting-power (user principal) (at-height uint))
-  (let ((voting-power (get-voting-power-at user at-height))))
+  (let ((voting-power (get-voting-power-at user at-height)))
     (map-set voting-power-snapshots { user: user, block-height: at-height } voting-power)
-    (ok true)
-  ))
+    (ok true)))
 
 ;; === ADMIN FUNCTIONS ===
 ;; @desc Updates the governance parameters of the protocol.
@@ -439,8 +432,7 @@
     (var-set quorum-threshold quorum-threshold)
     (var-set proposal-threshold proposal-threshold)
     (var-set execution-delay execution-delay)
-    (ok true)
-  ))
+    (ok true))
 
 ;; @desc Initializes the governance contract with the governance token and timelock address.
 ;; @param gov-token The principal address of the governance token.
@@ -451,8 +443,7 @@
     (asserts! (contract-call? .access-control has-role (as-contract tx-sender) ROLE_GOVERNOR) ERR_UNAUTHORIZED)
     (var-set governance-token gov-token)
     (var-set timelock-address (some timelock))
-    (ok true)
-  ))
+    (ok true)))
 
 ;; @desc Cancels an active or pending proposal.
 ;; @param proposal-id The ID of the proposal to cancel.
@@ -475,9 +466,9 @@
       
       (print (tuple
         (event "proposal-cancelled")
-        (proposal-id proposal-id))))
+        (proposal-id proposal-id)))
       
-      (ok true))))
+      (ok true)))
 
 ;; Emergency functions
 ;; @desc Allows a guardian to emergency cancel a proposal.
@@ -489,8 +480,7 @@
     (map-set proposals proposal-id (merge proposal {
       state: PROPOSAL_CANCELLED
     }))
-    (ok true)
-  ))
+    (ok true)))
 
 ;; @desc Allows a guardian to emergency execute a function on a target contract.
 ;; @param target-contract The principal address of the target contract.
@@ -500,7 +490,5 @@
   (begin
     (asserts! (contract-call? .access-control has-role ROLE_GUARDIAN tx-sender) ERR_UNAUTHORIZED)
     ;; Emergency execution without governance - should be very restricted
-    (ok true)
-  ))
-)
+    (ok true)))
 
