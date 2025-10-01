@@ -190,14 +190,14 @@
 ;; @param recipient (principal) The principal of the recipient.
 ;; @param memo (optional (buff 34)) An optional memo for the transfer.
 ;; @return (response bool) An (ok true) response if the transfer is successful, or an error if unauthorized, system paused, or insufficient balance.
-(define-public (transfer (amount uint) (sender principal) (recipient principal) (memo (optional (buff 34)))))
+(define-public (transfer (amount uint) (sender principal) (recipient principal) (memo (optional (buff 34))))
   (begin
     (asserts! (is-eq tx-sender sender) (err ERR_UNAUTHORIZED))
     (asserts! (check-system-pause) (err ERR_SYSTEM_PAUSED))
-    (let ((sender-bal (default-to u0 (get bal (map-get? balances { who: sender })))))
+    (let ((sender-bal (get bal (default-to {bal: u0} (map-get? balances {who: sender})))))
       (asserts! (>= sender-bal amount) (err ERR_NOT_ENOUGH_BALANCE))
       (map-set balances { who: sender } { bal: (- sender-bal amount) })
-      (let ((rec-bal (default-to u0 (get bal (map-get? balances { who: recipient })))))
+      (let ((rec-bal (get bal (default-to {bal: u0} (map-get? balances {who: recipient})))))
         (map-set balances { who: recipient } { bal: (+ rec-bal amount) })
       )
       ;; Notify system coordinator
@@ -208,7 +208,7 @@
 )
 
 (define-read-only (get-balance (who principal))
-  (ok (default-to u0 (get bal (map-get? balances { who: who }))))
+  (ok (get bal (default-to {bal: u0} (map-get? balances {who: who}))))
 )
 
 (define-read-only (get-total-supply)
@@ -252,7 +252,7 @@
     (asserts! (check-system-pause) (err ERR_SYSTEM_PAUSED))
     (asserts! (check-emission-allowed amount) (err ERR_EMISSION_DENIED))
     (var-set total-supply (+ (var-get total-supply) amount))
-    (let ((bal (default-to u0 (get bal (map-get? balances { who: recipient })))))
+    (let ((bal (get bal (default-to {bal: u0} (map-get? balances {who: recipient})))))
       (map-set balances { who: recipient } { bal: (+ bal amount) })
     )
     ;; Notify system coordinator
@@ -265,7 +265,7 @@
 ;; @param amount (uint) The amount of tokens to burn.
 ;; @return (response bool) An (ok true) response if tokens are successfully burned, or an error if system paused or insufficient balance.
 (define-public (burn (amount uint))
-  (let ((bal (default-to u0 (get bal (map-get? balances { who: tx-sender })))))
+  (let ((bal (get bal (default-to {bal: u0} (map-get? balances {who: tx-sender})))))
     (asserts! (>= bal amount) (err ERR_NOT_ENOUGH_BALANCE))
     (asserts! (check-system-pause) (err ERR_SYSTEM_PAUSED))
     (map-set balances { who: tx-sender } { bal: (- bal amount) })
@@ -278,12 +278,12 @@
 
 ;; --- System Integration Interface ---
 (define-read-only (get-system-info)
-  {
-    integration-enabled: (var-get system-integration-enabled),
-    coordinator: (var-get token-coordinator),
-    emission-controller: (var-get emission-controller),
-    protocol-monitor: (var-get protocol-monitor)
-  }
+  (ok (tuple
+    (integration-enabled (var-get system-integration-enabled))
+    (coordinator (var-get token-coordinator))
+    (emission-controller (var-get emission-controller))
+    (protocol-monitor (var-get protocol-monitor))
+  ))
 )
 
 ;; --- Creator Economy Functions ---
@@ -305,7 +305,7 @@
 
     ;; Mint tokens
     (var-set total-supply (+ (var-get total-supply) total-amount))
-    (let ((current-bal (default-to u0 (get bal (map-get? balances { who: recipient })))) )
+    (let ((current-bal (get bal (default-to {bal: u0} (map-get? balances {who: recipient})))))
       (map-set balances { who: recipient } { bal: (+ current-bal total-amount) }))
 
     ;; Update creator contributions
@@ -347,7 +347,7 @@
     ;; Update governance eligibility
     (map-set governance-eligibility creator (>= reputation (var-get reputation-threshold)))
     
-    (ok true))
+    (ok true)))
 
 ;; Distribute seasonal bonuses to active creators
 ;; @desc Distributes seasonal bonuses to a list of recipients.
@@ -364,7 +364,7 @@
     (let ((total-bonus (fold + amounts u0)))
       (asserts! (check-emission-allowed total-bonus) (err ERR_EMISSION_DENIED))
       (var-set total-supply (+ (var-get total-supply) total-bonus))
-      (ok total-bonus)))
+      (ok total-bonus))))
 
 ;; @desc Retrieves comprehensive information about a creator.
 ;; @param creator (principal) The principal of the creator.
@@ -409,7 +409,7 @@
 ;; @param description (string-utf8 512) A detailed description of the initiative.
 ;; @param funding-request (uint) The amount of funding requested for the initiative.
 ;; @return (response bool) An (ok true) response if the proposal is successfully submitted, or an error if unauthorized.
-(define-public (propose-creator-initiative (title (string-ascii 256)) (description (string-utf8 512)) (funding-request uint)))
+(define-public (propose-creator-initiative (title (string-ascii 256)) (description (string-utf8 512)) (funding-request uint))
   (begin
     (asserts! (default-to false (map-get? governance-eligibility tx-sender)) (err ERR_UNAUTHORIZED))
     
@@ -426,7 +426,7 @@
 ;; @param proposal-id (uint) The ID of the proposal to vote on.
 ;; @param support (bool) True if the creator supports the proposal, false otherwise.
 ;; @return (response bool) An (ok true) response if the vote is successfully cast, or an error if unauthorized.
-(define-public (vote-creator-proposal (proposal-id uint) (support bool)))
+(define-public (vote-creator-proposal (proposal-id uint) (support bool))
   (begin
     (asserts! (default-to false (map-get? governance-eligibility tx-sender)) (err ERR_UNAUTHORIZED))
     
@@ -437,4 +437,3 @@
                   (support support)))
     
     (ok true)))
-

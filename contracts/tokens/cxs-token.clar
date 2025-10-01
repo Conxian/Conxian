@@ -7,7 +7,7 @@
 (use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
 
 ;; Implement the standard trait
-(impl-trait sip-009-nft-trait)
+(impl-trait .all-traits.sip-009-nft-trait)
 
 ;; Constants
 (define-constant TRAIT_REGISTRY 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.trait-registry)
@@ -22,8 +22,8 @@
 (define-data-var contract-owner principal tx-sender)
 (define-data-var last-token-id uint u0)
 
-(define-map owners { id: uint } { owner: principal })
-(define-map token-uris { id: uint } { uri: (optional (string-utf8 256)) })
+(define-map owners uint principal)
+(define-map token-uris uint (optional (string-utf8 256)))
 
 ;; --- Helpers ---
 (define-read-only (is-owner (who principal))
@@ -31,7 +31,7 @@
 )
 
 (define-read-only (exists (id uint))
-  (is-some (map-get? owners { id: id }))
+  (is-some (map-get? owners id))
 )
 
 ;; --- Admin ---
@@ -49,8 +49,8 @@
     (asserts! (is-owner tx-sender) (err ERR_UNAUTHORIZED))
     (var-set last-token-id (+ (var-get last-token-id) u1))
     (let ((id (var-get last-token-id)))
-      (map-set owners { id: id } { owner: recipient })
-      (map-set token-uris { id: id } { uri: uri })
+      (map-set owners id recipient)
+      (map-set token-uris id uri)
       (ok id)
     )
   )
@@ -58,12 +58,12 @@
 
 (define-public (burn (id uint))
   (let (
-      (owner (unwrap! (get owner (map-get? owners { id: id })) (err ERR_NO_SUCH_TOKEN)))
+      (owner (unwrap! (map-get? owners id) (err ERR_NO_SUCH_TOKEN)))
     )
     (begin
       (asserts! (or (is-owner tx-sender) (is-eq tx-sender owner)) (err ERR_NOT_OWNER))
-      (map-delete owners { id: id })
-      (map-delete token-uris { id: id })
+      (map-delete owners id)
+      (map-delete token-uris id)
       (ok true)
     )
   )
@@ -75,10 +75,7 @@
 )
 
 (define-read-only (get-owner (id uint))
-  (ok (match (map-get? owners { id: id })
-        token
-          (some (get owner token))
-        none))
+  (ok (map-get? owners id))
 )
 
 (define-read-only (get-last-token-id)
@@ -86,7 +83,7 @@
 )
 
 (define-read-only (get-token-uri (id uint))
-  (ok (default-to none (get uri (map-get? token-uris { id: id }))))
+  (ok (map-get? token-uris id))
 )
 
 
