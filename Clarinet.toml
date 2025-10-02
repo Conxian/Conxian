@@ -68,6 +68,7 @@ dim-oracle-automation = { path = "contracts/dimensional/dim-oracle-automation.cl
 dim-registry = { path = "contracts/dimensional/dim-registry.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dim-registry" }
 dim-revenue-adapter = { path = "contracts/dimensional/dim-revenue-adapter.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dim-revenue-adapter" }
 dim-yield-stake = { path = "contracts/dimensional/dim-yield-stake.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dim-yield-stake" }
+advanced-router-dijkstra = { path = "contracts/dimensional/advanced-router-dijkstra.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.advanced-router-dijkstra" }
 
 # Governance Contracts
 access-control-gov = { path = "contracts/governance/access-control.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.access-control-gov" }
