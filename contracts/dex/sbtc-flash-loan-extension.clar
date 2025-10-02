@@ -2,7 +2,7 @@
 ;; sBTC Flash Loan Extension - Advanced flash loan functionality with sBTC support
 ;; Provides flash loans with enhanced security, multi-asset support, and bond integration
 
-(use-trait sip-010-trait .all-traits.sip-010-ft-trait)
+(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
 (use-trait flash-loan-receiver-trait .all-traits.flash-loan-receiver-trait)
 (impl-trait .all-traits.flash-loan-receiver-trait)
 
@@ -136,7 +136,7 @@
 ;; FLASH LOAN EXECUTION
 ;; =============================================================================
 
-(define-public (flash-loan (asset <ft-trait>) (amount uint) (receiver <flash-loan-receiver-trait>) (params (buff 2048)))
+(define-public (flash-loan (asset <sip-010-ft-trait>) (amount uint) (receiver <flash-loan-receiver-trait>) (params (buff 2048)))
   "Execute flash loan with callback"
   (let ((asset-principal (contract-of asset))
         (receiver-principal (contract-of receiver)))
@@ -211,7 +211,7 @@
   )
 )
 
-(define-private (verify-flash-loan-repayment (borrower principal) (asset <ft-trait>) (amount uint) (fee uint))
+(define-private (verify-flash-loan-repayment (borrower principal) (asset <sip-010-ft-trait>) (amount uint) (fee uint))
   "Verify flash loan has been repaid with fee"
   (let ((total-owed (+ amount fee)))
     ;; Check if borrower has transferred back the loan + fee
@@ -329,7 +329,7 @@
 ;; =============================================================================
 
 (define-public (flash-loan-with-bond-collateral 
-  (asset <ft-trait>) 
+  (asset <sip-010-ft-trait>) 
   (amount uint) 
   (bond-id uint)
   (receiver <flash-loan-receiver-trait>) 
@@ -353,7 +353,7 @@
   )
 )
 
-(define-private (flash-loan-with-enhanced-limits (asset <ft-trait>) (amount uint) (receiver <flash-loan-receiver-trait>) (params (buff 2048)))
+(define-private (flash-loan-with-enhanced-limits (asset <sip-010-ft-trait>) (amount uint) (receiver <flash-loan-receiver-trait>) (params (buff 2048)))
   "Flash loan with enhanced limits due to collateral"
   (let ((enhanced-max-amount (* MAX_FLASH_LOAN_AMOUNT u2))) ;; 2x normal limit
     (begin
@@ -368,7 +368,7 @@
 ;; LIQUIDITY PROVIDER FUNCTIONS
 ;; =============================================================================
 
-(define-public (provide-flash-loan-liquidity (asset <ft-trait>) (amount uint))
+(define-public (provide-flash-loan-liquidity (asset <sip-010-ft-trait>) (amount uint))
   "Provide liquidity for flash loans"
   (let ((asset-principal (contract-of asset)))
     (begin
@@ -403,7 +403,7 @@
   )
 )
 
-(define-public (withdraw-liquidity (asset <ft-trait>) (amount uint))
+(define-public (withdraw-liquidity (asset <sip-010-ft-trait>) (amount uint))
   "Withdraw provided liquidity"
   (let ((asset-principal (contract-of asset)))
     (match (map-get? flash-loan-providers { provider: tx-sender, asset: asset-principal })
@@ -490,7 +490,7 @@
 ;; EMERGENCY FUNCTIONS
 ;; =============================================================================
 
-(define-public (emergency-repay-flash-loan (borrower principal) (asset <ft-trait>))
+(define-public (emergency-repay-flash-loan (borrower principal) (asset <sip-010-ft-trait>))
   "Emergency repayment function (admin only)"
   (begin
     (asserts! (is-eq tx-sender CONTRACT_OWNER) ERR_NOT_AUTHORIZED)

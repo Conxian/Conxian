@@ -3,7 +3,6 @@
 ;; Routes protocol fees: 80% to xCXD stakers, 20% to treasury/reserves
 
 (use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
-(impl-trait .all-traits.sip-010-ft-trait)
 (use-trait staking-trait .all-traits.staking-trait)
 (impl-trait .all-traits.staking-trait)
 
@@ -155,7 +154,7 @@
 ;; --- Revenue Collection ---
 
 ;; Collect revenue from authorized sources (vaults, DEX, etc.)
-(define-public (collect-revenue (amount uint) (revenue-token <ft-trait>) (fee-type uint))
+(define-public (collect-revenue (amount uint) (revenue-token <sip-010-ft-trait>) (fee-type uint))
   (let ((collector tx-sender)
         (current-epoch (var-get current-distribution-epoch))
         (revenue-token-principal (contract-of revenue-token)))
@@ -272,7 +271,7 @@
 ;; --- Revenue Distribution ---
 
 ;; Distribute accumulated revenue using buyback-and-make for CXD
-(define-public (distribute-revenue (revenue-token <ft-trait>) (total-amount uint))
+(define-public (distribute-revenue (revenue-token <sip-010-ft-trait>) (total-amount uint))
   (let ((revenue-token-principal (contract-of revenue-token))
         (current-epoch (var-get current-distribution-epoch)))
     (begin
@@ -295,7 +294,7 @@
         (ok total-amount)))))
 
 ;; Emergency distribution bypass for specific scenarios
-(define-public (emergency-distribute (revenue-token <ft-trait>) (amount uint) (recipient principal))
+(define-public (emergency-distribute (revenue-token <sip-010-ft-trait>) (amount uint) (recipient principal))
   (begin
     (asserts! (is-eq tx-sender (var-get contract-owner)) (err ERR_UNAUTHORIZED))
     (try! (as-contract (contract-call? revenue-token transfer amount (as-contract tx-sender) recipient none)))
@@ -304,7 +303,7 @@
 ;; --- Revenue Path Integration ---
 
 ;; Called by vault contracts to report fee collection
-(define-public (report-vault-fees (performance-fee uint) (management-fee uint) (fee-token <ft-trait>))
+(define-public (report-vault-fees (performance-fee uint) (management-fee uint) (fee-token <sip-010-ft-trait>))
   (begin
     (asserts! (default-to false (map-get? authorized-collectors tx-sender)) (err ERR_UNAUTHORIZED))
     
@@ -321,7 +320,7 @@
         (ok total-fees)))))
 
 ;; Called by DEX contracts to report trading fees
-(define-public (report-dex-fees (trading-fee uint) (fee-token <ft-trait>))
+(define-public (report-dex-fees (trading-fee uint) (fee-token <sip-010-ft-trait>))
   (begin
     (asserts! (default-to false (map-get? authorized-collectors tx-sender)) (err ERR_UNAUTHORIZED))
     (if (> trading-fee u0)
@@ -330,7 +329,7 @@
     (ok u0)))
 
 ;; Called by migration system to report migration fees
-(define-public (report-migration-fees (migration-fee uint) (fee-token <ft-trait>))
+(define-public (report-migration-fees (migration-fee uint) (fee-token <sip-010-ft-trait>))
   (begin
     (asserts! (default-to false (map-get? authorized-collectors tx-sender)) (err ERR_UNAUTHORIZED))
     (if (> migration-fee u0)
@@ -340,7 +339,7 @@
 ;; --- Buyback Mechanism (Future Integration) ---
 
 ;; Interface for DEX integration to perform buyback-and-make
-(define-public (execute-buyback (revenue-amount uint) (revenue-token <ft-trait>) (min-cxd-out uint))
+(define-public (execute-buyback (revenue-amount uint) (revenue-token <sip-010-ft-trait>) (min-cxd-out uint))
   (begin
     (asserts! (is-eq tx-sender (var-get contract-owner)) (err ERR_UNAUTHORIZED))
     ;; TODO: Integrate with existing dex-factory.clar for optimal buyback path

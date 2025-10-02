@@ -32,7 +32,7 @@
 (use-trait err-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.errors.err-trait)
 
 ;; Constants
-(define-constant Q128 u340282366920938463463374607431768211456)
+(define-constant Q128 u340282366920938463463374607431768211455)
 
 ;; Data Maps
  (define-map pools

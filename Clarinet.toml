@@ -12,16 +12,16 @@ mnemonic = "twice kind fence tip hidden tilt action fragile skin nothing glory c
 balance = 100000000000000
 
 [accounts.wallet_1]
-address = "ST3PMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+address = "ST1SJ3DTE5DN7X54YDH5D64R3BCB6A2AG2ZQ8YPD5"
 
 [accounts.wallet_2]
-address = "ST3PMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+address = "ST2NEB84ASENDXKYGJPQW86YXQCEFEX2ZQPG87ND"
 
 [accounts.wallet_3]
-address = "ST3PMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+address = "ST2REHHS5J3CERCRBEPMGH7921Q6PYKAADT7JP2VB"
 
 [network.devnet]
-stacks_node_rpc_address = "https://api.hiro.so"
+stacks_node_rpc_address = "http://localhost:20443"
 bitcoin_node_rpc_address = "https://mempool.space/testnet/api"
 
 [network.mainnet]
@@ -59,10 +59,6 @@ address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.bond-factory"
 [contracts.bond-issuance-system]
 path = "contracts/dex/bond-issuance-system.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.bond-issuance-system"
-
-[contracts.concentrated-liquidity-pool]
-path = "contracts/dex/concentrated-liquidity-pool.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.concentrated-liquidity-pool"
 
 [contracts.concentrated-liquidity-pool-v2]
 path = "contracts/dimensional/concentrated-liquidity-pool-v2.clar"
@@ -183,10 +179,6 @@ address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dim-revenue-adapter"
 [contracts.dim-yield-stake]
 path = "contracts/dimensional/dim-yield-stake.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dim-yield-stake"
-
-[contracts.advanced-router-dijkstra]
-path = "contracts/dimensional/advanced-router-dijkstra.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.advanced-router-dijkstra"
 
 [contracts.access-control-gov]
 path = "contracts/governance/access-control.clar"
@@ -559,10 +551,6 @@ address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.oracle-oracle-aggregator"
 [contracts.oracle-oracle]
 path = "contracts/oracle/oracle.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.oracle-oracle"
-
-[contracts.pools-concentrated-liquidity-pool]
-path = "contracts/pools/concentrated-liquidity-pool.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.pools-concentrated-liquidity-pool"
 
 [contracts.pools-stable-pool-enhanced]
 path = "contracts/pools/stable-pool-enhanced.clar"

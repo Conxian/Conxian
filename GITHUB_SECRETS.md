@@ -36,6 +36,10 @@ env:
   TESTNET_DEPLOYER_MNEMONIC: ${{ secrets.TESTNET_DEPLOYER_MNEMONIC }}
   TESTNET_WALLET1_MNEMONIC: ${{ secrets.TESTNET_WALLET1_MNEMONIC }}
   TESTNET_WALLET2_MNEMONIC: ${{ secrets.TESTNET_WALLET2_MNEMONIC }}
+  # Optional aliases used by GUI and scripts
+  STACKS_DEPLOYER_PRIVKEY: ${{ secrets.TESTNET_DEPLOYER_KEY }}
+  STACKS_API_BASE: https://api.testnet.hiro.so
+  CORE_API_URL: https://api.testnet.hiro.so
 ```
 
 ### Keeper Configuration
@@ -44,7 +48,18 @@ env:
 env:
   STACKS_PRIVKEY: ${{ secrets.STACKS_PRIVKEY }}
   VAULT_CONTRACT: ${{ secrets.VAULT_CONTRACT_ADDRESS }}
+  # Optional: provide CORE_API_URL for network overrides
+  CORE_API_URL: https://api.testnet.hiro.so
 ```
+
+## GUI/Script Environment Aliases
+
+- **DEPLOYER_PRIVKEY**: primary variable read by deploy scripts and GUI.
+- **STACKS_DEPLOYER_PRIVKEY**: alias accepted by GUI; will map to `DEPLOYER_PRIVKEY` automatically.
+- **CORE_API_URL**: preferred API base; GUI uses this if set.
+- **STACKS_API_BASE**: alias for API base; GUI maps it to `CORE_API_URL`.
+
+These aliases allow workflows to remain unchanged while the GUI auto-detects and populates required fields when secrets are present.
 
 ## Security Notes
 

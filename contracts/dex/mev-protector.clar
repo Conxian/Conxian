@@ -1,6 +1,4 @@
-(use-trait utils-trait .all-traits.utils.utils-trait)
-(impl-trait .all-traits.sip-010-ft-trait)
-(impl-trait .all-traits.circuit-breaker-trait)
+(use-trait utils-trait .all-traits.utils-trait)
 
 ;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED (err u6000))

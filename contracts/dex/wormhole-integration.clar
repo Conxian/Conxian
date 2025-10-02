@@ -193,7 +193,7 @@
 ;; BRIDGE FUNCTIONS
 ;; =============================================================================
 
-(define-public (initiate-bridge-transfer (token <ft-trait>) 
+(define-public (initiate-bridge-transfer (token <sip-010-ft-trait>) 
                                        (amount uint) 
                                        (target-chain uint) 
                                        (recipient (buff 32)))
@@ -273,7 +273,7 @@
 ;; CROSS-CHAIN YIELD FUNCTIONS
 ;; =============================================================================
 
-(define-public (deposit-for-yield (token <ft-trait>) 
+(define-public (deposit-for-yield (token <sip-010-ft-trait>) 
                                 (amount uint) 
                                 (target-chain uint)
                                 (yield-strategy (string-ascii 50)))

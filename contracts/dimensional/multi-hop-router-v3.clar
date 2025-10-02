@@ -146,39 +146,35 @@
 (define-private (expand-path (path-info {path: (list 20 principal), weight: uint}) (new-paths (list 10 {path: (list 20 principal), weight: uint})))
   (let ((path (get path path-info)))
     (let ((last-token (unwrap-panic (element-at path (- (len path) u1)))))
-      (match (map-get? token-connections {token: last-token})
-        (connections
+      (match (map-get? token-connections { token: last-token })
+        conn
           (fold
-            (\ (connection {pool: principal, connected-token: principal, weight: uint}) (acc (list 10 {path: (list 20 principal), weight: uint})))
+            (lambda (connection acc)
               (let ((new-path (append path (list (get pool connection) (get connected-token connection))))
                     (new-weight (+ (get weight path-info) (get weight connection))))
-                (append acc (list {path: new-path, weight: new-weight})))
-            (get connections connections)
-            new-paths))
+                (append acc (list { path: new-path, weight: new-weight }))))
+            (get connections conn)
+            new-paths)
         new-paths))))
 
 (define-private (filter-paths (paths (list 10 {path: (list 20 principal), weight: uint})) (token-out principal))
-    (fold (\(path-info {path: (list 20 principal), weight: uint}) (acc (list 10 {path: (list 20 principal), weight: uint})))
-        (if (is-eq (unwrap-panic (element-at (get path path-info) (- (len (get path path-info)) u1))) token-out)
-            (append acc (list path-info))
-            acc
-        )
-    )
+  (fold
+    (lambda (path-info acc)
+      (if (is-eq (unwrap-panic (element-at (get path path-info) (- (len (get path path-info)) u1))) token-out)
+        (append acc (list path-info))
+        acc))
     paths
-    (list)
+    (list))
 )
 
 (define-private (get-best-path-by-weight (paths (list 10 {path: (list 20 principal), weight: uint})))
-    (fold
-        (\ (path-info {path: (list 20 principal), weight: uint}) (best {path: (list 20 principal), weight: uint}))
-            (if (> (get weight path-info) (get weight best))
-                path-info
-                best
-            )
-        )
-        paths
-        {path: (list), weight: u0}
-    )
+  (fold
+    (lambda (path-info best)
+      (if (> (get weight path-info) (get weight best))
+        path-info
+        best))
+    paths
+    { path: (list), weight: u0 })
 )
 
 
