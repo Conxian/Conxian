@@ -74,6 +74,8 @@ access-control-gov = { path = "contracts/governance/access-control.clar", addres
 governance-signature-verifier = { path = "contracts/governance/governance-signature-verifier.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.governance-signature-verifier" }
 lending-protocol-governance = { path = "contracts/governance/lending-protocol-governance.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.lending-protocol-governance" }
 signed-data-base = { path = "contracts/governance/signed-data-base.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.signed-data-base" }
+emergency-governance = { path = "contracts/governance/emergency-governance.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.emergency-governance" }
+upgrade-controller = { path = "contracts/governance/upgrade-controller.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.upgrade-controller" }
 
 # Math Libraries
 math-lib-concentrated = { path = "contracts/math/math-lib-concentrated.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math-lib-concentrated" }
@@ -85,6 +87,9 @@ cxlp-token = { path = "contracts/tokens/cxlp-token.clar", address = "ST3PPMPR7SA
 cxs-token = { path = "contracts/tokens/cxs-token.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.cxs-token" }
 cxtr-token = { path = "contracts/tokens/cxtr-token.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.cxtr-token" }
 cxvg-token = { path = "contracts/tokens/cxvg-token.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.cxvg-token" }
+
+# Vaults
+sbtc-vault = { path = "contracts/vaults/sbtc-vault.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.sbtc-vault" }
 
 # Access Control
 AccessControl = { path = "contracts/governance/access-control.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.AccessControl" }
@@ -100,12 +105,19 @@ enterprise-api = { path = "contracts/enterprise/enterprise-api.clar", address = 
 # Oracle
 dimensional-oracle = { path = "contracts/oracle/dimensional-oracle.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dimensional-oracle" }
 oracle-aggregator-v2 = { path = "contracts/oracle/oracle-aggregator-v2.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.oracle-aggregator-v2" }
+external-oracle-adapter = { path = "contracts/oracle/external-oracle-adapter.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.external-oracle-adapter" }
 
 # Monitoring
 system-monitor = { path = "contracts/monitoring/system-monitor.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.system-monitor" }
+analytics-aggregator = { path = "contracts/monitoring/analytics-aggregator.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.analytics-aggregator" }
+
+# Automation
+keeper-coordinator = { path = "contracts/automation/keeper-coordinator.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.keeper-coordinator" }
+batch-processor = { path = "contracts/automation/batch-processor.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.batch-processor" }
 
 # Security
 Pausable = { path = "contracts/security/Pausable.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.Pausable" }
+rate-limiter = { path = "contracts/security/rate-limiter.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.rate-limiter" }
 
 # Rewards
 rewards-distributor = { path = "contracts/rewards/rewards-distributor.clar", address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.rewards-distributor" }

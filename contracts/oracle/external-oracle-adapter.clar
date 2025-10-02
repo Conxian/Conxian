@@ -159,9 +159,9 @@
     
     ;; Calculate weighted average
     (prices-list (filter is-valid-price-data (list
-      {price: chainlink-price, weight: (get-source-weight SOURCE_CHAINLINK)},
-      {price: pyth-price, weight: (get-source-weight SOURCE_PYTH)},
-      {price: redstone-price, weight: (get-source-weight SOURCE_REDSTONE)},
+      {price: chainlink-price, weight: (get-source-weight SOURCE_CHAINLINK)}
+      {price: pyth-price, weight: (get-source-weight SOURCE_PYTH)}
+      {price: redstone-price, weight: (get-source-weight SOURCE_REDSTONE)}
       {price: internal-price, weight: (get-source-weight SOURCE_INTERNAL)}
     )))
     
