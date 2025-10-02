@@ -2,7 +2,7 @@
 /*
   Conxian docs/naming guard
   - Validate internal Markdown links resolve to files
-  - Guard against legacy/banned terms (AutoVault, AVG token, CVLP-token)
+  - Guard against legacy/banned terms (conxian, AVG token, CVLP-token)
   - Ensure no lowercase token symbols (cxd, cxvg, cxlp, cxtr)
 
   Exclusions:
@@ -93,9 +93,9 @@ function validateBannedTerms(mdPath, content, problems) {
   const inWorkflows = rel.startsWith('.windsurf/workflows/');
 
   // General legacy/banned terms
-  // Allow contextual mentions of AutoVault in .windsurf/workflows/*
+  // Allow contextual mentions of conxian in .windsurf/workflows/*
   const generalChecks = [
-    !inWorkflows && { re: /autovault/i, msg: 'Legacy name "AutoVault" found' },
+    !inWorkflows && { re: /conxian/i, msg: 'Legacy name "conxian" found' },
     { re: /avg[\s-]*token/i, msg: 'Legacy token reference "AVG token" found' },
     { re: /cvlp-token/i, msg: 'Legacy file/token "CVLP-token" found' },
   ].filter(Boolean);
