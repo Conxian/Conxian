@@ -1,5 +1,5 @@
 (use-trait oracle-trait .all-traits.oracle-trait)
-(impl-trait oracle-trait)
+(impl-trait .all-traits.oracle-trait)
 
 (define-constant ERR_NOT_AUTHORIZED (err u100))
 (define-constant ERR_INVALID_PRICE (err u101))

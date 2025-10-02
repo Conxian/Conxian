@@ -4,8 +4,8 @@
 (use-trait pool-trait .all-traits.pool-trait)
 (use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
 
-(impl-trait pool-trait)
-(impl-trait sip-010-ft-trait)
+(impl-trait .all-traits.pool-trait)
+(impl-trait .all-traits.sip-010-ft-trait)
 
 (define-constant ONE u1)
 (define-constant TWO u2)

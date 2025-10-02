@@ -19,7 +19,7 @@
 (define-constant OP_DONE 0x02)
 (define-constant OP_CANCELED 0x03)
 
-(impl-trait access-control-trait)
+(impl-trait .all-traits.access-control-trait)
 
 ;; ===== Core Functions =====
 

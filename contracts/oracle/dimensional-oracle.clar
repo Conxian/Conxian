@@ -5,7 +5,7 @@
 (use-trait access-control-trait .all-traits.access-control-trait)
 (use-trait pausable-trait .all-traits.pausable-trait)
 
-(impl-trait oracle-trait)
+(impl-trait .all-traits.oracle-trait)
 
 
 (define-constant ERR_NOT_AUTHORIZED (err u100))

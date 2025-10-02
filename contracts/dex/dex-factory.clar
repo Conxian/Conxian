@@ -5,7 +5,7 @@
 (use-trait circuit-breaker-trait .all-traits.circuit-breaker-trait)
 (use-trait pool-trait .all-traits.pool-trait)
 
-(impl-trait factory-trait)
+(impl-trait .all-traits.factory-trait)
 
 ;; --- Constants ---
 (define-constant ACCESS_CONTROL .access-control)

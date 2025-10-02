@@ -9,7 +9,7 @@
 (use-trait pool-trait .all-traits.pool-trait)
 (use-trait factory-trait .all-traits.factory-trait)
 
-(impl-trait router-trait)
+(impl-trait .all-traits.router-trait)
 
 ;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED (err u4000))

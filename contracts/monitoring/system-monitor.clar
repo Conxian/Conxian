@@ -4,8 +4,8 @@
 (use-trait monitoring-trait .all-traits.monitoring-trait)
 (use-trait ownable-trait .all-traits.ownable-trait)
 
-(impl-trait monitoring-trait)
-(impl-trait ownable-trait)
+(impl-trait .all-traits.monitoring-trait)
+(impl-trait .all-traits.ownable-trait)
 
 (define-constant ERR_NOT_AUTHORIZED (err u100))
 (define-constant ERR_INVALID_SEVERITY (err u101))

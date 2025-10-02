@@ -6,8 +6,8 @@
 (use-trait vault-trait .all-traits.vault-trait)
 (use-trait vault-admin-trait .all-traits.vault-admin-trait)
 
-(impl-trait vault-trait)
-(impl-trait vault-admin-trait)
+(impl-trait .all-traits.vault-trait)
+(impl-trait .all-traits.vault-admin-trait)
 
 ;; Constants
 (define-constant ERR_UNAUTHORIZED (err u6001))

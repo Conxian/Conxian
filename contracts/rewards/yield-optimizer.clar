@@ -77,6 +77,38 @@
       (map-set strategies id (merge strategy-data (tuple (is-active is-active))))
       (ok true))))
 
+;; === PRIVATE HELPERS ===
+(define-private (find-best-strategy-iter (id uint) (best-so-far (tuple (contract principal) (apy uint) (yield-efficiency uint) (vault-performance uint))))
+  (if (>= id (var-get strategy-count))
+    (ok best-so-far)
+    (match (map-get? strategies id)
+      (some strategy-data)
+      (if (get is-active strategy-data)
+        (let (
+          (apy (try! (contract-call? (var-get metrics-contract) get-apy (get contract strategy-data))))
+          (yield-efficiency (try! (contract-call? (var-get metrics-contract) get-yield-efficiency (get contract strategy-data))))
+          (vault-performance (try! (contract-call? (var-get metrics-contract) get-vault-performance (get contract strategy-data))))
+          (current-score (+ apy yield-efficiency vault-performance))
+          (memo-score (+ (get apy best-so-far) (get yield-efficiency best-so-far) (get vault-performance best-so-far)))
+        )
+          (if (> current-score memo-score)
+            (find-best-strategy-iter (+ id u1) (tuple (contract (get contract strategy-data)) (apy apy) (yield-efficiency yield-efficiency) (vault-performance vault-performance)))
+            (find-best-strategy-iter (+ id u1) best-so-far)
+          )
+        )
+        (find-best-strategy-iter (+ id u1) best-so-far)
+      )
+      none (find-best-strategy-iter (+ id u1) best-so-far)
+    )
+  )
+)
+
+;; @desc Finds the best active strategy based on APY.
+;; @return (response { contract: principal, apy: uint }) A response containing the contract principal of the best strategy and its APY.
+(define-private (find-best-strategy)
+  (find-best-strategy-iter u0 (tuple (contract (as-contract tx-sender)) (apy u0) (yield-efficiency u0) (vault-performance u0)))
+)
+
 ;; === CORE OPTIMIZER LOGIC ===
 ;; @desc Optimizes and rebalances the allocation of a specific asset across strategies.
 ;; @param asset (<sip-010-ft-trait>) The asset trait to optimize.
@@ -113,36 +145,4 @@
       (ok false) ;; No rebalance needed
     )
   )
-)
-
-;; === PRIVATE HELPERS ===
-(define-private (find-best-strategy-iter (id uint) (best-so-far (tuple (contract principal) (apy uint) (yield-efficiency uint) (vault-performance uint))))
-  (if (>= id (var-get strategy-count))
-    (ok best-so-far)
-    (match (map-get? strategies id)
-      (some strategy-data)
-      (if (get is-active strategy-data)
-        (let (
-          (apy (try! (contract-call? (var-get metrics-contract) get-apy (get contract strategy-data))))
-          (yield-efficiency (try! (contract-call? (var-get metrics-contract) get-yield-efficiency (get contract strategy-data))))
-          (vault-performance (try! (contract-call? (var-get metrics-contract) get-vault-performance (get contract strategy-data))))
-          (current-score (+ apy yield-efficiency vault-performance))
-          (memo-score (+ (get apy best-so-far) (get yield-efficiency best-so-far) (get vault-performance best-so-far)))
-        )
-          (if (> current-score memo-score)
-            (find-best-strategy-iter (+ id u1) (tuple (contract (get contract strategy-data)) (apy apy) (yield-efficiency yield-efficiency) (vault-performance vault-performance)))
-            (find-best-strategy-iter (+ id u1) best-so-far)
-          )
-        )
-        (find-best-strategy-iter (+ id u1) best-so-far)
-      )
-      none (find-best-strategy-iter (+ id u1) best-so-far)
-    )
-  )
-)
-
-;; @desc Finds the best active strategy based on APY.
-;; @return (response { contract: principal, apy: uint }) A response containing the contract principal of the best strategy and its APY.
-(define-private (find-best-strategy)
-  (find-best-strategy-iter u0 (tuple (contract (as-contract tx-sender)) (apy u0) (yield-efficiency u0) (vault-performance u0)))
 )

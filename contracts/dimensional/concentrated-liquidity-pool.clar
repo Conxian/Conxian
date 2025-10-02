@@ -26,7 +26,7 @@
 (use-trait position-nft-trait .all-traits.position-nft-trait)
 
 ;; Implement the standard pool trait
-(impl-trait pool-trait)
+(impl-trait .all-traits.pool-trait)
 
 ;; --- Contract State ---
 (define-data-var contract-owner principal tx-sender)

@@ -3,7 +3,7 @@
 
 (use-trait compliance-hooks-trait .all-traits.compliance-hooks-trait)
 
-(impl-trait compliance-hooks-trait)
+(impl-trait .all-traits.compliance-hooks-trait)
 
 (define-constant ERR_UNAUTHORIZED (err u401))
 (define-constant ERR_ACCOUNT_NOT_VERIFIED (err u403))

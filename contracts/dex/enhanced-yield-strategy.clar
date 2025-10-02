@@ -4,7 +4,7 @@
 (use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
 (use-trait strategy-trait .all-traits.strategy-trait)
 
-(impl-trait strategy-trait)
+(impl-trait .all-traits.strategy-trait)
 
 ;; Constants
 (define-constant ERR_UNAUTHORIZED (err u1001))

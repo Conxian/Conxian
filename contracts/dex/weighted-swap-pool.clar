@@ -4,7 +4,7 @@
 (use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
 (use-trait pool-creation-trait .all-traits.pool-creation-trait)
 
-(impl-trait pool-creation-trait)
+(impl-trait .all-traits.pool-creation-trait)
 
 ;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED (err u1003))

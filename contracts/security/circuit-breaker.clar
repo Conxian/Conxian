@@ -4,8 +4,8 @@
 (use-trait circuit-breaker-trait .all-traits.circuit-breaker-trait)
 (use-trait ownable-trait .all-traits.ownable-trait)
 
-(impl-trait circuit-breaker-trait)
-(impl-trait ownable-trait)
+(impl-trait .all-traits.circuit-breaker-trait)
+(impl-trait .all-traits.ownable-trait)
 
 ;; ===== Constants =====
 (define-constant ERR_UNAUTHORIZED (err u1001))

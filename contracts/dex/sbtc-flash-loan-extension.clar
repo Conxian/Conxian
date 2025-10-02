@@ -4,7 +4,7 @@
 
 (use-trait sip-010-trait .all-traits.sip-010-ft-trait)
 (use-trait flash-loan-receiver-trait .all-traits.flash-loan-receiver-trait)
-(impl-trait flash-loan-receiver-trait)
+(impl-trait .all-traits.flash-loan-receiver-trait)
 
 ;; =============================================================================
 ;; CONSTANTS AND ERROR CODES

@@ -3,7 +3,7 @@
 ;; Issues ERC-1155 style bonds representing shares in loan portfolios
 
 (use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
-(impl-trait sip-010-ft-trait)
+(impl-trait .all-traits.sip-010-ft-trait)
 
 ;; Constants
 (define-constant ERR_UNAUTHORIZED (err u8001))

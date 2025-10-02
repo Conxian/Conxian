@@ -6,7 +6,7 @@
 
 ;; Standardized trait references
 (use-trait math-trait .all-traits.math-trait)
-(impl-trait math-trait)
+(impl-trait .all-traits.math-trait)
 
 (define-read-only (pow-fixed (base uint) (exp uint))
   (let ((result (var-init PRECISION)))
