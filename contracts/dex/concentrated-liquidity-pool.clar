@@ -6,6 +6,7 @@
 (use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
 (use-trait pool-trait .all-traits.pool-trait)
 (use-trait position-nft-trait .all-traits.position-nft-trait)
+(use-trait oracle-trait .all-traits.oracle-trait)
 
 ;; Implementation
 ;; Constants
@@ -27,6 +28,8 @@
 (define-constant ERR_TICK_OUT_OF_BOUNDS (err u3007))
 (define-constant ERR_INVALID_POSITION (err u3008))
 (define-constant ERR_NO_LIQUIDITY (err u3009))
+(define-constant ERR_ORACLE_PRICE_TOO_STALE (err u3010))
+(define-constant ERR_ALREADY_INITIALIZED (err u1002))
 
 ;; Data Variables
 (define-data-var token0 principal tx-sender)
@@ -35,6 +38,7 @@
 (define-data-var tick-spacing int TICK_SPACING)
 (define-data-var max-liquidity-per-tick uint u11505743598341114571880798222544994499)
 (define-data-var factory principal tx-sender)
+(define-data-var oracle-contract principal tx-sender)
 
 ;; Tick data structure
 (define-map ticks
@@ -556,29 +560,87 @@
   )
 )
 
-(define-public (initialize (sqrt-price-x96 uint))
+(define-public (initialize (token-0-trait <ft-trait>) (token-1-trait <ft-trait>) (fee uint) (tick-spacing uint) (factory-principal principal) (oracle-principal principal) (protocol-fee-recipient-principal principal))
   (begin
     (asserts! (is-eq tx-sender (var-get factory)) ERR_UNAUTHORIZED)
-    (asserts! (is-eq (get tick (var-get slot0)) u0) ERR_ALREADY_INITIALIZED)
+    (asserts! (is-eq (var-get token0) tx-sender) ERR_ALREADY_INITIALIZED)
+    (asserts! (is-eq (var-get token1) tx-sender) ERR_ALREADY_INITIALIZED)
+    (asserts! (is-eq (var-get factory) tx-sender) ERR_ALREADY_INITIALIZED)
+    (asserts! (is-eq (var-get oracle-contract) tx-sender) ERR_ALREADY_INITIALIZED)
+    (asserts! (is-eq (var-get protocol-fee-recipient) tx-sender) ERR_ALREADY_INITIALIZED)
 
-    (let ((tick (unwrap-panic (get-tick-at-sqrt-ratio sqrt-price-x96))))
-      (var-set slot0
-        (merge (var-get slot0)
-          {
-            sqrt-price-x96: sqrt-price-x96,
-            tick: tick
-          }
-        )
-      )
+    (var-set token0 (contract-of token-0-trait))
+    (var-set token1 (contract-of token-1-trait))
+    (var-set fee fee)
+    (var-set tick-spacing tick-spacing)
+    (var-set factory factory-principal)
+    (var-set oracle-contract oracle-principal)
+    (var-set protocol-fee-recipient protocol-fee-recipient-principal)
+    (ok true)
+  )
+)
 
-      (print {
-        event: "initialize",
-        sqrt-price-x96: sqrt-price-x96,
-        tick: tick
-      })
+(define-public (set-oracle-contract (new-oracle-contract principal))
+  (begin
+    (asserts! (is-eq tx-sender CONTRACT_OWNER) ERR_UNAUTHORIZED)
+    (var-set oracle-contract new-oracle-contract)
+    (ok true)
+  )
+)
 
-      (ok true)
-    )
+(define-public (set-factory (new-factory principal))
+  (begin
+    (asserts! (is-eq tx-sender CONTRACT_OWNER) ERR_UNAUTHORIZED)
+    (var-set factory new-factory)
+    (ok true)
+  )
+)
+
+(define-public (set-token0 (new-token0 principal))
+  (begin
+    (asserts! (is-eq tx-sender CONTRACT_OWNER) ERR_UNAUTHORIZED)
+    (var-set token0 new-token0)
+    (ok true)
+  )
+)
+
+(define-public (set-token1 (new-token1 principal))
+  (begin
+    (asserts! (is-eq tx-sender CONTRACT_OWNER) ERR_UNAUTHORIZED)
+    (var-set token1 new-token1)
+    (ok true)
+  )
+)
+
+(define-public (set-fee (new-fee uint))
+  (begin
+    (asserts! (is-eq tx-sender CONTRACT_OWNER) ERR_UNAUTHORIZED)
+    (var-set fee new-fee)
+    (ok true)
+  )
+)
+
+(define-public (set-tick-spacing (new-tick-spacing int))
+  (begin
+    (asserts! (is-eq tx-sender CONTRACT_OWNER) ERR_UNAUTHORIZED)
+    (var-set tick-spacing new-tick-spacing)
+    (ok true)
+  )
+)
+
+(define-public (set-max-liquidity-per-tick (new-max-liquidity-per-tick uint))
+  (begin
+    (asserts! (is-eq tx-sender CONTRACT_OWNER) ERR_UNAUTHORIZED)
+    (var-set max-liquidity-per-tick new-max-liquidity-per-tick)
+    (ok true)
+  )
+)
+
+(define-public (set-protocol-fee-recipient (new-recipient principal))
+  (begin
+    (asserts! (is-eq tx-sender CONTRACT_OWNER) ERR_UNAUTHORIZED)
+    (var-set protocol-fee-recipient new-recipient)
+    (ok true)
   )
 )
 
