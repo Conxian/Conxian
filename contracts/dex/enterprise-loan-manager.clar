@@ -2,8 +2,8 @@
 ;; Enterprise Loan Manager - Advanced loan management with bond issuance
 ;; Supports institutional borrowing, risk-based pricing, and automated bond creation
 
-(use-trait ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
-(use-trait lending-trait .lending-system-trait)
+(use-trait ft-trait .all-traits.sip-010-ft-trait)
+(use-trait lending-trait .all-traits.lending-system-trait)
 
 ;; Import mathematical libraries for enterprise calculations (removed unresolved trait import)
 ;; (use-trait math-precision 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.precision-calculator)
@@ -170,7 +170,7 @@
                              (map-get? borrower-credit-profiles { borrower: borrower }))))
       (map-set borrower-credit-profiles { borrower: borrower }
         (merge current-profile 
-               {credit-score: new-score, last-updated: stacks-block-height}))
+               {credit-score: new-score, last-updated: block-height}))
       (ok new-score))))
 
 (define-private (assess-credit-risk (borrower principal) (amount uint))
@@ -206,7 +206,7 @@
                                     (map-get? borrower-credit-profiles { borrower: borrower }))))
         (interest-rate (assess-credit-risk borrower principal-amount))
         (ltv-ratio (/ (* principal-amount BASIS_POINTS) collateral-amount))
-        (maturity-block (+ stacks-block-height duration-blocks)))
+        (maturity-block (+ block-height duration-blocks)))
     
     ;; Validations
     (asserts! (not (var-get system-paused)) ERR_UNAUTHORIZED)
@@ -229,14 +229,14 @@
         collateral-asset: collateral-asset,
         loan-asset: loan-asset,
         interest-rate: interest-rate,
-        creation-block: stacks-block-height,
+        creation-block: block-height,
         maturity-block: maturity-block,
         status: "active",
         credit-score: credit-score,
         bond-issued: false,
         bond-token-id: none,
         total-interest-paid: u0,
-        last-payment-block: stacks-block-height
+        last-payment-block: block-height
       })
     
     ;; Update system state
@@ -298,7 +298,7 @@
     ;;     (try! (contract-call? bond-contract-ref create-bond-series
     ;;                         (unwrap-panic (as-max-len? "Enterprise Loan Bond" u50))
     ;;                         principal-amount
-    ;;                         (- maturity-block stacks-block-height)
+    ;;                         (- maturity-block block-height)
     ;;                         bond-yield
     ;;                         (list loan-id)
     ;;                         principal-amount))
@@ -330,7 +330,7 @@
       (asserts! (> payment-amount u0) ERR_INVALID_AMOUNT)
       
       ;; Calculate interest due
-      (let ((blocks-since-payment (- stacks-block-height (get last-payment-block loan)))
+      (let ((blocks-since-payment (- block-height (get last-payment-block loan)))
             (interest-due (calculate-total-interest (get principal-amount loan) 
                                                   (get interest-rate loan) 
                                                   blocks-since-payment)))
@@ -339,7 +339,7 @@
           (map-set enterprise-loans { loan-id: loan-id }
             (merge loan 
                    {total-interest-paid: (+ (get total-interest-paid loan) payment-amount),
-                    last-payment-block: stacks-block-height}))
+                    last-payment-block: block-height}))
           
           ;; Distribute yield to bond holders if bond exists  
           (match (get bond-token-id loan)
@@ -365,7 +365,7 @@
 
     ;; Calculate total amount due
     (let ((principal (get principal-amount loan))
-          (blocks-outstanding (- stacks-block-height (get creation-block loan)))
+          (blocks-outstanding (- block-height (get creation-block loan)))
           (total-interest (calculate-total-interest principal (get interest-rate loan) blocks-outstanding))
           (total-due (+ principal total-interest))
           (interest-already-paid (get total-interest-paid loan))
@@ -450,7 +450,7 @@
     (map-set borrower-credit-profiles { borrower: borrower }
       (merge current-profile 
              {total-borrowed: (+ (get total-borrowed current-profile) loan-amount),
-              last-updated: stacks-block-height}))))
+              last-updated: block-height}))))
 
 (define-private (update-borrower-repayment-history (borrower principal) (successful bool))
   (let ((current-profile (default-to 
@@ -464,14 +464,14 @@
                 credit-score: (if (<= (+ (get credit-score current-profile) u10) u1000)
                                  (+ (get credit-score current-profile) u10)
                                  u1000),
-                last-updated: stacks-block-height}))
+                last-updated: block-height}))
       (map-set borrower-credit-profiles { borrower: borrower }
         (merge current-profile 
                {defaults: (+ (get defaults current-profile) u1),
                 credit-score: (if (> (get credit-score current-profile) u100) 
                                (- (get credit-score current-profile) u100) 
                                u0),
-                last-updated: stacks-block-height})))))
+                last-updated: block-height})))))
 
 ;; === LIQUIDITY MANAGEMENT ===
 (define-public (add-liquidity (amount uint))
@@ -523,7 +523,7 @@
 (define-read-only (get-loan-payment-due (loan-id uint))
   (match (map-get? enterprise-loans loan-id)
     loan
-      (let ((blocks-since-payment (- stacks-block-height (get last-payment-block loan)))
+      (let ((blocks-since-payment (- block-height (get last-payment-block loan)))
             (interest-due (calculate-total-interest (get principal-amount loan) 
                                                   (get interest-rate loan) 
                                                   blocks-since-payment)))
@@ -538,7 +538,7 @@
     (asserts! (is-admin) ERR_UNAUTHORIZED)
     
     ;; Check if loan is past due or under-collateralized
-    (asserts! (or (> stacks-block-height (get maturity-block loan))
+    (asserts! (or (> block-height (get maturity-block loan))
                   ;; Add under-collateralization check here
                   false) ERR_INVALID_TERMS)
     
@@ -558,6 +558,7 @@
     (print (tuple (event "loan-liquidated") (loan-id loan-id)))
     
     (ok true)))
+
 
 
 

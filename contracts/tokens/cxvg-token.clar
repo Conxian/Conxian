@@ -3,17 +3,17 @@
 ;; Enhanced with delegation, voting power, and governance features
 
 ;; --- Traits ---
-(use-trait sip-010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
-(use-trait sip-010-ft-mintable-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-mintable-trait)
-(use-trait monitoring-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.monitoring-trait)
+(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
+(use-trait sip-010-ft-mintable-trait .all-traits.sip-010-ft-mintable-trait)
+(use-trait monitoring-trait .all-traits.monitoring-trait)
 
 ;; Implement the standard traits
-(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
-(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-mintable-trait)
-(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.monitoring-trait)
+(impl-trait .all-traits.sip-010-ft-trait)
+(impl-trait .all-traits.sip-010-ft-mintable-trait)
+(impl-trait .all-traits.monitoring-trait)
 
 ;; Constants
-(define-constant TRAIT_REGISTRY ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.trait-registry)
+(define-constant TRAIT_REGISTRY 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.trait-registry)
 
 ;; --- Errors ---
 (define-constant ERR_UNAUTHORIZED u100)
@@ -47,8 +47,8 @@
 (define-data-var symbol (string-ascii 10) "CXVG")
 (define-data-var token-uri (optional (string-utf8 256)) none)
 
-(define-map balances { who: principal } { bal: uint })
-(define-map minters { who: principal } { enabled: bool })
+(define-map balances principal uint)
+(define-map minters principal bool)
 
 ;; --- System Integration ---
 (define-data-var system-integration-enabled bool false)
@@ -62,25 +62,7 @@
 )
 
 (define-read-only (is-minter (who principal))
-  (is-some (map-get? minters { who: who }))
-)
-
-(define-public (mint (recipient principal) (amount uint))
-  (begin
-    (asserts! (or (is-owner tx-sender) (is-minter tx-sender)) (err ERR_UNAUTHORIZED))
-    (asserts! (check-system-pause) (err ERR_SYSTEM_PAUSED))
-    (asserts! (check-emission-allowed amount) (err ERR_EMISSION_DENIED))
-    
-    ;; Update total supply
-    (var-set total-supply (+ (var-get total-supply) amount))
-    
-    ;; Update recipient balance
-    (let ((bal (default-to u0 (get bal (map-get? balances { who: recipient })))))
-      (map-set balances { who: recipient } { bal: (+ bal amount) })
-    )
-    
-    (ok true)
-  )
+  (default-to false (map-get? minters who))
 )
 
 ;; --- Owner/Admin ---
@@ -95,10 +77,7 @@
 (define-public (set-minter (who principal) (enabled bool))
   (begin
     (asserts! (is-owner tx-sender) (err ERR_UNAUTHORIZED))
-    (if enabled
-      (map-set minters { who: who } { enabled: true })
-      (map-delete minters { who: who })
-    )
+    (map-set minters who enabled)
     (ok true)
   )
 )
@@ -190,11 +169,11 @@
     (asserts! (is-eq tx-sender sender) (err ERR_UNAUTHORIZED))
     (asserts! (check-system-pause) (err ERR_SYSTEM_PAUSED))
 
-    (let ((sender-bal (default-to u0 (get bal (map-get? balances { who: sender }))))
-          (rec-bal (default-to u0 (get bal (map-get? balances { who: recipient })))))
+    (let ((sender-bal (default-to u0 (map-get? balances sender)))
+          (rec-bal (default-to u0 (map-get? balances recipient))))
 
-      (map-set balances { who: sender } { bal: (unwrap! (safe-sub sender-bal amount) (err ERR_NOT_ENOUGH_BALANCE)) })
-      (map-set balances { who: recipient } { bal: (unwrap! (safe-add rec-bal amount) (err ERR_OVERFLOW)) })
+      (map-set balances sender (unwrap! (safe-sub sender-bal amount) (err ERR_NOT_ENOUGH_BALANCE)))
+      (map-set balances recipient (unwrap! (safe-add rec-bal amount) (err ERR_OVERFLOW)))
 
       ;; Notify system coordinator
       (notify-transfer amount sender recipient)
@@ -204,7 +183,7 @@
 )
 
 (define-read-only (get-balance (who principal))
-  (ok (default-to u0 (get bal (map-get? balances { who: who }))))
+  (ok (default-to u0 (map-get? balances who)))
 )
 
 (define-read-only (get-total-supply)
@@ -245,8 +224,8 @@
     (asserts! (check-emission-allowed amount) (err ERR_EMISSION_DENIED))
 
     (var-set total-supply (unwrap! (safe-add (var-get total-supply) amount) (err ERR_OVERFLOW)))
-    (let ((bal (default-to u0 (get bal (map-get? balances { who: recipient })))) )
-      (map-set balances { who: recipient } { bal: (unwrap! (safe-add bal amount) (err ERR_OVERFLOW)) })
+    (let ((bal (default-to u0 (map-get? balances recipient))))
+      (map-set balances recipient (unwrap! (safe-add bal amount) (err ERR_OVERFLOW)))
     )
     ;; Notify system coordinator
     (notify-mint amount recipient)
@@ -255,11 +234,11 @@
 )
 
 (define-public (burn (amount uint))
-  (let ((bal (default-to u0 (get bal (map-get? balances { who: tx-sender }))))
+  (let ((bal (default-to u0 (map-get? balances tx-sender)))
         (supply (var-get total-supply)))
     (asserts! (check-system-pause) (err ERR_SYSTEM_PAUSED))
 
-    (map-set balances { who: tx-sender } { bal: (unwrap! (safe-sub bal amount) (err ERR_NOT_ENOUGH_BALANCE)) })
+    (map-set balances tx-sender (unwrap! (safe-sub bal amount) (err ERR_NOT_ENOUGH_BALANCE)))
     (var-set total-supply (unwrap! (safe-sub supply amount) (err ERR_NOT_ENOUGH_BALANCE)))
 
     ;; Notify system coordinator
@@ -270,10 +249,11 @@
 
 ;; --- System Integration Interface ---
 (define-read-only (get-system-info)
-  {
-    integration-enabled: (var-get system-integration-enabled),
-    coordinator: (var-get token-coordinator),
-    emission-controller: (var-get emission-controller),
-    protocol-monitor: (var-get protocol-monitor)
-  }
+  (tuple
+    (integration-enabled (var-get system-integration-enabled))
+    (coordinator (var-get token-coordinator))
+    (emission-controller (var-get emission-controller))
+    (protocol-monitor (var-get protocol-monitor))
+  )
 )
+

@@ -2,8 +2,8 @@
 ;; Mock DAO implementation for testing the audit registry
 
 ;; --- Traits ---
-(use-trait dao-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dao-trait)
-(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dao-trait)
+(use-trait dao-trait .all-traits.dao-trait)
+(impl-trait .all-traits.dao-trait)
 
 ;; Constants
 (define-constant TRAIT_REGISTRY 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.trait-registry)
@@ -41,8 +41,7 @@
 )
 
 (define-read-only (get-total-voting-power)
-  (let ((total 0)) 0 voting-powers)
-  )
+  (ok u0)
 )
 
 (define-public (delegate (delegatee principal))
@@ -73,3 +72,4 @@
     canceled: false
   })
 )
+

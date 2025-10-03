@@ -1,0 +1,23 @@
+name: Trait Policy
+
+on:
+  pull_request:
+    branches: [ main, develop, enhancements ]
+  push:
+    branches: [ main, develop, enhancements ]
+
+jobs:
+  trait-policy:
+    name: Enforce centralized trait policy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+      - name: Install deps
+        run: npm ci --no-audit --no-fund
+      - name: Run trait policy test
+        run: npx vitest run --config vitest.config.traits.ts

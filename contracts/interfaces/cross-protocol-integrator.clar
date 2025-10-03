@@ -1,10 +1,10 @@
 ;; cross-protocol-integrator.clar
 ;; Facilitates integration with other Stacks protocols and Bitcoin layers
 
-(use-trait sip-010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
-(use-trait cross-protocol-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.cross-protocol-trait)
+(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
+(use-trait cross-protocol-trait .all-traits.cross-protocol-trait)
 
-(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.cross-protocol-trait)
+(impl-trait .all-traits.cross-protocol-trait)
 
 ;; ===== Constants =====
 (define-constant ERR_UNAUTHORIZED (err u100))

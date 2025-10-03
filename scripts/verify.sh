@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+sh #!/usr/bin/env bash
 set -euo pipefail
 
 # Conxian verification helper

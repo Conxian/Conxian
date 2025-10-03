@@ -9,3 +9,4 @@
 (define-constant ERR_UNDERFLOW u1008)
 (define-constant ERR_EMERGENCY_PAUSE u1009)
 (define-constant ERR_CIRCUIT_BREAKER_ACTIVE u1010)
+

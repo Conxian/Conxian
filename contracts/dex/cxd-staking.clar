@@ -6,13 +6,13 @@
 (define-constant TRAIT_REGISTRY .all-traits)
 
 ;; Resolve traits using the trait registry
-(use-trait sip-010-ft-trait '.all-traits.sip-010-ft-trait)
+(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
 (use-trait access-control-trait .all-traits.access-control-trait)
 (use-trait staking-trait .all-traits.staking-trait)
 (use-trait circuit-breaker-trait .all-traits.circuit-breaker-trait)
 
 ;; Implement the staking trait
-(impl-trait .traits.staking-trait)
+(impl-trait .all-traits.staking-trait)
 
 ;; --- Constants ---
 (define-constant CONTRACT_OWNER tx-sender)
@@ -44,10 +44,10 @@
 (define-data-var symbol (string-ascii 10) "xCXD")
 (define-data-var token-uri (optional (string-utf8 256)) none)
 (define-data-var paused bool false)
-(define-data-var circuit-breaker principal .traits.circuit-breaker)
+(define-data-var circuit-breaker principal .circuit-breaker)
 
 ;; CXD token contract
-(define-data-var cxd-token-contract principal .traits.cxd-token)
+(define-data-var cxd-token-contract principal .cxd-token)
 
 ;; --- User State ---
 (define-map user-balances principal uint) ;; xCXD balances
@@ -241,7 +241,7 @@
           (ok true))))))
 
 ;; Step 2: Complete unstake (after cool-down period)  
-(define-public (complete-unstake (cxd-token ft-trait))
+(define-public (complete-unstake (cxd-token <sip-010-ft-trait>))
   (begin
     (asserts! (not (try! (check-circuit-breaker))) ERR_CIRCUIT_OPEN)
     (let ((unstake-result (get-pending-unstake tx-sender)))
@@ -375,6 +375,7 @@
     paused: (var-get paused),
     kill-switch: (var-get kill-switch)
   })
+
 
 
 

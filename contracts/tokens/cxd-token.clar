@@ -3,12 +3,12 @@
 ;; Enhanced with integration hooks for staking, revenue distribution, and system monitoring
 
 ;; --- Traits ---
-(use-trait sip-010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
-(use-trait ownable-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.ownable-trait)
+(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
+(use-trait ownable-trait .all-traits.ownable-trait)
 
 ;; Implement required traits
-(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
-(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.ownable-trait)
+(impl-trait .all-traits.sip-010-ft-trait)
+(impl-trait .all-traits.ownable-trait)
 
 ;; Constants
 (define-constant TRAIT_REGISTRY 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.trait-registry)
@@ -27,6 +27,7 @@
 (define-data-var decimals uint u6)
 (define-data-var name (string-ascii 32) "Conxian Revenue Token")
 (define-data-var symbol (string-ascii 10) "CXD")
+(define-data-var total-supply uint u0)
 (define-data-var token-uri (optional (string-utf8 256)) none)
 
 ;;# Integration contracts
@@ -72,7 +73,7 @@
   "Check if token emission is allowed for the given amount"
   (if (var-get system-integration-enabled)
     (match (var-get emission-controller)
-      controller (unwrap-panic (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.emission-controller can-emit amount))
+      controller (unwrap-panic (contract-call? controller can-emit amount))
       true)
     true))
 
@@ -81,7 +82,7 @@
   (if (var-get system-integration-enabled)
     (begin
       (match (var-get token-coordinator)
-        coordinator (unwrap-panic (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.token-system-coordinator on-transfer amount sender recipient))
+        coordinator (unwrap-panic (contract-call? coordinator on-transfer amount sender recipient))
         true)
       true)
     true))
@@ -91,7 +92,7 @@
   (if (var-get system-integration-enabled)
     (begin
       (match (var-get token-coordinator)
-        coordinator (unwrap-panic (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.token-system-coordinator on-mint amount recipient))
+        coordinator (unwrap-panic (contract-call? coordinator on-mint amount recipient))
         true)
       true)
     true))
@@ -101,7 +102,7 @@
   (if (var-get system-integration-enabled)
     (begin
       (match (var-get token-coordinator)
-        coordinator (unwrap-panic (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.token-system-coordinator on-burn amount sender))
+        coordinator (unwrap-panic (contract-call? coordinator on-burn amount sender))
         true)
       true)
     true))
@@ -226,15 +227,15 @@
     (asserts! (is-eq tx-sender sender) (err ERR_UNAUTHORIZED))
     (asserts! (not (check-system-pause)) (err ERR_SYSTEM_PAUSED))
     
-    (let ((sender-bal (default-to u0 (map-get? balances {who: sender}))))
+    (let ((sender-bal (default-to u0 (map-get? balances sender))))
       (asserts! (>= sender-bal amount) (err ERR_NOT_ENOUGH_BALANCE))
       
       ;; Update sender balance
-      (map-set balances {who: sender} {bal: (- sender-bal amount)})
+      (map-set balances sender (- sender-bal amount))
       
       ;; Update recipient balance
-      (let ((rec-bal (default-to u0 (get bal (map-get? balances {who: recipient})))))
-        (map-set balances {who: recipient} {bal: (unwrap! (safe-add rec-bal amount) (err ERR_OVERFLOW))})
+      (let ((rec-bal (default-to u0 (map-get? balances recipient))))
+        (map-set balances recipient (unwrap! (safe-add rec-bal amount) (err ERR_OVERFLOW)))
       )
       
       (ok true)
@@ -268,7 +269,7 @@
 ;; @param who The address to query the balance of
 ;; @return balance The account balance
 (define-read-only (get-balance (who principal))
-  (ok (default-to u0 (map-get? balances {who: who})))
+  (ok (default-to u0 (map-get? balances who)))
 )
 
 ;; @notice Returns the total token supply
@@ -373,12 +374,13 @@
 
 ;; --- Additional Integration Functions ---
 (define-read-only (get-integration-info)
-  {
-    system-integration-enabled: (var-get system-integration-enabled),
-    transfer-hooks-enabled: (var-get transfer-hooks-enabled),
-    system-paused: (is-system-paused),
-    staking-contract: (var-get staking-contract),
-    revenue-distributor: (var-get revenue-distributor-contract),
-    emission-controller: (var-get emission-controller-contract)
-  })
+  (tuple
+    (system-integration-enabled (var-get system-integration-enabled))
+    (transfer-hooks-enabled (var-get transfer-hooks-enabled))
+    (system-paused (is-system-paused))
+    (staking-contract (var-get staking-contract))
+    (revenue-distributor (var-get revenue-distributor-contract))
+    (emission-controller (var-get emission-controller-contract))
+  ))
+
 

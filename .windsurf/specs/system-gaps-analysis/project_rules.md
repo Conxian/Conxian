@@ -2,7 +2,7 @@
 
 ## Introduction
 
-Conxian is a comprehensive DeFi platform on Stacks with 65+ smart contracts, advanced mathematical libraries, and extensive tokenomics. However, analysis reveals critical gaps between the current implementation and the planned features outlined in the PRD documents. This requirements document identifies missing functionality, incomplete implementations, and alignment issues that must be addressed to achieve the system's full potential as a Tier 1 DeFi protocol.
+Conxian is a comprehensive DeFi platform on Stacks with over 100 smart contracts, advanced mathematical libraries, and extensive tokenomics. However, analysis reveals critical gaps between the current implementation and the planned features outlined in the PRD documents. This requirements document identifies missing functionality, incomplete implementations, and alignment issues that must be addressed to achieve the system's full potential as a Tier 1 DeFi protocol.
 
 ## Requirements
 
@@ -64,7 +64,7 @@ Conxian is a comprehensive DeFi platform on Stacks with 65+ smart contracts, adv
 2. WHEN reviewing transaction ordering THEN the system SHALL implement batch auction mechanisms for fair ordering
 3. WHEN checking sandwich detection THEN the system SHALL automatically detect and prevent sandwich attacks
 4. WHEN validating protection levels THEN the system SHALL provide user-configurable MEV protection with clear cost/benefit analysis
-5. WHEN testing MEV resistance THEN the system SHALL demonstrate protection against front-running and sandwich attacks
+5. WHEN testing MEV resistance THEN the system shall demonstrate protection against front-running and sandwich attacks
 
 ### Requirement 6: Incomplete Enterprise Integration Features
 
@@ -76,7 +76,7 @@ Conxian is a comprehensive DeFi platform on Stacks with 65+ smart contracts, adv
 2. WHEN reviewing institutional features THEN the system SHALL provide tiered account systems with different privileges and fee discounts
 3. WHEN checking compliance integration THEN the system SHALL support KYC/AML integration points and audit trails
 4. WHEN validating advanced trading THEN the system SHALL provide TWAP orders, block trades, and institutional-specific risk management
-5. WHEN testing enterprise APIs THEN the system SHALL provide comprehensive REST APIs with real-time market data
+5. WHEN testing enterprise APIs THEN the system shall provide comprehensive REST APIs with real-time market data
 
 ### Requirement 7: Missing Yield Strategy Automation
 
@@ -88,7 +88,7 @@ Conxian is a comprehensive DeFi platform on Stacks with 65+ smart contracts, adv
 2. WHEN reviewing strategy automation THEN the system SHALL automatically deploy capital to highest-yielding opportunities
 3. WHEN checking rebalancing logic THEN the system SHALL automatically adjust positions based on changing yield opportunities
 4. WHEN validating compound mechanisms THEN the system SHALL automatically compound returns with optimized frequency
-5. WHEN testing yield optimization THEN the system SHALL demonstrate measurable improvements in yield generation
+5. WHEN testing yield optimization THEN the system shall demonstrate measurable improvements in yield generation
 
 ### Requirement 8: Incomplete Cross-Protocol Integration
 
@@ -112,7 +112,7 @@ Conxian is a comprehensive DeFi platform on Stacks with 65+ smart contracts, adv
 2. WHEN reviewing fee analytics THEN the system SHALL provide performance tracking and optimization recommendations for each tier
 3. WHEN checking fee distribution THEN the system SHALL implement dynamic fee adjustment based on market conditions
 4. WHEN validating fee migration THEN the system SHALL support seamless migration between fee tiers
-5. WHEN testing fee optimization THEN the system SHALL demonstrate improved capital efficiency through appropriate fee tier selection
+5. WHEN testing fee optimization THEN the system shall demonstrate improved capital efficiency through appropriate fee tier selection
 
 ### Requirement 10: Incomplete Performance and Scalability Features
 
@@ -124,7 +124,7 @@ Conxian is a comprehensive DeFi platform on Stacks with 65+ smart contracts, adv
 2. WHEN reviewing transaction processing THEN the system SHALL complete swaps within 2 blocks (average 20 seconds) on Stacks
 3. WHEN checking scalability mechanisms THEN the system SHALL handle concurrent transactions without conflicts
 4. WHEN validating gas optimization THEN the system SHALL provide batch transaction options and cost optimization
-5. WHEN testing system load THEN the system SHALL maintain >99.5% uptime and consistent performance under high load
+5. WHEN testing system load THEN the system shall maintain >99.5% uptime and consistent performance under high load
 
 ### Requirement 11: Missing Backward Compatibility Assurance
 
@@ -133,10 +133,10 @@ Conxian is a comprehensive DeFi platform on Stacks with 65+ smart contracts, adv
 #### Acceptance Criteria
 
 1. WHEN examining compatibility contracts THEN the system SHALL have legacy-adapter.clar and migration-manager.clar for seamless transitions
-2. WHEN reviewing interface changes THEN existing vault positions SHALL continue to function identically
-3. WHEN checking contract upgrades THEN old interfaces SHALL remain supported through adapter contracts
-4. WHEN validating user balances THEN existing user balances and shares SHALL be preserved exactly during upgrades
-5. WHEN testing migration tools THEN the system SHALL provide automated migration with rollback capabilities
+2. WHEN reviewing interface changes THEN existing vault positions shall continue to function identically
+3. WHEN checking contract upgrades THEN old interfaces shall remain supported through adapter contracts
+4. WHEN validating user balances THEN existing user balances and shares shall be preserved exactly during upgrades
+5. WHEN testing migration tools THEN the system shall provide automated migration with rollback capabilities
 
 ### Requirement 12: Incomplete Testing and Validation Framework
 
@@ -147,8 +147,8 @@ Conxian is a comprehensive DeFi platform on Stacks with 65+ smart contracts, adv
 1. WHEN examining test coverage THEN the system SHALL have tests for all contracts mentioned in the PRD but currently missing
 2. WHEN reviewing integration tests THEN the system SHALL validate cross-contract functionality and compatibility
 3. WHEN checking performance tests THEN the system SHALL include benchmarks for all mathematical functions and routing algorithms
-4. WHEN validating security tests THEN the system SHALL include vulnerability assessments and attack simulations
-5. WHEN testing deployment procedures THEN the system SHALL have automated deployment validation and verification
+4. WHEN validating security tests THEN the system shall include vulnerability assessments and attack simulations
+5. WHEN testing deployment procedures THEN the system shall have automated deployment validation and verification
 
 ### Requirement 13: Missing Documentation Alignment
 
@@ -158,30 +158,3 @@ Conxian is a comprehensive DeFi platform on Stacks with 65+ smart contracts, adv
 
 1. WHEN reviewing system documentation THEN it SHALL accurately reflect the current implementation status rather than planned features
 2. WHEN examining API documentation THEN it SHALL include only implemented functions and contracts
-3. WHEN checking architectural diagrams THEN they SHALL show the actual system structure rather than the planned architecture
-4. WHEN validating user guides THEN they SHALL provide accurate instructions for currently available features
-5. WHEN testing documentation examples THEN all code examples SHALL work with the current implementation
-
-### Requirement 14: Contract Compilation and Syntax Issues
-
-**User Story:** As a developer, I want all contracts to compile successfully so that I can deploy and test the system without syntax errors.
-
-#### Acceptance Criteria
-
-1. WHEN compiling comprehensive-lending-system.clar THEN it SHALL resolve all syntax errors and undefined function references
-2. WHEN checking contract dependencies THEN all contract calls SHALL reference existing and accessible contracts
-3. WHEN validating trait implementations THEN all contracts SHALL properly implement their declared traits
-4. WHEN testing contract interactions THEN all cross-contract calls SHALL use correct function signatures and parameters
-5. WHEN deploying contracts THEN all contracts SHALL deploy successfully without compilation errors
-
-### Requirement 15: System Architecture Alignment
-
-**User Story:** As a system architect, I want the actual implementation to align with the documented architecture so that the system functions as designed.
-
-#### Acceptance Criteria
-
-1. WHEN comparing implementation to design THEN the actual contract structure SHALL match the documented architecture
-2. WHEN reviewing component interactions THEN they SHALL follow the specified integration patterns
-3. WHEN checking data flow THEN it SHALL match the documented system workflows
-4. WHEN validating security measures THEN they SHALL implement the specified security architecture
-5. WHEN testing system behavior THEN it SHALL conform to the documented functional requirements

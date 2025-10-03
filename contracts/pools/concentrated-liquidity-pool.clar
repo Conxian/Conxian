@@ -22,21 +22,20 @@
 ;; - `error-codes-trait` for standardized errors
 ;; - `nft-trait` for position NFTs
 
-(use-trait sip-010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
-(use-trait pool-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.pool-trait)
-(use-trait math-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.math-trait)
-(use-trait error-codes-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.error-codes-trait)
-(use-trait nft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.nft-trait)
+(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
+(use-trait pool-trait .all-traits.pool-trait)
+(use-trait math-trait .all-traits.math-trait)
+(use-trait error-codes-trait .all-traits.error-codes-trait)
+(use-trait nft-trait .all-traits.nft-trait)
 (use-trait math-lib-concentrated 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated)
 
 (use-trait err-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.errors.err-trait)
 
 ;; Constants
-(define-constant Q128 u340282366920938463463374607431768211456)
+(define-constant Q128 u340282366920938463463374607431768211455)
 
 ;; Data Maps
-(
-define-map pools
+ (define-map pools
   {pool-id: uint}
   {
     token-x: <sip-010-ft-trait>,
@@ -1172,4 +1171,5 @@ define-map pools
   (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
 )
 
->>>>>>> 691ee6a4f2c3061a5257ef6a4aee949c84034a52
+ 
+

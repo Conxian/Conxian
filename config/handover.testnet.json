@@ -1,0 +1,17 @@
+{
+  "actions": [
+    { "contractKey": "upgrade-controller", "fn": "set-owner", "args": ["{TIMELOCK_CONTRACT}"] },
+
+    { "contractKey": "circuit-breaker", "fn": "set-admin", "args": ["{TIMELOCK_CONTRACT}"] },
+
+    { "contractKey": "revenue-distributor", "fn": "set-contract-owner", "args": ["{TIMELOCK_CONTRACT}"] },
+    { "contractKey": "revenue-distributor", "fn": "set-treasury-address", "args": ["{TREASURY_ADDRESS}"] },
+    { "contractKey": "revenue-distributor", "fn": "set-reserve-address", "args": ["{TREASURY_ADDRESS}"] },
+
+    { "contractKey": "vault", "fn": "transfer-admin", "args": ["{TIMELOCK_CONTRACT}"] },
+    { "contractKey": "sbtc-vault", "fn": "transfer-admin", "args": ["{TIMELOCK_CONTRACT}"] },
+
+    { "contractKey": "system-monitor", "fn": "set-admin", "args": ["{TIMELOCK_CONTRACT}"] },
+    { "contractKey": "analytics-aggregator", "fn": "set-admin", "args": ["{TIMELOCK_CONTRACT}"] }
+  ]
+}

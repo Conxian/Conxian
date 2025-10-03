@@ -3,12 +3,12 @@
 ;; Enhanced with staking, yield distribution, and system integration hooks
 
 ;; --- Traits ---
-(use-trait sip-010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
-(use-trait ownable-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.ownable-trait)
+(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
+(use-trait ownable-trait .all-traits.ownable-trait)
 
 ;; Implement the standard traits
-(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
-(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.ownable-trait)
+(impl-trait .all-traits.sip-010-ft-trait)
+(impl-trait .all-traits.ownable-trait)
 
 ;; Constants
 (define-constant TRAIT_REGISTRY 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.trait-registry)
@@ -21,8 +21,8 @@
     )
     (begin
       (asserts! (> len u0) (err ERR_MIGRATION_NOT_SET))
-      (asserts! (>= stacks-block-height start) (err ERR_MIGRATION_NOT_STARTED))
-      (ok (/ (- stacks-block-height start) len))
+      (asserts! (>= block-height start) (err ERR_MIGRATION_NOT_STARTED))
+      (ok (/ (- block-height start) len))
     )
   )
 )
@@ -46,11 +46,11 @@
 (define-data-var symbol (string-ascii 10) "CXLP")
 (define-data-var token-uri (optional (string-utf8 256)) none)
 
-(define-map balances { who: principal } { bal: uint })
-(define-map minters { who: principal } { enabled: bool })
+(define-map balances principal uint)
+(define-map minters principal bool)
 
 ;; Priority/allowance tracking
-(define-map balance-since { who: principal } { since: uint })
+(define-map balance-since principal uint)
 
 ;; Migration configuration
 (define-data-var migration-queue-contract (optional principal) none)
@@ -60,8 +60,8 @@
 
 ;; Epoch liquidity controls (caps measured in CXD minted)
 (define-data-var epoch-cap-cxd uint u0)
-(define-map epoch-minted { epoch: uint } { amount: uint })
-(define-map epoch-user-minted { epoch: uint, who: principal } { amount: uint })
+(define-map epoch-minted uint uint)
+(define-map epoch-user-minted (tuple (epoch uint) (who principal)) uint)
 
 ;; User allowance parameters (measured in CXD minted)
 (define-data-var user-base-cap-cxd uint u0)
@@ -85,23 +85,7 @@
 )
 
 (define-read-only (is-minter (who principal))
-  (is-some (map-get? minters { who: who }))
-)
-
-(define-public (mint (recipient principal) (amount uint))
-  (begin
-    (asserts! (or (is-owner tx-sender) (is-minter tx-sender)) (err ERR_UNAUTHORIZED))
-    
-    ;; Update total supply
-    (var-set total-supply (+ (var-get total-supply) amount))
-    
-    ;; Update recipient balance
-    (let ((bal (default-to u0 (get bal (map-get? balances { who: recipient })))))
-      (map-set balances { who: recipient } { bal: (+ bal amount) })
-    )
-    
-    (ok true)
-  )
+  (default-to false (map-get? minters who))
 )
 
 (define-read-only (current-band)
@@ -111,9 +95,9 @@
     )
     (begin
       (asserts! (> len u0) (err ERR_MIGRATION_NOT_SET))
-      (asserts! (>= stacks-block-height start) (err ERR_MIGRATION_NOT_STARTED))
-      (let ((delta (- stacks-block-height start))
-            (band (/ (- stacks-block-height start) len))
+      (asserts! (>= block-height start) (err ERR_MIGRATION_NOT_STARTED))
+      (let ((delta (- block-height start))
+            (band (/ (- block-height start) len))
           )
         (ok (if (>= band u3) u3 band))
       )
@@ -134,19 +118,19 @@
 ;; --- Liquidity controls helpers ---
 
 (define-read-only (get-epoch-minted (epoch uint))
-  (default-to u0 (get amount (map-get? epoch-minted { epoch: epoch })))
+  (default-to u0 (map-get? epoch-minted epoch))
 )
 
 (define-read-only (get-user-epoch-minted (epoch uint) (who principal))
-  (default-to u0 (get amount (map-get? epoch-user-minted { epoch: epoch, who: who })))
+  (default-to u0 (map-get? epoch-user-minted (tuple (epoch epoch) (who who))))
 )
 
 (define-read-only (get-balance-since (who principal))
   (let (
-      (maybe-since (get since (map-get? balance-since { who: who })))
+      (maybe-since (map-get? balance-since who))
       (start (var-get migration-start-height))
     )
-    (default-to (default-to stacks-block-height start) maybe-since)
+    (default-to (default-to block-height start) maybe-since)
   )
 )
 
@@ -156,7 +140,7 @@
       (factor (var-get user-duration-factor))
       (max-cap (var-get user-max-cap-cxd))
       (since (get-balance-since who))
-      (duration (- stacks-block-height since))
+      (duration (- block-height since))
       (calc (+ base (* factor duration)))
     )
     (ok (if (> calc max-cap) max-cap calc))
@@ -170,10 +154,10 @@
       (last (var-get last-midyear-adjustment))
       (override (var-get epoch-override))
     )
-    (if (and (> mb u0) (> bps u0) (is-eq override false) (>= (- stacks-block-height last) mb))
+    (if (and (> mb u0) (> bps u0) (is-eq override false) (>= (- block-height last) mb))
       (begin
         (var-set epoch-cap-cxd (/ (* (var-get epoch-cap-cxd) bps) u10000))
-        (var-set last-midyear-adjustment stacks-block-height)
+        (var-set last-midyear-adjustment block-height)
         true
       )
       false
@@ -193,10 +177,7 @@
 (define-public (set-minter (who principal) (enabled bool))
   (begin
     (asserts! (is-owner tx-sender) (err ERR_UNAUTHORIZED))
-    (if enabled
-      (map-set minters { who: who } { enabled: true })
-      (map-delete minters { who: who })
-    )
+    (map-set minters who enabled)
     (ok true)
   )
 )
@@ -250,12 +231,12 @@
 (define-public (transfer (amount uint) (sender principal) (recipient principal) (memo (optional (buff 34))))
   (begin
     (asserts! (is-eq tx-sender sender) (err ERR_UNAUTHORIZED))
-    (let ((sender-bal (default-to u0 (get bal (map-get? balances { who: sender })))) )
+    (let ((sender-bal (default-to u0 (map-get? balances sender))))
       (asserts! (>= sender-bal amount) (err ERR_NOT_ENOUGH_BALANCE))
-      (map-set balances { who: sender } { bal: (- sender-bal amount) })
-      (let ((rec-bal (default-to u0 (get bal (map-get? balances { who: recipient })))) )
-        (map-set balances { who: recipient } { bal: (+ rec-bal amount) })
-        (map-set balance-since { who: recipient } { since: stacks-block-height })
+      (map-set balances sender (- sender-bal amount))
+      (let ((rec-bal (default-to u0 (map-get? balances recipient))))
+        (map-set balances recipient (+ rec-bal amount))
+        (map-set balance-since recipient block-height)
       )
     )
     ;; --- HOOK FOR MIGRATION QUEUE ---
@@ -268,7 +249,7 @@
 )
 
 (define-read-only (get-balance (who principal))
-  (ok (default-to u0 (get bal (map-get? balances { who: who }))))
+  (ok (default-to u0 (map-get? balances who)))
 )
 
 (define-read-only (get-total-supply)
@@ -306,9 +287,9 @@
   (begin
     (asserts! (or (is-owner tx-sender) (is-minter tx-sender)) (err ERR_UNAUTHORIZED))
     (var-set total-supply (+ (var-get total-supply) amount))
-    (let ((bal (default-to u0 (get bal (map-get? balances { who: recipient })))) )
-      (map-set balances { who: recipient } { bal: (+ bal amount) })
-      (map-set balance-since { who: recipient } { since: stacks-block-height })
+    (let ((bal (default-to u0 (map-get? balances recipient))))
+      (map-set balances recipient (+ bal amount))
+      (map-set balance-since recipient block-height)
     )
     ;; --- HOOK FOR MIGRATION QUEUE ---
     (match (var-get migration-queue-contract)
@@ -320,31 +301,30 @@
 )
 
 (define-public (burn (amount uint))
-  (let ((bal (default-to u0 (get bal (map-get? balances { who: tx-sender })))) )
+  (let ((bal (default-to u0 (map-get? balances tx-sender))))
     (asserts! (>= bal amount) (err ERR_NOT_ENOUGH_BALANCE))
-    (map-set balances { who: tx-sender } { bal: (- bal amount) })
+    (map-set balances tx-sender (- bal amount))
     (var-set total-supply (- (var-get total-supply) amount))
     (ok true)
   )
 )
 
 ;; --- Migration: CXLP -> CXD ---
-(use-trait sip-010-ft-trait '.all-traits.sip-010-ft-trait)
-(define-public (migrate-to-cxd (amount uint) (recipient principal) (cxd <sip-010-ft-trait>))
+(define-public (migrate-to-cxd (amount uint) (recipient principal) (cxd (contract-of .all-traits.sip-010-ft-trait)))
   (let (
       (start (unwrap! (var-get migration-start-height) (err ERR_MIGRATION_NOT_SET)))
       (len (var-get epoch-length))
       (cxd-stored (unwrap! (var-get cxd-contract) (err ERR_CXD_NOT_SET)))
-      (sender-bal (default-to u0 (get bal (map-get? balances { who: tx-sender }))))
+      (sender-bal (default-to u0 (map-get? balances tx-sender)))
     )
     (begin
       (maybe-auto-adjust)
       (asserts! (> len u0) (err ERR_MIGRATION_NOT_SET))
-      (asserts! (>= stacks-block-height start) (err ERR_MIGRATION_NOT_STARTED))
+      (asserts! (>= block-height start) (err ERR_MIGRATION_NOT_STARTED))
       (asserts! (is-eq cxd-stored (contract-of cxd)) (err ERR_CXD_MISMATCH))
       (asserts! (>= sender-bal amount) (err ERR_NOT_ENOUGH_BALANCE))
       ;; burn CXLP from sender
-      (map-set balances { who: tx-sender } { bal: (- sender-bal amount) })
+      (map-set balances tx-sender (- sender-bal amount))
       (var-set total-supply (- (var-get total-supply) amount))
       ;; compute band and multiplier
       (let (
@@ -364,10 +344,11 @@
         ;; mint CXD to recipient (requires this contract to be an authorized minter in CXD)
         (try! (as-contract (contract-call? cxd mint recipient cxd-out)))
         ;; update epoch and user usage
-        (map-set epoch-minted { epoch: epoch } { amount: (+ epoch-used cxd-out) })
-        (map-set epoch-user-minted { epoch: epoch, who: tx-sender } { amount: (+ user-used cxd-out) })
-        (ok {band: band, multiplier: mult, cxd-amount: cxd-out})
+        (map-set epoch-minted epoch (+ epoch-used cxd-out))
+        (map-set epoch-user-minted (tuple (epoch epoch) (who tx-sender)) (+ user-used cxd-out))
+        (ok (tuple (band band) (multiplier mult) (cxd-amount cxd-out)))
       )
     )
   )
 )
+

@@ -1,10 +1,10 @@
 ;; batch-auction.clar
 ;; Implements a batch auction mechanism for fair execution
 
-(use-trait sip-010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
-(use-trait batch-auction-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.batch-auction-trait)
+(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
+(use-trait batch-auction-trait .all-traits.batch-auction-trait)
 
-(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.batch-auction-trait)
+(impl-trait .all-traits.batch-auction-trait)
 
 ;; ===== Constants =====
 (define-constant ERR_UNAUTHORIZED (err u100))
@@ -46,8 +46,8 @@
     (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
     (let ((id (var-get next-auction-id)))
       (map-set auctions {auction-id: id} {
-        start-block: stacks-block-height,
-        end-block: (+ stacks-block-height duration-blocks),
+        start-block: block-height,
+        end-block: (+ block-height duration-blocks),
         asset-to-sell: asset-to-sell,
         amount-to-sell: amount-to-sell,
         cleared-price: none
@@ -93,8 +93,8 @@
   (match (map-get? auctions {auction-id: auction-id})
     auction
     (and
-      (>= stacks-block-height (get start-block auction))
-      (<= stacks-block-height (get end-block auction))
+      (>= block-height (get start-block auction))
+      (<= block-height (get end-block auction))
       (is-none (get cleared-price auction))
     )
     false
@@ -105,7 +105,7 @@
   (match (map-get? auctions {auction-id: auction-id})
     auction
     (or
-      (> stacks-block-height (get end-block auction))
+      (> block-height (get end-block auction))
       (is-some (get cleared-price auction))
     )
     false

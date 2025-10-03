@@ -1,10 +1,10 @@
 ;; Enhanced Yield Strategy - Basic yield strategy with enhanced tokenomics integration
 ;; Implements strategy-trait for vault integration
 
-(use-trait sip-010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
-(use-trait strategy-trait .strategy-trait)
+(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
+(use-trait strategy-trait .all-traits.strategy-trait)
 
-(impl-trait .strategy-trait)
+(impl-trait .all-traits.strategy-trait)
 
 ;; Constants
 (define-constant ERR_UNAUTHORIZED (err u1001))
@@ -190,7 +190,7 @@
         (asserts! (> total-harvested u0) ERR_INSUFFICIENT_FUNDS)
         
         ;; Notify token system coordinator - PRODUCTION IMPLEMENTATION
-        (try! (contract-call? .token-system-coordinator
+        (try! (contract-call? (var-get token-system-coordinator)
                              distribute-strategy-rewards
                              (as-contract tx-sender)
                              asset
@@ -212,7 +212,7 @@
               (time-since-update (- block-height (var-get last-dimensional-update))))
           
           ;; Update weights based on performance - PRODUCTION IMPLEMENTATION
-          (try! (contract-call? .token-system-coordinator
+          (try! (contract-call? (var-get token-system-coordinator)
                                update-dimensional-weights
                                (as-contract tx-sender)
                                performance-ratio
@@ -223,7 +223,7 @@
         (err u999)))
 )
 
-(define-data-var token-system-coordinator principal ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.token-system-coordinator)
+(define-data-var token-system-coordinator principal 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.token-system-coordinator)
 
 (define-public (set-token-system-coordinator (new-coordinator principal))
   (begin
@@ -281,6 +281,7 @@
 
 ;; Initialize strategy
 ;; Note: Removed invalid top-level map-set initializer. The map will be populated during runtime calls.
+
 
 
 

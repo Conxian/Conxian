@@ -1,12 +1,12 @@
 ;; cxlp-migration-queue.clar
 ;; Intent queue system for CXLP to CXD migration with pro-rata settlement
 ;; Prevents FCFS races and enables fair distribution based on duration-weighted requests
-(use-trait sip-010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
-(use-trait access-control-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.access-control-trait)
-(use-trait cxlp-migration-queue-trait .cxlp-migration-queue-trait)
-(use-trait ft-mintable 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.ft-mintable-trait)
+(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
+(use-trait access-control-trait .all-traits.access-control-trait)
+(use-trait cxlp-migration-queue-trait .all-traits.cxlp-migration-queue-trait)
+(use-trait ft-mintable .all-traits.sip-010-ft-mintable-trait)
 
-(impl-trait .cxlp-migration-queue-trait)
+(impl-trait .all-traits.cxlp-migration-queue-trait)
 
 ;; --- Constants ---
 (define-constant CONTRACT_OWNER tx-sender)
@@ -33,8 +33,8 @@
 
 ;; --- Storage ---
 (define-data-var contract-owner principal CONTRACT_OWNER)
-(define-data-var cxlp-contract principal 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.cxlp-token')
-(define-data-var cxd-contract principal 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.cxd-token')
+(define-data-var cxlp-contract principal .cxlp-token)
+(define-data-var cxd-contract principal .cxd-token)
 
 ;; Migration configuration
 (define-data-var migration-start-height uint u0)
@@ -231,7 +231,7 @@
             (try! (as-contract (contract-call? (var-get cxlp-contract) burn user-cxlp)))
             
             ;; Mint CXD to user
-            (try! (as-contract (contract-call? cxd-token mint tx-sender pro-rata-cxd)))
+            (try! (as-contract (contract-call? cxd-token mint pro-rata-cxd tx-sender)))
             
             ;; Mark as claimed
             (map-set user-intents
@@ -294,6 +294,7 @@
     cxlp-contract: (var-get cxlp-contract),
     cxd-contract: (var-get cxd-contract)
   })
+
 
 
 

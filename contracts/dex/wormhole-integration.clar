@@ -2,7 +2,7 @@
 ;; Wormhole Cross-Chain Integration for Conxian Protocol
 ;; Provides cross-chain asset bridging, governance, and yield aggregation
 
-(use-trait sip-010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
+(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
 
 ;; =============================================================================
 ;; CONSTANTS AND ERROR CODES
@@ -193,7 +193,7 @@
 ;; BRIDGE FUNCTIONS
 ;; =============================================================================
 
-(define-public (initiate-bridge-transfer (token <ft-trait>) 
+(define-public (initiate-bridge-transfer (token <sip-010-ft-trait>) 
                                        (amount uint) 
                                        (target-chain uint) 
                                        (recipient (buff 32)))
@@ -273,7 +273,7 @@
 ;; CROSS-CHAIN YIELD FUNCTIONS
 ;; =============================================================================
 
-(define-public (deposit-for-yield (token <ft-trait>) 
+(define-public (deposit-for-yield (token <sip-010-ft-trait>) 
                                 (amount uint) 
                                 (target-chain uint)
                                 (yield-strategy (string-ascii 50)))
@@ -531,6 +531,7 @@
   (try! (add-supported-chain CHAIN_ID_POLYGON "Polygon" 0x0000000000000000000000007a4b5a56256163f07b2c80a7ca55aBE66c4ec4d7))
   (print { event: "wormhole-integration-deployed", version: "1.0.0", supported-chains: u3 })
 )
+
 
 
 

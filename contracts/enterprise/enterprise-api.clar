@@ -1,5 +1,5 @@
 ;; Conxian Enterprise API - Institutional features
-(use-trait sip-010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait')
+(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
 (use-trait compliance-hooks-trait .all-traits.compliance-hooks-trait)
 (use-trait circuit-breaker-trait .all-traits.circuit-breaker-trait)
 
@@ -23,25 +23,31 @@
 
 ;; --- Maps ---
 ;; Maps an institutional account ID to its details
-(define-map institutional-accounts uint {
-  owner: principal,
-  tier: uint,
-  created-at: uint,
-  fee-discount-rate: uint, ;; e.g., u100 for 1% discount
-  trading-privileges: uint ;; bitmask for different privileges
-})
+(define-map institutional-accounts uint (tuple
+  (owner principal)
+  (tier uint)
+  (created-at uint)
+  (fee-discount-rate uint) ;; e.g., u100 for 1% discount
+  (trading-privileges uint) ;; bitmask for different privileges
+))
 
 ;; Maps a TWAP order ID to its details
-(define-map twap-orders uint {
-    account-id: uint,
-    token-in: principal,
-    token-out: principal,
-    amount-in: uint,
-    min-amount-out: uint,
-    start-time: uint,
-    end-time: uint,
-    executed: bool
-})
+(define-map twap-orders uint (tuple
+    (account-id uint)
+    (token-in principal)
+    (token-out principal)
+    (amount-in uint)
+    (min-amount-out uint)
+    (start-time uint)
+    (end-time uint)
+    (executed bool)
+))
+
+;; Tier configurations: per-tier fee discount and privileges
+(define-map tier-configs uint (tuple
+  (fee-discount-rate uint)
+  (trading-privileges uint)
+))
 
 ;; @desc Sets the compliance hook contract.
 ;; @param hook (principal) The principal of the compliance hook contract.
@@ -69,20 +75,20 @@
 ;; @param owner (principal) The owner of the new account.
 ;; @param tier (uint) The tier level for the new account.
 ;; @return (response uint) An (ok account-id) response if the account was successfully created, or an error if unauthorized or the tier is invalid.
-(define-public (create-institutional-account (owner principal) (tier uint)))
+(define-public (create-institutional-account (owner principal) (tier uint))
     (begin
         (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
         (let (
             (account-id (+ u1 (var-get account-counter)))
             (tier-config (unwrap! (map-get? tier-configs tier) ERR_INVALID_TIER))
         )
-            (map-set institutional-accounts account-id {
-                owner: owner,
-                tier: tier,
-                created-at: block-height,
-                fee-discount-rate: (get fee-discount-rate tier-config),
-                trading-privileges: (get trading-privileges tier-config)
-            })
+            (map-set institutional-accounts account-id (tuple
+                (owner owner)
+                (tier tier)
+                (created-at block-height)
+                (fee-discount-rate (get fee-discount-rate tier-config))
+                (trading-privileges (get trading-privileges tier-config))
+            ))
             (var-set account-counter account-id)
             (ok account-id)
         )
@@ -93,18 +99,18 @@
 ;; @param account-id (uint) The ID of the account to update.
 ;; @param new-tier (uint) The new tier level for the account.
 ;; @return (response bool) An (ok true) response if the account tier was successfully updated, or an error if unauthorized, the account is not found, or the new tier is invalid.
-(define-public (update-account-tier (account-id uint) (new-tier uint)))
+(define-public (update-account-tier (account-id uint) (new-tier uint))
     (begin
         (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
         (let (
             (account (unwrap! (map-get? institutional-accounts account-id) ERR_ACCOUNT_NOT_FOUND))
             (tier-config (unwrap! (map-get? tier-configs new-tier) ERR_INVALID_TIER))
         )
-            (map-set institutional-accounts account-id (merge account {
-                tier: new-tier,
-                fee-discount-rate: (get fee-discount-rate tier-config),
-                trading-privileges: (get trading-privileges tier-config)
-            }))
+            (map-set institutional-accounts account-id (merge account (tuple
+                (tier new-tier)
+                (fee-discount-rate (get fee-discount-rate tier-config))
+                (trading-privileges (get trading-privileges tier-config))
+            )))
             (ok true)
         )
     )
@@ -115,14 +121,14 @@
 ;; @param fee-discount-rate (uint) The fee discount rate for this tier (e.g., u100 for 1%).
 ;; @param trading-privileges (uint) A bitmask representing the trading privileges for this tier.
 ;; @return (response bool) An (ok true) response if the tier configuration was successfully set, or an error if unauthorized or the fee discount rate is invalid.
-(define-public (set-tier-config (tier uint) (fee-discount-rate uint) (trading-privileges uint)))
+(define-public (set-tier-config (tier uint) (fee-discount-rate uint) (trading-privileges uint))
     (begin
         (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
         (asserts! (<= fee-discount-rate u10000) ERR_INVALID_FEE_DISCOUNT) ;; Max 100% discount (10000 basis points)
-        (map-set tier-configs tier {
-            fee-discount-rate: fee-discount-rate,
-            trading-privileges: trading-privileges
-        })
+        (map-set tier-configs tier (tuple
+            (fee-discount-rate fee-discount-rate)
+            (trading-privileges trading-privileges)
+        ))
         (ok true)
     )
 )
@@ -136,7 +142,7 @@
 ;; @param start-time (uint) The block height at which the order becomes active.
 ;; @param end-time (uint) The block height at which the order expires.
 ;; @return (response uint) An (ok order-id) response if the TWAP order was successfully created, or an error if a circuit breaker is open, the account is not found, unauthorized, not verified, invalid privilege, or invalid order times.
-(define-public (create-twap-order (account-id uint) (token-in principal) (token-out principal) (amount-in uint) (min-amount-out uint) (start-time uint) (end-time uint)))uint))
+(define-public (create-twap-order (account-id uint) (token-in principal) (token-out principal) (amount-in uint) (min-amount-out uint) (start-time uint) (end-time uint))
     (begin
         (try! (check-circuit-breaker))
         (let ((account (unwrap! (map-get? institutional-accounts account-id) ERR_ACCOUNT_NOT_FOUND)))
@@ -145,16 +151,16 @@
             (asserts! (has-privilege (get trading-privileges account) u2) ERR_INVALID_PRIVILEGE) ;; u2 could represent TWAP_ORDER_PRIVILEGE
             (asserts! (> end-time start-time) ERR_INVALID_ORDER)
             (let ((order-id (+ u1 (var-get twap-order-counter))))
-                (map-set twap-orders order-id {
-                    account-id: account-id,
-                    token-in: token-in,
-                    token-out: token-out,
-                    amount-in: amount-in,
-                    min-amount-out: min-amount-out,
-                    start-time: start-time,
-                    end-time: end-time,
-                    executed: false
-                })
+                (map-set twap-orders order-id (tuple
+                    (account-id account-id)
+                    (token-in token-in)
+                    (token-out token-out)
+                    (amount-in amount-in)
+                    (min-amount-out min-amount-out)
+                    (start-time start-time)
+                    (end-time end-time)
+                    (executed false)
+                ))
                 (var-set twap-order-counter order-id)
                 (ok order-id)
             )
@@ -168,7 +174,7 @@
 (define-private (check-verification (account principal))
     (match (var-get compliance-hook)
         (some hook) (contract-call? hook is-verified account)
-        (ok true) ;; No hook, no verification needed
+        none (ok true) ;; No hook, no verification needed
     )
 )
 
@@ -176,9 +182,9 @@
 ;; @return (response bool) An (ok true) response if the circuit breaker is not tripped, or an error if it is tripped.
 (define-private (check-circuit-breaker)
     (match (var-get circuit-breaker)
-        (breaker (let ((is-tripped (try! (contract-call? breaker is-circuit-open))))
-              (if is-tripped (err ERR_CIRCUIT_OPEN) (ok true))))
-        (ok true)
+        (some breaker) (let ((is-tripped (try! (contract-call? breaker is-circuit-open))))
+              (if is-tripped (err ERR_CIRCUIT_OPEN) (ok true)))
+        none (ok true)
     )
 )
 
@@ -186,18 +192,8 @@
 ;; @param privileges (uint) The bitmask of privileges.
 ;; @param privilege-flag (uint) The specific privilege flag to check for.
 ;; @return (bool) True if the privilege is present, false otherwise.
-(define-private (has-privilege (privileges uint) (privilege-flag uint)))
-    (> (and privileges privilege-flag) u0)
-)
-
-;; @desc Checks the KYC status of an account owner through the compliance hook.
-;; @param account-owner (principal) The principal of the account owner to check.
-;; @return (response bool) An (ok true) response if the KYC status is satisfactory or no compliance hook is set, or an error otherwise.
-(define-private (check-verification (account-owner principal))
-    (match (var-get compliance-hook)
-        (hook (contract-call? hook check-kyc-status account-owner))
-        (ok true)
-    )
+(define-private (has-privilege (privileges uint) (privilege-flag uint))
+  (is-eq (and privileges privilege-flag) privilege-flag)
 )
 
 (define-public (execute-twap-order (order-id uint))
@@ -221,10 +217,10 @@
     
             ;; Execute a portion of the swap
             ;; This is a simplified execution. In a real scenario, this would interact with a DEX router.
-            (print { notification: "TWAP order executed", order-id: order-id, amount: amount-to-execute })
+            (print (tuple (notification "TWAP order executed") (order-id order-id) (amount amount-to-execute)))
     
             ;; Update the order (e.g., remaining amount, mark as executed if fully done)
-            (map-set twap-orders order-id (merge order { executed: (if (>= elapsed duration) true false) }))
+            (map-set twap-orders order-id (merge order (tuple (executed (if (>= elapsed duration) true false)))))
             (ok true)
           )
         )
@@ -241,7 +237,7 @@
 
             ;; This is a placeholder for actual swap execution via a DEX router
             ;; In a real scenario, this would involve calling a DEX router contract
-            (print { notification: "Block trade executed", account-id: account-id, token-in: token-in, token-out: token-out, amount-in: amount-in, min-amount-out: min-amount-out, recipient: recipient })
+            (print (tuple (notification "Block trade executed") (account-id account-id) (token-in token-in) (token-out token-out) (amount-in amount-in) (min-amount-out min-amount-out) (recipient recipient)))
 
             ;; Assuming successful execution, return amount out
             (ok min-amount-out) ;; Simplified, actual amount-out would come from DEX
@@ -269,7 +265,7 @@
 ;; @desc Retrieves the configuration for a specific tier.
 ;; @param tier (uint) The tier level.
 ;; @return (response {fee-discount-rate: uint, trading-privileges: uint}) An (ok) response containing the tier configuration, or an error if the tier does not exist.
-(define-read-only (get-tier-config (tier uint)))
+(define-read-only (get-tier-config (tier uint))
     (map-get? tier-configs tier)
 )
 
@@ -281,12 +277,14 @@
 
 ;; @desc Retrieves the principal of the currently set circuit breaker contract.
 ;; @return (response principal) An (ok) response containing the principal of the circuit breaker, or an error if not set.
-(define-read-only (get-circuit-breaker))
+(define-read-only (get-circuit-breaker)
+  (ok (unwrap! (var-get circuit-breaker) (err u400)))
+)
 
 ;; @desc Retrieves the details of a TWAP order.
 ;; @param order-id (uint) The ID of the TWAP order.
 ;; @return (response {account-id: uint, token-in: principal, token-out: principal, amount-in: uint, min-amount-out: uint, start-time: uint, end-time: uint, filled-amount: uint}) An (ok) response containing the order details, or an error if the order does not exist.
-(define-read-only (get-twap-order-details (order-id uint)))uint))
+(define-read-only (get-twap-order-details (order-id uint))
     (map-get? twap-orders order-id)
 )
 

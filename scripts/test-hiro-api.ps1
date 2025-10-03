@@ -2,24 +2,27 @@
 # Tests the Hiro API key and basic functionality
 
 param(
-    [string]$ApiKey = "8f88f1cb5341624afdaa9d0282456506",
-    [string]$ApiBase = "https://api.testnet.hiro.so"
+    [string]$ApiKey,
+    [string]$ApiBase
 )
 
-Write-Host "🚀 Conxian Hiro API Integration Test" -ForegroundColor Green
+if (-not $ApiKey) { $ApiKey = $env:HIRO_API_KEY }
+if (-not $ApiBase) { $ApiBase = if ($env:STACKS_API_BASE) { $env:STACKS_API_BASE } else { "https://api.testnet.hiro.so" } }
+if (-not $ApiKey) {
+    Write-Host "❌ HIRO_API_KEY not provided. Set env:HIRO_API_KEY or pass -ApiKey." -ForegroundColor Red
+    exit 1
+}
+
 Write-Host ""
-Write-Host "🔗 API Base: $ApiBase" -ForegroundColor Cyan
-Write-Host "🔑 API Key: $($ApiKey.Substring(0,8))..." -ForegroundColor Cyan
-Write-Host ""
+
+$headers = @{
+    'X-API-Key' = $ApiKey
+    'Content-Type' = 'application/json'
+}
 
 # Test 1: Network Status
 Write-Host "🔍 Testing network status..." -ForegroundColor Yellow
 try {
-    $headers = @{
-        'X-API-Key' = $ApiKey
-        'Content-Type' = 'application/json'
-    }
-    
     $response = Invoke-RestMethod -Uri "$ApiBase/extended/v1/status" -Headers $headers -Method Get
     Write-Host "✅ Network status OK" -ForegroundColor Green
     Write-Host "   Chain ID: $($response.chain_id)" -ForegroundColor Gray

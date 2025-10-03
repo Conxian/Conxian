@@ -1,6 +1,9 @@
 ;; System Monitor
 ;; Implements monitoring and alerting for the Conxian protocol
 
+(use-trait monitoring-trait .all-traits.monitoring-trait)
+(use-trait ownable-trait .all-traits.ownable-trait)
+
 (impl-trait .all-traits.monitoring-trait)
 (impl-trait .all-traits.ownable-trait)
 
@@ -96,7 +99,7 @@
                          (data (optional {})))
   (let (
       (event-id (var-get event-counter))
-      (current-block stacks-block-height)
+      (current-block block-height)
     )
     ;; Validate severity level
     (asserts! (<= severity SEVERITY_CRITICAL) ERR_INVALID_SEVERITY)
@@ -214,7 +217,7 @@
     })
     (ok {
       status: STATUS_HEALTHY,
-      last-updated: stacks-block-height,
+      last-updated: block-height,
       uptime: u0,
       error-count: u0,
       warning-count: u0
@@ -225,3 +228,4 @@
 (define-read-only (get-admin)
   (ok (var-get admin))
 )
+

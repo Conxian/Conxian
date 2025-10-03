@@ -9,12 +9,12 @@
 ;; - Principal payout at maturity.
 
 ;; Import traits from the all-traits.clar file
-(use-trait sip-010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
-(use-trait bond-trait .bond-trait)
+(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
+(use-trait bond-trait .all-traits.bond-trait)
 
 ;; Implement the traits for this contract
-(impl-trait .bond-trait)
-(impl-trait .sip-010-ft-trait)
+(impl-trait .all-traits.bond-trait)
+(impl-trait .all-traits.sip-010-ft-trait)
 
 ;; Error codes
 (define-constant ERR_UNAUTHORIZED (err u100))
@@ -176,8 +176,8 @@
     (var-set token-name name)
     (var-set token-symbol symbol)
     (var-set token-decimals decimals)
-    (var-set issue-block stacks-block-height)
-    (var-set maturity-block (safe-add stacks-block-height maturity-in-blocks))
+    (var-set issue-block block-height)
+    (var-set maturity-block (safe-add block-height maturity-in-blocks))
     (var-set coupon-rate coupon-rate-scaled)
     (var-set coupon-frequency frequency-in-blocks)
     (var-set face-value bond-face-value)
@@ -231,11 +231,11 @@
   (let (
       (user tx-sender)
       (last-period (default-to u0 (get period (map-get? last-claimed-coupon { user: user }))))
-      (current-period (unwrap! (safe-div (unwrap! (safe-sub stacks-block-height (var-get issue-block)) (err ERR_INVALID_AMOUNT)) (var-get coupon-frequency)) (err ERR_INVALID_AMOUNT)))
+      (current-period (unwrap! (safe-div (unwrap! (safe-sub block-height (var-get issue-block)) (err ERR_INVALID_AMOUNT)) (var-get coupon-frequency)) (err ERR_INVALID_AMOUNT)))
       (balance (unwrap-panic (ft-get-balance tokenized-bond user)))
     )
     (asserts! (var-get bond-issued) ERR_BOND_NOT_ISSUED)
-    (asserts! (< stacks-block-height (var-get maturity-block)) ERR_ALREADY_MATURED)
+    (asserts! (< block-height (var-get maturity-block)) ERR_ALREADY_MATURED)
     (asserts! (> current-period last-period) ERR_NO_COUPONS_DUE)
     (asserts! (is-eq payment-token (unwrap! (var-get payment-token-contract) ERR_INVALID_AMOUNT)) ERR_INVALID_AMOUNT)
 
@@ -278,7 +278,7 @@
       (maturity (var-get maturity-block))
     )
     (asserts! (var-get bond-issued) ERR_BOND_NOT_ISSUED)
-    (asserts! (>= stacks-block-height maturity) ERR_NOT_YET_MATURED)
+    (asserts! (>= block-height maturity) ERR_NOT_YET_MATURED)
     (asserts! (> balance u0) ERR_INVALID_AMOUNT)
     (asserts! (is-eq payment-token (unwrap! (var-get payment-token-contract) ERR_INVALID_AMOUNT)) ERR_INVALID_AMOUNT)
 
@@ -376,3 +376,4 @@
 (define-read-only (get-payment-token-contract)
   (ok (var-get payment-token-contract))
 )
+

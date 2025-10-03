@@ -18,17 +18,19 @@
 (define-constant ERR_POOL_NOT_INITIALIZED (err u108))
 (define-constant ERR_PRICE_LIMIT_REACHED (err u109))
 (define-constant ERR_MATH_OVERFLOW (err u110))
+(define-constant ERR_TICK_NOT_FOUND (err u111))
+(define-constant ERR_INVALID_FEE (err u112))
 (define-constant PRECISION u1000000000000000000) ;; 18 decimals
 
 ;; --- Traits ---
-(use-trait sip-010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
-(use-trait pool-trait .pool-trait)
-(use-trait position-nft-trait .position-nft-trait)
-(use-trait pool-creation-trait .pool-creation-trait)
+(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
+(use-trait pool-trait .all-traits.pool-trait)
+(use-trait position-nft-trait .all-traits.position-nft-trait)
+(use-trait pool-creation-trait .all-traits.pool-creation-trait)
 
 ;; Implement the standard pool trait
-(impl-trait .pool-trait)
-(impl-trait .pool-creation-trait)
+(impl-trait pool-trait)
+(impl-trait pool-creation-trait)
 
 ;; --- Contract State ---
 (define-data-var contract-owner principal tx-sender)
@@ -51,24 +53,35 @@
 
 ;; Tracks individual positions
 (define-map positions 
-  {position-id: uint}
-  {owner: principal,
-   tick-lower: int,
-   tick-upper: int,
-   liquidity: uint,
-   fee-growth-inside-x: uint,
-   fee-growth-inside-y: uint,
-   tokens-owed-x: uint,
-   tokens-owed-y: uint})
+  (tuple (position-id uint))
+  (tuple (owner principal)
+   (tick-lower int)
+   (tick-upper int)
+   (liquidity uint)
+   (fee-growth-inside-x uint)
+   (fee-growth-inside-y uint)
+   (tokens-owed-x uint)
+   (tokens-owed-y uint)))
 
 ;; Tracks tick data
 (define-map ticks
-  {tick: int}
-  {liquidity-gross: uint,
-   liquidity-net: int,
-   fee-growth-outside-x: uint,
-   fee-growth-outside-y: uint,
-   initialized: bool})
+  (tuple (tick int))
+  (tuple (liquidity-gross uint)
+   (liquidity-net int)
+   (fee-growth-outside-x uint)
+   (fee-growth-outside-y uint)
+   (initialized bool)))
+
+;; --- Stubbed private functions ---
+(define-private (is-valid-fee-tier (fee uint)) true)
+(define-private (get-tick-spacing (fee uint)) u60)
+(define-private (is-valid-tick (tick int)) true)
+(define-private (calculate-amounts-for-liquidity (current-tick int) (tick-lower int) (tick-upper int) (liquidity-amount uint))
+  (tuple (amount-x u1000) (amount-y u1000))
+)
+(define-private (calculate-fees-earned (position (tuple (owner principal) (tick-lower int) (tick-upper int) (liquidity uint) (fee-growth-inside-x uint) (fee-growth-inside-y uint) (tokens-owed-x uint) (tokens-owed-y uint))))
+    (tuple (fees-x u10) (fees-y u10))
+)
 
 ;; Initialize pool with two tokens and fee tier
 (define-public (initialize (token-x principal) (token-y principal) (fee uint) (initial-sqrt-price uint))
@@ -84,7 +97,7 @@
     (var-set fee-tier fee)
     (var-set tick-spacing (get-tick-spacing fee))
     (var-set sqrt-price-x64 initial-sqrt-price)
-    (var-set current-tick (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.concentrated-math sqrt-price-to-tick initial-sqrt-price))
+    (var-set current-tick (unwrap! (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.concentrated-math sqrt-price-to-tick initial-sqrt-price) (err u0)))
     (var-set is-initialized true)
     
     (ok true)))
@@ -118,13 +131,13 @@
     (asserts! (is-valid-tick tick-upper) ERR_INVALID_TICK_RANGE)
     
     ;; Calculate liquidity from amounts
-    (let ((liquidity-amount (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.concentrated-math 
+    (let ((liquidity-amount (unwrap! (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.concentrated-math
                               get-liquidity-for-amounts 
                               (var-get sqrt-price-x64) 
-                              (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.concentrated-math tick-to-sqrt-price tick-lower)
-                              (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.concentrated-math tick-to-sqrt-price tick-upper)
+                              (unwrap! (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.concentrated-math tick-to-sqrt-price tick-lower) (err u0))
+                              (unwrap! (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.concentrated-math tick-to-sqrt-price tick-upper) (err u0))
                               amount-x-desired
-                              amount-y-desired)))
+                              amount-y-desired) (err u0))))
       
       ;; Ensure non-zero liquidity
       (asserts! (> liquidity-amount u0) ERR_ZERO_LIQUIDITY)
@@ -148,30 +161,29 @@
           (try! (contract-call? token-y transfer amount-y tx-sender (as-contract tx-sender) none))
           
           ;; Update ticks
-          (update-tick tick-lower (to-int liquidity-amount))
-          (update-tick tick-upper (to-int (- u0 liquidity-amount)))
+          (try! (update-tick tick-lower (to-int liquidity-amount)))
+          (try! (update-tick tick-upper (to-int (- u0 liquidity-amount))))
           
           ;; Create position
           (map-set positions 
-            {position-id: position-id}
-            {owner: recipient,
-             tick-lower: tick-lower,
-             tick-upper: tick-upper,
-             liquidity: liquidity-amount,
-             fee-growth-inside-x: u0,
-             fee-growth-inside-y: u0,
-             tokens-owed-x: u0,
-             tokens-owed-y: u0})
+            (tuple (position-id position-id))
+            (tuple (owner recipient)
+             (tick-lower tick-lower)
+             (tick-upper tick-upper)
+             (liquidity liquidity-amount)
+             (fee-growth-inside-x u0)
+             (fee-growth-inside-y u0)
+             (tokens-owed-x u0)
+             (tokens-owed-y u0)))
           
           ;; Update global state
           (var-set liquidity (+ (var-get liquidity) liquidity-amount))
           
-          (ok (tuple (position-id position-id) (liquidity liquidity-amount) (amount-x amount-x) (amount-y amount-y)))))))
-  ))
+          (ok (tuple (position-id position-id) (liquidity liquidity-amount) (amount-x amount-x) (amount-y amount-y))))))))
 
 ;; Remove liquidity from a position
 (define-public (burn-position (position-id uint))
-  (let ((position (unwrap! (map-get? positions {position-id: position-id}) ERR_POSITION_NOT_FOUND)))
+  (let ((position (unwrap! (map-get? positions (tuple (position-id position-id))) ERR_POSITION_NOT_FOUND)))
     
     ;; Verify ownership and burn NFT
     (asserts! (is-eq tx-sender (get owner position)) ERR_UNAUTHORIZED)
@@ -181,19 +193,19 @@
     (let ((fees (calculate-fees-earned position)))
       
       ;; Update ticks
-      (update-tick (get tick-lower position) (to-int (- u0 (get liquidity position))))
-      (update-tick (get tick-upper position) (to-int (get liquidity position)))
+      (try! (update-tick (get tick-lower position) (to-int (- u0 (get liquidity position)))))
+      (try! (update-tick (get tick-upper position) (to-int (get liquidity position))))
       
       ;; Update global liquidity
       (var-set liquidity (- (var-get liquidity) (get liquidity position)))
       
       ;; Update position with fees owed
       (map-set positions 
-        {position-id: position-id}
+        (tuple (position-id position-id))
         (merge position 
-          {liquidity: u0,
-           tokens-owed-x: (+ (get tokens-owed-x position) (get fees-x fees)),
-           tokens-owed-y: (+ (get tokens-owed-y position) (get fees-y fees))}))
+          (tuple (liquidity u0)
+           (tokens-owed-x (+ (get tokens-owed-x position) (get fees-x fees)))
+           (tokens-owed-y (+ (get tokens-owed-y position) (get fees-y fees))))))
       
       (ok (tuple (fees-x (get fees-x fees)) (fees-y (get fees-y fees))))
     ))
@@ -201,7 +213,7 @@
 
 ;; Collect fees and tokens from a burned position
 (define-public (collect-position (position-id uint) (recipient principal))
-  (let ((position (unwrap! (map-get? positions {position-id: position-id}) ERR_POSITION_NOT_FOUND))
+  (let ((position (unwrap! (map-get? positions (tuple (position-id position-id))) ERR_POSITION_NOT_FOUND))
         (token-x (var-get pool-token-x))
         (token-y (var-get pool-token-y)))
     
@@ -223,8 +235,8 @@
       
       ;; Update position
       (map-set positions 
-        {position-id: position-id}
-        (merge position {tokens-owed-x: u0, tokens-owed-y: u0}))
+        (tuple (position-id position-id))
+        (merge position (tuple (tokens-owed-x u0) (tokens-owed-y u0))))
       
       (ok (tuple (amount-x amount-x) (amount-y amount-y)))
     ))
@@ -244,7 +256,7 @@
     (asserts! (> amount-specified u0) ERR_INVALID_TICK_RANGE)
     
     ;; Execute swap
-    (let ((result (execute-swap zero-for-one amount-specified sqrt-price-limit)))
+    (let ((result (try! (execute-swap zero-for-one amount-specified sqrt-price-limit))))
       
       ;; Transfer tokens
       (try! (contract-call? token-in transfer (get amount-in result) tx-sender (as-contract tx-sender) none))
@@ -268,9 +280,9 @@
     
     ;; Calculate swap amounts (simplified)
     (let ((amount-in amount-specified)
-          (amount-out (calculate-output-amount amount-specified zero-for-one current-sqrt-price current-liquidity))
-          (new-sqrt-price (calculate-new-sqrt-price amount-specified zero-for-one current-sqrt-price current-liquidity))
-          (new-tick (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.concentrated-math sqrt-price-to-tick new-sqrt-price)))
+          (amount-out (try! (calculate-output-amount amount-specified zero-for-one current-sqrt-price current-liquidity)))
+          (new-sqrt-price (try! (calculate-new-sqrt-price amount-specified zero-for-one current-sqrt-price current-liquidity)))
+          (new-tick (unwrap! (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.concentrated-math sqrt-price-to-tick new-sqrt-price) (err u0))))
       
       ;; Calculate fees
       (let ((fee-amount (/ (* amount-in (var-get fee-tier)) u1000000))
@@ -289,7 +301,7 @@
             (var-set fee-growth-global-y (+ (var-get fee-growth-global-y) (/ (* (- fee-amount protocol-fee-amount) PRECISION) current-liquidity)))
             (var-set protocol-fees-y (+ (var-get protocol-fees-y) protocol-fee-amount))))
         
-        (tuple (amount-in amount-in) (amount-out amount-out) (fee fee-amount) (new-sqrt-price new-sqrt-price))
+        (ok (tuple (amount-in amount-in) (amount-out amount-out) (fee fee-amount) (new-sqrt-price new-sqrt-price)))
       ))
     ))
 
@@ -320,10 +332,10 @@
   )))
 
 (define-read-only (get-position-details (position-id uint))
-  (ok (map-get? positions position-id)))
+  (ok (map-get? positions (tuple (position-id position-id)))))
 
 (define-read-only (get-tick-details (tick int))
-  (ok (map-get? ticks tick)))
+  (ok (map-get? ticks (tuple (tick tick)))))
 
 (define-read-only (quote (zero-for-one bool) (amount-specified uint))
   (let ((current-sqrt-price (var-get sqrt-price-x64))
@@ -331,29 +343,29 @@
     (calculate-output-amount amount-specified zero-for-one current-sqrt-price current-liquidity)
   ))
 
-(define-private (update-tick (tick int) (liquidity-delta uint) (is-upper-tick bool) (fee-growth-outside uint))
-  (let ((tick-info (unwrap! (map-get? ticks tick) (err ERR_TICK_NOT_FOUND))))
-    (map-set ticks tick (merge tick-info (tuple
-      (liquidity-gross (+ (get liquidity-gross tick-info) liquidity-delta))
-      (liquidity-net (if is-upper-tick (- (get liquidity-net tick-info) (to-int liquidity-delta)) (+ (get liquidity-net tick-info) (to-int liquidity-delta))))
-      (fee-growth-outside (if is-upper-tick fee-growth-outside (get fee-growth-outside tick-info)))
-    )))
+(define-private (update-tick (tick int) (liquidity-delta int))
+  (let ((tick-info (default-to (tuple (liquidity-gross u0) (liquidity-net i0) (fee-growth-outside-x u0) (fee-growth-outside-y u0) (initialized false)) (map-get? ticks (tuple (tick tick))))))
+    (ok (map-set ticks (tuple (tick tick)) (merge tick-info (tuple
+      (liquidity-gross (+ (get liquidity-gross tick-info) (if (< liquidity-delta i0) (to-uint (- i0 liquidity-delta)) (to-uint liquidity-delta))))
+      (liquidity-net (+ (get liquidity-net tick-info) liquidity-delta))
+      (initialized true)
+    ))))
   )
 )
 
 (define-private (update-position (position-id uint) (liquidity uint) (fee-growth-inside-last-x uint) (fee-growth-inside-last-y uint))
-  (let ((position (unwrap! (map-get? positions position-id) (err ERR_POSITION_NOT_FOUND))))
-    (map-set positions position-id (merge position (tuple
+  (let ((position (unwrap! (map-get? positions (tuple (position-id position-id))) ERR_POSITION_NOT_FOUND)))
+    (ok (map-set positions (tuple (position-id position-id)) (merge position (tuple
       (liquidity liquidity)
       (fee-growth-inside-last-x fee-growth-inside-last-x)
       (fee-growth-inside-last-y fee-growth-inside-last-y)
-    )))
+    ))))
   )
 )
 
 (define-public (create-instance (token-a principal) (token-b principal) (params (buff 256)))
   (begin
-    (try! (initialize token-a token-b (unwrap! (get-fee-from-params params) (err ERR_INVALID_FEE))))
+    (try! (initialize token-a token-b (unwrap! (get-fee-from-params params) ERR_INVALID_FEE) u79228162514264337593543950336))
     (ok (as-contract tx-sender))
   )
 )

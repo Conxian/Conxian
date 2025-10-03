@@ -54,25 +54,16 @@
 (define-read-only (get-trait-metadata (name (string-ascii 32)))
   (match (map-get? trait-metadata {name: name})
     metadata (ok metadata)
-    (err ERR_TRAIT_NOT_FOUND)
-  )
-)
-
-;; List all registered traits with their implementations
-(define-read-only (list-traits)
-  (let ((traits (list)))
-    (map-get-keys trait-registry (element (name) 
-      (set! traits (append traits (list name)))))
-    (ok traits)
+    ERR_TRAIT_NOT_FOUND
   )
 )
 
 ;; Deprecate a trait
 (define-public (deprecate-trait (name (string-ascii 32)) (replacement (optional (string-ascii 32))))
   (begin
-    (asserts! (is-eq tx-sender contract-owner) (err u100))
+    (asserts! (is-eq tx-sender contract-owner) ERR_UNAUTHORIZED)
     (match (map-get? trait-metadata {name: name})
-      metadata (let ((current (unwrap-panic metadata)))
+      current (begin
         (map-set trait-metadata {name: name} {
           version: (get version current),
           description: (get description current),
@@ -81,7 +72,7 @@
         })
         (ok true)
       )
-      (err ERR_TRAIT_NOT_FOUND)
+      ERR_TRAIT_NOT_FOUND
     )
   )
 )
@@ -89,16 +80,16 @@
 ;; Check if a trait is deprecated
 (define-read-only (is-trait-deprecated (name (string-ascii 32)))
   (match (map-get? trait-metadata {name: name})
-    metadata (ok (get deprecated (unwrap-panic metadata)))
-    (err ERR_TRAIT_NOT_FOUND)
+    metadata (ok (get deprecated metadata))
+    ERR_TRAIT_NOT_FOUND
   )
 )
 
 ;; Get the recommended replacement for a deprecated trait
 (define-read-only (get-trait-replacement (name (string-ascii 32)))
   (match (map-get? trait-metadata {name: name})
-    metadata (ok (get replaced-by (unwrap-panic metadata)))
-    (err ERR_TRAIT_NOT_FOUND)
+    metadata (ok (get replaced-by metadata))
+    ERR_TRAIT_NOT_FOUND
   )
 )
 
@@ -110,7 +101,3 @@
   )
 )
 
-(define-read-only (get-trait-metadata (name (string-ascii 32)))
-  (match (map-get? trait-metadata {name: name})
-    entry (ok entry)
-    (err u404)))

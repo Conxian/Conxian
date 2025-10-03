@@ -2,7 +2,7 @@
 ;; Hard-coded emission rails with governance guards to prevent inflation abuse
 ;; Implements supply discipline across all 4 tokens with supermajority + timelock requirements
 
-(use-trait ft-mintable .ft-mintable-trait)
+(use-trait ft-mintable .all-traits.sip-010-ft-mintable-trait)
 
 ;; --- Constants ---
 (define-constant CONTRACT_OWNER tx-sender)
@@ -211,8 +211,8 @@
           ;; Check annual emission cap
           (asserts! (<= (+ (get minted epoch-data) amount) annual-cap) (err ERR_EMISSION_CAP_EXCEEDED))
           
-          ;; Execute mint
-          (try! (as-contract (contract-call? token-contract mint recipient amount)))
+          ;; Execute mint (mint (amount uint) (recipient principal))
+          (try! (as-contract (contract-call? token-contract mint amount recipient)))
           
           ;; Update epoch emissions
           (map-set epoch-emissions { token: token-principal, epoch: current-epoch-num }
@@ -356,6 +356,7 @@
     cxlp-info: (get-emission-info (default-to .cxlp-token (var-get cxlp-contract))),
     cxtr-info: (get-emission-info (default-to .cxtr-token (var-get cxtr-contract)))
   })
+
 
 
 

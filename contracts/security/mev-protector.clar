@@ -1,10 +1,10 @@
 ;; mev-protector.clar
 ;; Implements MEV protection mechanisms
 
-(use-trait sip-010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
-(use-trait mev-protector-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.mev-protector-trait)
+(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
+(use-trait mev-protector-trait .all-traits.mev-protector-trait)
 
-(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.mev-protector-trait)
+(impl-trait .all-traits.mev-protector-trait)
 
 ;; ===== Constants =====
 (define-constant ERR_UNAUTHORIZED (err u100))
@@ -46,7 +46,7 @@
     (map-set commitments {commitment-id: id} {
       hash: commitment,
       sender: tx-sender,
-      start-block: stacks-block-height
+      start-block: block-height
     })
     (var-set next-batch-id (+ id u1))
     (ok id)
@@ -64,7 +64,7 @@
       (sender (get sender data))
     )
       (asserts! (is-eq tx-sender sender) ERR_UNAUTHORIZED)
-      (asserts! (<= (+ start-block (var-get commit-period-blocks)) stacks-block-height) ERR_REVEAL_PERIOD_ENDED)
+      (asserts! (<= (+ start-block (var-get commit-period-blocks)) block-height) ERR_REVEAL_PERIOD_ENDED)
       ;; Verify hash (simplified for example)
       ;; (asserts! (is-eq (sha256 payload) (get hash data)) ERR_INVALID_REVEAL)
 

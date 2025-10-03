@@ -1,12 +1,10 @@
 ;; Oracle Aggregator V2
 ;; This contract aggregates prices from multiple oracle sources, calculates TWAP, and detects manipulation.
 
-(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.oracle-trait)
-(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.circuit-breaker-trait)
-(use-trait oracle-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.oracle-trait)
-(use-trait access-control-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.access-control-trait)
-(use-trait circuit-breaker-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.circuit-breaker-trait)
-(use-trait sip-010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
+(use-trait oracle-trait .all-traits.oracle-trait)
+(use-trait access-control-trait .all-traits.access-control-trait)
+(use-trait circuit-breaker-trait .all-traits.circuit-breaker-trait)
+(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
 
 ;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED (err u1003))
@@ -22,7 +20,7 @@
 ;; --- Data Variables ---
 (define-data-var contract-owner principal tx-sender)
 (define-data-var circuit-breaker principal 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.circuit-breaker)
-(define-map oracle-sources (list 20 principal) bool)
+(define-data-var oracle-sources (list 20 principal) (list))
 (define-map prices { token-a: principal, token-b: principal } { price: uint, last-updated: uint })
 (define-map twap { token-a: principal, token-b: principal } { price: uint, last-updated: uint })
 (define-map price-history { token-a: principal, token-b: principal } (list 100 uint)) ;; Stores last 100 prices
@@ -32,16 +30,25 @@
 (define-public (add-oracle-source (source principal))
   (begin
     (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
-    (map-set oracle-sources (list source) true)
-    (ok true)
+    (let ((sources (var-get oracle-sources)))
+      (if (contains-principal? source sources)
+        (ok true)
+        (begin
+          (var-set oracle-sources (unwrap-panic (as-max-len? (append sources (list source)) u20)))
+          (ok true)
+        )
+      )
+    )
   )
 )
 
 (define-public (remove-oracle-source (source principal))
   (begin
     (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
-    (map-delete oracle-sources (list source))
-    (ok true)
+    (let ((sources (var-get oracle-sources)))
+      (var-set oracle-sources (filter (lambda ((s principal)) (not (is-eq s source))) sources))
+      (ok true)
+    )
   )
 )
 
@@ -55,11 +62,12 @@
 
 (define-public (update-price (token-a principal) (token-b principal))
   (let (
-    (sources (map-get? oracle-sources))
-    (median-price (try! (calculate-median (try! (get-prices-from-sources (unwrap-panic (map-get? oracle-sources (list tx-sender))) token-a token-b)))))
+    (sources (var-get oracle-sources))
+    (prices-list (try! (get-prices-from-sources sources token-a token-b)))
+    (median-price (try! (calculate-median prices-list)))
   )
     (asserts! (not (try! (check-circuit-breaker))) ERR_CIRCUIT_OPEN)
-    (asserts! (is-some sources) ERR_NO_SOURCES)
+    (asserts! (> (len sources) u0) ERR_NO_SOURCES)
     (try! (check-deviation median-price token-a token-b))
     (try! (check-manipulation median-price token-a token-b))
     (map-set prices { token-a: token-a, token-b: token-b } { price: median-price, last-updated: block-height })
@@ -80,7 +88,7 @@
 ;; --- Private Helper Functions ---
 
 (define-private (check-circuit-breaker)
-  (contract-call? .circuit-breaker-v1 is-circuit-open)
+  (contract-call? (var-get circuit-breaker) is-circuit-open)
 )
 
 (define-private (get-prices-from-sources (sources (list 20 principal)) (token-a principal) (token-b principal))
@@ -105,7 +113,7 @@
 
 (define-private (check-deviation (new-price uint) (token-a principal) (token-b principal))
   (match (map-get? prices { token-a: token-a, token-b: token-b })
-    (some old-price-data
+    old-price-data
       (let (
         (old-price (get price old-price-data))
         (deviation (abs (- (to-int new-price) (to-int old-price))))
@@ -114,8 +122,7 @@
         (asserts! (<= deviation threshold) ERR_DEVIATION_TOO_HIGH)
         (ok true)
       )
-    )
-    (none (ok true)) ;; No previous price to compare, so no deviation
+    (ok true) ;; No previous price to compare, so no deviation
   )
 )
 
@@ -125,7 +132,7 @@
     (twap-period ONE_HOUR_IN_BLOCKS)
   )
     (match (map-get? twap { token-a: token-a, token-b: token-b })
-      (some old-twap-data
+      old-twap-data
         (let (
           (old-twap (get price old-twap-data))
           (last-updated (get last-updated old-twap-data))
@@ -141,14 +148,14 @@
             (ok true) ;; No block passed, no TWAP update needed
           )
         )
-      )
-      (none
+      (begin
         ;; First TWAP update
         (map-set twap { token-a: token-a, token-b: token-b } { price: new-price, last-updated: current-block })
         (ok true)
       )
     )
   )
+)
 
 (define-constant MANIPULATION_DEVIATION_THRESHOLD u1000) ;; 10% deviation threshold for manipulation
 

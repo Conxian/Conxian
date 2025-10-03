@@ -12,7 +12,7 @@
 (define-constant ERR_METRIC_NOT_FOUND u106)
 
 ;; --- Contract Dependencies ---
-(use-trait sip-010-ft-trait '.all-traits.sip-010-ft-trait')
+(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
 
 
 (define-data-var contract-owner principal tx-sender)
@@ -131,6 +131,7 @@
 (define-read-only (get-stake-info (staker principal) (dim-id uint))
     (map-get? stakes {staker: staker, dim-id: dim-id})
 )
+
 
 
 

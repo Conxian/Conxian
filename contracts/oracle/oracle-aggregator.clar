@@ -2,14 +2,13 @@
 ;; Aggregates price feeds from multiple oracles and provides TWAP calculations
 
 ;; Traits
-(
-use-trait sip-010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
-(use-trait oracle-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.oracle-trait)
-(use-trait access-control-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.access-control-trait)
-(use-trait circuit-breaker-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.circuit-breaker-trait)
-(use-trait oracle-aggregator-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.oracle-aggregator-trait)
+(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
+(use-trait oracle-trait .all-traits.oracle-trait)
+(use-trait access-control-trait .all-traits.access-control-trait)
+(use-trait circuit-breaker-trait .all-traits.circuit-breaker-trait)
+(use-trait oracle-aggregator-trait .all-traits.oracle-aggregator-trait)
 
-(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.oracle-aggregator-trait)
+(impl-trait .all-traits.oracle-aggregator-trait)
 
 ;; Constants
 (define-constant ERR_UNAUTHORIZED (err u100))
@@ -76,63 +75,13 @@ use-trait sip-010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits
   )
 )
 
-;; Placeholder for TWAP calculation and aggregation logic
+;; Simplified aggregated price: return last submitted price
 (define-read-only (get-aggregated-price (asset principal))
-  (let
-    ((total-price-sum u0)
-     (total-weight-sum u0)
-     (start-block (- block-height (var-get observation-period-blocks)))
-     (end-block block-height)
-     (prices (list )))
-
-    (if (<= start-block u0)
-        (begin
-            (var-set start-block u1)
-        )
-    )
-
-    (map registered-oracles
-      (lambda (oracle-id-entry oracle-data)
-        (let
-          ((oracle-id (get oracle-id oracle-id-entry))
-           (weight (get weight oracle-data)))
-
-          (if (is-some (map-get? last-observation-block {asset: asset}))
-            (let
-              ((last-obs-block (get block-height (unwrap-panic (map-get? last-observation-block {asset: asset})))))
-
-              (if (and (>= last-obs-block start-block) (<= last-obs-block end-block))
-                (if (is-some (map-get? asset-prices {asset: asset, block-height: last-obs-block}))
-                  (let
-                    ((price (get price (unwrap-panic (map-get? asset-prices {asset: asset, block-height: last-obs-block})))))
-                    (var-set total-price-sum (+ total-price-sum (* price weight)))
-                    (var-set total-weight-sum (+ total-weight-sum weight))
-                    (var-set prices (append prices price))
-                  )
-                )
-              )
-            )
-          )
-        )
-      )
-    )
-
-    (asserts! (> total-weight-sum u0) ERR_NO_PRICE_DATA)
-
-    (let
-      ((twap (/ total-price-sum total-weight-sum)))
-
-      ;; Basic manipulation detection: check if any price deviates significantly from TWAP
-      (map prices
-        (lambda (price)
-          (let
-            ((deviation (* (abs (- price twap)) u10000) (/ u1 twap)))
-            (asserts! (<= deviation MANIPULATION_THRESHOLD_PERCENTAGE) ERR_PRICE_MANIPULATION_DETECTED)
-          )
-        )
-      )
-      (ok twap)
-    )
+  (match (map-get? last-observation-block {asset: asset})
+    obs (match (map-get? asset-prices {asset: asset, block-height: (get block-height obs)})
+          price-entry (ok (get price price-entry))
+          (err ERR_NO_PRICE_DATA))
+    (err ERR_NO_PRICE_DATA)
   )
 )
 

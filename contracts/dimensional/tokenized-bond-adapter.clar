@@ -2,7 +2,7 @@
 ;; Integration adapter for tokenized bonds to connect with enhanced tokenomics system
 ;; Routes bond proceeds and coupon payments through revenue distribution system
 
-(use-trait sip-010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
+(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
 
 ;; --- Constants ---
 (define-constant CONTRACT_OWNER tx-sender)
@@ -293,6 +293,7 @@
     ;; Emergency withdrawal function
     (try! (as-contract (contract-call? token transfer amount (as-contract tx-sender) tx-sender none)))
     (ok amount)))
+
 
 
 

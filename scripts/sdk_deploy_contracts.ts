@@ -138,6 +138,10 @@ async function main() {
   if (!priv) throw new Error('DEPLOYER_PRIVKEY env required');
   const networkName = (process.env.NETWORK || 'testnet').toLowerCase();
   const network = networkName === 'mainnet' ? new StacksMainnet() : new StacksTestnet();
+  const envCore = process.env.CORE_API_URL || process.env.STACKS_API_BASE;
+  if (envCore) {
+    try { (network as any).coreApiUrl = envCore; } catch {}
+  }
   const dryRun = !!process.env.DRY_RUN;
   const deployerAddress = getAddressFromPrivateKey(priv, networkName === 'mainnet' ? 'mainnet' : 'testnet');
   console.log(`[preflight] deployer address: ${deployerAddress}`);

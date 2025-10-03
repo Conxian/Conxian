@@ -1,10 +1,10 @@
 ;; btc-adapter.clar
 ;; Facilitates Bitcoin Layer Integration
 
-(use-trait sip-010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
-(use-trait btc-adapter-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.btc-adapter-trait)
+(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
+(use-trait btc-adapter-trait .all-traits.btc-adapter-trait)
 
-(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.btc-adapter-trait)
+(impl-trait .all-traits.btc-adapter-trait)
 
 ;; ===== Constants =====
 (define-constant ERR_UNAUTHORIZED (err u100))
@@ -16,13 +16,13 @@
 (define-data-var contract-owner principal tx-sender)
 
 ;; btc-deposits: {btc-tx-id: (buff 32)} {stx-address: principal, amount-btc: uint, status: (string-ascii 32)}
-(define-map btc-deposits {
-  btc-tx-id: (buff 32)
-} {
-  stx-address: principal,
-  amount-btc: uint,
-  status: (string-ascii 32)
-})
+(define-map btc-deposits (buff 32)
+  (tuple
+    (stx-address principal)
+    (amount-btc uint)
+    (status (string-ascii 32))
+  )
+)
 
 ;; ===== Public Functions =====
 
@@ -30,11 +30,11 @@
   (begin
     (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
     (asserts! (> amount-btc u0) ERR_INVALID_AMOUNT)
-    (map-set btc-deposits {btc-tx-id: btc-tx-id} {
-      stx-address: stx-address,
-      amount-btc: amount-btc,
-      status: "pending"
-    })
+    (map-set btc-deposits btc-tx-id (tuple
+      (stx-address stx-address)
+      (amount-btc amount-btc)
+      (status "pending")
+    ))
     (ok true)
   )
 )
@@ -42,7 +42,7 @@
 (define-public (confirm-btc-deposit (btc-tx-id (buff 32)))
   (begin
     (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
-    (map-set btc-deposits {btc-tx-id: btc-tx-id} (merge (unwrap-panic (map-get? btc-deposits {btc-tx-id: btc-tx-id})) {status: "confirmed"}))
+    (map-set btc-deposits btc-tx-id (merge (unwrap-panic (map-get? btc-deposits btc-tx-id)) (tuple (status "confirmed"))))
     ;; Logic to mint sBTC or other Stacks-native token representing BTC
     (ok true)
   )
@@ -59,7 +59,7 @@
 ;; ===== Read-Only Functions =====
 
 (define-read-only (get-btc-deposit-status (btc-tx-id (buff 32)))
-  (ok (map-get? btc-deposits {btc-tx-id: btc-tx-id}))
+  (ok (map-get? btc-deposits btc-tx-id))
 )
 
 (define-read-only (get-contract-owner)

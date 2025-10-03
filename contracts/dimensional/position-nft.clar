@@ -1,5 +1,8 @@
 ;; SIP-009 Non-Fungible Token for Concentrated Liquidity Positions
 
+(use-trait sip-009-nft-trait .all-traits.sip-009-nft-trait)
+(impl-trait .all-traits.sip-009-nft-trait)
+
 (define-non-fungible-token concentrated-liquidity-positions uint)
 
 ;; --- Constants ---
@@ -33,14 +36,13 @@
 ;; Get the owner of a specific token
 (define-read-only (get-owner (token-id uint))
   (ok (nft-get-owner? concentrated-liquidity-positions token-id)))
-
 ;; Get the last token ID minted
 (define-read-only (get-last-token-id)
   (ok (var-get last-token-id)))
 
 ;; Get the token URI
 (define-read-only (get-token-uri (token-id uint))
-  (ok (some "https://conxian.io/positions/"))
+  (ok (some "https://conxian.io/positions/")))
 
 ;; --- Internal Functions ---
 
@@ -53,9 +55,11 @@
         success (begin
           (var-set last-token-id token-id)
           (ok token-id))
-        (err err-code) (err err-code))))
+        (err err-code) (err err-code)))))
 
 ;; Burn an NFT. Can only be called by the pool contract.
 (define-public (burn (token-id uint) (owner principal))
   (begin
-    (nft-burn? concentrated-liquidity-positions token-id owner)))
+    (asserts! (is-eq tx-sender (var-get pool-contract)) ERR_UNAUTHORIZED)
+    (try! (nft-burn? concentrated-liquidity-positions token-id owner))
+    (ok true)))

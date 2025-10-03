@@ -1,7 +1,16 @@
 # Simple Hiro API Test
 param(
-    [string]$ApiKey = "8f88f1cb5341624afdaa9d0282456506"
+    [string]$ApiKey,
+    [string]$ApiBase
 )
+
+if (-not $ApiKey) { $ApiKey = $env:HIRO_API_KEY }
+if (-not $ApiBase) { $ApiBase = if ($env:STACKS_API_BASE) { $env:STACKS_API_BASE } else { "https://api.testnet.hiro.so" } }
+
+if (-not $ApiKey) {
+    Write-Host "HIRO_API_KEY not provided. Set env:HIRO_API_KEY or pass -ApiKey." -ForegroundColor Red
+    exit 1
+}
 
 Write-Host "Testing Hiro API Integration..." -ForegroundColor Green
 
@@ -11,7 +20,7 @@ $headers = @{
 }
 
 try {
-    $response = Invoke-RestMethod -Uri "https://api.testnet.hiro.so/extended/v1/status" -Headers $headers
+    $response = Invoke-RestMethod -Uri "$ApiBase/extended/v1/status" -Headers $headers
     Write-Host "SUCCESS: API connection working" -ForegroundColor Green
     Write-Host "Chain ID: $($response.chain_id)" -ForegroundColor Cyan
     Write-Host "Network: $($response.network_id)" -ForegroundColor Cyan
@@ -20,8 +29,6 @@ try {
 }
 
 Write-Host ""
-Write-Host "Environment Setup Complete:" -ForegroundColor Yellow
+Write-Host "Environment Setup:" -ForegroundColor Yellow
+Write-Host "- API Base: $ApiBase" -ForegroundColor Gray
 Write-Host "- API Key: $($ApiKey.Substring(0,8))..." -ForegroundColor Gray
-Write-Host "- .env file created" -ForegroundColor Gray
-Write-Host "- Clarinet.toml updated" -ForegroundColor Gray
-Write-Host "- Ready for deployment!" -ForegroundColor Gray
