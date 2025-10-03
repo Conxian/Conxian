@@ -216,14 +216,47 @@
   (and (is-some (get price data)) (> (get weight data) u0)))
 
 (define-private (calculate-weighted-average (prices (list 10 {price: (optional uint), weight: uint})))
-  ;; Simplified weighted average calculation
-  ;; In production, implement proper weighted average with fold
-  u100000000) ;; Placeholder
+  (let ((total-weight u0)
+        (weighted-sum u0))
+    (fold (fun (item accumulator)
+            (let ((price (unwrap-panic (get price item)))
+                  (weight (get weight item)))
+              (begin
+                (var-set total-weight (+ (var-get total-weight) weight))
+                (var-set weighted-sum (+ (var-get weighted-sum) (* price weight)))
+                true)))
+          true
+          prices)
+    (if (> (var-get total-weight) u0)
+        (/ (var-get weighted-sum) (var-get total-weight))
+        u0)))
 
 (define-private (calculate-price-deviation (prices (list 10 {price: (optional uint), weight: uint})))
-  ;; Calculate standard deviation between prices
-  ;; Returns basis points deviation
-  u0) ;; Placeholder
+  (let ((sum-prices u0)
+        (count u0)
+        (mean u0)
+        (max-diff u0))
+    (fold (fun (item accumulator)
+            (let ((price (unwrap-panic (get price item))))
+              (begin
+                (var-set sum-prices (+ (var-get sum-prices) price))
+                (var-set count (+ (var-get count) u1))
+                true)))
+          true
+          prices)
+    (if (> (var-get count) u0)
+        (begin
+          (var-set mean (/ (var-get sum-prices) (var-get count)))
+          (fold (fun (item accumulator)
+                  (let ((price (unwrap-panic (get price item))))
+                    (var-set max-diff (max (var-get max-diff) (abs (- price (var-get mean))))))
+                  true)
+                true
+                prices)
+          (if (> (var-get mean) u0)
+              (/ (* max-diff u10000) (var-get mean))
+              u0))
+        u0)))
 
 (define-private (calculate-confidence-level (prices (list 10 {price: (optional uint), weight: uint})) (deviation uint))
   ;; Calculate confidence based on source agreement and deviation
@@ -235,8 +268,8 @@
           u5000))) ;; Medium confidence
 
 (define-private (verify-oracle-signature (asset principal) (price uint) (signature (buff 65)))
-  ;; Verify cryptographic signature from oracle
-  ;; In production, implement actual signature verification
+  ;; TODO: Implement actual cryptographic signature verification for external oracle providers
+  ;; This is a placeholder and should be replaced with robust verification logic in production.
   (ok true))
 
 ;; ===== Read-Only Functions =====
