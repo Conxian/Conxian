@@ -478,20 +478,19 @@
   (end-tick int)
   (initial-price uint)
 )
-  "Creates a new concentrated liquidity pool with specified parameters.
-  This function is typically called by a factory contract to deploy new pools.
-  It initializes the pool's state, including the tokens, fees, tick spacing, and initial price.
-
-  @param token-a The SIP-010 trait for the first token in the pool.
-  @param token-b The SIP-010 trait for the second token in the pool.
-  @param factory-address The principal of the factory contract that is authorized to create pools.
-  @param fee-bps The fee percentage for swaps in basis points (e.g., u30 for 0.3%).
-  @param tick-spacing The spacing between ticks, determining the granularity of liquidity ranges.
-  @param start-tick The initial lower tick for the pool's active liquidity range.
-  @param end-tick The initial upper tick for the pool's active liquidity range.
-  @param initial-price The initial square root price of the pool, used to set the starting price.
-  @returns An `(ok uint)` result containing the ID of the newly created pool, or an error if unauthorized.
-  "
+  ;; Creates a new concentrated liquidity pool with specified parameters.
+  ;; This function is typically called by a factory contract to deploy new pools.
+  ;; It initializes the pool's state, including the tokens, fees, tick spacing, and initial price.
+  ;;
+  ;; @param token-a The SIP-010 trait for the first token in the pool.
+  ;; @param token-b The SIP-010 trait for the second token in the pool.
+  ;; @param factory-address The principal of the factory contract that is authorized to create pools.
+  ;; @param fee-bps The fee percentage for swaps in basis points (e.g., u30 for 0.3%).
+  ;; @param tick-spacing The spacing between ticks, determining the granularity of liquidity ranges.
+  ;; @param start-tick The initial lower tick for the pool's active liquidity range.
+  ;; @param end-tick The initial upper tick for the pool's active liquidity range.
+  ;; @param initial-price The initial square root price of the pool, used to set the starting price.
+  ;; @returns An (ok uint) result containing the ID of the newly created pool, or an error if unauthorized.
   (let
     (
       (current-pool-id (var-get next-pool-id))
