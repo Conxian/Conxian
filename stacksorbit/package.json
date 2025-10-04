@@ -7,14 +7,15 @@
     "stacksorbit": "./bin/stacksorbit.js"
   },
   "scripts": {
-    "test": "powershell -ExecutionPolicy Bypass -File tests/test-all.ps1",
-    "test:unit": "python -m pytest tests/unit/",
-    "test:integration": "python -m pytest tests/integration/",
-    "test:gui": "powershell -ExecutionPolicy Bypass -File tests/test-gui.ps1",
-    "lint": "eslint . && pylint stacksorbit",
-    "format": "prettier --write . && black stacksorbit",
+    "test": "python -m pytest -q",
+    "test:unit": "python -m pytest tests/unit/ -q",
+    "test:integration": "python -m pytest tests/integration/ -q",
+    "test:gui": "python tests/test_gui.py",
+    "lint": "eslint bin/stacksorbit.js && pylint stacksorbit.py --exit-zero",
+    "format": "prettier --write bin/stacksorbit.js && black stacksorbit.py",
+    "ci": "npm install && python -m pip install --upgrade pip && python -m pip install -e .[dev,test] && npm run lint && npm test",
     "prepare": "python setup.py build",
-    "prepublishOnly": "npm test"
+    "prepublishOnly": "npm run ci"
   },
   "keywords": [
     "stacks",

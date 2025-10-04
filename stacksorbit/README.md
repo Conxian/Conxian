@@ -14,29 +14,34 @@
 ## ✨ Features
 
 ### 🚀 One-Click Deployment
+
 - Deploy to **devnet**, **testnet**, or **mainnet** with a single click
 - Auto-detects and deploys 100+ contracts in correct order
 - Smart deployment modes: **full** or **upgrade** (skips deployed)
 
 ### 🔍 Intelligent Pre-Checks
+
 - ✅ **Environment validation** - Required and optional variables
 - 🌐 **Network connectivity** - Tests API endpoints before deploy
 - 📊 **Existing deployments** - Auto-detects what's already on-chain
 - ✓ **Compilation status** - Validates contracts compile cleanly
 
 ### ⛔ Real-Time Process Control
+
 - **Start/Stop** deployments anytime
 - **Live status** indicators (running/complete/failed)
 - **PID tracking** for running processes
 - **Graceful termination** on stop
 
 ### 💾 Comprehensive Logging
+
 - **Auto-save** failure logs with full context
 - **Error tracking** throughout session
 - **Manual export** anytime
 - **Complete replay** capability
 
 ### ⚙️ Advanced Controls (Side Panel)
+
 - Network switching (devnet/testnet/mainnet)
 - Deploy mode selection (SDK/Clarinet TOML)
 - Contract filtering (comma-separated)
@@ -139,6 +144,7 @@ stacksorbit
 ### Advanced Features
 
 #### Network Selection (Right Panel)
+
 ```
 ○ Devnet   - Local testing (Clarinet)
 ● Testnet  - Public testing network
@@ -146,18 +152,22 @@ stacksorbit
 ```
 
 #### Deploy Modes
+
 ```
 ● SDK Deploy      - Uses @stacks/transactions (recommended)
 ○ Clarinet TOML   - Deploys from Clarinet.toml order
 ```
 
 #### Contract Filtering
+
 Filter specific contracts (comma-separated):
+
 ```
 all-traits,cxd-token,dex-factory,oracle-aggregator
 ```
 
 #### Deployment Options
+
 ```
 ☐ Devnet Dry Run      - Test without broadcasting
 ☐ Execute Handover    - Run post-deployment handover
@@ -172,17 +182,20 @@ StacksOrbit runs **4 comprehensive validation checks** before deployment:
 ### 1. Environment Variables ✅
 
 **Required Variables**:
+
 - `DEPLOYER_PRIVKEY` - Hex private key for deployment
 - `SYSTEM_ADDRESS` - Deployer Stacks address
 - `NETWORK` - Target network (devnet/testnet/mainnet)
 
 **Optional Variables**:
+
 - `HIRO_API_KEY` - Improves API rate limits
 - `CORE_API_URL` - Custom API endpoint
 
 ### 2. Network Connectivity 🌐
 
 Tests the configured API endpoint:
+
 - Validates network is accessible
 - Confirms network_id matches
 - Shows connection status
@@ -191,6 +204,7 @@ Tests the configured API endpoint:
 ### 3. Existing Deployments 🔍
 
 Checks blockchain for deployed contracts:
+
 - Queries account nonce
 - Samples key contracts (all-traits, tokens, dex)
 - **Auto-detects deployment mode**:
@@ -200,6 +214,7 @@ Checks blockchain for deployed contracts:
 ### 4. Compilation Status ✓
 
 Validates contracts compile:
+
 - Runs `clarinet check`
 - Counts compilation errors
 - Shows error summary
@@ -212,6 +227,7 @@ Validates contracts compile:
 ### Stop Button
 
 **Gracefully terminate** any running deployment:
+
 - Appears when process starts (red button)
 - Sends SIGTERM to process
 - Updates status immediately
@@ -220,6 +236,7 @@ Validates contracts compile:
 ### Status Indicators
 
 Real-time status with color coding:
+
 - 🔄 **Running...** (orange) - Deployment in progress
 - ✅ **Complete** (green) - Successfully deployed
 - ❌ **Failed** (red) - Deployment error occurred
@@ -228,6 +245,7 @@ Real-time status with color coding:
 ### Process Information
 
 Track running deployments:
+
 - **PID display** - Process ID shown when running
 - **Status updates** - Real-time progress
 - **Button states** - Deploy disabled when running
@@ -240,11 +258,13 @@ Track running deployments:
 ### Automatic Failure Logs
 
 All failures are automatically saved to:
+
 ```
 logs/deployment_failure_YYYYMMDD_HHMMSS.log
 ```
 
 **Log Contents**:
+
 - **Timestamp** - When failure occurred
 - **Network** - Target network
 - **Deployer** - Deployer address
@@ -255,6 +275,7 @@ logs/deployment_failure_YYYYMMDD_HHMMSS.log
 ### Manual Log Export
 
 Export current session anytime:
+
 - Click "💾 Save Log" button
 - Saves to `logs/` directory
 - Includes all output and errors
@@ -263,6 +284,7 @@ Export current session anytime:
 ### Error Tracking
 
 Real-time error monitoring:
+
 - Tracks errors throughout session
 - Shows count in log file
 - Highlights failures in red (❌)
@@ -308,16 +330,19 @@ Real-time error monitoring:
 ### Technology Stack
 
 **Frontend**:
+
 - Python 3.8+ (tkinter GUI)
 - Cross-platform (Windows, macOS, Linux)
 
 **Backend**:
+
 - Subprocess management
 - Environment variable handling
 - File I/O for logging
 - Network requests for validation
 
 **Deployment**:
+
 - `@stacks/transactions` (SDK mode)
 - Clarinet CLI (TOML mode)
 - Custom deployment scripts
@@ -329,17 +354,21 @@ Real-time error monitoring:
 StacksOrbit includes comprehensive test suite:
 
 ```bash
-# Run all tests
+# Run all checks (lint + tests)
+npm run ci
+
+# Or just tests
 npm test
 
-# Or with Python
-python -m pytest tests/
+# Or with Python directly
+python -m pytest
 
-# Run GUI test suite
-powershell scripts/test-gui-deployer.ps1
+# GUI smoke test (no window)
+python tests/test_gui.py
 ```
 
 **Test Coverage**:
+
 - ✅ Environment validation (17 tests)
 - ✅ Contract detection
 - ✅ Network connectivity
@@ -363,6 +392,7 @@ powershell scripts/test-gui-deployer.ps1
 ## 🤝 Contributing
 
 We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for:
+
 - Development setup
 - Code style guide
 - Testing requirements
@@ -378,12 +408,12 @@ MIT License - see [LICENSE](LICENSE) file for details
 
 ## 🔗 Links
 
-- **GitHub**: https://github.com/Anya-org/stacksorbit
-- **NPM**: https://www.npmjs.com/package/stacksorbit
-- **PyPI**: https://pypi.org/project/stacksorbit/
-- **Documentation**: https://stacksorbit.dev
-- **Issues**: https://github.com/Anya-org/stacksorbit/issues
-- **Discussions**: https://github.com/Anya-org/stacksorbit/discussions
+- **GitHub**: <https://github.com/Anya-org/stacksorbit>
+- **NPM**: <https://www.npmjs.com/package/stacksorbit>
+- **PyPI**: <https://pypi.org/project/stacksorbit/>
+- **Documentation**: <https://stacksorbit.dev>
+- **Issues**: <https://github.com/Anya-org/stacksorbit/issues>
+- **Discussions**: <https://github.com/Anya-org/stacksorbit/discussions>
 
 ---
 
@@ -399,6 +429,7 @@ MIT License - see [LICENSE](LICENSE) file for details
 ## 🎯 Roadmap
 
 ### v1.0.0 (Current)
+
 - ✅ GUI deployment interface
 - ✅ Pre-deployment checks
 - ✅ Process control
@@ -406,6 +437,7 @@ MIT License - see [LICENSE](LICENSE) file for details
 - ✅ Advanced controls
 
 ### v1.1.0 (Planned)
+
 - [ ] Multi-network parallel deploy
 - [ ] Deployment history/rollback
 - [ ] Contract upgrade wizard
@@ -413,6 +445,7 @@ MIT License - see [LICENSE](LICENSE) file for details
 - [ ] Deployment templates
 
 ### v2.0.0 (Future)
+
 - [ ] Web-based interface
 - [ ] REST API
 - [ ] Docker support

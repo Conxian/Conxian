@@ -10,10 +10,11 @@
 ### 1. Conxian Repository (Main)
 
 **Location**: `c:\Users\bmokoka\anyachainlabs\Conxian`  
-**GitHub**: https://github.com/Anya-org/Conxian  
+**GitHub**: <https://github.com/Anya-org/Conxian>  
 **Purpose**: Main DeFi protocol with 145 smart contracts
 
 **Contents**:
+
 - Smart contracts (145 .clar files)
 - Tests and documentation
 - Deployment scripts
@@ -27,10 +28,11 @@
 ### 2. StacksOrbit Repository (Standalone)
 
 **Location**: `c:\Users\bmokoka\anyachainlabs\Conxian\stacksorbit` (temporary)  
-**GitHub**: https://github.com/Anya-org/stacksorbit  
+**GitHub**: <https://github.com/Anya-org/stacksorbit>  
 **Purpose**: Standalone GUI deployment tool (npm/PyPI package)
 
 **Contents**:
+
 - `stacksorbit.py` - Main GUI deployer
 - `package.json` - npm configuration
 - `setup.py` - PyPI configuration
@@ -82,11 +84,13 @@ Projects/
 ### Option A: Keep stacksorbit/ as Submodule (Recommended)
 
 **Advantages**:
+
 - Maintains connection between repos
 - Easy to sync changes
 - Clear relationship
 
 **Implementation**:
+
 ```bash
 # In Conxian repo
 cd c:\Users\bmokoka\anyachainlabs\Conxian
@@ -99,11 +103,13 @@ git commit -m "chore: add StacksOrbit as submodule"
 ### Option B: Separate Completely (Alternative)
 
 **Advantages**:
+
 - Complete independence
 - No nested repos
 - Cleaner structure
 
 **Implementation**:
+
 ```bash
 # Move StacksOrbit out
 cd c:\Users\bmokoka\anyachainlabs
@@ -117,10 +123,12 @@ git commit -m "chore: remove nested StacksOrbit repo"
 ### Option C: Keep as Reference (Current)
 
 **Advantages**:
+
 - Easy local development
 - Both repos accessible
 
 **Implementation**:
+
 ```bash
 # Add to .gitignore
 echo "stacksorbit/" >> .gitignore
@@ -134,12 +142,12 @@ git commit -m "chore: ignore nested StacksOrbit repo"
 
 **Use Option C (Current Setup with .gitignore)**:
 
-1. ✅ **StacksOrbit is on GitHub** - https://github.com/Anya-org/stacksorbit
+1. ✅ **StacksOrbit is on GitHub** - <https://github.com/Anya-org/stacksorbit>
 2. ✅ **Conxian stays clean** - Add stacksorbit/ to .gitignore
 3. ✅ **Both repos independent** - No conflicts
 4. ✅ **Easy development** - Both accessible locally
 
-### Implementation Steps:
+### Implementation Steps
 
 ```bash
 # 1. Add to Conxian .gitignore
@@ -194,11 +202,13 @@ Built with ❤️ by Anya Chain Labs for the Conxian DeFi Protocol
 ## 📊 CURRENT STATUS
 
 ### Conxian Repository
+
 - ✅ Branch: feature/revert-incorrect-commits
 - ✅ Commits: 14 total (including StacksOrbit work)
 - ✅ Status: Clean (pending .gitignore update)
 
 ### StacksOrbit Repository
+
 - ✅ Branch: main
 - ✅ Commits: 2 (initial + tests)
 - ✅ Status: Published to GitHub
@@ -208,14 +218,16 @@ Built with ❤️ by Anya Chain Labs for the Conxian DeFi Protocol
 
 ## 🎯 FINAL CHECKLIST
 
-### Conxian Repo:
+### Conxian Repo
+
 - [x] All work committed
 - [x] Documentation complete
 - [ ] Add stacksorbit/ to .gitignore
 - [ ] Reference StacksOrbit in README
 - [ ] Push final changes
 
-### StacksOrbit Repo:
+### StacksOrbit Repo
+
 - [x] Published to GitHub
 - [x] Tests added
 - [x] Documentation complete
@@ -235,17 +247,19 @@ Built with ❤️ by Anya Chain Labs for the Conxian DeFi Protocol
    - Active development
 
 2. **StacksOrbit** - Standalone deployment tool
-   - Published to GitHub: https://github.com/Anya-org/stacksorbit
+   - Published to GitHub: <https://github.com/Anya-org/stacksorbit>
    - Ready for npm/PyPI publishing
    - Professional package
 
 **Relationship**:
+
 - StacksOrbit was extracted from Conxian's GUI deployer
 - Both are independent repositories
 - StacksOrbit is the public, packaged version
 - Conxian maintains the development version
 
 **Next Actions**:
+
 1. Update Conxian .gitignore
 2. Add cross-references in READMEs
 3. Tag StacksOrbit v1.0.0
