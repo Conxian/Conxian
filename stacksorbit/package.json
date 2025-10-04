@@ -1,0 +1,81 @@
+{
+  "name": "stacksorbit",
+  "version": "1.0.0",
+  "description": "Professional GUI deployment tool for Stacks blockchain smart contracts with intelligent pre-checks and process control",
+  "main": "index.js",
+  "bin": {
+    "stacksorbit": "./bin/stacksorbit.js"
+  },
+  "scripts": {
+    "test": "powershell -ExecutionPolicy Bypass -File tests/test-all.ps1",
+    "test:unit": "python -m pytest tests/unit/",
+    "test:integration": "python -m pytest tests/integration/",
+    "test:gui": "powershell -ExecutionPolicy Bypass -File tests/test-gui.ps1",
+    "lint": "eslint . && pylint stacksorbit",
+    "format": "prettier --write . && black stacksorbit",
+    "prepare": "python setup.py build",
+    "prepublishOnly": "npm test"
+  },
+  "keywords": [
+    "stacks",
+    "blockchain",
+    "smart-contracts",
+    "deployment",
+    "clarity",
+    "gui",
+    "devtools",
+    "web3",
+    "clarinet",
+    "defi"
+  ],
+  "author": {
+    "name": "Anya Chain Labs",
+    "email": "dev@anyachainlabs.com",
+    "url": "https://anyachainlabs.com"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Anya-org/stacksorbit.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Anya-org/stacksorbit/issues"
+  },
+  "homepage": "https://github.com/Anya-org/stacksorbit#readme",
+  "engines": {
+    "node": ">=14.0.0",
+    "npm": ">=6.0.0"
+  },
+  "os": [
+    "darwin",
+    "linux",
+    "win32"
+  ],
+  "dependencies": {
+    "@stacks/transactions": "^6.13.0",
+    "@stacks/network": "^6.13.0",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "eslint": "^8.52.0",
+    "prettier": "^3.0.3",
+    "jest": "^29.7.0"
+  },
+  "python": {
+    "version": ">=3.8",
+    "dependencies": [
+      "tkinter",
+      "pathlib",
+      "subprocess",
+      "threading",
+      "queue"
+    ]
+  },
+  "peerDependencies": {
+    "clarinet": ">=1.0.0"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  }
+}
