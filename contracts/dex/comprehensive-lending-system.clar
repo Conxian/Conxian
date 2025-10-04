@@ -56,7 +56,7 @@
     (err error) u0)) ;; Return 0 if oracle fails - should be handled by governance
 
 (define-read-only (get-total-collateral-value-in-usd-safe (user principal))
-  (let ((user-collateral-assets-keys (map-keys user-collateral-assets)))
+  (let ((supported-assets (map-keys user-collateral-assets)))
     (fold
       (lambda (asset-tuple total-value)
         (let ((asset (get asset asset-tuple)))
@@ -67,23 +67,20 @@
               (+ total-value (/ (* balance (get collateral-factor asset-info) price) (* PRECISION PRECISION))))
             total-value))
         )
-      user-collateral-assets-keys
+      supported-assets
       u0
     )
   )
-)
 (define-read-only (get-total-borrow-value-in-usd-safe (user principal))
-  (let ((all-supported-assets (map-keys supported-assets)))
-    (fold
+  (let ((borrowed-assets (map-keys user-borrow-balances)))
+     (fold
       (lambda (asset-tuple total-value)
-        (let ((asset (get asset asset-tuple))) ;; Extract asset from the supported-assets key tuple
-          (if (is-some (map-get? user-borrow-balances { user: user, asset: asset })) ;; Check if user has a borrow balance for this asset
-            (let ((balance (default-to u0 (map-get? user-borrow-balances { user: user, asset: asset })))
-                  (price (get-asset-price-safe asset)))
-              (+ total-value (/ (* balance price) PRECISION)))
-            total-value))
+        (let ((asset (get asset asset-tuple)))
+          (let ((balance (default-to u0 (map-get? user-borrow-balances { user: user, asset: asset })))
+                (price (get-asset-price-safe asset)))
+            (+ total-value (/ (* balance price) PRECISION))))
         )
-      all-supported-assets
+      borrowed-assets
       u0
     )
   )
@@ -98,7 +95,7 @@
   (let ((borrowed-assets (map-keys user-borrow-balances)))
      (fold
       (lambda (asset-tuple total-value)
-        (let ((asset (get asset-tuple asset)))
+        (let ((asset (get-in-tuple? asset-tuple { asset: principal })))
           (let ((balance (default-to u0 (map-get? user-borrow-balances { user: user, asset: asset })))
                 (price (get-asset-price-safe asset)))
             (+ total-value (/ (* balance price) PRECISION))))
@@ -107,6 +104,7 @@
       u0
     )
   )
+)
 
 ;; --- Health Factor Calculation ---
 (define-read-only (get-health-factor (user principal))
@@ -125,25 +123,11 @@
                     total-collateral-value: (+ (get total-collateral-value accumulator) collateral-value),
                     total-threshold-value: (+ (get total-threshold-value accumulator) (/ (* collateral-value (get liquidation-threshold asset-info)) PRECISION))})))
               accumulator)))
-        user-collateral-assets
+        supported-assets
         { total-collateral-value: u0, total-threshold-value: u0 })
     )
   )
-  (let ((accumulator (fold
-        (lambda (asset-tuple accumulator)
-          (let ((asset (get asset asset-tuple)))
-            (if (default-to false (map-get? user-collateral-assets { user: user, asset: asset }))
-              (let ((asset-info (unwrap! (map-get? supported-assets { asset: asset }) (err u0)))
-                    (balance (default-to u0 (map-get? user-supply-balances { user: user, asset: asset })))
-                    (price (get-asset-price-safe asset)))
-                (let ((collateral-value (/ (* balance (get collateral-factor asset-info) price) (* PRECISION PRECISION))))
-                  (merge accumulator {
-                    total-collateral-value: (+ (get total-collateral-value accumulator) collateral-value),
-                    total-threshold-value: (+ (get total-threshold-value accumulator) (/ (* collateral-value (get liquidation-threshold asset-info)) PRECISION))})))
-              accumulator)))
-        user-collateral-assets
-        { total-collateral-value: u0, total-threshold-value: u0 }))
-        (collateral-value (get total-collateral-value accumulator))
+  (let ((collateral-value (get total-collateral-value accumulator))
         (weighted-liquidation-threshold (if (> (get total-collateral-value accumulator) u0)
                                           (/ (get total-threshold-value accumulator) (get total-collateral-value accumulator))
                                           u0))

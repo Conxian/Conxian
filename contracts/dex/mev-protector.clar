@@ -10,7 +10,6 @@
 (define-constant ERR_AUCTION_IN_PROGRESS (err u6006))
 (define-constant ERR_SANDWICH_ATTACK_DETECTED (err u6007))
 (define-constant ERR_CIRCUIT_OPEN (err u6008))
-  (define-constant ERR_NO_ORDERS_IN_BATCH (err u6009))
 
 ;; --- Data Variables ---
 (define-data-var contract-owner principal tx-sender)
@@ -19,7 +18,6 @@
 (define-data-var last-batch-execution uint u0)
 (define-data-var circuit-breaker (optional principal) none)
 
-;; --- Data Maps ---
 (define-map commitments
   { user: principal, commitment-hash: (buff 32) }
   { block-height: uint, revealed: bool }
@@ -28,58 +26,12 @@
 (define-map pending-reveals uint { user: principal, path: (list 20 principal), amount-in: uint, min-amount-out: (optional uint), recipient: principal, salt: (buff 32) })
 (define-data-var next-reveal-id uint u0)
 
-;; --- Types ---
-(define-type BatchOrder {
-  path: (list 20 principal),
-  amount-in: uint,
-  min-amount-out: uint,
-  recipient: principal,
-  user: principal,
-  order-id: uint ;; Unique identifier for the order within the batch
-})
-
 ;; Helper to serialize a principal to a 32-byte buffer (hash of the principal)
 
 
 ;; Helper to serialize a list of principals to a concatenated buffer
 (define-private (serialize-principal-list (principal-list (list 20 principal)))
   (fold (lambda (p acc) (concat acc (contract-call? .utils principal-to-buff p))) principal-list 0x)
-)
-
-;; Placeholder for sorting function
-(define-private (sort-batch-orders (orders (list 100 BatchOrder)))
-  ;; This is a simplified bubble sort implementation for Clarity.
-  ;; For production, consider optimizing or using a more efficient sorting algorithm if list size is large.
-  (let ((n (len orders)))
-    (if (<= n u1) (ok orders) ;; Already sorted or empty
-      (let ((sorted-orders orders))
-        (fold (lambda (i current-orders)
-          (fold (lambda (j inner-orders)
-            (let (
-              (order-a (unwrap-panic (element-at inner-orders j)))
-              (order-b (unwrap-panic (element-at inner-orders (+ j u1))))
-            )
-              (if (> (get min-amount-out order-a) (get min-amount-out order-b))
-                (begin
-                  ;; Swap elements
-                  (ok (replace-at? (replace-at? inner-orders j order-b) (+ j u1) order-a))
-                )
-                (ok inner-orders)
-              )
-            )
-          ) (range u0 (- n u1)) current-orders)
-        ) (range u0 (- n u1)) sorted-orders)
-      )
-    )
-  )
-)
-
-;; Placeholder for uniform clearing price calculation
-(define-private (calculate-uniform-clearing-price (orders (list 100 BatchOrder)))
-  (if (is-none (last-element orders))
-    (err ERR_NO_ORDERS_IN_BATCH)
-    (ok (get min-amount-out (unwrap-panic (last-element orders))))
-  )
 )
 
 (define-private (get-commitment-hash (path (list 20 principal)) (amount-in uint) (min-amount-out (optional uint)) (recipient principal) (salt (buff 32)))
@@ -180,20 +132,12 @@
     
     (let ((reveals (map (lambda (id) (unwrap-panic (map-get? pending-reveals id))) (range (var-get next-reveal-id)))))
       (var-set next-reveal-id u0)
-      (let ((batch-orders (fold (lambda (r acc)
+      (ok (map (lambda (r)
         (begin
           (try! (detect-sandwich-attack (get path r) (get amount-in r)))
-          (ok (unwrap-panic (as-max-len? (append acc { path: (get path r), amount-in: (get amount-in r), min-amount-out: (unwrap-panic (get min-amount-out r)), recipient: (get recipient r), user: (get user r), order-id: (get id r) }) u100)))
+          (as-contract (contract-call? .multi-hop-router-v3 swap-exact-in-with-transfer (get path r) (get amount-in r) (get min-amount-out r) (get recipient r)))
         )
-      ) reveals (list))))
-        (let ((sorted-orders (try! (sort-batch-orders batch-orders))))
-          (let ((clearing-price (try! (calculate-uniform-clearing-price sorted-orders))))
-            (ok (map (lambda (order)
-              (as-contract (contract-call? .multi-hop-router-v3 swap-exact-in-with-transfer (get path order) (get amount-in order) clearing-price (get recipient order)))
-            ) sorted-orders))
-          )
-        )
-      )
+      ) reveals))
     )
   )
 )
