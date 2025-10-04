@@ -257,22 +257,6 @@
   )
 )
 
-(define-read-only (get-operation-breaker-status (operation (string-ascii 64)))
-  (let ((stats (default-to (get-default-stats block-height) 
-                          (map-get? operation-stats {operation: operation})))
-        (failure-rate (calculate-failure-rate (get success-count stats) (get failure-count stats))))
-    
-    (ok {
-      operation: operation,
-      is_open: (get is-open stats),
-      failure_rate: failure-rate,
-      success_count: (get success-count stats),
-      failure_count: (get failure-count stats),
-      last_state_change: (get last-state-change stats)
-    })
-  )
-)
-
 ;; ===== Admin Functions =====
 
 (define-public (set-circuit-state (operation (string-ascii 64)) (state bool))
@@ -384,8 +368,6 @@
 (define-read-only (get-health-status)
   (ok {
     is_operational: (not (var-get emergency-shutdown-active)),
-    emergency_shutdown_active: (var-get emergency-shutdown-active),
-    circuit_mode: (var-get circuit-mode),
     total_failure_rate: u0,  ;; Would need aggregation across all operations
     last_checked: block-height,
     uptime: u100,  ;; Would need actual uptime tracking

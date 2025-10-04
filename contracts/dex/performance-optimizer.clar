@@ -9,22 +9,10 @@
 
 (define-map gas-costs (string-ascii 256) uint)
 
-(define-map optimization-rules
-  { method: (string-ascii 256), strategy: (string-ascii 256) }
-  { rule-id: uint, description: (string-ascii 256), active: bool, gas-saving-estimate: uint })
-
 (define-public (update-gas-cost (method (string-ascii 256)) (cost uint))
   (begin
     (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
     (map-set gas-costs method cost)
-    (ok true)
-  )
-)
-
-(define-public (set-optimization-rule (method (string-ascii 256)) (strategy (string-ascii 256)) (rule-id uint) (description (string-ascii 256)) (active bool) (gas-saving-estimate uint))
-  (begin
-    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
-    (map-set optimization-rules { method: method, strategy: strategy } { rule-id: rule-id, description: description, active: active, gas-saving-estimate: gas-saving-estimate })
     (ok true)
   )
 )
@@ -65,20 +53,11 @@
 (define-public (optimize-gas-usage (method (string-ascii 256)) (optimization-strategy (string-ascii 256)))
   (begin
     (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
-    (let ((rule (map-get? optimization-rules { method: method, strategy: optimization-strategy })))
-      (if (and (is-some rule) (get active (unwrap! rule (err u0))))
-        (begin
-          ;; Apply optimization logic based on the rule
-          ;; For now, we'll just log the application of the rule
-          (print { event: "gas-optimization-applied", method: method, strategy: optimization-strategy, rule-id: (get rule-id (unwrap! rule (err u0))), gas-saving-estimate: (get gas-saving-estimate (unwrap! rule (err u0))) })
-          (ok true)
-        )
-        (begin
-          (print { event: "gas-optimization-attempt", method: method, strategy: optimization-strategy, status: "no-active-rule" })
-          (ok false)
-        )
-      )
-    )
+    ;; Placeholder for gas optimization logic
+    ;; This could involve reordering operations, using more efficient Clarity functions,
+    ;; or suggesting alternative contract calls.
+    (print { method: method, strategy: optimization-strategy, status: "optimization-suggested" })
+    (ok true)
   )
 )
 

@@ -12,9 +12,6 @@
 (define-constant ERR_OPTIMIZATION_FAILED (err u10005))
 (define-constant ERR_THRESHOLD_VIOLATION (err u10006))
 (define-constant ERR_REBALANCE_FAILED (err u10007))
-(define-constant ERR_REBALANCING_FAILED (err u100))
-(define-constant ERR_INVALID_TRIGGER_CONDITION (err u101))
-  (define-constant ERR_CIRCUIT_BREAKER_TRIGGERED (err u102))
 
 ;; Optimization constants
 (define-constant PRECISION u1000000000000000000) ;; 18 decimals
@@ -37,35 +34,23 @@
 
 ;; Liquidity pool definitions
 (define-map liquidity-pools
-    (tuple (pool-id uint) (asset principal))
-    (tuple
-      (category (string-ascii 20))
-      (total-liquidity uint)
-      (available-liquidity uint)
-      (utilized-liquidity uint)
-      (token0-amount uint)
-      (token1-amount uint)
-      (target-utilization uint) ;; basis points
-      (min-threshold uint)
-      (max-threshold uint)
-      (yield-rate uint)
-      (risk-score uint)
-      (performance-score uint)
-      (last-rebalance uint)
-      (active bool)
-      (emergency-mode bool)
-    ))
+  (tuple (pool-id uint) (asset principal))
+  (tuple
+    (pool-name (string-ascii 50))
+    (category (string-ascii 20))
+    (total-liquidity uint)
+    (available-liquidity uint)
+    (utilized-liquidity uint)
+    (target-utilization uint) ;; basis points
+    (min-threshold uint)
+    (max-threshold uint)
+    (yield-rate uint)
+    (last-rebalance uint)
+    (active bool)
+    (emergency-mode bool)
+  ))
 
-  ;; Circuit breaker configurations for each pool
-  (define-map circuit-breakers
-    (tuple (pool-id uint) (asset principal))
-    (tuple
-      (is-active bool)
-      (trigger-threshold uint) ;; e.g., max deviation from oracle price
-      (triggered-at uint)
-    ))
-
-  ;; Cross-pool liquidity optimization
+;; Cross-pool liquidity optimization
 (define-map optimization-strategies
   uint ;; strategy-id
   (tuple
@@ -182,14 +167,10 @@
         (total-liquidity u0)
         (available-liquidity u0)
         (utilized-liquidity u0)
-        (token0-amount u0)
-        (token1-amount u0)
         (target-utilization target-utilization)
         (min-threshold MIN_LIQUIDITY_THRESHOLD)
         (max-threshold MAX_UTILIZATION_RATE)
         (yield-rate u0)
-        (risk-score u0)
-        (performance-score u0)
         (last-rebalance block-height)
         (active true)
         (emergency-mode false)
@@ -202,34 +183,26 @@
 (define-public (update-pool-liquidity 
   (pool-id uint) 
   (asset principal) 
-  (new-token0-amount uint) 
-  (new-token1-amount uint)))uint))
+  (new-total uint) 
+  (new-available uint))
   
   (let ((pool (unwrap! (map-get? liquidity-pools (tuple (pool-id pool-id) (asset asset))) ERR_POOL_NOT_FOUND)))
     (asserts! (is-admin) ERR_UNAUTHORIZED)
+    (asserts! (>= new-total new-available) ERR_INVALID_AMOUNT)
     
-    ;; Calculate new total and available liquidity based on token amounts
-    (let ((new-total (+ new-token0-amount new-token1-amount))
-          (new-available (+ new-token0-amount new-token1-amount)))
-      (map-set liquidity-pools (tuple (pool-id pool-id) (asset asset))
-        (merge pool 
-               (tuple (total-liquidity new-total)
-                (available-liquidity new-available)
-                (utilized-liquidity (- new-total new-available))
-                (token0-amount new-token0-amount)
-                (token1-amount new-token1-amount)
-                (yield-rate (calculate-yield-rate pool-id asset))
-                (risk-score (calculate-risk-score pool-id asset))
-                (performance-score (calculate-performance-score pool-id asset)))))
+    ;; Update pool liquidity
+    (map-set liquidity-pools (tuple (pool-id pool-id) (asset asset))
+      (merge pool 
+             (tuple (total-liquidity new-total)
+              (available-liquidity new-available)
+              (utilized-liquidity (- new-total new-available)))))
     
     ;; Check if rebalancing is needed
     (try! (internal-check-rebalance-triggers pool-id asset))
-    ;; Check for circuit breaker conditions
-    (try! (internal-check-circuit-breaker pool-id asset))
     
-    (print (tuple (event "pool-liquidity-updated") (pool-id pool-id) (token0 new-token0-amount) (token1 new-token1-amount) (yield (calculate-yield-rate pool-id asset)) (risk (calculate-risk-score pool-id asset)) (performance (calculate-performance-score pool-id asset))))
+    (print (tuple (event "pool-liquidity-updated") (pool-id pool-id) (total new-total)))
     
-    (ok true))))
+    (ok true)))
 
 ;; === OPTIMIZATION STRATEGIES ===
 (define-public (create-optimization-strategy
@@ -306,106 +279,12 @@
     (print (tuple (optimization "balanced-approach") (pools-count (len pools))))
     (ok u3))) ;; Simplified implementation
 
-(define-private (calculate-utilization-rate (pool-id uint) (asset principal))
-  (let ((pool (unwrap! (map-get? liquidity-pools (tuple (pool-id pool-id) (asset asset))) ERR_POOL_NOT_FOUND)))
-    (if (is-eq (get total-liquidity pool) u0)
-      u0 ;; Avoid division by zero
-      (/ (* (get utilized-liquidity pool) u10000) (get total-liquidity pool)))))
-
-(define-private (calculate-yield-rate (pool-id uint) (asset principal))
-  ;; Placeholder for yield rate calculation
-  ;; This will be based on actual yield generation, e.g., from lending or trading fees
-  u1000 ;; Dummy value for now (10% yield)
-)
-
-(define-private (calculate-risk-score (pool-id uint) (asset principal))
-  ;; Placeholder for risk score calculation
-  ;; This will be based on factors like volatility, asset correlation, and pool concentration
-  u500 ;; Dummy value for now (medium risk)
-)
-
-(define-private (calculate-performance-score (pool-id uint) (asset principal))
-  ;; Placeholder for performance score calculation
-  ;; This will be based on historical yield, risk-adjusted returns, and efficiency
-  u750 ;; Dummy value for now (good performance)
-)
-
-(define-private (internal-check-circuit-breaker (pool-id uint) (asset principal))
-  (let ((breaker (map-get? circuit-breakers (tuple (pool-id pool-id) (asset asset))))
-        (pool (unwrap! (map-get? liquidity-pools (tuple (pool-id pool-id) (asset asset))) ERR_POOL_NOT_FOUND)))
-    (if (and (is-some breaker) (is-eq (get is-active (unwrap-panic breaker)) true))
-      (let ((current-risk (calculate-risk-score pool-id asset)))
-        (if (> current-risk (get trigger-threshold (unwrap-panic breaker)))
-          (begin
-            (map-set circuit-breakers (tuple (pool-id pool-id) (asset asset))
-              (merge (unwrap-panic breaker) (tuple (is-active false) (triggered-at block-height))))
-            (map-set liquidity-pools (tuple (pool-id pool-id) (asset asset))
-              (merge pool (tuple (emergency-mode true))))
-            (print (tuple (event "circuit-breaker-triggered") (pool-id pool-id) (asset asset) (triggered-at block-height)))
-            (err ERR_CIRCUIT_BREAKER_TRIGGERED))
-          (ok true)))
-      (ok true))))
-
-;; --- Internal Helper Functions for Rebalancing and Optimization ---
-
-(define-private (internal-check-rebalance-triggers (pool-id uint) (asset principal))
-  (let (
-    (pool (unwrap! (map-get? liquidity-pools (tuple (pool-id pool-id) (asset asset))) ERR_POOL_NOT_FOUND))
-    (current-utilization (calculate-utilization-rate pool-id asset))
-    (current-yield (calculate-yield-rate pool-id asset))
-    (current-risk (calculate-risk-score pool-id asset))
-    (current-performance (calculate-performance-score pool-id asset))
-  )
-    ;; Iterate through all rebalancing rules and check if any are triggered
-    (map-fold
-      (fun (key value accumulator)
-        (if (and
-              (is-eq (get active value) true)
-              (is-eq (get source-pool value) (tuple (pool-id pool-id) (asset asset)))
-              (or
-                (and (is-eq (get trigger-condition value) "UTILIZATION_HIGH") (> current-utilization (get trigger-threshold value)))
-                (and (is-eq (get trigger-condition value) "UTILIZATION_LOW") (< current-utilization (get trigger-threshold value)))
-                (and (is-eq (get trigger-condition value) "YIELD_LOW") (< current-yield (get trigger-threshold value)))
-                (and (is-eq (get trigger-condition value) "RISK_HIGH") (> current-risk (get trigger-threshold value)))
-                (and (is-eq (get trigger-condition value) "PERFORMANCE_LOW") (< current-performance (get trigger-threshold value))))
-            (begin
-              (try! (rebalance-liquidity key))
-              true)
-            accumulator))
-      false
-      rebalancing-rules))
-
-(define-private (rebalance-liquidity (rule-id uint))
-  (let ((rule (unwrap! (map-get? rebalancing-rules rule-id) ERR_REBALANCING_FAILED)))
-    (asserts! (is-eq (get active rule) true) ERR_REBALANCING_FAILED)
-
-    ;; Placeholder for actual rebalancing logic
-    ;; This will involve moving liquidity from source-pool to target-pools
-    ;; based on weights and max-rebalance-amount
-
-    (print (tuple (event "liquidity-rebalanced") (rule-id rule-id) (source (get source-pool rule)) (targets (get target-pools rule))))
-
-    (ok true)))
-
-(define-public (create-circuit-breaker
-  (pool-id uint)
-  (asset principal)
-  (trigger-threshold uint))
-  (asserts! (is-admin) ERR_UNAUTHORIZED)
-  (map-set circuit-breakers (tuple (pool-id pool-id) (asset asset))
-    (tuple
-      (is-active true)
-      (trigger-threshold trigger-threshold)
-      (triggered-at u0)
-    ))
-  (ok true))
-
 ;; === AUTOMATED REBALANCING ===
 (define-public (create-rebalancing-rule
   (rule-name (string-ascii 50))
   (source-pool (tuple (pool-id uint) (asset principal)))
   (target-pools (list 5 (tuple (pool-id uint) (asset principal) (weight uint))))
-  (trigger-condition (string-ascii 30)) ;; e.g., "UTILIZATION_HIGH", "YIELD_LOW", "RISK_HIGH", "PERFORMANCE_LOW"
+  (trigger-condition (string-ascii 30))
   (trigger-threshold uint)
   (max-rebalance-amount uint))
   
@@ -413,15 +292,6 @@
     (asserts! (is-admin) ERR_UNAUTHORIZED)
     (asserts! (> (len target-pools) u0) ERR_INVALID_AMOUNT)
     (asserts! (> max-rebalance-amount u0) ERR_INVALID_AMOUNT)
-    
-    ;; Validate trigger-condition
-    (asserts! (or
-                (is-eq trigger-condition "UTILIZATION_HIGH")
-                (is-eq trigger-condition "UTILIZATION_LOW")
-                (is-eq trigger-condition "YIELD_LOW")
-                (is-eq trigger-condition "RISK_HIGH")
-                (is-eq trigger-condition "PERFORMANCE_LOW"))
-              ERR_INVALID_TRIGGER_CONDITION)
     
     ;; Create rebalancing rule
     (map-set rebalancing-rules rule-id
@@ -601,17 +471,13 @@
     (print (tuple (event "system-emergency-resume") (block block-height)))
     (ok true)))
 
-(define-public (batch-update-pools (updates (list 10 (tuple (pool-id uint) (asset principal) (token0 uint) (token1 uint)))))
+(define-public (batch-update-pools (updates (list 10 (tuple (pool-id uint) (asset principal) (total uint) (available uint)))))
   (let ((results (map update-single-pool updates)))
     (print (tuple (event "batch-pool-update") (count (len updates))))
     (ok results)))
 
-(define-private (update-single-pool (pool-update (tuple (pool-id uint) (asset principal) (token0 uint) (token1 uint))))
-  (update-pool-liquidity 
-    (get pool-id pool-update) 
-    (get asset pool-update) 
-    (get token0 pool-update) 
-    (get token1 pool-update)))
+(define-private (update-single-pool (update (tuple (pool-id uint) (asset principal) (total uint) (available uint))))
+  (update-pool-liquidity (get pool-id update) (get asset update) (get total update) (get available update)))
 
 (define-read-only (calculate-system-performance)
   (let ((total-success (var-get successful-optimizations))
