@@ -3,7 +3,7 @@
 
 (use-trait pausable-trait .all-traits.pausable-trait)
 
-(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.pausable-trait)
+(impl-trait .all-traits.pausable-trait)
 
 (define-constant ERR_PAUSED (err u200))
 (define-constant ERR_NOT_PAUSED (err u201))

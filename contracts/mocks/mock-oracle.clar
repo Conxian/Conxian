@@ -1,5 +1,5 @@
 (use-trait oracle-trait .all-traits.oracle-trait)
-(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.oracle-trait)
+(impl-trait .all-traits.oracle-trait)
 
 (define-constant ERR_NOT_AUTHORIZED (err u100))
 (define-constant ERR_INVALID_PRICE (err u101))
