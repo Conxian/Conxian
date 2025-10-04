@@ -31,13 +31,14 @@ SCRIPTS = ROOT / "scripts"
 class GuiDeployer(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.title("Conxian GUI Deployer - Simple Mode")
-        self.geometry("900x650")
+        self.title("Conxian GUI Deployer - Enhanced Control")
+        self.geometry("1200x700")
         self.log_queue = queue.Queue()
         self.current_proc = None
         self.log_buffer = []  # Store all logs for failure analysis
         self.error_count = 0
         self.failure_log_path = ROOT / 'logs' / f'deployment_failure_{self._timestamp()}.log'
+        self.is_running = False  # Track if process is running
 
         # Auto-load .env first
         self._auto_load_env()
@@ -284,50 +285,125 @@ class GuiDeployer(tk.Tk):
         self.after(1500, after_gen)
 
     def _build_ui(self):
-        # Simple top info panel
-        info = ttk.LabelFrame(self, text="📊 Deployment Status")
-        info.pack(fill=tk.X, padx=10, pady=10)
+        # Main container with left and right panels
+        main_container = ttk.Frame(self)
+        main_container.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
         
-        info_text = f"""
-Network: {self.network.get().upper()}
-Contracts: {self.total_contracts} detected
-Deployer: {os.environ.get('SYSTEM_ADDRESS', 'Auto-detected from .env')}
-Status: ✅ Ready to Deploy
-        """.strip()
+        # Left panel (primary controls)
+        left_panel = ttk.Frame(main_container)
+        left_panel.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(0,5))
         
-        ttk.Label(info, text=info_text, justify=tk.LEFT, padding=10).pack()
+        # Right panel (advanced controls)
+        right_panel = ttk.LabelFrame(main_container, text="⚙️ Advanced Controls")
+        right_panel.pack(side=tk.RIGHT, fill=tk.Y, padx=(5,0))
+        
+        # === LEFT PANEL ===
+        
+        # Status info panel
+        info = ttk.LabelFrame(left_panel, text="📊 Deployment Status")
+        info.pack(fill=tk.X, padx=5, pady=5)
+        
+        status_frame = ttk.Frame(info)
+        status_frame.pack(fill=tk.X, padx=10, pady=10)
+        
+        ttk.Label(status_frame, text=f"Network:", font=("Arial", 9, "bold")).grid(row=0, column=0, sticky=tk.W)
+        ttk.Label(status_frame, text=f"{self.network.get().upper()}", foreground="blue").grid(row=0, column=1, sticky=tk.W, padx=(5,0))
+        
+        ttk.Label(status_frame, text=f"Contracts:", font=("Arial", 9, "bold")).grid(row=1, column=0, sticky=tk.W)
+        ttk.Label(status_frame, text=f"{self.total_contracts} detected", foreground="green").grid(row=1, column=1, sticky=tk.W, padx=(5,0))
+        
+        ttk.Label(status_frame, text=f"Deployer:", font=("Arial", 9, "bold")).grid(row=2, column=0, sticky=tk.W)
+        deployer = os.environ.get('SYSTEM_ADDRESS', 'Not configured')
+        deployer_display = deployer[:10] + '...' if len(deployer) > 10 else deployer
+        ttk.Label(status_frame, text=deployer_display, foreground="purple").grid(row=2, column=1, sticky=tk.W, padx=(5,0))
+        
+        # Process status indicator
+        self.status_label = ttk.Label(status_frame, text="Status: ✅ Ready", foreground="green", font=("Arial", 9, "bold"))
+        self.status_label.grid(row=3, column=0, columnspan=2, sticky=tk.W, pady=(5,0))
 
-        # Simple action buttons (BIG and clear)
-        actions = ttk.Frame(self)
-        actions.pack(fill=tk.X, padx=10, pady=10)
+        # Action buttons
+        actions = ttk.Frame(left_panel)
+        actions.pack(fill=tk.X, padx=5, pady=5)
         
         # Main deploy button - BIG
-        deploy_btn = tk.Button(actions, text="🚀 DEPLOY TO TESTNET", 
+        self.deploy_btn = tk.Button(actions, text="🚀 DEPLOY TO TESTNET", 
                                command=self.on_deploy_testnet,
-                               bg="#4CAF50", fg="white", font=("Arial", 16, "bold"),
+                               bg="#4CAF50", fg="white", font=("Arial", 14, "bold"),
                                height=2, cursor="hand2")
-        deploy_btn.pack(fill=tk.X, pady=(0,10))
+        self.deploy_btn.pack(fill=tk.X, pady=(0,5))
+        
+        # Stop button (initially disabled)
+        self.stop_btn = tk.Button(actions, text="⛔ STOP PROCESS", 
+                               command=self.on_stop_process,
+                               bg="#f44336", fg="white", font=("Arial", 12, "bold"),
+                               height=1, cursor="hand2", state=tk.DISABLED)
+        self.stop_btn.pack(fill=tk.X, pady=(0,10))
         
         # Pre-checks button
         precheck_btn = tk.Button(actions, text="🔍 Run Pre-Deployment Checks", 
                                command=self.on_pre_checks,
-                               bg="#2196F3", fg="white", font=("Arial", 12, "bold"),
+                               bg="#2196F3", fg="white", font=("Arial", 11, "bold"),
                                height=1, cursor="hand2")
         precheck_btn.pack(fill=tk.X, pady=(0,10))
         
-        # Secondary actions in row
+        # Secondary actions
         secondary = ttk.Frame(actions)
         secondary.pack(fill=tk.X)
         
-        ttk.Button(secondary, text="✓ Check Compilation", command=self.on_check).pack(side=tk.LEFT, padx=5)
-        ttk.Button(secondary, text="🧪 Run Tests", command=self.on_tests).pack(side=tk.LEFT, padx=5)
-        ttk.Button(secondary, text="💾 Save Log", command=self.on_save_log).pack(side=tk.LEFT, padx=5)
-        ttk.Button(secondary, text="🔄 Refresh", command=self.refresh_status).pack(side=tk.LEFT, padx=5)
+        ttk.Button(secondary, text="✓ Check", command=self.on_check).pack(side=tk.LEFT, padx=2)
+        ttk.Button(secondary, text="🧪 Tests", command=self.on_tests).pack(side=tk.LEFT, padx=2)
+        ttk.Button(secondary, text="💾 Save Log", command=self.on_save_log).pack(side=tk.LEFT, padx=2)
+        ttk.Button(secondary, text="🔄 Refresh", command=self.refresh_status).pack(side=tk.LEFT, padx=2)
 
         # Log area
-        ttk.Label(self, text="📝 Deployment Log:").pack(padx=10, anchor=tk.W)
-        self.log = ScrolledText(self, wrap=tk.WORD, height=20, bg="#1e1e1e", fg="#00ff00", font=("Courier", 9))
-        self.log.pack(fill=tk.BOTH, expand=True, padx=10, pady=(0,10))
+        ttk.Label(left_panel, text="📝 Deployment Log:", font=("Arial", 9, "bold")).pack(padx=5, anchor=tk.W)
+        self.log = ScrolledText(left_panel, wrap=tk.WORD, height=20, bg="#1e1e1e", fg="#00ff00", font=("Courier", 9))
+        self.log.pack(fill=tk.BOTH, expand=True, padx=5, pady=(0,5))
+        
+        # === RIGHT PANEL (ADVANCED CONTROLS) ===
+        
+        # Network selection
+        net_frame = ttk.LabelFrame(right_panel, text="Network")
+        net_frame.pack(fill=tk.X, padx=5, pady=5)
+        ttk.Radiobutton(net_frame, text="Devnet", variable=self.network, value="devnet", 
+                       command=self.on_network_change).pack(anchor=tk.W, padx=5)
+        ttk.Radiobutton(net_frame, text="Testnet", variable=self.network, value="testnet",
+                       command=self.on_network_change).pack(anchor=tk.W, padx=5)
+        ttk.Radiobutton(net_frame, text="Mainnet", variable=self.network, value="mainnet",
+                       command=self.on_network_change).pack(anchor=tk.W, padx=5)
+        
+        # Deploy mode
+        mode_frame = ttk.LabelFrame(right_panel, text="Deploy Mode")
+        mode_frame.pack(fill=tk.X, padx=5, pady=5)
+        ttk.Radiobutton(mode_frame, text="SDK Deploy", variable=self.deploy_mode, value="sdk").pack(anchor=tk.W, padx=5)
+        ttk.Radiobutton(mode_frame, text="Clarinet TOML", variable=self.deploy_mode, value="toml").pack(anchor=tk.W, padx=5)
+        
+        # Options
+        options_frame = ttk.LabelFrame(right_panel, text="Options")
+        options_frame.pack(fill=tk.X, padx=5, pady=5)
+        ttk.Checkbutton(options_frame, text="Devnet Dry Run", variable=self.devnet_dry_run).pack(anchor=tk.W, padx=5)
+        ttk.Checkbutton(options_frame, text="Execute Handover", variable=self.handover_execute).pack(anchor=tk.W, padx=5)
+        
+        # Contract filter
+        filter_frame = ttk.LabelFrame(right_panel, text="Contract Filter")
+        filter_frame.pack(fill=tk.X, padx=5, pady=5)
+        ttk.Label(filter_frame, text="Comma-separated:", font=("Arial", 8)).pack(anchor=tk.W, padx=5)
+        filter_entry = ttk.Entry(filter_frame, textvariable=self.contract_filter, width=20)
+        filter_entry.pack(fill=tk.X, padx=5, pady=(0,5))
+        
+        # Advanced actions
+        adv_actions = ttk.LabelFrame(right_panel, text="Actions")
+        adv_actions.pack(fill=tk.X, padx=5, pady=5)
+        ttk.Button(adv_actions, text="Deploy Devnet", command=self.on_deploy_devnet).pack(fill=tk.X, padx=5, pady=2)
+        ttk.Button(adv_actions, text="Handover", command=self.on_handover).pack(fill=tk.X, padx=5, pady=2)
+        ttk.Button(adv_actions, text="Pipeline", command=self.on_pipeline).pack(fill=tk.X, padx=5, pady=2)
+        ttk.Button(adv_actions, text="Gen Wallets", command=self.on_generate_wallets).pack(fill=tk.X, padx=5, pady=2)
+        
+        # Process info
+        info_frame = ttk.LabelFrame(right_panel, text="Process Info")
+        info_frame.pack(fill=tk.X, padx=5, pady=5)
+        self.proc_label = ttk.Label(info_frame, text="No process", font=("Arial", 8))
+        self.proc_label.pack(padx=5, pady=5)
 
     # Helpers
     def _env(self, overrides=None):
@@ -358,25 +434,67 @@ Status: ✅ Ready to Deploy
         def worker():
             try:
                 self._log(f"\n$ {cmd}\n")
+                self._update_status("🔄 Running...", "orange")
+                self._set_process_running(True)
+                
                 self.current_proc = subprocess.Popen(cmd, cwd=str(cwd or ROOT), env=env or self._env(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, shell=True)
+                self.proc_label.config(text=f"PID: {self.current_proc.pid}")
+                
                 for line in self.current_proc.stdout:
+                    if self.current_proc.poll() is not None:
+                        break
                     self.log_queue.put(line)
                     self.log_buffer.append(line)
+                    
                 rc = self.current_proc.wait()
                 self._log(f"\n[exit {rc}]\n")
                 
                 # Check for failure
                 if rc != 0:
                     self._log(f"❌ Command failed with exit code {rc}\n")
+                    self._update_status("❌ Failed", "red")
                     log_file = self._save_failure_log(f"Command failed: {cmd}")
                     if on_failure:
                         on_failure(rc, log_file)
+                else:
+                    self._update_status("✅ Complete", "green")
+                    
             except Exception as e:
                 self._log(f"❌ [error] {e}\n")
+                self._update_status("❌ Error", "red")
                 self._save_failure_log(f"Exception: {e}")
             finally:
                 self.current_proc = None
+                self._set_process_running(False)
+                self.proc_label.config(text="No process")
         threading.Thread(target=worker, daemon=True).start()
+    
+    def _update_status(self, text, color="black"):
+        """Update status label"""
+        self.status_label.config(text=f"Status: {text}", foreground=color)
+    
+    def _set_process_running(self, running):
+        """Enable/disable buttons based on process state"""
+        self.is_running = running
+        if running:
+            self.deploy_btn.config(state=tk.DISABLED)
+            self.stop_btn.config(state=tk.NORMAL)
+        else:
+            self.deploy_btn.config(state=tk.NORMAL)
+            self.stop_btn.config(state=tk.DISABLED)
+    
+    def on_stop_process(self):
+        """Stop the currently running process"""
+        if self.current_proc and self.current_proc.poll() is None:
+            self._log("\n⛔ STOPPING PROCESS...\n")
+            try:
+                self.current_proc.terminate()
+                self._log("⛔ Process terminated\n")
+                self._update_status("⛔ Stopped", "red")
+            except Exception as e:
+                self._log(f"⚠️  Error stopping process: {e}\n")
+        else:
+            self._log("ℹ️  No running process to stop\n")
 
     def _timestamp(self):
         """Generate timestamp for log files"""
