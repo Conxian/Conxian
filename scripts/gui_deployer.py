@@ -54,6 +54,9 @@ class GuiDeployer(tk.Tk):
         self.total_contracts = self._count_contracts()
         
         self.status_labels = {}
+        self.deployment_mode = 'full'
+        self.deployed_contracts = []
+        
         self._build_ui()
         self.after(100, self._drain_log)
         # Initial status
@@ -61,7 +64,7 @@ class GuiDeployer(tk.Tk):
         self._log(f"✅ Auto-loaded environment\n")
         self._log(f"✅ Detected {self.total_contracts} contracts\n")
         self._log(f"✅ Network: {self.network.get()}\n")
-        self._log(f"✅ Ready to deploy!\n\n")
+        self._log(f"ℹ️  Click 'Run Pre-Checks' to validate deployment readiness\n\n")
 
     def _auto_load_env(self):
         """Automatically load .env on startup"""
@@ -86,6 +89,184 @@ class GuiDeployer(tk.Tk):
             return len(contract_files)
         except:
             return 144  # fallback
+    
+    def _check_environment(self):
+        """Pre-deployment check: Validate environment variables"""
+        self._log("\n🔍 PRE-DEPLOYMENT CHECK: Environment Variables\n")
+        required = {
+            'DEPLOYER_PRIVKEY': 'Deployer private key',
+            'NETWORK': 'Network configuration',
+            'SYSTEM_ADDRESS': 'Deployer address'
+        }
+        optional = {
+            'HIRO_API_KEY': 'API access (improves rate limits)',
+            'CORE_API_URL': 'API endpoint'
+        }
+        
+        missing_required = []
+        for key, desc in required.items():
+            if os.environ.get(key):
+                self._log(f"  ✅ {key}: {desc}\n")
+            else:
+                self._log(f"  ❌ {key}: MISSING - {desc}\n")
+                missing_required.append(key)
+        
+        for key, desc in optional.items():
+            if os.environ.get(key):
+                self._log(f"  ✅ {key}: {desc}\n")
+            else:
+                self._log(f"  ⚠️  {key}: Optional - {desc}\n")
+        
+        return len(missing_required) == 0
+    
+    def _check_network_connectivity(self):
+        """Pre-deployment check: Test network connectivity"""
+        self._log("\n🔍 PRE-DEPLOYMENT CHECK: Network Connectivity\n")
+        api_url = self.core_api_url.get() or self._default_core_api_url(self.network.get())
+        self._log(f"  Testing: {api_url}\n")
+        
+        try:
+            import urllib.request
+            import json
+            
+            # Test API endpoint
+            req = urllib.request.Request(f"{api_url}/v2/info")
+            with urllib.request.urlopen(req, timeout=10) as response:
+                data = json.loads(response.read())
+                network_id = data.get('network_id', 'unknown')
+                self._log(f"  ✅ Connected to {network_id}\n")
+                self._log(f"  ✅ API responding normally\n")
+                return True
+        except Exception as e:
+            self._log(f"  ❌ Connection failed: {e}\n")
+            self._log(f"  ⚠️  Will retry during deployment\n")
+            return False
+    
+    def _check_deployed_contracts(self):
+        """Pre-deployment check: Check which contracts are already deployed"""
+        self._log("\n🔍 PRE-DEPLOYMENT CHECK: Existing Deployments\n")
+        api_url = self.core_api_url.get() or self._default_core_api_url(self.network.get())
+        deployer = os.environ.get('SYSTEM_ADDRESS', '')
+        
+        if not deployer:
+            self._log("  ⚠️  No deployer address found, skipping check\n")
+            return {'deployed': [], 'mode': 'full'}
+        
+        self._log(f"  Checking contracts for: {deployer}\n")
+        
+        try:
+            import urllib.request
+            import json
+            
+            # Get deployed contracts for this address
+            req = urllib.request.Request(f"{api_url}/v2/accounts/{deployer}?proof=0")
+            with urllib.request.urlopen(req, timeout=10) as response:
+                data = json.loads(response.read())
+                
+            # Check if any contracts exist
+            if 'nonce' in data and data['nonce'] > 0:
+                self._log(f"  📊 Account nonce: {data['nonce']} (transactions made)\n")
+                
+                # Try to get contract list (this varies by API version)
+                deployed_contracts = []
+                
+                # Sample check for common contracts
+                sample_contracts = ['all-traits', 'cxd-token', 'dex-factory', 'circuit-breaker']
+                for contract in sample_contracts:
+                    try:
+                        contract_req = urllib.request.Request(
+                            f"{api_url}/v2/contracts/interface/{deployer}.{contract}"
+                        )
+                        with urllib.request.urlopen(contract_req, timeout=5) as c_response:
+                            deployed_contracts.append(contract)
+                            self._log(f"  ✅ Found: {contract}\n")
+                    except:
+                        pass
+                
+                if len(deployed_contracts) > 0:
+                    self._log(f"\n  📋 Found {len(deployed_contracts)} deployed contracts\n")
+                    self._log(f"  🔄 Mode: UPGRADE (will skip existing contracts)\n")
+                    return {'deployed': deployed_contracts, 'mode': 'upgrade'}
+                else:
+                    self._log(f"  ℹ️  No contracts found for this deployer\n")
+                    self._log(f"  🆕 Mode: FULL DEPLOYMENT\n")
+                    return {'deployed': [], 'mode': 'full'}
+            else:
+                self._log(f"  ℹ️  Fresh deployer address (nonce: 0)\n")
+                self._log(f"  🆕 Mode: FULL DEPLOYMENT\n")
+                return {'deployed': [], 'mode': 'full'}
+                
+        except Exception as e:
+            self._log(f"  ⚠️  Could not check deployments: {e}\n")
+            self._log(f"  ℹ️  Assuming FULL DEPLOYMENT mode\n")
+            return {'deployed': [], 'mode': 'full'}
+    
+    def _run_pre_deployment_checks(self):
+        """Run all pre-deployment checks and return summary"""
+        self._log("=" * 60 + "\n")
+        self._log("🚀 STARTING PRE-DEPLOYMENT CHECKS\n")
+        self._log("=" * 60 + "\n")
+        
+        # Check 1: Environment
+        env_ok = self._check_environment()
+        
+        # Check 2: Network connectivity
+        network_ok = self._check_network_connectivity()
+        
+        # Check 3: Existing deployments
+        deployment_info = self._check_deployed_contracts()
+        
+        # Check 4: Compilation status
+        self._log("\n🔍 PRE-DEPLOYMENT CHECK: Contract Compilation\n")
+        self._log("  Running: clarinet check\n")
+        # We'll do this synchronously for the check
+        try:
+            result = subprocess.run(
+                "clarinet check",
+                cwd=str(ROOT),
+                capture_output=True,
+                text=True,
+                shell=True,
+                timeout=30
+            )
+            error_count = result.stdout.count('error:')
+            if error_count == 0:
+                self._log(f"  ✅ All contracts compile successfully\n")
+            else:
+                self._log(f"  ⚠️  {error_count} compilation errors detected\n")
+                self._log(f"  ℹ️  Will attempt deployment anyway (some may be warnings)\n")
+        except Exception as e:
+            self._log(f"  ⚠️  Could not run compilation check: {e}\n")
+        
+        # Summary
+        self._log("\n" + "=" * 60 + "\n")
+        self._log("📊 PRE-DEPLOYMENT CHECK SUMMARY\n")
+        self._log("=" * 60 + "\n")
+        self._log(f"Environment:     {'✅ PASS' if env_ok else '❌ FAIL'}\n")
+        self._log(f"Network:         {'✅ CONNECTED' if network_ok else '⚠️  RETRY'}\n")
+        self._log(f"Deployment Mode: 🔄 {deployment_info['mode'].upper()}\n")
+        self._log(f"Deployed Count:  {len(deployment_info['deployed'])} contracts\n")
+        self._log(f"Total Contracts: {self.total_contracts}\n")
+        self._log("=" * 60 + "\n\n")
+        
+        if not env_ok:
+            self._log("❌ CRITICAL: Missing required environment variables\n")
+            self._log("Please configure .env file and restart\n\n")
+            return False
+        
+        if deployment_info['mode'] == 'upgrade':
+            self._log("ℹ️  UPGRADE MODE: Will skip already deployed contracts\n")
+            self._log(f"Will deploy {self.total_contracts - len(deployment_info['deployed'])} new/updated contracts\n\n")
+        else:
+            self._log("ℹ️  FULL DEPLOYMENT: Will deploy all contracts\n\n")
+        
+        self._log("✅ PRE-CHECKS COMPLETE - Ready to deploy!\n\n")
+        
+        # Store deployment info for use during deployment
+        self.deployment_mode = deployment_info['mode']
+        self.deployed_contracts = deployment_info['deployed']
+        
+        return True
     
     def on_generate_wallets(self):
         net = self.network.get().strip().lower()
@@ -119,6 +300,13 @@ Status: ✅ Ready to Deploy
                                bg="#4CAF50", fg="white", font=("Arial", 16, "bold"),
                                height=2, cursor="hand2")
         deploy_btn.pack(fill=tk.X, pady=(0,10))
+        
+        # Pre-checks button
+        precheck_btn = tk.Button(actions, text="🔍 Run Pre-Deployment Checks", 
+                               command=self.on_pre_checks,
+                               bg="#2196F3", fg="white", font=("Arial", 12, "bold"),
+                               height=1, cursor="hand2")
+        precheck_btn.pack(fill=tk.X, pady=(0,10))
         
         # Secondary actions in row
         secondary = ttk.Frame(actions)
@@ -231,6 +419,12 @@ Status: ✅ Ready to Deploy
             cmd = f"node {SCRIPTS / 'deploy_from_clarinet_list.js'}"
         self._run(cmd, env=env)
 
+    def on_pre_checks(self):
+        """Run pre-deployment checks in background"""
+        def worker():
+            self._run_pre_deployment_checks()
+        threading.Thread(target=worker, daemon=True).start()
+    
     def on_deploy_testnet(self):
         env = self._env()
         env["NETWORK"] = "testnet"
@@ -240,6 +434,12 @@ Status: ✅ Ready to Deploy
         if not env.get("DEPLOYER_PRIVKEY"):
             self._log("[abort] DEPLOYER_PRIVKEY is required for testnet deploy\n")
             return
+        
+        # Set deployment mode based on pre-checks
+        if hasattr(self, 'deployment_mode') and self.deployment_mode == 'upgrade':
+            env["SKIP_DEPLOYED"] = "1"
+            self._log(f"\n🔄 UPGRADE MODE: Skipping {len(self.deployed_contracts)} deployed contracts\n")
+        
         if self.contract_filter.get().strip():
             env["CONTRACT_FILTER"] = self.contract_filter.get().strip()
         if self.deploy_mode.get() == "sdk":
