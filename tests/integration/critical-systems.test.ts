@@ -22,7 +22,7 @@ describe("Keeper Coordinator Integration", () => {
 
 describe("External Oracle Adapter Integration", () => {
   it("should submit and aggregate prices", async () => {
-    const assetAddress = "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.token";
+    const assetAddress = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.token";
     const result = await contracts.externalOracleAdapter.submitExternalPrice(
       Cl.principal(assetAddress), Cl.uint(1), Cl.uint(45000000000), Cl.uint(8), Cl.uint(9500), Cl.none()
     );

@@ -6,7 +6,7 @@
 (use-trait cxlp-migration-queue-trait .all-traits.cxlp-migration-queue-trait)
 (use-trait ft-mintable .all-traits.sip-010-ft-mintable-trait)
 
-(impl-trait .all-traits.cxlp-migration-queue-trait)
+(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.cxlp-migration-queue-trait)
 
 ;; --- Constants ---
 (define-constant CONTRACT_OWNER tx-sender)

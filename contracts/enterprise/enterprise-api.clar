@@ -340,7 +340,8 @@
 ;; @desc Retrieves the principal of the currently set compliance hook contract.
 ;; @return (response principal) An (ok) response containing the principal of the compliance hook, or an error if not set.
 (define-read-only (get-compliance-hook)
-  (ok (unwrap! (var-get compliance-hook) (err u400))) ;; Return u400 if hook is// ... existing code ...
+  (ok (unwrap! (var-get compliance-hook) (err u400)))
+)
 
 ;; @desc Retrieves the fee discount rate for an institutional account.
 ;; @param account-id (uint) The ID of the institutional account.

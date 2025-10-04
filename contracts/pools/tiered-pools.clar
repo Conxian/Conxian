@@ -5,7 +5,7 @@
 (use-trait pool-trait .all-traits.pool-trait)
 (use-trait fee-manager-trait .all-traits.fee-manager-trait)
 
-(impl-trait .all-traits.pool-trait)
+(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.pool-trait)
 
 ;; ===== Constants =====
 (define-constant ERR_UNAUTHORIZED (err u100))

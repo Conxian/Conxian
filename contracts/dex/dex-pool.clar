@@ -4,7 +4,7 @@
 (use-trait pool-trait .all-traits.pool-trait)
 (use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
 
-(impl-trait pool-trait)
+(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.pool-trait)
 
 (define-constant ONE u1)
 (define-constant TWO u2)
@@ -138,7 +138,9 @@
       (token-x (unwrap! (var-get token-a) (err ERR_NOT_INITIALIZED)))
       (token-y (unwrap! (var-get token-b) (err ERR_NOT_INITIALIZED)))
       (reserve-x (var-get reserve-a))
+    )
       (reserve-y (var-get reserve-b))
+    )
       (amount-out u0)
       (lp-fee-bps (get-lp-fee-bps tier-id))
       (protocol-fee-bps (get-protocol-fee-bps tier-id))
@@ -183,6 +185,7 @@
       (reserve-x (var-get reserve-a))
       (reserve-y (var-get reserve-b))
       (amount-in u0)
+    )
       (lp-fee-bps (get-lp-fee-bps tier-id))
       (protocol-fee-bps (get-protocol-fee-bps tier-id))
     )
