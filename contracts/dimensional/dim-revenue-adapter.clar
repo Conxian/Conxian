@@ -9,7 +9,7 @@
 (impl-trait .all-traits.ownable-trait)
 
 ;; --- Constants ---
-(define-constant TRAIT_REGISTRY 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.trait-registry)
+(define-constant TRAIT_REGISTRY ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.trait-registry)
 (define-constant CONTRACT_OWNER tx-sender)
 (define-constant PRECISION u100000000)
 

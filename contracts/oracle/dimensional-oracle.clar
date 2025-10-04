@@ -95,7 +95,7 @@
       )
       
       ;; Log the emergency override
-      (try! (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.system-monitor
+      (try! (contract-call? ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.system-monitor
         log-event
         "oracle"
         "emergency-override"
@@ -140,7 +140,7 @@
     (map-set price-feeds {token: token} (append current-feeds (list feed)))
     
     ;; Log the feed addition
-    (try! (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.system-monitor 
+    (try! (contract-call? ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.system-monitor 
       log-event 
       "oracle"
       "feed-added"
@@ -161,7 +161,7 @@
       (asserts! (> (len new-feeds) u0) (err u109))  ;; At least one feed required
       (map-set price-feeds {token: token} new-feeds)
       ;; Log the feed removal
-      (try! (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.system-monitor
+      (try! (contract-call? ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.system-monitor
         log-event
         "oracle"
         "feed-removed"

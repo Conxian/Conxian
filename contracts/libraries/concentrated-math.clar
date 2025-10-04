@@ -7,7 +7,7 @@
 (define-constant TICK_BASE u10000)  ;; 1.0001 in fixed-point with 4 decimals
 
 ;; Math library contract (to be set by admin)
-(define-constant MATH_CONTRACT 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math-lib-advanced)
+(define-constant MATH_CONTRACT ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math-lib-advanced)
 
 ;; Calculate sqrt price from tick using fixed-point arithmetic
 (define-read-only (tick-to-sqrt-price (tick int))

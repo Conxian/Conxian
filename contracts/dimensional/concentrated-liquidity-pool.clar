@@ -6,7 +6,7 @@
 (define-constant FEE_TIER_LOW u3000)   ;; 0.3%
 (define-constant FEE_TIER_MEDIUM u10000) ;; 1.0%
 (define-constant FEE_TIER_HIGH u30000)  ;; 3.0%
-(define-constant TRAIT_REGISTRY 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.trait-registry)
+(define-constant TRAIT_REGISTRY ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.trait-registry)
 (define-constant ERR_UNAUTHORIZED (err u100))
 (define-constant ERR_INVALID_FEE_TIER (err u101))
 (define-constant ERR_INVALID_TICK_RANGE (err u102))
@@ -82,7 +82,7 @@
     (var-set fee-tier fee)
     (var-set tick-spacing (get-tick-spacing fee))
     (var-set sqrt-price-x64 initial-sqrt-price)
-    (var-set current-tick (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.concentrated-math sqrt-price-to-tick initial-sqrt-price))
+    (var-set current-tick (contract-call? ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.concentrated-math sqrt-price-to-tick initial-sqrt-price))
     (var-set is-initialized true)
     
     (ok true)))
@@ -116,11 +116,11 @@
     (asserts! (is-valid-tick tick-upper) ERR_INVALID_TICK_RANGE)
     
     ;; Calculate liquidity from amounts
-    (let ((liquidity-amount (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.concentrated-math 
+    (let ((liquidity-amount (contract-call? ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.concentrated-math 
                               get-liquidity-for-amounts 
                               (var-get sqrt-price-x64) 
-                              (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.concentrated-math tick-to-sqrt-price tick-lower)
-                              (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.concentrated-math tick-to-sqrt-price tick-upper)
+                              (contract-call? ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.concentrated-math tick-to-sqrt-price tick-lower)
+                              (contract-call? ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.concentrated-math tick-to-sqrt-price tick-upper)
                               amount-x-desired
                               amount-y-desired)))
       
@@ -268,7 +268,7 @@
     (let ((amount-in amount-specified)
           (amount-out (calculate-output-amount amount-specified zero-for-one current-sqrt-price current-liquidity))
           (new-sqrt-price (calculate-new-sqrt-price amount-specified zero-for-one current-sqrt-price current-liquidity))
-          (new-tick (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.concentrated-math sqrt-price-to-tick new-sqrt-price)))
+          (new-tick (contract-call? ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.concentrated-math sqrt-price-to-tick new-sqrt-price)))
       
       ;; Calculate fees
       (let ((fee-amount (/ (* amount-in (var-get fee-tier)) u1000000))
@@ -336,8 +336,8 @@
 ;; Internal: Calculate amounts for liquidity
 (define-private (calculate-amounts-for-liquidity (current-tick int) (tick-lower int) (tick-upper int) (liquidity uint))
   (let ((sqrt-price-current (var-get sqrt-price-x64))
-        (sqrt-price-lower (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.concentrated-math tick-to-sqrt-price tick-lower))
-        (sqrt-price-upper (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.concentrated-math tick-to-sqrt-price tick-upper)))
+        (sqrt-price-lower (contract-call? ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.concentrated-math tick-to-sqrt-price tick-lower))
+        (sqrt-price-upper (contract-call? ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.concentrated-math tick-to-sqrt-price tick-upper)))
     
     (let ((amount-x (if (< current-tick tick-lower)
                        ;; Current price below range - only token X

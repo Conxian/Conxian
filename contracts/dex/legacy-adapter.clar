@@ -6,7 +6,7 @@
 (define-constant ERR_TOKEN_NOT_MAPPED (err u9202))
 
 (define-data-var contract-owner principal tx-sender)
-(define-data-var new-dex-contract principal 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dex-v2)
+(define-data-var new-dex-contract principal ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dex-v2)
 
 (define-map token-map principal principal)
 

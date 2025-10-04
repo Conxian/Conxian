@@ -6,7 +6,7 @@
 (define-constant FEE_TIER_LOW u3000)   ;; 0.3%
 (define-constant FEE_TIER_MEDIUM u10000) ;; 1.0%
 (define-constant FEE_TIER_HIGH u30000)  ;; 3.0%
-(define-constant TRAIT_REGISTRY 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.trait-registry)
+(define-constant TRAIT_REGISTRY ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.trait-registry)
 (define-constant ERR_UNAUTHORIZED (err u100))
 (define-constant ERR_INVALID_FEE_TIER (err u101))
 (define-constant ERR_INVALID_TICK_RANGE (err u102))
@@ -97,7 +97,7 @@
     (var-set fee-tier fee)
     (var-set tick-spacing (get-tick-spacing fee))
     (var-set sqrt-price-x64 initial-sqrt-price)
-    (var-set current-tick (unwrap! (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.concentrated-math sqrt-price-to-tick initial-sqrt-price) (err u0)))
+    (var-set current-tick (unwrap! (contract-call? ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.concentrated-math sqrt-price-to-tick initial-sqrt-price) (err u0)))
     (var-set is-initialized true)
     
     (ok true)))
@@ -131,11 +131,11 @@
     (asserts! (is-valid-tick tick-upper) ERR_INVALID_TICK_RANGE)
     
     ;; Calculate liquidity from amounts
-    (let ((liquidity-amount (unwrap! (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.concentrated-math
+    (let ((liquidity-amount (unwrap! (contract-call? ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.concentrated-math
                               get-liquidity-for-amounts 
                               (var-get sqrt-price-x64) 
-                              (unwrap! (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.concentrated-math tick-to-sqrt-price tick-lower) (err u0))
-                              (unwrap! (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.concentrated-math tick-to-sqrt-price tick-upper) (err u0))
+                              (unwrap! (contract-call? ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.concentrated-math tick-to-sqrt-price tick-lower) (err u0))
+                              (unwrap! (contract-call? ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.concentrated-math tick-to-sqrt-price tick-upper) (err u0))
                               amount-x-desired
                               amount-y-desired) (err u0))))
       
@@ -282,7 +282,7 @@
     (let ((amount-in amount-specified)
           (amount-out (try! (calculate-output-amount amount-specified zero-for-one current-sqrt-price current-liquidity)))
           (new-sqrt-price (try! (calculate-new-sqrt-price amount-specified zero-for-one current-sqrt-price current-liquidity)))
-          (new-tick (unwrap! (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.concentrated-math sqrt-price-to-tick new-sqrt-price) (err u0))))
+          (new-tick (unwrap! (contract-call? ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.concentrated-math sqrt-price-to-tick new-sqrt-price) (err u0))))
       
       ;; Calculate fees
       (let ((fee-amount (/ (* amount-in (var-get fee-tier)) u1000000))
@@ -307,13 +307,13 @@
 
 (define-private (calculate-output-amount (amount-in uint) (zero-for-one bool) (sqrt-price uint) (liquidity uint))
   (if zero-for-one
-    (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.concentrated-math get-amount-y amount-in sqrt-price (var-get sqrt-price-x64) liquidity)
-    (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.concentrated-math get-amount-x amount-in sqrt-price (var-get sqrt-price-x64) liquidity)
+    (contract-call? ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.concentrated-math get-amount-y amount-in sqrt-price (var-get sqrt-price-x64) liquidity)
+    (contract-call? ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.concentrated-math get-amount-x amount-in sqrt-price (var-get sqrt-price-x64) liquidity)
   )
 )
 
 (define-private (calculate-new-sqrt-price (amount-in uint) (zero-for-one bool) (sqrt-price uint) (liquidity uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.concentrated-math get-next-sqrt-price amount-in liquidity sqrt-price zero-for-one)
+  (contract-call? ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.concentrated-math get-next-sqrt-price amount-in liquidity sqrt-price zero-for-one)
 )
 
 ;; Read-only functions
