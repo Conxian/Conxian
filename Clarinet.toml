@@ -7,6 +7,14 @@ clarinet_version = "3.5.0"
 api_endpoint = "https://api.hiro.so"
 delay_execution_start = false
 
+[network.devnet]
+stacks_node_rpc_address = "http://localhost:20443"
+bitcoin_node_rpc_address = "https://mempool.space/testnet/api"
+
+[network.mainnet]
+stacks_node_rpc_address = "https://api.hiro.so"
+bitcoin_node_rpc_address = "https://blockstream.info/api"
+
 [accounts.deployer]
 mnemonic = "twice kind fence tip hidden tilt action fragile skin nothing glory cousin green tomorrow spring wrist shed math olympic multiply hip blue scout claw"
 balance = 100000000000000
@@ -19,14 +27,6 @@ address = "ST2NEB84ASENDXKYGJPQW86YXQCEFEX2ZQPG87ND"
 
 [accounts.wallet_3]
 address = "ST2REHHS5J3CERCRBEPMGH7921Q6PYKAADT7JP2VB"
-
-[network.devnet]
-stacks_node_rpc_address = "http://localhost:20443"
-bitcoin_node_rpc_address = "https://mempool.space/testnet/api"
-
-[network.mainnet]
-stacks_node_rpc_address = "https://api.hiro.so"
-bitcoin_node_rpc_address = "https://blockstream.info/api"
 
 [contracts.vault]
 path = "contracts/dex/vault.clar"
@@ -595,6 +595,22 @@ address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.traits-trait-registry"
 [contracts.utils-migration-manager]
 path = "contracts/utils/migration-manager.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.utils-migration-manager"
+
+[contracts.concentrated-liquidity-pool]
+path = "contracts/concentrated-liquidity-pool.clar"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.concentrated-liquidity-pool"
+
+[contracts.dex-concentrated-liquidity-pool]
+path = "contracts/dex/concentrated-liquidity-pool.clar"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dex-concentrated-liquidity-pool"
+
+[contracts.dimensional-advanced-router-dijkstra]
+path = "contracts/dimensional/advanced-router-dijkstra.clar"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dimensional-advanced-router-dijkstra"
+
+[contracts.pools-concentrated-liquidity-pool]
+path = "contracts/pools/concentrated-liquidity-pool.clar"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.pools-concentrated-liquidity-pool"
 
 [repl.remappings]
 access-control-trait = ".access-control-trait"

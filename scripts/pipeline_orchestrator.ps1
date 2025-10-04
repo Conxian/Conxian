@@ -18,9 +18,9 @@ Usage examples:
 
   # Disable dry-run for devnet (attempt broadcast on devnet)
   powershell -ExecutionPolicy Bypass -File .\scripts\pipeline_orchestrator.ps1 -NoDevnetDryRun
-
-Environment variables:
-  DEPLOYER_PRIVKEY   - <hex-private-key> (never commit; use secret manager)
+  
+  Environment variables:
+    DEPLOYER_PRIVKEY   - <hex-private-key> (never commit; use secret manager)
   CORE_API_URL       - optional; overrides network API URL resolution for SDK
 #>
 
@@ -94,7 +94,7 @@ Step "Verify contracts (listings/traits/compile)" {
 
 # 3) Unit & integration tests (Vitest)
 Step "Install dev deps if needed" {
-  npm ci | Out-Null
+  npm.cmd install | Out-Null
 }
 Step "Run tests (Vitest)" {
   npx vitest run

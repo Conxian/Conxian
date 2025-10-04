@@ -125,6 +125,16 @@
   )
 )
 
+(define-trait liquidity-manager-trait
+  (
+    (get-utilization () (response uint (err uint)))
+    (get-yield-rate () (response uint (err uint)))
+    (get-risk-score () (response uint (err uint)))
+    (get-performance-score () (response uint (err uint)))
+    (rebalance-liquidity (threshold uint) (response bool (err uint)))
+    (trigger-emergency-rebalance () (response bool (err uint)))
+  )
+)
 
 (define-trait access-control-trait
   (
@@ -742,7 +752,15 @@
     (mint (recipient principal) (liquidity uint) (tick-lower int) (tick-upper int) (response uint (err uint)))
     (burn (token-id uint) (response bool (err uint)))
     (get-position (token-id uint) (response (tuple (owner principal) (liquidity uint) (tick-lower int) (tick-upper int)) (err uint)))
-    (transfer (token-id uint) (sender principal) (recipient principal) (response bool (err uint)))
+    (trigger-emergency-rebalance () (response bool bool))
+    (rebalance-liquidity (threshold uint) (response bool bool))
+    (trigger-emergency-rebalance () (response bool bool))
+    (get-utilization () (response uint uint))
+    (get-yield-rate () (response uint uint))
+    (get-risk-score () (response uint uint))
+    (get-performance-score () (response uint uint))
+    (rebalance-liquidity (threshold uint) (response bool bool))
+    (trigger-emergency-rebalance () (response bool bool))
   )
 )
 
