@@ -20,8 +20,8 @@
 (define-constant ERR_CIRCUIT_BREAKER_ACTIVE (err u1008))
 
 ;; sBTC mainnet and testnet contract addresses
-(define-constant SBTC_MAINNET .sbtc-token)
-(define-constant SBTC_TESTNET .sbtc-token)
+(define-constant SBTC-MAINNET .sbtc-token)
+(define-constant SBTC-TESTNET .sbtc-token)
 
 ;; Risk management constants
 (define-constant DEFAULT_LTV u700000)           ;; 70% in basis points (1e6 scale)

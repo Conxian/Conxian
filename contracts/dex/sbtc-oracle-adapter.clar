@@ -327,7 +327,7 @@
   "Validate individual oracle price"
   (match (map-get? oracle-config { oracle: oracle })
     config (if (get is-active config)
-      (match (map-get? price-feeds { oracle: oracle, asset: .sbtc-integration.SBTC_MAINNET }) ;; Simplified asset reference
+      (match (map-get? price-feeds { oracle: oracle, asset: .sbtc-integration.SBTC-MAINNET }) ;; Simplified asset reference
         feed (if (< (- block-height (get block-height feed)) MAX_STALENESS_BLOCKS)
           (unwrap-panic (as-max-len? (append valid-prices {
             oracle: oracle,
