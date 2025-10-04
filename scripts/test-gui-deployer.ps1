@@ -217,6 +217,6 @@ if ($testsFailed -eq 0) {
     Write-Host "- Install Python 3.x with tkinter" -ForegroundColor White
     Write-Host "- Create/configure .env file" -ForegroundColor White
     Write-Host "- Check network connectivity" -ForegroundColor White
-    Write-Host "- Install Clarinet" -ForegroundColor White
+    Write-Host "- Install Clarinet CLI" -ForegroundColor White
     exit 1
 }
