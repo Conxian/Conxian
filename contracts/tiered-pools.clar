@@ -1,8 +1,8 @@
 ;; tiered-pools.clar
 ;; Implements tiered liquidity pools with different fee structures
 
-(use-trait sip-010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
-(use-trait pool-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.pool-trait)
+(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
+(use-trait pool-trait .all-traits.pool-trait)
 (use-trait fee-manager-trait .all-traits.fee-manager-trait)
 
 (impl-trait .all-traits.pool-trait)

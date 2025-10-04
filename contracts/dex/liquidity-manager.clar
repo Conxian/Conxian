@@ -1,4 +1,4 @@
-(use-trait liquidity-manager-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.liquidity-manager-trait)
+(use-trait liquidity-manager-trait .all-traits.liquidity-manager-trait)
 
 (define-public (get-utilization) (ok u0))
 (define-public (get-yield-rate) (ok u0))

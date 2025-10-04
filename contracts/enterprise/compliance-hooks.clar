@@ -1,9 +1,9 @@
 ;; compliance-hooks.clar
 ;; Implementation of compliance hooks for the enterprise API
 
-(use-trait compliance-hooks-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.compliance-hooks-trait)
+(use-trait compliance-hooks-trait .all-traits.compliance-hooks-trait)
 
-(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.compliance-hooks-trait)
+(impl-trait .all-traits.compliance-hooks-trait)
 
 (define-constant ERR_UNAUTHORIZED (err u401))
 (define-constant ERR_ACCOUNT_NOT_VERIFIED (err u403))
