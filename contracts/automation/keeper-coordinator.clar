@@ -6,6 +6,9 @@
 (use-trait lending-system-trait .all-traits.lending-system-trait)
 (use-trait oracle-trait .all-traits.oracle-trait)
 
+(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.keeper-coordinator-trait)
+(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.ownable-trait)
+
 ;; ===== Constants =====
 (define-constant ERR_UNAUTHORIZED (err u9001))
 (define-constant ERR_TASK_FAILED (err u9002))

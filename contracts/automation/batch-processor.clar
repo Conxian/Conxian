@@ -4,6 +4,10 @@
 
 (use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
 
+(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.batch-processor-trait)
+
+(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.ownable-trait)
+
 ;; ===== Constants =====
 (define-constant ERR_UNAUTHORIZED (err u7001))
 (define-constant ERR_BATCH_FULL (err u7002))

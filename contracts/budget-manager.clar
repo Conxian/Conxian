@@ -5,6 +5,9 @@
 (use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
 (use-trait proposal-trait .all-traits.proposal-trait)
 
+(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.budget-manager-trait)
+(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.proposal-trait)
+
 ;; Constants
 (define-constant ERR_UNAUTHORIZED (err u100))
 (define-constant ERR_PROPOSAL_NOT_FOUND (err u101))
