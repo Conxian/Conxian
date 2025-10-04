@@ -1,10 +1,10 @@
 ;; batch-auction.clar
 ;; Implements a batch auction mechanism for fair execution
 
-(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
-(use-trait batch-auction-trait .all-traits.batch-auction-trait)
+(use-trait sip-010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
+(use-trait batch-auction-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.batch-auction-trait)
 
-(impl-trait .all-traits.batch-auction-trait)
+(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.batch-auction-trait)
 
 ;; ===== Constants =====
 (define-constant ERR_UNAUTHORIZED (err u100))

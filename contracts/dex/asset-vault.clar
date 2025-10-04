@@ -1,9 +1,9 @@
 ;; Asset Vault Contract
 ;; Implements a simple asset vault for the Conxian protocol
 
-(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
-(use-trait asset-vault-trait .all-traits.asset-vault-trait)
-(impl-trait asset-vault-trait)
+(use-trait sip-010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
+(use-trait asset-vault-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.asset-vault-trait)
+(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.asset-vault-trait)
 
 (define-constant ERR-NOT-AUTHORIZED (err u100))
 (define-constant ERR-INVALID-TOKEN (err u101))
