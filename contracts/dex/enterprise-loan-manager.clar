@@ -6,7 +6,7 @@
 (use-trait lending-trait .all-traits.lending-system-trait)
 
 ;; Import mathematical libraries for enterprise calculations (removed unresolved trait import)
-;; (use-trait math-precision ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.precision-calculator)
+;; (use-trait math-precision .precision-calculator)
 
 ;; Constants
 (define-constant ERR_UNAUTHORIZED (err u7001))
@@ -33,8 +33,8 @@
 (define-constant MIN_LOAN_AMOUNT u1000000)  ;; 1.0 STX (6 decimals)
 
 ;; Contract references
-(define-constant BOND_ISSUANCE_CONTRACT ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.bond-issuance-system)
-(define-constant LENDING_SYSTEM ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.comprehensive-lending-system)
+(define-constant BOND_ISSUANCE_CONTRACT .bond-issuance-system)
+(define-constant LENDING_SYSTEM .comprehensive-lending-system)
 
 ;; Dynamic contract reference for bond issuance
 (define-data-var bond-issuance-system (optional principal) (some BOND_ISSUANCE_CONTRACT))

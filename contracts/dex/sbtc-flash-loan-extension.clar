@@ -338,7 +338,7 @@
   (let ((asset-principal (contract-of asset)))
     (begin
       ;; Verify bond ownership and value
-      (match (contract-call? ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.bond-issuance-system get-bond-details bond-id)
+      (match (contract-call? .bond-issuance-system get-bond-details bond-id)
         bond-details (let ((bond-value (get current-value bond-details)))
           ;; Allow larger loan amounts with bond collateral
           (if (>= bond-value amount)

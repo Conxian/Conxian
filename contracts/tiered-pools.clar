@@ -32,7 +32,7 @@
     (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
     (asserts! (is-none (map-get? pools {pool-id: pool-id})) ERR_POOL_ALREADY_EXISTS)
     ;; Assert that fee-tier-id is valid by calling fee-manager-trait
-    (ok (as-contract (contract-call? ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.fee-manager get-fee-tier fee-tier-id)))
+    (ok (as-contract (contract-call? .fee-manager get-fee-tier fee-tier-id)))
     (map-set pools {pool-id: pool-id} {
       token-x: token-x,
       token-y: token-y,
@@ -47,7 +47,7 @@
     (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
     (asserts! (is-some (map-get? pools {pool-id: pool-id})) ERR_POOL_NOT_FOUND)
     ;; Assert that new-fee-tier-id is valid by calling fee-manager-trait
-    (ok (as-contract (contract-call? ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.fee-manager get-fee-tier new-fee-tier-id)))
+    (ok (as-contract (contract-call? .fee-manager get-fee-tier new-fee-tier-id)))
     (map-set pools {pool-id: pool-id} (merge (unwrap-panic (map-get? pools {pool-id: pool-id})) {fee-tier-id: new-fee-tier-id}))
     (ok true)
   )

@@ -525,11 +525,11 @@
 ;; @returns An `(ok uint)` result containing the square root price, or an error.
 
 (define-read-only (get-sqrt-price-from-tick (tick int))
-  (contract-call? ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-sqrt-ratio-at-tick tick)
+  (contract-call? .math.math-lib-concentrated get-sqrt-ratio-at-tick tick)
 )
 
 (define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
+  (contract-call? .math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
 )
 
 
