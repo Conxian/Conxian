@@ -15,7 +15,7 @@
     "format": "prettier --write bin/stacksorbit.js && black stacksorbit.py",
     "ci": "npm install && python -m pip install --upgrade pip && python -m pip install -e .[dev,test] && npm run lint && npm test",
     "prepare": "python setup.py build",
-    "prepublishOnly": "npm run ci"
+    "prepublishOnly": "npm run lint && npm test"
   },
   "keywords": [
     "stacks",
@@ -71,9 +71,6 @@
       "threading",
       "queue"
     ]
-  },
-  "peerDependencies": {
-    "clarinet": ">=1.0.0"
   },
   "publishConfig": {
     "access": "public",
