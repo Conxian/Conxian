@@ -35,6 +35,9 @@ class GuiDeployer(tk.Tk):
         self.geometry("900x650")
         self.log_queue = queue.Queue()
         self.current_proc = None
+        self.log_buffer = []  # Store all logs for failure analysis
+        self.error_count = 0
+        self.failure_log_path = ROOT / 'logs' / f'deployment_failure_{self._timestamp()}.log'
 
         # Auto-load .env first
         self._auto_load_env()
@@ -56,6 +59,9 @@ class GuiDeployer(tk.Tk):
         self.status_labels = {}
         self.deployment_mode = 'full'
         self.deployed_contracts = []
+        
+        # Ensure logs directory exists
+        (ROOT / 'logs').mkdir(exist_ok=True)
         
         self._build_ui()
         self.after(100, self._drain_log)
@@ -252,6 +258,7 @@ class GuiDeployer(tk.Tk):
         if not env_ok:
             self._log("❌ CRITICAL: Missing required environment variables\n")
             self._log("Please configure .env file and restart\n\n")
+            self._save_failure_log("Missing required environment variables")
             return False
         
         if deployment_info['mode'] == 'upgrade':
@@ -314,6 +321,7 @@ Status: ✅ Ready to Deploy
         
         ttk.Button(secondary, text="✓ Check Compilation", command=self.on_check).pack(side=tk.LEFT, padx=5)
         ttk.Button(secondary, text="🧪 Run Tests", command=self.on_tests).pack(side=tk.LEFT, padx=5)
+        ttk.Button(secondary, text="💾 Save Log", command=self.on_save_log).pack(side=tk.LEFT, padx=5)
         ttk.Button(secondary, text="🔄 Refresh", command=self.refresh_status).pack(side=tk.LEFT, padx=5)
 
         # Log area
@@ -346,23 +354,76 @@ Status: ✅ Ready to Deploy
             return 'https://api.hiro.so'
         return 'https://api.testnet.hiro.so'
 
-    def _run(self, cmd, cwd=None, env=None):
+    def _run(self, cmd, cwd=None, env=None, on_failure=None):
         def worker():
             try:
                 self._log(f"\n$ {cmd}\n")
                 self.current_proc = subprocess.Popen(cmd, cwd=str(cwd or ROOT), env=env or self._env(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, shell=True)
                 for line in self.current_proc.stdout:
                     self.log_queue.put(line)
+                    self.log_buffer.append(line)
                 rc = self.current_proc.wait()
                 self._log(f"\n[exit {rc}]\n")
+                
+                # Check for failure
+                if rc != 0:
+                    self._log(f"❌ Command failed with exit code {rc}\n")
+                    log_file = self._save_failure_log(f"Command failed: {cmd}")
+                    if on_failure:
+                        on_failure(rc, log_file)
             except Exception as e:
-                self._log(f"[error] {e}\n")
+                self._log(f"❌ [error] {e}\n")
+                self._save_failure_log(f"Exception: {e}")
             finally:
                 self.current_proc = None
         threading.Thread(target=worker, daemon=True).start()
 
+    def _timestamp(self):
+        """Generate timestamp for log files"""
+        from datetime import datetime
+        return datetime.now().strftime('%Y%m%d_%H%M%S')
+    
     def _log(self, s):
+        """Log message and store in buffer for failure analysis"""
         self.log_queue.put(s)
+        self.log_buffer.append(s)
+        
+        # Track errors
+        if '❌' in s or 'error:' in s.lower() or 'failed' in s.lower():
+            self.error_count += 1
+    
+    def _save_failure_log(self, reason="Unknown"):
+        """Save complete log buffer to file on failure"""
+        try:
+            log_dir = ROOT / 'logs'
+            log_dir.mkdir(exist_ok=True)
+            
+            log_file = log_dir / f'deployment_failure_{self._timestamp()}.log'
+            
+            with open(log_file, 'w', encoding='utf-8') as f:
+                f.write("=" * 80 + "\n")
+                f.write("CONXIAN DEPLOYMENT FAILURE LOG\n")
+                f.write("=" * 80 + "\n")
+                f.write(f"Timestamp: {self._timestamp()}\n")
+                f.write(f"Network: {self.network.get()}\n")
+                f.write(f"Deployer: {os.environ.get('SYSTEM_ADDRESS', 'N/A')}\n")
+                f.write(f"Reason: {reason}\n")
+                f.write(f"Error Count: {self.error_count}\n")
+                f.write("=" * 80 + "\n\n")
+                f.write("FULL LOG:\n")
+                f.write("=" * 80 + "\n")
+                f.write(''.join(self.log_buffer))
+                f.write("\n" + "=" * 80 + "\n")
+                f.write("END OF LOG\n")
+            
+            self._log(f"\n💾 Failure log saved: {log_file}\n")
+            self._log(f"📊 Total errors detected: {self.error_count}\n")
+            self._log(f"ℹ️  Use this log to diagnose and fix issues\n\n")
+            
+            return str(log_file)
+        except Exception as e:
+            self._log(f"⚠️  Could not save failure log: {e}\n")
+            return None
 
     def _drain_log(self):
         try:
@@ -422,8 +483,16 @@ Status: ✅ Ready to Deploy
     def on_pre_checks(self):
         """Run pre-deployment checks in background"""
         def worker():
-            self._run_pre_deployment_checks()
+            success = self._run_pre_deployment_checks()
+            if not success:
+                self._save_failure_log("Pre-deployment checks failed")
         threading.Thread(target=worker, daemon=True).start()
+    
+    def on_save_log(self):
+        """Manually save current log"""
+        log_file = self._save_failure_log("Manual save requested")
+        if log_file:
+            self._log(f"✅ Log saved successfully\n")
     
     def on_deploy_testnet(self):
         env = self._env()
