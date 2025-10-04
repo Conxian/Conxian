@@ -46,7 +46,7 @@
 
 ;; --- Public Functions (Pool Creation Trait Implementation) ---
 
-(define-public (create-pool (token-a <mcsymbol name="sip-010-ft-trait" filename="all-traits.clar" path="C:\Users\bmokoka\anyachainlabs\Conxian\contracts\traits\all-traits.clar" startline="656" type="class"></mcsymbol>) (token-b <mcsymbol name="sip-010-ft-trait" filename="all-traits.clar" path="C:\Users\bmokoka\anyachainlabs\Conxian\contracts\traits\all-traits.clar" startline="656" type="class"></mcsymbol>) (fee-bps uint))
+(define-public (create-pool (token-a sip-010-ft-trait) (token-b sip-010-ft-trait) (fee-bps uint))
   (begin
     (asserts! (>= fee-bps u0) (err ERR_INVALID_FEE))
     (asserts! (<= fee-bps u10000) (err ERR_INVALID_FEE)) ;; Max 100% fee
@@ -67,7 +67,7 @@
   )
 )
 
-(define-public (get-pool (token-a <mcsymbol name="sip-010-ft-trait" filename="all-traits.clar" path="C:\Users\bmokoka\anyachainlabs\Conxian\contracts\traits\all-traits.clar" startline="656" type="class"></mcsymbol>) (token-b <mcsymbol name="sip-010-ft-trait" filename="all-traits.clar" path="C:\Users\bmokoka\anyachainlabs\Conxian\contracts\traits\all-traits.clar" startline="656" type="class"></mcsymbol>))
+(define-public (get-pool (token-a sip-010-ft-trait) (token-b sip-010-ft-trait))
   (let ((normalized-pair (unwrap! (normalize-token-pair (contract-of token-a) (contract-of token-b)) (err ERR_INVALID_TOKENS))))
     (ok (map-get? pools normalized-pair))
   )
@@ -82,18 +82,18 @@
   )
 )
 
-(define-public (set-pool-implementation (token-a <mcsymbol name="sip-010-ft-trait" filename="all-traits.clar" path="C:\Users\bmokoka\anyachainlabs\Conxian\contracts\traits\all-traits.clar" startline="656" type="class"></mcsymbol>) (token-b <mcsymbol name="sip-010-ft-trait" filename="all-traits.clar" path="C:\Users\bmokoka\anyachainlabs\Conxian\contracts\traits\all-traits.clar" startline="656" type="class"></mcsymbol>) (implementation-contract principal))
+(define-public (set-pool-implementation (token-a sip-010-ft-trait) (token-b sip-010-ft-trait) (implementation-contract principal))
   (err ERR_UNAUTHORIZED) ;; Not applicable for concentrated liquidity pools
 )
 
-(define-public (get-pool-implementation (token-a <mcsymbol name="sip-010-ft-trait" filename="all-traits.clar" path="C:\Users\bmokoka\anyachainlabs\Conxian\contracts\traits\all-traits.clar" startline="656" type="class"></mcsymbol>) (token-b <mcsymbol name="sip-010-ft-trait" filename="all-traits.clar" path="C:\Users\bmokoka\anyachainlabs\Conxian\contracts\traits\all-traits.clar" startline="656" type="class"></mcsymbol>))
+(define-public (get-pool-implementation (token-a sip-010-ft-trait) (token-b sip-010-ft-trait))
   (ok (as-contract tx-sender)) ;; Returns itself as the implementation
 )
 
 ;; --- Public Functions (Concentrated Liquidity Specific) ---
 
 ;; Add liquidity to a specific tick range
-(define-public (add-liquidity (token-a <mcsymbol name="sip-010-ft-trait" filename="all-traits.clar" path="C:\Users\bmokoka\anyachainlabs\Conxian\contracts\traits\all-traits.clar" startline="656" type="class"></mcsymbol>) (token-b <mcsymbol name="sip-010-ft-trait" filename="all-traits.clar" path="C:\Users\bmokoka\anyachainlabs\Conxian\contracts\traits\all-traits.clar" startline="656" type="class"></mcsymbol>) (lower-tick int) (upper-tick int) (amount-a uint) (amount-b uint))
+(define-public (add-liquidity (token-a sip-010-ft-trait) (token-b sip-010-ft-trait) (lower-tick int) (upper-tick int) (amount-a uint) (amount-b uint))
   (begin
     (asserts! (> amount-a u0) (err ERR_ZERO_AMOUNT))
     (asserts! (> amount-b u0) (err ERR_ZERO_AMOUNT))
@@ -146,7 +146,7 @@
 )
 
 ;; Swap tokens within the concentrated liquidity pool
-(define-public (swap-tokens (token-in <mcsymbol name="sip-010-ft-trait" filename="all-traits.clar" path="C:\Users\bmokoka\anyachainlabs\Conxian\contracts\traits\all-traits.clar" startline="656" type="class"></mcsymbol>) (token-out <mcsymbol name="sip-010-ft-trait" filename="all-traits.clar" path="C:\Users\bmokoka\anyachainlabs\Conxian\contracts\traits\all-traits.clar" startline="656" type="class"></mcsymbol>) (amount-in uint) (min-amount-out uint))
+(define-public (swap-tokens (token-in sip-010-ft-trait) (token-out sip-010-ft-trait) (amount-in uint) (min-amount-out uint))
   (begin
     (asserts! (> amount-in u0) (err ERR_ZERO_AMOUNT))
     (asserts! (not (is-eq (contract-of token-in) (contract-of token-out))) (err ERR_INVALID_TOKENS))
@@ -173,7 +173,7 @@
 ;; --- Read-Only Functions ---
 
 ;; Get the current price of a token pair
-(define-read-only (get-price (token-a <mcsymbol name="sip-010-ft-trait" filename="all-traits.clar" path="C:\Users\bmokoka\anyachainlabs\Conxian\contracts\traits\all-traits.clar" startline="656" type="class"></mcsymbol>) (token-b <mcsymbol name="sip-010-ft-trait" filename="all-traits.clar" path="C:\Users\bmokoka\anyachainlabs\Conxian\contracts\traits\all-traits.clar" startline="656" type="class"></mcsymbol>))
+(define-read-only (get-price (token-a sip-010-ft-trait) (token-b sip-010-ft-trait))
   (begin
     (let ((normalized-pair (unwrap! (normalize-token-pair (contract-of token-a) (contract-of token-b)) (err ERR_INVALID_TOKENS))))
       (asserts! (is-some (map-get? pools normalized-pair)) ERR_POOL_NOT_FOUND)

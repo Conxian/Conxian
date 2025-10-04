@@ -83,7 +83,7 @@
 
 ;; --- Public Functions ---
 
-(define-public (create-pool (token-a <mcsymbol name="sip-010-ft-trait" filename="all-traits.clar" path="C:\Users\bmokoka\anyachainlabs\Conxian\contracts\traits\all-traits.clar" startline="656" type="class"></mcsymbol>) (token-b <mcsymbol name="sip-010-ft-trait" filename="all-traits.clar" path="C:\Users\bmokoka\anyachainlabs\Conxian\contracts\traits\all-traits.clar" startline="656" type="class"></mcsymbol>) (pool-type (string-ascii 64)) (fee-bps uint))
+(define-public (create-pool (token-a sip-010-ft-trait) (token-b sip-010-ft-trait) (pool-type (string-ascii 64)) (fee-bps uint))
   (begin
     (try! (check-pool-manager))
     (asserts! (not (try! (check-circuit-breaker))) ERR_CIRCUIT_OPEN)

@@ -207,10 +207,9 @@
 ;; @param pool-id The ID of the pool.
 ;; @returns An `(ok {reserve-a: uint, reserve-b: uint})` result containing the reserves, or an error.
 (define-public (get-reserves (pool-id uint))
-  "Retrieves the current reserves (balances) of token-x and token-y held by a specific concentrated liquidity pool.
-
-  @param pool-id The ID of the pool to query.
-  @returns An `(ok {reserve-a: uint, reserve-b: uint})` result containing the current balances of token-x and token-y, or an error if the pool does not exist.
+  ;; Retrieves the current reserves (balances) of token-x and token-y held by a specific concentrated liquidity pool.
+  ;; @param pool-id The ID of the pool to query.
+  ;; @returns An (ok {reserve-a: uint, reserve-b: uint}) result containing the current balances of token-x and token-y, or an error if the pool does not exist.
   "
 
   ;; @desc Retrieves the total liquidity supply for a given pool.
