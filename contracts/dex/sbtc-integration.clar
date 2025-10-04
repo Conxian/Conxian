@@ -20,7 +20,7 @@
 (define-constant ERR_CIRCUIT_BREAKER_ACTIVE (err u1008))
 
 ;; sBTC mainnet and testnet contract addresses
-(define-constant SBTC_MAINNET 'SP3K8BC0PPEVCV7NZ6QSRWPQ2JE9E5B6N3PA0KBR9.sbtc-token)
+(define-constant SBTC_MAINNET .sbtc-token)
 (define-constant SBTC_TESTNET .sbtc-token)
 
 ;; Risk management constants

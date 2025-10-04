@@ -360,34 +360,34 @@
 (define-trait vault-trait
   (
     ;; @notice Deposit funds into the vault
-    (deposit (token-contract (contract-of sip-010-ft-trait)) (amount uint) (response uint (err uint)))
+    (deposit (token-contract <sip-010-ft-trait>) (amount uint) (response uint (err uint)))
 
     ;; @notice Withdraw funds from the vault
-    (withdraw (token-contract (contract-of sip-010-ft-trait)) (amount uint) (response uint (err uint)))
+    (withdraw (token-contract <sip-010-ft-trait>) (amount uint) (response uint (err uint)))
 
     ;; @notice Get the current total supply of shares for a token
-    (get-total-shares (token-contract (contract-of sip-010-ft-trait)) (response uint (err uint)))
+    (get-total-shares (token-contract <sip-010-ft-trait>) (response uint (err uint)))
 
     ;; @notice Get the amount of underlying tokens for a given amount of shares
-    (get-amount-out-from-shares (token-contract (contract-of sip-010-ft-trait)) (shares uint) (response uint (err uint)))
+    (get-amount-out-from-shares (token-contract <sip-010-ft-trait>) (shares uint) (response uint (err uint)))
 
     ;; @notice Get the amount of shares for a given amount of underlying tokens
-    (get-shares-from-amount-in (token-contract (contract-of sip-010-ft-trait)) (amount uint) (response uint (err uint)))
+    (get-shares-from-amount-in (token-contract <sip-010-ft-trait>) (amount uint) (response uint (err uint)))
 
     ;; @notice Harvest rewards (admin only)
-    (harvest (token-contract (contract-of sip-010-ft-trait)) (response bool (err uint)))
+    (harvest (token-contract <sip-010-ft-trait>) (response bool (err uint)))
 
     ;; @notice Set the strategy for a given token (admin only)
-    (set-strategy (token-contract (contract-of sip-010-ft-trait)) (strategy-contract principal) (response bool (err uint)))
+    (set-strategy (token-contract <sip-010-ft-trait>) (strategy-contract principal) (response bool (err uint)))
 
     ;; @notice Get the current strategy for a given token
-    (get-strategy (token-contract (contract-of sip-010-ft-trait)) (response (optional principal) (err uint)))
+    (get-strategy (token-contract <sip-010-ft-trait>) (response (optional principal) (err uint)))
 
     ;; @notice Get the current APY for a given token
-    (get-apy (token-contract (contract-of sip-010-ft-trait)) (response uint (err uint)))
+    (get-apy (token-contract <sip-010-ft-trait>) (response uint (err uint)))
 
     ;; @notice Get the total value locked (TVL) for a given token
-    (get-tvl (token-contract (contract-of sip-010-ft-trait)) (response uint (err uint)))
+    (get-tvl (token-contract <sip-010-ft-trait>) (response uint (err uint)))
   )
 )
 
@@ -416,10 +416,10 @@
 (define-trait strategy-trait
   (
     ;; @notice Deposit funds into the strategy
-    (deposit (token-contract (contract-of sip-010-ft-trait)) (amount uint) (response uint (err uint)))
+    (deposit (token-contract <sip-010-ft-trait>) (amount uint) (response uint (err uint)))
 
     ;; @notice Withdraw funds from the strategy
-    (withdraw (token-contract (contract-of sip-010-ft-trait)) (amount uint) (response uint (err uint)))
+    (withdraw (token-contract <sip-010-ft-trait>) (amount uint) (response uint (err uint)))
 
     ;; @notice Harvest rewards from the strategy
     (harvest ()) (response bool (err uint))
@@ -444,28 +444,28 @@
 (define-trait staking-trait
   (
     ;; @notice Stake tokens
-    (stake (token-contract (contract-of sip-010-ft-trait)) (amount uint) (response uint (err uint)))
+    (stake (token-contract <sip-010-ft-trait>) (amount uint) (response uint (err uint)))
 
     ;; @notice Unstake tokens
-    (unstake (token-contract (contract-of sip-010-ft-trait)) (amount uint) (response uint (err uint)))
+    (unstake (token-contract <sip-010-ft-trait>) (amount uint) (response uint (err uint)))
 
     ;; @notice Claim rewards
-    (claim-rewards (token-contract (contract-of sip-010-ft-trait)) (response uint (err uint)))
+    (claim-rewards (token-contract <sip-010-ft-trait>) (response uint (err uint)))
 
     ;; @notice Get the amount of staked tokens for a user
-    (get-staked-balance (token-contract (contract-of sip-010-ft-trait)) (user principal) (response uint (err uint)))
+    (get-staked-balance (token-contract <sip-010-ft-trait>) (user principal) (response uint (err uint)))
 
     ;; @notice Get the amount of available rewards for a user
-    (get-available-rewards (token-contract (contract-of sip-010-ft-trait)) (user principal) (response uint (err uint)))
+    (get-available-rewards (token-contract <sip-010-ft-trait>) (user principal) (response uint (err uint)))
 
     ;; @notice Get the total staked supply of a token
-    (get-total-staked (token-contract (contract-of sip-010-ft-trait)) (response uint (err uint)))
+    (get-total-staked (token-contract <sip-010-ft-trait>) (response uint (err uint)))
 
     ;; @notice Set the reward rate (admin only)
-    (set-reward-rate (token-contract (contract-of sip-010-ft-trait)) (rate uint) (response bool (err uint)))
+    (set-reward-rate (token-contract <sip-010-ft-trait>) (rate uint) (response bool (err uint)))
 
     ;; @notice Get the reward rate
-    (get-reward-rate (token-contract (contract-of sip-010-ft-trait)) (response uint (err uint)))
+    (get-reward-rate (token-contract <sip-010-ft-trait>) (response uint (err uint)))
   )
 )
 
@@ -659,17 +659,17 @@
 (define-trait flash-loan-receiver-trait
   (
     ;; @notice Execute a flash loan
-    (execute-flash-loan (token-contract (contract-of sip-010-ft-trait)) (amount uint) (initiator principal) (data (optional (buff 256))) (response bool (err uint)))
+    (execute-flash-loan (token-contract <sip-010-ft-trait>) (amount uint) (initiator principal) (data (optional (buff 256))) (response bool (err uint)))
   )
 )
 
 (define-trait pool-creation-trait
   (
     ;; @notice Create a new pool
-    (create-pool (token-a (contract-of sip-010-ft-trait)) (token-b (contract-of sip-010-ft-trait)) (fee-bps uint) (pool-type (string-ascii 64)) (response principal (err uint)))
+    (create-pool (token-a <sip-010-ft-trait>) (token-b <sip-010-ft-trait>) (fee-bps uint) (pool-type (string-ascii 64)) (response principal (err uint)))
 
     ;; @notice Get a pool address by its tokens and fee
-    (get-pool (token-a (contract-of sip-010-ft-trait)) (token-b (contract-of sip-010-ft-trait)) (fee-bps uint) (response (optional principal) (err uint)))
+    (get-pool (token-a <sip-010-ft-trait>) (token-b <sip-010-ft-trait>) (fee-bps uint) (response (optional principal) (err uint)))
 
     ;; @notice Get all pools created by the factory
     (get-all-pools () (response (list 100 (tuple (token-a principal) (token-b principal) (fee-bps uint) (pool-address principal) (pool-type (string-ascii 64)))) (err uint)))
@@ -684,8 +684,8 @@
 
 (define-trait factory-trait
   (
-    (create-pool (token-a (contract-of sip-010-ft-trait)) (token-b (contract-of sip-010-ft-trait)) (fee-bps uint) (pool-type (string-ascii 64)) (response principal (err uint)))
-    (get-pool (token-a (contract-of sip-010-ft-trait)) (token-b (contract-of sip-010-ft-trait)) (fee-bps uint) (response (optional principal) (err uint)))
+    (create-pool (token-a <sip-010-ft-trait>) (token-b <sip-010-ft-trait>) (fee-bps uint) (pool-type (string-ascii 64)) (response principal (err uint)))
+    (get-pool (token-a <sip-010-ft-trait>) (token-b <sip-010-ft-trait>) (fee-bps uint) (response (optional principal) (err uint)))
     (get-pool-count () (response uint (err uint)))
     (register-pool-implementation (pool-type (string-ascii 64)) (implementation-contract principal) (response bool (err uint)))
   )
@@ -703,34 +703,34 @@
 (define-trait yield-optimizer-trait
   (
     ;; @notice Deposit funds into the yield optimizer
-    (deposit (token-contract (contract-of sip-010-ft-trait)) (amount uint) (response uint (err uint)))
+    (deposit (token-contract <sip-010-ft-trait>) (amount uint) (response uint (err uint)))
 
     ;; @notice Withdraw funds from the yield optimizer
-    (withdraw (token-contract (contract-of sip-010-ft-trait)) (amount uint) (response uint (err uint)))
+    (withdraw (token-contract <sip-010-ft-trait>) (amount uint) (response uint (err uint)))
 
     ;; @notice Get the current total supply of shares for a token
-    (get-total-shares (token-contract (contract-of sip-010-ft-trait)) (response uint (err uint)))
+    (get-total-shares (token-contract <sip-010-ft-trait>) (response uint (err uint)))
 
     ;; @notice Get the amount of underlying tokens for a given amount of shares
-    (get-amount-out-from-shares (token-contract (contract-of sip-010-ft-trait)) (shares uint) (response uint (err uint)))
+    (get-amount-out-from-shares (token-contract <sip-010-ft-trait>) (shares uint) (response uint (err uint)))
 
     ;; @notice Get the amount of shares for a given amount of underlying tokens
-    (get-shares-from-amount-in (token-contract (contract-of sip-010-ft-trait)) (amount uint) (response uint (err uint)))
+    (get-shares-from-amount-in (token-contract <sip-010-ft-trait>) (amount uint) (response uint (err uint)))
 
     ;; @notice Rebalance the strategy (admin only)
-    (rebalance-strategy (token-contract (contract-of sip-010-ft-trait)) (response bool (err uint)))
+    (rebalance-strategy (token-contract <sip-010-ft-trait>) (response bool (err uint)))
 
     ;; @notice Set the strategy for a given token (admin only)
-    (set-strategy (token-contract (contract-of sip-010-ft-trait)) (strategy-contract principal) (response bool (err uint)))
+    (set-strategy (token-contract <sip-010-ft-trait>) (strategy-contract principal) (response bool (err uint)))
 
     ;; @notice Get the current strategy for a given token
-    (get-strategy (token-contract (contract-of sip-010-ft-trait)) (response (optional principal) (err uint)))
+    (get-strategy (token-contract <sip-010-ft-trait>) (response (optional principal) (err uint)))
 
     ;; @notice Get the current APY for a given token
-    (get-apy (token-contract (contract-of sip-010-ft-trait)) (response uint (err uint)))
+    (get-apy (token-contract <sip-010-ft-trait>) (response uint (err uint)))
 
     ;; @notice Get the total value locked (TVL) for a given token
-    (get-tvl (token-contract (contract-of sip-010-ft-trait)) (response uint (err uint)))
+    (get-tvl (token-contract <sip-010-ft-trait>) (response uint (err uint)))
   )
 )
 
@@ -759,7 +759,7 @@
 
 (define-trait migration-manager-trait
   (
-    (initiate-migration (from-token (contract-of sip-010-ft-trait)) (to-token (contract-of sip-010-ft-trait)) (amount uint) (response bool (err uint)))
+    (initiate-migration (from-token <sip-010-ft-trait>) (to-token <sip-010-ft-trait>) (amount uint) (response bool (err uint)))
     (complete-migration (migration-id uint) (response bool (err uint)))
     (get-migration-status (migration-id uint) (response (tuple (status (string-ascii 32)) (from-amount uint) (to-amount uint)) (err uint)))
   )
@@ -821,10 +821,10 @@
 
 (define-trait asset-vault-trait
   (
-    (deposit (token (contract-of sip-010-ft-trait)) (amount uint) (response uint (err uint)))
-    (withdraw (token (contract-of sip-010-ft-trait)) (amount uint) (response uint (err uint)))
-    (get-balance (token (contract-of sip-010-ft-trait)) (user principal) (response uint (err uint)))
-    (get-total-assets (token (contract-of sip-010-ft-trait)) (response uint (err uint)))
+    (deposit (token <sip-010-ft-trait>) (amount uint) (response uint (err uint)))
+    (withdraw (token <sip-010-ft-trait>) (amount uint) (response uint (err uint)))
+    (get-balance (token <sip-010-ft-trait>) (user principal) (response uint (err uint)))
+    (get-total-assets (token <sip-010-ft-trait>) (response uint (err uint)))
   )
 )
 
@@ -838,7 +838,7 @@
 
 (define-trait cross-protocol-trait
   (
-    (bridge-assets (from-token (contract-of sip-010-ft-trait)) (to-protocol (string-ascii 64)) (amount uint) (response uint (err uint)))
+    (bridge-assets (from-token <sip-010-ft-trait>) (to-protocol (string-ascii 64)) (amount uint) (response uint (err uint)))
     (get-bridge-status (tx-id (buff 32)) (response (tuple (status (string-ascii 32)) (amount uint)) (err uint)))
   )
 )
@@ -860,7 +860,7 @@
 
 (define-trait batch-auction-trait
   (
-    (create-auction (token-sell (contract-of sip-010-ft-trait)) (token-buy (contract-of sip-010-ft-trait)) (amount uint) (duration uint) (response uint (err uint)))
+    (create-auction (token-sell <sip-010-ft-trait>) (token-buy <sip-010-ft-trait>) (amount uint) (duration uint) (response uint (err uint)))
     (place-bid (auction-id uint) (amount uint) (response bool (err uint)))
     (settle-auction (auction-id uint) (response bool (err uint)))
     (get-auction-status (auction-id uint) (response (tuple (status (string-ascii 32)) (total-bids uint)) (err uint)))
