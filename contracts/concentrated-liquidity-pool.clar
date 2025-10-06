@@ -2,7 +2,7 @@
 ;; This contract implements a concentrated liquidity pool.
 
 ;; --- Traits ---
-(use-trait sip-010-ft-trait .sip-010-ft-trait.sip-010-ft-trait)
+(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
 (use-trait pool-creation-trait .pool-creation-trait.pool-creation-trait)
 (impl-trait pool-creation-trait)
 

@@ -3,13 +3,13 @@
 ;; Non-custodial, immutable design with bond trading support
 
 ;; --- Traits ---
-(use-trait bond-trait .bond-trait.bond-trait)
-(use-trait router-trait .router-trait.router-trait)
-(use-trait sip-010-ft-trait .sip-010-ft-trait.sip-010-ft-trait)
-(use-trait pool-trait .pool-trait.pool-trait)
-(use-trait factory-trait .factory-trait.factory-trait)
+(use-trait bond-trait .all-traits.bond-trait)
+(use-trait router-trait .all-traits.router-trait)
+(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
+(use-trait pool-trait .all-traits.pool-trait)
+(use-trait factory-trait .all-traits.factory-trait)
 
-(impl-trait router-trait)
+(impl-trait .all-traits.router-trait)
 
 ;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED (err u4000))

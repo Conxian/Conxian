@@ -1,10 +1,10 @@
 ;; stable-pool-enhanced.clar
 ;; Implements an enhanced stable pool for the Conxian DEX.
 
-(use-trait sip-010-ft-trait .sip-010-ft-trait.sip-010-ft-trait)
-(use-trait pool-trait .pool-trait.pool-trait)
-(use-trait math-trait .math-trait.math-trait)
-(use-trait error-codes-trait .error-codes-trait.error-codes-trait)
+(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
+(use-trait pool-trait .all-traits.pool-trait)
+(use-trait math-trait .all-traits.math-trait)
+(use-trait error-codes-trait .all-traits.error-codes-trait)
 
 ;; Constants
 (define-constant ERR_UNAUTHORIZED (err u100))

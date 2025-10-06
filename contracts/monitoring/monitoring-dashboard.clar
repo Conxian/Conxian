@@ -1,7 +1,7 @@
 ;; monitoring-dashboard.clar
 ;; Provides read-only functions for system monitoring and health checks
 
-(use-trait sip-010-ft-trait .sip-010-ft-trait.sip-010-ft-trait)
+(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
 (use-trait monitoring-trait .monitoring-trait.monitoring-trait)
 
 (impl-trait monitoring-trait)

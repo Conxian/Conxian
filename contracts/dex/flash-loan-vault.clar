@@ -2,11 +2,11 @@
 ;; A specialized vault for executing ERC-3156 compatible flash loans.
 
 ;; Import traits at the top
-(use-trait sip-010-ft-trait .sip-010-ft-trait.sip-010-ft-trait)
-(use-trait vault-trait .vault-trait.vault-trait)
+(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
+(use-trait vault-trait .all-traits.vault-trait)
 (use-trait vault-admin-trait .vault-admin-trait.vault-admin-trait)
 
-(impl-trait vault-trait)
+(impl-trait .all-traits.vault-trait)
 (impl-trait vault-admin-trait)
 
 ;; Constants

@@ -2,25 +2,18 @@
 ;;
 ;; This contract implements a SIP-010 tokenized bond.
 ;; It represents a single series of bonds with uniform characteristics.
-;;
-;; Features:
-;; - SIP-010 compliant fungible token for secondary market trading.
-;; - Periodic coupon payments that can be claimed by bondholders.
-;; - Principal payout at maturity.
-
 ;; Import traits from the all-traits.clar file
-(use-trait sip-010-ft-trait .sip-010-ft-trait.sip-010-ft-trait)
-(use-trait bond-trait .bond-trait.bond-trait)
+(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
+(use-trait bond-trait .all-traits.bond-trait)
 
 ;; Implement the traits for this contract
-(impl-trait bond-trait)
-(impl-trait sip-010-ft-trait)
+(impl-trait .all-traits.bond-trait)
+(impl-trait .all-traits.sip-010-ft-trait)
 
 ;; Error codes
 (define-constant ERR_UNAUTHORIZED (err u100))
 (define-constant ERR_INVALID_AMOUNT (err u101))
 (define-constant ERR_INSUFFICIENT_BALANCE (err u102))
-(define-constant ERR_NOT_OWNER (err u103))
 (define-constant ERR_BOND_NOT_ISSUED (err u104))
 (define-constant ERR_ALREADY_ISSUED (err u105))
 (define-constant ERR_INVALID_DECIMALS (err u106))
@@ -36,96 +29,9 @@
 (define-constant ERR_CONTRACT_PAUSED (err u116))
 (define-constant ERR_INVALID_TIMING (err u117))
 
-;; Reentrancy protection
-(define-data-var locked bool false)
-(define-data-var paused bool false)
-
-(define-private (non-reentrant)
-  (let ((current-locked (var-get locked)))
-    (asserts! (not current-locked) ERR_REENTRANCY)
-    (var-set locked true)
-    true))
-
-(define-private (when-not-paused)
-  (asserts! (not (var-get paused)) ERR_CONTRACT_PAUSED)
-  true)
-
-;; Constants
-(define-constant MAX_UINT u340282366920938463463374607431768211455)
-(define-constant MAX_DECIMALS u18)
-(define-constant MIN_MATURITY_BLOCKS u1440)  ;; ~1 day at 1 block/60s
-(define-constant MAX_COUPON_RATE u1000000000000000000)  ;; 100%
-(define-constant MIN_COUPON_FREQUENCY u144)  ;; ~1 day at 1 block/10min
-
-(define-fungible-token tokenized-bond u6)
-
-;; --- SIP-010 Token Functions ---
-
-(define-public (transfer (amount uint) (sender principal) (recipient principal) (memo (optional (buff 34))))
-  (begin
-    (asserts! (is-eq tx-sender sender) ERR_NOT_OWNER)
-    (asserts! (> amount u0) ERR_INVALID_AMOUNT)
-    (asserts! (is-valid-principal recipient) ERR_INVALID_AMOUNT)
-    (asserts! (>= (ft-get-balance tokenized-bond sender) amount) ERR_INSUFFICIENT_BALANCE)
-    (match (ft-transfer? tokenized-bond amount sender recipient memo)
-      (ok true) (ok true)
-      (err e) (err e)
-    )
-  )
-)
-
-;; Internal mint function (not part of SIP-010)
-(define-private (mint-internal (amount uint) (recipient principal))
-  (begin
-    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
-    (asserts! (> amount u0) ERR_INVALID_AMOUNT)
-    (asserts! (is-valid-principal recipient) ERR_INVALID_AMOUNT)
-    (asserts! (<= (+ (ft-get-supply tokenized-bond) amount) MAX_UINT) ERR_INVALID_AMOUNT)
-    (unwrap-panic (ft-mint? tokenized-bond amount recipient))
-  )
-)
-
-;; Internal burn function (not part of SIP-010)
-(define-private (burn-internal (amount uint) (owner principal))
-  (begin
-    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
-    (asserts! (> amount u0) ERR_INVALID_AMOUNT)
-    (asserts! (is-valid-principal owner) ERR_INVALID_AMOUNT)
-    (asserts! (>= (ft-get-balance tokenized-bond owner) amount) ERR_INSUFFICIENT_BALANCE)
-    (unwrap-panic (ft-burn? tokenized-bond amount owner))
-  )
-)
-
-(define-read-only (get-balance (who principal))
-  (ok (ft-get-balance tokenized-bond who))
-)
-
-(define-read-only (get-total-supply)
-  (ok (var-get total-supply))
-)
-
-(define-read-only (get-decimals)
-  (ok (var-get token-decimals))
-)
-
-(define-read-only (get-name)
-  (ok (var-get token-name))
-)
-
-(define-read-only (get-symbol)
-  (ok (var-get token-symbol))
-)
-
 (define-read-only (get-token-uri)
   (ok (var-get token-uri))
 )
-
-(define-constant ERR_UNAUTHORIZED u201)
-(define-constant ERR_NOT_YET_MATURED u202)
-(define-constant ERR_ALREADY_MATURED u203)
-(define-constant ERR_NO_COUPONS_DUE u204)
-(define-constant ERR_BOND_NOT_ISSUED u205)
-(define-constant ERR_ALREADY_ISSUED u210)
 
 (define-data-var token-name (string-ascii 32) "Tokenized Bond")
 (define-data-var token-symbol (string-ascii 10) "BOND")

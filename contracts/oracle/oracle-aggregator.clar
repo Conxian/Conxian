@@ -2,9 +2,9 @@
 ;; Aggregates price feeds from multiple oracles and provides TWAP calculations
 
 ;; Traits
-(use-trait sip-010-ft-trait .sip-010-ft-trait.sip-010-ft-trait)
+(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
 (use-trait oracle-trait .oracle-trait.oracle-trait)
-(use-trait access-control-trait .access-control-trait.access-control-trait)
+(use-trait access-control-trait .all-traits.access-control-trait)
 (use-trait circuit-breaker-trait .circuit-breaker-trait.circuit-breaker-trait)
 (use-trait oracle-aggregator-trait .oracle-aggregator-trait.oracle-aggregator-trait)
 

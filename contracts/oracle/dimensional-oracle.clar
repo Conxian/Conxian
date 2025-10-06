@@ -2,7 +2,7 @@
 ;; Implements a robust price oracle with multiple data sources and deviation checks
 
 (use-trait oracle-trait .oracle-trait.oracle-trait)
-(use-trait access-control-trait .access-control-trait.access-control-trait)
+(use-trait access-control-trait .all-traits.access-control-trait)
 (use-trait pausable-trait .pausable-trait.pausable-trait)
 
 (impl-trait oracle-trait)

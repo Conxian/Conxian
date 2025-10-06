@@ -1,6 +1,5 @@
-(use-trait sip-010-ft-trait .sip-010-ft-trait.sip-010-ft-trait)
+(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
 
-(use-trait sip-010-ft-trait .sip-010-ft-trait.sip-010-ft-trait)
 
 (define-trait cross-protocol-trait
   (

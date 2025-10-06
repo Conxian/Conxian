@@ -3,12 +3,12 @@
 ;; Enhanced with integration hooks for staking, revenue distribution, and system monitoring
 
 ;; --- Traits ---
-(use-trait sip-010-ft-trait .sip-010-ft-trait.sip-010-ft-trait)
-(use-trait ownable-trait .ownable-trait.ownable-trait)
+(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
+(use-trait ownable-trait .all-traits.ownable-trait)
 
 ;; Implement required traits
-(impl-trait sip-010-ft-trait)
-(impl-trait ownable-trait)
+(impl-trait .all-traits.sip-010-ft-trait)
+(impl-trait .all-traits.ownable-trait)
 
 ;; Constants
 (define-constant TRAIT_REGISTRY .trait-registry)

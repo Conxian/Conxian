@@ -6,13 +6,13 @@
 (define-constant TRAIT_REGISTRY .all-traits)
 
 ;; Resolve traits using the trait registry
-(use-trait sip-010-ft-trait .sip-010-ft-trait.sip-010-ft-trait)
-(use-trait access-control-trait .access-control-trait.access-control-trait)
-(use-trait staking-trait .staking-trait.staking-trait)
+(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
+(use-trait access-control-trait .all-traits.access-control-trait)
+(use-trait staking-trait .all-traits.staking-trait)
 (use-trait circuit-breaker-trait .circuit-breaker-trait.circuit-breaker-trait)
 
 ;; Implement the staking trait
-(impl-trait staking-trait)
+(impl-trait .all-traits.staking-trait)
 
 ;; --- Constants ---
 (define-constant CONTRACT_OWNER tx-sender)

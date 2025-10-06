@@ -2,7 +2,7 @@
 ;; Wormhole Cross-Chain Integration for Conxian Protocol
 ;; Provides cross-chain asset bridging, governance, and yield aggregation
 
-(use-trait sip-010-ft-trait .sip-010-ft-trait.sip-010-ft-trait)
+(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
 
 ;; =============================================================================
 ;; CONSTANTS AND ERROR CODES

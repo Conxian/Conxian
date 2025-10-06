@@ -6,7 +6,7 @@
 ;; User Metrics: CAC, LTV, Retention, Churn
 ;; Treasury Metrics: Runway, Burn Rate, Reserve Ratio
 
-(use-trait sip-010-ft-trait .sip-010-ft-trait.sip-010-ft-trait)
+(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
 
 ;; ===== Constants =====
 (define-constant ERR_UNAUTHORIZED (err u5001))

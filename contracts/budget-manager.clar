@@ -2,7 +2,7 @@
 ;; Manages treasury allocation and budget proposals for DAO governance
 
 ;; Traits
-(use-trait sip-010-ft-trait .sip-010-ft-trait.sip-010-ft-trait)
+(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
 (use-trait proposal-trait .proposal-trait.proposal-trait)
 
 (impl-trait budget-manager-trait)

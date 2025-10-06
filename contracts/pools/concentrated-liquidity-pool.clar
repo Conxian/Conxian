@@ -22,12 +22,11 @@
 ;; - `error-codes-trait` for standardized errors
 ;; - `nft-trait` for position NFTs
 
-(use-trait sip-010-ft-trait .sip-010-ft-trait.sip-010-ft-trait)
-(use-trait pool-trait .pool-trait.pool-trait)
-(use-trait math-trait .math-trait.math-trait)
-(use-trait error-codes-trait .error-codes-trait.error-codes-trait)
-(use-trait nft-trait .nft-trait.nft-trait)
-(use-trait math-lib-trait .math-trait.math-trait)
+(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
+(use-trait pool-trait .all-traits.pool-trait)
+(use-trait math-trait .all-traits.math-trait)
+(use-trait error-codes-trait .all-traits.error-codes-trait)
+(use-trait sip-009-nft-trait .all-traits.sip-009-nft-trait)
 
 
 
@@ -210,17 +209,15 @@
   ;; Retrieves the current reserves (balances) of token-x and token-y held by a specific concentrated liquidity pool.
   ;; @param pool-id The ID of the pool to query.
   ;; @returns An (ok {reserve-a: uint, reserve-b: uint}) result containing the current balances of token-x and token-y, or an error if the pool does not exist.
-  "
+  ;;
 
   ;; @desc Retrieves the total liquidity supply for a given pool.
 ;; @param pool-id The ID of the pool.
 ;; @returns An `(ok uint)` result containing the total liquidity, or an error.
 (define-public (get-total-supply (pool-id uint))
-  "Retrieves the total liquidity currently managed by a specific concentrated liquidity pool.
-
-  @param pool-id The ID of the pool to query.
-  @returns An `(ok uint)` result containing the total liquidity, or an error if the pool does not exist.
-  "
+  ;; Retrieves the total liquidity currently managed by a specific concentrated liquidity pool.
+  ;; @param pool-id The ID of the pool to query.
+  ;; @returns An `(ok uint)` result containing the total liquidity, or an error if the pool does not exist.
 
 ;; Public functions
 ;; @desc Creates a new concentrated liquidity pool.
@@ -494,7 +491,7 @@
     (
       (current-pool-id (var-get next-pool-id))
     )
-    (asserts! (is-eq tx-sender factory-address) (err-trait-err ERR_UNAUTHORIZED))
+    (asserts! (is-eq tx-sender factory-address) (err ERR_UNAUTHORIZED))
     (map-set pools
       {pool-id: current-pool-id}
       {

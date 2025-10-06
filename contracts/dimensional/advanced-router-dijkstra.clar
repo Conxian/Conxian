@@ -2,8 +2,8 @@
 ;; Implements optimal path finding for multi-hop swaps
 ;; Optimizes for best price with minimal gas
 
-(use-trait sip-010-ft-trait .sip-010-ft-trait.sip-010-ft-trait)
-(use-trait pool-trait .pool-trait.pool-trait)
+(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
+(use-trait pool-trait .all-traits.pool-trait)
 
 (impl-trait advanced-router-dijkstra-trait)
 

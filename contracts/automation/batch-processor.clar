@@ -2,10 +2,10 @@
 ;; Enhanced batch processing system for gas-efficient operations
 ;; Supports liquidations, fee distributions, token transfers, and multi-token swaps
 
-(use-trait sip-010-ft-trait .sip-010-ft-trait.sip-010-ft-trait)
-(use-trait ownable-trait .ownable-trait.ownable-trait)
+(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
+(use-trait ownable-trait .all-traits.ownable-trait)
 
-(impl-trait ownable-trait)
+(impl-trait .all-traits.ownable-trait)
 
 ;; ===== Constants =====
 (define-constant ERR_UNAUTHORIZED (err u7001))

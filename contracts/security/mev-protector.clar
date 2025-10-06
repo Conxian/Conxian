@@ -1,7 +1,7 @@
 ;; mev-protector.clar
 ;; Implements MEV protection mechanisms
 
-(use-trait sip-010-ft-trait .sip-010-ft-trait.sip-010-ft-trait)
+(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
 (use-trait mev-protector-trait .mev-protector-trait.mev-protector-trait)
 
 (impl-trait mev-protector-trait)

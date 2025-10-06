@@ -6,11 +6,11 @@
 
 ;; --- Traits ---
 (use-trait dim-registry-trait .dim-registry-trait.dim-registry-trait)
-(use-trait ownable-trait .ownable-trait.ownable-trait)
+(use-trait ownable-trait .all-traits.ownable-trait)
 
 
 (impl-trait dim-registry-trait)
-(impl-trait ownable-trait)
+(impl-trait .all-traits.ownable-trait)
 
 ;; Constants
 (define-constant TRAIT_REGISTRY .trait-registry)

@@ -2,7 +2,7 @@
 ;; Factory contract for creating and managing bond tokens
 
 (use-trait standard-constants-trait .standard-constants-trait.standard-constants-trait)
-(use-trait bond-trait .bond-trait.bond-trait)
+(use-trait bond-trait .all-traits.bond-trait)
 
 (impl-trait bond-factory-trait)
 (define-constant ERR_UNAUTHORIZED (err u5000))
