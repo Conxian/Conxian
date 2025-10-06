@@ -1,0 +1,25 @@
+(define-trait dao-trait
+  (
+    (has-voting-power (voter principal) (response bool (err uint)))
+    (get-voting-power (voter principal) (response uint (err uint)))
+    (get-total-voting-power () (response uint (err uint)))
+    (delegate (delegatee principal) (response bool (err uint)))
+    (undelegate () (response bool (err uint)))
+    (execute-proposal (proposal-id uint) (response bool (err uint)))
+    (vote (proposal-id uint) (support bool) (response bool (err uint)))
+    (get-proposal (proposal-id uint)
+      (response
+        (tuple
+          (proposer principal)
+          (start-block uint)
+          (end-block uint)
+          (votes-for uint)
+          (votes-against uint)
+          (executed bool)
+          (canceled bool)
+        )
+        (err uint)
+      )
+    )
+  )
+)

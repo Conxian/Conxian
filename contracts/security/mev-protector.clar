@@ -1,10 +1,10 @@
 ;; mev-protector.clar
 ;; Implements MEV protection mechanisms
 
-(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
-(use-trait mev-protector-trait .all-traits.mev-protector-trait)
+(use-trait sip-010-ft-trait .sip-010-ft-trait.sip-010-ft-trait)
+(use-trait mev-protector-trait .mev-protector-trait.mev-protector-trait)
 
-(impl-trait .all-traits.mev-protector-trait)
+(impl-trait mev-protector-trait)
 
 ;; ===== Constants =====
 (define-constant ERR_UNAUTHORIZED (err u100))
@@ -39,6 +39,9 @@
   payload: (buff 128) ;; Example payload, could be a serialized transaction
 })
 
+;; batch-order-counts: {batch-id: uint, count: uint}
+(define-map batch-order-counts {batch-id: uint} {count: uint})
+
 ;; ===== Public Functions =====
 
 (define-public (commit-order (commitment (buff 32)))
@@ -66,18 +69,21 @@
       (asserts! (is-eq tx-sender sender) ERR_UNAUTHORIZED)
       (asserts! (<= (+ start-block (var-get commit-period-blocks)) block-height) ERR_REVEAL_PERIOD_ENDED)
       ;; Verify hash (simplified for example)
-      ;; (asserts! (is-eq (sha256 payload) (get hash data)) ERR_INVALID_REVEAL)
+      (asserts! (is-eq (sha256 payload) (get hash data)) ERR_INVALID_REVEAL)
 
       ;; Add to batch orders
       (let ((batch-id (get-current-batch-id)))
-        (map-set batch-orders {
-          batch-id: batch-id,
-          order-index: (get-next-order-index batch-id)
-        } {
-          sender: tx-sender,
-          payload: payload
-        })
-        (ok true)
+        (let ((next-index (get-next-order-index batch-id)))
+          (map-set batch-orders {
+            batch-id: batch-id,
+            order-index: next-index
+          } {
+            sender: tx-sender,
+            payload: payload
+          })
+          (map-set batch-order-counts {batch-id: batch-id} {count: (+ next-index u1)})
+          (ok true)
+        )
       )
     )
   )
@@ -87,8 +93,8 @@
   (begin
     (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
     (asserts! (is-batch-ready batch-id) ERR_BATCH_NOT_READY)
-    ;; Logic to execute orders in a fair manner (e.g., uniform clearing price)
-    ;; This would involve iterating through batch-orders for the given batch-id
+    ;; TODO: Implement logic to execute orders in a fair manner (e.g., uniform clearing price)
+    ;; This would involve iterating through batch-orders for the given batch-id and executing their payloads.
     (ok true)
   )
 )
@@ -96,18 +102,25 @@
 ;; ===== Read-Only Functions =====
 
 (define-read-only (get-current-batch-id)
-  ;; Logic to determine the current active batch based on block height and periods
-  (ok (var-get next-batch-id))
+  (let (
+    (total-period (+ (var-get commit-period-blocks) (var-get reveal-period-blocks)))
+    (current-batch (/ block-height total-period))
+  )
+    current-batch
+  )
 )
 
 (define-read-only (get-next-order-index (batch-id uint))
-  ;; Logic to get the next available index for an order within a batch
-  (ok u0)
+  (ok (default-to u0 (get count (map-get? batch-order-counts {batch-id: batch-id}))))
 )
 
 (define-read-only (is-batch-ready (batch-id uint))
-  ;; Logic to check if a batch is ready for execution (e.g., reveal period ended)
-  (ok true)
+  (let (
+    (total-period (+ (var-get commit-period-blocks) (var-get reveal-period-blocks)))
+    (batch-end-block (* (+ batch-id u1) total-period))
+  )
+    (> block-height batch-end-block)
+  )
 )
 
 (define-read-only (get-commitment (commitment-id uint))

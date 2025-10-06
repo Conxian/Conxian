@@ -10,8 +10,8 @@
 ;; - User status aggregation
 ;; - Revenue distribution triggers
 
-(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
-(use-trait access-control-trait .all-traits.access-control-trait)
+(use-trait sip-010-ft-trait .sip-010-ft-trait.sip-010-ft-trait)
+(use-trait access-control-trait .access-control-trait.access-control-trait)
 
 ;; Error codes
 (define-constant ERR_UNAUTHORIZED (err u100))

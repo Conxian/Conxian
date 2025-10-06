@@ -22,14 +22,14 @@
 ;; - `error-codes-trait` for standardized errors
 ;; - `nft-trait` for position NFTs
 
-(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
-(use-trait pool-trait .all-traits.pool-trait)
-(use-trait math-trait .all-traits.math-trait)
-(use-trait error-codes-trait .all-traits.error-codes-trait)
-(use-trait nft-trait .all-traits.nft-trait)
-(use-trait math-lib-concentrated 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated)
+(use-trait sip-010-ft-trait .sip-010-ft-trait.sip-010-ft-trait)
+(use-trait pool-trait .pool-trait.pool-trait)
+(use-trait math-trait .math-trait.math-trait)
+(use-trait error-codes-trait .error-codes-trait.error-codes-trait)
+(use-trait nft-trait .nft-trait.nft-trait)
+(use-trait math-lib-trait .math-trait.math-trait)
 
-(use-trait err-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.errors.err-trait)
+
 
 ;; Constants
 (define-constant Q128 u340282366920938463463374607431768211455)
@@ -122,22 +122,21 @@
 ;; @param amount-y-desired The desired amount of token-y to provide.
 ;; @param amount-x-min The minimum acceptable amount of token-x to provide (slippage control).
 ;; @param amount-y-min The minimum acceptable amount of token-y to provide (slippage control).
-;; @param recipient The principal of the recipient for the position NFT.
+;; ;; @param recipient The principal of the recipient for the position NFT.
 ;; @returns An `(ok {tokens-minted: uint, token-a-used: uint, token-b-used: uint})` result containing the liquidity minted and tokens used, or an error.
 (define-public (add-liquidity (pool-id uint) (amount-x-desired uint) (amount-y-desired uint) (amount-x-min uint) (amount-y-min uint) (recipient principal) (tick-lower int) (tick-upper int))
-  "Adds liquidity to a concentrated liquidity pool within a specified price range.
-  This function mints a new position NFT representing the provided liquidity.
-
-  @param pool-id The ID of the pool to add liquidity to.
-  @param amount-x-desired The desired amount of token-x to provide.
-  @param amount-y-desired The desired amount of token-y to provide.
-  @param amount-x-min The minimum acceptable amount of token-x to provide (slippage control).
-  @param amount-y-min The minimum acceptable amount of token-y to provide (slippage control).
-  @param recipient The principal of the recipient for the position NFT.
-  @param tick-lower The lower tick of the liquidity range.
-  @param tick-upper The upper tick of the liquidity range.
-  @returns An `(ok {tokens-minted: uint, token-a-used: uint, token-b-used: uint, position-id: uint})` result containing the liquidity minted and tokens used, or an error.
-  "
+  ;; Adds liquidity to a concentrated liquidity pool within a specified price range.
+  ;; This function mints a new position NFT representing the provided liquidity.
+  ;;
+  ;; @param pool-id The ID of the pool to add liquidity to.
+  ;; @param amount-x-desired The desired amount of token-x to provide.
+  ;; @param amount-y-desired The desired amount of token-y to provide.
+  ;; @param amount-x-min The minimum acceptable amount of token-x to provide (slippage control).
+  ;; @param amount-y-min The minimum acceptable amount of token-y to provide (slippage control).
+  ;; @param recipient The principal of the recipient for the position NFT.
+  ;; @param tick-lower The lower tick of the liquidity range.
+  ;; @param tick-upper The upper tick of the liquidity range.
+  ;; @returns An (ok {tokens-minted: uint, token-a-used: uint, token-b-used: uint, position-id: uint}) result containing the liquidity minted and tokens used, or an error.
   (let
     (
       (pool (try! (map-get? pools {pool-id: pool-id})))
@@ -177,15 +176,14 @@
 ;; @param recipient The principal of the recipient for the tokens.
 ;; @returns An `(ok {amount-x: uint, amount-y: uint})` result containing the tokens received, or an error.
 (define-public (remove-liquidity (position-id uint) (amount-x-min uint) (amount-y-min uint) (recipient principal))
-  "Removes liquidity from a concentrated liquidity pool by burning a position NFT.
-  This function calculates the tokens owed for the given position and transfers them to the recipient.
-
-  @param position-id The ID of the position NFT to burn.
-  @param amount-x-min The minimum acceptable amount of token-x to receive (slippage control).
-  @param amount-y-min The minimum acceptable amount of token-y to receive (slippage control).
-  @param recipient The principal of the recipient for the tokens.
-  @returns An `(ok {amount-x: uint, amount-y: uint})` result containing the tokens received, or an error.
-  "
+  ;; Removes liquidity from a concentrated liquidity pool by burning a position NFT.
+  ;; This function calculates the tokens owed for the given position and transfers them to the recipient.
+  ;;
+  ;; @param position-id The ID of the position NFT to burn.
+  ;; @param amount-x-min The minimum acceptable amount of token-x to receive (slippage control).
+  ;; @param amount-y-min The minimum acceptable amount of token-y to receive (slippage control).
+  ;; @param recipient The principal of the recipient for the tokens.
+  ;; @returns An (ok {amount-x: uint, amount-y: uint}) result containing the tokens received, or an error.
   (let
     (
       (position (try! (map-get? positions {position-id: position-id})))
@@ -209,10 +207,9 @@
 ;; @param pool-id The ID of the pool.
 ;; @returns An `(ok {reserve-a: uint, reserve-b: uint})` result containing the reserves, or an error.
 (define-public (get-reserves (pool-id uint))
-  "Retrieves the current reserves (balances) of token-x and token-y held by a specific concentrated liquidity pool.
-
-  @param pool-id The ID of the pool to query.
-  @returns An `(ok {reserve-a: uint, reserve-b: uint})` result containing the current balances of token-x and token-y, or an error if the pool does not exist.
+  ;; Retrieves the current reserves (balances) of token-x and token-y held by a specific concentrated liquidity pool.
+  ;; @param pool-id The ID of the pool to query.
+  ;; @returns An (ok {reserve-a: uint, reserve-b: uint}) result containing the current balances of token-x and token-y, or an error if the pool does not exist.
   "
 
   ;; @desc Retrieves the total liquidity supply for a given pool.
@@ -480,20 +477,19 @@
   (end-tick int)
   (initial-price uint)
 )
-  "Creates a new concentrated liquidity pool with specified parameters.
-  This function is typically called by a factory contract to deploy new pools.
-  It initializes the pool's state, including the tokens, fees, tick spacing, and initial price.
-
-  @param token-a The SIP-010 trait for the first token in the pool.
-  @param token-b The SIP-010 trait for the second token in the pool.
-  @param factory-address The principal of the factory contract that is authorized to create pools.
-  @param fee-bps The fee percentage for swaps in basis points (e.g., u30 for 0.3%).
-  @param tick-spacing The spacing between ticks, determining the granularity of liquidity ranges.
-  @param start-tick The initial lower tick for the pool's active liquidity range.
-  @param end-tick The initial upper tick for the pool's active liquidity range.
-  @param initial-price The initial square root price of the pool, used to set the starting price.
-  @returns An `(ok uint)` result containing the ID of the newly created pool, or an error if unauthorized.
-  "
+  ;; Creates a new concentrated liquidity pool with specified parameters.
+  ;; This function is typically called by a factory contract to deploy new pools.
+  ;; It initializes the pool's state, including the tokens, fees, tick spacing, and initial price.
+  ;;
+  ;; @param token-a The SIP-010 trait for the first token in the pool.
+  ;; @param token-b The SIP-010 trait for the second token in the pool.
+  ;; @param factory-address The principal of the factory contract that is authorized to create pools.
+  ;; @param fee-bps The fee percentage for swaps in basis points (e.g., u30 for 0.3%).
+  ;; @param tick-spacing The spacing between ticks, determining the granularity of liquidity ranges.
+  ;; @param start-tick The initial lower tick for the pool's active liquidity range.
+  ;; @param end-tick The initial upper tick for the pool's active liquidity range.
+  ;; @param initial-price The initial square root price of the pool, used to set the starting price.
+  ;; @returns An (ok uint) result containing the ID of the newly created pool, or an error if unauthorized.
   (let
     (
       (current-pool-id (var-get next-pool-id))
@@ -526,650 +522,332 @@
 ;; @desc Calculates the square root price from a given tick.
 ;; @param tick The tick to convert.
 ;; @returns An `(ok uint)` result containing the square root price, or an error.
-(use-trait math-lib-concentrated-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated)
+
 (define-read-only (get-sqrt-price-from-tick (tick int))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-sqrt-ratio-at-tick tick)
+  (contract-call? .math.math-lib-concentrated get-sqrt-ratio-at-tick tick)
 )
 
 (define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
+  (contract-call? .math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
 )
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
 
-(define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
-)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
  
 

@@ -3,8 +3,8 @@
 ;; Provides reusable functionality for contracts needing signature verification
 
 ;; Centralized traits
-(use-trait sip-018-trait .all-traits.sip-018-trait)
-(impl-trait .all-traits.sip-018-trait)
+(use-trait sip-018-trait .sip-018-trait.sip-018-trait)
+(impl-trait sip-018-trait)
 
 ;; Constants
 (define-constant ERR_INVALID_SIGNATURE (err u6300))

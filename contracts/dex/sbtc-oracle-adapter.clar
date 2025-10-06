@@ -2,8 +2,8 @@
 ;; sBTC Oracle Adapter - Advanced price feeds and circuit breaker integration
 ;; Handles multiple oracle sources, price validation, and emergency controls
 
-(use-trait oracle-trait .all-traits.oracle-trait)
-(use-trait circuit-breaker-trait .all-traits.circuit-breaker-trait)
+(use-trait oracle-trait .oracle-trait.oracle-trait)
+(use-trait circuit-breaker-trait .circuit-breaker-trait.circuit-breaker-trait)
 
 ;; =============================================================================
 ;; CONSTANTS AND ERROR CODES
@@ -311,11 +311,12 @@
 )
 
 (define-private (get-active-oracles)
-  "Get list of active oracles (simplified - in full implementation would iterate)"
+  (begin
+    "Get list of active oracles (simplified - in full implementation would iterate)"
   ;; In a full implementation, this would iterate through all oracles
   ;; For now, return a placeholder list
   (list .oracle-1 .oracle-2 .oracle-3)
-)
+  ))
 
 (define-private (get-valid-prices (asset principal) (oracles (list 10 principal)))
   "Get valid price feeds from oracles"
@@ -327,7 +328,7 @@
   "Validate individual oracle price"
   (match (map-get? oracle-config { oracle: oracle })
     config (if (get is-active config)
-      (match (map-get? price-feeds { oracle: oracle, asset: .sbtc-integration.SBTC_MAINNET }) ;; Simplified asset reference
+      (match (map-get? price-feeds { oracle: oracle, asset: .sbtc-integration.SBTC-MAINNET }) ;; Simplified asset reference
         feed (if (< (- block-height (get block-height feed)) MAX_STALENESS_BLOCKS)
           (unwrap-panic (as-max-len? (append valid-prices {
             oracle: oracle,

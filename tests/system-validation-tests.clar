@@ -60,7 +60,8 @@
     (ok true)))
 
 (define-private (validate-contract-deployment)
-  "Validate all required contracts are properly deployed"
+  (begin
+    "Validate all required contracts are properly deployed"
   (begin
     ;; Check core token contracts
     (asserts! (is-some (contract-call? .cxd-token get-total-supply)) (err u1001))
@@ -79,10 +80,12 @@
     (asserts! (is-ok (contract-call? .dim-revenue-adapter get-system-contracts)) (err u1010))
     (asserts! (is-ok (contract-call? .tokenized-bond-adapter get-system-contracts)) (err u1011))
     
-    (ok true)))
+    (ok true))
+  ))
 
 (define-private (validate-system-configuration)
-  "Validate system configuration parameters"
+  (begin
+    "Validate system configuration parameters"
   (begin
     ;; Validate coordinator configuration
     (let ((coordinator-info (contract-call? .token-system-coordinator get-system-info)))
@@ -96,10 +99,12 @@
     (let ((revenue-config (contract-call? .revenue-distributor get-revenue-configuration)))
       (asserts! (> (get staker-share revenue-config) u5000) (err u1022))) ;; >50% to stakers
     
-    (ok true)))
+    (ok true))
+  ))
 
 (define-private (validate-security-configuration)
-  "Validate security configuration and access controls"
+  (begin
+    "Validate security configuration and access controls"
   (begin
     ;; Validate protocol monitor is active
     (let ((monitor-status (contract-call? .protocol-invariant-monitor get-system-status)))
@@ -109,10 +114,12 @@
     (let ((health-check (contract-call? .protocol-invariant-monitor check-system-health)))
       (asserts! (is-ok health-check) (err u1031)))
     
-    (ok true)))
+    (ok true))
+  ))
 
 (define-private (validate-emission-limits)
-  "Validate emission limits are properly configured"
+  (begin
+    "Validate emission limits are properly configured"
   (begin
     ;; Check CXD emission limits
     (let ((cxd-limits (contract-call? .token-emission-controller get-token-emission-info .cxd-token)))
@@ -123,10 +130,12 @@
     (let ((cxvg-limits (contract-call? .token-emission-controller get-token-emission-info .cxvg-token)))
       (asserts! (is-some cxvg-limits) (err u1042)))
     
-    (ok true)))
+    (ok true))
+  ))
 
 (define-private (validate-revenue-distribution-setup)
-  "Validate revenue distribution system setup"
+  (begin
+    "Validate revenue distribution system setup"
   (begin
     ;; Check staking contract is configured
     (let ((revenue-config (contract-call? .revenue-distributor get-revenue-configuration)))
@@ -136,7 +145,8 @@
     (let ((collector-count (get registered-collectors (contract-call? .revenue-distributor get-revenue-stats))))
       (asserts! (> collector-count u0) (err u1051)))
     
-    (ok true)))
+    (ok true))
+  ))
 
 ;; =============================================================================
 ;; REAL-WORLD SCENARIO VALIDATION
@@ -166,7 +176,8 @@
     (ok true)))
 
 (define-private (test-new-user-onboarding)
-  "Test new user onboarding flow"
+  (begin
+    "Test new user onboarding flow"
   (begin
     ;; User receives first CXD tokens
     (try! (contract-call? .cxd-token mint PROD_USER_1 PROD_AMOUNT_MEDIUM))
@@ -180,10 +191,12 @@
     ;; User locks CXVG for benefits
     (try! (contract-call? .cxvg-utility lock-cxvg (/ PROD_AMOUNT_SMALL u2) PROD_LOCK_DURATION))
     
-    (ok true)))
+    (ok true))
+  ))
 
 (define-private (test-vault-depositor-journey)
-  "Test typical vault depositor experience"
+  (begin
+    "Test typical vault depositor experience"
   (begin
     ;; User deposits into vault (vault generates fees)
     (try! (contract-call? .cxd-token mint PROD_VAULT_1 PROD_AMOUNT_LARGE))
@@ -195,10 +208,12 @@
     ;; Revenue is distributed to stakers
     (try! (contract-call? .revenue-distributor distribute-revenue .cxd-token))
     
-    (ok true)))
+    (ok true))
+  ))
 
 (define-private (test-governance-participant-workflow)
-  "Test governance participant workflow"
+  (begin
+    "Test governance participant workflow"
   (begin
     ;; Governance participant accumulates CXVG
     (try! (contract-call? .cxvg-token mint PROD_USER_2 PROD_AMOUNT_LARGE))
@@ -210,10 +225,12 @@
     (let ((discount (contract-call? .cxvg-utility get-user-fee-discount PROD_USER_2)))
       (asserts! (< discount u10000) (err u1100))) ;; Has discount
     
-    (ok true)))
+    (ok true))
+  ))
 
 (define-private (test-lp-migration-scenario)
-  "Test CXLP to CXD migration scenario"
+  (begin
+    "Test CXLP to CXD migration scenario"
   (begin
     ;; LP user has CXLP tokens
     (try! (contract-call? .cxlp-token mint PROD_USER_3 PROD_AMOUNT_LARGE))
@@ -231,10 +248,12 @@
            u525600              ;; midyear blocks
            u11000))             ;; 10% adjustment
     
-    (ok true)))
+    (ok true))
+  ))
 
 (define-private (test-whale-user-behavior)
-  "Test whale user behavior and system stability"
+  (begin
+    "Test whale user behavior and system stability"
   (begin
     ;; Whale user gets large amounts
     (try! (contract-call? .cxd-token mint PROD_USER_1 PROD_AMOUNT_WHALE))
@@ -246,7 +265,8 @@
     (let ((system-health (contract-call? .protocol-invariant-monitor check-system-health)))
       (asserts! (is-ok system-health) (err u1110)))
     
-    (ok true)))
+    (ok true))
+  ))
 
 ;; =============================================================================
 ;; REVENUE SYSTEM VALIDATION
@@ -275,7 +295,8 @@
     (ok true)))
 
 (define-private (test-multiple-revenue-streams)
-  "Test multiple concurrent revenue streams"
+  (begin
+    "Test multiple concurrent revenue streams"
   (begin
     ;; Vault fees
     (try! (contract-call? .cxd-token mint PROD_VAULT_1 PROD_AMOUNT_MEDIUM))
@@ -291,10 +312,12 @@
     (try! (contract-call? .dim-revenue-adapter report-dimensional-yield
            u1 (/ PROD_AMOUNT_MEDIUM u20) .cxd-token))
     
-    (ok true)))
+    (ok true))
+  ))
 
 (define-private (test-revenue-accounting-accuracy)
-  "Test revenue accounting accuracy"
+  (begin
+    "Test revenue accounting accuracy"
   (begin
     ;; Get revenue statistics
     (let ((revenue-stats (contract-call? .revenue-distributor get-revenue-stats)))
@@ -303,10 +326,12 @@
       ;; Verify distribution tracking
       (asserts! (>= (get distributed-revenue revenue-stats) u0) (err u1201)))
     
-    (ok true)))
+    (ok true))
+  ))
 
 (define-private (test-revenue-distribution-mechanics)
-  "Test revenue distribution mechanics"
+  (begin
+    "Test revenue distribution mechanics"
   (begin
     ;; Distribute accumulated revenue
     (let ((distribution-result (contract-call? .revenue-distributor distribute-revenue .cxd-token)))
@@ -316,7 +341,8 @@
     (let ((claimable (contract-call? .cxd-staking get-claimable-revenue PROD_USER_1)))
       (asserts! (> claimable u0) (err u1211)))
     
-    (ok true)))
+    (ok true))
+  ))
 
 ;; =============================================================================
 ;; SYSTEM STRESS AND LIMITS VALIDATION
@@ -343,7 +369,8 @@
     (ok true)))
 
 (define-private (test-emission-limit-enforcement)
-  "Test emission limit enforcement"
+  (begin
+    "Test emission limit enforcement"
   (begin
     ;; Test minting within limits
     (let ((mint-result (contract-call? .cxd-token mint PROD_USER_1 PROD_AMOUNT_LARGE)))
@@ -353,10 +380,12 @@
     (let ((emission-info (contract-call? .token-emission-controller get-token-emission-info .cxd-token)))
       (asserts! (is-some emission-info) (err u1301)))
     
-    (ok true)))
+    (ok true))
+  ))
 
 (define-private (test-circuit-breaker-scenarios)
-  "Test circuit breaker activation scenarios"
+  (begin
+    "Test circuit breaker activation scenarios"
   (begin
     ;; Test manual pause
     (try! (contract-call? .protocol-invariant-monitor pause-system))
@@ -368,10 +397,12 @@
     ;; Test unpause
     (try! (contract-call? .protocol-invariant-monitor unpause-system))
     
-    (ok true)))
+    (ok true))
+  ))
 
 (define-private (test-high-frequency-operations)
-  "Test high-frequency operations"
+  (begin
+    "Test high-frequency operations"
   (begin
     ;; Simulate multiple rapid operations
     (try! (contract-call? .cxd-token mint PROD_USER_1 PROD_AMOUNT_SMALL))
@@ -383,10 +414,12 @@
     (let ((system-health (contract-call? .protocol-invariant-monitor check-system-health)))
       (asserts! (is-ok system-health) (err u1320)))
     
-    (ok true)))
+    (ok true))
+  ))
 
 (define-private (test-system-recovery)
-  "Test system recovery after stress"
+  (begin
+    "Test system recovery after stress"
   (begin
     ;; Reset system to normal operation
     (let ((coordinator-status (contract-call? .token-system-coordinator get-system-info)))
@@ -398,7 +431,8 @@
           (emission-operational (is-ok (contract-call? .token-emission-controller get-system-info))))
       (asserts! (and revenue-operational (and staking-operational emission-operational)) (err u1331)))
     
-    (ok true)))
+    (ok true))
+  ))
 
 ;; =============================================================================
 ;; PRODUCTION METRICS VALIDATION
@@ -425,7 +459,8 @@
     (ok true)))
 
 (define-private (test-system-uptime-metrics)
-  "Test system uptime and availability metrics"
+  (begin
+    "Test system uptime and availability metrics"
   (begin
     ;; Check system operational status
     (let ((operational-result (contract-call? .protocol-invariant-monitor is-system-operational)))
@@ -435,10 +470,12 @@
     (let ((coordinator-info (contract-call? .token-system-coordinator get-system-info)))
       (asserts! (get system-active coordinator-info) (err u1401)))
     
-    (ok true)))
+    (ok true))
+  ))
 
 (define-private (test-revenue-distribution-efficiency)
-  "Test revenue distribution efficiency metrics"
+  (begin
+    "Test revenue distribution efficiency metrics"
   (begin
     ;; Calculate distribution efficiency
     (let ((revenue-stats (contract-call? .revenue-distributor get-revenue-stats))
@@ -450,10 +487,12 @@
           (asserts! (>= distribution-rate MIN_REVENUE_DISTRIBUTION_RATE) (err u1410)))
         true))
     
-    (ok true)))
+    (ok true))
+  ))
 
 (define-private (test-user-experience-metrics)
-  "Test user experience metrics"
+  (begin
+    "Test user experience metrics"
   (begin
     ;; Test transaction success rates
     (let ((successful-operations u0)) ;; Would track in real implementation
@@ -464,10 +503,12 @@
       ;; Discount should be reasonable
       (asserts! (and (< discount u10000) (>= discount u8000)) (err u1421)))
     
-    (ok true)))
+    (ok true))
+  ))
 
 (define-private (test-security-metrics)
-  "Test security metrics and audit trails"
+  (begin
+    "Test security metrics and audit trails"
   (begin
     ;; Check invariant monitoring
     (let ((monitor-status (contract-call? .protocol-invariant-monitor get-system-status)))
@@ -476,7 +517,8 @@
     ;; Check access control enforcement
     (asserts! (is-eq (var-get VALIDATION_DEPLOYER) VALIDATION_DEPLOYER) (err u1431))
     
-    (ok true)))
+    (ok true))
+  ))
 
 ;; =============================================================================
 ;; SYSTEM VALIDATION RUNNER

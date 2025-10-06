@@ -2,15 +2,15 @@
 ;; Implements the access control functionality specified in AIP-7
 
 ;; --- Traits ---
-(use-trait access-control-trait .all-traits.access-control-trait)
-(use-trait ownable-trait .all-traits.ownable-trait)
-(use-trait standard-constants-trait .all-traits.standard-constants-trait)
+(use-trait access-control-trait .access-control-trait.access-control-trait)
+(use-trait ownable-trait .ownable-trait.ownable-trait)
+(use-trait standard-constants-trait .standard-constants-trait.standard-constants-trait)
 
-(impl-trait .all-traits.access-control-trait)
-(impl-trait .all-traits.ownable-trait)
+(impl-trait access-control-trait)
+(impl-trait ownable-trait)
 
 ;; Constants
-(define-constant TRAIT_REGISTRY 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.trait-registry)
+(define-constant TRAIT_REGISTRY .trait-registry)
 
 ;; Roles
 (define-constant ROLE_ADMIN 0x41444d494e) ;; ADMIN in hex
@@ -26,7 +26,7 @@
   (list (string-ascii 32))
 )
 (define-data-var paused bool false)
-(define-data-var circuit-breaker principal 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.circuit-breaker)
+(define-data-var circuit-breaker principal .circuit-breaker)
 ;; proposals: id -> proposal tuple
 (define-map proposals
   uint

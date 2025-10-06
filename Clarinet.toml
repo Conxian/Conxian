@@ -7,6 +7,14 @@ clarinet_version = "3.5.0"
 api_endpoint = "https://api.hiro.so"
 delay_execution_start = false
 
+[network.devnet]
+stacks_node_rpc_address = "http://localhost:20443"
+bitcoin_node_rpc_address = "https://mempool.space/testnet/api"
+
+[network.mainnet]
+stacks_node_rpc_address = "https://api.hiro.so"
+bitcoin_node_rpc_address = "https://blockstream.info/api"
+
 [accounts.deployer]
 mnemonic = "twice kind fence tip hidden tilt action fragile skin nothing glory cousin green tomorrow spring wrist shed math olympic multiply hip blue scout claw"
 balance = 100000000000000
@@ -20,14 +28,6 @@ address = "ST2NEB84ASENDXKYGJPQW86YXQCEFEX2ZQPG87ND"
 [accounts.wallet_3]
 address = "ST2REHHS5J3CERCRBEPMGH7921Q6PYKAADT7JP2VB"
 
-[network.devnet]
-stacks_node_rpc_address = "http://localhost:20443"
-bitcoin_node_rpc_address = "https://mempool.space/testnet/api"
-
-[network.mainnet]
-stacks_node_rpc_address = "https://api.hiro.so"
-bitcoin_node_rpc_address = "https://blockstream.info/api"
-
 [contracts.vault]
 path = "contracts/dex/vault.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.vault"
@@ -35,10 +35,6 @@ address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.vault"
 [contracts.tokenized-bond]
 path = "contracts/dimensional/tokenized-bond.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.tokenized-bond"
-
-[contracts.all-traits]
-path = "contracts/traits/all-traits.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits"
 
 [contracts.math-lib-advanced]
 path = "contracts/lib/math-lib-advanced.clar"
@@ -596,6 +592,221 @@ address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.traits-trait-registry"
 path = "contracts/utils/migration-manager.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.utils-migration-manager"
 
+[contracts.concentrated-liquidity-pool]
+path = "contracts/concentrated-liquidity-pool.clar"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.concentrated-liquidity-pool"
+
+[contracts.dex-concentrated-liquidity-pool]
+path = "contracts/dex/concentrated-liquidity-pool.clar"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dex-concentrated-liquidity-pool"
+
+[contracts.dimensional-advanced-router-dijkstra]
+path = "contracts/dimensional/advanced-router-dijkstra.clar"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dimensional-advanced-router-dijkstra"
+
+[contracts.pools-concentrated-liquidity-pool]
+path = "contracts/pools/concentrated-liquidity-pool.clar"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.pools-concentrated-liquidity-pool"
+
+[contracts.fixed-point-math-trait]
+path = "contracts/traits/math/fixed-point-math-trait.clar"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.fixed-point-math-trait"
+
+[contracts.math-trait]
+path = "contracts/traits/math/math-trait.clar"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math-trait"
+
+[contracts.circuit-breaker-trait]
+path = "contracts/traits/security/circuit-breaker-trait.clar"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.circuit-breaker-trait"
+
+[contracts.access-control-trait]
+path = "contracts/traits/security/access-control-trait.clar"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.access-control-trait"
+
+[contracts.monitoring-trait]
+path = "contracts/traits/security/monitoring-trait.clar"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.monitoring-trait"
+
+[contracts.pausable-trait]
+path = "contracts/traits/security/pausable-trait.clar"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.pausable-trait"
+
+[contracts.compliance-hooks-trait]
+path = "contracts/traits/security/compliance-hooks-trait.clar"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.compliance-hooks-trait"
+
+[contracts.mev-protector-trait]
+path = "contracts/traits/security/mev-protector-trait.clar"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.mev-protector-trait"
+
+[contracts.btc-adapter-trait]
+path = "contracts/traits/protocol/btc-adapter-trait.clar"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.btc-adapter-trait"
+
+[contracts.oracle-trait]
+path = "contracts/traits/protocol/oracle-trait.clar"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.oracle-trait"
+
+[contracts.cross-protocol-trait]
+path = "contracts/traits/protocol/cross-protocol-trait.clar"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.cross-protocol-trait"
+depends_on = [ "sip-010-ft-trait",]
+
+[contracts.legacy-adapter-trait]
+path = "contracts/traits/protocol/legacy-adapter-trait.clar"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.legacy-adapter-trait"
+
+[contracts.cxlp-migration-queue-trait]
+path = "contracts/traits/protocol/cxlp-migration-queue-trait.clar"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.cxlp-migration-queue-trait"
+
+[contracts.oracle-aggregator-trait]
+path = "contracts/traits/protocol/oracle-aggregator-trait.clar"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.oracle-aggregator-trait"
+
+[contracts.sip-009-nft-trait]
+path = "contracts/traits/sips/sip-009-nft-trait.clar"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.sip-009-nft-trait"
+
+[contracts.sip-018-trait]
+path = "contracts/traits/sips/sip-018-trait.clar"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.sip-018-trait"
+
+[contracts.sip-010-ft-mintable-trait]
+path = "contracts/traits/sips/sip-010-ft-mintable-trait.clar"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.sip-010-ft-mintable-trait"
+
+[contracts.sip-010-ft-trait]
+path = "contracts/traits/sips/sip-010-ft-trait.clar"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.sip-010-ft-trait"
+
+[contracts.pool-creation-trait]
+path = "contracts/traits/defi/pool-creation-trait.clar"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.pool-creation-trait"
+depends_on = [ "sip-010-ft-trait",]
+
+[contracts.pool-trait]
+path = "contracts/traits/defi/pool-trait.clar"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.pool-trait"
+
+[contracts.factory-trait]
+path = "contracts/traits/defi/factory-trait.clar"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.factory-trait"
+depends_on = [ "sip-010-ft-trait",]
+
+[contracts.vault-trait]
+path = "contracts/traits/defi/vault-trait.clar"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.vault-trait"
+depends_on = [ "sip-010-ft-trait",]
+
+[contracts.staking-trait]
+path = "contracts/traits/defi/staking-trait.clar"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.staking-trait"
+depends_on = [ "sip-010-ft-trait",]
+
+[contracts.fee-manager-trait]
+path = "contracts/traits/defi/fee-manager-trait.clar"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.fee-manager-trait"
+
+[contracts.liquidity-manager-trait]
+path = "contracts/traits/defi/liquidity-manager-trait.clar"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.liquidity-manager-trait"
+
+[contracts.batch-auction-trait]
+path = "contracts/traits/defi/batch-auction-trait.clar"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.batch-auction-trait"
+depends_on = [ "sip-010-ft-trait",]
+
+[contracts.asset-vault-trait]
+path = "contracts/traits/defi/asset-vault-trait.clar"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.asset-vault-trait"
+depends_on = [ "sip-010-ft-trait",]
+
+[contracts.lending-system-trait]
+path = "contracts/traits/defi/lending-system-trait.clar"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.lending-system-trait"
+
+[contracts.vault-admin-trait]
+path = "contracts/traits/defi/vault-admin-trait.clar"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.vault-admin-trait"
+
+[contracts.yield-optimizer-trait]
+path = "contracts/traits/defi/yield-optimizer-trait.clar"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.yield-optimizer-trait"
+depends_on = [ "sip-010-ft-trait",]
+
+[contracts.strategy-trait]
+path = "contracts/traits/defi/strategy-trait.clar"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.strategy-trait"
+depends_on = [ "sip-010-ft-trait",]
+
+[contracts.bond-trait]
+path = "contracts/traits/defi/bond-trait.clar"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.bond-trait"
+
+[contracts.flash-loan-receiver-trait]
+path = "contracts/traits/defi/flash-loan-receiver-trait.clar"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.flash-loan-receiver-trait"
+depends_on = [ "sip-010-ft-trait",]
+
+[contracts.performance-optimizer-trait]
+path = "contracts/traits/defi/performance-optimizer-trait.clar"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.performance-optimizer-trait"
+
+[contracts.router-trait]
+path = "contracts/traits/defi/router-trait.clar"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.router-trait"
+
+[contracts.liquidation-trait]
+path = "contracts/traits/defi/liquidation-trait.clar"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.liquidation-trait"
+
+[contracts.dao-trait]
+path = "contracts/traits/governance/dao-trait.clar"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dao-trait"
+
+[contracts.governance-token-trait]
+path = "contracts/traits/governance/governance-token-trait.clar"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.governance-token-trait"
+
+[contracts.ownable-trait]
+path = "contracts/traits/core/ownable-trait.clar"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.ownable-trait"
+
+[contracts.standard-constants-trait]
+path = "contracts/traits/core/standard-constants-trait.clar"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.standard-constants-trait"
+
+[contracts.utils-trait]
+path = "contracts/traits/core/utils-trait.clar"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.utils-trait"
+
+[contracts.migration-manager-trait]
+path = "contracts/traits/core/migration-manager-trait.clar"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.migration-manager-trait"
+depends_on = [ "sip-010-ft-trait",]
+
+[contracts.metrics-trait]
+path = "contracts/traits/core/metrics-trait.clar"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.metrics-trait"
+
+[contracts.error-codes-trait]
+path = "contracts/traits/core/error-codes-trait.clar"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.error-codes-trait"
+
+[contracts.position-nft-trait]
+path = "contracts/traits/dimensional/position-nft-trait.clar"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.position-nft-trait"
+
+[contracts.dim-registry-trait]
+path = "contracts/traits/dimensional/dim-registry-trait.clar"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dim-registry-trait"
+
+[contracts.dimensional-oracle-trait]
+path = "contracts/traits/dimensional/dimensional-oracle-trait.clar"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dimensional-oracle-trait"
+
 [repl.remappings]
 access-control-trait = ".access-control-trait"
 ft-mintable-trait = ".ft-mintable-trait"
@@ -613,7 +824,6 @@ lending-system-trait = ".lending-system-trait"
 flash-loan-receiver-trait = ".flash-loan-receiver-trait"
 trait-registry = ".trait-registry"
 traits-manifest = ".traits-manifest"
-all-traits = "all-traits"
 cxd-token = ".cxd-token"
 cxvg-token = ".cxvg-token"
 cxtr-token = ".cxtr-token"
@@ -681,6 +891,41 @@ math-lib-advanced = ".math-lib-advanced"
 fixed-point-math = ".fixed-point-math"
 precision-calculator = ".precision-calculator"
 audit-registry = ".audit-registry"
+fixed-point-math-trait = ".fixed-point-math-trait"
+math-trait = ".math-trait"
+circuit-breaker-trait = ".circuit-breaker-trait"
+monitoring-trait = ".monitoring-trait"
+pausable-trait = ".pausable-trait"
+compliance-hooks-trait = ".compliance-hooks-trait"
+mev-protector-trait = ".mev-protector-trait"
+btc-adapter-trait = ".btc-adapter-trait"
+cross-protocol-trait = ".cross-protocol-trait"
+legacy-adapter-trait = ".legacy-adapter-trait"
+cxlp-migration-queue-trait = ".cxlp-migration-queue-trait"
+oracle-aggregator-trait = ".oracle-aggregator-trait"
+sip-009-nft-trait = ".sip-009-nft-trait"
+sip-018-trait = ".sip-018-trait"
+sip-010-ft-mintable-trait = ".sip-010-ft-mintable-trait"
+sip-010-ft-trait = ".sip-010-ft-trait"
+pool-creation-trait = ".pool-creation-trait"
+factory-trait = ".factory-trait"
+fee-manager-trait = ".fee-manager-trait"
+liquidity-manager-trait = ".liquidity-manager-trait"
+batch-auction-trait = ".batch-auction-trait"
+asset-vault-trait = ".asset-vault-trait"
+vault-admin-trait = ".vault-admin-trait"
+yield-optimizer-trait = ".yield-optimizer-trait"
+bond-trait = ".bond-trait"
+performance-optimizer-trait = ".performance-optimizer-trait"
+router-trait = ".router-trait"
+liquidation-trait = ".liquidation-trait"
+dao-trait = ".dao-trait"
+governance-token-trait = ".governance-token-trait"
+utils-trait = ".utils-trait"
+migration-manager-trait = ".migration-manager-trait"
+metrics-trait = ".metrics-trait"
+error-codes-trait = ".error-codes-trait"
+position-nft-trait = ".position-nft-trait"
 
 [accounts.wallet_3.system]
 mnemonic = "theme apart absurd gasp river used vessel screen fiction slice slab ice jar hurt slam puppy snake life radar sign ship list excuse trick"

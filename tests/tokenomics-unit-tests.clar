@@ -3,7 +3,7 @@
 ;; Tests all token contracts, staking, migration, governance utilities, and revenue distribution
 
 (use-trait sip-010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.sip-010-ft-trait)
-(use-trait ftm-trait .all-traits.ft-mintable-trait)
+(use-trait ftm-trait .ft-mintable-trait.ft-mintable-trait)
 
 ;; =============================================================================
 ;; TEST CONSTANTS AND SETUP

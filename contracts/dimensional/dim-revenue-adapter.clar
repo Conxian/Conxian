@@ -3,13 +3,13 @@
 ;; Routes dimensional rewards through revenue distributor for proper token holder distribution
 
 ;; --- Traits ---
-(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
-(use-trait ownable-trait .all-traits.ownable-trait)
+(use-trait sip-010-ft-trait .sip-010-ft-trait.sip-010-ft-trait)
+(use-trait ownable-trait .ownable-trait.ownable-trait)
 
-(impl-trait .all-traits.ownable-trait)
+(impl-trait ownable-trait)
 
 ;; --- Constants ---
-(define-constant TRAIT_REGISTRY 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.trait-registry)
+(define-constant TRAIT_REGISTRY .trait-registry)
 (define-constant CONTRACT_OWNER tx-sender)
 (define-constant PRECISION u100000000)
 

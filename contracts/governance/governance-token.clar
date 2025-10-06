@@ -2,8 +2,8 @@
 ;; Implements a SIP-010 fungible token for governance purposes
 
 ;; Traits
-(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
-(use-trait ownable-trait .all-traits.ownable-trait)
+(use-trait sip-010-ft-trait .sip-010-ft-trait.sip-010-ft-trait)
+(use-trait ownable-trait .ownable-trait.ownable-trait)
 
 ;; Constants
 (define-constant ERR_UNAUTHORIZED (err u100))

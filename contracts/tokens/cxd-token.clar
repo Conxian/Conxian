@@ -3,15 +3,15 @@
 ;; Enhanced with integration hooks for staking, revenue distribution, and system monitoring
 
 ;; --- Traits ---
-(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
-(use-trait ownable-trait .all-traits.ownable-trait)
+(use-trait sip-010-ft-trait .sip-010-ft-trait.sip-010-ft-trait)
+(use-trait ownable-trait .ownable-trait.ownable-trait)
 
 ;; Implement required traits
-(impl-trait .all-traits.sip-010-ft-trait)
-(impl-trait .all-traits.ownable-trait)
+(impl-trait sip-010-ft-trait)
+(impl-trait ownable-trait)
 
 ;; Constants
-(define-constant TRAIT_REGISTRY 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.trait-registry)
+(define-constant TRAIT_REGISTRY .trait-registry)
 
 ;; --- Errors ---
 (define-constant ERR_UNAUTHORIZED u100)
@@ -62,12 +62,14 @@
 
 ;; --- System Integration Helpers ---
 (define-private (check-system-pause)
-  "Check if system operations are paused"
+  (begin
+    "Check if system operations are paused"
   (if (var-get system-integration-enabled)
     (match (var-get protocol-monitor)
       monitor (unwrap-panic (contract-call? monitor is-paused))
       false)
-    false))
+    false)
+  ))
 
 (define-private (check-emission-allowed (amount uint))
   "Check if token emission is allowed for the given amount"

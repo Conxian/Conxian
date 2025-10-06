@@ -149,16 +149,18 @@ mnemonic*
 secrets*
 
 # Temporary files
-tmp/
 temp/
+tmp/
 .tmp/
 .temp/
 
 # Conxian specific
-oracle/data/
-chainhooks/data/
 monitoring/logs/
 analytics/cache/
+
+# StacksOrbit standalone repository (separate GitHub repo)
+# See: https://github.com/Anya-org/stacksorbit
+stacksorbit/
 
 # Kiro IDE specific files
 #.kiro/*

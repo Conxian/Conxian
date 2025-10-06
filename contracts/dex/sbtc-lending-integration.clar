@@ -2,7 +2,7 @@
 ;; sBTC Lending Integration - extends comprehensive lending system
 ;; Provides sBTC-specific lending, borrowing, and collateral management
 
-(use-trait ft-trait .all-traits.sip-010-ft-trait)
+(use-trait ft-trait .sip-010-ft-trait.sip-010-ft-trait)
 
 ;; =============================================================================
 ;; CONSTANTS AND ERROR CODES
@@ -97,9 +97,9 @@
 
 (define-read-only (calculate-account-liquidity (user principal))
   "Calculate users account liquidity (collateral value - borrowed value)"
-  (let ((sbtc-supply (get-user-supply-balance user (get-constant sbtc-integration SBTC_MAINNET)))
-        (sbtc-borrow (get-user-borrow-balance user (get-constant sbtc-integration SBTC_MAINNET))))
-    (match (contract-call? sbtc-integration calculate-collateral-value (get-constant sbtc-integration SBTC_MAINNET) sbtc-supply)
+  (let ((sbtc-supply (get-user-supply-balance user (get-constant sbtc-integration SBTC-MAINNET)))
+        (sbtc-borrow (get-user-borrow-balance user (get-constant sbtc-integration SBTC-MAINNET))))
+    (match (contract-call? sbtc-integration calculate-collateral-value (get-constant sbtc-integration SBTC-MAINNET) sbtc-supply)
       collateral-value (match (contract-call? sbtc-integration get-sbtc-price)
         price (let ((borrow-value (* sbtc-borrow price)))
           (if (>= collateral-value borrow-value)
@@ -116,11 +116,11 @@
 
 (define-read-only (calculate-health-factor (user principal))
   "Calculate users health factor (>1.0 = healthy, <1.0 = can be liquidated)"
-  (let ((sbtc-supply (get-user-supply-balance user (get-constant sbtc-integration SBTC_MAINNET)))
-        (sbtc-borrow (get-user-borrow-balance user (get-constant sbtc-integration SBTC_MAINNET))))
+  (let ((sbtc-supply (get-user-supply-balance user (get-constant sbtc-integration SBTC-MAINNET)))
+        (sbtc-borrow (get-user-borrow-balance user (get-constant sbtc-integration SBTC-MAINNET))))
     (if (is-eq sbtc-borrow u0)
       (ok u2000000) ;; Very high health factor if no borrows
-      (match (contract-call? sbtc-integration calculate-liquidation-threshold (get-constant sbtc-integration SBTC_MAINNET) sbtc-supply)
+      (match (contract-call? sbtc-integration calculate-liquidation-threshold (get-constant sbtc-integration SBTC-MAINNET) sbtc-supply)
         liquidation-value (match (contract-call? sbtc-integration get-sbtc-price)
           price (let ((borrow-value (* sbtc-borrow price)))
             (if (> borrow-value u0)
@@ -154,8 +154,8 @@
   "Get liquidation information for borrower"
   (match (calculate-health-factor borrower)
     health-factor (if (< health-factor u1000000) ;; Health factor < 1.0
-      (let ((sbtc-supply (get-user-supply-balance borrower (get-constant sbtc-integration SBTC_MAINNET)))
-            (sbtc-borrow (get-user-borrow-balance borrower (get-constant sbtc-integration SBTC_MAINNET))))
+      (let ((sbtc-supply (get-user-supply-balance borrower (get-constant sbtc-integration SBTC-MAINNET)))
+            (sbtc-borrow (get-user-borrow-balance borrower (get-constant sbtc-integration SBTC-MAINNET))))
         (ok {
           can-liquidate: true,
           health-factor: health-factor,
@@ -503,8 +503,8 @@
 
 (define-public (get-account-summary (user principal))
   "Get comprehensive account summary"
-  (let ((sbtc-supply (get-user-supply-balance user (get-constant sbtc-integration SBTC_MAINNET)))
-        (sbtc-borrow (get-user-borrow-balance user (get-constant sbtc-integration SBTC_MAINNET))))
+  (let ((sbtc-supply (get-user-supply-balance user (get-constant sbtc-integration SBTC-MAINNET)))
+        (sbtc-borrow (get-user-borrow-balance user (get-constant sbtc-integration SBTC-MAINNET))))
     (match (calculate-health-factor user)
       health-factor (match (calculate-account-liquidity user)
         liquidity (ok {

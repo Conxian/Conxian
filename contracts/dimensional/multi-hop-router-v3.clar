@@ -3,12 +3,12 @@
 ;; Supports all pool types including concentrated liquidity pools
 
 ;; --- Traits ---
-(use-trait pool-trait .all-traits.pool-trait)
-(use-trait router-trait .all-traits.router-trait)
-(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
-(use-trait factory-trait .all-traits.factory-trait)
+(use-trait pool-trait .pool-trait.pool-trait)
+(use-trait router-trait .router-trait.router-trait)
+(use-trait sip-010-ft-trait .sip-010-ft-trait.sip-010-ft-trait)
+(use-trait factory-trait .factory-trait.factory-trait)
 
-(impl-trait .all-traits.router-trait)
+(impl-trait router-trait)
 
 ;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED (err u5000))

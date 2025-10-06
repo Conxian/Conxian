@@ -1,5 +1,5 @@
-(use-trait ft-trait .all-traits.sip-010-ft-trait)
-(use-trait dex-factory-trait .all-traits.dex-factory-trait)
+(use-trait ft-trait .sip-010-ft-trait.sip-010-ft-trait)
+(use-trait dex-factory-trait .dex-factory-trait.dex-factory-trait)
 
 (define-constant DEX-FACTORY-CONTRACT (contract-of .dex-factory))
 

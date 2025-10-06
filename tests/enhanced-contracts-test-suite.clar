@@ -358,37 +358,51 @@
 ;; =============================================================================
 
 (define-private (test-cross-system-workflows)
-  "Test workflows that span multiple enhanced systems"
+  (begin
+    "Test workflows that span multiple enhanced systems"
   (begin
     ;; Test: Deposit -> Cache Price -> Optimal Pool Selection
     (try! (contract-call? .vault-enhanced deposit TEST_TOKEN_A u1000))
     (try! (contract-call? .oracle-aggregator-enhanced get-cached-price "BTC-STX"))
     (try! (contract-call? .dex-factory-enhanced get-optimal-pool TEST_TOKEN_A TEST_TOKEN_B u500))
-    (ok true)))
+    (ok true))
+  ))
 
 (define-private (test-vault-performance)
-  "Test vault performance metrics"
-  (ok u200000)) ;; Placeholder TPS
+  (begin
+    "Test vault performance metrics"
+  (ok u200000)
+  )) ;; Placeholder TPS
 
 (define-private (test-oracle-performance)
-  "Test oracle performance metrics"
-  (ok u50000)) ;; Placeholder TPS
+  (begin
+    "Test oracle performance metrics"
+  (ok u50000)
+  )) ;; Placeholder TPS
 
 (define-private (test-dex-performance)
-  "Test DEX performance metrics"
-  (ok u50000)) ;; Placeholder TPS
+  (begin
+    "Test DEX performance metrics"
+  (ok u50000)
+  )) ;; Placeholder TPS
 
 (define-private (test-high-volume-scenario)
-  "Test high volume operations"
-  (ok true))
+  (begin
+    "Test high volume operations"
+  (ok true)
+  ))
 
 (define-private (test-concurrent-operations)
-  "Test concurrent system operations"
-  (ok true))
+  (begin
+    "Test concurrent system operations"
+  (ok true)
+  ))
 
 (define-private (test-system-limits)
-  "Test system operational limits"
-  (ok true))
+  (begin
+    "Test system operational limits"
+  (ok true)
+  ))
 
 ;; =============================================================================
 ;; TEST SUITE RUNNER

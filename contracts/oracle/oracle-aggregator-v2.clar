@@ -1,10 +1,10 @@
 ;; Oracle Aggregator V2
 ;; This contract aggregates prices from multiple oracle sources, calculates TWAP, and detects manipulation.
 
-(use-trait oracle-trait .all-traits.oracle-trait)
-(use-trait access-control-trait .all-traits.access-control-trait)
-(use-trait circuit-breaker-trait .all-traits.circuit-breaker-trait)
-(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
+(use-trait oracle-trait .oracle-trait.oracle-trait)
+(use-trait access-control-trait .access-control-trait.access-control-trait)
+(use-trait circuit-breaker-trait .circuit-breaker-trait.circuit-breaker-trait)
+(use-trait sip-010-ft-trait .sip-010-ft-trait.sip-010-ft-trait)
 
 ;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED (err u1003))
@@ -19,7 +19,7 @@
 
 ;; --- Data Variables ---
 (define-data-var contract-owner principal tx-sender)
-(define-data-var circuit-breaker principal 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.circuit-breaker)
+(define-data-var circuit-breaker principal .circuit-breaker)
 (define-data-var oracle-sources (list 20 principal) (list))
 (define-map prices { token-a: principal, token-b: principal } { price: uint, last-updated: uint })
 (define-map twap { token-a: principal, token-b: principal } { price: uint, last-updated: uint })
