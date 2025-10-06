@@ -42,7 +42,19 @@ foreach ($file in $contractFiles) {
         @{Name="lending-system-trait"; Old="\.lending-system-trait\.lending-system-trait"; New=".all-traits.lending-system-trait"},
         @{Name="math-trait"; Old="\.math-trait\.math-trait"; New=".all-traits.math-trait"},
         @{Name="bond-trait"; Old="\.bond-trait\.bond-trait"; New=".all-traits.bond-trait"},
-        @{Name="router-trait"; Old="\.router-trait\.router-trait"; New=".all-traits.router-trait"}
+        @{Name="router-trait"; Old="\.router-trait\.router-trait"; New=".all-traits.router-trait"},
+        @{Name="error-codes-trait"; Old="\.error-codes-trait\.error-codes-trait"; New=".all-traits.error-codes-trait"},
+        @{Name="standard-constants-trait"; Old="\.standard-constants-trait\.standard-constants-trait"; New=".all-traits.standard-constants-trait"},
+        @{Name="vault-admin-trait"; Old="\.vault-admin-trait\.vault-admin-trait"; New=".all-traits.vault-admin-trait"},
+        @{Name="pool-creation-trait"; Old="\.pool-creation-trait\.pool-creation-trait"; New=".all-traits.pool-creation-trait"},
+        @{Name="fee-manager-trait"; Old="\.fee-manager-trait\.fee-manager-trait"; New=".all-traits.fee-manager-trait"},
+        @{Name="circuit-breaker-trait"; Old="\.circuit-breaker-trait\.circuit-breaker-trait"; New=".all-traits.circuit-breaker-trait"},
+        @{Name="monitoring-trait"; Old="\.monitoring-trait\.monitoring-trait"; New=".all-traits.monitoring-trait"},
+        @{Name="pausable-trait"; Old="\.pausable-trait\.pausable-trait"; New=".all-traits.pausable-trait"},
+        @{Name="compliance-hooks-trait"; Old="\.compliance-hooks-trait\.compliance-hooks-trait"; New=".all-traits.compliance-hooks-trait"},
+        @{Name="mev-protector-trait"; Old="\.mev-protector-trait\.mev-protector-trait"; New=".all-traits.mev-protector-trait"},
+        @{Name="sip-010-ft-mintable-trait"; Old="\.sip-010-ft-mintable-trait\.sip-010-ft-mintable-trait"; New=".all-traits.sip-010-ft-mintable-trait"},
+        @{Name="position-nft-trait"; Old="\.position-nft-trait\.position-nft-trait"; New=".all-traits.position-nft-trait"}
     )
     
     foreach ($pattern in $traitPatterns) {
@@ -52,6 +64,47 @@ foreach ($file in $contractFiles) {
             $fileFixCount++
             Write-Host "  OK Fixed use-trait for $($pattern.Name)" -ForegroundColor Green
         }
+    }
+
+    # Special case: legacy alias 'nft-trait' -> centralized sip-009-nft-trait
+    $legacyNftRegex = "\(use-trait\s+nft-trait\s+\.nft-trait\.nft-trait\)"
+    if ($content -match $legacyNftRegex) {
+        $content = $content -replace $legacyNftRegex, "(use-trait sip-009-nft-trait .all-traits.sip-009-nft-trait)"
+        $fileFixCount++
+        Write-Host "  OK Rewrote legacy nft-trait alias to sip-009-nft-trait" -ForegroundColor Green
+    }
+
+    # Rewrite relative .all-traits.* references to explicit principal to avoid principal mismatch
+    # Skip rewriting in the all-traits.clar file itself
+    $allTraitsPrincipal = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+    if ($File.FullName -notmatch "all-traits\.clar$") {
+        $useTraitRelRegex = "\(use-trait\s+([a-zA-Z0-9\-]+)\s+\.all-traits\.([a-zA-Z0-9\-]+)\)"
+        $implTraitRelRegex = "\(impl-trait\s+\.all-traits\.([a-zA-Z0-9\-]+)\)"
+
+        if ($content -match $useTraitRelRegex) {
+            $content = [regex]::Replace($content, $useTraitRelRegex, "(use-trait $1 '$allTraitsPrincipal .all-traits.$2)")
+            $fileFixCount++
+            Write-Host "  OK Rewrote relative .all-traits use-trait to explicit principal" -ForegroundColor Green
+        }
+        if ($content -match $implTraitRelRegex) {
+            $content = [regex]::Replace($content, $implTraitRelRegex, "(impl-trait '$allTraitsPrincipal .all-traits.$1)")
+            $fileFixCount++
+            Write-Host "  OK Rewrote relative .all-traits impl-trait to explicit principal" -ForegroundColor Green
+        }
+    }
+
+    # Also fix explicit principals missing quote in previous passes
+    $useTraitExplicitNoQuote = "\(use-trait\s+([a-zA-Z0-9\-]+)\s+(S[A-Z0-9]+)\.all-traits\.([a-zA-Z0-9\-]+)\)"
+    if ($content -match $useTraitExplicitNoQuote) {
+        $content = [regex]::Replace($content, $useTraitExplicitNoQuote, "(use-trait $1 '$2 .all-traits.$3)")
+        $fileFixCount++
+        Write-Host "  OK Quoted explicit principal for use-trait" -ForegroundColor Green
+    }
+    $implTraitExplicitNoQuote = "\(impl-trait\s+(S[A-Z0-9]+)\.all-traits\.([a-zA-Z0-9\-]+)\)"
+    if ($content -match $implTraitExplicitNoQuote) {
+        $content = [regex]::Replace($content, $implTraitExplicitNoQuote, "(impl-trait '$1 .all-traits.$2)")
+        $fileFixCount++
+        Write-Host "  OK Quoted explicit principal for impl-trait" -ForegroundColor Green
     }
     
     # =========================================================================

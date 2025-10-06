@@ -3,14 +3,14 @@
 
 ;; --- Traits ---
 (use-trait oracle-trait .oracle-trait.oracle-trait)
-(use-trait lending-system-trait .all-traits.lending-system-trait)
-(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
-(use-trait access-control-trait .all-traits.access-control-trait)
-(use-trait pool-trait .all-traits.pool-trait)
+(use-trait  ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
+(use-trait  ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
+(use-trait  ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
+(use-trait  ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
 (use-trait flash-loan-receiver-trait .flash-loan-receiver-trait.flash-loan-receiver-trait)
-(use-trait circuit-breaker-trait .circuit-breaker-trait.circuit-breaker-trait)
+(use-trait  ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
 
-(impl-trait .all-traits.lending-system-trait)
+(impl-trait ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
 
 ;; --- Constants ---
 (define-constant LENDING_SERVICE "lending-service")

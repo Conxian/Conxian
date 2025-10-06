@@ -1,7 +1,7 @@
 ;; legacy-adapter.clar
 ;; Provides backward compatibility for legacy contracts and interfaces
 
-(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
+(use-trait  ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
 (use-trait legacy-adapter-trait .legacy-adapter-trait.legacy-adapter-trait)
 
 (impl-trait legacy-adapter-trait)

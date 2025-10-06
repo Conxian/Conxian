@@ -1,5 +1,5 @@
 ;; Conxian Cross-Protocol Integrator
-(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
+(use-trait  ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
 (use-trait dex-router-trait .dex-router-trait.dex-router-trait)
 (use-trait oracle-trait .oracle-trait.oracle-trait)
 

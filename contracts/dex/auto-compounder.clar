@@ -1,10 +1,10 @@
 ;; auto-compounder.clar
 ;; This contract automatically compounds rewards for users.
 
-(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
+(use-trait  ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
 (use-trait yield-optimizer-trait .yield-optimizer-trait.yield-optimizer-trait)
-(use-trait strategy-trait .all-traits.strategy-trait)
-(use-trait circuit-breaker-trait .circuit-breaker-trait.circuit-breaker-trait)
+(use-trait  ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
+(use-trait  ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
 (use-trait metrics-trait .metrics-trait.metrics-trait)
 
 (define-constant ERR_UNAUTHORIZED (err u8000))

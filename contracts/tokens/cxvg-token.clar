@@ -3,14 +3,14 @@
 ;; Enhanced with delegation, voting power, and governance features
 
 ;; --- Traits ---
-(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
-(use-trait sip-010-ft-mintable-trait .sip-010-ft-mintable-trait.sip-010-ft-mintable-trait)
-(use-trait monitoring-trait .monitoring-trait.monitoring-trait)
+(use-trait  ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
+(use-trait  ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
+(use-trait  ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
 
 ;; Implement the standard traits
-(impl-trait .all-traits.sip-010-ft-trait)
-(impl-trait sip-010-ft-mintable-trait)
-(impl-trait monitoring-trait)
+(impl-trait ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
+(impl-trait ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
+(impl-trait ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
 
 ;; Constants
 (define-constant TRAIT_REGISTRY .trait-registry)

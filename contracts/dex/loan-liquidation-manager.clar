@@ -2,10 +2,10 @@
 ;; Manages liquidations for undercollateralized loans
 ;; Implements a permissionless liquidation entry point
 
-(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
+(use-trait  ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
 
 ;; --- Traits ---
-(use-trait lending-system-trait .all-traits.lending-system-trait)
+(use-trait  ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
 
 ;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED (err u2001))

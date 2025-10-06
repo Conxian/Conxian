@@ -3,12 +3,12 @@
 ;; Supports multiple pool types and complex multi-hop swaps
 
 ;; Traits
-(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
-(use-trait pool-trait .all-traits.pool-trait)
-(use-trait factory-trait .all-traits.factory-trait)
+(use-trait  ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
+(use-trait  ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
+(use-trait  ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
 
 ;; Implementation
-;; (impl-trait .all-traits.router-trait) ;; removed until router-trait is defined in all-traits
+;; (impl-trait ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.) ;; removed until router-trait is defined in all-traits
 
 ;; Constants
 (define-constant CONTRACT_OWNER tx-sender)

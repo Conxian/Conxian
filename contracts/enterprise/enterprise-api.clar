@@ -1,7 +1,7 @@
 ;; Conxian Enterprise API - Institutional features
-(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
-(use-trait compliance-hooks-trait .compliance-hooks-trait.compliance-hooks-trait)
-(use-trait circuit-breaker-trait .circuit-breaker-trait.circuit-breaker-trait)
+(use-trait  ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
+(use-trait  ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
+(use-trait  ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
 (use-trait dex-router-trait .dex-router-trait.dex-router-trait)
 
 ;; --- Constants ---

@@ -2,12 +2,12 @@
 ;; Bitcoin asset management vault with sBTC wrapping/unwrapping
 ;; Provides secure custody, yield generation, and cross-chain bridging for BTC
 
-(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
-(use-trait vault-trait .all-traits.vault-trait)
-(use-trait vault-admin-trait .all-traits.vault-admin-trait)
+(use-trait  ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
+(use-trait  ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
+(use-trait  ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
 
-(impl-trait .all-traits.vault-trait)
-(impl-trait .all-traits.vault-admin-trait)
+(impl-trait ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
+(impl-trait ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
 
 ;; ===== Constants =====
 (define-constant ERR_UNAUTHORIZED (err u2001))
@@ -138,7 +138,7 @@
     (var-set performance-fee-bps fee-bps)
     (ok true)))
 
-;; ===== Core Vault Functions (impl-trait .all-traits.vault-trait) =====
+;; ===== Core Vault Functions (impl-trait ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.) =====
 
 ;; Deposit sBTC into vault
 (define-public (deposit (token-contract (contract-of sip-010-ft-trait)) (amount uint))

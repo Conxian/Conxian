@@ -1,7 +1,7 @@
 ;; performance-optimizer.clar
 ;; Optimizes transaction performance and gas usage
 
-(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
+(use-trait  ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
 (use-trait performance-optimizer-trait .performance-optimizer-trait.performance-optimizer-trait)
 
 (impl-trait performance-optimizer-trait)

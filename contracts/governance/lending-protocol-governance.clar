@@ -3,8 +3,8 @@
 ;; Integrates with AccessControl for role-based access
 
 ;; --- Traits ---
-(use-trait access-control-trait .all-traits.access-control-trait)
-(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
+(use-trait  ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
+(use-trait  ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
 (define-constant TRAIT_REGISTRY .trait-registry)
 
 (define-constant ERR_UNAUTHORIZED (err u8001))

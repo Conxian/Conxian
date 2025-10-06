@@ -1,11 +1,11 @@
 ;; circuit-breaker.clar
 ;; Implements the enhanced circuit breaker pattern
 
- (use-trait circuit-breaker-trait .all-traits.circuit-breaker-trait)
- (use-trait ownable-trait .all-traits.ownable-trait)
+ (use-trait  ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
+ (use-trait  ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
 
- (impl-trait .all-traits.circuit-breaker-trait)
- (impl-trait .all-traits.ownable-trait)
+ (impl-trait ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
+ (impl-trait ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
 
 ;; ===== Constants =====
 (define-constant ERR_UNAUTHORIZED (err u1001))

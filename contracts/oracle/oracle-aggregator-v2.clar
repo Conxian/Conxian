@@ -2,9 +2,9 @@
 ;; This contract aggregates prices from multiple oracle sources, calculates TWAP, and detects manipulation.
 
 (use-trait oracle-trait .oracle-trait.oracle-trait)
-(use-trait access-control-trait .all-traits.access-control-trait)
-(use-trait circuit-breaker-trait .circuit-breaker-trait.circuit-breaker-trait)
-(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
+(use-trait  ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
+(use-trait  ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
+(use-trait  ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
 
 ;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED (err u1003))

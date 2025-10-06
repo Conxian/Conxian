@@ -5,8 +5,8 @@
 ;; Square root implementation using Newton's method (Babylonian method)
 
 ;; Standardized trait references
-(use-trait math-trait .all-traits.math-trait)
-(impl-trait .all-traits.math-trait)
+(use-trait  ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
+(impl-trait ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
 
 (define-read-only (pow-fixed (base uint) (exp uint))
   (let ((result (var-init PRECISION)))

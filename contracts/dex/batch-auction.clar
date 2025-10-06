@@ -1,7 +1,7 @@
 ;; batch-auction.clar
 ;; Implements a batch auction mechanism for fair execution
 
-(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
+(use-trait  ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
 (use-trait batch-auction-trait .batch-auction-trait.batch-auction-trait)
 
 (impl-trait batch-auction-trait)

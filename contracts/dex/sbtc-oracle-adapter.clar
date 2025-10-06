@@ -3,7 +3,7 @@
 ;; Handles multiple oracle sources, price validation, and emergency controls
 
 (use-trait oracle-trait .oracle-trait.oracle-trait)
-(use-trait circuit-breaker-trait .circuit-breaker-trait.circuit-breaker-trait)
+(use-trait  ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
 
 ;; =============================================================================
 ;; CONSTANTS AND ERROR CODES

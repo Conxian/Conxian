@@ -1,11 +1,11 @@
 ;; System Monitor
 ;; Implements monitoring and alerting for the Conxian protocol
 
-(use-trait monitoring-trait .all-traits.monitoring-trait)
-(use-trait ownable-trait .all-traits.ownable-trait)
+(use-trait  ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
+(use-trait  ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
 
-(impl-trait .all-traits.monitoring-trait)
-(impl-trait .all-traits.ownable-trait)
+(impl-trait ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
+(impl-trait ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
 
 (define-constant ERR_NOT_AUTHORIZED (err u100))
 (define-constant ERR_INVALID_SEVERITY (err u101))

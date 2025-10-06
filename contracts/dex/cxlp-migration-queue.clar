@@ -1,8 +1,8 @@
 ;; cxlp-migration-queue.clar
 ;; Intent queue system for CXLP to CXD migration with pro-rata settlement
 ;; Prevents FCFS races and enables fair distribution based on duration-weighted requests
-(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
-(use-trait access-control-trait .all-traits.access-control-trait)
+(use-trait  ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
+(use-trait  ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
 (use-trait cxlp-migration-queue-trait .cxlp-migration-queue-trait.cxlp-migration-queue-trait)
 (use-trait ft-mintable .sip-010-ft-mintable-trait.sip-010-ft-mintable-trait)
 

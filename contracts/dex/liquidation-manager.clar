@@ -1,6 +1,6 @@
-(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
-(use-trait lending-system-trait .all-traits.lending-system-trait)
-(use-trait standard-constants-trait .standard-constants-trait.standard-constants-trait)
+(use-trait  ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
+(use-trait  ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
+(use-trait  ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
 (use-trait liquidation-interface .liquidation-trait.liquidation-trait)
 
 (impl-trait liquidation-trait)
