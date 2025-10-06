@@ -1,4 +1,4 @@
-(use-trait liquidity-manager-trait .all-traits.liquidity-manager-trait)
+(use-trait liquidity-manager-trait .liquidity-manager-trait.liquidity-manager-trait)
 
 (define-public (get-utilization) (ok u0))
 (define-public (get-yield-rate) (ok u0))

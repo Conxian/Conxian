@@ -2,13 +2,13 @@
 ;; Aggregates price feeds from multiple oracles and provides TWAP calculations
 
 ;; Traits
-(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
-(use-trait oracle-trait .all-traits.oracle-trait)
-(use-trait access-control-trait .all-traits.access-control-trait)
-(use-trait circuit-breaker-trait .all-traits.circuit-breaker-trait)
-(use-trait oracle-aggregator-trait .all-traits.oracle-aggregator-trait)
+(use-trait sip-010-ft-trait .sip-010-ft-trait.sip-010-ft-trait)
+(use-trait oracle-trait .oracle-trait.oracle-trait)
+(use-trait access-control-trait .access-control-trait.access-control-trait)
+(use-trait circuit-breaker-trait .circuit-breaker-trait.circuit-breaker-trait)
+(use-trait oracle-aggregator-trait .oracle-aggregator-trait.oracle-aggregator-trait)
 
-(impl-trait .all-traits.oracle-aggregator-trait)
+(impl-trait oracle-aggregator-trait)
 
 ;; Constants
 (define-constant ERR_UNAUTHORIZED (err u100))

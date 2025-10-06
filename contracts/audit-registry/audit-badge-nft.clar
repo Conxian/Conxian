@@ -1,7 +1,7 @@
 ;; audit-badge-nft.clar
 ;; SIP-009 compliant NFT contract for audit badges
 
-(use-trait sip-009-nft-trait .all-traits.sip-009-nft-trait)
+(use-trait sip-009-nft-trait .sip-009-nft-trait.sip-009-nft-trait)
 (impl-trait sip-009-nft-trait)
 (define-non-fungible-token audit-badge-nft uint)
 (define-constant CONTRACT_OWNER tx-sender)

@@ -1,9 +1,9 @@
 ;; Conxian Cross-Protocol Integrator
-(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
-(use-trait dex-router-trait .all-traits.dex-router-trait)
-(use-trait oracle-trait .all-traits.oracle-trait)
+(use-trait sip-010-ft-trait .sip-010-ft-trait.sip-010-ft-trait)
+(use-trait dex-router-trait .dex-router-trait.dex-router-trait)
+(use-trait oracle-trait .oracle-trait.oracle-trait)
 
-(impl-trait .all-traits.cross-protocol-integrator-trait)
+(impl-trait cross-protocol-integrator-trait)
 
 ;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED (err u701))

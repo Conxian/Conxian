@@ -2,8 +2,8 @@
 ;; Enhanced Flash Loan Vault with sBTC Support
 ;; Implements secure flash loans with sBTC collateral and risk management
 
-(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
-(use-trait flash-loan-receiver-trait .all-traits.flash-loan-receiver-trait)
+(use-trait sip-010-ft-trait .sip-010-ft-trait.sip-010-ft-trait)
+(use-trait flash-loan-receiver-trait .flash-loan-receiver-trait.flash-loan-receiver-trait)
 
 ;; =============================================================================
 ;; CONSTANTS

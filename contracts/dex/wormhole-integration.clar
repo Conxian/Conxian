@@ -2,7 +2,7 @@
 ;; Wormhole Cross-Chain Integration for Conxian Protocol
 ;; Provides cross-chain asset bridging, governance, and yield aggregation
 
-(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
+(use-trait sip-010-ft-trait .sip-010-ft-trait.sip-010-ft-trait)
 
 ;; =============================================================================
 ;; CONSTANTS AND ERROR CODES
@@ -462,12 +462,14 @@
 )
 
 (define-private (is-bridge-paused)
-  "Check if bridge is currently paused"
+  (begin
+    "Check if bridge is currently paused"
   (get is-paused (get-bridge-state))
-)
+  ))
 
 (define-private (get-bridge-state)
-  "Get current bridge state"
+  (begin
+    "Get current bridge state"
   (default-to {
     is-paused: false,
     current-guardian-set: u0,
@@ -475,12 +477,13 @@
     total-fees-collected: u0,
     last-guardian-update: u0
   } (map-get? bridge-state { }))
-)
+  ))
 
 (define-private (get-bridge-sequence)
-  "Get next bridge sequence number"
+  (begin
+    "Get next bridge sequence number"
   (get total-volume (get-bridge-state))
-)
+  ))
 
 (define-private (update-bridge-volume (amount uint) (fee uint))
   "Update bridge volume and fee statistics"

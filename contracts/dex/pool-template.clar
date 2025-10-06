@@ -1,5 +1,5 @@
-(use-trait ft-trait .all-traits.sip-010-ft-trait)
-(use-trait nft-trait .all-traits.sip-009-nft-trait)
+(use-trait ft-trait .sip-010-ft-trait.sip-010-ft-trait)
+(use-trait nft-trait .sip-009-nft-trait.sip-009-nft-trait)
 
 ;; Pool Template - Basic DEX Pool Implementation
 ;; This contract serves as a template for creating new DEX pools

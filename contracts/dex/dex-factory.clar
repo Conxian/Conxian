@@ -2,11 +2,11 @@
 ;; This contract is responsible for creating and registering new DEX pools.
 
 ;; --- Traits ---
-(use-trait access-control-trait .all-traits.access-control-trait)
-(use-trait factory-trait .all-traits.factory-trait)
-(use-trait pool-creation-trait .all-traits.pool-creation-trait)
-(use-trait circuit-breaker-trait .all-traits.circuit-breaker-trait)
-(impl-trait .all-traits.factory-trait)
+(use-trait access-control-trait .access-control-trait.access-control-trait)
+(use-trait factory-trait .factory-trait.factory-trait)
+(use-trait pool-creation-trait .pool-creation-trait.pool-creation-trait)
+(use-trait circuit-breaker-trait .circuit-breaker-trait.circuit-breaker-trait)
+(impl-trait factory-trait)
 
 ;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED (err u1003))
@@ -71,7 +71,6 @@
 
 (define-private (check-circuit-breaker)
   (contract-call? .circuit-breaker is-circuit-open))
-)
 
 (define-private (validate-pool-type (pool-type (string-ascii 64)))
   (let ((pool-type-data (map-get? pool-type-info pool-type)))

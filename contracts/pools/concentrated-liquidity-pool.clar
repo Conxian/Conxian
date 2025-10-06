@@ -22,12 +22,12 @@
 ;; - `error-codes-trait` for standardized errors
 ;; - `nft-trait` for position NFTs
 
-(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
-(use-trait pool-trait .all-traits.pool-trait)
-(use-trait math-trait .all-traits.math-trait)
-(use-trait error-codes-trait .all-traits.error-codes-trait)
-(use-trait nft-trait .all-traits.nft-trait)
-(use-trait math-lib-trait .all-traits.math-trait)
+(use-trait sip-010-ft-trait .sip-010-ft-trait.sip-010-ft-trait)
+(use-trait pool-trait .pool-trait.pool-trait)
+(use-trait math-trait .math-trait.math-trait)
+(use-trait error-codes-trait .error-codes-trait.error-codes-trait)
+(use-trait nft-trait .nft-trait.nft-trait)
+(use-trait math-lib-trait .math-trait.math-trait)
 
 
 

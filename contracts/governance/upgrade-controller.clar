@@ -2,7 +2,7 @@
 ;; Manages safe protocol upgrades with timelock and approval mechanisms
 ;; Enables contract migrations and parameter updates with rollback capability
 
-(use-trait access-control-trait .all-traits.access-control-trait)
+(use-trait access-control-trait .access-control-trait.access-control-trait)
 
 ;; ===== Constants =====
 (define-constant ERR_UNAUTHORIZED (err u4001))

@@ -1,10 +1,10 @@
 ;; performance-optimizer.clar
 ;; Optimizes transaction performance and gas usage
 
-(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
-(use-trait performance-optimizer-trait .all-traits.performance-optimizer-trait)
+(use-trait sip-010-ft-trait .sip-010-ft-trait.sip-010-ft-trait)
+(use-trait performance-optimizer-trait .performance-optimizer-trait.performance-optimizer-trait)
 
-(impl-trait .all-traits.performance-optimizer-trait)
+(impl-trait performance-optimizer-trait)
 
 ;; ===== Constants =====
 (define-constant ERR_UNAUTHORIZED (err u100))

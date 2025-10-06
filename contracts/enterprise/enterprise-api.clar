@@ -1,8 +1,8 @@
 ;; Conxian Enterprise API - Institutional features
-(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
-(use-trait compliance-hooks-trait .all-traits.compliance-hooks-trait)
-(use-trait circuit-breaker-trait .all-traits.circuit-breaker-trait)
-(use-trait dex-router-trait .all-traits.dex-router-trait)
+(use-trait sip-010-ft-trait .sip-010-ft-trait.sip-010-ft-trait)
+(use-trait compliance-hooks-trait .compliance-hooks-trait.compliance-hooks-trait)
+(use-trait circuit-breaker-trait .circuit-breaker-trait.circuit-breaker-trait)
+(use-trait dex-router-trait .dex-router-trait.dex-router-trait)
 
 ;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED (err u401))

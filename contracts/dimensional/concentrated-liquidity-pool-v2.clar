@@ -23,14 +23,14 @@
 (define-constant PRECISION u1000000000000000000) ;; 18 decimals
 
 ;; --- Traits ---
-(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
-(use-trait pool-trait .all-traits.pool-trait)
-(use-trait position-nft-trait .all-traits.position-nft-trait)
-(use-trait pool-creation-trait .all-traits.pool-creation-trait)
+(use-trait sip-010-ft-trait .sip-010-ft-trait.sip-010-ft-trait)
+(use-trait pool-trait .pool-trait.pool-trait)
+(use-trait position-nft-trait .position-nft-trait.position-nft-trait)
+(use-trait pool-creation-trait .pool-creation-trait.pool-creation-trait)
 
 ;; Implement the standard pool trait
-(impl-trait .all-traits.pool-trait)
-(impl-trait .all-traits.pool-creation-trait)
+(impl-trait pool-trait)
+(impl-trait pool-creation-trait)
 
 ;; --- Contract State ---
 (define-data-var contract-owner principal tx-sender)

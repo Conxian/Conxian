@@ -1,13 +1,13 @@
 ;; Conxian Vault - Core yield-bearing vault with enhanced tokenomics integration
 ;; Implements vault-trait and vault-admin-trait with full system integration
 
-(use-trait vault-trait .all-traits.vault-trait)
-(use-trait vault-admin-trait .all-traits.vault-admin-trait)
-(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
-(use-trait strategy-trait .all-traits.strategy-trait)
+(use-trait vault-trait .vault-trait.vault-trait)
+(use-trait vault-admin-trait .vault-admin-trait.vault-admin-trait)
+(use-trait sip-010-ft-trait .sip-010-ft-trait.sip-010-ft-trait)
+(use-trait strategy-trait .strategy-trait.strategy-trait)
 
-(impl-trait .all-traits.vault-trait)
-(impl-trait .all-traits.vault-admin-trait)
+(impl-trait vault-trait)
+(impl-trait vault-admin-trait)
 
 ;; Constants
 (define-constant ERR_UNAUTHORIZED (err u1001))

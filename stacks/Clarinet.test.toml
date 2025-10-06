@@ -3,71 +3,296 @@ name = "conxian-tests"
 description = "Test configuration for Conxian DeFi protocol"
 clarinet_version = "3.7.0"
 
-[accounts]
-deployer = { mnemonic = "twice kind fence tip hidden tilt action fragile skin nothing glory cousin green tomorrow spring wrist shed math olympic multiply hip blue scout claw", balance = 100_000_000_000_000 }
-wallet_1 = { mnemonic = "sell invite acquire kitten bamboo drastic jelly vivid peace spawn twice guilt pave pen trash pretty park cube fragile unaware remain midnight betray rebuild", balance = 100_000_000_000_000 }
-wallet_2 = { mnemonic = "hold excess usual excess ring elephant install account glad dry fragile donkey gaze humble truck breeze nation gasp vacuum limb head keep delay hospital", balance = 100_000_000_000_000 }
+[accounts.deployer]
+mnemonic = "twice kind fence tip hidden tilt action fragile skin nothing glory cousin green tomorrow spring wrist shed math olympic multiply hip blue scout claw"
+balance = 100000000000000
 
-# Core Traits - Centralized
-[contracts.all-traits]
-path = "contracts/traits/all-traits.clar"
-clarity_version = 3
-epoch = "2.4"
+[accounts.wallet_1]
+mnemonic = "sell invite acquire kitten bamboo drastic jelly vivid peace spawn twice guilt pave pen trash pretty park cube fragile unaware remain midnight betray rebuild"
+balance = 100000000000000
 
-# Mock Contracts for Testing
+[accounts.wallet_2]
+mnemonic = "hold excess usual excess ring elephant install account glad dry fragile donkey gaze humble truck breeze nation gasp vacuum limb head keep delay hospital"
+balance = 100000000000000
+
 [contracts.mock-token]
-path = "contracts/mocks/mock-token.clar"
+path = "../contracts/mocks/mock-token.clar"
 clarity_version = 3
-epoch = "2.4"
-depends_on = ["all-traits"]
+epoch = "3.0"
 
-# Core Contracts
 [contracts.dex-factory]
-path = "contracts/dex/dex-factory.clar"
+path = "../contracts/dex/dex-factory.clar"
 clarity_version = 3
-epoch = "2.4"
-depends_on = ["all-traits"]
+epoch = "3.0"
 
 [contracts.dex-pool]
-path = "contracts/dex/dex-pool.clar"
+path = "../contracts/dex/dex-pool.clar"
 clarity_version = 3
-epoch = "2.4"
-depends_on = ["all-traits"]
+epoch = "3.0"
 
 [contracts.dex-router]
-path = "contracts/dex/dex-router.clar"
+path = "../contracts/dex/dex-router.clar"
 clarity_version = 3
-epoch = "2.4"
-depends_on = ["all-traits", "dex-factory", "dex-pool"]
+epoch = "3.0"
+depends_on = [ "dex-factory", "dex-pool",]
 
-# Tokens
 [contracts.cxd-token]
-path = "contracts/tokens/cxd-token.clar"
+path = "../contracts/tokens/cxd-token.clar"
 clarity_version = 3
-epoch = "2.4"
-depends_on = ["all-traits"]
+epoch = "3.0"
 
 [contracts.cxvg-token]
-path = "contracts/tokens/cxvg-token.clar"
+path = "../contracts/tokens/cxvg-token.clar"
 clarity_version = 3
-epoch = "2.4"
-depends_on = ["all-traits"]
+epoch = "3.0"
 
 [contracts.cxlp-token]
-path = "contracts/tokens/cxlp-token.clar"
+path = "../contracts/tokens/cxlp-token.clar"
 clarity_version = 3
-epoch = "2.4"
-depends_on = ["all-traits"]
+epoch = "3.0"
 
-# Dimensional Contracts
 [contracts.tokenized-bond]
-path = "contracts/dimensional/tokenized-bond.clar"
+path = "../contracts/dimensional/tokenized-bond.clar"
 clarity_version = 3
-epoch = "2.4"
-depends_on = ["all-traits"]
+epoch = "3.0"
 
 [contracts.tokenized-bond-adapter]
-path = "contracts/dimensional/tokenized-bond-adapter.clar"
+path = "../contracts/dimensional/tokenized-bond-adapter.clar"
 clarity_version = 3
-epoch = "2.4"
-depends_on = ["all-traits", "tokenized-bond"]
+epoch = "3.0"
+depends_on = [ "tokenized-bond",]
+
+[contracts.fixed-point-math-trait]
+path = "../contracts/traits/math/fixed-point-math-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+
+[contracts.math-trait]
+path = "../contracts/traits/math/math-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+
+[contracts.circuit-breaker-trait]
+path = "../contracts/traits/security/circuit-breaker-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+
+[contracts.access-control-trait]
+path = "../contracts/traits/security/access-control-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+
+[contracts.monitoring-trait]
+path = "../contracts/traits/security/monitoring-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+
+[contracts.pausable-trait]
+path = "../contracts/traits/security/pausable-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+
+[contracts.compliance-hooks-trait]
+path = "../contracts/traits/security/compliance-hooks-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+
+[contracts.mev-protector-trait]
+path = "../contracts/traits/security/mev-protector-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+
+[contracts.btc-adapter-trait]
+path = "../contracts/traits/protocol/btc-adapter-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+
+[contracts.oracle-trait]
+path = "../contracts/traits/protocol/oracle-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+
+[contracts.cross-protocol-trait]
+path = "../contracts/traits/protocol/cross-protocol-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+
+[contracts.legacy-adapter-trait]
+path = "../contracts/traits/protocol/legacy-adapter-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+
+[contracts.cxlp-migration-queue-trait]
+path = "../contracts/traits/protocol/cxlp-migration-queue-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+
+[contracts.oracle-aggregator-trait]
+path = "../contracts/traits/protocol/oracle-aggregator-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+
+[contracts.sip-009-nft-trait]
+path = "../contracts/traits/sips/sip-009-nft-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+
+[contracts.sip-018-trait]
+path = "../contracts/traits/sips/sip-018-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+
+[contracts.sip-010-ft-mintable-trait]
+path = "../contracts/traits/sips/sip-010-ft-mintable-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+
+[contracts.sip-010-ft-trait]
+path = "../contracts/traits/sips/sip-010-ft-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+
+[contracts.pool-creation-trait]
+path = "../contracts/traits/defi/pool-creation-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+
+[contracts.pool-trait]
+path = "../contracts/traits/defi/pool-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+
+[contracts.factory-trait]
+path = "../contracts/traits/defi/factory-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+
+[contracts.vault-trait]
+path = "../contracts/traits/defi/vault-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+
+[contracts.staking-trait]
+path = "../contracts/traits/defi/staking-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+
+[contracts.fee-manager-trait]
+path = "../contracts/traits/defi/fee-manager-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+
+[contracts.liquidity-manager-trait]
+path = "../contracts/traits/defi/liquidity-manager-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+
+[contracts.batch-auction-trait]
+path = "../contracts/traits/defi/batch-auction-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+
+[contracts.asset-vault-trait]
+path = "../contracts/traits/defi/asset-vault-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+
+[contracts.lending-system-trait]
+path = "../contracts/traits/defi/lending-system-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+
+[contracts.vault-admin-trait]
+path = "../contracts/traits/defi/vault-admin-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+
+[contracts.yield-optimizer-trait]
+path = "../contracts/traits/defi/yield-optimizer-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+
+[contracts.strategy-trait]
+path = "../contracts/traits/defi/strategy-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+
+[contracts.bond-trait]
+path = "../contracts/traits/defi/bond-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+
+[contracts.flash-loan-receiver-trait]
+path = "../contracts/traits/defi/flash-loan-receiver-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+
+[contracts.performance-optimizer-trait]
+path = "../contracts/traits/defi/performance-optimizer-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+
+[contracts.router-trait]
+path = "../contracts/traits/defi/router-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+
+[contracts.liquidation-trait]
+path = "../contracts/traits/defi/liquidation-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+
+[contracts.dao-trait]
+path = "../contracts/traits/governance/dao-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+
+[contracts.governance-token-trait]
+path = "../contracts/traits/governance/governance-token-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+
+[contracts.ownable-trait]
+path = "../contracts/traits/core/ownable-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+
+[contracts.standard-constants-trait]
+path = "../contracts/traits/core/standard-constants-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+
+[contracts.utils-trait]
+path = "../contracts/traits/core/utils-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+
+[contracts.migration-manager-trait]
+path = "../contracts/traits/core/migration-manager-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+
+[contracts.metrics-trait]
+path = "../contracts/traits/core/metrics-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+
+[contracts.error-codes-trait]
+path = "../contracts/traits/core/error-codes-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+
+[contracts.position-nft-trait]
+path = "../contracts/traits/dimensional/position-nft-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+
+[contracts.dim-registry-trait]
+path = "../contracts/traits/dimensional/dim-registry-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+
+[contracts.dimensional-oracle-trait]
+path = "../contracts/traits/dimensional/dimensional-oracle-trait.clar"
+clarity_version = 3
+epoch = "3.0"

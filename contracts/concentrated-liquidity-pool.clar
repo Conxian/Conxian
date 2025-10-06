@@ -2,9 +2,9 @@
 ;; This contract implements a concentrated liquidity pool.
 
 ;; --- Traits ---
-(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
-(use-trait pool-creation-trait .all-traits.pool-creation-trait)
-(impl-trait .all-traits.pool-creation-trait)
+(use-trait sip-010-ft-trait .sip-010-ft-trait.sip-010-ft-trait)
+(use-trait pool-creation-trait .pool-creation-trait.pool-creation-trait)
+(impl-trait pool-creation-trait)
 
 ;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED (err u1003))

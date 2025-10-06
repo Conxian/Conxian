@@ -65,7 +65,7 @@
 
 (define-contract-public .mock-auto-compounder
   (
-    (use-trait yield-optimizer-trait .all-traits.yield-optimizer-trait)
+    (use-trait yield-optimizer-trait .yield-optimizer-trait.yield-optimizer-trait)
     (use-trait sip-010-ft-trait .ft-trait)
 
     (define-data-var contract-owner principal tx-sender)
