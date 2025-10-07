@@ -25,8 +25,8 @@ $allTraitsPath = "contracts/traits/all-traits.clar"
 if (Test-Path $allTraitsPath) {
     $allTraitsContent = Get-Content $allTraitsPath -Raw
     $defineTraitRegex = "(?m)^\s*\(define-trait\s+([a-zA-Z0-9\-]+)"
-    $matches = [regex]::Matches($allTraitsContent, $defineTraitRegex)
-    foreach ($m in $matches) { $AllTraits[$m.Groups[1].Value] = $true }
+    $traitDefsMatches = [regex]::Matches($allTraitsContent, $defineTraitRegex)
+    foreach ($m in $traitDefsMatches) { $AllTraits[$m.Groups[1].Value] = $true }
     Write-Host "Loaded $($AllTraits.Keys.Count) centralized trait definitions from all-traits.clar" -ForegroundColor DarkCyan
 } else {
     Write-Host "Warning: $allTraitsPath not found; trait validation skipped" -ForegroundColor Yellow
@@ -36,6 +36,40 @@ if (Test-Path $allTraitsPath) {
 $Issues = @()
 # Track referenced contracts discovered from dotted references like .trait-registry
 $ReferencedContracts = New-Object System.Collections.Generic.HashSet[string]
+# Track globally used trait aliases from code for all-traits coverage verification
+$GlobalUsedTraits = New-Object System.Collections.Generic.HashSet[string]
+# Ignore set to avoid false positives from file extensions or common tokens
+$IgnoredRefNames = New-Object System.Collections.Generic.HashSet[string]
+[void]$IgnoredRefNames.Add('clar')
+[void]$IgnoredRefNames.Add('self')
+[void]$IgnoredRefNames.Add('io')
+[void]$IgnoredRefNames.Add('utils')
+[void]$IgnoredRefNames.Add('math')
+[void]$IgnoredRefNames.Add('SBTC-MAINNET')
+
+# Special mapping for known test mocks or aliases
+$SpecialRefMap = @{
+    'token-a' = 'tests/mocks/test-token-a.clar'
+    'token-b' = 'tests/mocks/test-token-b.clar'
+}
+
+# Optional external alias map (JSON object: { "alias": "relative/path.clar", ... })
+$ExternalRefMapPath = "scripts/ref-alias-map.json"
+$ExternalRefPathMap = @{}
+if (Test-Path $ExternalRefMapPath) {
+    try {
+        $json = Get-Content -Path $ExternalRefMapPath -Raw -ErrorAction Stop | ConvertFrom-Json
+        if ($null -ne $json) {
+            foreach ($prop in $json.PSObject.Properties) {
+                if ($prop.Value -and ([string]$prop.Value).Trim().Length -gt 0) {
+                    $ExternalRefPathMap[$prop.Name] = [string]$prop.Value
+                }
+            }
+        }
+    } catch {
+        Write-Host ("Warning: Failed to parse {0}: {1}" -f $ExternalRefMapPath, $_) -ForegroundColor Yellow
+    }
+}
 
 # Get all Clarity contract files
 $contractFiles = Get-ChildItem -Path "contracts" -Filter "*.clar" -Recurse -Exclude "all-traits.clar"
@@ -66,15 +100,34 @@ foreach ($file in $contractFiles) {
     $implAliasRegex = "\(impl-trait\s+([a-zA-Z0-9\-]+)\s*\)"
     $implAliasMatches = [regex]::Matches($content, $implAliasRegex)
     foreach ($m in $implAliasMatches) { [void]$detectedAliases.Add($m.Groups[1].Value) }
+    foreach ($alias in $detectedAliases) { [void]$GlobalUsedTraits.Add($alias) }
 
     # Discover dotted contract references: .contract-name (exclude .all-traits.* and known trait aliases)
-    $dotRefRegex = "(?<!\.)\.([a-zA-Z][a-zA-Z0-9\-]+)\b"
+    # Avoid dots inside strings/paths: negative lookbehind for ., ", ', /, \
+    $dotRefRegex = '(?<![\.''"/\\])\.([a-zA-Z][a-zA-Z0-9\-]+)\b'
     $dotMatches = [regex]::Matches($content, $dotRefRegex)
     foreach ($d in $dotMatches) {
         $ref = $d.Groups[1].Value
-        if ($ref -ne 'all-traits' -and -not $AllTraits.ContainsKey($ref)) {
+        if ($ref -ne 'all-traits' -and -not $AllTraits.ContainsKey($ref) -and -not $IgnoredRefNames.Contains($ref)) {
             [void]$ReferencedContracts.Add($ref)
         }
+
+    # Also scan test clarity files for dotted references
+    $testFiles = @()
+    if (Test-Path "tests") { $testFiles = Get-ChildItem -Path "tests" -Filter "*.clar" -Recurse -ErrorAction SilentlyContinue }
+    foreach ($tfile in $testFiles) {
+        $tcontent = Get-Content $tfile.FullName -Raw
+        # strip line comments '; ...' to reduce false positives
+        $tcontent = ($tcontent -replace '(?m);.*$','')
+        $dotRefRegexTests = '(?<![\.''"/\\])\.([a-zA-Z][a-zA-Z0-9\-]+)\b'
+        $tdots = [regex]::Matches($tcontent, $dotRefRegexTests)
+        foreach ($d in $tdots) {
+            $ref = $d.Groups[1].Value
+            if ($ref -ne 'all-traits' -and -not $AllTraits.ContainsKey($ref) -and -not $IgnoredRefNames.Contains($ref)) {
+                [void]$ReferencedContracts.Add($ref)
+            }
+        }
+    }
     }
     # Existing use-trait aliases
     $existingUseAliases = New-Object System.Collections.Generic.HashSet[string]
@@ -331,19 +384,7 @@ foreach ($file in $contractFiles) {
     # FIX 6: Fix contract references to use relative paths
     # =========================================================================
     
-    # Fix references like .trait-registry to contracts that exist
-    $contractRefs = @(
-        @{Name="trait-registry"; Path=".trait-registry"},
-        @{Name="circuit-breaker"; Path=".circuit-breaker"},
-        @{Name="fee-manager"; Path=".fee-manager"}
-    )
-    
-    # This is informational only - these need to be reviewed manually
-    foreach ($ref in $contractRefs) {
-        if ($content -match "\.$($ref.Name)\b") {
-            Write-Host "  Info: Found reference to $($ref.Name) - verify this contract exists" -ForegroundColor DarkYellow
-        }
-    }
+    # Dotted contract references are collected earlier into $ReferencedContracts; manifest verification occurs later.
 
     # =========================================================================
     # FIX 7: Special-case alias normalization - ft-trait -> sip-010-ft-trait
@@ -414,7 +455,13 @@ function Get-RelativePath([string]$fromDir, [string]$toPath) {
         # Clarinet TOML paths prefer forward slashes
         return ($rel -replace '\\','/')
     } catch {
-        return $toPath
+        try {
+            # Fallback to .NET relative path computation
+            $rel2 = [IO.Path]::GetRelativePath((Resolve-Path -LiteralPath $fromDir), (Resolve-Path -LiteralPath $toPath))
+            return ($rel2 -replace '\\','/')
+        } catch {
+            return ($toPath -replace '\\','/')
+        }
     }
 }
 
@@ -426,6 +473,7 @@ function Align-Manifest {
     )
 
     $result = [ordered]@{ ManifestPath = $ManifestPath; AddressFixes = 0; PathFixes = 0; AddedAllTraits = $false }
+    $removedNames = New-Object System.Collections.Generic.HashSet[string]
     if (-not (Test-Path $ManifestPath)) { return $result }
 
     try {
@@ -445,6 +493,52 @@ function Align-Manifest {
         $result.AddedAllTraits = $true
     }
 
+    # Deduplicate duplicate [contracts.*] tables: keep the last occurrence per contract name
+    $contractsBlockRegex = New-Object System.Text.RegularExpressions.Regex("(?ms)^(\[contracts\.(?<name>[^\]]+)\])\s*(?<body>.*?)(?=^\[contracts\.|\Z)")
+    $matches = $contractsBlockRegex.Matches($manifestContent)
+    if ($matches.Count -gt 0) {
+        $lastBlockByName = @{}
+        foreach ($m in $matches) {
+            $n = $m.Groups['name'].Value
+            $cur = $m.Value
+            $curPathMatch = [regex]::Match($cur, '(?m)^\s*path\s*=\s*"([^"]+)"')
+            $curPath = if ($curPathMatch.Success) { $curPathMatch.Groups[1].Value } else { '' }
+            if ($lastBlockByName.ContainsKey($n)) {
+                $prev = $lastBlockByName[$n]
+                $prevPathMatch = [regex]::Match($prev, '(?m)^\s*path\s*=\s*"([^"]+)"')
+                $prevPath = if ($prevPathMatch.Success) { $prevPathMatch.Groups[1].Value } else { '' }
+                $isTopCur = ($curPath -eq ("contracts/$n.clar"))
+                $isTopPrev = ($prevPath -eq ("contracts/$n.clar"))
+                $isContractsCur = ($curPath -like 'contracts/*')
+                $isContractsPrev = ($prevPath -like 'contracts/*')
+                if ($isTopCur -and -not $isTopPrev) {
+                    $lastBlockByName[$n] = $cur
+                } elseif (-not $isContractsPrev -and $isContractsCur) {
+                    $lastBlockByName[$n] = $cur
+                } else {
+                    # keep existing (prefer previous canonical or last if equal)
+                    $lastBlockByName[$n] = $prev
+                }
+            } else {
+                $lastBlockByName[$n] = $cur
+            }
+        }
+        $sbDedup = New-Object System.Text.StringBuilder
+        $used = New-Object System.Collections.Generic.HashSet[string]
+        $lastIndexD = 0
+        foreach ($m in $matches) {
+            $sbDedup.Append($manifestContent.Substring($lastIndexD, $m.Index - $lastIndexD)) | Out-Null
+            $n = $m.Groups['name'].Value
+            if (-not $used.Contains($n)) {
+                $sbDedup.Append($lastBlockByName[$n]) | Out-Null
+                [void]$used.Add($n)
+            }
+            $lastIndexD = $m.Index + $m.Length
+        }
+        $sbDedup.Append($manifestContent.Substring($lastIndexD)) | Out-Null
+        $manifestContent = $sbDedup.ToString()
+    }
+
     # If enforcing addresses, ensure [contracts.all-traits] uses ST3 principal and add ST3 address to any missing
     if ($EnforceAddresses) {
         $manifestContent = [regex]::Replace($manifestContent,
@@ -454,15 +548,10 @@ function Align-Manifest {
                 $block = $m.Groups[1].Value
                 if ($block -notmatch '(?m)^\s*address\s*=\s*"') {
                     $result.AddressFixes++
-                    return ($block + ("address = `"$CanonicalPrincipal.all-traits`"`n"))
+                    return ($block + ("address = `"$CanonicalPrincipal`"`n"))
                 } else {
-                    if ($block -match '(?m)^\s*address\s*=\s*"(ST[0-9A-Z]+)\.all-traits"') {
-                        $addr = $Matches[1]
-                        if ($addr -ne $CanonicalPrincipal) {
-                            $result.AddressFixes++
-                            $block = [regex]::Replace($block, '(?m)^\s*address\s*=\s*".*?"', ("address = `"$CanonicalPrincipal.all-traits`""))
-                        }
-                    }
+                    # Normalize any address (with or without suffix) to principal-only
+                    $block = [regex]::Replace($block, '(?mi)^\s*address\s*=\s*"ST[0-9A-Z]+(?:\.[A-Za-z0-9\-]+)?"', ("address = `"$CanonicalPrincipal`""))
                     return $block
                 }
             },
@@ -478,13 +567,13 @@ function Align-Manifest {
             $body = $m.Groups['body'].Value
             $block = $m.Value
             if ($body -notmatch '(?m)^\s*address\s*=\s*"') {
-                $addrLine = "address = `"$CanonicalPrincipal.$name`""
+                $addrLine = "address = `"$CanonicalPrincipal`""
                 $newBody = ($body.TrimEnd() + "`n" + $addrLine + "`n")
                 $block = "[contracts.$name]`n" + $newBody
                 $result.AddressFixes++
             } else {
                 # Sanitize to canonical principal (remove any .contract suffix or wrong principal)
-                $body = [regex]::Replace($body, '(?mi)^\s*address\s*=\s*"ST[0-9A-Z]+(?:\.[A-Za-z0-9\-]+)?"', ("address = `"$CanonicalPrincipal.$name`""))
+                $body = [regex]::Replace($body, '(?mi)^\s*address\s*=\s*"ST[0-9A-Z]+(?:\.[A-Za-z0-9\-]+)?"', ("address = `"$CanonicalPrincipal`""))
                 $block = "[contracts.$name]`n" + $body
             }
             $sb.Append($block) | Out-Null
@@ -537,17 +626,20 @@ function Align-Manifest {
                         Write-Host "Manifest: Multiple candidates for $name ($leaf), manual review needed" -ForegroundColor Yellow
                     }
                 } else {
-                    Write-Host "Manifest: Missing file for $name at '$origPath' not found in repo" -ForegroundColor Yellow
+                    # File not found anywhere. If it looks like a trait placeholder (e.g., sip-010-trait), prune the block and rewrite depends_on later
+                    if (($name -ne 'all-traits') -and ($name -match '(^sip-010-trait$)|(^.+-trait$)')) {
+                        Write-Host "Manifest: Pruning missing trait block contracts.$name (path '$origPath')" -ForegroundColor Yellow
+                        [void]$removedNames.Add($name)
+                        $block = ''
+                    } else {
+                        Write-Host "Manifest: Missing file for $name at '$origPath' not found in repo" -ForegroundColor Yellow
+                    }
                 }
             } else {
                 # Normalize to relative forward-slash path if currently absolute/backslash
                 if ($origPath -match '^[A-Za-z]:\\' -or $origPath -match '\\') {
                     $resolved = (Resolve-Path -LiteralPath $absOrig).Path
-                    if ($resolved.StartsWith($repoRoot, [System.StringComparison]::OrdinalIgnoreCase)) {
-                        $rel = $resolved.Substring($repoRoot.Length + 1) -replace '\\','/'
-                    } else {
-                        $rel = Get-RelativePath -fromDir $manifestDir -toPath $resolved
-                    }
+                    $rel = Get-RelativePath -fromDir $manifestDir -toPath $resolved
                     $newBody = [regex]::Replace($body, '(?m)^\s*path\s*=\s*"[^"]+"', ("path = `"$rel`""))
                     $block = "[contracts.$name]`n" + $newBody
                     $result.PathFixes++
@@ -561,6 +653,39 @@ function Align-Manifest {
     }
     $sb2.Append($manifestContent.Substring($lastIndex2)) | Out-Null
     $newManifest = $sb2.ToString()
+    # Rewrite depends_on entries: replace any pruned names with all-traits and dedupe items
+    if ($removedNames.Count -gt 0) {
+        foreach ($rn in $removedNames) {
+            $newManifest = $newManifest -replace ('"' + [regex]::Escape($rn) + '"'), '"all-traits"'
+        }
+        $newManifest = [regex]::Replace($newManifest, '(?ms)^\s*depends_on\s*=\s*\[(?<items>[^\]]*)\]', {
+            param($me)
+            $items = $me.Groups['items'].Value
+            $parts = @()
+            if ($items.Trim().Length -gt 0) { $parts = $items -split ',' }
+            $seen = @{}
+            $out = @()
+            foreach ($p in $parts) {
+                $n = ($p.Trim() -replace '^"', '' -replace '"$', '')
+                if ([string]::IsNullOrWhiteSpace($n)) { continue }
+                if (-not $seen.ContainsKey($n)) { $seen[$n] = $true; $out += $n }
+            }
+            $joined = ($out | ForEach-Object { '"' + $_ + '"' }) -join ', '
+            return "depends_on = [${joined}]"
+        })
+    }
+    # Strip accidental repo folder prefix (e.g., 'Conxian/contracts/...') to canonical 'contracts/...'
+    $repoLeafEsc = [regex]::Escape((Split-Path $repoRoot -Leaf))
+    $newManifest = [regex]::Replace($newManifest, '(?m)^\s*path\s*=\s*"' + $repoLeafEsc + '/(contracts/[^"\r\n]+)"', 'path = "$1"')
+    # Sanitize all path lines: convert backslashes to forward slashes, and collapse any leading prefix before contracts/ or tests/
+    $newManifest = [regex]::Replace($newManifest, '(?m)^\s*path\s*=\s*"([^"]+)"', {
+        param($me)
+        $p = $me.Groups[1].Value
+        $canon = ($p -replace '\\','/')
+        # reduce to repo-relative when possible
+        $canon = [regex]::Replace($canon, '.*?((?:contracts|tests)/[^"\r\n]+)$', '$1')
+        return 'path = "' + $canon + '"'
+    })
 
     if ($newManifest -ne $originalManifest) {
         if (-not $ReportOnly) {
@@ -594,31 +719,70 @@ function Ensure-Referenced-Contracts-In-Manifest {
     $missing = @()
     foreach ($name in $Refs) {
         if ($name -eq 'all-traits') { continue }
-        if ($content -match "(?m)^\[contracts\.$([regex]::Escape($name))\]") { continue }
+        $nameEsc = [regex]::Escape($name)
+        $hdrPat = '(?m)^\[contracts\.' + $nameEsc + '\]'
+        if ($content -match $hdrPat) { continue }
         # Skip if any block already references a path ending with /<name>.clar
-        if ($content -match "(?m)^\s*path\s*=\s*\"[^\"]*[/\\]$([regex]::Escape($name))\.clar\"") { continue }
-        # Find file named <name>.clar under contracts/
+        $pathPat = '(?m)^\s*path\s*=\s*"[^"]*[/\\]' + $nameEsc + '\.clar"'
+        if ($content -match $pathPat) { continue }
+        # Prefer special mapping when available
+        if ($SpecialRefMap.ContainsKey($name)) {
+            $mapped = $SpecialRefMap[$name]
+            if (Test-Path -LiteralPath $mapped) {
+                $rel = Get-RelativePath -fromDir $manifestDir -toPath (Resolve-Path -LiteralPath $mapped)
+                $block = "`n[contracts.$name]`npath = `"$rel`"`nclarity_version = 3`nepoch = `"3.0`"`naddress = `"$CanonicalPrincipal`"`n"
+                $content += $block
+                $added += @{ name = $name; path = $rel }
+                continue
+            }
+        }
+        # Prefer external alias mapping when available
+        if ($ExternalRefPathMap.ContainsKey($name)) {
+            $mappedRel = $ExternalRefPathMap[$name]
+            $mappedAbs = if ([IO.Path]::IsPathRooted($mappedRel)) { $mappedRel } else { Join-Path (Get-Location) $mappedRel }
+            if (Test-Path -LiteralPath $mappedAbs) {
+                $rel = Get-RelativePath -fromDir $manifestDir -toPath (Resolve-Path -LiteralPath $mappedAbs)
+                $block = "`n[contracts.$name]`npath = `"$rel`"`nclarity_version = 3`nepoch = `"3.0`"`naddress = `"$CanonicalPrincipal`"`n"
+                $content += $block
+                $added += @{ name = $name; path = $rel }
+                continue
+            }
+        }
+        # Find best file for <name> across repo (contracts and tests)
         $cands = Get-ChildItem -Path "contracts" -Filter "$name.clar" -Recurse -ErrorAction SilentlyContinue
         if ($cands.Count -eq 1) {
             $full = $cands[0].FullName
             $rel = Get-RelativePath -fromDir $manifestDir -toPath (Resolve-Path -LiteralPath $full)
-            $block = "`n[contracts.$name]`npath = `"$rel`"`nclarity_version = 3`nepoch = `"3.0`"`naddress = `"$CanonicalPrincipal.$name`"`n"
+            $block = "`n[contracts.$name]`npath = `"$rel`"`nclarity_version = 3`nepoch = `"3.0`"`naddress = `"$CanonicalPrincipal`"`n"
             $content += $block
             $added += @{ name = $name; path = $rel }
-        } elseif ($cands.Count -gt 1) {
-            # Prefer path under contracts/<name>.clar exact match if exists
-            $pref = $cands | Where-Object { $_.FullName -like "*\contracts\$name.clar" }
-            if ($pref.Count -eq 1) {
-                $full = $pref[0].FullName
-                $rel = Get-RelativePath -fromDir $manifestDir -toPath (Resolve-Path -LiteralPath $full)
-                $block = "`n[contracts.$name]`npath = `"$rel`"`nclarity_version = 3`nepoch = `"3.0`"`naddress = `"$CanonicalPrincipal.$name`"`n"
-                $content += $block
-                $added += @{ name = $name; path = $rel }
+        } else {
+            # Try additional flexible patterns and include tests
+            $extra = @()
+            $extra += Get-ChildItem -Path "contracts" -Filter "*-$name.clar" -Recurse -ErrorAction SilentlyContinue
+            $extra += Get-ChildItem -Path "contracts" -Filter "*$name*.clar" -Recurse -ErrorAction SilentlyContinue
+            if (Test-Path "tests") {
+                $extra += Get-ChildItem -Path "tests" -Filter "$name.clar" -Recurse -ErrorAction SilentlyContinue
+                $extra += Get-ChildItem -Path "tests" -Filter "test-$name.clar" -Recurse -ErrorAction SilentlyContinue
+                $extra += Get-ChildItem -Path "tests" -Filter "*$name*.clar" -Recurse -ErrorAction SilentlyContinue
+            }
+            if ($extra.Count -gt 0) {
+                # Prefer contracts/** exact, else tests/mocks, else shortest
+                $pick = $extra | Where-Object { $_.FullName -like "*\contracts\*\$name.clar" } | Select-Object -First 1
+                if (-not $pick) { $pick = $extra | Where-Object { $_.FullName -like "*\tests\mocks\*" } | Sort-Object { $_.FullName.Length } | Select-Object -First 1 }
+                if (-not $pick) { $pick = ($extra | Sort-Object { $_.FullName.Length } | Select-Object -First 1) }
+                if ($pick) {
+                    $full = $pick.FullName
+                    $rel = Get-RelativePath -fromDir $manifestDir -toPath (Resolve-Path -LiteralPath $full)
+                    $block = "`n[contracts.$name]`npath = `"$rel`"`nclarity_version = 3`nepoch = `"3.0`"`naddress = `"$CanonicalPrincipal`"`n"
+                    $content += $block
+                    $added += @{ name = $name; path = $rel }
+                } else {
+                    $missing += $name
+                }
             } else {
                 $missing += $name
             }
-        } else {
-            $missing += $name
         }
     }
     if ($added.Count -gt 0) { Set-Content -Path $ManifestPath -Value $content -NoNewline }
@@ -640,27 +804,33 @@ function Sync-Manifest-With-Contracts {
     foreach ($cf in $contracts) {
         $basename = [IO.Path]::GetFileNameWithoutExtension($cf.Name)
         # If a block exists by name, ensure path and address
-        $sectionRegex = "(?ms)^(\[contracts\.$([regex]::Escape($basename))\])\s*(?<body>.*?)(?=^\[contracts\.|\Z)"
+        $bnEsc = [regex]::Escape($basename)
+        $sectionRegex = '(?ms)^(\[contracts\.' + $bnEsc + '\])\s*(?<body>.*?)(?=^\[contracts\.|\Z)'
         if ($content -match $sectionRegex) {
             $body = $Matches['body']
             $rel = Get-RelativePath -fromDir $manifestDir -toPath (Resolve-Path -LiteralPath $cf.FullName)
             # path
-            if ($body -notmatch "(?m)^\s*path\s*=\s*\"[^"]*\Q$rel\E\"") {
-                $newBody = [regex]::Replace($body, '(?m)^\s*path\s*=\s*"[^"]+"', ("path = `"$rel`""))
+            $pathCapture = [regex]::Match($body, '(?m)^\s*path\s*=\s*"([^"]+)"')
+            if (-not $pathCapture.Success -or ($pathCapture.Groups[1].Value -ne $rel)) {
+                if ($pathCapture.Success) {
+                    $newBody = [regex]::Replace($body, '(?m)^\s*path\s*=\s*"[^"]+"', ("path = `"$rel`""))
+                } else {
+                    $newBody = ("path = `"$rel`"`n" + $body)
+                }
                 if ($newBody -ne $body) { $body = $newBody; $result.UpdatedPaths++ }
             }
             # address
-            $addrLine = "address = `"$CanonicalPrincipal.$basename`""
+            $addrLine = "address = `"$CanonicalPrincipal`""
             if ($body -notmatch '(?m)^\s*address\s*=\s*"') {
                 $body = ($body.TrimEnd() + "`n" + $addrLine + "`n")
             } else {
-                $body = [regex]::Replace($body, '(?mi)^\s*address\s*=\s*"ST[0-9A-Z]+(?:\.[A-Za-z0-9\-]+)?"', ("address = `"$CanonicalPrincipal.$basename`""))
+                $body = [regex]::Replace($body, '(?mi)^\s*address\s*=\s*"ST[0-9A-Z]+(?:\.[A-Za-z0-9\-]+)?"', ("address = `"$CanonicalPrincipal`""))
             }
             $content = [regex]::Replace($content, $sectionRegex, "[contracts.$basename]`n" + $body)
         } else {
             # Add a new section
             $rel = Get-RelativePath -fromDir $manifestDir -toPath (Resolve-Path -LiteralPath $cf.FullName)
-            $block = "`n[contracts.$basename]`npath = `"$rel`"`nclarity_version = 3`nepoch = `"3.0`"`naddress = `"$CanonicalPrincipal.$basename`"`n"
+            $block = "`n[contracts.$basename]`npath = `"$rel`"`nclarity_version = 3`nepoch = `"3.0`"`naddress = `"$CanonicalPrincipal`"`n"
             $content += $block
             $result.Added++
         }
@@ -681,8 +851,8 @@ function Sync-Manifest-With-Contracts {
                 $bn = [IO.Path]::GetFileNameWithoutExtension($p)
                 if ($bn -and ($bn -ne $name)) {
                     $block = "[contracts.$bn]`n" + $body
-                    # fix address suffix as well
-                    $block = [regex]::Replace($block, '(?mi)^\s*address\s*=\s*"ST[0-9A-Z]+(?:\.[A-Za-z0-9\-]+)?"', ("address = `"$CanonicalPrincipal.$bn`""))
+                    # fix address to principal-only
+                    $block = [regex]::Replace($block, '(?mi)^\s*address\s*=\s*"ST[0-9A-Z]+(?:\.[A-Za-z0-9\-]+)?"', ("address = `"$CanonicalPrincipal`""))
                     $result.Renamed++
                 }
             }
@@ -696,12 +866,114 @@ function Sync-Manifest-With-Contracts {
     return $result
 }
 
+# Extract a complete (define-trait <alias> ...) block from a file by balancing parentheses
+function Extract-DefineTraitBlock {
+    param(
+        [string]$FilePath,
+        [string]$Alias
+    )
+    if (-not (Test-Path $FilePath)) { return $null }
+    $text = Get-Content $FilePath -Raw
+    $pat = "(?m)^\s*\(define-trait\s+" + [regex]::Escape($Alias) + "\b"
+    $m = [regex]::Match($text, $pat)
+    if (-not $m.Success) { return $null }
+    $start = $m.Index
+    $src = $text.Substring($start)
+    $depth = 0
+    $foundStart = $false
+    for ($i = 0; $i -lt $src.Length; $i++) {
+        $ch = $src[$i]
+        if ($ch -eq '(') { $depth++; $foundStart = $true }
+        elseif ($ch -eq ')') { $depth-- }
+        if ($foundStart -and $depth -le 0 -and $i -gt 0) {
+            return $src.Substring(0, $i+1)
+        }
+    }
+    return $null
+}
+
+# Verify that all used traits exist in all-traits.clar; auto-append missing define-trait blocks when found
+function Verify-And-Fix-AllTraits {
+    param(
+        [string]$AllTraitsPath,
+        [System.Collections.Generic.HashSet[string]]$UsedTraits
+    )
+    $result = [ordered]@{ Used=$UsedTraits.Count; MissingBefore=@(); AddedFromRepo=@(); MissingUnresolved=@() }
+    if (-not (Test-Path $AllTraitsPath)) {
+        $dir = Split-Path -Parent $AllTraitsPath
+        if (-not (Test-Path $dir)) { New-Item -ItemType Directory -Path $dir | Out-Null }
+        Set-Content -Path $AllTraitsPath -Value "; Centralized trait definitions" -NoNewline
+    }
+    $allText = Get-Content $AllTraitsPath -Raw
+    foreach ($alias in $UsedTraits) {
+        if ($AllTraits.ContainsKey($alias)) { continue }
+        $result.MissingBefore += $alias
+        # Search likely trait definition files first under contracts/traits
+        $cands = Get-ChildItem -Path "contracts" -Filter "*.clar" -Recurse -ErrorAction SilentlyContinue | Where-Object { Select-String -Path $_.FullName -Pattern ("(?m)^\s*\(define-trait\s+" + [regex]::Escape($alias) + "\b") -Quiet }
+        if ($cands.Count -gt 0) {
+            # Prefer files under contracts/traits/
+            $pref = $cands | Where-Object { $_.FullName -like "*\contracts\traits\*" }
+            $file = if ($pref.Count -gt 0) { $pref[0].FullName } else { $cands[0].FullName }
+            $block = Extract-DefineTraitBlock -FilePath $file -Alias $alias
+            if ($null -ne $block -and $block.Trim().Length -gt 0) {
+                Add-Content -Path $AllTraitsPath -Value ("`n" + $block + "`n")
+                $result.AddedFromRepo += @{ alias=$alias; from=$file }
+                $AllTraits[$alias] = $true
+            } else {
+                $result.MissingUnresolved += $alias
+            }
+        } else {
+            $result.MissingUnresolved += $alias
+        }
+    }
+    return $result
+}
+
 $refResults = Ensure-Referenced-Contracts-In-Manifest -ManifestPath "Clarinet.toml" -Refs $ReferencedContracts -CanonicalPrincipal $CanonicalPrincipal
+
+# Ensure referenced contracts in test manifest too
+$refResultsTests = Ensure-Referenced-Contracts-In-Manifest -ManifestPath "stacks/Clarinet.test.toml" -Refs $ReferencedContracts -CanonicalPrincipal $CanonicalPrincipal
 
 # Optionally, sync all contract files into Clarinet.toml
 $syncResults = $null
 if ($SyncContracts) {
     $syncResults = Sync-Manifest-With-Contracts -ManifestPath "Clarinet.toml" -CanonicalPrincipal $CanonicalPrincipal -RenameBlocks:$RenameBlocks
+}
+
+# Verify centralized traits coverage and auto-fix when possible
+$traitsCoverage = Verify-And-Fix-AllTraits -AllTraitsPath $allTraitsPath -UsedTraits $GlobalUsedTraits
+
+# Re-normalize manifests after any additions so paths are canonical
+$manifestResults += Align-Manifest -ManifestPath "Clarinet.toml" -CanonicalPrincipal $CanonicalPrincipal -EnforceAddresses
+if (Test-Path "stacks/Clarinet.test.toml") {
+    $manifestResults += Align-Manifest -ManifestPath "stacks/Clarinet.test.toml" -CanonicalPrincipal $CanonicalPrincipal -EnforceAddresses
+}
+
+# Referenced contract verification summary (root + test manifests)
+if ($ReferencedContracts.Count -gt 0) {
+    $allRefs = New-Object System.Collections.Generic.HashSet[string]
+    foreach ($r in $ReferencedContracts) { [void]$allRefs.Add($r) }
+    $addedRoot = @($refResults.Added | ForEach-Object { $_.name })
+    $addedTest = @($refResultsTests.Added | ForEach-Object { $_.name })
+    $missingRoot = @($refResults.Missing)
+    $missingTest = @($refResultsTests.Missing)
+    # Remove added in either manifest from the outstanding set
+    foreach ($n in $addedRoot) { [void]$allRefs.Remove($n) }
+    foreach ($n in $addedTest) { [void]$allRefs.Remove($n) }
+    # Remove missing (we will print them explicitly)
+    foreach ($n in $missingRoot) { [void]$allRefs.Remove($n) }
+    foreach ($n in $missingTest) { [void]$allRefs.Remove($n) }
+    $verified = @(); foreach ($x in $allRefs) { $verified += $x }
+    if ($addedRoot.Count -gt 0) { Write-Host ("Added referenced contracts (root): " + ($addedRoot -join ', ')) -ForegroundColor Green }
+    if ($addedTest.Count -gt 0) { Write-Host ("Added referenced contracts (tests): " + ($addedTest -join ', ')) -ForegroundColor Green }
+    if ($verified.Count -gt 0) { Write-Host ("Verified referenced contracts already present: " + ($verified -join ', ')) -ForegroundColor Green }
+    $unresolved = @()
+    # Consider unresolved only if missing in both
+    $missingBoth = New-Object System.Collections.Generic.HashSet[string]
+    foreach ($n in $missingRoot) { if (-not $addedTest.Contains($n)) { [void]$missingBoth.Add($n) } }
+    foreach ($n in $missingTest) { if (-not $addedRoot.Contains($n)) { [void]$missingBoth.Add($n) } }
+    foreach ($n in $missingBoth) { $unresolved += $n }
+    if ($unresolved.Count -gt 0) { Write-Host ("Unresolved referenced contracts (manual review): " + ($unresolved -join ', ')) -ForegroundColor Yellow }
 }
 
 if ($FileCount -gt 0) {
@@ -728,6 +1000,7 @@ try {
             Added = $refResults.Added
             Missing = $refResults.Missing
         }
+        TraitsCoverage = $traitsCoverage
         SyncResults = $syncResults
     }
     if ($ReportJsonPath) {
