@@ -1,3 +1,8 @@
+
+[contracts.all-traits]
+path = "contracts/traits/all-traits.clar"
+clarity_version = 3
+epoch = "3.0"
 [project]
 name = "conxian-tests"
 description = "Minimal manifest for SDK tests"
@@ -12,13 +17,8 @@ wallet_1 = { mnemonic = "sell invite acquire kitten bamboo drastic jelly vivid p
 # Use the root-level Clarinet.toml and Clarinet.test.toml instead to avoid drift.
 # This file remains for historical reference; paths may be stale.
 # Traits
-[contracts.sip-010-trait]
-path = "../contracts/traits/sip-010-trait.clar"
-clarity_version = 3
-epoch = "2.5"
-
 [contracts.dim-registry-trait]
-path = "../contracts/traits/dim-registry-trait.clar"
+path = "contracts/traits/dimensional/dim-registry-trait.clar"
 clarity_version = 3
 epoch = "2.5"
 
@@ -32,4 +32,4 @@ epoch = "2.5"
 path = "../contracts/dimensional/tokenized-bond.clar"
 clarity_version = 3
 epoch = "2.5"
-depends_on = ["sip-010-trait"]
+depends_on = ["all-traits"]

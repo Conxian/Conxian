@@ -3,7 +3,7 @@
 ;; Supports institutional borrowing, risk-based pricing, and automated bond creation
 
 (use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
-(use-trait lending-trait .lending-system-trait.lending-system-trait)
+(use-trait lending-trait .all-traits.lending-system-trait)
 
 ;; Import mathematical libraries for enterprise calculations (removed unresolved trait import)
 ;; (use-trait math-precision .precision-calculator)

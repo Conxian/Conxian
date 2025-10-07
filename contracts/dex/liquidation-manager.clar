@@ -1,5 +1,5 @@
 (use-trait liquidation-trait .all-traits.liquidation-trait)
-(use-trait liquidation-interface .liquidation-trait.liquidation-trait)
+(use-trait liquidation-interface .all-traits.liquidation-trait)
 
 (impl-trait .all-traits.liquidation-trait)
 
