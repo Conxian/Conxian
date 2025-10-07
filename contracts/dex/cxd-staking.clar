@@ -1,3 +1,4 @@
+(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
 ;; cxd-staking.clar
 ;; xCXD Staking Contract - Revenue distribution with warm-up/cool-down to prevent snapshot sniping
 ;; Implements buyback-and-make mechanism for revenue sharing
@@ -6,13 +7,8 @@
 (define-constant TRAIT_REGISTRY .all-traits)
 
 ;; Resolve traits using the trait registry
-(use-trait  ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
-(use-trait  ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
-(use-trait  ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
-(use-trait  ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
 
 ;; Implement the staking trait
-(impl-trait ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
 
 ;; --- Constants ---
 (define-constant CONTRACT_OWNER tx-sender)

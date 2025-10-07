@@ -2,12 +2,7 @@
 ;; Bitcoin asset management vault with sBTC wrapping/unwrapping
 ;; Provides secure custody, yield generation, and cross-chain bridging for BTC
 
-(use-trait  ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
-(use-trait  ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
-(use-trait  ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
 
-(impl-trait ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
-(impl-trait ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
 
 ;; ===== Constants =====
 (define-constant ERR_UNAUTHORIZED (err u2001))

@@ -1,4 +1,3 @@
-(use-trait utils-trait .utils-trait.utils-trait)
 
 ;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED (err u6000))

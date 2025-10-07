@@ -1,9 +1,6 @@
 ;; mock-strategy-a.clar
 ;; A simple mock strategy contract for testing the yield optimizer.
 
-(use-trait  ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
-(use-trait  ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
-(impl-trait ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
 
 (define-public (deposit (asset principal) (amount uint))
   ;; This function is called when the vault transfers funds to this strategy.

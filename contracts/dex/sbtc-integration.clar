@@ -2,7 +2,6 @@
 ;; sBTC Integration Module for Conxian Protocol
 ;; Provides sBTC asset management, risk parameters, and oracle integration
 
-(use-trait  ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
 
 ;; =============================================================================
 ;; CONSTANTS AND ERROR CODES

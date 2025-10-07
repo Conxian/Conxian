@@ -2,7 +2,6 @@
 ;; Advanced liquidity management and optimization system for enterprise operations
 ;; Handles automated liquidity balancing, capital efficiency, and risk management
 
-(use-trait  ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
 
 ;; Constants
 (define-constant ERR_UNAUTHORIZED (err u10001))

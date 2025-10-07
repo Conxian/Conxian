@@ -1,9 +1,8 @@
+(use-trait cross-protocol-integrator-trait .all-traits.cross-protocol-integrator-trait)
 ;; Conxian Cross-Protocol Integrator
-(use-trait  ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
-(use-trait dex-router-trait .dex-router-trait.dex-router-trait)
-(use-trait oracle-trait .oracle-trait.oracle-trait)
 
-(impl-trait cross-protocol-integrator-trait)
+
+(impl-trait .all-traits.cross-protocol-integrator-trait)
 
 ;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED (err u701))

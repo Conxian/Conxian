@@ -1,9 +1,7 @@
 ;; Pausable Contract
 ;; Provides emergency stop mechanism that can be triggered by authorized accounts
 
-(use-trait  ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
 
-(impl-trait ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
 
 (define-constant ERR_PAUSED (err u200))
 (define-constant ERR_NOT_PAUSED (err u201))

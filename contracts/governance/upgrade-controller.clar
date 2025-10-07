@@ -2,7 +2,6 @@
 ;; Manages safe protocol upgrades with timelock and approval mechanisms
 ;; Enables contract migrations and parameter updates with rollback capability
 
-(use-trait  ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
 
 ;; ===== Constants =====
 (define-constant ERR_UNAUTHORIZED (err u4001))

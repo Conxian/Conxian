@@ -10,8 +10,6 @@
 ;; - User status aggregation
 ;; - Revenue distribution triggers
 
-(use-trait  ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
-(use-trait  ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
 
 ;; Error codes
 (define-constant ERR_UNAUTHORIZED (err u100))

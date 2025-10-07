@@ -1,10 +1,11 @@
+(use-trait sip-018-trait .all-traits.sip-018-trait)
 ;; signed-data-base.clar
 ;; Base implementation of SIP-018 Signed Structured Data standard
 ;; Provides reusable functionality for contracts needing signature verification
 
 ;; Centralized traits
-(use-trait sip-018-trait .sip-018-trait.sip-018-trait)
-(impl-trait sip-018-trait)
+
+(impl-trait .all-traits.sip-018-trait)
 
 ;; Constants
 (define-constant ERR_INVALID_SIGNATURE (err u6300))

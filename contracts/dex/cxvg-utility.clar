@@ -2,7 +2,6 @@
 ;; CXVG Utility System - Fee discounts, proposal bonding, governance boosts
 ;; Addresses governance token utility sinks and voting power concentration risks
 
-(use-trait  ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
 
 ;; --- Constants ---
 (define-constant CONTRACT_OWNER tx-sender)

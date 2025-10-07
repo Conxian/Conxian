@@ -1,7 +1,5 @@
 ;; SIP-009 Non-Fungible Token for Concentrated Liquidity Positions
 
-(use-trait  ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
-(impl-trait ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
 
 (define-non-fungible-token concentrated-liquidity-positions uint)
 

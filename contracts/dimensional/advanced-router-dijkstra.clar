@@ -1,11 +1,10 @@
+(use-trait advanced-router-dijkstra-trait .all-traits.advanced-router-dijkstra-trait)
 ;; Advanced Router with Dijkstra's Algorithm
 ;; Implements optimal path finding for multi-hop swaps
 ;; Optimizes for best price with minimal gas
 
-(use-trait  ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
-(use-trait  ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
 
-(impl-trait advanced-router-dijkstra-trait)
+(impl-trait .all-traits.advanced-router-dijkstra-trait)
 
 ;; === CONSTANTS ===
 (define-constant CONTRACT_OWNER tx-sender)

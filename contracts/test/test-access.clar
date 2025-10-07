@@ -1,7 +1,6 @@
 ;; test-access.clar
 ;; Test contract to verify access control trait resolution
 
-(use-trait  ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
 
 (define-constant contract-owner tx-sender)
 (define-constant ERR_NOT_AUTHORIZED u100)

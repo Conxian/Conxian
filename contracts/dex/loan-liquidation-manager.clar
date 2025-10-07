@@ -1,11 +1,10 @@
+(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
 ;; loan-liquidation-manager.clar
 ;; Manages liquidations for undercollateralized loans
 ;; Implements a permissionless liquidation entry point
 
-(use-trait  ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
 
 ;; --- Traits ---
-(use-trait  ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
 
 ;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED (err u2001))

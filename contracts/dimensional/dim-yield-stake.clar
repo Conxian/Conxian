@@ -12,7 +12,6 @@
 (define-constant ERR_METRIC_NOT_FOUND u106)
 
 ;; --- Contract Dependencies ---
-(use-trait  ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
 
 
 (define-data-var contract-owner principal tx-sender)

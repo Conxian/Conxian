@@ -1,9 +1,7 @@
-(use-trait  ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
-(use-trait  ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
-(use-trait  ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
+(use-trait liquidation-trait .all-traits.liquidation-trait)
 (use-trait liquidation-interface .liquidation-trait.liquidation-trait)
 
-(impl-trait liquidation-trait)
+(impl-trait .all-traits.liquidation-trait)
 
 ;; Constants
 (define-constant CONTRACT_OWNER tx-sender)

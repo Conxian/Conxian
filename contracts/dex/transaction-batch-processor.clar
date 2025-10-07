@@ -1,7 +1,6 @@
 ;; Transaction Batch Processor - Enables 5x throughput improvement
 ;; Processes multiple transactions in batches for optimized performance
 
-(use-trait  ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
 
 ;; Constants
 (define-constant ERR_UNAUTHORIZED (err u1001))

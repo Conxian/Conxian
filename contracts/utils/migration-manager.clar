@@ -1,10 +1,8 @@
+(use-trait migration-manager-trait .all-traits.migration-manager-trait)
 ;; migration-manager.clar
 ;; Manages contract migrations and upgrades
 
-(use-trait  ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
-(use-trait migration-manager-trait .migration-manager-trait.migration-manager-trait)
-
-(impl-trait migration-manager-trait)
+(impl-trait .all-traits.migration-manager-trait)
 
 ;; ===== Constants =====
 (define-constant ERR_UNAUTHORIZED (err u100))

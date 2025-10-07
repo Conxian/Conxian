@@ -601,6 +601,89 @@
 )
 
 ;; =============================================================================
+;; CENTRALIZATION ADDITIONS (missing traits discovered by fixer)
+;; =============================================================================
+
+;; Batch Auction Trait (centralized)
+(define-trait batch-auction-trait
+  (
+    (create-auction (token-sell <sip-010-ft-trait>) (token-buy <sip-010-ft-trait>) (amount uint) (duration uint) (response uint (err uint)))
+    (place-bid (auction-id uint) (amount uint) (response bool (err uint)))
+    (settle-auction (auction-id uint) (response bool (err uint)))
+    (get-auction-status (auction-id uint) (response (tuple (status (string-ascii 32)) (total-bids uint)) (err uint)))
+  )
+)
+
+;; Keeper Coordinator Trait (centralized)
+(define-trait keeper-coordinator-trait
+  (
+    (execute-keeper-tasks () (response (tuple (tasks-attempted uint) (block uint) (keeper principal)) (err uint)))
+    (set-keeper-enabled (enabled bool) (response bool (err uint)))
+    (is-authorized-keeper (keeper principal) (response bool (err uint)))
+    (get-keeper-status ()
+      (response (tuple (enabled bool) (last-execution uint) (interval uint) (total-executed uint) (total-failed uint) (success-rate uint)) (err uint)))
+  )
+)
+
+;; Bond Factory Trait (centralized)
+(define-trait bond-factory-trait
+  (
+    (create-bond (principal-amount uint) (coupon-rate uint) (maturity-blocks uint) (collateral-amount uint) (collateral-token principal) (is-callable bool) (call-premium uint)
+      (response (tuple (bond-id uint) (bond-contract principal) (maturity-block uint)) (err uint)))
+    (redeem-bond (bond-id uint)
+      (response (tuple (principal uint) (interest uint) (total-payout uint)) (err uint)))
+    (report-coupon-payment (bond-id uint) (payment-amount uint) (response bool (err uint)))
+    (get-bond-status (bond-id uint)
+      (response (tuple (bond-id uint) (status (string-ascii 20)) (is-mature bool) (blocks-until-maturity uint) (current-block uint) (maturity-block uint)) (err uint)))
+  )
+)
+
+;; Cross-Protocol Integrator Trait (centralized)
+(define-trait cross-protocol-integrator-trait
+  (
+    (register-protocol (protocol-name (string-ascii 64)) (protocol-contract principal) (response bool (err uint)))
+    (remove-protocol (protocol-name (string-ascii 64)) (response bool (err uint)))
+    (swap-via-protocol (protocol-name (string-ascii 64)) (token-in principal) (token-out principal) (amount-in uint) (min-amount-out uint) (response bool (err uint)))
+    (get-protocol-contract (protocol-name (string-ascii 64)) (response (optional principal) (err uint)))
+  )
+)
+
+;; DEX Factory (internal) Trait used by templates
+(define-trait dex-factory-trait
+  (
+    (create-pool-internal (token-a <sip-010-ft-trait>) (token-b <sip-010-ft-trait>) (token-a-amount uint) (token-b-amount uint) (response principal (err uint)))
+  )
+)
+
+;; Advanced Router Dijkstra Trait (centralized)
+(define-trait advanced-router-dijkstra-trait
+  (
+    (find-optimal-path (token-in principal) (token-out principal) (amount-in uint)
+      (response (tuple (path (list 20 principal)) (distance uint) (hops uint)) (err uint)))
+    (swap-optimal-path (token-in principal) (token-out principal) (amount-in uint) (min-amount-out uint)
+      (response (tuple (amount-out uint) (path (list 20 principal)) (hops uint) (distance uint)) (err uint)))
+    (get-graph-stats () (response (tuple (nodes uint) (edges uint)) (err uint)))
+  )
+)
+
+;; Budget Manager Trait (centralized)
+(define-trait budget-manager-trait
+  (
+    (create-budget-proposal (amount uint) (token principal) (response uint (err uint)))
+    (execute-budget-proposal (budget-id uint) (response bool (err uint)))
+    (get-budget-proposal (budget-id uint) (response (optional (tuple (proposer principal) (amount uint) (token principal) (executed bool))) (err uint)))
+    (get-contract-owner () (response principal (err uint)))
+  )
+)
+
+;; Proposal Trait (centralized, minimal)
+(define-trait proposal-trait
+  (
+    (get-contract-owner () (response principal (err uint)))
+  )
+)
+
+;; =============================================================================
 ;; ERROR CODES
 ;; =============================================================================
 

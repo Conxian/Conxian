@@ -2,8 +2,6 @@
 ;; Adapter for integrating external oracle providers (Chainlink, Pyth, Redstone)
 ;; Provides multi-source price aggregation with manipulation detection
 
-(use-trait oracle-trait .oracle-trait.oracle-trait)
-
 ;; ===== Constants =====
 (define-constant ERR_UNAUTHORIZED (err u8001))
 (define-constant ERR_INVALID_SOURCE (err u8002))

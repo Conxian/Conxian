@@ -15,9 +15,9 @@ balance = 100000000000000
 mnemonic = "hold excess usual excess ring elephant install account glad dry fragile donkey gaze humble truck breeze nation gasp vacuum limb head keep delay hospital"
 balance = 100000000000000
 
-;; =============================================================================
-;; CENTRALIZED TRAITS (Primary Reference)
-;; =============================================================================
+# =============================================================================
+# CENTRALIZED TRAITS (Primary Reference)
+# =============================================================================
 
 [contracts.all-traits]
 path = "../contracts/traits/all-traits.clar"

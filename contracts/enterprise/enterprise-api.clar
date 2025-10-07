@@ -1,8 +1,4 @@
 ;; Conxian Enterprise API - Institutional features
-(use-trait  ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
-(use-trait  ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
-(use-trait  ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
-(use-trait dex-router-trait .dex-router-trait.dex-router-trait)
 
 ;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED (err u401))

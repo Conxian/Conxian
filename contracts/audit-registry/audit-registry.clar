@@ -2,9 +2,6 @@
 ;; DAO-based contract security audit registry
 ;; Handles audit submissions, DAO voting, and NFT badge issuance
 
-(use-trait  ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
-(use-trait dao-trait .dao-trait.dao-trait)
-
 ;; --- Traits ---
 
 ;; --- Constants ---

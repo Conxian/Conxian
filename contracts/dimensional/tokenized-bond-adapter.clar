@@ -1,8 +1,8 @@
+(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
 ;; tokenized-bond-adapter.clar
 ;; Integration adapter for tokenized bonds to connect with enhanced tokenomics system
 ;; Routes bond proceeds and coupon payments through revenue distribution system
 
-(use-trait  ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
 
 ;; --- Constants ---
 (define-constant CONTRACT_OWNER tx-sender)

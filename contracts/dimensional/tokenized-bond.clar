@@ -3,12 +3,8 @@
 ;; This contract implements a SIP-010 tokenized bond.
 ;; It represents a single series of bonds with uniform characteristics.
 ;; Import traits from the all-traits.clar file
-(use-trait  ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
-(use-trait  ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
 
 ;; Implement the traits for this contract
-(impl-trait ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
-(impl-trait ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
 
 ;; Error codes
 (define-constant ERR_UNAUTHORIZED (err u100))

@@ -1,13 +1,9 @@
+(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
 ;; flash-loan-vault.clar
 ;; A specialized vault for executing ERC-3156 compatible flash loans.
 
 ;; Import traits at the top
-(use-trait  ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
-(use-trait  ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
-(use-trait  ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
 
-(impl-trait ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
-(impl-trait ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.)
 
 ;; Constants
 (define-constant ERR_UNAUTHORIZED (err u6001))
