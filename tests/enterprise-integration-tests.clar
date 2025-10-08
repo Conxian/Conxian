@@ -1,16 +1,15 @@
 ;; enterprise-integration-tests.clar
-;; Comprehensive integration tests for the enterprise loan system
-;; Tests all components working together: loans, bonds, yield distribution, and liquidity optimization
+    ;; Comprehensive integration tests for the enterprise loan system
+    ;; Tests all components working together: loans, bonds, yield distribution, and liquidity optimization
 
-(use-trait sip10 .sip-010-ft-trait.sip-010-ft-trait)
-(use-trait flash-loan-receiver .flash-loan-receiver-trait.flash-loan-receiver-trait)
+    (use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
+    (use-trait flash-loan-receiver-trait .all-traits.flash-loan-receiver-trait)
 
-;; Test constants
+    ;; Test constants
 (define-constant TEST_ADMIN tx-sender)
 (define-constant TEST_BORROWER_1 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6)
 (define-constant TEST_BORROWER_2 'ST1SJ3DTE5DN7X54YDH5D64R3BCB6A2AG2ZQ8YPD5)
 (define-constant TEST_BOND_INVESTOR 'ST2CY5V39NHDPWSXMW9QDT3HC3GD6Q6XX4CFRK9AG)
-
 ;; Test amounts
 (define-constant SMALL_LOAN_AMOUNT u10000000000000000000000) ;; 10,000 tokens
 (define-constant ENTERPRISE_LOAN_AMOUNT u100000000000000000000000) ;; 100,000 tokens (triggers bond issuance)

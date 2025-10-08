@@ -1,18 +1,16 @@
 ;; tokenomics-integration-tests.clar
-;; Integration tests for Conxian enhanced tokenomics system
-;; Tests cross-contract interactions, revenue flows, and system coordination
+    ;; Integration tests for Conxian enhanced tokenomics system
+    ;; Tests cross-contract interactions, revenue flows, and system coordination
 
-(use-trait sip-010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.sip-010-ft-trait)
+    (use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
 
-;; =============================================================================
-;; TEST CONSTANTS AND SETUP
-;; =============================================================================
-
+    ;; =============================================================================
+    ;; TEST CONSTANTS AND SETUP
+    ;; =============================================================================
 (define-constant TEST_DEPLOYER tx-sender)
 (define-constant TEST_USER_1 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6)
 (define-constant TEST_USER_2 'ST1SJ3DTE5DN7X54YDH5D64R3BCB6A2AG2ZQ8YPD5)
 (define-constant TEST_VAULT 'ST2CY5V39NHDPWSXMW9QDT3HC3GD6Q6XX4CFRK9AG)
-
 ;; Test amounts for integration scenarios
 (define-constant INTEGRATION_AMOUNT_SMALL u5000)
 (define-constant INTEGRATION_AMOUNT_MEDIUM u50000)

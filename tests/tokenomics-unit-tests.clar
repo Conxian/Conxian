@@ -1,13 +1,13 @@
 ;; tokenomics-unit-tests.clar
-;; Comprehensive unit tests for Conxian enhanced tokenomics system
-;; Tests all token contracts, staking, migration, governance utilities, and revenue distribution
+    ;; Comprehensive unit tests for Conxian enhanced tokenomics system
+    ;; Tests all token contracts, staking, migration, governance utilities, and revenue distribution
 
-(use-trait sip-010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.sip-010-ft-trait)
-(use-trait ftm-trait .ft-mintable-trait.ft-mintable-trait)
+    (use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
+    (use-trait ftm-trait .all-traits.sip-010-ft-mintable-trait)
 
-;; =============================================================================
-;; TEST CONSTANTS AND SETUP
-;; =============================================================================
+    ;; =============================================================================
+    ;; TEST CONSTANTS AND SETUP
+    ;; =============================================================================
 
 (define-constant TEST_DEPLOYER tx-sender)
 (define-constant TEST_USER_1 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6)
