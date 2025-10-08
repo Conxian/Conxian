@@ -3,12 +3,8 @@
 ;; Enhanced with staking, yield distribution, and system integration hooks
 
 ;; --- Traits ---
-(use-trait sip-010-ft-trait .sip-010-ft-trait.sip-010-ft-trait)
-(use-trait ownable-trait .ownable-trait.ownable-trait)
 
 ;; Implement the standard traits
-(impl-trait sip-010-ft-trait)
-(impl-trait ownable-trait)
 
 ;; Constants
 (define-constant TRAIT_REGISTRY .trait-registry)

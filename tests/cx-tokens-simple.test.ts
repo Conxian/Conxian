@@ -109,7 +109,7 @@ const baseContracts = {
   this.balances.set(recipient, currentBalance + amount);
   this.totalSupply += amount;
   return { isOk: true };
-}
+},
     async balanceOf(owner: string) {
       return { value: this.balances.get(owner) || 0 };
     },

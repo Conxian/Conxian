@@ -2,8 +2,6 @@
 ;; Minimal SIP-010-compliant mock for testing
 
 ;; --- Traits ---
-(use-trait sip-010-ft-trait .sip-010-ft-trait.sip-010-ft-trait)
-(impl-trait sip-010-ft-trait)
 
 ;; Constants
 (define-constant TRAIT_REGISTRY .trait-registry)

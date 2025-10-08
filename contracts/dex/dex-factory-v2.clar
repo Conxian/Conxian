@@ -2,11 +2,7 @@
 ;; This contract is responsible for creating and registering new DEX pools.
 
 ;; --- Traits ---
-(use-trait access-control-trait .access-control-trait.access-control-trait)
-(use-trait factory-trait .factory-trait.factory-trait)
-(use-trait pool-creation-trait .pool-creation-trait.pool-creation-trait)
-(use-trait circuit-breaker-trait .circuit-breaker-trait.circuit-breaker-trait)
-(impl-trait factory-trait)
+
 
 ;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED (err u1003))

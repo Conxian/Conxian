@@ -2,12 +2,7 @@
 ;; Implements the access control functionality specified in AIP-7
 
 ;; --- Traits ---
-(use-trait access-control-trait .access-control-trait.access-control-trait)
-(use-trait ownable-trait .ownable-trait.ownable-trait)
-(use-trait standard-constants-trait .standard-constants-trait.standard-constants-trait)
 
-(impl-trait access-control-trait)
-(impl-trait ownable-trait)
 
 ;; Constants
 (define-constant TRAIT_REGISTRY .trait-registry)

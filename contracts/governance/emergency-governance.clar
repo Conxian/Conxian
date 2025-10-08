@@ -2,7 +2,6 @@
 ;; Fast-track emergency governance for critical protocol actions
 ;; Multi-sig protected emergency pause, parameter updates, and recovery
 
-(use-trait access-control-trait .access-control-trait.access-control-trait)
 
 ;; ===== Constants =====
 (define-constant ERR_UNAUTHORIZED (err u6001))

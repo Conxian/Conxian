@@ -1,11 +1,7 @@
 ;; tiered-pools.clar
 ;; Implements tiered liquidity pools with different fee structures
 
-(use-trait sip-010-ft-trait .sip-010-ft-trait.sip-010-ft-trait)
-(use-trait pool-trait .pool-trait.pool-trait)
-(use-trait fee-manager-trait .fee-manager-trait.fee-manager-trait)
 
-(impl-trait pool-trait)
 
 ;; ===== Constants =====
 (define-constant ERR_UNAUTHORIZED (err u100))

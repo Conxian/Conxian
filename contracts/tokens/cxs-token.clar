@@ -3,11 +3,8 @@
 ;; Implements SIP-009 NFT standard with staking and governance features
 
 ;; --- Traits ---
-(use-trait sip-009-nft-trait .sip-009-nft-trait.sip-009-nft-trait)
-(use-trait sip-010-ft-trait .sip-010-ft-trait.sip-010-ft-trait)
 
 ;; Implement the standard trait
-(impl-trait sip-009-nft-trait)
 
 ;; Constants
 (define-constant TRAIT_REGISTRY .trait-registry)

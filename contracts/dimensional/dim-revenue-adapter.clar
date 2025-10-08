@@ -1,12 +1,10 @@
+(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
 ;; dim-revenue-adapter.clar
 ;; Integration adapter connecting dimensional yield system with enhanced tokenomics
 ;; Routes dimensional rewards through revenue distributor for proper token holder distribution
 
 ;; --- Traits ---
-(use-trait sip-010-ft-trait .sip-010-ft-trait.sip-010-ft-trait)
-(use-trait ownable-trait .ownable-trait.ownable-trait)
 
-(impl-trait ownable-trait)
 
 ;; --- Constants ---
 (define-constant TRAIT_REGISTRY .trait-registry)

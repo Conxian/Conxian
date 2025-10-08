@@ -1,7 +1,4 @@
 ;; Conxian Yield Optimizer - Automated yield strategies
-(use-trait sip-010-ft-trait .sip-010-ft-trait.sip-010-ft-trait)
-(use-trait strategy-trait .strategy-trait.strategy-trait)
-(use-trait circuit-breaker-trait .circuit-breaker-trait.circuit-breaker-trait)
 
 ;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED (err u601))

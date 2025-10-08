@@ -1,7 +1,6 @@
 ;; Transaction Batch Processor - Enables 5x throughput improvement
 ;; Processes multiple transactions in batches for optimized performance
 
-(use-trait sip-010-ft-trait .sip-010-ft-trait.sip-010-ft-trait)
 
 ;; Constants
 (define-constant ERR_UNAUTHORIZED (err u1001))

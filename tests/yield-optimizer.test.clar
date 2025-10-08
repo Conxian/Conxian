@@ -1,141 +1,71 @@
 ;; tests/yield-optimizer.test.clar
-;;
-;; Test suite for the yield optimizer and its integration with the vault.
-;;
+    ;;
+    ;; Test suite for the yield optimizer and its integration with the vault.
+    ;;
 
-;; --- Setup ---
-(use-trait ft-trait .ft-trait)
+    ;; --- Setup ---
+    (use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
 
-(define-contract-public .mock-wstx
-  (
-    (impl-trait .ft-trait)
-    (define-data-var name (string-ascii 32) "Wrapped Stacks")
-    (define-data-var symbol (string-ascii 32) "wSTX")
-    (define-data-var decimals uint u8)
-    (define-map balances principal uint)
-    (define-data-var total-supply uint u0)
-    (define-data-var token-uri (string-utf8 256) u"")
+    (define-contract-public .mock-wstx
+      (
+        (impl-trait .all-traits.sip-010-ft-trait)
+        (define-data-var name (string-ascii 32) "Wrapped Stacks")
+        (define-data-var symbol (string-ascii 32) "wSTX")
+        (define-data-var decimals uint u8)
+        (define-map balances principal uint)
+        (define-data-var total-supply uint u0)
+        (define-data-var token-uri (string-utf8 256) u"")
 
     (define-public (transfer (amount uint) (sender principal) (recipient principal) (memo (optional (buff 34))))
       (begin
         (asserts! (is-eq tx-sender sender) (err u1000))
         (asserts! (>= (get-balance sender) amount) (err u1001))
-        (try! (debit sender amount))
-        (try! (credit recipient amount))
-        (ok true)
-      )
-    )
-    (define-read-only (get-name) (ok (var-get name)))
-    (define-read-only (get-symbol) (ok (var-get symbol)))
-    (define-read-only (get-decimals) (ok (var-get decimals)))
-    (define-read-only (get-balance (owner principal)) (ok (default-to u0 (map-get? balances owner))))
-    (define-read-only (get-total-supply) (ok (var-get total-supply)))
-    (define-public (set-token-uri (uri (string-utf8 256))) (begin (var-set token-uri uri) (ok true)))
-
-    (define-private (credit (account principal) (amount uint))
-      (map-set balances account (+ (get-balance account) amount))
-      (var-set total-supply (+ (var-get total-supply) amount))
-      (ok true)
-    )
-    (define-private (debit (account principal) (amount uint))
-      (map-set balances account (- (get-balance account) amount))
-      (var-set total-supply (- (var-get total-supply) amount))
-      (ok true)
-    )
-
-    (define-public (mint (recipient principal) (amount uint))
-      (begin
-        (asserts! (is-eq tx-sender .faucet) (err u2000))
-        (try! (credit recipient amount))
-        (ok true)
-      )
-    )
-  )
-)
-
-(define-contract-public .faucet
-  (
-    (define-public (mint-wstx (recipient principal) (amount uint))
-      (contract-call? .mock-wstx mint recipient amount)
-    )
+{{ ... }}
   )
 )
 
 ;; --- Test Cases ---
 
-(define-contract-public .mock-auto-compounder
-  (
-    (use-trait yield-optimizer-trait .yield-optimizer-trait.yield-optimizer-trait)
-    (use-trait sip-010-ft-trait .ft-trait)
+    (define-contract-public .mock-auto-compounder
+      (
+        (use-trait yield-optimizer-trait .all-traits.yield-optimizer-trait)
+        (use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
 
     (define-data-var contract-owner principal tx-sender)
     (define-data-var yield-optimizer-contract principal .yield-optimizer)
     (define-map user-positions { user: principal, token: principal } { amount: uint, last-compounded: uint })
 
-    (define-public (set-yield-optimizer-contract (new-optimizer principal))
-      (begin
-        (asserts! (is-eq tx-sender (var-get contract-owner)) (err u1000))
-        (var-set yield-optimizer-contract new-optimizer)
-        (ok true)
-      )
-    )
-
-    (define-public (deposit (token principal) (amount uint))
-      (begin
-        (try! (contract-call? token transfer amount tx-sender (as-contract tx-sender)))
-        (let ((position (default-to { amount: u0, last-compounded: u0 } (map-get? user-positions { user: tx-sender, token: token }))))
-          (map-set user-positions { user: tx-sender, token: token } (merge position { amount: (+ (get amount position) amount) }))
-          (ok true)
-        )
-      )
-    )
-
-    (define-public (compound (user principal) (token principal))
-      (begin
-        (ok (print (merge-map
-                    {event: "auto-compound-test", user: user, token: token}
-                    (try! (contract-call? (var-get yield-optimizer-contract) auto-compound user token)))))
-      )
-    )
-
-    (define-read-only (get-position (user principal) (token principal))
+{{ ... }}
       (map-get? user-positions { user: user, token: token })
     )
   )
 )
 
-(define-contract-public .mock-strategy-a
-  (
-    (use-trait sip-010-ft-trait .ft-trait)
-    (define-data-var apy uint u0)
+    (define-contract-public .mock-strategy-a
+      (
+        (use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
+        (define-data-var apy uint u0)
 
     (define-public (harvest-rewards)
       (ok u1000)
     )
 
-    (define-public (set-apy (new-apy uint))
-      (begin
-        (var-set apy new-apy)
-        (ok true)
-      )
-    )
-
-    (define-read-only (get-apy)
+{{ ... }}
       (ok (var-get apy))
     )
   )
 )
 
-(define-contract-public .mock-strategy-b
-  (
-    (use-trait sip-010-ft-trait .ft-trait)
-    (define-data-var apy uint u0)
+    (define-contract-public .mock-strategy-b
+      (
+        (use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
+        (define-data-var apy uint u0)
 
     (define-public (harvest-rewards)
       (ok u2000)
     )
 
-    (define-public (set-apy (new-apy uint))
+{{ ... }}
       (begin
         (var-set apy new-apy)
         (ok true)

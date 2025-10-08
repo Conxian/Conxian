@@ -2,8 +2,6 @@
 ;; Manages DAO-based voting and proposal execution
 
 ;; Traits
-(use-trait sip-010-ft-trait .sip-010-ft-trait.sip-010-ft-trait)
-(use-trait governance-token-trait .governance-token-trait.governance-token-trait)
 
 ;; Constants
 (define-constant ERR_UNAUTHORIZED (err u100))

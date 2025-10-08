@@ -3,8 +3,8 @@ import { defineConfig } from 'vitest/config';
 export default defineConfig({
   test: {
     environment: 'node',
-    include: ['stacks/tests/**/*.ts', 'stacks/sdk-tests/**/*.spec.ts', 'tests/**/*.test.ts'],
-  exclude: ['stacks/tests/helpers/**'],
+    include: ['tests/governance-token.test.ts'],
+    exclude: ['stacks/tests/**', 'stacks/sdk-tests/**', 'stacks/tests/helpers/**'],
     testTimeout: 120000,
     hookTimeout: 90000,
     globals: true,

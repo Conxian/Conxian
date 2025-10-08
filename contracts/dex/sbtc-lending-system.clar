@@ -1,8 +1,8 @@
+(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
 ;; sbtc-lending-system.clar  
 ;; Enhanced Lending System with sBTC Collateral Support
 ;; Implements lending/borrowing with sBTC as collateral and enterprise bond integration
 
-(use-trait sip-010-ft-trait .sip-010-ft-trait.sip-010-ft-trait)
 
 ;; =============================================================================
 ;; CONSTANTS

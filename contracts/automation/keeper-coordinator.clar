@@ -1,13 +1,9 @@
+(use-trait keeper-coordinator-trait .all-traits.keeper-coordinator-trait)
 ;; keeper-coordinator.clar
 ;; Central coordinator for automated keeper tasks across the Conxian protocol
 ;; Manages automated interest accrual, liquidations, rebalancing, and fee distribution
 
-(use-trait sip-010-ft-trait .sip-010-ft-trait.sip-010-ft-trait)
-(use-trait lending-system-trait .lending-system-trait.lending-system-trait)
-(use-trait oracle-trait .oracle-trait.oracle-trait)
-
-(impl-trait keeper-coordinator-trait)
-(impl-trait ownable-trait)
+(impl-trait .all-traits.keeper-coordinator-trait)
 
 ;; ===== Constants =====
 (define-constant ERR_UNAUTHORIZED (err u9001))

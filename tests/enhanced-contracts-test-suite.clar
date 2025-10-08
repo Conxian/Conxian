@@ -1,12 +1,12 @@
 ;; Conxian Enhanced Contracts Test Suite
-;; Comprehensive testing for all optimization systems
-;; Target: Validate +735K TPS improvements
+    ;; Comprehensive testing for all optimization systems
+    ;; Target: Validate +735K TPS improvements
 
-(use-trait sip010 'traits.sip-010-trait.sip-010-trait)
+    (use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
 
-;; =============================================================================
-;; TEST CONSTANTS AND SETUP
-;; =============================================================================
+    ;; =============================================================================
+    ;; TEST CONSTANTS AND SETUP
+    ;; =============================================================================
 
 (define-constant TEST_DEPLOYER tx-sender)
 (define-constant TEST_USER_1 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6)

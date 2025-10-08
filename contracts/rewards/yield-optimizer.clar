@@ -1,13 +1,10 @@
+(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
 ;; yield-optimizer.clar
 ;; The central brain of the Conxian yield system.
 ;; This contract dynamically analyzes and allocates funds across various yield-generating
 ;; strategies to maximize returns for the protocol.
 
 ;; --- Traits ---
-(use-trait sip-010-ft-trait .sip-010-ft-trait.sip-010-ft-trait)
-(use-trait vault-trait .vault-trait.vault-trait)
-(use-trait strategy-trait .strategy-trait.strategy-trait)
-(use-trait metrics-trait .metrics-trait.metrics-trait)
 
 ;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED (err u8001))

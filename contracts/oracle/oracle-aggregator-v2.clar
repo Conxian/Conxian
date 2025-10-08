@@ -1,11 +1,6 @@
 ;; Oracle Aggregator V2
 ;; This contract aggregates prices from multiple oracle sources, calculates TWAP, and detects manipulation.
 
-(use-trait oracle-trait .oracle-trait.oracle-trait)
-(use-trait access-control-trait .access-control-trait.access-control-trait)
-(use-trait circuit-breaker-trait .circuit-breaker-trait.circuit-breaker-trait)
-(use-trait sip-010-ft-trait .sip-010-ft-trait.sip-010-ft-trait)
-
 ;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED (err u1003))
 (define-constant ERR_INVALID_SOURCE (err u6001))

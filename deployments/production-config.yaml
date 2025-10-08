@@ -5,6 +5,7 @@
 
 # Environment Settings
 # ===================
+name: Production
 environment: "production"
 network: "mainnet"
 node_url: "https://stacks-node-api.mainnet.stacks.co"

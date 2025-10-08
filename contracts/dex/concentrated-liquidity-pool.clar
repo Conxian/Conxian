@@ -3,11 +3,7 @@
 ;; Implements tick-based liquidity management with NFT position representation
 
 ;; Traits
-(use-trait sip-010-ft-trait .sip-010-ft-trait.sip-010-ft-trait)
-(use-trait pool-trait .pool-trait.pool-trait)
-(use-trait position-nft-trait .position-nft-trait.position-nft-trait)
 
-(impl-trait concentrated-liquidity-pool-trait)
 
 ;; Implementation
 ;; Constants

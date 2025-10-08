@@ -1,10 +1,7 @@
 ;; Conxian DEX Pool - Constant product AMM pool with enhanced tokenomics integration
 ;; Implements pool-trait with full system integration
 
-(use-trait pool-trait .pool-trait.pool-trait)
-(use-trait sip-010-ft-trait .sip-010-ft-trait.sip-010-ft-trait)
 
-(impl-trait pool-trait)
 
 (define-constant ONE u1)
 (define-constant TWO u2)

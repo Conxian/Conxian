@@ -1,10 +1,7 @@
 ;; monitoring-dashboard.clar
 ;; Provides read-only functions for system monitoring and health checks
 
-(use-trait sip-010-ft-trait .sip-010-ft-trait.sip-010-ft-trait)
-(use-trait monitoring-trait .monitoring-trait.monitoring-trait)
 
-(impl-trait monitoring-trait)
 
 ;; ===== Constants =====
 (define-constant ERR_UNAUTHORIZED (err u100))

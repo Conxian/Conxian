@@ -2,9 +2,6 @@
 ;; Provides price feeds for various assets
 
 ;; Traits
-(use-trait sip-010-ft-trait .sip-010-ft-trait.sip-010-ft-trait)
-(use-trait oracle-trait .oracle-trait.oracle-trait)
-(use-trait access-control-trait .access-control-trait.access-control-trait)
 
 ;; Constants
 (define-constant ERR_UNAUTHORIZED (err u100))

@@ -1,3 +1,4 @@
+(use-trait dim-registry-trait .all-traits.dim-registry-trait)
 ;; dim-registry.clar
 ;; Dimensional Registry & Weight Updates
 ;; Registry for dimensional contracts and their associated metrics
@@ -5,12 +6,8 @@
 ;; This contract is controlled by a contract owner who can designate a whitelisted oracle.
 
 ;; --- Traits ---
-(use-trait dim-registry-trait .dim-registry-trait.dim-registry-trait)
-(use-trait ownable-trait .ownable-trait.ownable-trait)
 
-
-(impl-trait dim-registry-trait)
-(impl-trait ownable-trait)
+(impl-trait .all-traits.dim-registry-trait)
 
 ;; Constants
 (define-constant TRAIT_REGISTRY .trait-registry)

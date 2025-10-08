@@ -1,9 +1,7 @@
-(use-trait sip-010-ft-trait .sip-010-ft-trait.sip-010-ft-trait)
-(use-trait lending-system-trait .lending-system-trait.lending-system-trait)
-(use-trait standard-constants-trait .standard-constants-trait.standard-constants-trait)
-(use-trait liquidation-interface .liquidation-trait.liquidation-trait)
+(use-trait liquidation-trait .all-traits.liquidation-trait)
+(use-trait liquidation-interface .all-traits.liquidation-trait)
 
-(impl-trait liquidation-trait)
+(impl-trait .all-traits.liquidation-trait)
 
 ;; Constants
 (define-constant CONTRACT_OWNER tx-sender)
