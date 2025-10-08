@@ -226,7 +226,7 @@ describe('Flash Loan Integration Tests', () => {
       const failingReceiver = 'ST000000000000000000002AMW42H.failing-receiver';
       
       const flashLoanResult = simnet.callPublicFn('flash-loan-vault', 'flash-loan', [
-        Cl.principal(deployer + '.mock-token'),
+        Cl.principal(deployer + '.test-token-a'),
         Cl.uint(50000000000),
         Cl.principal(failingReceiver),
         Cl.buffer(new TextEncoder().encode('fail-test'))
@@ -331,7 +331,7 @@ describe('Flash Loan Integration Tests', () => {
       for (let i = 0; i < 5; i++) {
         rapidCalls.push(
           simnet.callPublicFn('flash-loan-vault', 'flash-loan', [
-            Cl.principal(deployer + '.mock-token'),
+            Cl.principal(deployer + '.test-token-a'),
             Cl.uint(10000000000),
             Cl.principal(flashLoanReceiver),
             Cl.buffer(new TextEncoder().encode(`rapid-${i}`))

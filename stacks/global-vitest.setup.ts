@@ -1,7 +1,8 @@
 // global-vitest.setup.ts
 import { getSDK } from '@hirosystems/clarinet-sdk';
 
-// Force Clarinet to use the ST3-based test manifest for all tests (including initSimnet callers)
+// Force Clarinet to use the dedicated test manifest for all tests
+// This ensures contracts compile under the ST3 deployer and `.all-traits` resolves
 process.env.CLARINET_MANIFEST = process.env.CLARINET_MANIFEST || 'stacks/Clarinet.test.toml';
 
 // Use a minimal test manifest to avoid loading optional/missing contracts

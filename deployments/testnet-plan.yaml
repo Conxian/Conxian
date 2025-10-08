@@ -10,6 +10,7 @@ plan:
         - contract-publish:
             contract-name: all-traits
             expected-sender: ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6
+            cost: 5000
             path: "contracts/traits/all-traits.clar"
             anchor-block-only: true
             clarity-version: 3
@@ -17,6 +18,7 @@ plan:
         - contract-publish:
             contract-name: cxd-token
             expected-sender: ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6
+            cost: 10000
             path: "contracts/tokens/cxd-token.clar"
             anchor-block-only: true
             clarity-version: 3
@@ -24,79 +26,9 @@ plan:
         - contract-publish:
             contract-name: governance-token
             expected-sender: ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6
+            cost: 10000
             path: "contracts/governance/governance-token.clar"
             anchor-block-only: true
             clarity-version: 3
             epoch: "3.0"
 ...
-# Testnet deployment plan for Conxian Protocol
-# This file is used by Clarinet for testnet deployments
-
-# Core traits and interfaces
-- id: access-control-trait
-  contract: access-control-trait
-  depends_on: []
-- id: ft-mintable-trait
-  contract: ft-mintable-trait
-  depends_on: []
-
-- id: strategy-trait
-  contract: strategy-trait
-  depends_on: []
-
-- id: pool-trait
-  contract: pool-trait
-  depends_on: []
-
-- id: vault-trait
-  contract: vault-trait
-  depends_on: []
-
-- id: oracle-trait
-  contract: oracle-trait
-  depends_on: []
-
-- id: sip-010-ft-trait
-  contract: sip-010-ft-trait
-  depends_on: []
-
-# Token deployments
-- id: cxd-token
-  contract: cxd-token
-  depends_on: [sip-010-ft-trait]
-
-- id: cxvg-token
-  contract: cxvg-token
-  depends_on: [sip-010-ft-trait]
-
-# Core protocol contracts
-- id: access-control
-  contract: access-control
-  depends_on: [access-control-trait]
-
-- id: protocol-monitor
-  contract: protocol-monitor
-  depends_on: [access-control]
-
-# Deploy DEX contracts after core dependencies
-- id: dex-core
-  contract: dex-core
-  depends_on: [access-control, protocol-monitor, cxd-token]
-
-- id: dex-liquidity-pool
-  contract: dex-liquidity-pool
-  depends_on: [dex-core, pool-trait]
-
-- id: dex-vault
-  contract: dex-vault
-  depends_on: [dex-core, vault-trait]
-
-# Deploy yield farming contracts
-- id: yield-farm
-  contract: yield-farm
-  depends_on: [dex-core, cxd-token, cxvg-token]
-
-# Deploy governance contracts last
-- id: governance
-  contract: governance
-  depends_on: [access-control, protocol-monitor, cxvg-token]
