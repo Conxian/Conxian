@@ -1,6 +1,6 @@
 ;; Test Token B - Mock ERC20-like token for testing
 
-(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.sip-010-ft-trait)
+(impl-trait .all-traits.sip-010-ft-trait)
 
 ;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED (err u1001))

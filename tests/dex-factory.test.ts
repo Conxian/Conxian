@@ -1,6 +1,5 @@
 import { Cl, ClarityType, ClarityValue, ResponseOk, ResponseError, TupleCV, uintCV, standardPrincipalCV, someCV, noneCV, contractPrincipalCV } from '@stacks/transactions';
 import { describe, expect, it, beforeEach, beforeAll, afterEach } from 'vitest';
-import { initSimnet } from '@hirosystems/clarinet-sdk';
 import { Simnet } from '@hirosystems/clarinet-sdk';
 
 // Helper function to parse response
@@ -14,7 +13,7 @@ const parseResponse = (response: any) => {
 };
 
 describe('DEX Factory Tests', () => {
-  let simnet: Simnet;
+  const simnet: Simnet = (global as any).simnet;
   let accounts: Map<string, any>;
   let deployer: any;
   let wallet1: any;
@@ -28,7 +27,6 @@ describe('DEX Factory Tests', () => {
   let poolTemplateContract: string;
 
   beforeAll(async () => {
-    simnet = await initSimnet();
     accounts = simnet.getAccounts();
     deployer = accounts.get('deployer');
     wallet1 = accounts.get('wallet_1');

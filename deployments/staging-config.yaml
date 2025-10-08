@@ -5,6 +5,7 @@
 
 # Environment Settings
 # ===================
+name: Staging
 environment: "staging"
 network: "testnet"
 node_url: "https://stacks-node-api.testnet.stacks.co"

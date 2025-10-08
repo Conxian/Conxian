@@ -35,475 +35,475 @@ epoch = "3.0"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.vault]
-path = "Conxian/contracts/dex/vault.clar"
+path = "contracts/dex/vault.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.tokenized-bond]
-path = "Conxian/contracts/dimensional/tokenized-bond.clar"
+path = "contracts/dimensional/tokenized-bond.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.math-lib-advanced]
-path = "Conxian/contracts/lib/math-lib-advanced.clar"
+path = "contracts/lib/math-lib-advanced.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.circuit-breaker]
-path = "Conxian/contracts/security/circuit-breaker.clar"
+path = "contracts/security/circuit-breaker.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.auto-compounder]
-path = "Conxian/contracts/dex/auto-compounder.clar"
+path = "contracts/dex/auto-compounder.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.bond-factory]
-path = "Conxian/contracts/dex/bond-factory.clar"
+path = "contracts/dex/bond-factory.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.bond-issuance-system]
-path = "Conxian/contracts/dex/bond-issuance-system.clar"
+path = "contracts/dex/bond-issuance-system.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.concentrated-liquidity-pool-v2]
-path = "Conxian/contracts/dimensional/concentrated-liquidity-pool-v2.clar"
+path = "contracts/dimensional/concentrated-liquidity-pool-v2.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.position-nft]
-path = "Conxian/contracts/dimensional/position-nft.clar"
+path = "contracts/dimensional/position-nft.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.cxd-staking]
-path = "Conxian/contracts/dex/cxd-staking.clar"
+path = "contracts/dex/cxd-staking.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.cxlp-migration-queue]
-path = "Conxian/contracts/dex/cxlp-migration-queue.clar"
+path = "contracts/dex/cxlp-migration-queue.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.cxvg-utility]
-path = "Conxian/contracts/dex/cxvg-utility.clar"
+path = "contracts/dex/cxvg-utility.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.dex-factory]
-path = "Conxian/contracts/dex/dex-factory.clar"
+path = "contracts/dex/dex-factory.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.dex-router]
-path = "Conxian/contracts/dex/dex-router.clar"
+path = "contracts/dex/dex-router.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.distributed-cache-manager]
-path = "Conxian/contracts/dex/distributed-cache-manager.clar"
+path = "contracts/dex/distributed-cache-manager.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.flash-loan-vault]
-path = "Conxian/contracts/dex/flash-loan-vault.clar"
+path = "contracts/dex/flash-loan-vault.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.enhanced-yield-strategy]
-path = "Conxian/contracts/dex/enhanced-yield-strategy.clar"
+path = "contracts/dex/enhanced-yield-strategy.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.enterprise-loan-manager]
-path = "Conxian/contracts/dex/enterprise-loan-manager.clar"
+path = "contracts/dex/enterprise-loan-manager.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.interest-rate-model]
-path = "Conxian/contracts/dex/interest-rate-model.clar"
+path = "contracts/dex/interest-rate-model.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.liquidation-manager]
-path = "Conxian/contracts/dex/liquidation-manager.clar"
+path = "contracts/dex/liquidation-manager.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.liquidity-optimization-engine]
-path = "Conxian/contracts/dex/liquidity-optimization-engine.clar"
+path = "contracts/dex/liquidity-optimization-engine.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.loan-liquidation-manager]
-path = "Conxian/contracts/dex/loan-liquidation-manager.clar"
+path = "contracts/dex/loan-liquidation-manager.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.memory-pool-management]
-path = "Conxian/contracts/dex/memory-pool-management.clar"
+path = "contracts/dex/memory-pool-management.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.multi-hop-router-v3]
-path = "Conxian/contracts/dimensional/multi-hop-router-v3.clar"
+path = "contracts/dimensional/multi-hop-router-v3.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.nakamoto-compatibility]
-path = "Conxian/contracts/dex/nakamoto-compatibility.clar"
+path = "contracts/dex/nakamoto-compatibility.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.oracle]
-path = "Conxian/contracts/oracle/oracle.clar"
+path = "contracts/oracle/oracle.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.pool-factory-template]
-path = "Conxian/contracts/dex/pool-factory-template.clar"
+path = "contracts/dex/pool-factory-template.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.pool-template]
-path = "Conxian/contracts/dex/pool-template.clar"
+path = "contracts/dex/pool-template.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.predictive-scaling-system]
-path = "Conxian/contracts/dex/predictive-scaling-system.clar"
+path = "contracts/dex/predictive-scaling-system.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.protocol-invariant-monitor]
-path = "Conxian/contracts/dex/protocol-invariant-monitor.clar"
+path = "contracts/dex/protocol-invariant-monitor.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.real-time-monitoring-dashboard]
-path = "Conxian/contracts/dex/real-time-monitoring-dashboard.clar"
+path = "contracts/dex/real-time-monitoring-dashboard.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.dim-graph]
-path = "Conxian/contracts/dimensional/dim-graph.clar"
+path = "contracts/dimensional/dim-graph.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.dim-metrics]
-path = "Conxian/contracts/dimensional/dim-metrics.clar"
+path = "contracts/dimensional/dim-metrics.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.dim-oracle-automation]
-path = "Conxian/contracts/dimensional/dim-oracle-automation.clar"
+path = "contracts/dimensional/dim-oracle-automation.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.dim-registry]
-path = "Conxian/contracts/dimensional/dim-registry.clar"
+path = "contracts/dimensional/dim-registry.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.dim-revenue-adapter]
-path = "Conxian/contracts/dimensional/dim-revenue-adapter.clar"
+path = "contracts/dimensional/dim-revenue-adapter.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.dim-yield-stake]
-path = "Conxian/contracts/dimensional/dim-yield-stake.clar"
+path = "contracts/dimensional/dim-yield-stake.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.access-control]
-path = "Conxian/contracts/interfaces/access-control.clar"
+path = "contracts/interfaces/access-control.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.governance-signature-verifier]
-path = "Conxian/contracts/governance/governance-signature-verifier.clar"
+path = "contracts/governance/governance-signature-verifier.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.lending-protocol-governance]
-path = "Conxian/contracts/governance/lending-protocol-governance.clar"
+path = "contracts/governance/lending-protocol-governance.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.signed-data-base]
-path = "Conxian/contracts/governance/signed-data-base.clar"
+path = "contracts/governance/signed-data-base.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.emergency-governance]
-path = "Conxian/contracts/governance/emergency-governance.clar"
+path = "contracts/governance/emergency-governance.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.upgrade-controller]
-path = "Conxian/contracts/governance/upgrade-controller.clar"
+path = "contracts/governance/upgrade-controller.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.math-lib-concentrated]
-path = "Conxian/contracts/math/math-lib-concentrated.clar"
+path = "contracts/math/math-lib-concentrated.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.concentrated-math]
-path = "Conxian/contracts/libraries/concentrated-math.clar"
+path = "contracts/libraries/concentrated-math.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.cxd-token]
-path = "Conxian/contracts/tokens/cxd-token.clar"
+path = "contracts/tokens/cxd-token.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.cxlp-token]
-path = "Conxian/contracts/tokens/cxlp-token.clar"
+path = "contracts/tokens/cxlp-token.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.cxs-token]
-path = "Conxian/contracts/tokens/cxs-token.clar"
+path = "contracts/tokens/cxs-token.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.cxtr-token]
-path = "Conxian/contracts/tokens/cxtr-token.clar"
+path = "contracts/tokens/cxtr-token.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.cxvg-token]
-path = "Conxian/contracts/tokens/cxvg-token.clar"
+path = "contracts/tokens/cxvg-token.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.sbtc-vault]
-path = "Conxian/contracts/vaults/sbtc-vault.clar"
+path = "contracts/vaults/sbtc-vault.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.audit-badge-nft]
-path = "Conxian/contracts/audit-registry/audit-badge-nft.clar"
+path = "contracts/audit-registry/audit-badge-nft.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.audit-registry]
-path = "Conxian/contracts/audit-registry/audit-registry.clar"
+path = "contracts/audit-registry/audit-registry.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.compliance-hooks]
-path = "Conxian/contracts/enterprise/compliance-hooks.clar"
+path = "contracts/enterprise/compliance-hooks.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.enterprise-api]
-path = "Conxian/contracts/enterprise/enterprise-api.clar"
+path = "contracts/enterprise/enterprise-api.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.dimensional-oracle]
-path = "Conxian/contracts/oracle/dimensional-oracle.clar"
+path = "contracts/oracle/dimensional-oracle.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.oracle-aggregator-v2]
-path = "Conxian/contracts/oracle/oracle-aggregator-v2.clar"
+path = "contracts/oracle/oracle-aggregator-v2.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.external-oracle-adapter]
-path = "Conxian/contracts/oracle/external-oracle-adapter.clar"
+path = "contracts/oracle/external-oracle-adapter.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.system-monitor]
-path = "Conxian/contracts/monitoring/system-monitor.clar"
+path = "contracts/monitoring/system-monitor.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.analytics-aggregator]
-path = "Conxian/contracts/monitoring/analytics-aggregator.clar"
+path = "contracts/monitoring/analytics-aggregator.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.keeper-coordinator]
-path = "Conxian/contracts/automation/keeper-coordinator.clar"
+path = "contracts/automation/keeper-coordinator.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.batch-processor]
-path = "Conxian/contracts/automation/batch-processor.clar"
+path = "contracts/automation/batch-processor.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.Pausable]
-path = "Conxian/contracts/security/Pausable.clar"
+path = "contracts/security/Pausable.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.rate-limiter]
-path = "Conxian/contracts/security/rate-limiter.clar"
+path = "contracts/security/rate-limiter.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.rewards-distributor]
-path = "Conxian/contracts/rewards/rewards-distributor.clar"
+path = "contracts/rewards/rewards-distributor.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.yield-optimizer]
-path = "Conxian/contracts/rewards/yield-optimizer.clar"
+path = "contracts/rewards/yield-optimizer.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.test-access]
-path = "Conxian/contracts/test/test-access.clar"
+path = "contracts/test/test-access.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.mock-token]
-path = "Conxian/contracts/mocks/mock-token.clar"
+path = "contracts/mocks/mock-token.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.mock-metrics]
-path = "Conxian/contracts/mocks/mock-metrics.clar"
+path = "contracts/mocks/mock-metrics.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.mock-strategy-a]
-path = "Conxian/contracts/mocks/mock-strategy-a.clar"
+path = "contracts/mocks/mock-strategy-a.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.mock-strategy-b]
-path = "Conxian/contracts/mocks/mock-strategy-b.clar"
+path = "contracts/mocks/mock-strategy-b.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.batch-auction]
-path = "Conxian/contracts/dex/batch-auction.clar"
+path = "contracts/dex/batch-auction.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.btc-adapter]
-path = "Conxian/contracts/interfaces/btc-adapter.clar"
+path = "contracts/interfaces/btc-adapter.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.budget-manager]
-path = "Conxian/contracts/budget-manager.clar"
+path = "contracts/budget-manager.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.asset-vault]
-path = "Conxian/contracts/dex/asset-vault.clar"
+path = "contracts/dex/asset-vault.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.comprehensive-lending-system]
-path = "Conxian/contracts/dex/comprehensive-lending-system.clar"
+path = "contracts/dex/comprehensive-lending-system.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.cross-protocol-integrator]
-path = "Conxian/contracts/interfaces/cross-protocol-integrator.clar"
+path = "contracts/interfaces/cross-protocol-integrator.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.dex-factory-v2]
-path = "Conxian/contracts/dex/dex-factory-v2.clar"
+path = "contracts/dex/dex-factory-v2.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.dex-pool]
-path = "Conxian/contracts/dex/dex-pool.clar"
+path = "contracts/dex/dex-pool.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.fee-manager]
-path = "Conxian/contracts/dex/fee-manager.clar"
+path = "contracts/dex/fee-manager.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.legacy-adapter]
-path = "Conxian/contracts/interfaces/legacy-adapter.clar"
+path = "contracts/interfaces/legacy-adapter.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.liquidity-manager]
-path = "Conxian/contracts/dex/liquidity-manager.clar"
+path = "contracts/dex/liquidity-manager.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.manipulation-detector]
-path = "Conxian/contracts/dex/manipulation-detector.clar"
+path = "contracts/dex/manipulation-detector.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.mev-protector]
-path = "Conxian/contracts/security/mev-protector.clar"
+path = "contracts/security/mev-protector.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.migration-manager]
-path = "Conxian/contracts/utils/migration-manager.clar"
+path = "contracts/utils/migration-manager.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.monitoring-dashboard]
-path = "Conxian/contracts/monitoring/monitoring-dashboard.clar"
+path = "contracts/monitoring/monitoring-dashboard.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.performance-optimizer]
-path = "Conxian/contracts/monitoring/performance-optimizer.clar"
+path = "contracts/monitoring/performance-optimizer.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.rebalancing-rules]
-path = "Conxian/contracts/dex/rebalancing-rules.clar"
+path = "contracts/dex/rebalancing-rules.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.revenue-distributor]
-path = "Conxian/contracts/dex/revenue-distributor.clar"
+path = "contracts/dex/revenue-distributor.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.sbtc-bond-integration]
-path = "Conxian/contracts/dex/sbtc-bond-integration.clar"
+path = "contracts/dex/sbtc-bond-integration.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.sbtc-flash-loan-extension]
-path = "Conxian/contracts/dex/sbtc-flash-loan-extension.clar"
+path = "contracts/dex/sbtc-flash-loan-extension.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.sbtc-flash-loan-vault]
-path = "Conxian/contracts/dex/sbtc-flash-loan-vault.clar"
+path = "contracts/dex/sbtc-flash-loan-vault.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.sbtc-integration]
-path = "Conxian/contracts/dex/sbtc-integration.clar"
+path = "contracts/dex/sbtc-integration.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.sbtc-lending-integration]
-path = "Conxian/contracts/dex/sbtc-lending-integration.clar"
+path = "contracts/dex/sbtc-lending-integration.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.sbtc-lending-system]
-path = "Conxian/contracts/dex/sbtc-lending-system.clar"
+path = "contracts/dex/sbtc-lending-system.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.sbtc-oracle-adapter]
-path = "Conxian/contracts/dex/sbtc-oracle-adapter.clar"
+path = "contracts/dex/sbtc-oracle-adapter.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.stable-swap-pool]
-path = "Conxian/contracts/dex/stable-swap-pool.clar"
+path = "contracts/dex/stable-swap-pool.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.timelock-controller]
-path = "Conxian/contracts/dex/timelock-controller.clar"
+path = "contracts/dex/timelock-controller.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.token-emission-controller]
-path = "Conxian/contracts/dex/token-emission-controller.clar"
+path = "contracts/dex/token-emission-controller.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.token-system-coordinator]
-path = "Conxian/contracts/tokens/token-system-coordinator.clar"
+path = "contracts/tokens/token-system-coordinator.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.transaction-batch-processor]
-path = "Conxian/contracts/dex/transaction-batch-processor.clar"
+path = "contracts/dex/transaction-batch-processor.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.weighted-swap-pool]
-path = "Conxian/contracts/dex/weighted-swap-pool.clar"
+path = "contracts/dex/weighted-swap-pool.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.wormhole-integration]
-path = "Conxian/contracts/dex/wormhole-integration.clar"
+path = "contracts/dex/wormhole-integration.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.yield-distribution-engine]
-path = "Conxian/contracts/dex/yield-distribution-engine.clar"
+path = "contracts/dex/yield-distribution-engine.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.concentrated-liquidity-pool]
-path = "Conxian/contracts/pools/concentrated-liquidity-pool.clar"
+path = "contracts/pools/concentrated-liquidity-pool.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.tokenized-bond-adapter]
-path = "Conxian/contracts/dimensional/tokenized-bond-adapter.clar"
+path = "contracts/dimensional/tokenized-bond-adapter.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.governance-token]
-path = "Conxian/contracts/governance/governance-token.clar"
+path = "contracts/governance/governance-token.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.proposal-engine]
-path = "Conxian/contracts/governance/proposal-engine.clar"
+path = "contracts/governance/proposal-engine.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.audit-registry-trait]
-path = "Conxian/contracts/interfaces/audit-registry-trait.clar"
+path = "contracts/interfaces/audit-registry-trait.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.error-codes]
-path = "Conxian/contracts/lib/error-codes.clar"
+path = "contracts/lib/error-codes.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.fixed-point-math]
-path = "Conxian/contracts/lib/fixed-point-math.clar"
+path = "contracts/lib/fixed-point-math.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.precision-calculator]
-path = "Conxian/contracts/lib/precision-calculator.clar"
+path = "contracts/lib/precision-calculator.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.mock-dao]
-path = "Conxian/contracts/mocks/mock-dao.clar"
+path = "contracts/mocks/mock-dao.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.mock-oracle]
-path = "Conxian/contracts/mocks/mock-oracle.clar"
+path = "contracts/mocks/mock-oracle.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.oracle-aggregator]
-path = "Conxian/contracts/oracle/oracle-aggregator.clar"
+path = "contracts/oracle/oracle-aggregator.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.stable-pool-enhanced]
-path = "Conxian/contracts/pools/stable-pool-enhanced.clar"
+path = "contracts/pools/stable-pool-enhanced.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.tiered-pools]
-path = "Conxian/contracts/pools/tiered-pools.clar"
+path = "contracts/pools/tiered-pools.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.weighted-pool]
-path = "Conxian/contracts/pools/weighted-pool.clar"
+path = "contracts/pools/weighted-pool.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.errors]
@@ -515,7 +515,7 @@ path = "contracts/traits/trait-registry.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.advanced-router-dijkstra]
-path = "Conxian/contracts/dimensional/advanced-router-dijkstra.clar"
+path = "contracts/dimensional/advanced-router-dijkstra.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.fixed-point-math-trait]
@@ -841,8 +841,6 @@ position-nft-trait = ".position-nft-trait"
 mnemonic = "theme apart absurd gasp river used vessel screen fiction slice slab ice jar hurt slam puppy snake life radar sign ship list excuse trick"
 balance = 100000000000000
 
-
-
 [contracts.test-token-a]
 path = "tests/mocks/test-token-a.clar"
 clarity_version = 3
@@ -855,26 +853,10 @@ clarity_version = 3
 epoch = "3.0"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
-[contracts.sip-010-ft-mintable-trait]
-path = "contracts/traits/sips/sip-010-ft-mintable-trait.clar"
+[contracts.test-flash-loan-receiver]
+path = "tests/mocks/test-flash-loan-receiver.clar"
 clarity_version = 3
 epoch = "3.0"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
-[contracts.sip-010-ft-trait]
-path = "contracts/traits/sips/sip-010-ft-trait.clar"
-clarity_version = 3
-epoch = "3.0"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
-[contracts.test-token-a]
-path = "tests\mocks\test-token-a.clar"
-clarity_version = 3
-epoch = "3.0"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
-
-[contracts.test-token-b]
-path = "tests\mocks\test-token-b.clar"
-clarity_version = 3
-epoch = "3.0"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"

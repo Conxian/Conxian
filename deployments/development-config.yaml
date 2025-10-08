@@ -5,6 +5,7 @@
 
 # Environment Settings
 # ===================
+name: Development
 network: "testnet"
 node_url: "https://stacks-node-api.testnet.stacks.co"
 chain_id: 2147483648  # Testnet chain ID

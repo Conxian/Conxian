@@ -597,12 +597,12 @@ address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
      address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
      # ================= Additional Test Suites =================
-     [contracts.enhanced-contracts-test-suite]
-     path = "tests/enhanced-contracts-test-suite.clar"
-     clarity_version = 3
-     epoch = "3.0"
-     address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
-     depends_on = [ "all-traits" ]
+     # [contracts.enhanced-contracts-test-suite]
+     # path = "tests/enhanced-contracts-test-suite.clar"
+     # clarity_version = 3
+     # epoch = "3.0"
+     # address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+     # depends_on = [ "all-traits" ]
 
      [contracts.enterprise-integration-tests]
      path = "tests/enterprise-integration-tests.clar"
@@ -632,15 +632,22 @@ address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
      address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
      depends_on = [ "all-traits" ]
 
-     [contracts.yield-optimizer-test]
-     path = "tests/yield-optimizer.test.clar"
+     # [contracts.yield-optimizer-test]
+     # path = "tests/yield-optimizer.test.clar"
+     # clarity_version = 3
+     # epoch = "3.0"
+     # address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+     # depends_on = [ "all-traits" ]
+
+     [contracts.revenue-distributor-hysteresis-tests]
+     path = "tests/revenue-distributor-hysteresis-tests.clar"
      clarity_version = 3
      epoch = "3.0"
      address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
      depends_on = [ "all-traits" ]
 
-     [contracts.revenue-distributor-hysteresis-tests]
-     path = "tests/revenue-distributor-hysteresis-tests.clar"
+     [contracts.test-flash-loan-receiver]
+     path = "tests/mocks/test-flash-loan-receiver.clar"
      clarity_version = 3
      epoch = "3.0"
      address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"

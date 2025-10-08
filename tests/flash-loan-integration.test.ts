@@ -4,7 +4,7 @@
 
 import { describe, it, expect, beforeEach, beforeAll } from 'vitest';
 import { Cl, ClarityValue, cvToValue } from '@stacks/transactions';
-import { Simnet, burnSTX } from '@hirosystems/clarinet-sdk';
+import { Simnet } from '@hirosystems/clarinet-sdk';
 
 describe('Flash Loan Integration Tests', () => {
   const simnet: Simnet = (global as any).simnet;
@@ -17,12 +17,13 @@ describe('Flash Loan Integration Tests', () => {
     deployer = 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6';
     wallet1 = 'ST1SJ3DTE5DN7X54YDH5D64R3BCB6A2AG2ZQ8YPD5';
     wallet2 = 'ST2CY5V39NHDPWSXMW9QDT3HC3GD6Q6XX4CFRK9AG';
-    flashLoanReceiver = 'ST2NEB84ASENDXKYGJPQW86YXQCEFEX2ZQPG87ND';
+    // Use the deployed test receiver contract for on-flash-loan callbacks
+    flashLoanReceiver = deployer + '.test-flash-loan-receiver';
   });
 
   beforeEach(async () => {
     // Advance block and set up test tokens and initial liquidity
-    simnet.mineEmptyBlock(0);
+    simnet.mineEmptyBlock();
     await setupTestEnvironment();
   });
 
@@ -34,7 +35,7 @@ describe('Flash Loan Integration Tests', () => {
     expect(mathInit.result).toBeDefined();
 
     // Initialize mock token for testing
-    const tokenInit = simnet.callPublicFn('mock-token', 'mint', [
+    const tokenInit = simnet.callPublicFn('test-token-a', 'mint', [
       Cl.uint(1000000000000), // 1M tokens
       Cl.principal(deployer)
     ], deployer);
@@ -42,14 +43,14 @@ describe('Flash Loan Integration Tests', () => {
 
     // Add supported asset to vault
     const addAsset = simnet.callPublicFn('flash-loan-vault', 'add-supported-asset', [
-      Cl.principal(deployer + '.mock-token'),
+      Cl.principal(deployer + '.test-token-a'),
       Cl.uint(10000000000000) // 10K cap
     ], deployer);
     expect(addAsset.result).toBeOk(Cl.bool(true));
 
     // Deposit initial liquidity
     const deposit = simnet.callPublicFn('flash-loan-vault', 'deposit', [
-      Cl.principal(deployer + '.mock-token'),
+      Cl.principal(deployer + '.test-token-a'),
       Cl.uint(500000000000) // 500K tokens
     ], deployer);
     expect(deposit.result).toBeDefined();
@@ -61,12 +62,12 @@ describe('Flash Loan Integration Tests', () => {
       
       // Check initial balances
       const initialVaultBalance = simnet.callReadOnlyFn('flash-loan-vault', 'get-total-balance', [
-        Cl.principal(deployer + '.mock-token')
+        Cl.principal(deployer + '.test-token-a')
       ], deployer);
       
       // Execute flash loan
       const flashLoanResult = simnet.callPublicFn('flash-loan-vault', 'flash-loan', [
-        Cl.principal(deployer + '.mock-token'),
+        Cl.principal(deployer + '.test-token-a'),
         Cl.uint(flashLoanAmount),
         Cl.principal(flashLoanReceiver),
         Cl.buffer(new TextEncoder().encode('test-data'))
@@ -76,7 +77,7 @@ describe('Flash Loan Integration Tests', () => {
 
       // Verify fee was collected
       const finalVaultBalance = simnet.callReadOnlyFn('flash-loan-vault', 'get-total-balance', [
-        Cl.principal(deployer + '.mock-token')
+        Cl.principal(deployer + '.test-token-a')
       ], deployer);
       
       // Balance should be slightly higher due to fee
@@ -100,7 +101,7 @@ describe('Flash Loan Integration Tests', () => {
       const excessiveAmount = 1000000000000; // 1M tokens (more than available)
       
       const flashLoanResult = simnet.callPublicFn('flash-loan-vault', 'flash-loan', [
-        Cl.principal(deployer + '.mock-token'),
+        Cl.principal(deployer + '.test-token-a'),
         Cl.uint(excessiveAmount),
         Cl.principal(flashLoanReceiver),
         Cl.buffer(new TextEncoder().encode(''))
@@ -141,7 +142,7 @@ describe('Flash Loan Integration Tests', () => {
       const feeBps = 30; // 0.3%
       
       const feeResult = simnet.callReadOnlyFn('flash-loan-vault', 'get-flash-loan-fee', [
-        Cl.principal(deployer + '.mock-token'),
+        Cl.principal(deployer + '.test-token-a'),
         Cl.uint(amount)
       ], deployer);
 
@@ -153,7 +154,7 @@ describe('Flash Loan Integration Tests', () => {
       const preciseAmount = 123456789123456; // Complex number
       
       const feeResult = simnet.callReadOnlyFn('flash-loan-vault', 'get-flash-loan-fee', [
-        Cl.principal(deployer + '.mock-token'),
+        Cl.principal(deployer + '.test-token-a'),
         Cl.uint(preciseAmount)
       ], deployer);
 
@@ -166,7 +167,7 @@ describe('Flash Loan Integration Tests', () => {
     it('should interact with comprehensive lending system', async () => {
       // Setup lending system
       const setupLending = simnet.callPublicFn('comprehensive-lending-system', 'add-supported-asset', [
-        Cl.principal(deployer + '.mock-token'),
+        Cl.principal(deployer + '.test-token-a'),
         Cl.uint(800000000000000000), // 80% collateral factor
         Cl.uint(850000000000000000), // 85% liquidation threshold  
         Cl.uint(50000000000000000),  // 5% liquidation bonus
@@ -177,7 +178,7 @@ describe('Flash Loan Integration Tests', () => {
 
       // Execute flash loan through lending system
       const flashLoanResult = simnet.callPublicFn('comprehensive-lending-system', 'flash-loan', [
-        Cl.principal(deployer + '.mock-token'),
+        Cl.principal(deployer + '.test-token-a'),
         Cl.uint(100000000000),
         Cl.principal(flashLoanReceiver),
         Cl.buffer(new TextEncoder().encode('lending-test'))
@@ -189,16 +190,16 @@ describe('Flash Loan Integration Tests', () => {
     it('should update interest rates after flash loan', async () => {
       // Get initial rates
       const initialSupplyAPY = simnet.callReadOnlyFn('comprehensive-lending-system', 'get-supply-apy', [
-        Cl.principal(deployer + '.mock-token')
+        Cl.principal(deployer + '.test-token-a')
       ], deployer);
 
       const initialBorrowAPY = simnet.callReadOnlyFn('comprehensive-lending-system', 'get-borrow-apy', [
-        Cl.principal(deployer + '.mock-token')
+        Cl.principal(deployer + '.test-token-a')
       ], deployer);
 
       // Execute flash loan
       const flashLoan = simnet.callPublicFn('comprehensive-lending-system', 'flash-loan', [
-        Cl.principal(deployer + '.mock-token'),
+        Cl.principal(deployer + '.test-token-a'),
         Cl.uint(200000000000),
         Cl.principal(flashLoanReceiver),
         Cl.buffer(new TextEncoder().encode('rate-test'))
@@ -206,11 +207,11 @@ describe('Flash Loan Integration Tests', () => {
 
       // Get updated rates
       const finalSupplyAPY = simnet.callReadOnlyFn('comprehensive-lending-system', 'get-supply-apy', [
-        Cl.principal(deployer + '.mock-token')
+        Cl.principal(deployer + '.test-token-a')
       ], deployer);
 
       const finalBorrowAPY = simnet.callReadOnlyFn('comprehensive-lending-system', 'get-borrow-apy', [
-        Cl.principal(deployer + '.mock-token')
+        Cl.principal(deployer + '.test-token-a')
       ], deployer);
 
       // Rates should be updated (could be same if utilization doesn't change much)
@@ -260,10 +261,10 @@ describe('Flash Loan Integration Tests', () => {
 
       // Attempt flash loan
       const flashLoanResult = simnet.callPublicFn('flash-loan-vault', 'flash-loan', [
-        Cl.principal(deployer + '.mock-token'),
-        Cl.uint(50000000000),
+        Cl.principal(deployer + '.test-token-a'),
+        Cl.uint(1000),
         Cl.principal(flashLoanReceiver),
-        Cl.buffer(new TextEncoder().encode('pause-test'))
+        Cl.buffer(new TextEncoder().encode(''))
       ], deployer);
 
       expect(flashLoanResult.result).toBeErr(Cl.uint(6002)); // ERR_PAUSED
@@ -277,7 +278,7 @@ describe('Flash Loan Integration Tests', () => {
       
       for (const amount of amounts) {
         const flashLoan = simnet.callPublicFn('flash-loan-vault', 'flash-loan', [
-          Cl.principal(deployer + '.mock-token'),
+          Cl.principal(deployer + '.test-token-a'),
           Cl.uint(amount),
           Cl.principal(flashLoanReceiver),
           Cl.buffer(new TextEncoder().encode(`stats-${amount}`))
@@ -287,7 +288,7 @@ describe('Flash Loan Integration Tests', () => {
       }
 
       // Check statistics
-      const stats = simnet.callReadOnlyFn('flash-loan-vault', 'get-flash-loan-stats', [
+{{ ... }}
         Cl.principal(deployer + '.mock-token')
       ], deployer);
 
@@ -299,7 +300,7 @@ describe('Flash Loan Integration Tests', () => {
 
     it('should calculate utilization metrics', async () => {
       const utilizationResult = simnet.callReadOnlyFn('flash-loan-vault', 'get-utilization', [
-        Cl.principal(deployer + '.mock-token')
+        Cl.principal(deployer + '.test-token-a')
       ], deployer);
 
       expect(utilizationResult.result).toBeOk(Cl.tuple({
