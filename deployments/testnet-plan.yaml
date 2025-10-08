@@ -1,3 +1,34 @@
+---
+id: 0
+name: Testnet Deployment
+network: testnet
+stacks-node: "https://stacks-node-api.testnet.stacks.co"
+plan:
+  batches:
+    - id: 0
+      transactions:
+        - contract-publish:
+            contract-name: all-traits
+            expected-sender: ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6
+            path: "contracts/traits/all-traits.clar"
+            anchor-block-only: true
+            clarity-version: 3
+            epoch: "3.0"
+        - contract-publish:
+            contract-name: cxd-token
+            expected-sender: ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6
+            path: "contracts/tokens/cxd-token.clar"
+            anchor-block-only: true
+            clarity-version: 3
+            epoch: "3.0"
+        - contract-publish:
+            contract-name: governance-token
+            expected-sender: ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6
+            path: "contracts/governance/governance-token.clar"
+            anchor-block-only: true
+            clarity-version: 3
+            epoch: "3.0"
+...
 # Testnet deployment plan for Conxian Protocol
 # This file is used by Clarinet for testnet deployments
 
@@ -5,7 +36,6 @@
 - id: access-control-trait
   contract: access-control-trait
   depends_on: []
-
 - id: ft-mintable-trait
   contract: ft-mintable-trait
   depends_on: []

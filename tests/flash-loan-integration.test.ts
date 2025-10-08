@@ -113,7 +113,7 @@ describe('Flash Loan Integration Tests', () => {
     it('should prevent reentrancy attacks', async () => {
       // First flash loan call
       const firstCall = simnet.callPublicFn('flash-loan-vault', 'flash-loan', [
-        Cl.principal(deployer + '.mock-token'),
+        Cl.principal(deployer + '.test-token-a'),
         Cl.uint(50000000000),
         Cl.principal(flashLoanReceiver),
         Cl.buffer(new TextEncoder().encode('first'))
@@ -121,7 +121,7 @@ describe('Flash Loan Integration Tests', () => {
 
       // Attempt second flash loan while first is in progress (simulated)
       const secondCall = simnet.callPublicFn('flash-loan-vault', 'flash-loan', [
-        Cl.principal(deployer + '.mock-token'),
+        Cl.principal(deployer + '.test-token-a'),
         Cl.uint(25000000000),
         Cl.principal(flashLoanReceiver),
         Cl.buffer(new TextEncoder().encode('second'))
@@ -242,7 +242,7 @@ describe('Flash Loan Integration Tests', () => {
 
       // Get maximum flash loan amount
       const maxAmount = simnet.callReadOnlyFn('flash-loan-vault', 'get-max-flash-loan', [
-        Cl.principal(deployer + '.mock-token')
+        Cl.principal(deployer + '.test-token-a')
       ], deployer);
 
       expect(maxAmount.result.type).toBe('ok');
@@ -288,14 +288,14 @@ describe('Flash Loan Integration Tests', () => {
       }
 
       // Check statistics
-{{ ... }}
-        Cl.principal(deployer + '.mock-token')
+      const stats = simnet.callReadOnlyFn('flash-loan-vault', 'get-flash-loan-stats', [
+        Cl.principal(deployer + '.test-token-a')
       ], deployer);
 
       expect(stats.result).toBeDefined();
       // Should have recorded 3 flash loans
-      // const statsValue = cvToValue(stats.result);
-      // expect(statsValue['total-flash-loans']).toBe(3);
+      const statsValue = cvToValue(stats.result);
+      expect(statsValue['total-flash-loans']).toBe(3);
     });
 
     it('should calculate utilization metrics', async () => {
@@ -351,7 +351,7 @@ describe('Flash Loan Integration Tests', () => {
       
       // Should handle different precision levels
       const feeResult = simnet.callReadOnlyFn('flash-loan-vault', 'get-flash-loan-fee', [
-        Cl.principal(deployer + '.mock-token'),
+        Cl.principal(deployer + '.test-token-a'),
         Cl.uint(btcAmount)
       ], deployer);
 
