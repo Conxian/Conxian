@@ -6,6 +6,7 @@ clarinet_version = "3.7.0"
 [accounts.deployer]
 mnemonic = "twice kind fence tip hidden tilt action fragile skin nothing glory cousin green tomorrow spring wrist shed math olympic multiply hip blue scout claw"
 balance = 100000000000000
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [accounts.wallet_1]
 mnemonic = "sell invite acquire kitten bamboo drastic jelly vivid peace spawn twice guilt pave pen trash pretty park cube fragile unaware remain midnight betray rebuild"
@@ -589,8 +590,77 @@ clarity_version = 3
 epoch = "3.0"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
-[contracts.cxs-token]
-path = "contracts/tokens/cxs-token.clar"
-clarity_version = 3
-epoch = "3.0"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+     [contracts.cxs-token]
+     path = "contracts/tokens/cxs-token.clar"
+     clarity_version = 3
+     epoch = "3.0"
+     address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+
+     # ================= Additional Test Suites =================
+     [contracts.enhanced-contracts-test-suite]
+     path = "tests/enhanced-contracts-test-suite.clar"
+     clarity_version = 3
+     epoch = "3.0"
+     address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+     depends_on = [ "all-traits" ]
+
+     [contracts.enterprise-integration-tests]
+     path = "tests/enterprise-integration-tests.clar"
+     clarity_version = 3
+     epoch = "3.0"
+     address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+     depends_on = [ "all-traits" ]
+
+     [contracts.system-validation-tests]
+     path = "tests/system-validation-tests.clar"
+     clarity_version = 3
+     epoch = "3.0"
+     address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+     depends_on = [ "all-traits" ]
+
+     [contracts.tokenomics-unit-tests]
+     path = "tests/tokenomics-unit-tests.clar"
+     clarity_version = 3
+     epoch = "3.0"
+     address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+     depends_on = [ "all-traits" ]
+
+     [contracts.tokenomics-integration-tests]
+     path = "tests/tokenomics-integration-tests.clar"
+     clarity_version = 3
+     epoch = "3.0"
+     address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+     depends_on = [ "all-traits" ]
+
+     [contracts.yield-optimizer-test]
+     path = "tests/yield-optimizer.test.clar"
+     clarity_version = 3
+     epoch = "3.0"
+     address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+     depends_on = [ "all-traits" ]
+
+     [contracts.revenue-distributor-hysteresis-tests]
+     path = "tests/revenue-distributor-hysteresis-tests.clar"
+     clarity_version = 3
+     epoch = "3.0"
+     address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+     depends_on = [ "all-traits" ]
+
+     # ================= Missing Target Contracts (for tests) =================
+     [contracts.mev-protector]
+     path = "contracts/security/mev-protector.clar"
+     clarity_version = 3
+     epoch = "3.0"
+     address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+
+     [contracts.batch-auction]
+     path = "contracts/dex/batch-auction.clar"
+     clarity_version = 3
+     epoch = "3.0"
+     address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+
+     [contracts.btc-adapter]
+     path = "contracts/interfaces/btc-adapter.clar"
+     clarity_version = 3
+     epoch = "3.0"
+     address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
