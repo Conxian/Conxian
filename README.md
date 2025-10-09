@@ -163,9 +163,9 @@ clarinet test
 #### Requirements
 
 - Node.js (v18+)
-- Clarinet CLI v3.5.0 (install locally or use `bin/clarinet`); CI installs on runners
+- Clarinet CLI v3.7.0 (install locally or use `bin/clarinet`); CI installs on runners
 
-Note: This repo uses Clarinet SDK v3.5.0. Local development can use `npx clarinet` or the Clarinet CLI; deployment uses the Clarinet binary in CI.
+Note: This repo uses Clarinet SDK v3.7.0. Local development can use `npx clarinet` or the Clarinet CLI; deployment uses the Clarinet binary in CI.
 
 #### Setup
 

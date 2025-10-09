@@ -19,21 +19,19 @@ The pipeline consists of several key stages:
 
 - **Push to main/develop**: Runs tests and builds
 - **Pull Requests**: Runs tests and security checks
-- **Manual Dispatch**: Trigger deployments to different environments
 - **Scheduled**: Weekly security scans
 
 ## Environment Variables
 
 | Variable | Description | Required | Default |
-|----------|-------------|----------|---------|
+|----------|-------------|----------|---------|  
 | `NODE_VERSION` | Node.js version | No | 20 |
-| `CLARINET_VERSION` | Clarinet version | No | 3.5.0 |
+| `CLARINET_VERSION` | Clarinet version | No | 3.7.0 |
 | `DOCKERHUB_USERNAME` | Docker Hub username | Yes | - |
 | `IMAGE_NAME` | Docker image name | No | conxian-protocol |
 
 ## Required Secrets
 
-| Secret | Description |
 |--------|-------------|
 | `DOCKERHUB_TOKEN` | Docker Hub access token |
 | `AWS_ACCESS_KEY_ID` | AWS access key for deployments |
@@ -63,10 +61,12 @@ To rollback a deployment:
 
 1. Identify the previous working commit
 2. Revert to the previous version:
+
    ```bash
    git revert <commit-hash>
    git push origin main
    ```
+
 3. The CI/CD pipeline will automatically deploy the previous version
 
 ## Troubleshooting

@@ -78,7 +78,7 @@
                                             u1500000000000000000 u2000000000000000000))) ;; 1.5 * 2.0
       (record-test-result "precision-calc" (is-ok precision-result) "Precision multiplication test"))
     
-    (print "✅ Mathematical foundation tests completed")
+    (print "OK: Mathematical foundation tests completed")
     (ok true)))
 
 ;; === PHASE 2: FLASH LOAN SYSTEM TESTS ===
@@ -101,7 +101,7 @@
     (let ((max-result (contract-call? .flash-loan-vault get-max-flash-loan TEST_LOAN_ASSET)))
       (record-test-result "flash-loan-max" (is-ok max-result) "Max flash loan amount check"))
     
-    (print "✅ Flash loan system tests completed")
+    (print "OK: Flash loan system tests completed")
     (ok true)))
 
 ;; === PHASE 3: ENTERPRISE LOAN TESTS ===
@@ -138,7 +138,7 @@
                                             LONG_LOAN_DURATION)))
       (record-test-result "enterprise-loan" (is-ok large-loan-result) "Large enterprise loan with bond issuance"))
     
-    (print "✅ Enterprise loan tests completed")
+    (print "OK: Enterprise loan tests completed")
     (ok true)))
 
 ;; === PHASE 4: BOND SYSTEM TESTS ===
@@ -167,7 +167,7 @@
     (let ((bond-stats-result (contract-call? .bond-issuance-system get-series-stats u1)))
       (record-test-result "bond-stats" (is-ok bond-stats-result) "Bond series statistics"))
     
-    (print "✅ Bond issuance tests completed")
+    (print "OK: Bond issuance tests completed")
     (ok true)))
 
 ;; === PHASE 5: YIELD DISTRIBUTION TESTS ===
@@ -196,7 +196,7 @@
                                             TEST_BOND_INVESTOR)))
       (record-test-result "yield-calc" (is-ok yield-calc-result) "Yield calculation for participant"))
     
-    (print "✅ Yield distribution tests completed")
+    (print "OK: Yield distribution tests completed")
     (ok true)))
 
 ;; === PHASE 6: LIQUIDITY OPTIMIZATION TESTS ===
@@ -227,7 +227,7 @@
                                             u1 TEST_LOAN_ASSET)))
       (record-test-result "pool-efficiency" (is-ok efficiency-result) "Pool efficiency calculation"))
     
-    (print "✅ Liquidity optimization tests completed")
+    (print "OK: Liquidity optimization tests completed")
     (ok true)))
 
 ;; === PHASE 7: END-TO-END INTEGRATION TESTS ===
@@ -254,7 +254,7 @@
     (let ((health-result (contract-call? .liquidity-optimization-engine get-system-health)))
       (record-test-result "system-health" (is-ok health-result) "Overall system health check"))
     
-    (print "✅ End-to-end integration tests completed")
+    (print "End-to-end integration tests completed")
     (ok true)))
 
 ;; === PHASE 8: STRESS TESTS ===
@@ -291,14 +291,14 @@
     (let ((optimization-result (contract-call? .liquidity-optimization-engine scan-arbitrage-opportunities)))
       (record-test-result "arbitrage-scan" (is-ok optimization-result) "Arbitrage opportunity scanning"))
     
-    (print "✅ High volume stress tests completed")
+    (print "High volume stress tests completed")
     (ok true)))
 
 ;; === MAIN TEST SUITE EXECUTION ===
 (define-public (run-full-integration-test-suite)
   "Execute complete integration test suite for enterprise loan system"
   (begin
-    (print "🚀 STARTING COMPREHENSIVE ENTERPRISE LOAN INTEGRATION TESTS 🚀")
+    (print "STARTING COMPREHENSIVE ENTERPRISE LOAN INTEGRATION TESTS")
     (print (tuple (start-time block-height)))
     
     ;; Reset test counters
@@ -323,7 +323,7 @@
                          u0)))
       
       (print "")
-      (print "📊 INTEGRATION TEST SUMMARY REPORT")
+      (print "INTEGRATION TEST SUMMARY REPORT")
       (print "=====================================")
       (print (tuple (total-tests total-tests)))
       (print (tuple (passed-tests (var-get passed-tests))))
@@ -334,10 +334,10 @@
       
       (if (>= success-rate u80) ;; 80% success rate required
         (begin
-          (print "✅ INTEGRATION TESTS PASSED - System ready for deployment")
+          (print "INTEGRATION TESTS PASSED - System ready for deployment")
           (ok (tuple (status "PASSED") (success-rate success-rate))))
         (begin
-          (print "❌ INTEGRATION TESTS FAILED - System needs fixes before deployment")
+          (print "INTEGRATION TESTS FAILED - System needs fixes before deployment")
           (err (tuple (status "FAILED") (success-rate success-rate))))))))
 
 ;; === TEST RESULT QUERY FUNCTIONS ===
@@ -362,7 +362,7 @@
 (define-public (validate-production-readiness)
   "Final validation check before production deployment"
   (begin
-    (print "🔍 PRODUCTION READINESS VALIDATION")
+    (print "PRODUCTION READINESS VALIDATION")
     
     ;; Check all critical systems are deployed and functional
     (let ((math-check (is-ok (contract-call? .math-lib-advanced sqrt u1000000000000000000)))
@@ -383,21 +383,21 @@
         
         (if all-systems-ok
           (begin
-            (print "✅ ALL SYSTEMS OPERATIONAL - READY FOR PRODUCTION")
+            (print "ALL SYSTEMS OPERATIONAL - READY FOR PRODUCTION")
             (ok true))
           (begin
-            (print "❌ SYSTEM CHECK FAILED - NOT READY FOR PRODUCTION")
+            (print "SYSTEM CHECK FAILED - NOT READY FOR PRODUCTION")
             (err u99999)))))))
 
 ;; Initialize test environment
 (define-public (initialize-test-environment)
   "Setup test environment with required permissions and initial state"
   (begin
-    (print "🔧 Initializing enterprise loan test environment...")
+    (print "Initializing enterprise loan test environment...")
     
     ;; This would set up test tokens, permissions, and initial liquidity
     ;; For now, just mark as initialized
     
-    (print "✅ Test environment initialized successfully")
+    (print "Test environment initialized successfully")
     (ok true)))
 

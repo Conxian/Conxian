@@ -7,4 +7,6 @@
   (begin
     ;; Transfer back the amount + fee to the initiator (the vault contract)
     (try! (as-contract (contract-call? asset transfer (+ amount fee) tx-sender initiator none)))
-    (ok (tuple (success true))))
+    (ok (tuple (success true)))
+  )
+)

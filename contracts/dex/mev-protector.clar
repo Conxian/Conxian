@@ -9,7 +9,6 @@
 (define-constant ERR_AUCTION_IN_PROGRESS (err u6006))
 (define-constant ERR_SANDWICH_ATTACK_DETECTED (err u6007))
 (define-constant ERR_CIRCUIT_OPEN (err u6008))
-
 ;; --- Data Variables ---
 (define-data-var contract-owner principal tx-sender)
 (define-data-var reveal-period uint u10) ;; Number of blocks for reveal period
@@ -23,32 +22,31 @@
 )
 
 (define-map pending-reveals uint { user: principal, path: (list 20 principal), amount-in: uint, min-amount-out: (optional uint), recipient: principal, salt: (buff 32) })
-(define-data-var next-reveal-id uint u0)
 
-;; Helper to serialize a principal to a 32-byte buffer (hash of the principal)
+;; Deterministic encoding: map principals to numeric indices
+(define-map principal-index principal uint)
 
-
-;; Helper to serialize a list of principals to a concatenated buffer
-(define-private (serialize-principal-list (principal-list (list 20 principal)))
-  (fold (lambda (p acc) (concat acc (contract-call? .utils principal-to-buff p))) principal-list 0x)
-)
-
-(define-private (get-commitment-hash (path (list 20 principal)) (amount-in uint) (min-amount-out (optional uint)) (recipient principal) (salt (buff 32)))
-  (let (
-      (path-serialized (serialize-principal-list path))
-      (amount-serialized (to-consensus-buff amount-in))
-      (min-amount-serialized (match min-amount-out (some u) (to-consensus-buff u) 0x))
-      (recipient-serialized (contract-call? .utils principal-to-buff recipient))
-    )
-    (sha256 (concat
-      path-serialized
-      amount-serialized
-      min-amount-serialized
-      recipient-serialized
-      salt
-    ))
+;; Helper: get index for principal (defaults to 0 if not set)
+(define-private (principal->index (p principal))
+  (default-to u0 (map-get? principal-index p))
+  ;; Helper: convert path of principals into a list of indices
+  (define-private (path->index-list (path (list 20 principal)))
+    (map (lambda (p) (principal->index p)) path)
   )
-)
+
+  (define-private (get-commitment-hash (path (list 20 principal)) (amount-in uint) (min-amount-out (optional uint)) (recipient principal) (salt (buff 32)))
+    (let (
+      (payload {
+        path: (path->index-list path),
+        amount: amount-in,
+        min: min-amount-out,
+        rcpt: (principal->index recipient),
+        salt: salt
+      })
+    )
+      (sha256 (to-consensus-buff payload))
+    )
+  )
 
 (define-private (accumulate-path (p principal) (acc (buff 800)))
   ;; Simplified - in production this would properly serialize the principal
@@ -84,6 +82,15 @@
   (begin
     (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
     (var-set circuit-breaker (some cb))
+    (ok true)
+  )
+)
+
+;; Owner-only: assign a numeric index to a principal
+(define-public (set-principal-index (p principal) (idx uint))
+  (begin
+    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
+    (map-set principal-index p idx)
     (ok true)
   )
 )

@@ -1,11 +1,41 @@
 # Conxian System Gaps Analysis and Enhancement Requirements
 
+## SDK 3.7.0 Alignment Notes (2025-10-09)
+
+- **Centralized Traits**: All contracts must import traits from `contracts/traits/all-traits.clar` via `.all-traits.<trait>`.
+- **Deterministic ordering/Encoding**:
+  - Token ordering moved to owner-settable `token-order` maps (no principal serialization).
+  - Commitment hashing uses `sha256 (to-consensus-buff payload)` via `contracts/utils/encoding.clar`.
+- **Non-Standard Functions**: Replaced/avoided `buff-to-uint-be`, `principal-to-buff`, `string-to-buff`, `keccak256` (experimental contracts disabled).
+
+### Current Implementation Cross-Reference
+
+- Requirement 1 (Concentrated LP):
+  - Implementations present: `contracts/pools/concentrated-liquidity-pool.clar`, `contracts/dimensional/concentrated-liquidity-pool-v2.clar` (partial math/trade path; continued work planned).
+- Requirement 2 (Multi-pool factory):
+  - Enhanced: `contracts/dex/dex-factory.clar` with pool types and deterministic token ordering.
+- Requirement 3 (Advanced routing):
+  - Present: `contracts/dex/multi-hop-router-v3.clar` (further optimization planned).
+- Requirement 4 (Oracle/TWAP + detection):
+  - Baseline present; `contracts/dex/manipulation-detector.clar` and oracle adapters exist; TWAP/detection enhancements planned.
+- Requirement 5 (MEV protection):
+  - Implemented: `contracts/dex/mev-protector.clar` refactored to deterministic encoding; analytics/batching to iterate.
+- Requirement 6 (Enterprise integration):
+  - Partial contracts exist; more endpoints to add per design.
+- Requirement 7 (Yield automation):
+  - `contracts/dex/auto-compounder.clar` exists; `yield-optimizer.clar` present (tests referenced); more strategies planned.
+- Requirement 9 (Fee tiers):
+  - Fee manager and tiered logic present in DEX components; expand analytics.
+- Requirement 12 (Testing framework):
+  - Vitest configs present (`vitest.config.enhanced.ts`, `stacks/sdk-tests/*`); expand coverage.
+- Requirement 14 (Compilation):
+  - Active fixes ongoing; experimental contracts disabled; `clarinet check` troubleshooting continues re: `.all-traits` principal consistency.
+
 ## Introduction
 
 Conxian is a comprehensive DeFi platform on Stacks with 65+ smart contracts, advanced mathematical libraries, and extensive tokenomics. However, analysis reveals critical gaps between the current implementation and the planned features outlined in the PRD documents. This requirements document identifies missing functionality, incomplete implementations, and alignment issues that must be addressed to achieve the system's full potential as a Tier 1 DeFi protocol.
 
 ## Requirements
-
 ### Requirement 1: Missing Concentrated Liquidity Implementation
 
 **User Story:** As a liquidity provider, I want concentrated liquidity pools so that I can achieve 100-4000x better capital efficiency compared to traditional constant product pools.

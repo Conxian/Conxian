@@ -7,7 +7,7 @@ Conxian smart contracts.
 
 ### Prerequisites
 
-- Clarinet SDK v3.5.0 (via root `package.json`) and Clarinet CLI v3.5.0 on PATH
+- Clarinet SDK v3.7.0 (via root `package.json`) and Clarinet CLI v3.7.0 on PATH
 - Node.js (v18+)
 - Git for version control
 
@@ -458,10 +458,10 @@ npx clarinet deployment status --mainnet
 
 ```bash
 # Check syntax errors
-npx clarinet check --contract problematic-contract --sdk-version 3.5.0
+npx clarinet check --contract problematic-contract --sdk-version 3.7.0
 
 # View detailed error messages
-npx clarinet check --verbose --sdk-version 3.5.0
+npx clarinet check --verbose --sdk-version 3.7.0
 npx clarinet check --verbose
 ```
 
@@ -610,5 +610,5 @@ This developer guide provides:
 
 Follow this guide to contribute effectively to the Conxian project.
 
-*Last Updated: September 10, 2025*  
-*Framework Version: Clarinet v3.5.0, Nakamoto-ready, Wormhole-integrated*
+*Last Updated: October 9, 2025*  
+*Framework Version: Clarinet v3.7.0, Nakamoto-ready, Wormhole-integrated*

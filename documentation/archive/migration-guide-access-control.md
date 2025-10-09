@@ -16,7 +16,7 @@ The new AccessControl system provides:
 ## Prerequisites
 
 - Conxian contracts v2.0.0 or later
-- Clarinet v3.5.0+
+- Clarinet v3.7.0+
 - Node.js v18+
 
 ## Migration Steps

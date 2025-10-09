@@ -8,7 +8,7 @@ concurrency:
 
 env:
   NODE_VERSION: '20'
-  CLARINET_VERSION: '3.5.0'
+  CLARINET_VERSION: '3.7.0'
 
 permissions:
   contents: read
@@ -55,7 +55,7 @@ jobs:
         run: npm ci --no-audit --no-fund
       - name: Install Clarinet
         run: |
-          curl -L https://github.com/hirosystems/clarinet/releases/download/v3.5.0/clarinet-linux-x64-glibc.tar.gz | tar xz
+          curl -L https://github.com/hirosystems/clarinet/releases/download/v${{ env.CLARINET_VERSION }}/clarinet-linux-x64-glibc.tar.gz | tar xz
           sudo mv clarinet /usr/local/bin/clarinet
           chmod +x /usr/local/bin/clarinet
       - name: Verify Clarinet Installation
@@ -94,7 +94,7 @@ jobs:
         run: npm ci --no-audit --no-fund
       - name: Install Clarinet
         run: |
-          curl -L https://github.com/hirosystems/clarinet/releases/download/v3.5.0/clarinet-linux-x64-glibc.tar.gz | tar xz
+          curl -L https://github.com/hirosystems/clarinet/releases/download/v${{ env.CLARINET_VERSION }}/clarinet-linux-x64-glibc.tar.gz | tar xz
           sudo mv clarinet /usr/local/bin/
           chmod +x /usr/local/bin/clarinet
       - name: Configure Testnet Deployer

@@ -51,7 +51,7 @@ Total tracked contracts (Clarinet): 30
 
 ## Requirements
 
-- **Clarinet SDK** (pinned v3.5.0 via npm in `stacks/package.json`)
+- **Clarinet SDK** (pinned v3.7.0 via npm in root `package.json`)
 - **Node.js** (v18+) to run SDK and tests
 - **Deno** (optional; required for console features)
 

@@ -1,12 +1,12 @@
 ;; Test Token B - Mock ERC20-like token for testing
 
-(impl-trait .all-traits.sip-010-ft-trait)
+(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
+(impl-trait sip-010-ft-trait)
 
 ;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED (err u1001))
 (define-constant ERR_NOT_ENOUGH_BALANCE (err u1002))
 (define-constant ERR_OVERFLOW (err u1003))
-
 ;; --- Data Variables ---
 (define-data-var name (string-ascii 32) "Test Token B")
 (define-data-var symbol (string-ascii 10) "TTB")

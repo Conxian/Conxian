@@ -27,7 +27,7 @@ on:
 # Environment configurations
 env:
   NODE_VERSION: '20'
-  CLARINET_VERSION: '3.5.0'
+  CLARINET_VERSION: '3.7.0'
   DOCKERHUB_USERNAME: ${{ vars.DOCKERHUB_USERNAME || 'conxian' }}
   IMAGE_NAME: 'conxian-protocol'
 

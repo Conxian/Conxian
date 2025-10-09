@@ -82,6 +82,7 @@ Conxian represents a **comprehensive DeFi ecosystem on Stacks** with **productio
 ├── dimensional/ - Dimensional analysis contracts
 └── Additional utility and testing contracts
 ```
+
 ├── vault-multi-token.clar
 ├── vault-production.clar
 └── vault.clar
@@ -147,6 +148,7 @@ Conxian represents a **comprehensive DeFi ecosystem on Stacks** with **productio
 ├── traits/vault-init-trait.clar
 ├── traits/vault-production-trait.clar
 └── traits/vault-trait.clar
+
 ```
 
 ---
@@ -355,7 +357,7 @@ Conxian represents a **comprehensive DeFi ecosystem on Stacks** with **productio
 ```text
 🛠️ SMART CONTRACT DEVELOPMENT:
 ├── Language: Clarity (Stacks native)
-├── Framework: Clarinet SDK v3.5.0
+├── Framework: Clarinet SDK v3.7.0
 ├── Testing: Vitest with comprehensive suites
 ├── Deployment: Automated scripts and CI/CD
 └── Monitoring: Real-time health checks
