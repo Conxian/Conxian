@@ -133,7 +133,7 @@
     (var-set performance-fee-bps fee-bps)
     (ok true)))
 
-;; ===== Core Vault Functions (impl-trait ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.) =====
+;; ===== Core Vault Functions (trait impl placeholder; centralized all-traits used where applicable) =====
 
 ;; Deposit sBTC into vault
 (define-public (deposit (token-contract (contract-of sip-010-ft-trait)) (amount uint))

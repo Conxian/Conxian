@@ -1,3 +1,5 @@
+> NOTE: Archived documentation. See canonical docs index: ../README.md
+
 # Conxian Documentation
 
 This is the central documentation hub for the Conxian DeFi platform.

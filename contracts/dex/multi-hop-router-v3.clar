@@ -5,7 +5,7 @@
 ;; Traits
 
 ;; Implementation
-;; (impl-trait ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.) ;; removed until router-trait is defined in all-traits
+;; impl-trait placeholder for router-trait (to be defined in centralized all-traits)
 
 ;; Constants
 (define-constant CONTRACT_OWNER tx-sender)

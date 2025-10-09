@@ -1,3 +1,5 @@
+> NOTE: Archived. See canonical guide: ../guides/migration-guide-access-control.md
+
 # Access Control Migration Guide
 
 This guide provides step-by-step instructions for integrating the new AccessControl contract with existing Conxian protocol contracts.
