@@ -5,8 +5,8 @@
 
 ;; Traits
 
-(impl-trait .all-traits.budget-manager-trait)
-(impl-trait .all-traits.proposal-trait)
+(impl-trait budget-manager-trait)
+(impl-trait proposal-trait)
 
 ;; Constants
 (define-constant ERR_UNAUTHORIZED (err u100))

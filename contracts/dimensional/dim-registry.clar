@@ -7,7 +7,7 @@
 
 ;; --- Traits ---
 
-(impl-trait .all-traits.dim-registry-trait)
+(impl-trait dim-registry-trait)
 
 ;; Constants
 (define-constant TRAIT_REGISTRY .trait-registry)

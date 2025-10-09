@@ -5,7 +5,7 @@
 
 (use-trait ft-mintable .all-traits.sip-010-ft-mintable-trait)
 
-(impl-trait .all-traits.cxlp-migration-queue-trait)
+(impl-trait cxlp-migration-queue-trait)
 
 ;; --- Constants ---
 (define-constant CONTRACT_OWNER tx-sender)

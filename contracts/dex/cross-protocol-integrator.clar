@@ -2,7 +2,7 @@
 ;; Conxian Cross-Protocol Integrator
 
 
-(impl-trait .all-traits.cross-protocol-integrator-trait)
+(impl-trait cross-protocol-integrator-trait)
 
 ;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED (err u701))
