@@ -1,7 +1,7 @@
 ;; Test Token B - Mock ERC20-like token for testing
 
 (use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
-(impl-trait sip-010-ft-trait)
+(impl-trait .all-traits.sip-010-ft-trait)
 
 ;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED (err u1001))
@@ -16,10 +16,7 @@
 
 (define-map balances { who: principal } { balance: uint })
 
-;; --- Events ---
-(define-event Transfer (sender principal) (recipient principal) (amount uint))
-(define-event Mint (to principal) (amount uint))
-(define-event Burn (from principal) (amount uint))
+;; --- Events removed for Clarity 3 (use print if needed) ---
 
 ;; --- Public Functions ---
 (define-public (transfer (amount uint) (sender principal) (recipient principal) (memo (optional (buff 34))))

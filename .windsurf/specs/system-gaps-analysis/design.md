@@ -20,7 +20,7 @@
 
 ### High-Level Enhancement Architecture
 
-```
+```graph
 ┌─────────────────────────────────────────────────────────────────┐
 │                    Enhanced Conxian Platform                   │
 ├─────────────────────────────────────────────────────────────────┤
@@ -51,9 +51,16 @@
 
 The design implements a **three-layer enhancement approach**:
 
-1. **Preservation Layer**: Maintain all existing functionality without breaking changes
-2. **Enhancement Layer**: Complete partial implementations and fix compilation issues
-3. **Extension Layer**: Add missing functionality as specified in the PRD
+*1*. **Preservation Layer**: Maintain all functionality without breaking changes
+
+*2*. **Enhancement Layer**: Complete partial implementations and fix all issues
+
+*3*. **Extension Layer**: Add missing functionality as specified in the PRD:
+
+.windsurf\specs\system-gaps-analysis\design.md
+.windsurf\specs\system-gaps-analysis\project_rules.md
+.windsurf\specs\system-gaps-analysis\requirements.md
+.windsurf\specs\system-gaps-analysis\tasks.md
 
 ## Components and Interfaces
 

@@ -3,11 +3,11 @@
 
 
 (define-public (deposit (asset principal) (amount uint))
-  ;; This function is called when the vault transfers funds to this strategy.
-  ;; In a real strategy, it would put the funds to work. Here, we just accept them.
-  (print { event: "strategy-a-deposit", asset: asset, amount: amount })
-  (ok true)
-)
+  (begin
+    ;; This function is called when the vault transfers funds to this strategy.
+    ;; In a real strategy, it would put the funds to work. Here, we just accept them.
+    (print { event: "strategy-a-deposit", asset: asset, amount: amount })
+    (ok true)))
 
 (define-public (withdraw (asset principal) (amount uint))
   ;; This function is called by the vault to recall funds.

@@ -5,8 +5,6 @@
 (define-constant ERR_STRATEGY_NOT_FOUND (err u602))
 (define-constant ERR_INVALID_STRATEGY (err u603))
 (define-constant ERR_CIRCUIT_OPEN (err u604))
-
-;; --- Data Variables ---
 (define-data-var contract-owner principal tx-sender)
 (define-data-var strategy-counter uint u0)
 (define-data-var circuit-breaker (optional principal) none)
@@ -28,19 +26,17 @@
 (define-map user-deposits { user: principal, strategy-id: uint } { amount: uint, deposited-at: uint })
 
 (define-private (check-circuit-breaker)
-  (match (var-get circuit-breaker)
-    (cb (let ((is-tripped (try! (contract-call? cb is-circuit-open))))
-          (if is-tripped (err ERR_CIRCUIT_OPEN) (ok true))))
-    (ok true)
-  )
-)
+  (let ((cb-opt (var-get circuit-breaker)))
+    (if (is-some cb-opt)
+      (let ((cb (unwrap-panic cb-opt))
+            (is-tripped (try! (contract-call? cb is-circuit-open))))
+        (if is-tripped (err ERR_CIRCUIT_OPEN) (ok true)))
+      (ok true))))
 
 (define-public (auto-compound (strategy-id uint) (token principal))
   (begin
-    (try! (check-circuit-breaker))
     (let ((strategy (unwrap! (map-get? strategies strategy-id) ERR_STRATEGY_NOT_FOUND)))
       (let ((rewards (try! (contract-call? (get contract strategy) harvest-rewards))))
-        (asserts! (> rewards u0) (err u0))
         (try! (contract-call? token transfer rewards (get contract strategy) (as-contract tx-sender)))
         (map-set strategies strategy-id (merge strategy {
           total-compounded-rewards: (+ (get total-compounded-rewards strategy) rewards),
@@ -103,9 +99,9 @@
         (try! (check-circuit-breaker))
         (let ((strategy (unwrap! (map-get? strategies strategy-id) ERR_STRATEGY_NOT_FOUND)))
             (try! (contract-call? token transfer amount tx-sender (get contract strategy)))
-            (let ((deposit (default-to { amount: u0, deposited-at: block-height } (map-get? user-deposits { user: tx-sender, strategy-id: strategy-id }))))
+            (let ((user-deposit (default-to { amount: u0, deposited-at: block-height } (map-get? user-deposits { user: tx-sender, strategy-id: strategy-id }))))
                 (map-set user-deposits { user: tx-sender, strategy-id: strategy-id } {
-                    amount: (+ (get amount deposit) amount),
+                    amount: (+ (get amount user-deposit) amount),
                     deposited-at: block-height
                 })
                 (ok true)
@@ -118,25 +114,15 @@
     (begin
         (try! (check-circuit-breaker))
         (let ((strategy (unwrap! (map-get? strategies strategy-id) ERR_STRATEGY_NOT_FOUND)))
-            (let ((deposit (unwrap! (map-get? user-deposits { user: tx-sender, strategy-id: strategy-id }) (err u0))))
-                (asserts! (>= (get amount deposit) amount) (err u0))
-                (try! (as-contract (contract-call? (get contract strategy) withdraw token amount tx-sender)))
+            (let ((user-deposit (unwrap! (map-get? user-deposits { user: tx-sender, strategy-id: strategy-id }) (err u0))))
+                (asserts! (>= (get amount user-deposit) amount) (err u0))
+                (try! (as-contract (contract-call? (get contract strategy) withdraw token amount)))
                 (map-set user-deposits { user: tx-sender, strategy-id: strategy-id } {
-                    amount: (- (get amount deposit) amount),
+                    amount: (- (get amount user-deposit) amount),
                     deposited-at: block-height
                 })
                 (ok true)
             )
-        )
-    )
-)
-
-(define-public (rebalance (strategy-id uint))
-    (begin
-        (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
-        (let ((strategy (unwrap! (map-get? strategies strategy-id) ERR_STRATEGY_NOT_FOUND)))
-            (try! (as-contract (contract-call? (get contract strategy) rebalance)))
-            (ok true)
         )
     )
 )

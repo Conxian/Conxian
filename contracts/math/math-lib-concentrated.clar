@@ -227,46 +227,13 @@
 )
 
 (define-read-only (get-fee-growth-above (tick int) (fee-growth-global uint))
-    (let (
-            (upper-tick (get-upper-tick tick u60))
-            (fee-growth-outside (get-fee-growth-outside upper-tick))
+   (let (
+           (upper-tick (get-upper-tick tick u60))
+           (fee-growth-outside (get-fee-growth-outside upper-tick))
         )
-        (ok (if (< tick (get-current-tick))
-            (- fee-growth-global fee-growth-outside)
-            fee-growth-outside
+     (ok (if (< tick (get-current-tick))
+           (- fee-growth-global fee-growth-outside)
+           fee-growth-outside
         ))
-    )
-)
-
-(define-private (sqrt-iter (x uint) (y uint) (z uint))
-  (if (or (is-eq y u0) (>= y z))
-    z
-    (sqrt-iter x (div (+ (div x y) y) u2) y)
-  )
-)
-
-;; Public wrapper for sqrt calculation
-(define-public (sqrt-fixed (x uint)) 
-  (ok (sqrt-priv x))
-)
-
-;; Private sqrt implementation
-(define-private (sqrt-priv (x uint))
-  (if (is-eq x u0)
-    u0
-    (sqrt-iter x (/ (+ x u1) u2) u0)
-  )
-)
-
-(define-private (exp-iter (x uint) (term uint) (i uint) (result uint))
-  (if (is-eq term u0)
-    result
-    (let ((new-term (div (* term x) i)))
-      (exp-iter x new-term (+ i u1) (+ result new-term))
-    )
-  )
-)
-
-(define-public (exp-fixed (x uint))
-  (ok (exp-iter x Q96 u1 Q96))
+   )
 )

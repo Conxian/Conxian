@@ -1,12 +1,10 @@
 (use-trait liquidation-trait .all-traits.liquidation-trait)
-(use-trait liquidation-interface .all-traits.liquidation-trait)
 
-(impl-trait liquidation-trait)
+ (impl-trait liquidation-trait)
 
 ;; Constants
 (define-constant CONTRACT_OWNER tx-sender)
 (define-constant MAX_POSITIONS_PER_BATCH u10)
-
 ;; Data variables
 (define-data-var admin principal CONTRACT_OWNER)
 (define-data-var liquidation-paused bool false)

@@ -1,16 +1,15 @@
+;; Traits
 (use-trait cxlp-migration-queue-trait .all-traits.cxlp-migration-queue-trait)
 ;; cxlp-migration-queue.clar
 ;; Intent queue system for CXLP to CXD migration with pro-rata settlement
 ;; Prevents FCFS races and enables fair distribution based on duration-weighted requests
 
 (use-trait ft-mintable .all-traits.sip-010-ft-mintable-trait)
-
-(impl-trait cxlp-migration-queue-trait)
+ (impl-trait cxlp-migration-queue-trait)
 
 ;; --- Constants ---
 (define-constant CONTRACT_OWNER tx-sender)
 (define-constant PRECISION u100000000)
-
 ;; Migration bands with multipliers
 (define-constant BAND0 u10000) ;; 1.00x
 (define-constant BAND1 u12500) ;; 1.25x  

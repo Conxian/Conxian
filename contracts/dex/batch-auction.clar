@@ -2,14 +2,13 @@
 ;; batch-auction.clar
 ;; Implements a batch auction mechanism for fair execution
 
-(impl-trait batch-auction-trait)
+ (impl-trait batch-auction-trait)
 
 ;; ===== Constants =====
 (define-constant ERR_UNAUTHORIZED (err u100))
 (define-constant ERR_AUCTION_NOT_ACTIVE (err u101))
 (define-constant ERR_AUCTION_ENDED (err u102))
 (define-constant ERR_INVALID_BID (err u103))
-(define-constant ERR_NO_BIDS (err u104))
 (define-constant ERR_ALREADY_BID (err u105))
 
 ;; ===== Data Variables =====
