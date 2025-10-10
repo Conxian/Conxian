@@ -59,6 +59,7 @@ External price adapters (async):
 - `oracle_sources.py` - CoinGecko, Binance, Kraken, ALEX DEX adapters returning normalized integer prices
 
 **Stacks Ecosystem Support:**
+
 - Comprehensive mappings for 30+ Stacks tokens (STX, ALEX, DIKO, USDA, XBTC, WELSH, AUTO, etc.)
 - ALEX DEX integration for Stacks-native token prices
 - StacksSwap adapter (when API available)

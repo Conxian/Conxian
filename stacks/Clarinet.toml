@@ -3,15 +3,20 @@
 path = "contracts/traits/all-traits.clar"
 clarity_version = 3
 epoch = "3.0"
+
 [project]
 name = "conxian-tests"
 description = "Minimal manifest for SDK tests"
 requirements = []
 clarinet_version = "3.7.0"
 
-[accounts]
-deployer = { mnemonic = "twice kind fence tip hidden tilt action fragile skin nothing glory cousin green tomorrow spring wrist shed math olympic multiply hip blue scout claw", balance = 100_000_000_000_000 }
-wallet_1 = { mnemonic = "sell invite acquire kitten bamboo drastic jelly vivid peace spawn twice guilt pave pen trash pretty park cube fragile unaware remain midnight betray rebuild", balance = 100_000_000_000_000 }
+[accounts.deployer]
+mnemonic = "twice kind fence tip hidden tilt action fragile skin nothing glory cousin green tomorrow spring wrist shed math olympic multiply hip blue scout claw"
+balance = 100000000000000
+
+[accounts.wallet_1]
+mnemonic = "sell invite acquire kitten bamboo drastic jelly vivid peace spawn twice guilt pave pen trash pretty park cube fragile unaware remain midnight betray rebuild"
+balance = 100000000000000
 
 # DEPRECATED: This stacks/Clarinet.toml is not used by tests/CI.
 # Use the root-level Clarinet.toml and Clarinet.test.toml instead to avoid drift.
@@ -31,16 +36,23 @@ epoch = "2.5"
 [contracts.tokenized-bond]
 path = "contracts/dimensional/tokenized-bond.clar"
 clarity_version = 3
-epoch = "2.5"
-depends_on = ["all-traits"]
 [contracts.utils]
 path = "contracts/utils/utils.clar"
 clarity_version = 3
 epoch = "3.0"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+
 [contracts.encoding]
 path = "contracts/utils/encoding.clar"
 clarity_version = 3
 epoch = "3.0"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
+[accounts]
+[accounts.deployer]
+mnemonic = "twice kind fence tip hidden tilt action fragile skin nothing glory cousin green tomorrow spring wrist shed math olympic multiply hip blue scout claw"
+balance = 100000000000000
+
+[accounts.wallet_1]
+mnemonic = "sell invite acquire kitten bamboo drastic jelly vivid peace spawn twice guilt pave pen trash pretty park cube fragile unaware remain midnight betray rebuild"
+balance = 100000000000000
