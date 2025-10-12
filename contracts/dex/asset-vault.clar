@@ -1,13 +1,16 @@
 (use-trait asset-vault-trait .all-traits.asset-vault-trait)
+(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
+
 ;; Asset Vault Contract
 ;; Implements a simple asset vault for the Conxian protocol
- (impl-trait asset-vault-trait)
+(impl-trait asset-vault-trait)
+
 (define-constant ERR-NOT-AUTHORIZED (err u100))
 (define-constant ERR-INVALID-TOKEN (err u101))
 (define-constant ERR-INSUFFICIENT-BALANCE (err u102))
 (define-constant ERR-TRANSFER-FAILED (err u103))
 (define-constant ERR-VAULT-PAUSED (err u104))
-;;
+(define-constant ERR-ZERO-AMOUNT (err u105))
 (define-constant ERR-UNEXPECTED-ERROR (err u106))
 
 (define-data-var contract-owner principal tx-sender)
@@ -45,28 +48,30 @@
   )
 )
 
-(define-public (deposit (token principal) (amount uint))
+(define-public (deposit (token <sip-010-ft-trait>) (amount uint))
   (begin
     (asserts! (not (var-get paused)) ERR-VAULT-PAUSED)
-    (asserts! (map-get? allowed-tokens token) ERR-INVALID-TOKEN)
+    (asserts! (is-allowed-token (contract-of token)) ERR-INVALID-TOKEN)
     (asserts! (> amount u0) ERR-ZERO-AMOUNT)
     (try! (contract-call? token transfer amount tx-sender (as-contract tx-sender) none))
     (ok true)
   )
 )
 
-(define-public (withdraw (token principal) (amount uint))
-  (begin
+(define-public (withdraw (token <sip-010-ft-trait>) (amount uint))
+  (let (
+    (token-principal (contract-of token))
+  )
     (asserts! (not (var-get paused)) ERR-VAULT-PAUSED)
-    (asserts! (map-get? allowed-tokens token) ERR-INVALID-TOKEN)
+    (asserts! (is-allowed-token token-principal) ERR-INVALID-TOKEN)
     (asserts! (> amount u0) ERR-ZERO-AMOUNT)
-    (asserts! (>= (get-balance token (as-contract tx-sender)) amount) ERR-INSUFFICIENT-BALANCE)
-    (try! (contract-call? token transfer amount (as-contract tx-sender) tx-sender none))
+    (asserts! (>= (unwrap-panic (contract-call? token get-balance (as-contract tx-sender))) amount) ERR-INSUFFICIENT-BALANCE)
+    (try! (as-contract (contract-call? token transfer amount tx-sender tx-sender none)))
     (ok true)
   )
 )
 
-(define-read-only (get-balance (token principal) (owner principal))
+(define-read-only (get-balance (token <sip-010-ft-trait>) (owner principal))
   (contract-call? token get-balance owner)
 )
 

@@ -34,11 +34,11 @@
 (define-constant Q128 u340282366920938463463374607431768211455)
 
 ;; Data Maps
- (define-map pools
+(define-map pools
   {pool-id: uint}
   {
-    token-x: <sip-010-ft-trait>,
-    token-y: <sip-010-ft-trait>,
+    token-x: principal,
+    token-y: principal,
     factory: principal,
     fee-bps: uint,
     tick-spacing: uint,
@@ -234,15 +234,17 @@
 ;; SWAP FUNCTION
 ;; ----------------------------------------------------------------------------------------------------
 (define-public (swap
+  (pool-id uint)
+  (token-x <sip-010-ft-trait>)
+  (token-y <sip-010-ft-trait>)
   (zero-for-one bool)
   (amount-specified uint)
   (limit-sqrt-price uint)
 )
   (let (
-    (pool-id (var-get next-pool-id))
     (pool (unwrap! (map-get? pools {pool-id: pool-id}) (err ERR_POOL_NOT_FOUND)))
-    (token-x (get token-x pool))
-    (token-y (get token-y pool))
+    (token-x-principal (contract-of token-x))
+    (token-y-principal (contract-of token-y))
     (fee-bps (get fee-bps pool))
     (current-sqrt-price (get current-sqrt-price pool))
     (current-tick (get current-tick pool))
@@ -256,6 +258,9 @@
     (next-tick current-tick)
     (total-fee u0)
   )
+    ;; Validate tokens match pool
+    (asserts! (is-eq token-x-principal (get token-x pool)) (err ERR_INVALID_TOKEN))
+    (asserts! (is-eq token-y-principal (get token-y pool)) (err ERR_INVALID_TOKEN))
     ;; Input validation
     (asserts! (not (is-eq amount-specified u0)) (err ERR_INVALID_AMOUNT))
 
@@ -371,8 +376,9 @@
                                    (recipient principal))
   (let (
     (pool-id (var-get next-pool-id))
-    (zero-for-one (if (is-eq token-in (get token-x (map-get? pools {pool-id: pool-id})))) true false))
-    (result (swap pool-id zero-for-one amount-in u0))
+    (pool (unwrap! (map-get? pools {pool-id: pool-id}) (err ERR_POOL_NOT_FOUND)))
+    (zero-for-one (is-eq (contract-of token-in) (get token-x pool)))
+    (result (swap pool-id token-in token-out zero-for-one amount-in u0))
   )
   (match result
     (ok (tuple (amount-in uint) (amount-out uint) (next-sqrt-price uint)) (ok (tuple (amount-in amount-in) (amount-out amount-out))))
@@ -495,8 +501,8 @@
     (map-set pools
       {pool-id: current-pool-id}
       {
-        token-x: token-a,
-        token-y: token-b,
+        token-x: (contract-of token-a),
+        token-y: (contract-of token-b),
         factory: factory-address,
         fee-bps: fee-bps,
         tick-spacing: tick-spacing,
@@ -521,11 +527,11 @@
 ;; @returns An `(ok uint)` result containing the square root price, or an error.
 
 (define-read-only (get-sqrt-price-from-tick (tick int))
-  (contract-call? .math.math-lib-concentrated get-sqrt-ratio-at-tick tick)
+  (contract-call? .math-lib-concentrated get-sqrt-ratio-at-tick tick)
 )
 
 (define-read-only (get-tick-from-sqrt-price (sqrt-price uint))
-  (contract-call? .math.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
+  (contract-call? .math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price)
 )
 
 

@@ -503,8 +503,8 @@ digraph conxian {
   "file:contracts/pools/concentrated-liquidity-pool.clar" -> "file:contracts/math/math-lib-concentrated.clar" [color="#44aa44", label="calls"];
   "file:contracts/pools/concentrated-liquidity-pool.clar" -> "token-x" [color="#ffaa00", label="dynamic-call"];
   "file:contracts/pools/concentrated-liquidity-pool.clar" -> "token-y" [color="#ffaa00", label="dynamic-call"];
-  "file:contracts/pools/concentrated-liquidity-pool.clar" -> "contract-ref:.math.math-lib-concentrated" [color="#44aa44", label="calls"];
-  "file:contracts/pools/concentrated-liquidity-pool.clar" -> "contract-ref:.math.math-lib-concentrated" [color="#44aa44", label="calls"];
+  "file:contracts/pools/concentrated-liquidity-pool.clar" -> "file:contracts/math/math-lib-concentrated.clar" [color="#44aa44", label="calls"];
+  "file:contracts/pools/concentrated-liquidity-pool.clar" -> "file:contracts/math/math-lib-concentrated.clar" [color="#44aa44", label="calls"];
   "file:contracts/governance/proposal-engine.clar" -> "file:contracts/governance/governance-token.clar" [color="#44aa44", label="calls"];
   "file:contracts/governance/proposal-engine.clar" -> "file:contracts/governance/governance-token.clar" [color="#44aa44", label="calls"];
   "file:contracts/pools/tiered-pools.clar" -> "file:contracts/dex/fee-manager.clar" [color="#44aa44", label="calls"];
@@ -514,7 +514,9 @@ digraph conxian {
   "file:contracts/automation/keeper-coordinator.clar" -> "trait:keeper-coordinator-trait" [color="#8888ff", label="use-trait"];
   "file:contracts/automation/keeper-coordinator.clar" -> "trait:keeper-coordinator-trait" [color="#3333ff", label="impl-trait"];
   "file:contracts/dex/asset-vault.clar" -> "trait:asset-vault-trait" [color="#8888ff", label="use-trait"];
+  "file:contracts/dex/asset-vault.clar" -> "trait:sip-010-ft-trait" [color="#8888ff", label="use-trait"];
   "file:contracts/dex/asset-vault.clar" -> "trait:asset-vault-trait" [color="#3333ff", label="impl-trait"];
+  "file:contracts/dex/asset-vault.clar" -> "token" [color="#ffaa00", label="dynamic-call"];
   "file:contracts/dex/asset-vault.clar" -> "token" [color="#ffaa00", label="dynamic-call"];
   "file:contracts/dex/asset-vault.clar" -> "token" [color="#ffaa00", label="dynamic-call"];
   "file:contracts/dex/asset-vault.clar" -> "token" [color="#ffaa00", label="dynamic-call"];

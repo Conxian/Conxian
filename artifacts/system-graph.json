@@ -1358,15 +1358,15 @@
     },
     {
       "from": "file:contracts/pools/concentrated-liquidity-pool.clar",
-      "to": "contract-ref:.math.math-lib-concentrated",
+      "to": "file:contracts/math/math-lib-concentrated.clar",
       "type": "calls",
-      "resolved": false
+      "resolved": true
     },
     {
       "from": "file:contracts/pools/concentrated-liquidity-pool.clar",
-      "to": "contract-ref:.math.math-lib-concentrated",
+      "to": "file:contracts/math/math-lib-concentrated.clar",
       "type": "calls",
-      "resolved": false
+      "resolved": true
     },
     {
       "from": "file:contracts/governance/proposal-engine.clar",
@@ -1420,8 +1420,18 @@
     },
     {
       "from": "file:contracts/dex/asset-vault.clar",
+      "to": "trait:sip-010-ft-trait",
+      "type": "use-trait"
+    },
+    {
+      "from": "file:contracts/dex/asset-vault.clar",
       "to": "trait:asset-vault-trait",
       "type": "impl-trait"
+    },
+    {
+      "from": "file:contracts/dex/asset-vault.clar",
+      "to": "token",
+      "type": "dynamic-call"
     },
     {
       "from": "file:contracts/dex/asset-vault.clar",
@@ -5015,7 +5025,7 @@
   ],
   "stats": {
     "nodes": 235,
-    "edges": 706,
+    "edges": 708,
     "traits": 54
   },
   "cycles": []
