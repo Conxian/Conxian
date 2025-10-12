@@ -1,0 +1,1181 @@
+digraph conxian {
+  rankdir=LR;
+  "trait:access-control-trait" [label="access-control-trait
+(trait)", shape=ellipse];
+  "trait:advanced-router-dijkstra-trait" [label="advanced-router-dijkstra-trait
+(trait)", shape=ellipse];
+  "trait:asset-vault-trait" [label="asset-vault-trait
+(trait)", shape=ellipse];
+  "trait:batch-auction-trait" [label="batch-auction-trait
+(trait)", shape=ellipse];
+  "trait:bond-factory-trait" [label="bond-factory-trait
+(trait)", shape=ellipse];
+  "trait:bond-trait" [label="bond-trait
+(trait)", shape=ellipse];
+  "trait:btc-adapter-trait" [label="btc-adapter-trait
+(trait)", shape=ellipse];
+  "trait:budget-manager-trait" [label="budget-manager-trait
+(trait)", shape=ellipse];
+  "trait:circuit-breaker-trait" [label="circuit-breaker-trait
+(trait)", shape=ellipse];
+  "trait:compliance-hooks-trait" [label="compliance-hooks-trait
+(trait)", shape=ellipse];
+  "trait:cross-protocol-integrator-trait" [label="cross-protocol-integrator-trait
+(trait)", shape=ellipse];
+  "trait:cross-protocol-trait" [label="cross-protocol-trait
+(trait)", shape=ellipse];
+  "trait:cxlp-migration-queue-trait" [label="cxlp-migration-queue-trait
+(trait)", shape=ellipse];
+  "trait:dao-trait" [label="dao-trait
+(trait)", shape=ellipse];
+  "trait:dex-factory-trait" [label="dex-factory-trait
+(trait)", shape=ellipse];
+  "trait:dim-registry-trait" [label="dim-registry-trait
+(trait)", shape=ellipse];
+  "trait:dimensional-oracle-trait" [label="dimensional-oracle-trait
+(trait)", shape=ellipse];
+  "trait:error-codes-trait" [label="error-codes-trait
+(trait)", shape=ellipse];
+  "trait:factory-trait" [label="factory-trait
+(trait)", shape=ellipse];
+  "trait:fee-manager-trait" [label="fee-manager-trait
+(trait)", shape=ellipse];
+  "trait:fixed-point-math-trait" [label="fixed-point-math-trait
+(trait)", shape=ellipse];
+  "trait:flash-loan-receiver-trait" [label="flash-loan-receiver-trait
+(trait)", shape=ellipse];
+  "trait:governance-token-trait" [label="governance-token-trait
+(trait)", shape=ellipse];
+  "trait:keeper-coordinator-trait" [label="keeper-coordinator-trait
+(trait)", shape=ellipse];
+  "trait:legacy-adapter-trait" [label="legacy-adapter-trait
+(trait)", shape=ellipse];
+  "trait:lending-system-trait" [label="lending-system-trait
+(trait)", shape=ellipse];
+  "trait:liquidation-trait" [label="liquidation-trait
+(trait)", shape=ellipse];
+  "trait:liquidity-manager-trait" [label="liquidity-manager-trait
+(trait)", shape=ellipse];
+  "trait:math-trait" [label="math-trait
+(trait)", shape=ellipse];
+  "trait:metrics-trait" [label="metrics-trait
+(trait)", shape=ellipse];
+  "trait:mev-protector-trait" [label="mev-protector-trait
+(trait)", shape=ellipse];
+  "trait:migration-manager-trait" [label="migration-manager-trait
+(trait)", shape=ellipse];
+  "trait:monitoring-trait" [label="monitoring-trait
+(trait)", shape=ellipse];
+  "trait:oracle-aggregator-trait" [label="oracle-aggregator-trait
+(trait)", shape=ellipse];
+  "trait:oracle-trait" [label="oracle-trait
+(trait)", shape=ellipse];
+  "trait:ownable-trait" [label="ownable-trait
+(trait)", shape=ellipse];
+  "trait:pausable-trait" [label="pausable-trait
+(trait)", shape=ellipse];
+  "trait:performance-optimizer-trait" [label="performance-optimizer-trait
+(trait)", shape=ellipse];
+  "trait:pool-creation-trait" [label="pool-creation-trait
+(trait)", shape=ellipse];
+  "trait:pool-trait" [label="pool-trait
+(trait)", shape=ellipse];
+  "trait:position-nft-trait" [label="position-nft-trait
+(trait)", shape=ellipse];
+  "trait:proposal-trait" [label="proposal-trait
+(trait)", shape=ellipse];
+  "trait:router-trait" [label="router-trait
+(trait)", shape=ellipse];
+  "trait:sip-009-nft-trait" [label="sip-009-nft-trait
+(trait)", shape=ellipse];
+  "trait:sip-010-ft-mintable-trait" [label="sip-010-ft-mintable-trait
+(trait)", shape=ellipse];
+  "trait:sip-010-ft-trait" [label="sip-010-ft-trait
+(trait)", shape=ellipse];
+  "trait:sip-018-trait" [label="sip-018-trait
+(trait)", shape=ellipse];
+  "trait:staking-trait" [label="staking-trait
+(trait)", shape=ellipse];
+  "trait:standard-constants-trait" [label="standard-constants-trait
+(trait)", shape=ellipse];
+  "trait:strategy-trait" [label="strategy-trait
+(trait)", shape=ellipse];
+  "trait:utils-trait" [label="utils-trait
+(trait)", shape=ellipse];
+  "trait:vault-admin-trait" [label="vault-admin-trait
+(trait)", shape=ellipse];
+  "trait:vault-trait" [label="vault-trait
+(trait)", shape=ellipse];
+  "trait:yield-optimizer-trait" [label="yield-optimizer-trait
+(trait)", shape=ellipse];
+  "file:contracts/dex/batch-auction.clar" [label="batch-auction
+(contract)", shape=box];
+  "file:contracts/interfaces/btc-adapter.clar" [label="btc-adapter
+(contract)", shape=box];
+  "file:contracts/budget-manager.clar" [label="budget-manager
+(contract)", shape=box];
+  "file:contracts/security/circuit-breaker.clar" [label="circuit-breaker
+(contract)", shape=box];
+  "file:contracts/pools/concentrated-liquidity-pool.clar" [label="concentrated-liquidity-pool
+(contract)", shape=box];
+  "file:contracts/governance/governance-token.clar" [label="governance-token
+(contract)", shape=box];
+  "file:contracts/security/mev-protector.clar" [label="mev-protector
+(contract)", shape=box];
+  "file:contracts/oracle/oracle.clar" [label="oracle
+(contract)", shape=box];
+  "file:contracts/governance/proposal-engine.clar" [label="proposal-engine
+(contract)", shape=box];
+  "file:contracts/dex/rebalancing-rules.clar" [label="rebalancing-rules
+(contract)", shape=box];
+  "file:contracts/pools/tiered-pools.clar" [label="tiered-pools
+(contract)", shape=box];
+  "file:contracts/audit-registry/audit-badge-nft.clar" [label="audit-badge-nft
+(contract)", shape=box];
+  "file:contracts/audit-registry/audit-registry.clar" [label="audit-registry
+(contract)", shape=box];
+  "file:contracts/automation/batch-processor.clar" [label="batch-processor
+(contract)", shape=box];
+  "file:contracts/automation/keeper-coordinator.clar" [label="keeper-coordinator
+(contract)", shape=box];
+  "file:contracts/dex/asset-vault.clar" [label="asset-vault
+(contract)", shape=box];
+  "file:contracts/dex/auto-compounder.clar" [label="auto-compounder
+(contract)", shape=box];
+  "file:contracts/dex/bond-factory.clar" [label="bond-factory
+(contract)", shape=box];
+  "file:contracts/dex/bond-issuance-system.clar" [label="bond-issuance-system
+(contract)", shape=box];
+  "file:contracts/dex/comprehensive-lending-system.clar" [label="comprehensive-lending-system
+(contract)", shape=box];
+  "file:contracts/interfaces/cross-protocol-integrator.clar" [label="cross-protocol-integrator
+(contract)", shape=box];
+  "file:contracts/dex/cxd-staking.clar" [label="cxd-staking
+(contract)", shape=box];
+  "file:contracts/dex/cxlp-migration-queue.clar" [label="cxlp-migration-queue
+(contract)", shape=box];
+  "file:contracts/dex/cxvg-utility.clar" [label="cxvg-utility
+(contract)", shape=box];
+  "file:contracts/dex/dex-factory-v2.clar" [label="dex-factory-v2
+(contract)", shape=box];
+  "file:contracts/dex/dex-factory.clar" [label="dex-factory
+(contract)", shape=box];
+  "file:contracts/dex/dex-pool.clar" [label="dex-pool
+(contract)", shape=box];
+  "file:contracts/dex/dex-router.clar" [label="dex-router
+(contract)", shape=box];
+  "file:contracts/dex/distributed-cache-manager.clar" [label="distributed-cache-manager
+(contract)", shape=box];
+  "file:contracts/dex/enhanced-yield-strategy.clar" [label="enhanced-yield-strategy
+(contract)", shape=box];
+  "file:contracts/dex/enterprise-loan-manager.clar" [label="enterprise-loan-manager
+(contract)", shape=box];
+  "file:contracts/dex/fee-manager.clar" [label="fee-manager
+(contract)", shape=box];
+  "file:contracts/dex/flash-loan-vault.clar" [label="flash-loan-vault
+(contract)", shape=box];
+  "file:contracts/dex/interest-rate-model.clar" [label="interest-rate-model
+(contract)", shape=box];
+  "file:contracts/interfaces/legacy-adapter.clar" [label="legacy-adapter
+(contract)", shape=box];
+  "file:contracts/dex/liquidation-manager.clar" [label="liquidation-manager
+(contract)", shape=box];
+  "file:contracts/dex/liquidity-manager.clar" [label="liquidity-manager
+(contract)", shape=box];
+  "file:contracts/dex/liquidity-optimization-engine.clar" [label="liquidity-optimization-engine
+(contract)", shape=box];
+  "file:contracts/dex/loan-liquidation-manager.clar" [label="loan-liquidation-manager
+(contract)", shape=box];
+  "file:contracts/dex/manipulation-detector.clar" [label="manipulation-detector
+(contract)", shape=box];
+  "file:contracts/dex/memory-pool-management.clar" [label="memory-pool-management
+(contract)", shape=box];
+  "file:contracts/utils/migration-manager.clar" [label="migration-manager
+(contract)", shape=box];
+  "file:contracts/monitoring/monitoring-dashboard.clar" [label="monitoring-dashboard
+(contract)", shape=box];
+  "file:contracts/dimensional/multi-hop-router-v3.clar" [label="multi-hop-router-v3
+(contract)", shape=box];
+  "file:contracts/dex/nakamoto-compatibility.clar" [label="nakamoto-compatibility
+(contract)", shape=box];
+  "file:contracts/monitoring/performance-optimizer.clar" [label="performance-optimizer
+(contract)", shape=box];
+  "file:contracts/dex/pool-factory-template.clar" [label="pool-factory-template
+(contract)", shape=box];
+  "file:contracts/dex/pool-template.clar" [label="pool-template
+(contract)", shape=box];
+  "file:contracts/dex/predictive-scaling-system.clar" [label="predictive-scaling-system
+(contract)", shape=box];
+  "file:contracts/dex/protocol-invariant-monitor.clar" [label="protocol-invariant-monitor
+(contract)", shape=box];
+  "file:contracts/dex/real-time-monitoring-dashboard.clar" [label="real-time-monitoring-dashboard
+(contract)", shape=box];
+  "file:contracts/dex/revenue-distributor.clar" [label="revenue-distributor
+(contract)", shape=box];
+  "file:contracts/dex/sbtc-bond-integration.clar" [label="sbtc-bond-integration
+(contract)", shape=box];
+  "file:contracts/dex/sbtc-flash-loan-extension.clar" [label="sbtc-flash-loan-extension
+(contract)", shape=box];
+  "file:contracts/dex/sbtc-flash-loan-vault.clar" [label="sbtc-flash-loan-vault
+(contract)", shape=box];
+  "file:contracts/dex/sbtc-integration.clar" [label="sbtc-integration
+(contract)", shape=box];
+  "file:contracts/dex/sbtc-lending-integration.clar" [label="sbtc-lending-integration
+(contract)", shape=box];
+  "file:contracts/dex/sbtc-lending-system.clar" [label="sbtc-lending-system
+(contract)", shape=box];
+  "file:contracts/dex/sbtc-oracle-adapter.clar" [label="sbtc-oracle-adapter
+(contract)", shape=box];
+  "file:contracts/dex/stable-swap-pool.clar" [label="stable-swap-pool
+(contract)", shape=box];
+  "file:contracts/dex/timelock-controller.clar" [label="timelock-controller
+(contract)", shape=box];
+  "file:contracts/dex/token-emission-controller.clar" [label="token-emission-controller
+(contract)", shape=box];
+  "file:contracts/tokens/token-system-coordinator.clar" [label="token-system-coordinator
+(contract)", shape=box];
+  "file:contracts/dex/transaction-batch-processor.clar" [label="transaction-batch-processor
+(contract)", shape=box];
+  "file:contracts/dex/vault.clar" [label="vault
+(contract)", shape=box];
+  "file:contracts/dex/weighted-swap-pool.clar" [label="weighted-swap-pool
+(contract)", shape=box];
+  "file:contracts/dex/wormhole-integration.clar" [label="wormhole-integration
+(contract)", shape=box];
+  "file:contracts/dex/yield-distribution-engine.clar" [label="yield-distribution-engine
+(contract)", shape=box];
+  "file:contracts/rewards/yield-optimizer.clar" [label="yield-optimizer
+(contract)", shape=box];
+  "file:contracts/dimensional/advanced-router-dijkstra.clar" [label="advanced-router-dijkstra
+(contract)", shape=box];
+  "file:contracts/dimensional/concentrated-liquidity-pool-v2.clar" [label="concentrated-liquidity-pool-v2
+(contract)", shape=box];
+  "file:contracts/dimensional/dim-graph.clar" [label="dim-graph
+(contract)", shape=box];
+  "file:contracts/dimensional/dim-metrics.clar" [label="dim-metrics
+(contract)", shape=box];
+  "file:contracts/dimensional/dim-oracle-automation.clar" [label="dim-oracle-automation
+(contract)", shape=box];
+  "file:contracts/dimensional/dim-registry.clar" [label="dim-registry
+(contract)", shape=box];
+  "file:contracts/dimensional/dim-revenue-adapter.clar" [label="dim-revenue-adapter
+(contract)", shape=box];
+  "file:contracts/dimensional/dim-yield-stake.clar" [label="dim-yield-stake
+(contract)", shape=box];
+  "file:contracts/dimensional/position-nft.clar" [label="position-nft
+(contract)", shape=box];
+  "file:contracts/dimensional/tokenized-bond-adapter.clar" [label="tokenized-bond-adapter
+(contract)", shape=box];
+  "file:contracts/dimensional/tokenized-bond.clar" [label="tokenized-bond
+(contract)", shape=box];
+  "file:contracts/enterprise/compliance-hooks.clar" [label="compliance-hooks
+(contract)", shape=box];
+  "file:contracts/enterprise/enterprise-api.clar" [label="enterprise-api
+(contract)", shape=box];
+  "file:contracts/interfaces/access-control.clar" [label="access-control
+(contract)", shape=box];
+  "file:contracts/governance/emergency-governance.clar" [label="emergency-governance
+(contract)", shape=box];
+  "file:contracts/governance/governance-signature-verifier.clar" [label="governance-signature-verifier
+(contract)", shape=box];
+  "file:contracts/governance/lending-protocol-governance.clar" [label="lending-protocol-governance
+(contract)", shape=box];
+  "file:contracts/governance/signed-data-base.clar" [label="signed-data-base
+(contract)", shape=box];
+  "file:contracts/governance/upgrade-controller.clar" [label="upgrade-controller
+(contract)", shape=box];
+  "file:contracts/interfaces/audit-registry-trait.clar" [label="audit-registry-trait
+(contract)", shape=box];
+  "file:contracts/lib/error-codes.clar" [label="error-codes
+(contract)", shape=box];
+  "file:contracts/lib/fixed-point-math.clar" [label="fixed-point-math
+(contract)", shape=box];
+  "file:contracts/lib/math-lib-advanced.clar" [label="math-lib-advanced
+(contract)", shape=box];
+  "file:contracts/lib/precision-calculator.clar" [label="precision-calculator
+(contract)", shape=box];
+  "file:contracts/libraries/concentrated-math.clar" [label="concentrated-math
+(contract)", shape=box];
+  "file:contracts/math/math-lib-concentrated.clar" [label="math-lib-concentrated
+(contract)", shape=box];
+  "file:contracts/mocks/mock-dao.clar" [label="mock-dao
+(contract)", shape=box];
+  "file:contracts/mocks/mock-metrics.clar" [label="mock-metrics
+(contract)", shape=box];
+  "file:contracts/mocks/mock-oracle.clar" [label="mock-oracle
+(contract)", shape=box];
+  "file:contracts/mocks/mock-strategy-a.clar" [label="mock-strategy-a
+(contract)", shape=box];
+  "file:contracts/mocks/mock-strategy-b.clar" [label="mock-strategy-b
+(contract)", shape=box];
+  "file:contracts/mocks/mock-token.clar" [label="mock-token
+(contract)", shape=box];
+  "file:contracts/monitoring/analytics-aggregator.clar" [label="analytics-aggregator
+(contract)", shape=box];
+  "file:contracts/monitoring/system-monitor.clar" [label="system-monitor
+(contract)", shape=box];
+  "file:contracts/oracle/dimensional-oracle.clar" [label="dimensional-oracle
+(contract)", shape=box];
+  "file:contracts/oracle/external-oracle-adapter.clar" [label="external-oracle-adapter
+(contract)", shape=box];
+  "file:contracts/oracle/oracle-aggregator-v2.clar" [label="oracle-aggregator-v2
+(contract)", shape=box];
+  "file:contracts/oracle/oracle-aggregator.clar" [label="oracle-aggregator
+(contract)", shape=box];
+  "file:contracts/pools/stable-pool-enhanced.clar" [label="stable-pool-enhanced
+(contract)", shape=box];
+  "file:contracts/pools/weighted-pool.clar" [label="weighted-pool
+(contract)", shape=box];
+  "file:contracts/rewards/rewards-distributor.clar" [label="rewards-distributor
+(contract)", shape=box];
+  "file:contracts/security/Pausable.clar" [label="Pausable
+(contract)", shape=box];
+  "file:contracts/security/rate-limiter.clar" [label="rate-limiter
+(contract)", shape=box];
+  "file:contracts/test/test-access.clar" [label="test-access
+(contract)", shape=box];
+  "file:contracts/tokens/cxd-token.clar" [label="cxd-token
+(contract)", shape=box];
+  "file:contracts/tokens/cxlp-token.clar" [label="cxlp-token
+(contract)", shape=box];
+  "file:contracts/tokens/cxs-token.clar" [label="cxs-token
+(contract)", shape=box];
+  "file:contracts/tokens/cxtr-token.clar" [label="cxtr-token
+(contract)", shape=box];
+  "file:contracts/tokens/cxvg-token.clar" [label="cxvg-token
+(contract)", shape=box];
+  "file:contracts/traits/all-traits.clar" [label="all-traits
+(contract)", shape=box];
+  "file:contracts/traits/errors.clar" [label="errors
+(contract)", shape=box];
+  "file:contracts/traits/trait-registry.clar" [label="trait-registry
+(contract)", shape=box];
+  "file:contracts/traits/core/error-codes-trait.clar" [label="error-codes-trait
+(contract)", shape=box];
+  "file:contracts/traits/core/metrics-trait.clar" [label="metrics-trait
+(contract)", shape=box];
+  "file:contracts/traits/core/migration-manager-trait.clar" [label="migration-manager-trait
+(contract)", shape=box];
+  "file:contracts/traits/core/ownable-trait.clar" [label="ownable-trait
+(contract)", shape=box];
+  "file:contracts/traits/core/standard-constants-trait.clar" [label="standard-constants-trait
+(contract)", shape=box];
+  "file:contracts/traits/core/utils-trait.clar" [label="utils-trait
+(contract)", shape=box];
+  "file:contracts/traits/defi/asset-vault-trait.clar" [label="asset-vault-trait
+(contract)", shape=box];
+  "file:contracts/traits/defi/batch-auction-trait.clar" [label="batch-auction-trait
+(contract)", shape=box];
+  "file:contracts/traits/defi/bond-trait.clar" [label="bond-trait
+(contract)", shape=box];
+  "file:contracts/traits/defi/factory-trait.clar" [label="factory-trait
+(contract)", shape=box];
+  "file:contracts/traits/defi/fee-manager-trait.clar" [label="fee-manager-trait
+(contract)", shape=box];
+  "file:contracts/traits/defi/flash-loan-receiver-trait.clar" [label="flash-loan-receiver-trait
+(contract)", shape=box];
+  "file:contracts/traits/defi/lending-system-trait.clar" [label="lending-system-trait
+(contract)", shape=box];
+  "file:contracts/traits/defi/liquidation-trait.clar" [label="liquidation-trait
+(contract)", shape=box];
+  "file:contracts/traits/defi/liquidity-manager-trait.clar" [label="liquidity-manager-trait
+(contract)", shape=box];
+  "file:contracts/traits/defi/performance-optimizer-trait.clar" [label="performance-optimizer-trait
+(contract)", shape=box];
+  "file:contracts/traits/defi/pool-creation-trait.clar" [label="pool-creation-trait
+(contract)", shape=box];
+  "file:contracts/traits/defi/pool-trait.clar" [label="pool-trait
+(contract)", shape=box];
+  "file:contracts/traits/defi/router-trait.clar" [label="router-trait
+(contract)", shape=box];
+  "file:contracts/traits/defi/staking-trait.clar" [label="staking-trait
+(contract)", shape=box];
+  "file:contracts/traits/defi/strategy-trait.clar" [label="strategy-trait
+(contract)", shape=box];
+  "file:contracts/traits/defi/vault-admin-trait.clar" [label="vault-admin-trait
+(contract)", shape=box];
+  "file:contracts/traits/defi/vault-trait.clar" [label="vault-trait
+(contract)", shape=box];
+  "file:contracts/traits/defi/yield-optimizer-trait.clar" [label="yield-optimizer-trait
+(contract)", shape=box];
+  "file:contracts/traits/dimensional/dim-registry-trait.clar" [label="dim-registry-trait
+(contract)", shape=box];
+  "file:contracts/traits/dimensional/dimensional-oracle-trait.clar" [label="dimensional-oracle-trait
+(contract)", shape=box];
+  "file:contracts/traits/dimensional/position-nft-trait.clar" [label="position-nft-trait
+(contract)", shape=box];
+  "file:contracts/traits/governance/dao-trait.clar" [label="dao-trait
+(contract)", shape=box];
+  "file:contracts/traits/governance/governance-token-trait.clar" [label="governance-token-trait
+(contract)", shape=box];
+  "file:contracts/traits/math/fixed-point-math-trait.clar" [label="fixed-point-math-trait
+(contract)", shape=box];
+  "file:contracts/traits/math/math-trait.clar" [label="math-trait
+(contract)", shape=box];
+  "file:contracts/traits/protocol/btc-adapter-trait.clar" [label="btc-adapter-trait
+(contract)", shape=box];
+  "file:contracts/traits/protocol/cross-protocol-trait.clar" [label="cross-protocol-trait
+(contract)", shape=box];
+  "file:contracts/traits/protocol/cxlp-migration-queue-trait.clar" [label="cxlp-migration-queue-trait
+(contract)", shape=box];
+  "file:contracts/traits/protocol/legacy-adapter-trait.clar" [label="legacy-adapter-trait
+(contract)", shape=box];
+  "file:contracts/traits/protocol/oracle-aggregator-trait.clar" [label="oracle-aggregator-trait
+(contract)", shape=box];
+  "file:contracts/traits/protocol/oracle-trait.clar" [label="oracle-trait
+(contract)", shape=box];
+  "file:contracts/traits/security/access-control-trait.clar" [label="access-control-trait
+(contract)", shape=box];
+  "file:contracts/traits/security/circuit-breaker-trait.clar" [label="circuit-breaker-trait
+(contract)", shape=box];
+  "file:contracts/traits/security/compliance-hooks-trait.clar" [label="compliance-hooks-trait
+(contract)", shape=box];
+  "file:contracts/traits/security/mev-protector-trait.clar" [label="mev-protector-trait
+(contract)", shape=box];
+  "file:contracts/traits/security/monitoring-trait.clar" [label="monitoring-trait
+(contract)", shape=box];
+  "file:contracts/traits/security/pausable-trait.clar" [label="pausable-trait
+(contract)", shape=box];
+  "file:contracts/traits/sips/sip-009-nft-trait.clar" [label="sip-009-nft-trait
+(contract)", shape=box];
+  "file:contracts/traits/sips/sip-010-ft-mintable-trait.clar" [label="sip-010-ft-mintable-trait
+(contract)", shape=box];
+  "file:contracts/traits/sips/sip-010-ft-trait.clar" [label="sip-010-ft-trait
+(contract)", shape=box];
+  "file:contracts/traits/sips/sip-018-trait.clar" [label="sip-018-trait
+(contract)", shape=box];
+  "file:contracts/utils/encoding.clar" [label="encoding
+(contract)", shape=box];
+  "file:contracts/utils/utils.clar" [label="utils
+(contract)", shape=box];
+  "file:contracts/vaults/sbtc-vault.clar" [label="sbtc-vault
+(contract)", shape=box];
+  "file:tests/enhanced-contracts-test-suite.clar" [label="enhanced-contracts-test-suite
+(test)", shape=note];
+  "file:tests/enterprise-integration-tests.clar" [label="enterprise-integration-tests
+(test)", shape=note];
+  "file:tests/revenue-distributor-hysteresis-tests.clar" [label="revenue-distributor-hysteresis-tests
+(test)", shape=note];
+  "file:tests/system-validation-tests.clar" [label="system-validation-tests
+(test)", shape=note];
+  "file:tests/tokenomics-integration-tests.clar" [label="tokenomics-integration-tests
+(test)", shape=note];
+  "file:tests/tokenomics-unit-tests.clar" [label="tokenomics-unit-tests
+(test)", shape=note];
+  "file:tests/yield-optimizer.test.clar" [label="yield-optimizer.test
+(test)", shape=note];
+  "file:tests/mocks/test-flash-loan-receiver.clar" [label="test-flash-loan-receiver
+(test)", shape=note];
+  "file:tests/mocks/test-token-a.clar" [label="test-token-a
+(test)", shape=note];
+  "file:tests/mocks/test-token-b.clar" [label="test-token-b
+(test)", shape=note];
+  "file:contracts/dex/batch-auction.clar" -> "trait:batch-auction-trait" [color="#8888ff", label="use-trait"];
+  "file:contracts/dex/batch-auction.clar" -> "trait:batch-auction-trait" [color="#3333ff", label="impl-trait"];
+  "file:contracts/interfaces/btc-adapter.clar" -> "trait:btc-adapter-trait" [color="#8888ff", label="use-trait"];
+  "file:contracts/interfaces/btc-adapter.clar" -> "trait:btc-adapter-trait" [color="#3333ff", label="impl-trait"];
+  "file:contracts/budget-manager.clar" -> "trait:budget-manager-trait" [color="#8888ff", label="use-trait"];
+  "file:contracts/budget-manager.clar" -> "trait:proposal-trait" [color="#8888ff", label="use-trait"];
+  "file:contracts/budget-manager.clar" -> "trait:budget-manager-trait" [color="#3333ff", label="impl-trait"];
+  "file:contracts/budget-manager.clar" -> "trait:proposal-trait" [color="#3333ff", label="impl-trait"];
+  "file:contracts/pools/concentrated-liquidity-pool.clar" -> "trait:sip-010-ft-trait" [color="#8888ff", label="use-trait"];
+  "file:contracts/pools/concentrated-liquidity-pool.clar" -> "trait:pool-trait" [color="#8888ff", label="use-trait"];
+  "file:contracts/pools/concentrated-liquidity-pool.clar" -> "trait:math-trait" [color="#8888ff", label="use-trait"];
+  "file:contracts/pools/concentrated-liquidity-pool.clar" -> "trait:error-codes-trait" [color="#8888ff", label="use-trait"];
+  "file:contracts/pools/concentrated-liquidity-pool.clar" -> "trait:sip-009-nft-trait" [color="#8888ff", label="use-trait"];
+  "file:contracts/pools/concentrated-liquidity-pool.clar" -> "file:contracts/math/math-lib-concentrated.clar" [color="#44aa44", label="calls"];
+  "file:contracts/pools/concentrated-liquidity-pool.clar" -> "file:contracts/math/math-lib-concentrated.clar" [color="#44aa44", label="calls"];
+  "file:contracts/pools/concentrated-liquidity-pool.clar" -> "file:contracts/math/math-lib-concentrated.clar" [color="#44aa44", label="calls"];
+  "file:contracts/pools/concentrated-liquidity-pool.clar" -> "file:contracts/math/math-lib-concentrated.clar" [color="#44aa44", label="calls"];
+  "file:contracts/pools/concentrated-liquidity-pool.clar" -> "file:contracts/math/math-lib-concentrated.clar" [color="#44aa44", label="calls"];
+  "file:contracts/pools/concentrated-liquidity-pool.clar" -> "file:contracts/math/math-lib-concentrated.clar" [color="#44aa44", label="calls"];
+  "file:contracts/pools/concentrated-liquidity-pool.clar" -> "file:contracts/math/math-lib-concentrated.clar" [color="#44aa44", label="calls"];
+  "file:contracts/pools/concentrated-liquidity-pool.clar" -> "file:contracts/math/math-lib-concentrated.clar" [color="#44aa44", label="calls"];
+  "file:contracts/pools/concentrated-liquidity-pool.clar" -> "file:contracts/math/math-lib-concentrated.clar" [color="#44aa44", label="calls"];
+  "file:contracts/pools/concentrated-liquidity-pool.clar" -> "file:contracts/math/math-lib-concentrated.clar" [color="#44aa44", label="calls"];
+  "file:contracts/pools/concentrated-liquidity-pool.clar" -> "token-x" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/pools/concentrated-liquidity-pool.clar" -> "token-y" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/pools/concentrated-liquidity-pool.clar" -> "token-y" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/pools/concentrated-liquidity-pool.clar" -> "token-x" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/pools/concentrated-liquidity-pool.clar" -> "file:contracts/math/math-lib-concentrated.clar" [color="#44aa44", label="calls"];
+  "file:contracts/pools/concentrated-liquidity-pool.clar" -> "file:contracts/math/math-lib-concentrated.clar" [color="#44aa44", label="calls"];
+  "file:contracts/pools/concentrated-liquidity-pool.clar" -> "file:contracts/math/math-lib-concentrated.clar" [color="#44aa44", label="calls"];
+  "file:contracts/pools/concentrated-liquidity-pool.clar" -> "file:contracts/math/math-lib-concentrated.clar" [color="#44aa44", label="calls"];
+  "file:contracts/pools/concentrated-liquidity-pool.clar" -> "token-x" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/pools/concentrated-liquidity-pool.clar" -> "token-y" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/pools/concentrated-liquidity-pool.clar" -> "file:contracts/math/math-lib-concentrated.clar" [color="#44aa44", label="calls"];
+  "file:contracts/pools/concentrated-liquidity-pool.clar" -> "file:contracts/math/math-lib-concentrated.clar" [color="#44aa44", label="calls"];
+  "file:contracts/governance/proposal-engine.clar" -> "file:contracts/governance/governance-token.clar" [color="#44aa44", label="calls"];
+  "file:contracts/governance/proposal-engine.clar" -> "file:contracts/governance/governance-token.clar" [color="#44aa44", label="calls"];
+  "file:contracts/pools/tiered-pools.clar" -> "file:contracts/dex/fee-manager.clar" [color="#44aa44", label="calls"];
+  "file:contracts/pools/tiered-pools.clar" -> "file:contracts/dex/fee-manager.clar" [color="#44aa44", label="calls"];
+  "file:contracts/audit-registry/audit-registry.clar" -> "dc" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/audit-registry/audit-registry.clar" -> "file:contracts/audit-registry/audit-badge-nft.clar" [color="#44aa44", label="calls"];
+  "file:contracts/automation/keeper-coordinator.clar" -> "trait:keeper-coordinator-trait" [color="#8888ff", label="use-trait"];
+  "file:contracts/automation/keeper-coordinator.clar" -> "trait:keeper-coordinator-trait" [color="#3333ff", label="impl-trait"];
+  "file:contracts/dex/asset-vault.clar" -> "trait:asset-vault-trait" [color="#8888ff", label="use-trait"];
+  "file:contracts/dex/asset-vault.clar" -> "trait:sip-010-ft-trait" [color="#8888ff", label="use-trait"];
+  "file:contracts/dex/asset-vault.clar" -> "trait:asset-vault-trait" [color="#3333ff", label="impl-trait"];
+  "file:contracts/dex/asset-vault.clar" -> "token" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/asset-vault.clar" -> "token" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/asset-vault.clar" -> "token" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/asset-vault.clar" -> "token" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/auto-compounder.clar" -> "cb" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/auto-compounder.clar" -> "token" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/auto-compounder.clar" -> "token" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/auto-compounder.clar" -> "(var-get" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/auto-compounder.clar" -> "(var-get" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/auto-compounder.clar" -> "strategy" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/auto-compounder.clar" -> "token" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/auto-compounder.clar" -> "(var-get" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/auto-compounder.clar" -> "(var-get" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/bond-factory.clar" -> "trait:bond-factory-trait" [color="#8888ff", label="use-trait"];
+  "file:contracts/dex/bond-factory.clar" -> "trait:bond-factory-trait" [color="#3333ff", label="impl-trait"];
+  "file:contracts/dex/bond-factory.clar" -> "collateral-token" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/bond-factory.clar" -> "contract-ref:.token-soft-launch" [color="#44aa44", label="calls"];
+  "file:contracts/dex/bond-factory.clar" -> "bond-contract" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/bond-factory.clar" -> "collateral-token" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/bond-factory.clar" -> "(get" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/comprehensive-lending-system.clar" -> "(var-get" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/comprehensive-lending-system.clar" -> "(var-get" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/comprehensive-lending-system.clar" -> "breaker" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/comprehensive-lending-system.clar" -> "breaker" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/comprehensive-lending-system.clar" -> "breaker" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/comprehensive-lending-system.clar" -> "asset-trait" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/comprehensive-lending-system.clar" -> "breaker" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/comprehensive-lending-system.clar" -> "asset-trait" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/comprehensive-lending-system.clar" -> "breaker" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/comprehensive-lending-system.clar" -> "asset-trait" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/comprehensive-lending-system.clar" -> "breaker" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/comprehensive-lending-system.clar" -> "asset-trait" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/comprehensive-lending-system.clar" -> "repay-asset" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/comprehensive-lending-system.clar" -> "collateral-asset" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/interfaces/cross-protocol-integrator.clar" -> "trait:cross-protocol-trait" [color="#8888ff", label="use-trait"];
+  "file:contracts/interfaces/cross-protocol-integrator.clar" -> "trait:cross-protocol-trait" [color="#3333ff", label="impl-trait"];
+  "file:contracts/dex/cxd-staking.clar" -> "trait:sip-010-ft-trait" [color="#8888ff", label="use-trait"];
+  "file:contracts/dex/cxd-staking.clar" -> "(as-contract" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/cxd-staking.clar" -> "cxd-token" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/cxd-staking.clar" -> "revenue-token" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/cxd-staking.clar" -> "revenue-token" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/cxlp-migration-queue.clar" -> "trait:cxlp-migration-queue-trait" [color="#8888ff", label="use-trait"];
+  "file:contracts/dex/cxlp-migration-queue.clar" -> "trait:sip-010-ft-mintable-trait" [color="#8888ff", label="use-trait"];
+  "file:contracts/dex/cxlp-migration-queue.clar" -> "trait:cxlp-migration-queue-trait" [color="#3333ff", label="impl-trait"];
+  "file:contracts/dex/cxlp-migration-queue.clar" -> "(var-get" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/cxlp-migration-queue.clar" -> "(var-get" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/cxlp-migration-queue.clar" -> "(var-get" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/cxlp-migration-queue.clar" -> "cxd-token" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/dex-factory-v2.clar" -> "access-control" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/dex-factory-v2.clar" -> "file:contracts/security/circuit-breaker.clar" [color="#44aa44", label="calls"];
+  "file:contracts/dex/dex-factory-v2.clar" -> "token-a" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/dex-factory-v2.clar" -> "token-b" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/dex-factory-v2.clar" -> "pool-impl" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/dex-factory-v2.clar" -> "pool-implementation" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/dex-factory.clar" -> "trait:sip-010-ft-trait" [color="#8888ff", label="use-trait"];
+  "file:contracts/dex/dex-factory.clar" -> "trait:access-control-trait" [color="#8888ff", label="use-trait"];
+  "file:contracts/dex/dex-factory.clar" -> "trait:factory-trait" [color="#8888ff", label="use-trait"];
+  "file:contracts/dex/dex-factory.clar" -> "trait:pool-creation-trait" [color="#8888ff", label="use-trait"];
+  "file:contracts/dex/dex-factory.clar" -> "trait:circuit-breaker-trait" [color="#8888ff", label="use-trait"];
+  "file:contracts/dex/dex-factory.clar" -> "trait:factory-trait" [color="#3333ff", label="impl-trait"];
+  "file:contracts/dex/dex-factory.clar" -> "access-control" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/dex-factory.clar" -> "file:contracts/security/circuit-breaker.clar" [color="#44aa44", label="calls"];
+  "file:contracts/dex/dex-factory.clar" -> "token-a" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/dex-factory.clar" -> "token-b" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/dex-factory.clar" -> "pool-impl" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/dex-pool.clar" -> "(as-contract" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/dex-pool.clar" -> "(as-contract" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/dex-pool.clar" -> "(as-contract" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/dex-pool.clar" -> "(as-contract" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/dex-pool.clar" -> "(as-contract" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/dex-pool.clar" -> "(as-contract" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/dex-pool.clar" -> "(as-contract" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/dex-pool.clar" -> "(as-contract" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/dex-router.clar" -> "trait:router-trait" [color="#8888ff", label="use-trait"];
+  "file:contracts/dex/dex-router.clar" -> "trait:factory-trait" [color="#8888ff", label="use-trait"];
+  "file:contracts/dex/dex-router.clar" -> "trait:sip-010-ft-trait" [color="#8888ff", label="use-trait"];
+  "file:contracts/dex/dex-router.clar" -> "trait:router-trait" [color="#3333ff", label="impl-trait"];
+  "file:contracts/dex/dex-router.clar" -> "bond-contract" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/dex-router.clar" -> "bond-in" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/dex-router.clar" -> "bond-out" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/dex-router.clar" -> "bond-contract" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/dex-router.clar" -> "token-contract" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/dex-router.clar" -> "factory" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/dex-router.clar" -> "pool-principal" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/dex-router.clar" -> "factory" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/dex-router.clar" -> "new-pool" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/dex-router.clar" -> "(var-get" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/dex-router.clar" -> "pool" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/dex-router.clar" -> "pool" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/dex-router.clar" -> "token-in" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/dex-router.clar" -> "token-in" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/dex-router.clar" -> "token-in" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/dex-router.clar" -> "new-owner" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/enhanced-yield-strategy.clar" -> "(var-get" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/enhanced-yield-strategy.clar" -> "(var-get" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/enterprise-loan-manager.clar" -> "trait:sip-010-ft-trait" [color="#8888ff", label="use-trait"];
+  "file:contracts/dex/enterprise-loan-manager.clar" -> "trait:lending-system-trait" [color="#8888ff", label="use-trait"];
+  "file:contracts/dex/enterprise-loan-manager.clar" -> "bond-issuance-system" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/enterprise-loan-manager.clar" -> "collateral-asset" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/enterprise-loan-manager.clar" -> "bond-issuance-system" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/flash-loan-vault.clar" -> "trait:sip-010-ft-trait" [color="#8888ff", label="use-trait"];
+  "file:contracts/dex/flash-loan-vault.clar" -> "receiver" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/flash-loan-vault.clar" -> "asset" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/flash-loan-vault.clar" -> "asset" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/flash-loan-vault.clar" -> "token-principal" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/flash-loan-vault.clar" -> "asset" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/interest-rate-model.clar" -> "trait:sip-010-ft-trait" [color="#8888ff", label="use-trait"];
+  "file:contracts/interfaces/legacy-adapter.clar" -> "trait:legacy-adapter-trait" [color="#8888ff", label="use-trait"];
+  "file:contracts/interfaces/legacy-adapter.clar" -> "trait:legacy-adapter-trait" [color="#3333ff", label="impl-trait"];
+  "file:contracts/dex/liquidation-manager.clar" -> "trait:liquidation-trait" [color="#8888ff", label="use-trait"];
+  "file:contracts/dex/liquidation-manager.clar" -> "trait:liquidation-trait" [color="#3333ff", label="impl-trait"];
+  "file:contracts/dex/liquidation-manager.clar" -> "lending-system" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/liquidation-manager.clar" -> "lending-system" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/liquidation-manager.clar" -> "lending-system" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/liquidation-manager.clar" -> "lending-system" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/loan-liquidation-manager.clar" -> "trait:sip-010-ft-trait" [color="#8888ff", label="use-trait"];
+  "file:contracts/dex/loan-liquidation-manager.clar" -> "lending-system" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/manipulation-detector.clar" -> "breaker" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/manipulation-detector.clar" -> "breaker" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/utils/migration-manager.clar" -> "trait:migration-manager-trait" [color="#8888ff", label="use-trait"];
+  "file:contracts/utils/migration-manager.clar" -> "trait:migration-manager-trait" [color="#3333ff", label="impl-trait"];
+  "file:contracts/dimensional/multi-hop-router-v3.clar" -> "trait:pool-trait" [color="#8888ff", label="use-trait"];
+  "file:contracts/dimensional/multi-hop-router-v3.clar" -> "pool" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dimensional/multi-hop-router-v3.clar" -> "pool" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dimensional/multi-hop-router-v3.clar" -> "pool" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dimensional/multi-hop-router-v3.clar" -> "pool" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dimensional/multi-hop-router-v3.clar" -> "pool" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dimensional/multi-hop-router-v3.clar" -> "pool" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dimensional/multi-hop-router-v3.clar" -> "pool" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dimensional/multi-hop-router-v3.clar" -> "pool" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dimensional/multi-hop-router-v3.clar" -> "pool" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dimensional/multi-hop-router-v3.clar" -> "pool" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/monitoring/performance-optimizer.clar" -> "trait:performance-optimizer-trait" [color="#8888ff", label="use-trait"];
+  "file:contracts/monitoring/performance-optimizer.clar" -> "trait:performance-optimizer-trait" [color="#3333ff", label="impl-trait"];
+  "file:contracts/dex/pool-factory-template.clar" -> "trait:dex-factory-trait" [color="#8888ff", label="use-trait"];
+  "file:contracts/dex/pool-factory-template.clar" -> "trait:sip-010-ft-trait" [color="#8888ff", label="use-trait"];
+  "file:contracts/dex/pool-factory-template.clar" -> "factory-contract" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/pool-template.clar" -> "trait:sip-010-ft-trait" [color="#8888ff", label="use-trait"];
+  "file:contracts/dex/pool-template.clar" -> "trait:sip-009-nft-trait" [color="#8888ff", label="use-trait"];
+  "file:contracts/dex/pool-template.clar" -> "a" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/pool-template.clar" -> "b" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/protocol-invariant-monitor.clar" -> "staking-contract" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/protocol-invariant-monitor.clar" -> "lending-system" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/revenue-distributor.clar" -> "trait:sip-010-ft-trait" [color="#8888ff", label="use-trait"];
+  "file:contracts/dex/revenue-distributor.clar" -> "revenue-token" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/revenue-distributor.clar" -> "revenue-token" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/revenue-distributor.clar" -> "revenue-token" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/revenue-distributor.clar" -> "revenue-token" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/sbtc-bond-integration.clar" -> "trait:sip-010-ft-trait" [color="#8888ff", label="use-trait"];
+  "file:contracts/dex/sbtc-bond-integration.clar" -> "file:contracts/dex/sbtc-integration.clar" [color="#44aa44", label="calls"];
+  "file:contracts/dex/sbtc-bond-integration.clar" -> "contract-ref:.sbtc-token" [color="#44aa44", label="calls"];
+  "file:contracts/dex/sbtc-bond-integration.clar" -> "contract-ref:.sbtc-token" [color="#44aa44", label="calls"];
+  "file:contracts/dex/sbtc-bond-integration.clar" -> "contract-ref:.sbtc-token" [color="#44aa44", label="calls"];
+  "file:contracts/dex/sbtc-bond-integration.clar" -> "file:contracts/dex/enhanced-yield-strategy.clar" [color="#44aa44", label="calls"];
+  "file:contracts/dex/sbtc-bond-integration.clar" -> "contract-ref:.sbtc-token" [color="#44aa44", label="calls"];
+  "file:contracts/dex/sbtc-bond-integration.clar" -> "contract-ref:.sbtc-token" [color="#44aa44", label="calls"];
+  "file:contracts/dex/sbtc-bond-integration.clar" -> "file:contracts/dex/sbtc-integration.clar" [color="#44aa44", label="calls"];
+  "file:contracts/dex/sbtc-bond-integration.clar" -> "contract-ref:.sbtc-token" [color="#44aa44", label="calls"];
+  "file:contracts/dex/sbtc-flash-loan-extension.clar" -> "trait:flash-loan-receiver-trait" [color="#8888ff", label="use-trait"];
+  "file:contracts/dex/sbtc-flash-loan-extension.clar" -> "trait:sip-010-ft-trait" [color="#8888ff", label="use-trait"];
+  "file:contracts/dex/sbtc-flash-loan-extension.clar" -> "trait:flash-loan-receiver-trait" [color="#3333ff", label="impl-trait"];
+  "file:contracts/dex/sbtc-flash-loan-extension.clar" -> "asset" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/sbtc-flash-loan-extension.clar" -> "asset" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/sbtc-flash-loan-extension.clar" -> "receiver" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/sbtc-flash-loan-extension.clar" -> "asset" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/sbtc-flash-loan-extension.clar" -> "asset" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/sbtc-flash-loan-extension.clar" -> "file:contracts/dex/bond-issuance-system.clar" [color="#44aa44", label="calls"];
+  "file:contracts/dex/sbtc-flash-loan-extension.clar" -> "asset" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/sbtc-flash-loan-extension.clar" -> "asset" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/sbtc-flash-loan-extension.clar" -> "asset" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/sbtc-flash-loan-extension.clar" -> "asset" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/sbtc-flash-loan-vault.clar" -> "asset" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/sbtc-flash-loan-vault.clar" -> "receiver" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/sbtc-flash-loan-vault.clar" -> "asset" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/sbtc-flash-loan-vault.clar" -> "asset" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/sbtc-flash-loan-vault.clar" -> "asset" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/sbtc-integration.clar" -> "contract-ref:.sbtc-token" [color="#44aa44", label="calls"];
+  "file:contracts/dex/sbtc-integration.clar" -> "contract-ref:.sbtc-token" [color="#44aa44", label="calls"];
+  "file:contracts/dex/sbtc-integration.clar" -> "contract-ref:.sbtc-token" [color="#44aa44", label="calls"];
+  "file:contracts/dex/sbtc-lending-integration.clar" -> "trait:sip-010-ft-trait" [color="#8888ff", label="use-trait"];
+  "file:contracts/dex/sbtc-lending-integration.clar" -> "sbtc-integration" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/sbtc-lending-integration.clar" -> "sbtc-integration" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/sbtc-lending-integration.clar" -> "sbtc-integration" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/sbtc-lending-integration.clar" -> "sbtc-integration" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/sbtc-lending-integration.clar" -> "sbtc-integration" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/sbtc-lending-integration.clar" -> "sbtc-integration" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/sbtc-lending-integration.clar" -> "sbtc-integration" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/sbtc-lending-integration.clar" -> "sbtc-integration" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/sbtc-lending-integration.clar" -> "sbtc-integration" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/sbtc-lending-integration.clar" -> "sbtc-integration" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/sbtc-lending-integration.clar" -> "sbtc-integration" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/sbtc-lending-integration.clar" -> "asset" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/sbtc-lending-integration.clar" -> "sbtc-integration" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/sbtc-lending-integration.clar" -> "sbtc-integration" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/sbtc-lending-integration.clar" -> "sbtc-integration" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/sbtc-lending-integration.clar" -> "asset" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/sbtc-lending-integration.clar" -> "sbtc-integration" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/sbtc-lending-integration.clar" -> "sbtc-integration" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/sbtc-lending-integration.clar" -> "sbtc-integration" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/sbtc-lending-integration.clar" -> "sbtc-integration" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/sbtc-lending-integration.clar" -> "asset" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/sbtc-lending-integration.clar" -> "sbtc-integration" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/sbtc-lending-integration.clar" -> "sbtc-integration" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/sbtc-lending-integration.clar" -> "asset" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/sbtc-lending-integration.clar" -> "sbtc-integration" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/sbtc-lending-integration.clar" -> "sbtc-integration" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/sbtc-lending-integration.clar" -> "sbtc-integration" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/sbtc-lending-integration.clar" -> "sbtc-integration" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/sbtc-lending-integration.clar" -> "asset" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/sbtc-lending-integration.clar" -> "collateral-asset" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/sbtc-lending-system.clar" -> "trait:sip-010-ft-trait" [color="#8888ff", label="use-trait"];
+  "file:contracts/dex/sbtc-lending-system.clar" -> "asset" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/sbtc-lending-system.clar" -> "asset" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/sbtc-lending-system.clar" -> "asset" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/sbtc-lending-system.clar" -> "asset" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/sbtc-lending-system.clar" -> "repay-asset" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/sbtc-lending-system.clar" -> "collateral-asset" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/stable-swap-pool.clar" -> "(var-get" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/stable-swap-pool.clar" -> "(var-get" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/stable-swap-pool.clar" -> "(var-get" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/stable-swap-pool.clar" -> "(var-get" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/stable-swap-pool.clar" -> "(var-get" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/stable-swap-pool.clar" -> "(var-get" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/timelock-controller.clar" -> "(get" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/token-emission-controller.clar" -> "trait:sip-010-ft-mintable-trait" [color="#8888ff", label="use-trait"];
+  "file:contracts/dex/token-emission-controller.clar" -> "token-contract" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/tokens/token-system-coordinator.clar" -> "(var-get" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/vault.clar" -> "asset" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/vault.clar" -> "(var-get" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/vault.clar" -> "strategy-contract" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/vault.clar" -> "strategy-contract" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/vault.clar" -> "(var-get" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/vault.clar" -> "asset" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/vault.clar" -> "(var-get" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/weighted-swap-pool.clar" -> "(var-get" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/weighted-swap-pool.clar" -> "(var-get" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/weighted-swap-pool.clar" -> "(var-get" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/weighted-swap-pool.clar" -> "(var-get" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/wormhole-integration.clar" -> "trait:sip-010-ft-trait" [color="#8888ff", label="use-trait"];
+  "file:contracts/dex/wormhole-integration.clar" -> "token" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/wormhole-integration.clar" -> "token" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/rewards/yield-optimizer.clar" -> "trait:sip-010-ft-trait" [color="#8888ff", label="use-trait"];
+  "file:contracts/rewards/yield-optimizer.clar" -> "(var-get" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/rewards/yield-optimizer.clar" -> "(var-get" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/rewards/yield-optimizer.clar" -> "(var-get" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/rewards/yield-optimizer.clar" -> "vault" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/rewards/yield-optimizer.clar" -> "vault" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/rewards/yield-optimizer.clar" -> "vault" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dimensional/advanced-router-dijkstra.clar" -> "trait:advanced-router-dijkstra-trait" [color="#8888ff", label="use-trait"];
+  "file:contracts/dimensional/advanced-router-dijkstra.clar" -> "trait:advanced-router-dijkstra-trait" [color="#3333ff", label="impl-trait"];
+  "file:contracts/dimensional/concentrated-liquidity-pool-v2.clar" -> "file:contracts/libraries/concentrated-math.clar" [color="#44aa44", label="calls"];
+  "file:contracts/dimensional/concentrated-liquidity-pool-v2.clar" -> "(var-get" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dimensional/concentrated-liquidity-pool-v2.clar" -> "file:contracts/libraries/concentrated-math.clar" [color="#44aa44", label="calls"];
+  "file:contracts/dimensional/concentrated-liquidity-pool-v2.clar" -> "file:contracts/libraries/concentrated-math.clar" [color="#44aa44", label="calls"];
+  "file:contracts/dimensional/concentrated-liquidity-pool-v2.clar" -> "file:contracts/libraries/concentrated-math.clar" [color="#44aa44", label="calls"];
+  "file:contracts/dimensional/concentrated-liquidity-pool-v2.clar" -> "token-x" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dimensional/concentrated-liquidity-pool-v2.clar" -> "token-y" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dimensional/concentrated-liquidity-pool-v2.clar" -> "(var-get" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dimensional/concentrated-liquidity-pool-v2.clar" -> "token-x" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dimensional/concentrated-liquidity-pool-v2.clar" -> "token-y" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dimensional/concentrated-liquidity-pool-v2.clar" -> "token-in" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dimensional/concentrated-liquidity-pool-v2.clar" -> "token-out" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dimensional/concentrated-liquidity-pool-v2.clar" -> "file:contracts/libraries/concentrated-math.clar" [color="#44aa44", label="calls"];
+  "file:contracts/dimensional/concentrated-liquidity-pool-v2.clar" -> "file:contracts/libraries/concentrated-math.clar" [color="#44aa44", label="calls"];
+  "file:contracts/dimensional/concentrated-liquidity-pool-v2.clar" -> "file:contracts/libraries/concentrated-math.clar" [color="#44aa44", label="calls"];
+  "file:contracts/dimensional/concentrated-liquidity-pool-v2.clar" -> "file:contracts/libraries/concentrated-math.clar" [color="#44aa44", label="calls"];
+  "file:contracts/dimensional/dim-oracle-automation.clar" -> "trait:dimensional-oracle-trait" [color="#8888ff", label="use-trait"];
+  "file:contracts/dimensional/dim-oracle-automation.clar" -> "trait:dimensional-oracle-trait" [color="#3333ff", label="impl-trait"];
+  "file:contracts/dimensional/dim-oracle-automation.clar" -> "file:contracts/dimensional/dim-registry.clar" [color="#44aa44", label="calls"];
+  "file:contracts/dimensional/dim-registry.clar" -> "trait:dim-registry-trait" [color="#8888ff", label="use-trait"];
+  "file:contracts/dimensional/dim-registry.clar" -> "trait:dim-registry-trait" [color="#3333ff", label="impl-trait"];
+  "file:contracts/dimensional/dim-revenue-adapter.clar" -> "trait:sip-010-ft-trait" [color="#8888ff", label="use-trait"];
+  "file:contracts/dimensional/dim-revenue-adapter.clar" -> "monitor-contract" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dimensional/dim-revenue-adapter.clar" -> "reward-token" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dimensional/dim-revenue-adapter.clar" -> "distributor-contract" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dimensional/dim-revenue-adapter.clar" -> "coordinator-contract" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dimensional/dim-revenue-adapter.clar" -> "metrics-contract" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dimensional/dim-revenue-adapter.clar" -> "metrics-contract" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dimensional/dim-revenue-adapter.clar" -> "payment-token" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dimensional/dim-revenue-adapter.clar" -> "distributor-contract" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dimensional/dim-yield-stake.clar" -> "token" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dimensional/dim-yield-stake.clar" -> "token" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dimensional/dim-yield-stake.clar" -> "token" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dimensional/dim-yield-stake.clar" -> "file:contracts/dimensional/dim-metrics.clar" [color="#44aa44", label="calls"];
+  "file:contracts/dimensional/tokenized-bond-adapter.clar" -> "trait:sip-010-ft-trait" [color="#8888ff", label="use-trait"];
+  "file:contracts/dimensional/tokenized-bond-adapter.clar" -> "monitor-contract" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dimensional/tokenized-bond-adapter.clar" -> "payment-token" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dimensional/tokenized-bond-adapter.clar" -> "distributor-contract" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dimensional/tokenized-bond-adapter.clar" -> "coordinator-contract" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dimensional/tokenized-bond-adapter.clar" -> "monitor-contract" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dimensional/tokenized-bond-adapter.clar" -> "payment-token" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dimensional/tokenized-bond-adapter.clar" -> "distributor-contract" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dimensional/tokenized-bond-adapter.clar" -> "coordinator-contract" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dimensional/tokenized-bond-adapter.clar" -> "monitor-contract" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dimensional/tokenized-bond-adapter.clar" -> "coordinator-contract" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dimensional/tokenized-bond-adapter.clar" -> "token" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dimensional/tokenized-bond.clar" -> "payment-token" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dimensional/tokenized-bond.clar" -> "payment-token" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/enterprise/enterprise-api.clar" -> "hook" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/enterprise/enterprise-api.clar" -> "breaker" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/enterprise/enterprise-api.clar" -> "router" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/enterprise/enterprise-api.clar" -> "router" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/governance/governance-signature-verifier.clar" -> "trait:sip-018-trait" [color="#8888ff", label="use-trait"];
+  "file:contracts/governance/governance-signature-verifier.clar" -> "trait:sip-018-trait" [color="#3333ff", label="impl-trait"];
+  "file:contracts/governance/governance-signature-verifier.clar" -> "governance" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/governance/governance-signature-verifier.clar" -> "signed-data-base" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/governance/governance-signature-verifier.clar" -> "governance" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/governance/governance-signature-verifier.clar" -> "signed-data-base" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/governance/governance-signature-verifier.clar" -> "signed-data-base" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/governance/governance-signature-verifier.clar" -> "signed-data-base" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/governance/governance-signature-verifier.clar" -> "signed-data-base" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/governance/lending-protocol-governance.clar" -> "target-contract" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/governance/lending-protocol-governance.clar" -> "token-contract" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/governance/lending-protocol-governance.clar" -> "utility-contract" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/governance/lending-protocol-governance.clar" -> "utility-contract" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/governance/lending-protocol-governance.clar" -> "file:contracts/interfaces/access-control.clar" [color="#44aa44", label="calls"];
+  "file:contracts/governance/lending-protocol-governance.clar" -> "file:contracts/interfaces/access-control.clar" [color="#44aa44", label="calls"];
+  "file:contracts/governance/lending-protocol-governance.clar" -> "file:contracts/interfaces/access-control.clar" [color="#44aa44", label="calls"];
+  "file:contracts/governance/lending-protocol-governance.clar" -> "file:contracts/interfaces/access-control.clar" [color="#44aa44", label="calls"];
+  "file:contracts/governance/lending-protocol-governance.clar" -> "file:contracts/interfaces/access-control.clar" [color="#44aa44", label="calls"];
+  "file:contracts/governance/lending-protocol-governance.clar" -> "file:contracts/interfaces/access-control.clar" [color="#44aa44", label="calls"];
+  "file:contracts/governance/signed-data-base.clar" -> "trait:sip-018-trait" [color="#8888ff", label="use-trait"];
+  "file:contracts/governance/signed-data-base.clar" -> "trait:sip-018-trait" [color="#3333ff", label="impl-trait"];
+  "file:contracts/lib/fixed-point-math.clar" -> "trait:fixed-point-math-trait" [color="#8888ff", label="use-trait"];
+  "file:contracts/lib/fixed-point-math.clar" -> "trait:fixed-point-math-trait" [color="#3333ff", label="impl-trait"];
+  "file:contracts/lib/fixed-point-math.clar" -> "file:contracts/lib/math-lib-advanced.clar" [color="#44aa44", label="calls"];
+  "file:contracts/lib/precision-calculator.clar" -> "file:contracts/lib/math-lib-advanced.clar" [color="#44aa44", label="calls"];
+  "file:contracts/lib/precision-calculator.clar" -> "file:contracts/lib/math-lib-advanced.clar" [color="#44aa44", label="calls"];
+  "file:contracts/lib/precision-calculator.clar" -> "file:contracts/lib/math-lib-advanced.clar" [color="#44aa44", label="calls"];
+  "file:contracts/lib/precision-calculator.clar" -> "file:contracts/lib/math-lib-advanced.clar" [color="#44aa44", label="calls"];
+  "file:contracts/libraries/concentrated-math.clar" -> "math-addr" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/libraries/concentrated-math.clar" -> "math-addr" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/libraries/concentrated-math.clar" -> "math-addr" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/libraries/concentrated-math.clar" -> "math-addr" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/libraries/concentrated-math.clar" -> "math-addr" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/libraries/concentrated-math.clar" -> "math-addr" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/libraries/concentrated-math.clar" -> "math-addr" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/mocks/mock-dao.clar" -> "trait:dao-trait" [color="#8888ff", label="use-trait"];
+  "file:contracts/mocks/mock-dao.clar" -> "trait:dao-trait" [color="#3333ff", label="impl-trait"];
+  "file:contracts/mocks/mock-oracle.clar" -> "trait:oracle-trait" [color="#8888ff", label="use-trait"];
+  "file:contracts/mocks/mock-oracle.clar" -> "trait:oracle-trait" [color="#3333ff", label="impl-trait"];
+  "file:contracts/mocks/mock-strategy-a.clar" -> "trait:sip-010-ft-trait" [color="#8888ff", label="use-trait"];
+  "file:contracts/mocks/mock-strategy-a.clar" -> "asset" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/mocks/mock-strategy-a.clar" -> "asset" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/mocks/mock-strategy-b.clar" -> "trait:sip-010-ft-trait" [color="#8888ff", label="use-trait"];
+  "file:contracts/mocks/mock-strategy-b.clar" -> "asset" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/mocks/mock-strategy-b.clar" -> "asset" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/oracle/dimensional-oracle.clar" -> "trait:oracle-trait" [color="#8888ff", label="use-trait"];
+  "file:contracts/oracle/dimensional-oracle.clar" -> "trait:oracle-trait" [color="#3333ff", label="impl-trait"];
+  "file:contracts/oracle/dimensional-oracle.clar" -> "file:contracts/monitoring/system-monitor.clar" [color="#44aa44", label="calls"];
+  "file:contracts/oracle/dimensional-oracle.clar" -> "file:contracts/monitoring/system-monitor.clar" [color="#44aa44", label="calls"];
+  "file:contracts/oracle/dimensional-oracle.clar" -> "file:contracts/monitoring/system-monitor.clar" [color="#44aa44", label="calls"];
+  "file:contracts/oracle/oracle-aggregator-v2.clar" -> "(var-get" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/oracle/oracle-aggregator-v2.clar" -> "source" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/oracle/oracle-aggregator.clar" -> "trait:oracle-aggregator-trait" [color="#8888ff", label="use-trait"];
+  "file:contracts/oracle/oracle-aggregator.clar" -> "trait:oracle-aggregator-trait" [color="#3333ff", label="impl-trait"];
+  "file:contracts/oracle/oracle-aggregator.clar" -> "file:contracts/security/circuit-breaker.clar" [color="#44aa44", label="calls"];
+  "file:contracts/pools/stable-pool-enhanced.clar" -> "trait:sip-010-ft-trait" [color="#8888ff", label="use-trait"];
+  "file:contracts/pools/weighted-pool.clar" -> "trait:sip-010-ft-trait" [color="#8888ff", label="use-trait"];
+  "file:contracts/rewards/rewards-distributor.clar" -> "file:contracts/security/circuit-breaker.clar" [color="#44aa44", label="calls"];
+  "file:contracts/rewards/rewards-distributor.clar" -> "(var-get" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/test/test-access.clar" -> "file:contracts/traits/security/access-control-trait.clar" [color="#44aa44", label="calls"];
+  "file:contracts/test/test-access.clar" -> "file:contracts/traits/security/access-control-trait.clar" [color="#44aa44", label="calls"];
+  "file:contracts/tokens/cxd-token.clar" -> "monitor" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/tokens/cxd-token.clar" -> "controller" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/tokens/cxd-token.clar" -> "coordinator" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/tokens/cxd-token.clar" -> "coordinator" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/tokens/cxd-token.clar" -> "coordinator" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/tokens/cxlp-token.clar" -> "queue-contract" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/tokens/cxlp-token.clar" -> "queue-contract" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/tokens/cxlp-token.clar" -> "cxd" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/traits/core/migration-manager-trait.clar" -> "trait:sip-010-ft-trait" [color="#8888ff", label="use-trait"];
+  "file:contracts/traits/defi/asset-vault-trait.clar" -> "trait:sip-010-ft-trait" [color="#8888ff", label="use-trait"];
+  "file:contracts/traits/defi/batch-auction-trait.clar" -> "trait:sip-010-ft-trait" [color="#8888ff", label="use-trait"];
+  "file:contracts/traits/defi/factory-trait.clar" -> "trait:sip-010-ft-trait" [color="#8888ff", label="use-trait"];
+  "file:contracts/traits/defi/flash-loan-receiver-trait.clar" -> "trait:sip-010-ft-trait" [color="#8888ff", label="use-trait"];
+  "file:contracts/traits/defi/pool-creation-trait.clar" -> "trait:sip-010-ft-trait" [color="#8888ff", label="use-trait"];
+  "file:contracts/traits/defi/staking-trait.clar" -> "trait:sip-010-ft-trait" [color="#8888ff", label="use-trait"];
+  "file:contracts/traits/defi/strategy-trait.clar" -> "trait:sip-010-ft-trait" [color="#8888ff", label="use-trait"];
+  "file:contracts/traits/defi/vault-trait.clar" -> "trait:sip-010-ft-trait" [color="#8888ff", label="use-trait"];
+  "file:contracts/traits/defi/yield-optimizer-trait.clar" -> "trait:sip-010-ft-trait" [color="#8888ff", label="use-trait"];
+  "file:contracts/traits/protocol/cross-protocol-trait.clar" -> "trait:sip-010-ft-trait" [color="#8888ff", label="use-trait"];
+  "file:contracts/utils/utils.clar" -> "trait:utils-trait" [color="#8888ff", label="use-trait"];
+  "file:contracts/utils/utils.clar" -> "trait:utils-trait" [color="#3333ff", label="impl-trait"];
+  "file:contracts/vaults/sbtc-vault.clar" -> "token-contract" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/vaults/sbtc-vault.clar" -> "token-contract" [color="#ffaa00", label="dynamic-call"];
+  "file:tests/enhanced-contracts-test-suite.clar" -> "trait:sip-010-ft-trait" [color="#8888ff", label="use-trait"];
+  "file:tests/enhanced-contracts-test-suite.clar" -> "contract-ref:.enhanced-batch-processing" [color="#44aa44", label="calls"];
+  "file:tests/enhanced-contracts-test-suite.clar" -> "contract-ref:.enhanced-batch-processing" [color="#44aa44", label="calls"];
+  "file:tests/enhanced-contracts-test-suite.clar" -> "contract-ref:.advanced-caching-system" [color="#44aa44", label="calls"];
+  "file:tests/enhanced-contracts-test-suite.clar" -> "contract-ref:.advanced-caching-system" [color="#44aa44", label="calls"];
+  "file:tests/enhanced-contracts-test-suite.clar" -> "contract-ref:.advanced-caching-system" [color="#44aa44", label="calls"];
+  "file:tests/enhanced-contracts-test-suite.clar" -> "contract-ref:.advanced-caching-system" [color="#44aa44", label="calls"];
+  "file:tests/enhanced-contracts-test-suite.clar" -> "contract-ref:.advanced-caching-system" [color="#44aa44", label="calls"];
+  "file:tests/enhanced-contracts-test-suite.clar" -> "contract-ref:.dynamic-load-distribution" [color="#44aa44", label="calls"];
+  "file:tests/enhanced-contracts-test-suite.clar" -> "contract-ref:.vault-enhanced" [color="#44aa44", label="calls"];
+  "file:tests/enhanced-contracts-test-suite.clar" -> "contract-ref:.oracle-aggregator-enhanced" [color="#44aa44", label="calls"];
+  "file:tests/enhanced-contracts-test-suite.clar" -> "contract-ref:.dex-factory-enhanced" [color="#44aa44", label="calls"];
+  "file:tests/enhanced-contracts-test-suite.clar" -> "contract-ref:.advanced-caching-system" [color="#44aa44", label="calls"];
+  "file:tests/enhanced-contracts-test-suite.clar" -> "contract-ref:.advanced-caching-system" [color="#44aa44", label="calls"];
+  "file:tests/enhanced-contracts-test-suite.clar" -> "contract-ref:.dynamic-load-distribution" [color="#44aa44", label="calls"];
+  "file:tests/enhanced-contracts-test-suite.clar" -> "contract-ref:.dynamic-load-distribution" [color="#44aa44", label="calls"];
+  "file:tests/enhanced-contracts-test-suite.clar" -> "contract-ref:.vault-enhanced" [color="#44aa44", label="calls"];
+  "file:tests/enhanced-contracts-test-suite.clar" -> "contract-ref:.oracle-aggregator-enhanced" [color="#44aa44", label="calls"];
+  "file:tests/enhanced-contracts-test-suite.clar" -> "contract-ref:.dex-factory-enhanced" [color="#44aa44", label="calls"];
+  "file:tests/enterprise-integration-tests.clar" -> "trait:sip-010-ft-trait" [color="#8888ff", label="use-trait"];
+  "file:tests/enterprise-integration-tests.clar" -> "trait:flash-loan-receiver-trait" [color="#8888ff", label="use-trait"];
+  "file:tests/enterprise-integration-tests.clar" -> "file:contracts/lib/math-lib-advanced.clar" [color="#44aa44", label="calls"];
+  "file:tests/enterprise-integration-tests.clar" -> "file:contracts/lib/math-lib-advanced.clar" [color="#44aa44", label="calls"];
+  "file:tests/enterprise-integration-tests.clar" -> "file:contracts/lib/precision-calculator.clar" [color="#44aa44", label="calls"];
+  "file:tests/enterprise-integration-tests.clar" -> "file:contracts/dex/flash-loan-vault.clar" [color="#44aa44", label="calls"];
+  "file:tests/enterprise-integration-tests.clar" -> "file:contracts/dex/flash-loan-vault.clar" [color="#44aa44", label="calls"];
+  "file:tests/enterprise-integration-tests.clar" -> "file:contracts/dex/flash-loan-vault.clar" [color="#44aa44", label="calls"];
+  "file:tests/enterprise-integration-tests.clar" -> "file:contracts/dex/enterprise-loan-manager.clar" [color="#44aa44", label="calls"];
+  "file:tests/enterprise-integration-tests.clar" -> "file:contracts/dex/enterprise-loan-manager.clar" [color="#44aa44", label="calls"];
+  "file:tests/enterprise-integration-tests.clar" -> "file:contracts/dex/enterprise-loan-manager.clar" [color="#44aa44", label="calls"];
+  "file:tests/enterprise-integration-tests.clar" -> "file:contracts/dex/enterprise-loan-manager.clar" [color="#44aa44", label="calls"];
+  "file:tests/enterprise-integration-tests.clar" -> "file:contracts/dex/bond-issuance-system.clar" [color="#44aa44", label="calls"];
+  "file:tests/enterprise-integration-tests.clar" -> "file:contracts/dex/bond-issuance-system.clar" [color="#44aa44", label="calls"];
+  "file:tests/enterprise-integration-tests.clar" -> "file:contracts/dex/bond-issuance-system.clar" [color="#44aa44", label="calls"];
+  "file:tests/enterprise-integration-tests.clar" -> "file:contracts/dex/yield-distribution-engine.clar" [color="#44aa44", label="calls"];
+  "file:tests/enterprise-integration-tests.clar" -> "file:contracts/dex/yield-distribution-engine.clar" [color="#44aa44", label="calls"];
+  "file:tests/enterprise-integration-tests.clar" -> "file:contracts/dex/yield-distribution-engine.clar" [color="#44aa44", label="calls"];
+  "file:tests/enterprise-integration-tests.clar" -> "file:contracts/dex/liquidity-optimization-engine.clar" [color="#44aa44", label="calls"];
+  "file:tests/enterprise-integration-tests.clar" -> "file:contracts/dex/liquidity-optimization-engine.clar" [color="#44aa44", label="calls"];
+  "file:tests/enterprise-integration-tests.clar" -> "file:contracts/dex/liquidity-optimization-engine.clar" [color="#44aa44", label="calls"];
+  "file:tests/enterprise-integration-tests.clar" -> "file:contracts/dex/enterprise-loan-manager.clar" [color="#44aa44", label="calls"];
+  "file:tests/enterprise-integration-tests.clar" -> "file:contracts/dex/yield-distribution-engine.clar" [color="#44aa44", label="calls"];
+  "file:tests/enterprise-integration-tests.clar" -> "file:contracts/dex/yield-distribution-engine.clar" [color="#44aa44", label="calls"];
+  "file:tests/enterprise-integration-tests.clar" -> "file:contracts/dex/liquidity-optimization-engine.clar" [color="#44aa44", label="calls"];
+  "file:tests/enterprise-integration-tests.clar" -> "file:contracts/dex/enterprise-loan-manager.clar" [color="#44aa44", label="calls"];
+  "file:tests/enterprise-integration-tests.clar" -> "file:contracts/dex/enterprise-loan-manager.clar" [color="#44aa44", label="calls"];
+  "file:tests/enterprise-integration-tests.clar" -> "file:contracts/dex/bond-issuance-system.clar" [color="#44aa44", label="calls"];
+  "file:tests/enterprise-integration-tests.clar" -> "file:contracts/dex/liquidity-optimization-engine.clar" [color="#44aa44", label="calls"];
+  "file:tests/enterprise-integration-tests.clar" -> "file:contracts/lib/math-lib-advanced.clar" [color="#44aa44", label="calls"];
+  "file:tests/enterprise-integration-tests.clar" -> "file:contracts/dex/flash-loan-vault.clar" [color="#44aa44", label="calls"];
+  "file:tests/enterprise-integration-tests.clar" -> "file:contracts/dex/enterprise-loan-manager.clar" [color="#44aa44", label="calls"];
+  "file:tests/enterprise-integration-tests.clar" -> "file:contracts/dex/bond-issuance-system.clar" [color="#44aa44", label="calls"];
+  "file:tests/enterprise-integration-tests.clar" -> "file:contracts/dex/yield-distribution-engine.clar" [color="#44aa44", label="calls"];
+  "file:tests/enterprise-integration-tests.clar" -> "file:contracts/dex/liquidity-optimization-engine.clar" [color="#44aa44", label="calls"];
+  "file:tests/revenue-distributor-hysteresis-tests.clar" -> "file:contracts/dex/revenue-distributor.clar" [color="#44aa44", label="calls"];
+  "file:tests/revenue-distributor-hysteresis-tests.clar" -> "file:contracts/dex/revenue-distributor.clar" [color="#44aa44", label="calls"];
+  "file:tests/revenue-distributor-hysteresis-tests.clar" -> "file:contracts/dex/revenue-distributor.clar" [color="#44aa44", label="calls"];
+  "file:tests/revenue-distributor-hysteresis-tests.clar" -> "file:contracts/dex/revenue-distributor.clar" [color="#44aa44", label="calls"];
+  "file:tests/revenue-distributor-hysteresis-tests.clar" -> "file:contracts/dex/revenue-distributor.clar" [color="#44aa44", label="calls"];
+  "file:tests/revenue-distributor-hysteresis-tests.clar" -> "file:contracts/dex/revenue-distributor.clar" [color="#44aa44", label="calls"];
+  "file:tests/revenue-distributor-hysteresis-tests.clar" -> "file:contracts/dex/revenue-distributor.clar" [color="#44aa44", label="calls"];
+  "file:tests/revenue-distributor-hysteresis-tests.clar" -> "file:contracts/dex/revenue-distributor.clar" [color="#44aa44", label="calls"];
+  "file:tests/revenue-distributor-hysteresis-tests.clar" -> "file:contracts/dex/revenue-distributor.clar" [color="#44aa44", label="calls"];
+  "file:tests/system-validation-tests.clar" -> "file:contracts/tokens/cxd-token.clar" [color="#44aa44", label="calls"];
+  "file:tests/system-validation-tests.clar" -> "file:contracts/tokens/cxvg-token.clar" [color="#44aa44", label="calls"];
+  "file:tests/system-validation-tests.clar" -> "file:contracts/tokens/cxlp-token.clar" [color="#44aa44", label="calls"];
+  "file:tests/system-validation-tests.clar" -> "file:contracts/tokens/cxtr-token.clar" [color="#44aa44", label="calls"];
+  "file:tests/system-validation-tests.clar" -> "file:contracts/dex/cxd-staking.clar" [color="#44aa44", label="calls"];
+  "file:tests/system-validation-tests.clar" -> "file:contracts/dex/revenue-distributor.clar" [color="#44aa44", label="calls"];
+  "file:tests/system-validation-tests.clar" -> "file:contracts/dex/token-emission-controller.clar" [color="#44aa44", label="calls"];
+  "file:tests/system-validation-tests.clar" -> "file:contracts/dex/protocol-invariant-monitor.clar" [color="#44aa44", label="calls"];
+  "file:tests/system-validation-tests.clar" -> "file:contracts/tokens/token-system-coordinator.clar" [color="#44aa44", label="calls"];
+  "file:tests/system-validation-tests.clar" -> "file:contracts/dimensional/dim-revenue-adapter.clar" [color="#44aa44", label="calls"];
+  "file:tests/system-validation-tests.clar" -> "file:contracts/dimensional/tokenized-bond-adapter.clar" [color="#44aa44", label="calls"];
+  "file:tests/system-validation-tests.clar" -> "file:contracts/tokens/token-system-coordinator.clar" [color="#44aa44", label="calls"];
+  "file:tests/system-validation-tests.clar" -> "file:contracts/dex/token-emission-controller.clar" [color="#44aa44", label="calls"];
+  "file:tests/system-validation-tests.clar" -> "file:contracts/dex/revenue-distributor.clar" [color="#44aa44", label="calls"];
+  "file:tests/system-validation-tests.clar" -> "file:contracts/dex/protocol-invariant-monitor.clar" [color="#44aa44", label="calls"];
+  "file:tests/system-validation-tests.clar" -> "file:contracts/dex/protocol-invariant-monitor.clar" [color="#44aa44", label="calls"];
+  "file:tests/system-validation-tests.clar" -> "file:contracts/dex/token-emission-controller.clar" [color="#44aa44", label="calls"];
+  "file:tests/system-validation-tests.clar" -> "file:contracts/dex/token-emission-controller.clar" [color="#44aa44", label="calls"];
+  "file:tests/system-validation-tests.clar" -> "file:contracts/dex/revenue-distributor.clar" [color="#44aa44", label="calls"];
+  "file:tests/system-validation-tests.clar" -> "file:contracts/dex/revenue-distributor.clar" [color="#44aa44", label="calls"];
+  "file:tests/system-validation-tests.clar" -> "file:contracts/tokens/cxd-token.clar" [color="#44aa44", label="calls"];
+  "file:tests/system-validation-tests.clar" -> "file:contracts/dex/cxd-staking.clar" [color="#44aa44", label="calls"];
+  "file:tests/system-validation-tests.clar" -> "file:contracts/tokens/cxvg-token.clar" [color="#44aa44", label="calls"];
+  "file:tests/system-validation-tests.clar" -> "file:contracts/dex/cxvg-utility.clar" [color="#44aa44", label="calls"];
+  "file:tests/system-validation-tests.clar" -> "file:contracts/tokens/cxd-token.clar" [color="#44aa44", label="calls"];
+  "file:tests/system-validation-tests.clar" -> "file:contracts/dex/revenue-distributor.clar" [color="#44aa44", label="calls"];
+  "file:tests/system-validation-tests.clar" -> "file:contracts/dex/revenue-distributor.clar" [color="#44aa44", label="calls"];
+  "file:tests/system-validation-tests.clar" -> "file:contracts/tokens/cxvg-token.clar" [color="#44aa44", label="calls"];
+  "file:tests/system-validation-tests.clar" -> "file:contracts/dex/cxvg-utility.clar" [color="#44aa44", label="calls"];
+  "file:tests/system-validation-tests.clar" -> "file:contracts/dex/cxvg-utility.clar" [color="#44aa44", label="calls"];
+  "file:tests/system-validation-tests.clar" -> "file:contracts/tokens/cxlp-token.clar" [color="#44aa44", label="calls"];
+  "file:tests/system-validation-tests.clar" -> "file:contracts/tokens/cxlp-token.clar" [color="#44aa44", label="calls"];
+  "file:tests/system-validation-tests.clar" -> "file:contracts/tokens/cxlp-token.clar" [color="#44aa44", label="calls"];
+  "file:tests/system-validation-tests.clar" -> "file:contracts/tokens/cxd-token.clar" [color="#44aa44", label="calls"];
+  "file:tests/system-validation-tests.clar" -> "file:contracts/dex/cxd-staking.clar" [color="#44aa44", label="calls"];
+  "file:tests/system-validation-tests.clar" -> "file:contracts/dex/protocol-invariant-monitor.clar" [color="#44aa44", label="calls"];
+  "file:tests/system-validation-tests.clar" -> "file:contracts/tokens/cxd-token.clar" [color="#44aa44", label="calls"];
+  "file:tests/system-validation-tests.clar" -> "file:contracts/tokens/cxd-token.clar" [color="#44aa44", label="calls"];
+  "file:tests/system-validation-tests.clar" -> "file:contracts/dex/cxd-staking.clar" [color="#44aa44", label="calls"];
+  "file:tests/system-validation-tests.clar" -> "file:contracts/tokens/cxd-token.clar" [color="#44aa44", label="calls"];
+  "file:tests/system-validation-tests.clar" -> "file:contracts/dex/revenue-distributor.clar" [color="#44aa44", label="calls"];
+  "file:tests/system-validation-tests.clar" -> "file:contracts/tokens/cxd-token.clar" [color="#44aa44", label="calls"];
+  "file:tests/system-validation-tests.clar" -> "file:contracts/dex/revenue-distributor.clar" [color="#44aa44", label="calls"];
+  "file:tests/system-validation-tests.clar" -> "file:contracts/dimensional/dim-revenue-adapter.clar" [color="#44aa44", label="calls"];
+  "file:tests/system-validation-tests.clar" -> "file:contracts/dex/revenue-distributor.clar" [color="#44aa44", label="calls"];
+  "file:tests/system-validation-tests.clar" -> "file:contracts/dex/revenue-distributor.clar" [color="#44aa44", label="calls"];
+  "file:tests/system-validation-tests.clar" -> "file:contracts/dex/cxd-staking.clar" [color="#44aa44", label="calls"];
+  "file:tests/system-validation-tests.clar" -> "file:contracts/tokens/cxd-token.clar" [color="#44aa44", label="calls"];
+  "file:tests/system-validation-tests.clar" -> "file:contracts/dex/token-emission-controller.clar" [color="#44aa44", label="calls"];
+  "file:tests/system-validation-tests.clar" -> "file:contracts/dex/protocol-invariant-monitor.clar" [color="#44aa44", label="calls"];
+  "file:tests/system-validation-tests.clar" -> "file:contracts/dex/protocol-invariant-monitor.clar" [color="#44aa44", label="calls"];
+  "file:tests/system-validation-tests.clar" -> "file:contracts/dex/protocol-invariant-monitor.clar" [color="#44aa44", label="calls"];
+  "file:tests/system-validation-tests.clar" -> "file:contracts/tokens/cxd-token.clar" [color="#44aa44", label="calls"];
+  "file:tests/system-validation-tests.clar" -> "file:contracts/tokens/cxd-token.clar" [color="#44aa44", label="calls"];
+  "file:tests/system-validation-tests.clar" -> "file:contracts/tokens/cxvg-token.clar" [color="#44aa44", label="calls"];
+  "file:tests/system-validation-tests.clar" -> "file:contracts/tokens/cxtr-token.clar" [color="#44aa44", label="calls"];
+  "file:tests/system-validation-tests.clar" -> "file:contracts/dex/protocol-invariant-monitor.clar" [color="#44aa44", label="calls"];
+  "file:tests/system-validation-tests.clar" -> "file:contracts/tokens/token-system-coordinator.clar" [color="#44aa44", label="calls"];
+  "file:tests/system-validation-tests.clar" -> "file:contracts/dex/revenue-distributor.clar" [color="#44aa44", label="calls"];
+  "file:tests/system-validation-tests.clar" -> "file:contracts/dex/cxd-staking.clar" [color="#44aa44", label="calls"];
+  "file:tests/system-validation-tests.clar" -> "file:contracts/dex/token-emission-controller.clar" [color="#44aa44", label="calls"];
+  "file:tests/system-validation-tests.clar" -> "file:contracts/dex/protocol-invariant-monitor.clar" [color="#44aa44", label="calls"];
+  "file:tests/system-validation-tests.clar" -> "file:contracts/tokens/token-system-coordinator.clar" [color="#44aa44", label="calls"];
+  "file:tests/system-validation-tests.clar" -> "file:contracts/dex/revenue-distributor.clar" [color="#44aa44", label="calls"];
+  "file:tests/system-validation-tests.clar" -> "file:contracts/dex/cxvg-utility.clar" [color="#44aa44", label="calls"];
+  "file:tests/system-validation-tests.clar" -> "file:contracts/dex/protocol-invariant-monitor.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-integration-tests.clar" -> "trait:sip-010-ft-trait" [color="#8888ff", label="use-trait"];
+  "file:tests/tokenomics-integration-tests.clar" -> "file:contracts/dex/protocol-invariant-monitor.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-integration-tests.clar" -> "file:contracts/dex/protocol-invariant-monitor.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-integration-tests.clar" -> "file:contracts/dex/protocol-invariant-monitor.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-integration-tests.clar" -> "file:contracts/dex/token-emission-controller.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-integration-tests.clar" -> "file:contracts/dex/token-emission-controller.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-integration-tests.clar" -> "file:contracts/dex/revenue-distributor.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-integration-tests.clar" -> "file:contracts/dex/revenue-distributor.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-integration-tests.clar" -> "file:contracts/dex/revenue-distributor.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-integration-tests.clar" -> "file:contracts/tokens/token-system-coordinator.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-integration-tests.clar" -> "file:contracts/tokens/cxd-token.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-integration-tests.clar" -> "file:contracts/tokens/cxvg-token.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-integration-tests.clar" -> "file:contracts/tokens/cxtr-token.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-integration-tests.clar" -> "file:contracts/tokens/cxlp-token.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-integration-tests.clar" -> "file:contracts/tokens/cxlp-token.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-integration-tests.clar" -> "file:contracts/tokens/cxd-token.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-integration-tests.clar" -> "file:contracts/dex/cxd-staking.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-integration-tests.clar" -> "file:contracts/tokens/cxd-token.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-integration-tests.clar" -> "file:contracts/dex/revenue-distributor.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-integration-tests.clar" -> "file:contracts/dex/revenue-distributor.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-integration-tests.clar" -> "file:contracts/tokens/cxd-token.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-integration-tests.clar" -> "file:contracts/dex/revenue-distributor.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-integration-tests.clar" -> "file:contracts/tokens/cxlp-token.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-integration-tests.clar" -> "file:contracts/tokens/cxd-token.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-integration-tests.clar" -> "file:contracts/dex/revenue-distributor.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-integration-tests.clar" -> "file:contracts/dimensional/dim-revenue-adapter.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-integration-tests.clar" -> "file:contracts/tokens/cxd-token.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-integration-tests.clar" -> "file:contracts/dimensional/dim-revenue-adapter.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-integration-tests.clar" -> "file:contracts/dimensional/tokenized-bond-adapter.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-integration-tests.clar" -> "file:contracts/dimensional/tokenized-bond-adapter.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-integration-tests.clar" -> "file:contracts/tokens/cxd-token.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-integration-tests.clar" -> "file:contracts/dimensional/tokenized-bond-adapter.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-integration-tests.clar" -> "file:contracts/tokens/cxd-token.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-integration-tests.clar" -> "file:contracts/dex/cxd-staking.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-integration-tests.clar" -> "file:contracts/tokens/cxd-token.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-integration-tests.clar" -> "file:contracts/dex/revenue-distributor.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-integration-tests.clar" -> "file:contracts/dex/revenue-distributor.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-integration-tests.clar" -> "file:contracts/dex/cxd-staking.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-integration-tests.clar" -> "file:contracts/tokens/cxvg-token.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-integration-tests.clar" -> "file:contracts/dex/cxvg-utility.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-integration-tests.clar" -> "file:contracts/dex/cxvg-utility.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-integration-tests.clar" -> "file:contracts/dex/cxvg-utility.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-integration-tests.clar" -> "file:contracts/tokens/cxd-token.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-integration-tests.clar" -> "file:contracts/dex/token-emission-controller.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-integration-tests.clar" -> "file:contracts/tokens/cxd-token.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-integration-tests.clar" -> "file:contracts/dex/protocol-invariant-monitor.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-integration-tests.clar" -> "file:contracts/tokens/cxd-token.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-integration-tests.clar" -> "file:contracts/dex/protocol-invariant-monitor.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-integration-tests.clar" -> "file:contracts/dex/protocol-invariant-monitor.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-integration-tests.clar" -> "file:contracts/dex/protocol-invariant-monitor.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-integration-tests.clar" -> "file:contracts/tokens/cxd-token.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-integration-tests.clar" -> "file:contracts/dex/cxd-staking.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-integration-tests.clar" -> "file:contracts/tokens/cxvg-token.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-integration-tests.clar" -> "file:contracts/dex/cxvg-utility.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-integration-tests.clar" -> "file:contracts/tokens/cxd-token.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-integration-tests.clar" -> "file:contracts/dex/revenue-distributor.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-integration-tests.clar" -> "file:contracts/dex/revenue-distributor.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-integration-tests.clar" -> "file:contracts/dex/cxvg-utility.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-integration-tests.clar" -> "file:contracts/dex/cxd-staking.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-integration-tests.clar" -> "file:contracts/tokens/cxd-token.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-integration-tests.clar" -> "file:contracts/tokens/cxd-token.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-integration-tests.clar" -> "file:contracts/tokens/cxd-token.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-integration-tests.clar" -> "file:contracts/dex/revenue-distributor.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-integration-tests.clar" -> "file:contracts/dex/revenue-distributor.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-integration-tests.clar" -> "file:contracts/dex/revenue-distributor.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-integration-tests.clar" -> "file:contracts/dex/protocol-invariant-monitor.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-unit-tests.clar" -> "trait:sip-010-ft-trait" [color="#8888ff", label="use-trait"];
+  "file:tests/tokenomics-unit-tests.clar" -> "trait:sip-010-ft-mintable-trait" [color="#8888ff", label="use-trait"];
+  "file:tests/tokenomics-unit-tests.clar" -> "file:contracts/tokens/cxd-token.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-unit-tests.clar" -> "file:contracts/tokens/cxd-token.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-unit-tests.clar" -> "file:contracts/tokens/cxd-token.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-unit-tests.clar" -> "file:contracts/tokens/cxd-token.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-unit-tests.clar" -> "file:contracts/tokens/cxd-token.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-unit-tests.clar" -> "file:contracts/tokens/cxd-token.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-unit-tests.clar" -> "file:contracts/tokens/cxd-token.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-unit-tests.clar" -> "file:contracts/tokens/cxd-token.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-unit-tests.clar" -> "file:contracts/dex/cxd-staking.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-unit-tests.clar" -> "file:contracts/dex/cxd-staking.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-unit-tests.clar" -> "file:contracts/tokens/cxd-token.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-unit-tests.clar" -> "file:contracts/dex/cxd-staking.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-unit-tests.clar" -> "file:contracts/dex/cxd-staking.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-unit-tests.clar" -> "file:contracts/tokens/cxvg-token.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-unit-tests.clar" -> "file:contracts/tokens/cxvg-token.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-unit-tests.clar" -> "file:contracts/tokens/cxvg-token.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-unit-tests.clar" -> "file:contracts/tokens/cxvg-token.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-unit-tests.clar" -> "file:contracts/dex/cxvg-utility.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-unit-tests.clar" -> "file:contracts/dex/cxvg-utility.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-unit-tests.clar" -> "file:contracts/dex/cxvg-utility.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-unit-tests.clar" -> "file:contracts/tokens/cxvg-token.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-unit-tests.clar" -> "file:contracts/dex/cxvg-utility.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-unit-tests.clar" -> "file:contracts/dex/cxvg-utility.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-unit-tests.clar" -> "file:contracts/tokens/cxlp-token.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-unit-tests.clar" -> "file:contracts/tokens/cxlp-token.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-unit-tests.clar" -> "file:contracts/tokens/cxlp-token.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-unit-tests.clar" -> "file:contracts/tokens/cxlp-token.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-unit-tests.clar" -> "file:contracts/tokens/cxtr-token.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-unit-tests.clar" -> "file:contracts/tokens/cxtr-token.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-unit-tests.clar" -> "file:contracts/tokens/cxtr-token.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-unit-tests.clar" -> "file:contracts/dex/revenue-distributor.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-unit-tests.clar" -> "file:contracts/dex/revenue-distributor.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-unit-tests.clar" -> "file:contracts/dex/revenue-distributor.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-unit-tests.clar" -> "file:contracts/dex/revenue-distributor.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-unit-tests.clar" -> "file:contracts/dex/revenue-distributor.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-unit-tests.clar" -> "file:contracts/dex/revenue-distributor.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-unit-tests.clar" -> "file:contracts/dex/revenue-distributor.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-unit-tests.clar" -> "file:contracts/dex/revenue-distributor.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-unit-tests.clar" -> "file:contracts/dex/revenue-distributor.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-unit-tests.clar" -> "file:contracts/dex/revenue-distributor.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-unit-tests.clar" -> "file:contracts/dex/revenue-distributor.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-unit-tests.clar" -> "file:contracts/dex/token-emission-controller.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-unit-tests.clar" -> "file:contracts/dex/token-emission-controller.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-unit-tests.clar" -> "file:contracts/dex/protocol-invariant-monitor.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-unit-tests.clar" -> "file:contracts/dex/protocol-invariant-monitor.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-unit-tests.clar" -> "file:contracts/tokens/token-system-coordinator.clar" [color="#44aa44", label="calls"];
+  "file:tests/tokenomics-unit-tests.clar" -> "file:contracts/tokens/token-system-coordinator.clar" [color="#44aa44", label="calls"];
+  "file:tests/yield-optimizer.test.clar" -> "trait:sip-010-ft-trait" [color="#8888ff", label="use-trait"];
+  "file:tests/yield-optimizer.test.clar" -> "trait:sip-010-ft-trait" [color="#8888ff", label="use-trait"];
+  "file:tests/yield-optimizer.test.clar" -> "trait:yield-optimizer-trait" [color="#8888ff", label="use-trait"];
+  "file:tests/yield-optimizer.test.clar" -> "trait:sip-010-ft-trait" [color="#8888ff", label="use-trait"];
+  "file:tests/yield-optimizer.test.clar" -> "trait:sip-010-ft-trait" [color="#8888ff", label="use-trait"];
+  "file:tests/yield-optimizer.test.clar" -> "trait:sip-010-ft-trait" [color="#8888ff", label="use-trait"];
+  "file:tests/yield-optimizer.test.clar" -> "trait:sip-010-ft-trait" [color="#3333ff", label="impl-trait"];
+  "file:tests/yield-optimizer.test.clar" -> "vault" [color="#ffaa00", label="dynamic-call"];
+  "file:tests/yield-optimizer.test.clar" -> "optimizer" [color="#ffaa00", label="dynamic-call"];
+  "file:tests/yield-optimizer.test.clar" -> "optimizer" [color="#ffaa00", label="dynamic-call"];
+  "file:tests/yield-optimizer.test.clar" -> "optimizer" [color="#ffaa00", label="dynamic-call"];
+  "file:tests/yield-optimizer.test.clar" -> "vault" [color="#ffaa00", label="dynamic-call"];
+  "file:tests/yield-optimizer.test.clar" -> "contract-ref:.faucet" [color="#44aa44", label="calls"];
+  "file:tests/yield-optimizer.test.clar" -> "vault" [color="#ffaa00", label="dynamic-call"];
+  "file:tests/yield-optimizer.test.clar" -> "metrics" [color="#ffaa00", label="dynamic-call"];
+  "file:tests/yield-optimizer.test.clar" -> "metrics" [color="#ffaa00", label="dynamic-call"];
+  "file:tests/yield-optimizer.test.clar" -> "optimizer" [color="#ffaa00", label="dynamic-call"];
+  "file:tests/yield-optimizer.test.clar" -> "metrics" [color="#ffaa00", label="dynamic-call"];
+  "file:tests/yield-optimizer.test.clar" -> "metrics" [color="#ffaa00", label="dynamic-call"];
+  "file:tests/yield-optimizer.test.clar" -> "optimizer" [color="#ffaa00", label="dynamic-call"];
+  "file:tests/yield-optimizer.test.clar" -> "token" [color="#ffaa00", label="dynamic-call"];
+  "file:tests/yield-optimizer.test.clar" -> "auto-compounder" [color="#ffaa00", label="dynamic-call"];
+  "file:tests/yield-optimizer.test.clar" -> "contract-ref:.faucet" [color="#44aa44", label="calls"];
+  "file:tests/yield-optimizer.test.clar" -> "wstx-token" [color="#ffaa00", label="dynamic-call"];
+  "file:tests/yield-optimizer.test.clar" -> "wstx-token" [color="#ffaa00", label="dynamic-call"];
+  "file:tests/yield-optimizer.test.clar" -> "auto-compounder" [color="#ffaa00", label="dynamic-call"];
+  "file:tests/mocks/test-flash-loan-receiver.clar" -> "trait:sip-010-ft-trait" [color="#8888ff", label="use-trait"];
+  "file:tests/mocks/test-flash-loan-receiver.clar" -> "asset" [color="#ffaa00", label="dynamic-call"];
+  "file:tests/mocks/test-token-a.clar" -> "trait:sip-010-ft-trait" [color="#8888ff", label="use-trait"];
+  "file:tests/mocks/test-token-a.clar" -> "trait:sip-010-ft-trait" [color="#3333ff", label="impl-trait"];
+  "file:tests/mocks/test-token-b.clar" -> "trait:sip-010-ft-trait" [color="#8888ff", label="use-trait"];
+  "file:tests/mocks/test-token-b.clar" -> "trait:sip-010-ft-trait" [color="#3333ff", label="impl-trait"];
+}
