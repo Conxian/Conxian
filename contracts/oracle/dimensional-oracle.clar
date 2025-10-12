@@ -1,8 +1,9 @@
+(use-trait oracle .all-traits.oracle-trait)
 (use-trait oracle-trait .all-traits.oracle-trait)
 ;; Dimensional Oracle
 ;; Implements a robust price oracle with multiple data sources and deviation checks
 
-(impl-trait oracle-trait)
+(impl-trait oracle)
 
 
 (define-constant ERR_NOT_AUTHORIZED (err u100))
@@ -277,4 +278,5 @@
 (define-read-only (get-admin)
   (ok (var-get admin))
 )
+
 

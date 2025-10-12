@@ -1,6 +1,7 @@
+(use-trait liquidation .all-traits.liquidation-trait)
 (use-trait liquidation-trait .all-traits.liquidation-trait)
 
- (impl-trait liquidation-trait)
+ (impl-trait liquidation)
 
 ;; Constants
 (define-constant CONTRACT_OWNER tx-sender)
@@ -208,6 +209,7 @@
     )
   )
 )
+
 
 
 

@@ -1,3 +1,4 @@
+(use-trait factory .all-traits.factory-trait)
 ;; Conxian DEX Factory V2 - Pool creation and registry
   ;; This contract is responsible for creating and registering new DEX pools.
 
@@ -7,7 +8,7 @@
   (use-trait factory-trait .all-traits.factory-trait)
   (use-trait pool-creation-trait .all-traits.pool-creation-trait)
   (use-trait circuit-breaker-trait .all-traits.circuit-breaker-trait)
-(impl-trait factory-trait)
+(impl-trait factory)
 
 ;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED (err u1003))
@@ -280,3 +281,4 @@
     (ok true)
   )
 )
+

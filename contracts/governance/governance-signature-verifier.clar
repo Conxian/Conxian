@@ -1,3 +1,4 @@
+(use-trait sip-018 .all-traits.sip-018-trait)
 (use-trait sip-018-trait .all-traits.sip-018-trait)
 ;; governance-signature-verifier.clar
 ;; Governance signature verification using SIP-018 implementation
@@ -5,7 +6,7 @@
 
 ;; --- Traits ---
 
-(impl-trait sip-018-trait)
+(impl-trait sip-018)
 
 ;; Constants
 (define-constant TRAIT_REGISTRY .trait-registry)
@@ -115,4 +116,5 @@
 
 (define-public (get-structured-data-version)
     (contract-call? signed-data-base get-structured-data-version))
+
 

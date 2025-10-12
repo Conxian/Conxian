@@ -1,7 +1,8 @@
+(use-trait cross-protocol-integrator .all-traits.cross-protocol-integrator-trait)
 (use-trait cross-protocol-integrator-trait .all-traits.cross-protocol-integrator-trait)
 ;; Conxian Cross-Protocol Integrator
 
- (impl-trait cross-protocol-integrator-trait)
+ (impl-trait cross-protocol-integrator)
 ;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED (err u701))
 (define-constant ERR_INVALID_PROTOCOL (err u702))
@@ -61,3 +62,4 @@
 (define-read-only (get-protocol-contract (protocol-name (string-ascii 64)))
   (ok (map-get? registered-protocols protocol-name))
 )
+

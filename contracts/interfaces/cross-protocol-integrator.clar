@@ -1,8 +1,9 @@
+(use-trait cross-protocol .all-traits.cross-protocol-trait)
 (use-trait cross-protocol-trait .all-traits.cross-protocol-trait)
 ;; cross-protocol-integrator.clar
 ;; Facilitates integration with other Stacks protocols and Bitcoin layers
 
-(impl-trait cross-protocol-trait)
+(impl-trait cross-protocol)
 
 ;; ===== Constants =====
 (define-constant ERR_UNAUTHORIZED (err u100))
@@ -65,3 +66,4 @@
     (ok true)
   )
 )
+

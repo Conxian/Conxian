@@ -8,6 +8,7 @@
 (define-constant ERR_NOT_ENOUGH_BALANCE (err u1002))
 (define-constant ERR_OVERFLOW (err u1003))
 ;; --- Data Variables ---
+(define-data-var name (string-ascii 32) "Test Token A")
 (define-data-var symbol (string-ascii 10) "TTA")
 (define-data-var decimals uint u6)
 (define-data-var total-supply uint u0)

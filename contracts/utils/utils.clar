@@ -1,3 +1,4 @@
+(use-trait utils .all-traits.utils-trait)
 ;; utils.clar
 ;; Utility contract implementing `utils-trait` to provide a placeholder
 ;; principal-to-buff serialization for SDK 3.7.0 compatibility.
@@ -11,8 +12,9 @@
 ;; migrate to an approved serialization scheme once available.
 
 (use-trait utils-trait .all-traits.utils-trait)
-(impl-trait utils-trait)
+(impl-trait utils)
 
 (define-public (principal-to-buff (p principal))
   (ok 0x0000000000000000000000000000000000000000000000000000000000000000)
 )
+

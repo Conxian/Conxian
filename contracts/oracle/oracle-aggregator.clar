@@ -1,3 +1,4 @@
+(use-trait oracle-aggregator .all-traits.oracle-aggregator-trait)
 (use-trait oracle-aggregator-trait .all-traits.oracle-aggregator-trait)
 ;; oracle-aggregator.clar
 ;; Aggregates price feeds from multiple oracles and provides TWAP calculations
@@ -6,7 +7,7 @@
 
 
 
-(impl-trait oracle-aggregator-trait)
+(impl-trait oracle-aggregator)
 
 ;; Constants
 (define-constant ERR_UNAUTHORIZED (err u100))
@@ -223,3 +224,4 @@
 (define-read-only (get-manipulation-thresholds (asset-id (string-ascii 32)))
   (ok (map-get? manipulation-thresholds {asset-id: asset-id}))
 )
+

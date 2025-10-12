@@ -1,0 +1,44 @@
+[accounts.deployer]
+mnemonic = "twice kind fence tip hidden tilt action fragile skin nothing glory cousin green tomorrow spring wrist shed math olympic multiply hip blue scout claw"
+balance = 100000000000000
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+
+[accounts.wallet_1]
+mnemonic = "sell invite acquire kitten bamboo drastic jelly vivid peace spawn twice guilt pave pen trash pretty park cube fragile unaware remain midnight betray rebuild"
+balance = 100000000000000
+
+[accounts.wallet_2]
+mnemonic = "hold excess usual excess ring elephant install account glad dry fragile donkey gaze humble truck breeze nation gasp vacuum limb head keep delay hospital"
+balance = 100000000000000
+
+[network]
+name = "testnet"
+node_rpc_address = "https://stacks-node-api.testnet.stacks.co"
+node_p2p_address = "https://stacks-node-api.testnet.stacks.co"
+
+[devnet]
+stacks_node = "https://stacks-node-api.testnet.stacks.co"
+bitcoin_node = "https://mempool.space/testnet/api"
+
+[costs]
+contract_publish = 1000000
+
+[deployment]
+max_fee = 1000000
+fee_rate = 10
+anchor_block_only = true
+
+[contracts]
+# All contracts will be deployed with these default settings
+clarity_version = 3
+epoch = "3.0"
+
+# Specific contract overrides can be added here if needed
+[contracts.all-traits]
+cost = 1000000
+
+[contracts.cxd-token]
+cost = 1000000
+
+[contracts.governance-token]
+cost = 1000000

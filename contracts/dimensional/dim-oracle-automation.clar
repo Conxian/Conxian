@@ -1,3 +1,4 @@
+(use-trait dimensional-oracle .all-traits.dimensional-oracle-trait)
 (use-trait dimensional-oracle-trait .all-traits.dimensional-oracle-trait)
 ;; dim-oracle-automation.clar
 ;; Dimensional Oracle Automation
@@ -8,7 +9,7 @@
 ;; This contract implements the dimensional-oracle-trait and is designed
 ;; to be called by a whitelisted keeper principal.
 
-(impl-trait dimensional-oracle-trait)
+(impl-trait dimensional-oracle)
 
 (define-constant ERR_UNAUTHORIZED u101)
 
@@ -57,6 +58,7 @@
     (ok true)
   )
 )
+
 
 
 

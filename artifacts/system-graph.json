@@ -3172,11 +3172,6 @@
     },
     {
       "from": "file:contracts/mocks/mock-strategy-a.clar",
-      "to": "trait:sip-010-ft-trait",
-      "type": "use-trait"
-    },
-    {
-      "from": "file:contracts/mocks/mock-strategy-a.clar",
       "to": "asset",
       "type": "dynamic-call"
     },
@@ -3184,11 +3179,6 @@
       "from": "file:contracts/mocks/mock-strategy-a.clar",
       "to": "asset",
       "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/mocks/mock-strategy-b.clar",
-      "to": "trait:sip-010-ft-trait",
-      "type": "use-trait"
     },
     {
       "from": "file:contracts/mocks/mock-strategy-b.clar",
@@ -5025,7 +5015,7 @@
   ],
   "stats": {
     "nodes": 235,
-    "edges": 708,
+    "edges": 706,
     "traits": 54
   },
   "cycles": []

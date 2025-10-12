@@ -484,6 +484,57 @@ class ContractVerifier:
         
         return len(suggestions)
     
+    def autofix_impl_traits(self) -> int:
+        """Rewrite (impl-trait <alias|name>) to centralized (impl-trait .all-traits.<trait>)
+        when possible, by:
+        - Mapping local aliases from (use-trait alias .all-traits.<trait>)
+        - Falling back to defined trait names in all-traits.clar
+        Returns number of files modified.
+        """
+        modified_files = 0
+        for f in self.contract_files:
+            try:
+                original = f.read_text()
+            except Exception:
+                continue
+            content = original
+            # Build alias -> centralized trait mapping from use-trait lines
+            try:
+                use_matches = list(re.finditer(self.USE_TRAIT_PATTERN if hasattr(self, 'USE_TRAIT_PATTERN') else USE_TRAIT_PATTERN, original))
+            except Exception:
+                use_matches = []
+            alias_map: Dict[str, str] = {}
+            for m in re.finditer(USE_TRAIT_PATTERN, original):
+                alias = m.group(1)
+                ref = m.group(2)
+                if ref.startswith('.all-traits.'):
+                    base = ref.split('.')[-1]
+                    alias_map[alias] = base
+            # Replace impl-trait occurrences
+            def repl_impl(m: re.Match) -> str:
+                trait_ref = m.group(1)
+                # Already centralized
+                if trait_ref.startswith('.all-traits.'):
+                    return m.group(0)
+                # If alias maps to centralized base
+                if trait_ref in alias_map:
+                    base = alias_map[trait_ref]
+                    return f"(impl-trait .all-traits.{base})"
+                # If trait_ref is a known trait name
+                if trait_ref in self.defined_traits:
+                    return f"(impl-trait .all-traits.{trait_ref})"
+                # Otherwise keep as-is
+                return m.group(0)
+            new_content = re.sub(IMPL_TRAIT_PATTERN, repl_impl, content)
+            if new_content != original:
+                f.write_text(new_content)
+                modified_files += 1
+        if modified_files:
+            print(f"Auto-fix impl-trait: rewritten in {modified_files} files.")
+        else:
+            print("Auto-fix impl-trait: no changes needed.")
+        return modified_files
+    
     def check_compilation(self) -> bool:
         """Check if all contracts compile successfully (tolerate known false positives)."""
         print("\n=== Checking Contract Compilation ===")
@@ -584,6 +635,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Conxian Contract Verification")
     parser.add_argument("--autofix-manifest", action="store_true", help="Auto-add depends_on=['all-traits'] in stacks/Clarinet.test.toml where missing for centralized-trait users.")
     parser.add_argument("--autofix-graph", action="store_true", help="Suggest refactors for dynamic contract-call? in non-test contracts (writes artifacts/autofix-graph-suggestions.json)")
+    parser.add_argument("--autofix-impl-traits", action="store_true", help="Rewrite (impl-trait <alias|name>) to (impl-trait .all-traits.<trait>) where possible.")
     args = parser.parse_args()
 
     verifier = ContractVerifier()
@@ -593,5 +645,7 @@ if __name__ == "__main__":
     if args.autofix_graph:
         cnt = verifier.autofix_graph_dynamic_calls()
         # Do not fail if no suggestions; proceed to verification
+    if args.autofix_impl_traits:
+        _ = verifier.autofix_impl_traits()
     if not verifier.run_verification():
         exit(1)

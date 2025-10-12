@@ -1,11 +1,13 @@
+(use-trait budget-manager .all-traits.budget-manager-trait)
+(use-trait proposal .all-traits.proposal-trait)
 (use-trait budget-manager-trait .all-traits.budget-manager-trait)
 (use-trait proposal-trait .all-traits.proposal-trait)
 ;; budget-manager.clar
 ;; Manages treasury allocation and budget proposals for DAO governance
 
 ;; Traits
- (impl-trait budget-manager-trait)
- (impl-trait proposal-trait)
+ (impl-trait budget-manager)
+ (impl-trait proposal)
 
 ;; Constants
 (define-constant ERR_UNAUTHORIZED (err u100))
@@ -62,3 +64,4 @@
 (define-read-only (get-contract-owner)
   (ok (var-get contract-owner))
 )
+

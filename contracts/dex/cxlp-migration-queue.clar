@@ -1,3 +1,4 @@
+(use-trait cxlp-migration-queue .all-traits.cxlp-migration-queue-trait)
 ;; Traits
 (use-trait cxlp-migration-queue-trait .all-traits.cxlp-migration-queue-trait)
 ;; cxlp-migration-queue.clar
@@ -5,7 +6,7 @@
 ;; Prevents FCFS races and enables fair distribution based on duration-weighted requests
 
 (use-trait ft-mintable .all-traits.sip-010-ft-mintable-trait)
- (impl-trait cxlp-migration-queue-trait)
+ (impl-trait cxlp-migration-queue)
 
 ;; --- Constants ---
 (define-constant CONTRACT_OWNER tx-sender)
@@ -292,6 +293,7 @@
     cxlp-contract: (var-get cxlp-contract),
     cxd-contract: (var-get cxd-contract)
   })
+
 
 
 

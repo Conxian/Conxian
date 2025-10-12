@@ -1,7 +1,8 @@
+(use-trait btc-adapter .all-traits.btc-adapter-trait)
 (use-trait btc-adapter-trait .all-traits.btc-adapter-trait)
 ;; btc-adapter.clar
 ;; Facilitates Bitcoin Layer Integration
- (impl-trait btc-adapter-trait)
+ (impl-trait btc-adapter)
 ;; ===== Constants =====
 (define-constant ERR_UNAUTHORIZED (err u100))
 (define-constant ERR_INVALID_BTC_ADDRESS (err u101))
@@ -68,3 +69,4 @@
     (ok true)
   )
 )
+
