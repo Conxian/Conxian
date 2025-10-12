@@ -4,12 +4,12 @@
     ;;
 
     ;; --- Setup ---
-    (use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
+    (use-trait sip-010-ft-trait sip-010-ft-trait)
 
     (define-contract-public .mock-wstx
       (
-        (use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
-        (impl-trait .all-traits.sip-010-ft-trait)
+        (use-trait sip-010-ft-trait sip-010-ft-trait)
+        (impl-trait sip-010-ft-trait)
         (define-data-var name (string-ascii 32) "Wrapped Stacks")
         (define-data-var symbol (string-ascii 32) "wSTX")
         (define-data-var decimals uint u8)
@@ -30,7 +30,7 @@
     (define-contract-public .mock-auto-compounder
       (
         (use-trait yield-optimizer-trait .all-traits.yield-optimizer-trait)
-        (use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
+        (use-trait sip-010-ft-trait sip-010-ft-trait)
 
     (define-data-var contract-owner principal tx-sender)
     (define-data-var yield-optimizer-contract principal .yield-optimizer)
@@ -44,7 +44,7 @@
 
     (define-contract-public .mock-strategy-a
       (
-        (use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
+        (use-trait sip-010-ft-trait sip-010-ft-trait)
         (define-data-var apy uint u0)
 
     (define-public (harvest-rewards)
@@ -59,7 +59,7 @@
 
     (define-contract-public .mock-strategy-b
       (
-        (use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
+        (use-trait sip-010-ft-trait sip-010-ft-trait)
         (define-data-var apy uint u0)
 
     (define-public (harvest-rewards)
