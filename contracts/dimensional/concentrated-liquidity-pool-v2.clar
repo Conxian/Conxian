@@ -364,9 +364,8 @@
   )
 )
 
-(define-private (get-fee-from-params (params (buff 256)))
-  (if (>= (len params) u4)
-    (ok (buff-to-uint-be (slice params 0 4)))
+  (define-private (get-fee-from-params (params (buff 256)))
+    (if (>= (len params) u4)
+    (ok (to-uint (buff-to-int-be (slice params 0 4))))
     (err ERR_INVALID_FEE)
   )
-)

@@ -5,6 +5,7 @@
 ;; Traits
 
 
+
 (impl-trait .all-traits.oracle-aggregator-trait)
 
 ;; Constants

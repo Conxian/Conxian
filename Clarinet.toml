@@ -131,7 +131,7 @@ address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 path = "contracts/dimensional/multi-hop-router-v3.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
-[contracts.nakamoto-compatibility]
+[disabled.nakamoto-compatibility]
 path = "contracts/dex/nakamoto-compatibility.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
@@ -443,7 +443,7 @@ address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 path = "contracts/dex/weighted-swap-pool.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
-[contracts.wormhole-integration]
+[disabled.wormhole-integration]
 path = "contracts/dex/wormhole-integration.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
@@ -860,4 +860,15 @@ clarity_version = 3
 epoch = "3.0"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
+
+[contracts.utils]
+path = "contracts/utils/utils.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+[contracts.encoding]
+path = "contracts/utils/encoding.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 

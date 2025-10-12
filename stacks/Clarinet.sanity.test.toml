@@ -1,0 +1,67 @@
+[project]
+name = "conxian-sanity"
+description = "Minimal sanity manifest focusing on flash-loan-vault + SIP-010 tests"
+clarinet_version = "3.7.0"
+
+[accounts.deployer]
+mnemonic = "twice kind fence tip hidden tilt action fragile skin nothing glory cousin green tomorrow spring wrist shed math olympic multiply hip blue scout claw"
+balance = 100000000000000
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+
+# Centralized traits aggregator
+[contracts.all-traits]
+path = "../contracts/traits/all-traits.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+
+# Core target: flash-loan vault
+[contracts.flash-loan-vault]
+path = "../contracts/dex/flash-loan-vault.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits" ]
+
+# Yield optimizer (fixed interdependent functions)
+[contracts.yield-optimizer]
+path = "../contracts/dex/yield-optimizer.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+
+# Mocks: strategies used by yield-optimizer
+[contracts.mock-strategy-a]
+path = "../contracts/mocks/mock-strategy-a.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+
+[contracts.mock-strategy-b]
+path = "../contracts/mocks/mock-strategy-b.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+
+# Test tokens implementing SIP-010 via centralized traits
+[contracts.test-token-a]
+path = "../tests/mocks/test-token-a.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits" ]
+
+[contracts.test-token-b]
+path = "../tests/mocks/test-token-b.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits" ]
+
+# Minimal flash-loan receiver for callback path
+[contracts.test-flash-loan-receiver]
+path = "../tests/mocks/test-flash-loan-receiver.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits" ]

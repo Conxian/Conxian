@@ -2,7 +2,7 @@
 ;; legacy-adapter.clar
 ;; Provides backward compatibility for legacy contracts and interfaces
 
-(impl-trait .all-traits.legacy-adapter-trait)
+(impl-trait legacy-adapter-trait)
 
 ;; ===== Constants =====
 (define-constant ERR_UNAUTHORIZED (err u100))

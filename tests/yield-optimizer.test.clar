@@ -8,6 +8,7 @@
 
     (define-contract-public .mock-wstx
       (
+        (use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
         (impl-trait .all-traits.sip-010-ft-trait)
         (define-data-var name (string-ascii 32) "Wrapped Stacks")
         (define-data-var symbol (string-ascii 32) "wSTX")

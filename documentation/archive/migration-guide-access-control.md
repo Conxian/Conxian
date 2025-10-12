@@ -1,3 +1,5 @@
+> NOTE: Archived. See canonical guide: ../guides/migration-guide-access-control.md
+
 # Access Control Migration Guide
 
 This guide provides step-by-step instructions for integrating the new AccessControl contract with existing Conxian protocol contracts.
@@ -14,7 +16,7 @@ The new AccessControl system provides:
 ## Prerequisites
 
 - Conxian contracts v2.0.0 or later
-- Clarinet v3.5.0+
+- Clarinet v3.7.0+
 - Node.js v18+
 
 ## Migration Steps

@@ -1,7 +1,6 @@
 ;; dex-router.clar
 ;; Conxian DEX Router - Routes trades across DEX pools and bond markets
 ;; Non-custodial, immutable design with bond trading support
-
 ;; --- Traits ---
 (use-trait router-trait .all-traits.router-trait)
 (use-trait factory-trait .all-traits.factory-trait)

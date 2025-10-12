@@ -16,14 +16,13 @@
 
 ;; --- Data Variables ---
 (define-data-var contract-owner principal tx-sender)
-(define-data-var next-position-id uint u0)
 
 ;; --- Maps ---
 ;; Map to store pool details: token-a, token-b, fee-bps
 (define-map pools { token-a: principal, token-b: principal } { fee-bps: uint, token-a-addr: principal, token-b-addr: principal })
 
-;; Map to store position details: owner, lower-tick, upper-tick, liquidity
-(define-map positions uint { owner: principal, token-a: principal, token-b: principal, lower-tick: int, upper-tick: int, liquidity: uint })
+;; Deterministic ordering registry for principals (owner-managed)
+(define-map token-order principal uint)
 
 ;; --- Private Functions ---
 
@@ -31,22 +30,20 @@
 (define-private (normalize-token-pair (token-a principal) (token-b principal))
   (if (is-eq token-a token-b)
     (err ERR_INVALID_TOKENS)
-    (let ((token-a-str (contract-call? .utils principal-to-buff token-a))
-          (token-b-str (contract-call? .utils principal-to-buff token-b)))
-      (if (< (buff-to-uint-be token-a-str) (buff-to-uint-be token-b-str))
+    (let ((order-a (default-to u0 (map-get? token-order token-a)))
+          (order-b (default-to u0 (map-get? token-order token-b))))
+      (if (< order-a order-b)
         (ok { token-a: token-a, token-b: token-b })
         (ok { token-a: token-b, token-b: token-a })
       )
     )
   )
 )
-
 ;; --- Public Functions (Pool Creation Trait Implementation) ---
 
 (define-public (create-pool (token-a sip-010-ft-trait) (token-b sip-010-ft-trait) (fee-bps uint))
   (begin
-    (asserts! (>= fee-bps u0) (err ERR_INVALID_FEE))
-    (asserts! (<= fee-bps u10000) (err ERR_INVALID_FEE)) ;; Max 100% fee
+{{ ... }}
     (asserts! (is-ok (contract-call? token-a get-symbol)) (err ERR_INVALID_TOKENS))
     (asserts! (is-ok (contract-call? token-b get-symbol)) (err ERR_INVALID_TOKENS))
     (asserts! (not (is-eq (contract-of token-a) (contract-of token-b))) (err ERR_INVALID_TOKENS))

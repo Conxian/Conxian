@@ -1,15 +1,20 @@
 # Conxian Protocol - Traits
 
+## ⚠️ IMPORTANT DEPRECATION NOTICE
+
+**As of SDK 3.7.0 (October 2025)**: All trait definitions are centralized in `all-traits.clar`. Individual trait files in subdirectories (`core/`, `defi/`, `security/`, etc.) are **DEPRECATED** and maintained only for reference.
+
 ## Overview
 
 The Conxian protocol uses a centralized trait system for consistency and maintainability. All trait definitions are contained in `all-traits.clar`, ensuring standardized interfaces across the entire protocol.
 
 ## Current Status ✅
 
-- ✅ **Centralized**: All traits defined in `all-traits.clar`
-- ✅ **No Duplicates**: Removed all duplicate trait definitions
-- ✅ **Well Organized**: Traits categorized by functionality
+- ✅ **Centralized**: All traits defined in `all-traits.clar` (718 lines, 40+ traits)
+- ✅ **No Duplicates**: Individual trait files deprecated
+- ✅ **Well Organized**: Traits categorized by functionality within `all-traits.clar`
 - ✅ **Enhanced Features**: Comprehensive trait definitions with advanced functionality
+- ⚠️ **Legacy Files**: Individual trait files in subdirectories are deprecated (for removal in future version)
 
 ## Trait Categories
 

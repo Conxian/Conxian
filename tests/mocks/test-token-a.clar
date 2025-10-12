@@ -1,14 +1,13 @@
 ;; Test Token A - Mock ERC20-like token for testing
 
+(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
 (impl-trait .all-traits.sip-010-ft-trait)
 
 ;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED (err u1001))
 (define-constant ERR_NOT_ENOUGH_BALANCE (err u1002))
 (define-constant ERR_OVERFLOW (err u1003))
-
 ;; --- Data Variables ---
-(define-data-var name (string-ascii 32) "Test Token A")
 (define-data-var symbol (string-ascii 10) "TTA")
 (define-data-var decimals uint u6)
 (define-data-var total-supply uint u0)
@@ -16,16 +15,10 @@
 
 (define-map balances { who: principal } { balance: uint })
 
-;; --- Events ---
-(define-event Transfer (sender principal) (recipient principal) (amount uint))
-(define-event Mint (to principal) (amount uint))
-(define-event Burn (from principal) (amount uint))
-
 ;; --- Public Functions ---
 (define-public (transfer (amount uint) (sender principal) (recipient principal) (memo (optional (buff 34))))
   (begin
     (asserts! (is-eq tx-sender sender) (err ERR_UNAUTHORIZED))
-    (asserts! (> amount u0) (err ERR_NOT_ENOUGH_BALANCE))
     
     (let (
       (sender-bal (default-to u0 (get balance (map-get? balances { who: sender }))))

@@ -1,5 +1,28 @@
 # Conxian System Gaps Analysis and Enhancement Implementation Plan
 
+## Phase 0: SDK 3.7.0 Alignment (Status: partial complete)
+
+- [x] Create utils implementation contract
+  - Added `contracts/utils/utils.clar` implementing `.all-traits.utils-trait` (placeholder, non-production serialization).
+- [x] Introduce deterministic encoding helper
+  - Added `contracts/utils/encoding.clar` providing stable `sha256 (to-consensus-buff ...)` encodings for commitments.
+- [x] Replace principal serialization with deterministic ordering
+  - `contracts/dex/dex-factory.clar`: added `token-order` map, `set-token-order()`, refactored `normalize-token-pair()`.
+  - `contracts/concentrated-liquidity-pool.clar`: added `token-order` map and deterministic normalization.
+- [x] Refactor MEV commitment hashing to deterministic encoding
+  - `contracts/dex/mev-protector.clar`: added `principal-index` map; switched to payload hashing via encoding helper.
+- [x] Replace unsupported buffer conversions
+  - `contracts/dex/weighted-swap-pool.clar`: replaced `buff-to-uint-be` with `to-uint (buff-to-int-be ...)`.
+  - `contracts/dimensional/concentrated-liquidity-pool-v2.clar`: same replacement in fee parsing.
+- [x] Manifest updates
+  - Registered `[contracts.utils]` and `[contracts.encoding]` in `Clarinet.toml`.
+  - Temporarily disabled `[contracts.wormhole-integration]` and `[contracts.nakamoto-compatibility]` (non-standard ops).
+- [ ] Resolve `.all-traits` principal mismatch in `clarinet check`
+  - Error observed: `NoSuchContract("ST1PQ... .all-traits")`.
+  - Actions next: search for explicit `ST1PQ...` references; ensure single deployer address; add `depends_on = ["all-traits"]` where needed; try `clarinet check` in `stacks/`.
+- [ ] Markdown lint cleanup (design/project_rules/requirements)
+  - Wrap long lines (MD013), normalize ordered list numbers (MD029), spacing (MD012), and indentation (MD007).
+
 ## Overview
 
 This implementation plan converts the gap analysis and enhancement design into a series of discrete, manageable coding tasks. Each task builds incrementally on previous work, ensuring no orphaned code and maintaining system stability throughout the enhancement process. The plan prioritizes critical gap resolution while implementing missing functionality to achieve Tier 1 DeFi protocol status.

@@ -1,16 +1,26 @@
 # Conxian System Gaps Analysis and Enhancement Design Document
 
-## Overview
+## SDK 3.7.0 Alignment Update (2025-10-09)
 
-This design document provides a comprehensive solution architecture to address the critical gaps identified in the Conxian DeFi platform. The design focuses on implementing missing functionality, completing incomplete features, and aligning the actual implementation with the documented architecture while maintaining backward compatibility and system stability.
-
-The enhancement strategy follows a modular approach, implementing missing contracts, completing partial implementations, and establishing proper integration patterns to transform Conxian into a fully-featured Tier 1 DeFi protocol.
+- **Centralized Traits Policy**: All contracts must import traits from `contracts/traits/all-traits.clar` using `.all-traits.<trait>` (canonical; no principal-qualified imports).
+- **Deterministic Token ordering**: Replaced non-standard principal serialization with admin-managed ordering via `token-order` maps.
+  - `contracts/dex/dex-factory.clar`: added `token-order` map and `set-token-order()`; updated `normalize-token-pair()`.
+  - `contracts/concentrated-liquidity-pool.clar`: added `token-order` and deterministic normalization.
+- **Deterministic Commitment Encoding**: Removed principal serialization in MEV commit hashing.
+  - `contracts/utils/encoding.clar`: new fixed, deterministic payload encoding using `sha256 (to-consensus-buff ...)`.
+  - `contracts/dex/mev-protector.clar`: introduced `principal-index` map and switched to encoded payload hashing.
+- **Non-standard Function Removal**: Replaced `buff-to-uint-be` with `to-uint (buff-to-int-be ...)` where needed.
+  - Updated: `contracts/dex/weighted-swap-pool.clar`, `contracts/dimensional/concentrated-liquidity-pool-v2.clar`.
+- **Manifest Updates**: Registered new utilities and excluded experimental contracts that rely on non-standard ops.
+  - Added: `[contracts.utils] -> contracts/utils/utils.clar`, `[contracts.encoding] -> contracts/utils/encoding.clar` in `Clarinet.toml`.
+  - Disabled: `[contracts.wormhole-integration]` and `[contracts.nakamoto-compatibility]` (non-standard `keccak256`, `string-to-buff`, etc.).
+- **Address Consistency**: Ensure `[contracts.all-traits]` uses the same deployer in both `Clarinet.toml` and `stacks/Clarinet.test.toml` (currently `ST3PP...JE6`). If `clarinet check` errors with `ST1PQH... .all-traits`, re-validate the active manifest and deployer address.
 
 ## Architecture
 
 ### High-Level Enhancement Architecture
 
-```
+```graph
 ┌─────────────────────────────────────────────────────────────────┐
 │                    Enhanced Conxian Platform                   │
 ├─────────────────────────────────────────────────────────────────┤
@@ -41,9 +51,16 @@ The enhancement strategy follows a modular approach, implementing missing contra
 
 The design implements a **three-layer enhancement approach**:
 
-1. **Preservation Layer**: Maintain all existing functionality without breaking changes
-2. **Enhancement Layer**: Complete partial implementations and fix compilation issues
-3. **Extension Layer**: Add missing functionality as specified in the PRD
+*1*. **Preservation Layer**: Maintain all functionality without breaking changes
+
+*2*. **Enhancement Layer**: Complete partial implementations and fix all issues
+
+*3*. **Extension Layer**: Add missing functionality as specified in the PRD:
+
+.windsurf\specs\system-gaps-analysis\design.md
+.windsurf\specs\system-gaps-analysis\project_rules.md
+.windsurf\specs\system-gaps-analysis\requirements.md
+.windsurf\specs\system-gaps-analysis\tasks.md
 
 ## Components and Interfaces
 

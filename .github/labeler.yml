@@ -4,7 +4,7 @@
 enhancement:
 - changed-files:
   - any-glob-to-any-file:
-    - 'stacks/contracts/**/*.clar'
+    - 'contracts/**/*.clar'
     - 'stacks/src/**/*.ts'
     - 'scripts/**/*.ts'
     - 'stacks/tests/**/*.ts'
@@ -26,10 +26,10 @@ bugfix:
 contracts:
 - changed-files:
   - any-glob-to-any-file:
-    - 'stacks/contracts/**/*.clar'
+    - 'contracts/**/*.clar'
 
 security:
 - changed-files:
   - any-glob-to-any-file:
-    - 'stacks/contracts/**/*.clar'
+    - 'contracts/**/*.clar'
     - 'documentation/SECURITY.md'

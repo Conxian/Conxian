@@ -1,12 +1,13 @@
 ;; Conxian DEX Factory V2 - Pool creation and registry
-;; This contract is responsible for creating and registering new DEX pools.
+  ;; This contract is responsible for creating and registering new DEX pools.
 
-;; --- Traits ---
-(use-trait access-control-trait .all-traits.access-control-trait)
-(use-trait factory-trait .all-traits.factory-trait)
-(use-trait pool-creation-trait .all-traits.pool-creation-trait)
-(use-trait circuit-breaker-trait .all-traits.circuit-breaker-trait)
-(impl-trait .all-traits.factory-trait)
+  ;; --- Traits ---
+  (use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
+  (use-trait access-control-trait .all-traits.access-control-trait)
+  (use-trait factory-trait .all-traits.factory-trait)
+  (use-trait pool-creation-trait .all-traits.pool-creation-trait)
+  (use-trait circuit-breaker-trait .all-traits.circuit-breaker-trait)
+(impl-trait factory-trait)
 
 ;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED (err u1003))
@@ -18,19 +19,20 @@
 (define-constant ERR_IMPLEMENTATION_NOT_FOUND (err u2006))
 (define-constant ERR_SWAP_FAILED (err u2007))
 (define-constant ERR_CIRCUIT_OPEN (err u5000))
-
 ;; --- Data Variables ---
 (define-data-var contract-owner principal tx-sender)
 (define-data-var access-control-contract principal .access-control)
 (define-data-var pool-count uint u0)
 (define-data-var circuit-breaker principal .circuit-breaker)
-(define-data-var default-pool-type (string-ascii 64) POOL_TYPE_CONSTANT_PRODUCT)
+(define-data-var default-pool-type (string-ascii 64) POOL_TYPE_WEIGHTED)
 
 ;; --- Maps ---
 (define-map pools { token-a: principal, token-b: principal } principal)
 (define-map pool-info principal { token-a: principal, token-b: principal, fee-bps: uint, created-at: uint })
 (define-map pool-implementations (string-ascii 64) principal)
 (define-map pool-types principal (string-ascii 64))
+;; Deterministic ordering registry for principals (owner-managed)
+(define-map token-order principal uint)
 
 ;; Stores pool type metadata
 (define-map pool-type-info (string-ascii 64) {
@@ -40,27 +42,29 @@
 })
 
 ;; Pool Types
-(define-constant POOL_TYPE_CONSTANT_PRODUCT "constant-product")
-(define-constant POOL_TYPE_STABLE "stable")
 (define-constant POOL_TYPE_WEIGHTED "weighted")
 (define-constant POOL_TYPE_CONCENTRATED_LIQUIDITY "concentrated-liquidity")
 (define-constant POOL_TYPE_LIQUIDITY_BOOTSTRAP "liquidity-bootstrap")
 
-(define-private (normalize-token-pair (token-a principal) (token-b principal))
-  (if (is-eq token-a token-b)
-    (err ERR_INVALID_TOKENS)
-    (let ((token-a-str (contract-call? .utils principal-to-buff token-a))
-          (token-b-str (contract-call? .utils principal-to-buff token-b)))
-      (if (< (buff-to-uint-be token-a-str) (buff-to-uint-be token-b-str))
-        (ok { token-a: token-a, token-b: token-b })
-        (ok { token-a: token-b, token-b: token-a })
+  (define-private (normalize-token-pair (token-a principal) (token-b principal))
+    (if (is-eq token-a token-b)
+      (err ERR_INVALID_TOKENS)
+      (let ((order-a (default-to u0 (map-get? token-order token-a)))
+            (order-b (default-to u0 (map-get? token-order token-b))))
+        (if (< order-a order-b)
+          (ok { token-a: token-a, token-b: token-b })
+          (ok { token-a: token-b, token-b: token-a })
+        )
       )
     )
   )
-)
+
 
 (define-private (check-is-owner)
-  (ok (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED))
+  (begin
+    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
+    (ok true)
+  )
 )
 
 (define-private (check-pool-manager)
@@ -82,7 +86,7 @@
 
 ;; --- Public Functions ---
 
-(define-public (create-pool (token-a sip-010-ft-trait) (token-b sip-010-ft-trait) (pool-type (string-ascii 64)) (fee-bps uint))
+(define-public (create-pool (token-a <sip-010-ft-trait>) (token-b <sip-010-ft-trait>) (pool-type (string-ascii 64)) (fee-bps uint))
   (begin
     (try! (check-pool-manager))
     (asserts! (not (try! (check-circuit-breaker))) ERR_CIRCUIT_OPEN)
@@ -143,6 +147,15 @@
   )
 )
 
+;; Owner-only: set deterministic order index for a token principal
+(define-public (set-token-order (token principal) (order uint))
+  (begin
+    (try! (check-is-owner))
+    (map-set token-order token order)
+    (ok true)
+  )
+)
+
 ;; Register a pool implementation for a specific pool type
 (define-public (register-pool-implementation (pool-type (string-ascii 64)) (implementation-contract principal))
   (begin
@@ -171,7 +184,13 @@
   (begin
     (try! (check-is-owner))
     (asserts! (is-some (map-get? pool-type-info pool-type)) (err ERR_INVALID_POOL_TYPE))
-    (map-set pool-type-info pool-type (merge (unwrap-panic (map-get? pool-type-info pool-type)) { is-active: is-active }))
+    (let ((pti (unwrap-panic (map-get? pool-type-info pool-type))))
+      (map-set pool-type-info pool-type {
+        name: (get name pti),
+        description: (get description pti),
+        is-active: is-active
+      })
+    )
     (ok true)
   )
 )

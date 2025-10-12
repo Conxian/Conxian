@@ -1,5 +1,22 @@
 # Conxian System Gaps Analysis and Enhancement Requirements
 
+## Repository Rules (SDK 3.7.0)
+
+- **Centralized Traits Only**: Always reference traits via `.all-traits.<trait>` in code. Do not use principal-qualified trait imports. Example: `(use-trait pool-trait .all-traits.pool-trait)` and `(impl-trait .all-traits.pool-trait)`.
+- **Read-First Workflow**: Before edits, search and read all relevant files to avoid drift. Document changes with exact paths, functions, and rationale.
+- **Non-Standard Functions Policy**: Do not use `keccak256`, `principal-to-buff`, `string-to-buff`, or `buff-to-uint-be`. Any usage must be refactored to SDK-supported patterns or gated as experimental.
+- **Deterministic Token Ordering**: Replace principal serialization comparisons with owner-managed order indices using a `token-order` map and a setter like `set-token-order()`.
+- **Deterministic Encoding**: Use canonical `to-consensus-buff` + `sha256` for payload hashing. Centralize in `contracts/utils/encoding.clar` to keep encodings stable and audited.
+- **Manifest Best Practices**:
+  - Ensure `[contracts.all-traits]` exists and uses the same deployer across `Clarinet.toml` and `stacks/Clarinet.test.toml`.
+  - Register shared utilities: `[contracts.utils]` and `[contracts.encoding]`.
+  - Temporarily disable experimental or non-standard contracts by renaming sections, e.g. `[disabled.wormhole-integration]`.
+  - Add `depends_on = ["all-traits"]` where necessary to aid build order.
+- **Testing & CI**:
+  - `clarinet check` must pass before merges.
+  - Use `vitest.config.enhanced.ts` for full suite; isolate trait tests with `vitest.config.traits.ts`.
+  - Keep markdown and repo lints green. Fix MD013/MD029/MD012/MD007 promptly.
+
 ## Introduction
 
 Conxian is a comprehensive DeFi platform on Stacks with over 100 smart contracts, advanced mathematical libraries, and extensive tokenomics. However, analysis reveals critical gaps between the current implementation and the planned features outlined in the PRD documents. This requirements document identifies missing functionality, incomplete implementations, and alignment issues that must be addressed to achieve the system's full potential as a Tier 1 DeFi protocol.

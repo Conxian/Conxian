@@ -1,34 +1,22 @@
 ;; all-traits.clar
 ;; Conxian Protocol - Centralized Trait Definitions
 ;; All protocol contracts should reference traits from this file
-;; Version: 1.0.0
-
 ;; =============================================================================
 ;; TOKEN STANDARDS (SIPs)
 ;; =============================================================================
 
-;; SIP-010: Fungible Token Standard
-(define-trait sip-010-ft-trait
-  (
-    (transfer (amount uint) (sender principal) (recipient principal) (memo (optional (buff 34))) (response bool (err uint)))
-    (get-balance (account principal) (response uint (err uint)))
-    (get-total-supply () (response uint (err uint)))
-    (get-decimals () (response uint (err uint)))
-    (get-name () (response (string-ascii 32) (err uint)))
-    (get-symbol () (response (string-ascii 10) (err uint)))
-    (get-token-uri () (response (optional (string-utf8 256)) (err uint)))
+  ;; SIP-010: Fungible Token Standard
+  (define-trait sip-010-ft-trait
+    (
+      (transfer (amount uint) (sender principal) (recipient principal) (memo (optional (buff 34))) (response bool uint))
+      (get-balance (account principal) (response uint uint))
+      (get-total-supply () (response uint uint))
+      (get-decimals () (response uint uint))
+      (get-name () (response (string-ascii 32) uint))
+      (get-symbol () (response (string-ascii 10) uint))
+      (get-token-uri () (response (optional (string-utf8 256)) uint))
+    )
   )
-)
-
-;; SIP-009: NFT Standard
-(define-trait sip-009-nft-trait
-  (
-    (get-last-token-id () (response uint (err uint)))
-    (get-token-uri (token-id uint) (response (optional (string-utf8 256)) (err uint)))
-    (get-owner (token-id uint) (response (optional principal) (err uint)))
-    (transfer (token-id uint) (sender principal) (recipient principal) (response bool (err uint)))
-  )
-)
 
 ;; =============================================================================
 ;; CORE TRAITS
@@ -123,11 +111,11 @@
 ;; Monitoring Trait - System monitoring and alerting
 (define-trait monitoring-trait
   (
-    (log-event (component (string-ascii 32)) (event-type (string-ascii 32)) (severity uint) (message (string-ascii 256)) (data (optional (tuple))) (response bool (err uint)))
+    (log-event (component (string-ascii 32)) (event-type (string-ascii 32)) (severity uint) (message (string-ascii 256)) (data (optional (buff 256))) (response bool (err uint)))
     (get-events (component (string-ascii 32)) (limit uint) (offset uint)
-      (response (list 100 (tuple (id uint) (event-type (string-ascii 32)) (severity uint) (message (string-ascii 256)) (block-height uint) (data (optional (tuple))))) (err uint)))
+      (response (list 100 (tuple (id uint) (event-type (string-ascii 32)) (severity uint) (message (string-ascii 256)) (block-height uint) (data (optional (buff 256))))) (err uint)))
     (get-event (event-id uint)
-      (response (tuple (id uint) (component (string-ascii 32)) (event-type (string-ascii 32)) (severity uint) (message (string-ascii 256)) (block-height uint) (data (optional (tuple)))) (err uint)))
+      (response (tuple (id uint) (component (string-ascii 32)) (event-type (string-ascii 32)) (severity uint) (message (string-ascii 256)) (block-height uint) (data (optional (buff 256)))) (err uint)))
     (get-health-status (component (string-ascii 32))
       (response (tuple (status uint) (last-updated uint) (uptime uint) (error-count uint) (warning-count uint)) (err uint)))
     (set-alert-threshold (component (string-ascii 32)) (alert-type (string-ascii 32)) (threshold uint) (response bool (err uint)))
@@ -714,4 +702,6 @@
 ;;
 ;; Note: The relative path `.all-traits` assumes the contract is deployed
 ;; by the same principal. For cross-principal references, use full principal.
+
+
 

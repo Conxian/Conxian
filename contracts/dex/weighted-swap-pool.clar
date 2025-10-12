@@ -72,7 +72,6 @@
 (define-private (get-amount-out (amount-in uint) (balance-in uint) (balance-out uint) (weight-in uint) (weight-out uint))
   ;; out = balanceOut * (1 - (balanceIn / (balanceIn + amountIn))^(weightIn/weightOut))
   (let ((ratio (/ (* balance-in u100000000) (+ balance-in amount-in))))
-    (let ((power (pow-approx ratio (/ (* weight-in u100000000) weight-out))))
       (* balance-out (- u100000000 power))
     )
   )
@@ -81,8 +80,8 @@
 (define-private (get-weights-from-params (params (buff 256)))
   (if (>= (len params) u8)
     (ok { 
-      weight-x: (buff-to-uint-be (slice params 0 4)),
-      weight-y: (buff-to-uint-be (slice params 4 8))
+      weight-x: (to-uint (buff-to-int-be (slice params 0 4))),
+      weight-y: (to-uint (buff-to-int-be (slice params 4 8)))
     })
     (err ERR_INVALID_WEIGHTS)
   )
@@ -92,7 +91,6 @@
   ;; Simplified power function using integer math
   (if (is-eq exp u100000000) base
     (if (is-eq exp u0) u100000000
-      (if (< exp u100000000)
         (/ (* base exp) u100000000)
         (* base (/ exp u100000000))
       )
