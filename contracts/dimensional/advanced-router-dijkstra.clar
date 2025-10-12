@@ -4,7 +4,7 @@
 ;; Optimizes for best price with minimal gas
 
 
-(impl-trait .all-traits.advanced-router-dijkstra-trait)
+(impl-trait advanced-router-dijkstra-trait)
 
 ;; === CONSTANTS ===
 (define-constant CONTRACT_OWNER tx-sender)

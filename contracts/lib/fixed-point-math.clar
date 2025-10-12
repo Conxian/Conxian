@@ -6,7 +6,7 @@
 (define-constant ERR_DIVISION_BY_ZERO (err u2002))
 (define-constant ERR_INVALID_PRECISION (err u2003))
 
-(impl-trait .all-traits.fixed-point-math-trait)
+(impl-trait fixed-point-math-trait)
 
 ;; Precision constants
 (define-constant ONE_18 u1000000000000000000) ;; 18 decimals
