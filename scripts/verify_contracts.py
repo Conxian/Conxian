@@ -18,6 +18,8 @@ import toml
 from pathlib import Path
 from typing import Dict, List, Set, Tuple, Optional
 import importlib.util
+import argparse
+import json
 
 # Configuration
 ROOT_DIR = Path(__file__).parent.parent
@@ -362,6 +364,125 @@ class ContractVerifier:
             self.warnings.append("Call graph cycles detected: " + " | ".join(pretty) + more)
 
         return True
+
+    # --------------------
+    # Auto-fix utilities
+    # --------------------
+    def _contracts_using_all_traits(self) -> List[Path]:
+        results: List[Path] = []
+        for f in self.contract_files:
+            try:
+                content = self._strip_comments(f.read_text())
+            except Exception:
+                continue
+            if '.all-traits.' in content:
+                results.append(f)
+        return results
+
+    def autofix_manifest_depends_on(self) -> int:
+        """Ensure depends_on = ["all-traits"] is present for any contract listed in
+        stacks/Clarinet.test.toml that uses centralized traits.
+
+        Returns number of modifications made.
+        """
+        if not STACKS_TEST_TOML.exists():
+            self.warnings.append("Test manifest not found; cannot autofix depends_on.")
+            return 0
+
+        test_contracts = self.test_config.get("contracts", {})
+
+        # Build reverse map path(normalized) -> key
+        path_to_key: Dict[str, str] = {}
+        for key, entry in test_contracts.items():
+            if isinstance(entry, dict) and 'path' in entry:
+                norm = entry['path'].replace('\\', '/')
+                path_to_key[norm] = key
+
+        modified = 0
+        for f in self._contracts_using_all_traits():
+            rel_part = str(f.relative_to(self.contracts_dir)).replace('\\', '/')
+            path_variants = [f"contracts/{rel_part}", rel_part]
+            key = None
+            for pv in path_variants:
+                if pv in path_to_key:
+                    key = path_to_key[pv]
+                    break
+            if not key:
+                # not listed in test manifest; skip
+                continue
+            entry = test_contracts.get(key)
+            if not isinstance(entry, dict):
+                continue
+            deps = entry.get('depends_on')
+            if not isinstance(deps, list):
+                entry['depends_on'] = ['all-traits']
+                modified += 1
+            else:
+                if 'all-traits' not in deps:
+                    entry['depends_on'] = ['all-traits'] + deps
+                    modified += 1
+
+        if modified > 0:
+            # Write back
+            data = dict(self.test_config)
+            data['contracts'] = test_contracts
+            with open(STACKS_TEST_TOML, 'w') as f:
+                toml.dump(data, f)
+            # Reload into memory
+            with open(STACKS_TEST_TOML, 'r') as f:
+                self.test_config = toml.load(f)
+
+        return modified
+    
+    def autofix_graph_dynamic_calls(self) -> int:
+        """Generate suggestions for refactoring dynamic contract-call? patterns in non-test contracts
+        to use trait-typed parameters instead.
+        
+        Writes artifacts/autofix-graph-suggestions.json with suggestions.
+        Returns number of suggestions generated.
+        """
+        self._load_system_graph()
+        if not self.system_graph or not self._graph:
+            # Build graph if not already done
+            try:
+                graph = self.system_graph.build_system_graph(ROOT_DIR)
+                self._graph = graph
+            except Exception as e:
+                self.warnings.append(f"Failed to build system graph for autofix: {e}")
+                return 0
+        
+        graph = self._graph
+        node_types: Dict[str, str] = {n["id"]: n.get("type", "") for n in graph.get("nodes", [])}
+        
+        suggestions = []
+        for e in graph.get("edges", []):
+            if e.get("type") == "dynamic-call":
+                src = e.get("from", "")
+                target = e.get("to", "")
+                # Only suggest for contracts (not tests)
+                if node_types.get(src) == "contract":
+                    suggestions.append({
+                        "source": src,
+                        "target": target,
+                        "recommendation": f"Consider refactoring {src} to accept {target} as a trait-typed parameter (<sip-010-ft-trait>) and use static contract-call? instead of dynamic dispatch."
+                    })
+        
+        # Write to artifacts
+        artifacts_dir = ROOT_DIR / "artifacts"
+        artifacts_dir.mkdir(exist_ok=True)
+        output_path = artifacts_dir / "autofix-graph-suggestions.json"
+        with open(output_path, 'w') as f:
+            json.dump({
+                "dynamic_call_suggestions": suggestions,
+                "count": len(suggestions)
+            }, f, indent=2)
+        
+        if suggestions:
+            print(f"Generated {len(suggestions)} graph refactoring suggestions in {output_path}")
+        else:
+            print(f"No dynamic call patterns found requiring refactoring.")
+        
+        return len(suggestions)
     
     def check_compilation(self) -> bool:
         """Check if all contracts compile successfully (tolerate known false positives)."""
@@ -460,6 +581,17 @@ class ContractVerifier:
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Conxian Contract Verification")
+    parser.add_argument("--autofix-manifest", action="store_true", help="Auto-add depends_on=['all-traits'] in stacks/Clarinet.test.toml where missing for centralized-trait users.")
+    parser.add_argument("--autofix-graph", action="store_true", help="Suggest refactors for dynamic contract-call? in non-test contracts (writes artifacts/autofix-graph-suggestions.json)")
+    args = parser.parse_args()
+
     verifier = ContractVerifier()
+    if args.autofix_manifest:
+        mods = verifier.autofix_manifest_depends_on()
+        print(f"Auto-fix manifest: {mods} modifications applied.")
+    if args.autofix_graph:
+        cnt = verifier.autofix_graph_dynamic_calls()
+        # Do not fail if no suggestions; proceed to verification
     if not verifier.run_verification():
         exit(1)
