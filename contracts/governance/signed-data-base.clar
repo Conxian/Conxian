@@ -1,3 +1,4 @@
+(use-trait sip-018 .all-traits.sip-018-trait)
 (use-trait sip-018-trait .all-traits.sip-018-trait)
 ;; signed-data-base.clar
 ;; Base implementation of SIP-018 Signed Structured Data standard
@@ -5,7 +6,7 @@
 
 ;; Centralized traits
 
-(impl-trait sip-018-trait)
+(impl-trait sip-018)
 
 ;; Constants
 (define-constant ERR_INVALID_SIGNATURE (err u6300))
@@ -82,4 +83,5 @@
         (asserts! (is-eq tx-sender (var-get admin)) ERR_INVALID_SIGNER)
         (var-set domain-separator new-separator)
         (ok true)))
+
 

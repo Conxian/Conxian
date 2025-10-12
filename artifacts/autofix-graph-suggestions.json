@@ -51,6 +51,11 @@
       "recommendation": "Consider refactoring file:contracts/dex/asset-vault.clar to accept token as a trait-typed parameter (<sip-010-ft-trait>) and use static contract-call? instead of dynamic dispatch."
     },
     {
+      "source": "file:contracts/dex/asset-vault.clar",
+      "target": "token",
+      "recommendation": "Consider refactoring file:contracts/dex/asset-vault.clar to accept token as a trait-typed parameter (<sip-010-ft-trait>) and use static contract-call? instead of dynamic dispatch."
+    },
+    {
       "source": "file:contracts/dex/auto-compounder.clar",
       "target": "cb",
       "recommendation": "Consider refactoring file:contracts/dex/auto-compounder.clar to accept cb as a trait-typed parameter (<sip-010-ft-trait>) and use static contract-call? instead of dynamic dispatch."
@@ -1316,5 +1321,5 @@
       "recommendation": "Consider refactoring file:contracts/vaults/sbtc-vault.clar to accept token-contract as a trait-typed parameter (<sip-010-ft-trait>) and use static contract-call? instead of dynamic dispatch."
     }
   ],
-  "count": 263
+  "count": 264
 }

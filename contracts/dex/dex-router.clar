@@ -1,3 +1,4 @@
+(use-trait router .all-traits.router-trait)
 ;; dex-router.clar
 ;; Conxian DEX Router - Routes trades across DEX pools and bond markets
 ;; Non-custodial, immutable design with bond trading support
@@ -6,7 +7,7 @@
 (use-trait factory-trait .all-traits.factory-trait)
 (use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
 
-(impl-trait router-trait)
+(impl-trait router)
 
 ;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED (err u4000))
@@ -357,5 +358,6 @@
     (ok true)
   )
 )
+
 
 

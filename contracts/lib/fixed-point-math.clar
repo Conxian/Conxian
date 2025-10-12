@@ -1,3 +1,4 @@
+(use-trait fixed-point-math .all-traits.fixed-point-math-trait)
 (use-trait fixed-point-math-trait .all-traits.fixed-point-math-trait)
 ;; fixed-point-math.clar
 ;; Base fixed-point arithmetic utilities without external dependencies
@@ -6,7 +7,7 @@
 (define-constant ERR_DIVISION_BY_ZERO (err u2002))
 (define-constant ERR_INVALID_PRECISION (err u2003))
 
-(impl-trait fixed-point-math-trait)
+(impl-trait fixed-point-math)
 
 ;; Precision constants
 (define-constant ONE_18 u1000000000000000000) ;; 18 decimals
@@ -208,4 +209,5 @@
       (if (or (< result a) (< result b) (not (is-eq (/ result a) b)))
         ERR_OVERFLOW
         (ok result)))))
+
 

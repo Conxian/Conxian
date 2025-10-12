@@ -1,9 +1,10 @@
+(use-trait keeper-coordinator .all-traits.keeper-coordinator-trait)
 (use-trait keeper-coordinator-trait .all-traits.keeper-coordinator-trait)
 ;; keeper-coordinator.clar
 ;; Central coordinator for automated keeper tasks across the Conxian protocol
 ;; Manages automated interest accrual, liquidations, rebalancing, and fee distribution
 
- (impl-trait keeper-coordinator-trait)
+ (impl-trait keeper-coordinator)
 
 ;; ===== Constants =====
 (define-constant ERR_UNAUTHORIZED (err u9001))
@@ -329,3 +330,4 @@
 (define-read-only (should-execute-now)
   (and (var-get keeper-enabled)
        (>= (- block-height (var-get last-execution-block)) (var-get execution-interval))))
+

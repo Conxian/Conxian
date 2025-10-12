@@ -857,10 +857,8 @@ digraph conxian {
   "file:contracts/mocks/mock-dao.clar" -> "trait:dao-trait" [color="#3333ff", label="impl-trait"];
   "file:contracts/mocks/mock-oracle.clar" -> "trait:oracle-trait" [color="#8888ff", label="use-trait"];
   "file:contracts/mocks/mock-oracle.clar" -> "trait:oracle-trait" [color="#3333ff", label="impl-trait"];
-  "file:contracts/mocks/mock-strategy-a.clar" -> "trait:sip-010-ft-trait" [color="#8888ff", label="use-trait"];
   "file:contracts/mocks/mock-strategy-a.clar" -> "asset" [color="#ffaa00", label="dynamic-call"];
   "file:contracts/mocks/mock-strategy-a.clar" -> "asset" [color="#ffaa00", label="dynamic-call"];
-  "file:contracts/mocks/mock-strategy-b.clar" -> "trait:sip-010-ft-trait" [color="#8888ff", label="use-trait"];
   "file:contracts/mocks/mock-strategy-b.clar" -> "asset" [color="#ffaa00", label="dynamic-call"];
   "file:contracts/mocks/mock-strategy-b.clar" -> "asset" [color="#ffaa00", label="dynamic-call"];
   "file:contracts/oracle/dimensional-oracle.clar" -> "trait:oracle-trait" [color="#8888ff", label="use-trait"];

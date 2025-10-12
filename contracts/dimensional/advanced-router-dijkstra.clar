@@ -1,10 +1,11 @@
+(use-trait advanced-router-dijkstra .all-traits.advanced-router-dijkstra-trait)
 (use-trait advanced-router-dijkstra-trait .all-traits.advanced-router-dijkstra-trait)
 ;; Advanced Router with Dijkstra's Algorithm
 ;; Implements optimal path finding for multi-hop swaps
 ;; Optimizes for best price with minimal gas
 
 
-(impl-trait advanced-router-dijkstra-trait)
+(impl-trait advanced-router-dijkstra)
 
 ;; === CONSTANTS ===
 (define-constant CONTRACT_OWNER tx-sender)
@@ -296,3 +297,4 @@
   
   ;; Quick estimate without executing
   (find-optimal-path token-in token-out amount-in))
+

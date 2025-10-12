@@ -8,8 +8,8 @@
 ;; SIP-010: Fungible Token Standard
 (define-trait sip-010-ft-trait
   (
-    (transfer (uint principal principal (optional (buff 34))) (response bool uint))
-    (get-balance (principal) (response uint uint))
+    (transfer (amount uint) (sender principal) (recipient principal) (memo (optional (buff 34))) (response bool uint))
+    (get-balance (account principal) (response uint uint))
     (get-total-supply () (response uint uint))
     (get-decimals () (response uint uint))
     (get-name () (response (string-ascii 32) uint))
@@ -22,9 +22,9 @@
 (define-trait sip-009-nft-trait
   (
     (get-last-token-id () (response uint uint))
-    (get-token-uri (uint) (response (optional (string-ascii 256)) uint))
-    (get-owner (uint) (response (optional principal) uint))
-    (transfer (uint principal principal) (response bool uint))
+    (get-token-uri (token-id uint) (response (optional (string-ascii 256)) uint))
+    (get-owner (token-id uint) (response (optional principal) uint))
+    (transfer (token-id uint) (sender principal) (recipient principal) (response bool uint))
   )
 )
 
@@ -36,7 +36,7 @@
 (define-trait ownable-trait
   (
     (get-owner () (response principal uint))
-    (transfer-ownership (principal) (response bool uint))
+    (transfer-ownership (new-owner principal) (response bool uint))
     (renounce-ownership () (response bool uint))
   )
 )
@@ -520,14 +520,14 @@
 ;; Additional SIP Traits
 (define-trait sip-018-trait
   (
-    (get-balance (uint principal) (response uint uint))
-    (get-overall-balance (principal) (response uint uint))
-    (get-total-supply (uint) (response uint uint))
+    (get-balance (token-id uint) (user principal) (response uint uint))
+    (get-overall-balance (user principal) (response uint uint))
+    (get-total-supply (token-id uint) (response uint uint))
     (get-overall-supply () (response uint uint))
-    (get-decimals (uint) (response uint uint))
-    (get-token-uri (uint) (response (optional (string-ascii 256)) uint))
-    (transfer (uint uint principal principal) (response bool uint))
-    (transfer-memo (uint uint principal principal (buff 34)) (response bool uint))
+    (get-decimals (token-id uint) (response uint uint))
+    (get-token-uri (token-id uint) (response (optional (string-ascii 256)) uint))
+    (transfer (token-id uint) (amount uint) (sender principal) (recipient principal) (response bool uint))
+    (transfer-memo (token-id uint) (amount uint) (sender principal) (recipient principal) (memo (buff 34)) (response bool uint))
   )
 )
 

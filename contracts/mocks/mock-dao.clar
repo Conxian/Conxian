@@ -1,10 +1,11 @@
+(use-trait dao .all-traits.dao-trait)
 (use-trait dao-trait .all-traits.dao-trait)
 ;; mock-dao.clar
 ;; Mock DAO implementation for testing the audit registry
 
 ;; --- Traits ---
 
-(impl-trait dao-trait)
+(impl-trait dao)
 
 ;; Constants
 (define-constant TRAIT_REGISTRY .trait-registry)
@@ -73,4 +74,5 @@
     canceled: false
   })
 )
+
 
