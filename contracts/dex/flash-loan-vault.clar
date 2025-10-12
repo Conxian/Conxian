@@ -395,13 +395,13 @@
       (flash-loans-count (get total-loans stats))
       (flash-loan-volume (get total-volume stats))
       (fees-collected (get total-fees stats))
-      (utilization-rate utilization-rate))))
+      (utilization-rate utilization-rate)))))
 
 (define-public (flash-loan-basic (amount uint) (recipient principal))
   (let ((token-principal (unwrap-panic (var-get default-loan-asset))))
     (match (as-contract (contract-call? token-principal transfer amount tx-sender recipient none))
       (ok success) (ok success)
-      (err e) (err e)))
+      (err e) (err e))))
 
 (define-public (set-protocol-monitor (monitor-contract principal))
   (begin
@@ -483,4 +483,6 @@
     (protocol-reserve (var-get protocol-reserve))
     (treasury-reserve (var-get treasury-reserve))
     (total-revenue (+ (var-get protocol-reserve) (var-get treasury-reserve)))
-    (revenue-share-bps (var-get revenue-share-bps)))))
+    (revenue-share-bps (var-get revenue-share-bps))
+  ))
+)
