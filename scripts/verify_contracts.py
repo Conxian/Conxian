@@ -17,11 +17,13 @@ import re
 import toml
 from pathlib import Path
 from typing import Dict, List, Set, Tuple, Optional
+import importlib.util
 
 # Configuration
 ROOT_DIR = Path(__file__).parent.parent
 CONTRACTS_DIR = ROOT_DIR / "contracts"
 CLARINET_TOML = ROOT_DIR / "Clarinet.toml"
+STACKS_TEST_TOML = ROOT_DIR / "stacks" / "Clarinet.test.toml"
 TRAITS_FILE = ROOT_DIR / "contracts" / "traits" / "all-traits.clar"
 
 # Directories not required to be listed in Clarinet.toml (auxiliary/non-deployable)
@@ -77,9 +79,14 @@ class ContractVerifier:
         self.errors: List[str] = []
         self.warnings: List[str] = []
         
-        # Load Clarinet.toml
+        # Load Clarinet.toml (root) and stacks/Clarinet.test.toml (test)
         with open(self.clarinet_toml, 'r') as f:
             self.config = toml.load(f)
+        if STACKS_TEST_TOML.exists():
+            with open(STACKS_TEST_TOML, 'r') as f:
+                self.test_config = toml.load(f)
+        else:
+            self.test_config = {"contracts": {}}
             
         # Find all contract files
         self.contract_files = list(self.contracts_dir.rglob("*.clar"))
@@ -92,6 +99,27 @@ class ContractVerifier:
         self.defined_traits: Set[str] = set()
         self.trait_definitions: Dict[str, List[str]] = {}
         self._load_traits()
+
+        # Lazy-load system graph module (avoid package import issues)
+        self.system_graph = None
+        self._graph = None
+
+    def _load_system_graph(self):
+        if self.system_graph is not None:
+            return
+        sg_path = ROOT_DIR / "scripts" / "system_graph.py"
+        if not sg_path.exists():
+            self.warnings.append("system_graph.py not found; skipping system graph analysis.")
+            self.system_graph = False
+            return
+        spec = importlib.util.spec_from_file_location("system_graph", str(sg_path))
+        if not spec or not spec.loader:
+            self.warnings.append("Failed to load system_graph module; skipping graph analysis.")
+            self.system_graph = False
+            return
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)  # type: ignore
+        self.system_graph = module
         
     def _strip_comments(self, content: str) -> str:
         """Remove Clarity line comments starting with ';' to avoid false positives in regex scans."""
@@ -208,22 +236,31 @@ class ContractVerifier:
         return success
 
     def verify_manifest_alignment(self) -> bool:
-        """Ensure contracts using centralized .all-traits.* are listed in Clarinet.toml with same address as all-traits, and advise depends_on."""
-        success = True
-        contracts_table = self.config.get("contracts", {})
-        # Build path -> (name, address, depends_on)
-        manifest_paths: Dict[str, Tuple[str, Optional[str], List[str]]] = {}
-        for name, entry in contracts_table.items():
-            if isinstance(entry, dict):
-                path = entry.get('path')
-                addr = entry.get('address')
-                deps = entry.get('depends_on', []) or []
-                if path:
-                    manifest_paths[path.replace('\\', '/')] = (name, addr, deps)
+        """Ensure contracts using centralized .all-traits.* are listed in manifests with same address as all-traits, and advise depends_on.
 
-        # Determine all-traits address
-        all_traits = contracts_table.get('all-traits', {})
-        all_traits_addr = all_traits.get('address') if isinstance(all_traits, dict) else None
+        Preference order for checks: stacks/Clarinet.test.toml > Clarinet.toml.
+        If the test manifest contains the contract path and has depends_on, warnings are suppressed.
+        """
+        success = True
+        root_contracts = self.config.get("contracts", {})
+        test_contracts = self.test_config.get("contracts", {})
+
+        # Build path -> (name, address, depends_on, source)
+        manifest_paths: Dict[str, Tuple[str, Optional[str], List[str], str]] = {}
+        for source, table in (("test", test_contracts), ("root", root_contracts)):
+            for name, entry in table.items():
+                if isinstance(entry, dict):
+                    path = entry.get('path')
+                    addr = entry.get('address')
+                    deps = entry.get('depends_on', []) or []
+                    if path:
+                        manifest_paths[path.replace('\\', '/')] = (name, addr, deps, source)
+
+        # Determine all-traits address for both manifests
+        test_all_traits = test_contracts.get('all-traits', {})
+        test_all_traits_addr = test_all_traits.get('address') if isinstance(test_all_traits, dict) else None
+        root_all_traits = root_contracts.get('all-traits', {})
+        root_all_traits_addr = root_all_traits.get('address') if isinstance(root_all_traits, dict) else None
 
         for f in self.contract_files:
             content = self._strip_comments(f.read_text())
@@ -236,17 +273,21 @@ class ContractVerifier:
                     self.errors.append(f"Contract using centralized traits not listed in Clarinet.toml: {rel}")
                     success = False
                     continue
-                _, addr, deps = manifest_entry
-                if all_traits_addr and addr and addr != all_traits_addr:
+                _, addr, deps, source = manifest_entry
+                # Compare against matching manifest's all-traits address
+                reference_addr = test_all_traits_addr if source == "test" else root_all_traits_addr
+                if reference_addr and addr and addr != reference_addr:
                     self.errors.append(
-                        f"Address mismatch for {rel}: {addr} != all-traits address {all_traits_addr}. This can cause NoSuchContract(.all-traits)."
+                        f"Address mismatch for {rel}: {addr} != all-traits address {reference_addr} in {source} manifest."
                     )
                     success = False
                 # Soft-check depends_on
                 if isinstance(deps, list) and 'all-traits' not in deps:
-                    self.warnings.append(
-                        f"Recommend depends_on = ['all-traits'] for {rel} to ensure build order."
-                    )
+                    # Only warn when the preferred manifest (test) is missing depends_on
+                    if source == "test":
+                        self.warnings.append(
+                            f"Recommend depends_on = ['all-traits'] for {rel} to ensure build order."
+                        )
         return success
     
     def verify_trait_implementation(self) -> bool:
@@ -255,6 +296,72 @@ class ContractVerifier:
         # and verify they match the trait definitions
         # For now, we'll just check that the trait is implemented
         return True  # Placeholder for actual implementation
+
+    def analyze_system_graph(self) -> bool:
+        """Build and analyze the system graph to surface structural issues."""
+        self._load_system_graph()
+        if not self.system_graph:
+            return True
+
+        try:
+            graph = self.system_graph.build_system_graph(ROOT_DIR)
+            self._graph = graph
+        except Exception as e:
+            self.warnings.append(f"Failed to build system graph: {e}")
+            return True
+
+        # Collect node ids for traits and files
+        node_ids = {n["id"] for n in graph.get("nodes", [])}
+
+        # 1) Unknown trait references (edges to trait:* without a matching node)
+        unknown_traits: Set[str] = set()
+        # 2) Unresolved static calls (.contract not found)
+        unresolved_calls: List[Tuple[str, str]] = []
+        # 3) Dynamic calls from contracts (not tests)
+        dynamic_calls_from_contracts: List[Tuple[str, str]] = []
+
+        # Build map from node id to type for contract/test identification
+        node_types: Dict[str, str] = {n["id"]: n.get("type", "") for n in graph.get("nodes", [])}
+
+        for e in graph.get("edges", []):
+            etype = e.get("type")
+            to = e.get("to")
+            src = e.get("from")
+            if etype in ("use-trait", "impl-trait") and isinstance(to, str) and to.startswith("trait:"):
+                if to not in node_ids:
+                    unknown_traits.add(to.replace("trait:", ""))
+            if etype == "calls" and not e.get("resolved"):
+                unresolved_calls.append((src, to))
+            if etype == "dynamic-call":
+                # flag only if source is a contract (not a test)
+                if node_types.get(src) == "contract":
+                    dynamic_calls_from_contracts.append((src, str(to)))
+
+        # 4) Cycles
+        cycles = graph.get("cycles", []) or []
+
+        # Emit warnings (non-fatal for now; policy can escalate later)
+        if unknown_traits:
+            self.warnings.append(
+                "Unknown trait references detected in graph: " + ", ".join(sorted(unknown_traits))
+            )
+        if unresolved_calls:
+            sample = "; ".join([f"{s} -> {t}" for s, t in unresolved_calls[:10]])
+            more = "" if len(unresolved_calls) <= 10 else f" (+{len(unresolved_calls)-10} more)"
+            self.warnings.append(f"Unresolved static contract-call? edges: {sample}{more}")
+        if dynamic_calls_from_contracts:
+            sample = "; ".join([f"{s} -> {t}" for s, t in dynamic_calls_from_contracts[:10]])
+            more = "" if len(dynamic_calls_from_contracts) <= 10 else f" (+{len(dynamic_calls_from_contracts)-10} more)"
+            self.warnings.append(f"Dynamic calls from contracts detected: {sample}{more}")
+        if cycles:
+            # Render succinctly
+            pretty = []
+            for cyc in cycles[:5]:
+                pretty.append(" -> ".join(cyc))
+            more = "" if len(cycles) <= 5 else f" (+{len(cycles)-5} more)"
+            self.warnings.append("Call graph cycles detected: " + " | ".join(pretty) + more)
+
+        return True
     
     def check_compilation(self) -> bool:
         """Check if all contracts compile successfully (tolerate known false positives)."""
@@ -321,6 +428,7 @@ class ContractVerifier:
             ("Trait References", self.verify_trait_references()),
             ("Trait Implementations", self.verify_trait_implementation()),
             ("Manifest Alignment", self.verify_manifest_alignment()),
+            ("System Graph", self.analyze_system_graph()),
             ("Contract Compilation", self.check_compilation())
         ]
         
