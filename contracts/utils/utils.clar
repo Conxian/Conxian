@@ -12,7 +12,7 @@
 ;; migrate to an approved serialization scheme once available.
 
 (use-trait utils-trait .all-traits.utils-trait)
-(impl-trait utils)
+(impl-trait .all-traits.utils-trait)
 
 (define-public (principal-to-buff (p principal))
   (ok 0x0000000000000000000000000000000000000000000000000000000000000000)

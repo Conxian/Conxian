@@ -7,7 +7,7 @@
 
 
 
-(impl-trait oracle-aggregator)
+(impl-trait .all-traits.oracle-aggregator-trait)
 
 ;; Constants
 (define-constant ERR_UNAUTHORIZED (err u100))

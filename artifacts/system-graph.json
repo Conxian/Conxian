@@ -771,11 +771,6 @@
       "name": "mock-strategy-b"
     },
     {
-      "id": "file:contracts/mocks/mock-token.clar",
-      "type": "contract",
-      "name": "mock-token"
-    },
-    {
       "id": "file:contracts/monitoring/analytics-aggregator.clar",
       "type": "contract",
       "name": "analytics-aggregator"
@@ -869,11 +864,6 @@
       "id": "file:contracts/traits/errors.clar",
       "type": "contract",
       "name": "errors"
-    },
-    {
-      "id": "file:contracts/traits/trait-registry.clar",
-      "type": "contract",
-      "name": "trait-registry"
     },
     {
       "id": "file:contracts/traits/core/error-codes-trait.clar",
@@ -1185,6 +1175,11 @@
     {
       "from": "file:contracts/dex/batch-auction.clar",
       "to": "trait:batch-auction-trait",
+      "type": "use-trait"
+    },
+    {
+      "from": "file:contracts/dex/batch-auction.clar",
+      "to": "trait:batch-auction-trait",
       "type": "impl-trait"
     },
     {
@@ -1195,7 +1190,22 @@
     {
       "from": "file:contracts/interfaces/btc-adapter.clar",
       "to": "trait:btc-adapter-trait",
+      "type": "use-trait"
+    },
+    {
+      "from": "file:contracts/interfaces/btc-adapter.clar",
+      "to": "trait:btc-adapter-trait",
       "type": "impl-trait"
+    },
+    {
+      "from": "file:contracts/budget-manager.clar",
+      "to": "trait:budget-manager-trait",
+      "type": "use-trait"
+    },
+    {
+      "from": "file:contracts/budget-manager.clar",
+      "to": "trait:proposal-trait",
+      "type": "use-trait"
     },
     {
       "from": "file:contracts/budget-manager.clar",
@@ -1369,6 +1379,11 @@
       "resolved": true
     },
     {
+      "from": "file:contracts/governance/governance-token.clar",
+      "to": "trait:governance-token-trait",
+      "type": "use-trait"
+    },
+    {
       "from": "file:contracts/governance/proposal-engine.clar",
       "to": "file:contracts/governance/governance-token.clar",
       "type": "calls",
@@ -1411,7 +1426,17 @@
     {
       "from": "file:contracts/automation/keeper-coordinator.clar",
       "to": "trait:keeper-coordinator-trait",
+      "type": "use-trait"
+    },
+    {
+      "from": "file:contracts/automation/keeper-coordinator.clar",
+      "to": "trait:keeper-coordinator-trait",
       "type": "impl-trait"
+    },
+    {
+      "from": "file:contracts/dex/asset-vault.clar",
+      "to": "trait:asset-vault-trait",
+      "type": "use-trait"
     },
     {
       "from": "file:contracts/dex/asset-vault.clar",
@@ -1492,6 +1517,11 @@
       "from": "file:contracts/dex/auto-compounder.clar",
       "to": "(var-get",
       "type": "dynamic-call"
+    },
+    {
+      "from": "file:contracts/dex/bond-factory.clar",
+      "to": "trait:bond-factory-trait",
+      "type": "use-trait"
     },
     {
       "from": "file:contracts/dex/bond-factory.clar",
@@ -1607,6 +1637,11 @@
     {
       "from": "file:contracts/interfaces/cross-protocol-integrator.clar",
       "to": "trait:cross-protocol-trait",
+      "type": "use-trait"
+    },
+    {
+      "from": "file:contracts/interfaces/cross-protocol-integrator.clar",
+      "to": "trait:cross-protocol-trait",
       "type": "impl-trait"
     },
     {
@@ -1633,6 +1668,11 @@
       "from": "file:contracts/dex/cxd-staking.clar",
       "to": "revenue-token",
       "type": "dynamic-call"
+    },
+    {
+      "from": "file:contracts/dex/cxlp-migration-queue.clar",
+      "to": "trait:cxlp-migration-queue-trait",
+      "type": "use-trait"
     },
     {
       "from": "file:contracts/dex/cxlp-migration-queue.clar",
@@ -1699,6 +1739,11 @@
       "from": "file:contracts/dex/dex-factory-v2.clar",
       "to": "pool-implementation",
       "type": "dynamic-call"
+    },
+    {
+      "from": "file:contracts/dex/dex-factory.clar",
+      "to": "trait:factory-trait",
+      "type": "use-trait"
     },
     {
       "from": "file:contracts/dex/dex-factory.clar",
@@ -1795,6 +1840,11 @@
       "from": "file:contracts/dex/dex-pool.clar",
       "to": "(as-contract",
       "type": "dynamic-call"
+    },
+    {
+      "from": "file:contracts/dex/dex-router.clar",
+      "to": "trait:router-trait",
+      "type": "use-trait"
     },
     {
       "from": "file:contracts/dex/dex-router.clar",
@@ -1974,7 +2024,17 @@
     {
       "from": "file:contracts/interfaces/legacy-adapter.clar",
       "to": "trait:legacy-adapter-trait",
+      "type": "use-trait"
+    },
+    {
+      "from": "file:contracts/interfaces/legacy-adapter.clar",
+      "to": "trait:legacy-adapter-trait",
       "type": "impl-trait"
+    },
+    {
+      "from": "file:contracts/dex/liquidation-manager.clar",
+      "to": "trait:liquidation-trait",
+      "type": "use-trait"
     },
     {
       "from": "file:contracts/dex/liquidation-manager.clar",
@@ -2025,6 +2085,11 @@
       "from": "file:contracts/dex/manipulation-detector.clar",
       "to": "breaker",
       "type": "dynamic-call"
+    },
+    {
+      "from": "file:contracts/utils/migration-manager.clar",
+      "to": "trait:migration-manager-trait",
+      "type": "use-trait"
     },
     {
       "from": "file:contracts/utils/migration-manager.clar",
@@ -2090,6 +2155,11 @@
       "from": "file:contracts/dimensional/multi-hop-router-v3.clar",
       "to": "pool",
       "type": "dynamic-call"
+    },
+    {
+      "from": "file:contracts/monitoring/performance-optimizer.clar",
+      "to": "trait:performance-optimizer-trait",
+      "type": "use-trait"
     },
     {
       "from": "file:contracts/monitoring/performance-optimizer.clar",
@@ -2229,6 +2299,11 @@
       "to": "contract-ref:.sbtc-token",
       "type": "calls",
       "resolved": false
+    },
+    {
+      "from": "file:contracts/dex/sbtc-flash-loan-extension.clar",
+      "to": "trait:flash-loan-receiver-trait",
+      "type": "use-trait"
     },
     {
       "from": "file:contracts/dex/sbtc-flash-loan-extension.clar",
@@ -2581,6 +2656,11 @@
     },
     {
       "from": "file:contracts/dex/vault.clar",
+      "to": "trait:vault-trait",
+      "type": "impl-trait"
+    },
+    {
+      "from": "file:contracts/dex/vault.clar",
       "to": "asset",
       "type": "dynamic-call"
     },
@@ -2683,6 +2763,11 @@
       "from": "file:contracts/rewards/yield-optimizer.clar",
       "to": "vault",
       "type": "dynamic-call"
+    },
+    {
+      "from": "file:contracts/dimensional/advanced-router-dijkstra.clar",
+      "to": "trait:advanced-router-dijkstra-trait",
+      "type": "use-trait"
     },
     {
       "from": "file:contracts/dimensional/advanced-router-dijkstra.clar",
@@ -2790,6 +2875,11 @@
     {
       "from": "file:contracts/dimensional/dim-oracle-automation.clar",
       "to": "trait:dimensional-oracle-trait",
+      "type": "use-trait"
+    },
+    {
+      "from": "file:contracts/dimensional/dim-oracle-automation.clar",
+      "to": "trait:dimensional-oracle-trait",
       "type": "impl-trait"
     },
     {
@@ -2797,6 +2887,11 @@
       "to": "file:contracts/dimensional/dim-registry.clar",
       "type": "calls",
       "resolved": true
+    },
+    {
+      "from": "file:contracts/dimensional/dim-registry.clar",
+      "to": "trait:dim-registry-trait",
+      "type": "use-trait"
     },
     {
       "from": "file:contracts/dimensional/dim-registry.clar",
@@ -2972,6 +3067,11 @@
     {
       "from": "file:contracts/governance/governance-signature-verifier.clar",
       "to": "trait:sip-018-trait",
+      "type": "use-trait"
+    },
+    {
+      "from": "file:contracts/governance/governance-signature-verifier.clar",
+      "to": "trait:sip-018-trait",
       "type": "impl-trait"
     },
     {
@@ -3073,7 +3173,17 @@
     {
       "from": "file:contracts/governance/signed-data-base.clar",
       "to": "trait:sip-018-trait",
+      "type": "use-trait"
+    },
+    {
+      "from": "file:contracts/governance/signed-data-base.clar",
+      "to": "trait:sip-018-trait",
       "type": "impl-trait"
+    },
+    {
+      "from": "file:contracts/lib/fixed-point-math.clar",
+      "to": "trait:fixed-point-math-trait",
+      "type": "use-trait"
     },
     {
       "from": "file:contracts/lib/fixed-point-math.clar",
@@ -3158,7 +3268,17 @@
     {
       "from": "file:contracts/mocks/mock-dao.clar",
       "to": "trait:dao-trait",
+      "type": "use-trait"
+    },
+    {
+      "from": "file:contracts/mocks/mock-dao.clar",
+      "to": "trait:dao-trait",
       "type": "impl-trait"
+    },
+    {
+      "from": "file:contracts/mocks/mock-oracle.clar",
+      "to": "trait:oracle-trait",
+      "type": "use-trait"
     },
     {
       "from": "file:contracts/mocks/mock-oracle.clar",
@@ -3189,6 +3309,11 @@
       "from": "file:contracts/mocks/mock-strategy-b.clar",
       "to": "asset",
       "type": "dynamic-call"
+    },
+    {
+      "from": "file:contracts/oracle/dimensional-oracle.clar",
+      "to": "trait:oracle-trait",
+      "type": "use-trait"
     },
     {
       "from": "file:contracts/oracle/dimensional-oracle.clar",
@@ -3227,6 +3352,11 @@
       "from": "file:contracts/oracle/oracle-aggregator-v2.clar",
       "to": "source",
       "type": "dynamic-call"
+    },
+    {
+      "from": "file:contracts/oracle/oracle-aggregator.clar",
+      "to": "trait:oracle-aggregator-trait",
+      "type": "use-trait"
     },
     {
       "from": "file:contracts/oracle/oracle-aggregator.clar",
@@ -3370,6 +3500,11 @@
     {
       "from": "file:contracts/traits/protocol/cross-protocol-trait.clar",
       "to": "trait:sip-010-ft-trait",
+      "type": "use-trait"
+    },
+    {
+      "from": "file:contracts/utils/utils.clar",
+      "to": "trait:utils-trait",
       "type": "use-trait"
     },
     {
@@ -5014,8 +5149,8 @@
     }
   ],
   "stats": {
-    "nodes": 235,
-    "edges": 706,
+    "nodes": 233,
+    "edges": 735,
     "traits": 54
   },
   "cycles": []

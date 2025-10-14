@@ -25,12 +25,6 @@ path = "../contracts/traits/all-traits.clar"
 clarity_version = 3
 epoch = "3.0"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
-[contracts.mock-token]
-path = "../contracts/mocks/mock-token.clar"
-clarity_version = 3
-epoch = "3.0"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
-depends_on = [ "all-traits" ]
 [contracts.dex-factory]
 path = "../contracts/dex/dex-factory.clar"
 clarity_version = 3
@@ -516,19 +510,6 @@ epoch = "3.0"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 depends_on = [ "all-traits" ]
 
-[contracts.mock-strategy-a]
-path = "../contracts/mocks/mock-strategy-a.clar"
-clarity_version = 3
-epoch = "3.0"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
-depends_on = [ "all-traits" ]
-
-[contracts.mock-strategy-b]
-path = "../contracts/mocks/mock-strategy-b.clar"
-clarity_version = 3
-epoch = "3.0"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
-depends_on = [ "all-traits" ]
 
 [contracts.vault]
 path = "../contracts/dex/vault.clar"
@@ -537,12 +518,6 @@ epoch = "3.0"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 depends_on = [ "all-traits" ]
 
-[contracts.mock-metrics]
-path = "../contracts/mocks/mock-metrics.clar"
-clarity_version = 3
-epoch = "3.0"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
-depends_on = [ "all-traits" ]
 
 [contracts.audit-registry]
 path = "../contracts/audit-registry/audit-registry.clar"
@@ -609,13 +584,6 @@ depends_on = [ "all-traits" ]
 
 [contracts.multi-hop-router-v3]
 path = "../contracts/dex/multi-hop-router-v3.clar"
-clarity_version = 3
-epoch = "3.0"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
-depends_on = [ "all-traits" ]
-
-[contracts.trait-registry]
-path = "../contracts/traits/trait-registry.clar"
 clarity_version = 3
 epoch = "3.0"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"

@@ -6,8 +6,8 @@
 ;; Manages treasury allocation and budget proposals for DAO governance
 
 ;; Traits
- (impl-trait budget-manager)
- (impl-trait proposal)
+ (impl-trait .all-traits.budget-manager-trait)
+ (impl-trait .all-traits.proposal-trait)
 
 ;; Constants
 (define-constant ERR_UNAUTHORIZED (err u100))

@@ -308,8 +308,6 @@ digraph conxian {
 (contract)", shape=box];
   "file:contracts/mocks/mock-strategy-b.clar" [label="mock-strategy-b
 (contract)", shape=box];
-  "file:contracts/mocks/mock-token.clar" [label="mock-token
-(contract)", shape=box];
   "file:contracts/monitoring/analytics-aggregator.clar" [label="analytics-aggregator
 (contract)", shape=box];
   "file:contracts/monitoring/system-monitor.clar" [label="system-monitor
@@ -347,8 +345,6 @@ digraph conxian {
   "file:contracts/traits/all-traits.clar" [label="all-traits
 (contract)", shape=box];
   "file:contracts/traits/errors.clar" [label="errors
-(contract)", shape=box];
-  "file:contracts/traits/trait-registry.clar" [label="trait-registry
 (contract)", shape=box];
   "file:contracts/traits/core/error-codes-trait.clar" [label="error-codes-trait
 (contract)", shape=box];
@@ -471,9 +467,13 @@ digraph conxian {
   "file:tests/mocks/test-token-b.clar" [label="test-token-b
 (test)", shape=note];
   "file:contracts/dex/batch-auction.clar" -> "trait:batch-auction-trait" [color="#8888ff", label="use-trait"];
+  "file:contracts/dex/batch-auction.clar" -> "trait:batch-auction-trait" [color="#8888ff", label="use-trait"];
   "file:contracts/dex/batch-auction.clar" -> "trait:batch-auction-trait" [color="#3333ff", label="impl-trait"];
   "file:contracts/interfaces/btc-adapter.clar" -> "trait:btc-adapter-trait" [color="#8888ff", label="use-trait"];
+  "file:contracts/interfaces/btc-adapter.clar" -> "trait:btc-adapter-trait" [color="#8888ff", label="use-trait"];
   "file:contracts/interfaces/btc-adapter.clar" -> "trait:btc-adapter-trait" [color="#3333ff", label="impl-trait"];
+  "file:contracts/budget-manager.clar" -> "trait:budget-manager-trait" [color="#8888ff", label="use-trait"];
+  "file:contracts/budget-manager.clar" -> "trait:proposal-trait" [color="#8888ff", label="use-trait"];
   "file:contracts/budget-manager.clar" -> "trait:budget-manager-trait" [color="#8888ff", label="use-trait"];
   "file:contracts/budget-manager.clar" -> "trait:proposal-trait" [color="#8888ff", label="use-trait"];
   "file:contracts/budget-manager.clar" -> "trait:budget-manager-trait" [color="#3333ff", label="impl-trait"];
@@ -505,6 +505,7 @@ digraph conxian {
   "file:contracts/pools/concentrated-liquidity-pool.clar" -> "token-y" [color="#ffaa00", label="dynamic-call"];
   "file:contracts/pools/concentrated-liquidity-pool.clar" -> "file:contracts/math/math-lib-concentrated.clar" [color="#44aa44", label="calls"];
   "file:contracts/pools/concentrated-liquidity-pool.clar" -> "file:contracts/math/math-lib-concentrated.clar" [color="#44aa44", label="calls"];
+  "file:contracts/governance/governance-token.clar" -> "trait:governance-token-trait" [color="#8888ff", label="use-trait"];
   "file:contracts/governance/proposal-engine.clar" -> "file:contracts/governance/governance-token.clar" [color="#44aa44", label="calls"];
   "file:contracts/governance/proposal-engine.clar" -> "file:contracts/governance/governance-token.clar" [color="#44aa44", label="calls"];
   "file:contracts/pools/tiered-pools.clar" -> "file:contracts/dex/fee-manager.clar" [color="#44aa44", label="calls"];
@@ -512,7 +513,9 @@ digraph conxian {
   "file:contracts/audit-registry/audit-registry.clar" -> "dc" [color="#ffaa00", label="dynamic-call"];
   "file:contracts/audit-registry/audit-registry.clar" -> "file:contracts/audit-registry/audit-badge-nft.clar" [color="#44aa44", label="calls"];
   "file:contracts/automation/keeper-coordinator.clar" -> "trait:keeper-coordinator-trait" [color="#8888ff", label="use-trait"];
+  "file:contracts/automation/keeper-coordinator.clar" -> "trait:keeper-coordinator-trait" [color="#8888ff", label="use-trait"];
   "file:contracts/automation/keeper-coordinator.clar" -> "trait:keeper-coordinator-trait" [color="#3333ff", label="impl-trait"];
+  "file:contracts/dex/asset-vault.clar" -> "trait:asset-vault-trait" [color="#8888ff", label="use-trait"];
   "file:contracts/dex/asset-vault.clar" -> "trait:asset-vault-trait" [color="#8888ff", label="use-trait"];
   "file:contracts/dex/asset-vault.clar" -> "trait:sip-010-ft-trait" [color="#8888ff", label="use-trait"];
   "file:contracts/dex/asset-vault.clar" -> "trait:asset-vault-trait" [color="#3333ff", label="impl-trait"];
@@ -529,6 +532,7 @@ digraph conxian {
   "file:contracts/dex/auto-compounder.clar" -> "token" [color="#ffaa00", label="dynamic-call"];
   "file:contracts/dex/auto-compounder.clar" -> "(var-get" [color="#ffaa00", label="dynamic-call"];
   "file:contracts/dex/auto-compounder.clar" -> "(var-get" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/bond-factory.clar" -> "trait:bond-factory-trait" [color="#8888ff", label="use-trait"];
   "file:contracts/dex/bond-factory.clar" -> "trait:bond-factory-trait" [color="#8888ff", label="use-trait"];
   "file:contracts/dex/bond-factory.clar" -> "trait:bond-factory-trait" [color="#3333ff", label="impl-trait"];
   "file:contracts/dex/bond-factory.clar" -> "collateral-token" [color="#ffaa00", label="dynamic-call"];
@@ -551,12 +555,14 @@ digraph conxian {
   "file:contracts/dex/comprehensive-lending-system.clar" -> "repay-asset" [color="#ffaa00", label="dynamic-call"];
   "file:contracts/dex/comprehensive-lending-system.clar" -> "collateral-asset" [color="#ffaa00", label="dynamic-call"];
   "file:contracts/interfaces/cross-protocol-integrator.clar" -> "trait:cross-protocol-trait" [color="#8888ff", label="use-trait"];
+  "file:contracts/interfaces/cross-protocol-integrator.clar" -> "trait:cross-protocol-trait" [color="#8888ff", label="use-trait"];
   "file:contracts/interfaces/cross-protocol-integrator.clar" -> "trait:cross-protocol-trait" [color="#3333ff", label="impl-trait"];
   "file:contracts/dex/cxd-staking.clar" -> "trait:sip-010-ft-trait" [color="#8888ff", label="use-trait"];
   "file:contracts/dex/cxd-staking.clar" -> "(as-contract" [color="#ffaa00", label="dynamic-call"];
   "file:contracts/dex/cxd-staking.clar" -> "cxd-token" [color="#ffaa00", label="dynamic-call"];
   "file:contracts/dex/cxd-staking.clar" -> "revenue-token" [color="#ffaa00", label="dynamic-call"];
   "file:contracts/dex/cxd-staking.clar" -> "revenue-token" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/cxlp-migration-queue.clar" -> "trait:cxlp-migration-queue-trait" [color="#8888ff", label="use-trait"];
   "file:contracts/dex/cxlp-migration-queue.clar" -> "trait:cxlp-migration-queue-trait" [color="#8888ff", label="use-trait"];
   "file:contracts/dex/cxlp-migration-queue.clar" -> "trait:sip-010-ft-mintable-trait" [color="#8888ff", label="use-trait"];
   "file:contracts/dex/cxlp-migration-queue.clar" -> "trait:cxlp-migration-queue-trait" [color="#3333ff", label="impl-trait"];
@@ -570,6 +576,7 @@ digraph conxian {
   "file:contracts/dex/dex-factory-v2.clar" -> "token-b" [color="#ffaa00", label="dynamic-call"];
   "file:contracts/dex/dex-factory-v2.clar" -> "pool-impl" [color="#ffaa00", label="dynamic-call"];
   "file:contracts/dex/dex-factory-v2.clar" -> "pool-implementation" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/dex-factory.clar" -> "trait:factory-trait" [color="#8888ff", label="use-trait"];
   "file:contracts/dex/dex-factory.clar" -> "trait:sip-010-ft-trait" [color="#8888ff", label="use-trait"];
   "file:contracts/dex/dex-factory.clar" -> "trait:access-control-trait" [color="#8888ff", label="use-trait"];
   "file:contracts/dex/dex-factory.clar" -> "trait:factory-trait" [color="#8888ff", label="use-trait"];
@@ -589,6 +596,7 @@ digraph conxian {
   "file:contracts/dex/dex-pool.clar" -> "(as-contract" [color="#ffaa00", label="dynamic-call"];
   "file:contracts/dex/dex-pool.clar" -> "(as-contract" [color="#ffaa00", label="dynamic-call"];
   "file:contracts/dex/dex-pool.clar" -> "(as-contract" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/dex-router.clar" -> "trait:router-trait" [color="#8888ff", label="use-trait"];
   "file:contracts/dex/dex-router.clar" -> "trait:router-trait" [color="#8888ff", label="use-trait"];
   "file:contracts/dex/dex-router.clar" -> "trait:factory-trait" [color="#8888ff", label="use-trait"];
   "file:contracts/dex/dex-router.clar" -> "trait:sip-010-ft-trait" [color="#8888ff", label="use-trait"];
@@ -624,7 +632,9 @@ digraph conxian {
   "file:contracts/dex/flash-loan-vault.clar" -> "asset" [color="#ffaa00", label="dynamic-call"];
   "file:contracts/dex/interest-rate-model.clar" -> "trait:sip-010-ft-trait" [color="#8888ff", label="use-trait"];
   "file:contracts/interfaces/legacy-adapter.clar" -> "trait:legacy-adapter-trait" [color="#8888ff", label="use-trait"];
+  "file:contracts/interfaces/legacy-adapter.clar" -> "trait:legacy-adapter-trait" [color="#8888ff", label="use-trait"];
   "file:contracts/interfaces/legacy-adapter.clar" -> "trait:legacy-adapter-trait" [color="#3333ff", label="impl-trait"];
+  "file:contracts/dex/liquidation-manager.clar" -> "trait:liquidation-trait" [color="#8888ff", label="use-trait"];
   "file:contracts/dex/liquidation-manager.clar" -> "trait:liquidation-trait" [color="#8888ff", label="use-trait"];
   "file:contracts/dex/liquidation-manager.clar" -> "trait:liquidation-trait" [color="#3333ff", label="impl-trait"];
   "file:contracts/dex/liquidation-manager.clar" -> "lending-system" [color="#ffaa00", label="dynamic-call"];
@@ -635,6 +645,7 @@ digraph conxian {
   "file:contracts/dex/loan-liquidation-manager.clar" -> "lending-system" [color="#ffaa00", label="dynamic-call"];
   "file:contracts/dex/manipulation-detector.clar" -> "breaker" [color="#ffaa00", label="dynamic-call"];
   "file:contracts/dex/manipulation-detector.clar" -> "breaker" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/utils/migration-manager.clar" -> "trait:migration-manager-trait" [color="#8888ff", label="use-trait"];
   "file:contracts/utils/migration-manager.clar" -> "trait:migration-manager-trait" [color="#8888ff", label="use-trait"];
   "file:contracts/utils/migration-manager.clar" -> "trait:migration-manager-trait" [color="#3333ff", label="impl-trait"];
   "file:contracts/dimensional/multi-hop-router-v3.clar" -> "trait:pool-trait" [color="#8888ff", label="use-trait"];
@@ -648,6 +659,7 @@ digraph conxian {
   "file:contracts/dimensional/multi-hop-router-v3.clar" -> "pool" [color="#ffaa00", label="dynamic-call"];
   "file:contracts/dimensional/multi-hop-router-v3.clar" -> "pool" [color="#ffaa00", label="dynamic-call"];
   "file:contracts/dimensional/multi-hop-router-v3.clar" -> "pool" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/monitoring/performance-optimizer.clar" -> "trait:performance-optimizer-trait" [color="#8888ff", label="use-trait"];
   "file:contracts/monitoring/performance-optimizer.clar" -> "trait:performance-optimizer-trait" [color="#8888ff", label="use-trait"];
   "file:contracts/monitoring/performance-optimizer.clar" -> "trait:performance-optimizer-trait" [color="#3333ff", label="impl-trait"];
   "file:contracts/dex/pool-factory-template.clar" -> "trait:dex-factory-trait" [color="#8888ff", label="use-trait"];
@@ -674,6 +686,7 @@ digraph conxian {
   "file:contracts/dex/sbtc-bond-integration.clar" -> "contract-ref:.sbtc-token" [color="#44aa44", label="calls"];
   "file:contracts/dex/sbtc-bond-integration.clar" -> "file:contracts/dex/sbtc-integration.clar" [color="#44aa44", label="calls"];
   "file:contracts/dex/sbtc-bond-integration.clar" -> "contract-ref:.sbtc-token" [color="#44aa44", label="calls"];
+  "file:contracts/dex/sbtc-flash-loan-extension.clar" -> "trait:flash-loan-receiver-trait" [color="#8888ff", label="use-trait"];
   "file:contracts/dex/sbtc-flash-loan-extension.clar" -> "trait:flash-loan-receiver-trait" [color="#8888ff", label="use-trait"];
   "file:contracts/dex/sbtc-flash-loan-extension.clar" -> "trait:sip-010-ft-trait" [color="#8888ff", label="use-trait"];
   "file:contracts/dex/sbtc-flash-loan-extension.clar" -> "trait:flash-loan-receiver-trait" [color="#3333ff", label="impl-trait"];
@@ -743,6 +756,7 @@ digraph conxian {
   "file:contracts/dex/token-emission-controller.clar" -> "trait:sip-010-ft-mintable-trait" [color="#8888ff", label="use-trait"];
   "file:contracts/dex/token-emission-controller.clar" -> "token-contract" [color="#ffaa00", label="dynamic-call"];
   "file:contracts/tokens/token-system-coordinator.clar" -> "(var-get" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/dex/vault.clar" -> "trait:vault-trait" [color="#3333ff", label="impl-trait"];
   "file:contracts/dex/vault.clar" -> "asset" [color="#ffaa00", label="dynamic-call"];
   "file:contracts/dex/vault.clar" -> "(var-get" [color="#ffaa00", label="dynamic-call"];
   "file:contracts/dex/vault.clar" -> "strategy-contract" [color="#ffaa00", label="dynamic-call"];
@@ -765,6 +779,7 @@ digraph conxian {
   "file:contracts/rewards/yield-optimizer.clar" -> "vault" [color="#ffaa00", label="dynamic-call"];
   "file:contracts/rewards/yield-optimizer.clar" -> "vault" [color="#ffaa00", label="dynamic-call"];
   "file:contracts/dimensional/advanced-router-dijkstra.clar" -> "trait:advanced-router-dijkstra-trait" [color="#8888ff", label="use-trait"];
+  "file:contracts/dimensional/advanced-router-dijkstra.clar" -> "trait:advanced-router-dijkstra-trait" [color="#8888ff", label="use-trait"];
   "file:contracts/dimensional/advanced-router-dijkstra.clar" -> "trait:advanced-router-dijkstra-trait" [color="#3333ff", label="impl-trait"];
   "file:contracts/dimensional/concentrated-liquidity-pool-v2.clar" -> "file:contracts/libraries/concentrated-math.clar" [color="#44aa44", label="calls"];
   "file:contracts/dimensional/concentrated-liquidity-pool-v2.clar" -> "(var-get" [color="#ffaa00", label="dynamic-call"];
@@ -783,8 +798,10 @@ digraph conxian {
   "file:contracts/dimensional/concentrated-liquidity-pool-v2.clar" -> "file:contracts/libraries/concentrated-math.clar" [color="#44aa44", label="calls"];
   "file:contracts/dimensional/concentrated-liquidity-pool-v2.clar" -> "file:contracts/libraries/concentrated-math.clar" [color="#44aa44", label="calls"];
   "file:contracts/dimensional/dim-oracle-automation.clar" -> "trait:dimensional-oracle-trait" [color="#8888ff", label="use-trait"];
+  "file:contracts/dimensional/dim-oracle-automation.clar" -> "trait:dimensional-oracle-trait" [color="#8888ff", label="use-trait"];
   "file:contracts/dimensional/dim-oracle-automation.clar" -> "trait:dimensional-oracle-trait" [color="#3333ff", label="impl-trait"];
   "file:contracts/dimensional/dim-oracle-automation.clar" -> "file:contracts/dimensional/dim-registry.clar" [color="#44aa44", label="calls"];
+  "file:contracts/dimensional/dim-registry.clar" -> "trait:dim-registry-trait" [color="#8888ff", label="use-trait"];
   "file:contracts/dimensional/dim-registry.clar" -> "trait:dim-registry-trait" [color="#8888ff", label="use-trait"];
   "file:contracts/dimensional/dim-registry.clar" -> "trait:dim-registry-trait" [color="#3333ff", label="impl-trait"];
   "file:contracts/dimensional/dim-revenue-adapter.clar" -> "trait:sip-010-ft-trait" [color="#8888ff", label="use-trait"];
@@ -819,6 +836,7 @@ digraph conxian {
   "file:contracts/enterprise/enterprise-api.clar" -> "router" [color="#ffaa00", label="dynamic-call"];
   "file:contracts/enterprise/enterprise-api.clar" -> "router" [color="#ffaa00", label="dynamic-call"];
   "file:contracts/governance/governance-signature-verifier.clar" -> "trait:sip-018-trait" [color="#8888ff", label="use-trait"];
+  "file:contracts/governance/governance-signature-verifier.clar" -> "trait:sip-018-trait" [color="#8888ff", label="use-trait"];
   "file:contracts/governance/governance-signature-verifier.clar" -> "trait:sip-018-trait" [color="#3333ff", label="impl-trait"];
   "file:contracts/governance/governance-signature-verifier.clar" -> "governance" [color="#ffaa00", label="dynamic-call"];
   "file:contracts/governance/governance-signature-verifier.clar" -> "signed-data-base" [color="#ffaa00", label="dynamic-call"];
@@ -838,7 +856,9 @@ digraph conxian {
   "file:contracts/governance/lending-protocol-governance.clar" -> "file:contracts/interfaces/access-control.clar" [color="#44aa44", label="calls"];
   "file:contracts/governance/lending-protocol-governance.clar" -> "file:contracts/interfaces/access-control.clar" [color="#44aa44", label="calls"];
   "file:contracts/governance/signed-data-base.clar" -> "trait:sip-018-trait" [color="#8888ff", label="use-trait"];
+  "file:contracts/governance/signed-data-base.clar" -> "trait:sip-018-trait" [color="#8888ff", label="use-trait"];
   "file:contracts/governance/signed-data-base.clar" -> "trait:sip-018-trait" [color="#3333ff", label="impl-trait"];
+  "file:contracts/lib/fixed-point-math.clar" -> "trait:fixed-point-math-trait" [color="#8888ff", label="use-trait"];
   "file:contracts/lib/fixed-point-math.clar" -> "trait:fixed-point-math-trait" [color="#8888ff", label="use-trait"];
   "file:contracts/lib/fixed-point-math.clar" -> "trait:fixed-point-math-trait" [color="#3333ff", label="impl-trait"];
   "file:contracts/lib/fixed-point-math.clar" -> "file:contracts/lib/math-lib-advanced.clar" [color="#44aa44", label="calls"];
@@ -854,7 +874,9 @@ digraph conxian {
   "file:contracts/libraries/concentrated-math.clar" -> "math-addr" [color="#ffaa00", label="dynamic-call"];
   "file:contracts/libraries/concentrated-math.clar" -> "math-addr" [color="#ffaa00", label="dynamic-call"];
   "file:contracts/mocks/mock-dao.clar" -> "trait:dao-trait" [color="#8888ff", label="use-trait"];
+  "file:contracts/mocks/mock-dao.clar" -> "trait:dao-trait" [color="#8888ff", label="use-trait"];
   "file:contracts/mocks/mock-dao.clar" -> "trait:dao-trait" [color="#3333ff", label="impl-trait"];
+  "file:contracts/mocks/mock-oracle.clar" -> "trait:oracle-trait" [color="#8888ff", label="use-trait"];
   "file:contracts/mocks/mock-oracle.clar" -> "trait:oracle-trait" [color="#8888ff", label="use-trait"];
   "file:contracts/mocks/mock-oracle.clar" -> "trait:oracle-trait" [color="#3333ff", label="impl-trait"];
   "file:contracts/mocks/mock-strategy-a.clar" -> "asset" [color="#ffaa00", label="dynamic-call"];
@@ -862,12 +884,14 @@ digraph conxian {
   "file:contracts/mocks/mock-strategy-b.clar" -> "asset" [color="#ffaa00", label="dynamic-call"];
   "file:contracts/mocks/mock-strategy-b.clar" -> "asset" [color="#ffaa00", label="dynamic-call"];
   "file:contracts/oracle/dimensional-oracle.clar" -> "trait:oracle-trait" [color="#8888ff", label="use-trait"];
+  "file:contracts/oracle/dimensional-oracle.clar" -> "trait:oracle-trait" [color="#8888ff", label="use-trait"];
   "file:contracts/oracle/dimensional-oracle.clar" -> "trait:oracle-trait" [color="#3333ff", label="impl-trait"];
   "file:contracts/oracle/dimensional-oracle.clar" -> "file:contracts/monitoring/system-monitor.clar" [color="#44aa44", label="calls"];
   "file:contracts/oracle/dimensional-oracle.clar" -> "file:contracts/monitoring/system-monitor.clar" [color="#44aa44", label="calls"];
   "file:contracts/oracle/dimensional-oracle.clar" -> "file:contracts/monitoring/system-monitor.clar" [color="#44aa44", label="calls"];
   "file:contracts/oracle/oracle-aggregator-v2.clar" -> "(var-get" [color="#ffaa00", label="dynamic-call"];
   "file:contracts/oracle/oracle-aggregator-v2.clar" -> "source" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/oracle/oracle-aggregator.clar" -> "trait:oracle-aggregator-trait" [color="#8888ff", label="use-trait"];
   "file:contracts/oracle/oracle-aggregator.clar" -> "trait:oracle-aggregator-trait" [color="#8888ff", label="use-trait"];
   "file:contracts/oracle/oracle-aggregator.clar" -> "trait:oracle-aggregator-trait" [color="#3333ff", label="impl-trait"];
   "file:contracts/oracle/oracle-aggregator.clar" -> "file:contracts/security/circuit-breaker.clar" [color="#44aa44", label="calls"];
@@ -896,6 +920,7 @@ digraph conxian {
   "file:contracts/traits/defi/vault-trait.clar" -> "trait:sip-010-ft-trait" [color="#8888ff", label="use-trait"];
   "file:contracts/traits/defi/yield-optimizer-trait.clar" -> "trait:sip-010-ft-trait" [color="#8888ff", label="use-trait"];
   "file:contracts/traits/protocol/cross-protocol-trait.clar" -> "trait:sip-010-ft-trait" [color="#8888ff", label="use-trait"];
+  "file:contracts/utils/utils.clar" -> "trait:utils-trait" [color="#8888ff", label="use-trait"];
   "file:contracts/utils/utils.clar" -> "trait:utils-trait" [color="#8888ff", label="use-trait"];
   "file:contracts/utils/utils.clar" -> "trait:utils-trait" [color="#3333ff", label="impl-trait"];
   "file:contracts/vaults/sbtc-vault.clar" -> "token-contract" [color="#ffaa00", label="dynamic-call"];
