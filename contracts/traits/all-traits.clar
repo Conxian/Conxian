@@ -6,7 +6,8 @@
 ;; =============================================================================
 
 ;; SIP-010: Fungible Token Standard
-(define-trait sip-010-ft-trait
+(use-trait sip_010_ft_trait .all-traits.sip-010-ft-trait)
+-trait sip-010-ft-trait
   (
     (transfer (amount uint) (sender principal) (recipient principal) (memo (optional (buff 34))) (response bool uint))
     (get-balance (account principal) (response uint uint))
@@ -321,13 +322,7 @@
   )
 )
 
-(define-trait governance-token-trait
-  (
-    (delegate (delegatee principal) (response bool uint))
-    (get-voting-power (account principal) (response uint uint))
-    (get-prior-votes (account principal) (block-height uint) (response uint uint))
-  )
-)
+(use-trait governance-token-trait .governance.governance-token-trait)
 
 ;; DeFi Traits (additional)
 (define-trait bond-trait
@@ -682,6 +677,77 @@
 )
 
 ;; =============================================================================
+;; TRAIT DISCOVERY AND VERSIONING
+;; =============================================================================
+(define-read-only (get-all-traits)
+  (ok (tuple
+    (sips (list 
+      "sip-010-ft-trait" 
+      "sip-009-nft-trait" 
+      "sip-018-trait" 
+      "sip-010-ft-mintable-trait"
+    ))
+    (core (list 
+      "ownable-trait" 
+      "access-control-trait"
+    ))
+    (security (list 
+      "circuit-breaker-trait" 
+      "monitoring-trait" 
+      "pausable-trait" 
+      "compliance-hooks-trait" 
+      "mev-protector-trait"
+    ))
+    (defi (list 
+      "pool-trait" 
+      "factory-trait" 
+      "vault-trait" 
+      "strategy-trait" 
+      "staking-trait" 
+      "lending-system-trait"
+    ))
+    (math (list 
+      "math-trait" 
+      "fixed-point-math-trait"
+    ))
+    (governance (list 
+      "dao-trait" 
+      "governance-token-trait"
+    ))
+    (additional (list 
+      "oracle-trait" 
+      "oracle-aggregator-trait" 
+      "btc-adapter-trait" 
+      "cross-protocol-trait"
+    ))
+    (dimensional (list 
+      "position-nft-trait" 
+      "dim-registry-trait" 
+      "dimensional-oracle-trait"
+    ))
+    (utilities (list 
+      "migration-manager-trait" 
+      "metrics-trait" 
+      "error-codes-trait" 
+      "standard-constants-trait" 
+      "utils-trait"
+    ))
+  ))
+)
+
+(define-read-only (get-trait-version (trait-name (string-ascii 64)))
+  (ok (match trait-name
+    "sip-010-ft-trait" u100
+    "sip-009-nft-trait" u100
+    "ownable-trait" u100
+    "access-control-trait" u100
+    "governance-token-trait" u100
+    ;; Default version for all traits
+    u100
+  ))
+)
+
+;; =============================================================================
 ;; ERROR CODES
 ;; =============================================================================
 
@@ -705,13 +771,10 @@
 ;;    (use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
 ;;
 ;; 2. Implement the trait:
-;;    (impl-trait .all-traits.sip-010-ft-trait)
+;;    (impl-trait sip_010_ft_trait)
 ;;
 ;; 3. Use trait types in function parameters:
 ;;    (define-public (my-function (token <sip-010-ft-trait>)) ...)
 ;;
 ;; Note: The relative path `.all-traits` assumes the contract is deployed
 ;; by the same principal. For cross-principal references, use full principal.
-
-
-

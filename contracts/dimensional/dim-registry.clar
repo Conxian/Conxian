@@ -8,7 +8,8 @@
 
 ;; --- Traits ---
 
-(impl-trait .all-traits.dim-registry-trait)
+(use-trait dim_registry_trait .all-traits.dim-registry-trait)
+ .all-traits.dim-registry-trait)
 
 ;; Constants
 (define-constant TRAIT_REGISTRY .trait-registry)

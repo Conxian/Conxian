@@ -168,11 +168,16 @@ class ContractVerifier:
 
         # Ensure every .clar under contracts/ is listed in Clarinet.toml by path
         for f in self.contract_files:
+            if "traits" in f.parts and f.name != "all-traits.clar":
+                continue
             rel = str(f.relative_to(self.contracts_dir)).replace('\\', '/')
             full = f"contracts/{rel}"
             if full not in toml_paths and rel not in toml_paths:
                 # accept either with or without leading 'contracts/' depending on config style
-                self.errors.append(f"Contract not listed in Clarinet.toml: {rel}")
+                if "traits" in f.parts and f.name == "all-traits.clar":
+                    self.errors.append(f"Centralized traits file not listed in Clarinet.toml: {rel}")
+                else:
+                    self.errors.append(f"Contract not listed in Clarinet.toml: {rel}")
                 success = False
 
         return success
@@ -265,6 +270,9 @@ class ContractVerifier:
         root_all_traits_addr = root_all_traits.get('address') if isinstance(root_all_traits, dict) else None
 
         for f in self.contract_files:
+            # Skip trait files that are not the centralized all-traits.clar
+            if "traits" in f.parts and f.name != "all-traits.clar":
+                continue
             content = self._strip_comments(f.read_text())
             if '.all-traits.' in content:
                 rel_part = str(f.relative_to(self.contracts_dir)).replace("\\", "/")

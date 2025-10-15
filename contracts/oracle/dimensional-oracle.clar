@@ -3,7 +3,8 @@
 ;; Dimensional Oracle
 ;; Implements a robust price oracle with multiple data sources and deviation checks
 
-(impl-trait .all-traits.oracle-trait)
+(use-trait oracle_trait .all-traits.oracle-trait)
+ .all-traits.oracle-trait)
 
 
 (define-constant ERR_NOT_AUTHORIZED (err u100))

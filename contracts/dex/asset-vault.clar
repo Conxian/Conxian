@@ -4,7 +4,8 @@
 
 ;; Asset Vault Contract
 ;; Implements a simple asset vault for the Conxian protocol
-(impl-trait .all-traits.asset-vault-trait)
+(use-trait asset_vault_trait .all-traits.asset-vault-trait)
+ .all-traits.asset-vault-trait)
 
 (define-constant ERR-NOT-AUTHORIZED (err u100))
 (define-constant ERR-INVALID-TOKEN (err u101))

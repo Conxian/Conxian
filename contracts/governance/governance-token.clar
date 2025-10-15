@@ -2,12 +2,13 @@
 ;; Implements a SIP-010 fungible token for governance purposes
 
 (use-trait governance-token-trait .all-traits.governance-token-trait)
-
-;; Traits
+(use-trait governance_token_trait .all-traits.governance-token-trait)
+ .all-traits.governance-token-trait)
 
 ;; Constants
 (define-constant ERR_UNAUTHORIZED (err u100))
 (define-constant ERR_INSUFFICIENT_FUNDS (err u101))
+(define-constant TRAIT_VERSION u100)
 
 ;; Data Variables
 (define-data-var token-name (string-ascii 32) "GovernanceToken")
@@ -42,6 +43,10 @@
 
 (define-read-only (get-balance (account principal))
   (ok (default-to u0 (get amount (map-get? token-balances { account: account })) ))
+)
+
+(define-read-only (get-version)
+  (ok TRAIT_VERSION)
 )
 
 (define-public (transfer (amount uint) (sender principal) (recipient principal) (memo (optional (buffer 34))))
@@ -88,6 +93,9 @@
       (print { event: "burn", sender: sender, amount: amount })
       (ok true)
     )
+  )
+)
+
 (define-public (delegate (delegatee principal))
   (begin
     ;; Simple delegation implementation - in a real system this would be more complex
@@ -105,4 +113,3 @@
   ;; In a real implementation, this would look up historical voting power
   (ok (get-balance account))
 )
-

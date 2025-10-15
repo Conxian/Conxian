@@ -1,0 +1,4 @@
+# error Trait
+
+## Functions
+

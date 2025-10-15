@@ -8,7 +8,8 @@
   (use-trait factory-trait .all-traits.factory-trait)
   (use-trait pool-creation-trait .all-traits.pool-creation-trait)
   (use-trait circuit-breaker-trait .all-traits.circuit-breaker-trait)
-(impl-trait .all-traits.factory-trait)
+(use-trait factory_trait .all-traits.factory-trait)
+ .all-traits.factory-trait)
 
 ;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED (err u1003))

@@ -6,7 +6,8 @@
 
 ;; --- Traits ---
 
-(impl-trait .all-traits.sip-018-trait)
+(use-trait sip_018_trait .all-traits.sip-018-trait)
+ .all-traits.sip-018-trait)
 
 ;; Constants
 (define-constant TRAIT_REGISTRY .trait-registry)

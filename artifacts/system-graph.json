@@ -111,11 +111,6 @@
       "name": "flash-loan-receiver-trait"
     },
     {
-      "id": "trait:governance-token-trait",
-      "type": "trait",
-      "name": "governance-token-trait"
-    },
-    {
       "id": "trait:keeper-coordinator-trait",
       "type": "trait",
       "name": "keeper-coordinator-trait"
@@ -224,11 +219,6 @@
       "id": "trait:sip-010-ft-mintable-trait",
       "type": "trait",
       "name": "sip-010-ft-mintable-trait"
-    },
-    {
-      "id": "trait:sip-010-ft-trait",
-      "type": "trait",
-      "name": "sip-010-ft-trait"
     },
     {
       "id": "trait:sip-018-trait",
@@ -1180,11 +1170,6 @@
     {
       "from": "file:contracts/dex/batch-auction.clar",
       "to": "trait:batch-auction-trait",
-      "type": "impl-trait"
-    },
-    {
-      "from": "file:contracts/interfaces/btc-adapter.clar",
-      "to": "trait:btc-adapter-trait",
       "type": "use-trait"
     },
     {
@@ -1195,7 +1180,12 @@
     {
       "from": "file:contracts/interfaces/btc-adapter.clar",
       "to": "trait:btc-adapter-trait",
-      "type": "impl-trait"
+      "type": "use-trait"
+    },
+    {
+      "from": "file:contracts/interfaces/btc-adapter.clar",
+      "to": "trait:btc-adapter-trait",
+      "type": "use-trait"
     },
     {
       "from": "file:contracts/budget-manager.clar",
@@ -1220,12 +1210,12 @@
     {
       "from": "file:contracts/budget-manager.clar",
       "to": "trait:budget-manager-trait",
-      "type": "impl-trait"
+      "type": "use-trait"
     },
     {
       "from": "file:contracts/budget-manager.clar",
       "to": "trait:proposal-trait",
-      "type": "impl-trait"
+      "type": "use-trait"
     },
     {
       "from": "file:contracts/pools/concentrated-liquidity-pool.clar",
@@ -1384,6 +1374,11 @@
       "type": "use-trait"
     },
     {
+      "from": "file:contracts/governance/governance-token.clar",
+      "to": "trait:governance-token-trait",
+      "type": "use-trait"
+    },
+    {
       "from": "file:contracts/governance/proposal-engine.clar",
       "to": "file:contracts/governance/governance-token.clar",
       "type": "calls",
@@ -1451,7 +1446,7 @@
     {
       "from": "file:contracts/dex/asset-vault.clar",
       "to": "trait:asset-vault-trait",
-      "type": "impl-trait"
+      "type": "use-trait"
     },
     {
       "from": "file:contracts/dex/asset-vault.clar",
@@ -1531,7 +1526,7 @@
     {
       "from": "file:contracts/dex/bond-factory.clar",
       "to": "trait:bond-factory-trait",
-      "type": "impl-trait"
+      "type": "use-trait"
     },
     {
       "from": "file:contracts/dex/bond-factory.clar",
@@ -1642,7 +1637,7 @@
     {
       "from": "file:contracts/interfaces/cross-protocol-integrator.clar",
       "to": "trait:cross-protocol-trait",
-      "type": "impl-trait"
+      "type": "use-trait"
     },
     {
       "from": "file:contracts/dex/cxd-staking.clar",
@@ -1687,7 +1682,7 @@
     {
       "from": "file:contracts/dex/cxlp-migration-queue.clar",
       "to": "trait:cxlp-migration-queue-trait",
-      "type": "impl-trait"
+      "type": "use-trait"
     },
     {
       "from": "file:contracts/dex/cxlp-migration-queue.clar",
@@ -1773,7 +1768,7 @@
     {
       "from": "file:contracts/dex/dex-factory.clar",
       "to": "trait:factory-trait",
-      "type": "impl-trait"
+      "type": "use-trait"
     },
     {
       "from": "file:contracts/dex/dex-factory.clar",
@@ -1864,7 +1859,7 @@
     {
       "from": "file:contracts/dex/dex-router.clar",
       "to": "trait:router-trait",
-      "type": "impl-trait"
+      "type": "use-trait"
     },
     {
       "from": "file:contracts/dex/dex-router.clar",
@@ -2029,11 +2024,6 @@
     {
       "from": "file:contracts/interfaces/legacy-adapter.clar",
       "to": "trait:legacy-adapter-trait",
-      "type": "impl-trait"
-    },
-    {
-      "from": "file:contracts/dex/liquidation-manager.clar",
-      "to": "trait:liquidation-trait",
       "type": "use-trait"
     },
     {
@@ -2044,7 +2034,12 @@
     {
       "from": "file:contracts/dex/liquidation-manager.clar",
       "to": "trait:liquidation-trait",
-      "type": "impl-trait"
+      "type": "use-trait"
+    },
+    {
+      "from": "file:contracts/dex/liquidation-manager.clar",
+      "to": "trait:liquidation-trait",
+      "type": "use-trait"
     },
     {
       "from": "file:contracts/dex/liquidation-manager.clar",
@@ -2099,7 +2094,7 @@
     {
       "from": "file:contracts/utils/migration-manager.clar",
       "to": "trait:migration-manager-trait",
-      "type": "impl-trait"
+      "type": "use-trait"
     },
     {
       "from": "file:contracts/dimensional/multi-hop-router-v3.clar",
@@ -2155,11 +2150,6 @@
       "from": "file:contracts/dimensional/multi-hop-router-v3.clar",
       "to": "pool",
       "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/monitoring/performance-optimizer.clar",
-      "to": "trait:performance-optimizer-trait",
-      "type": "use-trait"
     },
     {
       "from": "file:contracts/monitoring/performance-optimizer.clar",
@@ -2318,7 +2308,7 @@
     {
       "from": "file:contracts/dex/sbtc-flash-loan-extension.clar",
       "to": "trait:flash-loan-receiver-trait",
-      "type": "impl-trait"
+      "type": "use-trait"
     },
     {
       "from": "file:contracts/dex/sbtc-flash-loan-extension.clar",
@@ -2657,6 +2647,11 @@
     {
       "from": "file:contracts/dex/vault.clar",
       "to": "trait:vault-trait",
+      "type": "use-trait"
+    },
+    {
+      "from": "file:contracts/dex/vault.clar",
+      "to": "trait:vault_trait",
       "type": "impl-trait"
     },
     {
@@ -2777,7 +2772,7 @@
     {
       "from": "file:contracts/dimensional/advanced-router-dijkstra.clar",
       "to": "trait:advanced-router-dijkstra-trait",
-      "type": "impl-trait"
+      "type": "use-trait"
     },
     {
       "from": "file:contracts/dimensional/concentrated-liquidity-pool-v2.clar",
@@ -2880,7 +2875,7 @@
     {
       "from": "file:contracts/dimensional/dim-oracle-automation.clar",
       "to": "trait:dimensional-oracle-trait",
-      "type": "impl-trait"
+      "type": "use-trait"
     },
     {
       "from": "file:contracts/dimensional/dim-oracle-automation.clar",
@@ -2901,7 +2896,7 @@
     {
       "from": "file:contracts/dimensional/dim-registry.clar",
       "to": "trait:dim-registry-trait",
-      "type": "impl-trait"
+      "type": "use-trait"
     },
     {
       "from": "file:contracts/dimensional/dim-revenue-adapter.clar",
@@ -3072,7 +3067,7 @@
     {
       "from": "file:contracts/governance/governance-signature-verifier.clar",
       "to": "trait:sip-018-trait",
-      "type": "impl-trait"
+      "type": "use-trait"
     },
     {
       "from": "file:contracts/governance/governance-signature-verifier.clar",
@@ -3178,7 +3173,12 @@
     {
       "from": "file:contracts/governance/signed-data-base.clar",
       "to": "trait:sip-018-trait",
-      "type": "impl-trait"
+      "type": "use-trait"
+    },
+    {
+      "from": "file:contracts/lib/fixed-point-math.clar",
+      "to": "trait:fixed-point-math-trait",
+      "type": "use-trait"
     },
     {
       "from": "file:contracts/lib/fixed-point-math.clar",
@@ -3192,7 +3192,7 @@
     },
     {
       "from": "file:contracts/lib/fixed-point-math.clar",
-      "to": "trait:fixed-point-math-trait",
+      "to": "trait:fixed_point_math_trait",
       "type": "impl-trait"
     },
     {
@@ -3273,11 +3273,6 @@
     {
       "from": "file:contracts/mocks/mock-dao.clar",
       "to": "trait:dao-trait",
-      "type": "impl-trait"
-    },
-    {
-      "from": "file:contracts/mocks/mock-oracle.clar",
-      "to": "trait:oracle-trait",
       "type": "use-trait"
     },
     {
@@ -3288,7 +3283,12 @@
     {
       "from": "file:contracts/mocks/mock-oracle.clar",
       "to": "trait:oracle-trait",
-      "type": "impl-trait"
+      "type": "use-trait"
+    },
+    {
+      "from": "file:contracts/mocks/mock-oracle.clar",
+      "to": "trait:oracle-trait",
+      "type": "use-trait"
     },
     {
       "from": "file:contracts/mocks/mock-strategy-a.clar",
@@ -3323,7 +3323,7 @@
     {
       "from": "file:contracts/oracle/dimensional-oracle.clar",
       "to": "trait:oracle-trait",
-      "type": "impl-trait"
+      "type": "use-trait"
     },
     {
       "from": "file:contracts/oracle/dimensional-oracle.clar",
@@ -3366,7 +3366,7 @@
     {
       "from": "file:contracts/oracle/oracle-aggregator.clar",
       "to": "trait:oracle-aggregator-trait",
-      "type": "impl-trait"
+      "type": "use-trait"
     },
     {
       "from": "file:contracts/oracle/oracle-aggregator.clar",
@@ -3448,6 +3448,16 @@
       "type": "dynamic-call"
     },
     {
+      "from": "file:contracts/traits/all-traits.clar",
+      "to": "trait:sip-010-ft-trait",
+      "type": "use-trait"
+    },
+    {
+      "from": "file:contracts/traits/all-traits.clar",
+      "to": "trait:.governance.governance-token-trait",
+      "type": "use-trait"
+    },
+    {
       "from": "file:contracts/traits/core/migration-manager-trait.clar",
       "to": "trait:sip-010-ft-trait",
       "type": "use-trait"
@@ -3515,7 +3525,7 @@
     {
       "from": "file:contracts/utils/utils.clar",
       "to": "trait:utils-trait",
-      "type": "impl-trait"
+      "type": "use-trait"
     },
     {
       "from": "file:contracts/vaults/sbtc-vault.clar",
@@ -5149,9 +5159,9 @@
     }
   ],
   "stats": {
-    "nodes": 233,
-    "edges": 735,
-    "traits": 54
+    "nodes": 231,
+    "edges": 739,
+    "traits": 52
   },
   "cycles": []
 }

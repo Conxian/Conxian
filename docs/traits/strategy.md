@@ -1,0 +1,4 @@
+# strategy Trait
+
+## Functions
+

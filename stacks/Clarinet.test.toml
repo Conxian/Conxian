@@ -22,9 +22,8 @@ balance = 100000000000000
 
 [contracts.all-traits]
 path = "../contracts/traits/all-traits.clar"
-clarity_version = 3
-epoch = "3.0"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+
 [contracts.dex-factory]
 path = "../contracts/dex/dex-factory.clar"
 clarity_version = 3

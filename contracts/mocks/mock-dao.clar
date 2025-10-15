@@ -5,7 +5,8 @@
 
 ;; --- Traits ---
 
-(impl-trait .all-traits.dao-trait)
+(use-trait dao_trait .all-traits.dao-trait)
+ .all-traits.dao-trait)
 
 ;; Constants
 (define-constant TRAIT_REGISTRY .trait-registry)

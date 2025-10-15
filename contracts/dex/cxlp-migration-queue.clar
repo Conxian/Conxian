@@ -6,7 +6,8 @@
 ;; Prevents FCFS races and enables fair distribution based on duration-weighted requests
 
 (use-trait ft-mintable .all-traits.sip-010-ft-mintable-trait)
- (impl-trait .all-traits.cxlp-migration-queue-trait)
+ (use-trait cxlp_migration_queue_trait .all-traits.cxlp-migration-queue-trait)
+ .all-traits.cxlp-migration-queue-trait)
 
 ;; --- Constants ---
 (define-constant CONTRACT_OWNER tx-sender)
