@@ -1,44 +1,62 @@
 import toml
 import json
+import re
 
-files_to_parse = [
-    "Clarinet.base.toml",
-    "Clarinet.enhanced.toml",
-    "Clarinet.lending.toml",
-    "Clarinet.minimal.toml",
-    "Clarinet.simple.toml",
-    "Clarinet.test.toml",
-    "Clarinet.tokens.toml",
-    "Clarinet.toml",
-    "Testnet.toml",
-    "settings/Devnet.toml",
-    "settings/Testnet.toml",
-    "stacks/Clarinet.test.toml",
-    "stacks/Clarinet.toml",
-    "stacks/settings/Devnet.toml"
-]
+def get_contracts_from_toml(file_path):
+    """
+    Reads a TOML file and extracts all contract definitions.
 
-all_dependencies = {}
+    A contract definition is any section that looks like [contracts.<name>]
+    or [disabled.<name>]
 
-for file_path in files_to_parse:
+    Args:
+        file_path (str): The path to the TOML file.
+
+    Returns:
+        dict: A dictionary containing all contract definitions,
+              preserving their structure.
+    """
+    contracts = {}
+    disabled_contracts = {}
     try:
-        with open(file_path, 'r') as f:
+        with open(file_path, 'r', encoding='utf-8') as f:
             data = toml.load(f)
             if 'contracts' in data:
-                for contract_name, contract_data in data['contracts'].items():
-                    if 'depends_on' in contract_data:
-                        if contract_name not in all_dependencies:
-                            all_dependencies[contract_name] = []
+                contracts.update(data['contracts'])
+            # Also capture disabled contracts to ensure they are preserved
+            if 'disabled' in data:
+                disabled_contracts.update(data['disabled'])
 
-                        for dep in contract_data['depends_on']:
-                            if dep not in all_dependencies[contract_name]:
-                                all_dependencies[contract_name].append(dep)
     except FileNotFoundError:
-        # It's okay if some files are not found, they might be optional configs
-        pass
+        print(f"Warning: Could not find TOML file at {file_path}")
+        return {}, {}
     except Exception as e:
-        # It's also okay if some files have parsing errors, we'll just skip them
-        pass
+        print(f"Error parsing TOML file at {file_path}: {e}")
+        return {}, {}
 
-with open('toml_deps.json', 'w') as f:
-    json.dump(all_dependencies, f, indent=2)
+    return contracts, disabled_contracts
+
+if __name__ == "__main__":
+    # This script is now intended to be used as a module,
+    # but we can add a simple main block for testing.
+    print("Parsing TOML files for contract lists...")
+
+    clarinet_toml_path = "Clarinet.toml"
+    clarinet_test_toml_path = "stacks/Clarinet.test.toml"
+
+    active_contracts, disabled_contracts = get_contracts_from_toml(clarinet_toml_path)
+    print(f"Found {len(active_contracts)} active contracts in {clarinet_toml_path}")
+    print(f"Found {len(disabled_contracts)} disabled contracts in {clarinet_toml_path}")
+
+    test_active, test_disabled = get_contracts_from_toml(clarinet_test_toml_path)
+    print(f"Found {len(test_active)} active contracts in {clarinet_test_toml_path}")
+    print(f"Found {len(test_disabled)} disabled contracts in {clarinet_test_toml_path}")
+
+    # For compatibility with other scripts, we can output a simple list of names
+    all_contract_names = list(active_contracts.keys()) + list(disabled_contracts.keys())
+    output = {"contracts": sorted(all_contract_names)}
+
+    with open('toml_deps.json', 'w') as f:
+        json.dump(output, f, indent=2)
+
+    print("TOML parsing complete. Output written to toml_deps.json")

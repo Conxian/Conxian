@@ -309,8 +309,4 @@
 ;; Initialize default supported asset (STX)
 (map-set supported-assets SP000000000000000000002Q6VF78 true)
 
-
-
-
-
-
+(impl-trait vault_trait)

@@ -1,0 +1,4 @@
+# circuit Trait
+
+## Functions
+

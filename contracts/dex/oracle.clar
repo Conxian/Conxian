@@ -4,9 +4,10 @@
 ;; Standard price oracle implementation for the Conxian protocol
 
 ;; Constants
-(define-constant TRAIT_REGISTRY .trait-registry)
+(use-trait oracle_trait .all-traits.oracle-trait)
+-constant TRAIT_REGISTRY .trait-registry)
 
-(impl-trait oracle)
+(impl-trait oracle_trait)
 
 ;; Error codes
 (define-constant ERR_UNAUTHORIZED (err u1001))

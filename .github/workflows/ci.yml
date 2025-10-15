@@ -35,6 +35,8 @@ jobs:
         run: npm run clarinet:check
       - name: Docs and Naming Guard
         run: npm run validate:docs
+      - name: Validate trait implementations
+        run: python scripts/validate-trait-implementation.py
       - name: Run Tests
         run: npm test
 

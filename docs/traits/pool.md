@@ -1,0 +1,4 @@
+# pool Trait
+
+## Functions
+

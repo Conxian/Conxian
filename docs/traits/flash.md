@@ -1,0 +1,4 @@
+# flash Trait
+
+## Functions
+

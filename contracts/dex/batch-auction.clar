@@ -3,7 +3,7 @@
 ;; batch-auction.clar
 ;; Implements a batch auction mechanism for fair execution
 
- (impl-trait batch-auction)
+ (impl-trait .all-traits.batch-auction-trait)
 
 ;; ===== Constants =====
 (define-constant ERR_UNAUTHORIZED (err u100))

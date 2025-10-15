@@ -1,0 +1,4 @@
+# bond Trait
+
+## Functions
+

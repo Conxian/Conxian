@@ -1,0 +1,4 @@
+# staking Trait
+
+## Functions
+

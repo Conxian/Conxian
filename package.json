@@ -23,6 +23,7 @@
     "clarinet:check": "clarinet check",
     "check": "clarinet check",
     "clarinet:console": "clarinet console",
+    "align": "python3 align_contracts.py",
     "validate:docs": "node ./scripts/validate-docs.js",
     "ci": "node ./scripts/ensure-deps.js && node ./scripts/validate-docs.js && npx vitest run",
     "coverage": "vitest run --coverage",

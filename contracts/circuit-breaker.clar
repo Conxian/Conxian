@@ -1,8 +1,6 @@
 ;; circuit-breaker.clar
 ;; Implements the enhanced circuit breaker pattern
 
-
-
 ;; ===== Constants =====
 (define-constant ERR_UNAUTHORIZED (err u1001))
 (define-constant ERR_CIRCUIT_OPEN (err u1002))
