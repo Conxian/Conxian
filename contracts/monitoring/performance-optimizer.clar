@@ -1,5 +1,4 @@
-(use-trait perf-opt .all-traits.performance-optimizer-trait)
-(impl-trait perf-opt)
+(impl-trait .all-traits.performance-optimizer-trait)
 ;; performance-optimizer.clar
 ;; Optimizes transaction performance and gas usage
 

@@ -1,6 +1,8 @@
 ;; oracle.clar
 ;; Provides price feeds for various assets
 
+(impl-trait .all-traits.oracle-trait)
+
 ;; Traits
 
 ;; Constants

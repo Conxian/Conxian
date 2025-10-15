@@ -1,11 +1,10 @@
 ;; Conxian Vault - Core yield-bearing vault with enhanced tokenomics integration
 ;; Implements vault-trait and vault-admin-trait with full system integration
 
-
+(impl-trait .all-traits.vault-trait)
 
 ;; Constants
-(use-trait vault_trait .all-traits.vault-trait)
--constant ERR_UNAUTHORIZED (err u1001))
+(define-constant ERR_UNAUTHORIZED (err u1001))
 (define-constant ERR_PAUSED (err u1002))
 (define-constant ERR_INSUFFICIENT_BALANCE (err u1003))
 (define-constant ERR_INVALID_AMOUNT (err u1004))
@@ -309,5 +308,3 @@
 
 ;; Initialize default supported asset (STX)
 (map-set supported-assets SP000000000000000000002Q6VF78 true)
-
-(impl-trait vault_trait)
