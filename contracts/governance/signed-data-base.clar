@@ -6,8 +6,7 @@
 
 ;; Centralized traits
 
-(use-trait sip_018_trait .all-traits.sip-018-trait)
- .all-traits.sip-018-trait)
+(impl-trait .all-traits.sip-018-trait)
 
 ;; Constants
 (define-constant ERR_INVALID_SIGNATURE (err u6300))

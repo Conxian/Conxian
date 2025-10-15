@@ -6,8 +6,7 @@
 ;; =============================================================================
 
 ;; SIP-010: Fungible Token Standard
-(use-trait sip_010_ft_trait .all-traits.sip-010-ft-trait)
--trait sip-010-ft-trait
+(define-trait sip-010-ft-trait
   (
     (transfer (amount uint) (sender principal) (recipient principal) (memo (optional (buff 34))) (response bool uint))
     (get-balance (account principal) (response uint uint))
@@ -322,7 +321,6 @@
   )
 )
 
-(use-trait governance-token-trait .governance.governance-token-trait)
 
 ;; DeFi Traits (additional)
 (define-trait bond-trait

@@ -4,8 +4,7 @@
 
 
 ;; Constants
-(use-trait vault_trait .all-traits.vault-trait)
--constant ERR_UNAUTHORIZED (err u1001))
+(define-constant ERR_UNAUTHORIZED (err u1001))
 (define-constant ERR_PAUSED (err u1002))
 (define-constant ERR_INSUFFICIENT_BALANCE (err u1003))
 (define-constant ERR_INVALID_AMOUNT (err u1004))

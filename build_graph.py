@@ -1,51 +1,60 @@
 import json
+from parse_clar_files import parse_clarity_files
 
-# Load the dependencies from the toml files
-with open('toml_deps.json', 'r') as f:
-    toml_deps = json.load(f)
+def build_dependency_graph():
+    """
+    Builds a complete dependency graph for all Clarity contracts.
 
-# Load the dependencies from the clar files
-with open('clar_deps.json', 'r') as f:
-    clar_deps = json.load(f)
+    This function reads dependencies parsed from .clar files and
+    constructs a graph suitable for topological sorting.
 
-# The master dependency graph
-dependency_graph = {}
+    Returns:
+        dict: A dictionary where keys are contract names and values are
+              sets of their dependencies.
+    """
+    # Use the enhanced Clarity parser
+    clar_deps = parse_clarity_files()
 
-# Add all contracts from both sources to the graph
-for contract_name in list(toml_deps.keys()) + list(clar_deps.keys()):
-    if contract_name not in dependency_graph:
-        dependency_graph[contract_name] = []
+    # The dependency graph is now directly the output of the parser
+    # The keys are the contracts, and the values are their dependencies
+    dependency_graph = {
+        contract: set(deps)
+        for contract, deps in clar_deps.items()
+    }
 
-# Process toml dependencies
-for contract_name, deps in toml_deps.items():
-    for dep in deps:
-        if dep not in dependency_graph[contract_name]:
-            dependency_graph[contract_name].append(dep)
+    # Ensure all dependencies are also present as keys in the graph
+    all_contracts = set(dependency_graph.keys())
+    all_dependencies = set()
+    for deps in dependency_graph.values():
+        all_dependencies.update(deps)
 
-# Process clar dependencies
-for contract_name, deps in clar_deps.items():
-    # Add trait dependencies
-    for trait in deps.get("traits", []):
-        if trait not in dependency_graph[contract_name]:
-            dependency_graph[contract_name].append(trait)
-    # Add contract dependencies
-    for contract in deps.get("contracts", []):
-        # Filter out noise
-        if contract.startswith("(") or contract == "self":
-            continue
-        if contract not in dependency_graph[contract_name]:
-            dependency_graph[contract_name].append(contract)
+    for dep in all_dependencies:
+        if dep not in all_contracts:
+            # This dependency is a contract that exists but might not have
+            # its own outgoing dependencies. Add it to the graph with an
+            # empty set of dependencies.
+            dependency_graph[dep] = set()
 
-# Sort the dependencies for consistent output
-for contract_name in dependency_graph:
-    dependency_graph[contract_name].sort()
+    return dependency_graph
 
-# Print the graph in a markdown-friendly format
-for contract_name, deps in sorted(dependency_graph.items()):
-    print(f"### {contract_name}")
-    if deps:
-        for dep in deps:
-            print(f"- `{dep}`")
-    else:
-        print("- No explicit dependencies found.")
-    print()
+if __name__ == "__main__":
+    print("Building dependency graph...")
+    graph = build_dependency_graph()
+
+    # Save the graph for other tools to use
+    # Convert sets to lists for JSON serialization
+    serializable_graph = {k: sorted(list(v)) for k, v in graph.items()}
+    with open('dependency-graph.json', 'w') as f:
+        json.dump(serializable_graph, f, indent=2)
+
+    print(f"Dependency graph built with {len(graph)} nodes.")
+    print("Graph saved to dependency-graph.json")
+
+    # Optional: Print the graph in a human-readable format
+    for contract, deps in sorted(serializable_graph.items()):
+        print(f"\n- {contract}")
+        if deps:
+            for dep in deps:
+                print(f"  - depends on: {dep}")
+        else:
+            print("  - no dependencies")

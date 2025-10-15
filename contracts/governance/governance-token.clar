@@ -2,8 +2,7 @@
 ;; Implements a SIP-010 fungible token for governance purposes
 
 (use-trait governance-token-trait .all-traits.governance-token-trait)
-(use-trait governance_token_trait .all-traits.governance-token-trait)
- .all-traits.governance-token-trait)
+(impl-trait .all-traits.governance-token-trait)
 
 ;; Constants
 (define-constant ERR_UNAUTHORIZED (err u100))

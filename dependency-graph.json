@@ -1,0 +1,269 @@
+{
+  "concentrated-liquidity-pool": [
+    "concentrated-math",
+    "math-lib-concentrated"
+  ],
+  "proposal-engine": [
+    "governance-token"
+  ],
+  "btc-adapter": [
+    "all-traits",
+    "btc-adapter-trait"
+  ],
+  "budget-manager": [],
+  "rebalancing-rules": [],
+  "governance-token": [
+    "all-traits"
+  ],
+  "oracle": [
+    "oracle_trait"
+  ],
+  "mev-protector": [
+    "multi-hop-router-v3"
+  ],
+  "batch-auction": [
+    "all-traits",
+    "batch-auction-trait"
+  ],
+  "tiered-pools": [
+    "fee-manager"
+  ],
+  "circuit-breaker": [],
+  "migration-manager": [],
+  "utils": [],
+  "encoding": [],
+  "test-access": [
+    "access-control-trait"
+  ],
+  "fixed-point-math": [
+    "fixed_point_math_trait",
+    "math-lib-advanced"
+  ],
+  "math-lib-advanced": [],
+  "precision-calculator": [
+    "math-lib-advanced"
+  ],
+  "error-codes": [],
+  "concentrated-math": [],
+  "oracle-aggregator": [
+    "circuit-breaker"
+  ],
+  "external-oracle-adapter": [],
+  "oracle-aggregator-v2": [],
+  "dimensional-oracle": [
+    "system-monitor"
+  ],
+  "dim-oracle-automation": [
+    "dim-registry"
+  ],
+  "dim-graph": [],
+  "dim-revenue-adapter": [],
+  "dim-registry": [
+    "all-traits"
+  ],
+  "advanced-router-dijkstra": [],
+  "tokenized-bond-adapter": [],
+  "multi-hop-router-v3": [
+    "all-traits"
+  ],
+  "dim-metrics": [],
+  "position-nft": [],
+  "tokenized-bond": [],
+  "concentrated-liquidity-pool-v2": [
+    "concentrated-math"
+  ],
+  "dim-yield-stake": [
+    "dim-metrics"
+  ],
+  "sbtc-vault": [
+    "all-traits"
+  ],
+  "all-traits": [
+    "sip_010_ft_trait"
+  ],
+  "errors": [],
+  "sip-010-ft-mintable-trait": [],
+  "sip-018-trait": [],
+  "sip-009-nft-trait": [],
+  "sip-010-ft-trait": [],
+  "dim-registry-trait": [],
+  "dimensional-oracle-trait": [],
+  "position-nft-trait": [],
+  "router-trait": [],
+  "lending-system-trait": [],
+  "batch-auction-trait": [],
+  "pool-trait": [],
+  "vault-admin-trait": [],
+  "liquidation-trait": [],
+  "staking-trait": [],
+  "yield-optimizer-trait": [],
+  "liquidity-manager-trait": [],
+  "factory-trait": [],
+  "vault-trait": [],
+  "fee-manager-trait": [],
+  "strategy-trait": [],
+  "performance-optimizer-trait": [],
+  "asset-vault-trait": [],
+  "bond-trait": [],
+  "flash-loan-receiver-trait": [],
+  "pool-creation-trait": [],
+  "dao-trait": [],
+  "governance-token-trait": [],
+  "standard-constants-trait": [],
+  "utils-trait": [],
+  "metrics-trait": [],
+  "ownable-trait": [],
+  "error-codes-trait": [],
+  "migration-manager-trait": [],
+  "fixed-point-math-trait": [],
+  "math-trait": [],
+  "circuit-breaker-trait": [],
+  "pausable-trait": [],
+  "compliance-hooks-trait": [],
+  "mev-protector-trait": [],
+  "access-control-trait": [],
+  "monitoring-trait": [],
+  "oracle-aggregator-trait": [],
+  "oracle-trait": [],
+  "btc-adapter-trait": [],
+  "cxlp-migration-queue-trait": [],
+  "legacy-adapter-trait": [],
+  "cross-protocol-trait": [],
+  "analytics-aggregator": [],
+  "system-monitor": [],
+  "performance-optimizer": [
+    "dex-pool",
+    "perf-opt"
+  ],
+  "monitoring-dashboard": [],
+  "governance-signature-verifier": [],
+  "upgrade-controller": [],
+  "lending-protocol-governance": [
+    "access-control"
+  ],
+  "signed-data-base": [
+    "all-traits"
+  ],
+  "access-control": [
+    "self"
+  ],
+  "emergency-governance": [],
+  "mock-metrics": [],
+  "mock-oracle": [],
+  "mock-dao": [],
+  "mock-strategy-a": [],
+  "mock-strategy-b": [],
+  "enterprise-api": [],
+  "compliance-hooks": [],
+  "cxvg-token": [],
+  "cxtr-token": [],
+  "cxlp-token": [],
+  "token-system-coordinator": [
+    "protocol-invariant-monitor"
+  ],
+  "cxd-token": [],
+  "cxs-token": [],
+  "audit-registry": [
+    "audit-badge-nft"
+  ],
+  "audit-badge-nft": [],
+  "math-lib-concentrated": [],
+  "cross-protocol-integrator": [],
+  "audit-registry-trait": [],
+  "legacy-adapter": [],
+  "rewards-distributor": [
+    "circuit-breaker"
+  ],
+  "yield-optimizer": [
+    "all-traits"
+  ],
+  "rate-limiter": [],
+  "Pausable": [],
+  "batch-processor": [],
+  "keeper-coordinator": [
+    "keeper-coordinator-trait"
+  ],
+  "stable-pool-enhanced": [],
+  "weighted-pool": [],
+  "vault": [
+    "vault_trait"
+  ],
+  "protocol-invariant-monitor": [],
+  "bond-factory": [
+    "all-traits",
+    "token-soft-launch"
+  ],
+  "cxlp-migration-queue": [
+    "all-traits"
+  ],
+  "dex-pool": [],
+  "loan-liquidation-manager": [],
+  "timelock-controller": [],
+  "sbtc-bond-integration": [
+    "enhanced-yield-strategy",
+    "sbtc-integration",
+    "sbtc-token"
+  ],
+  "dex-factory-v2": [
+    "circuit-breaker"
+  ],
+  "enhanced-yield-strategy": [],
+  "sbtc-integration": [
+    "sbtc-token"
+  ],
+  "cxd-staking": [],
+  "yield-distribution-engine": [],
+  "sbtc-flash-loan-extension": [
+    "bond-issuance-system"
+  ],
+  "auto-compounder": [
+    "all-traits"
+  ],
+  "pool-template": [],
+  "enterprise-loan-manager": [],
+  "sbtc-lending-integration": [],
+  "wormhole-integration": [],
+  "interest-rate-model": [],
+  "weighted-swap-pool": [],
+  "pool-factory-template": [],
+  "fee-manager": [],
+  "asset-vault": [],
+  "sbtc-oracle-adapter": [],
+  "flash-loan-vault": [],
+  "liquidation-manager": [],
+  "memory-pool-management": [],
+  "real-time-monitoring-dashboard": [],
+  "predictive-scaling-system": [],
+  "dex-router": [
+    "all-traits"
+  ],
+  "revenue-distributor": [],
+  "sbtc-flash-loan-vault": [],
+  "cxvg-utility": [
+    "cxvg-token"
+  ],
+  "comprehensive-lending-system": [],
+  "transaction-batch-processor": [],
+  "distributed-cache-manager": [],
+  "manipulation-detector": [],
+  "liquidity-manager": [],
+  "stable-swap-pool": [],
+  "bond-issuance-system": [],
+  "token-emission-controller": [],
+  "nakamoto-compatibility": [],
+  "sbtc-lending-system": [],
+  "dex-factory": [
+    "all-traits",
+    "circuit-breaker"
+  ],
+  "liquidity-optimization-engine": [],
+  "self": [],
+  "sip_010_ft_trait": [],
+  "vault_trait": [],
+  "fixed_point_math_trait": [],
+  "sbtc-token": [],
+  "token-soft-launch": [],
+  "oracle_trait": [],
+  "perf-opt": [],
+  "keeper-coordinator-trait": []
+}
