@@ -380,11 +380,11 @@ python tests/test_gui.py
 
 ## 📚 Documentation
 
-- [Installation Guide](docs/installation.md)
-- [Configuration](docs/configuration.md)
-- [Deployment Guide](docs/deployment.md)
-- [Troubleshooting](docs/troubleshooting.md)
-- [API Reference](docs/api.md)
+- [Installation Guide](./docs/installation.md)
+- [Configuration Options](./docs/configuration.md)
+- [Deployment Strategies](./docs/deployment.md)
+- [Troubleshooting](./docs/troubleshooting.md)
+- [API Reference](./docs/api.md)
 - [Contributing](CONTRIBUTING.md)
 
 ---
