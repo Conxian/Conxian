@@ -28,7 +28,7 @@ The pipeline consists of several key stages:
 | `NODE_VERSION` | Node.js version | No | 20 |
 | `CLARINET_VERSION` | Clarinet version | No | 3.7.0 |
 | `DOCKERHUB_USERNAME` | Docker Hub username | Yes | - |
-| `IMAGE_NAME` | Docker image name | No | conxian-protocol |
+| `IMAGE_NAME` | Docker image name | No | Conxian-protocol |
 
 ## Required Secrets
 

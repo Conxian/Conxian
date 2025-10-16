@@ -27,7 +27,7 @@ This document reflects the current smart contract framework implementation statu
 - **Standards**: SIP-010 (FT), SIP-009 (NFT) — used across tokens.
 - **Tokens**:
   - `cxd-token.clar`: Implemented
-  - `cxlp-token.clar`: Implemented
+  - `CXLP-token.clar`: Implemented
   - `cxs-token.clar`: Implemented
   - `cxtr-token.clar`: Implemented
   - `cxvg-token.clar`: Implemented
@@ -56,7 +56,7 @@ Revenue Distribution:
 └── 20% to protocol treasury (TREASURY_RESERVE_BPS: 2000)
 ```
 
-### **CXLP Token (cxlp-token.clar)**
+### **CXLP Token (CXLP-token.clar)**
 
 ```clarity
 Token: Conxian Liquidity Provider (CXLP)

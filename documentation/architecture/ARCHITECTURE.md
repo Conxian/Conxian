@@ -31,8 +31,8 @@ For detailed product-level requirements, see `documentation/prd/` (e.g., `VAULT.
 ### Token System
 - `cxd-staking.clar` – Staking contract for CXD tokens
 - `cxd-token.clar` – The main token contract for CXD
-- `cxlp-migration-queue.clar` – Manages the migration of CXLP tokens
-- `cxlp-token.clar` – The liquidity pool token
+- `CXLP-migration-queue.clar` – Manages the migration of CXLP tokens
+- `CXLP-token.clar` – The liquidity pool token
 - `cxs-token.clar` – A secondary token in the system
 - `cxtr-token.clar` – A tertiary token in the system
 - `cxvg-token.clar` – The governance token

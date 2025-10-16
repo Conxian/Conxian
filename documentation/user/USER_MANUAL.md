@@ -8,7 +8,7 @@
 
 ## 📋 Table of Contents
 
-1. [What is Conxian?](#what-is-conxian)
+1. [What is Conxian?](#what-is-Conxian)
 2. [Getting Started](#getting-started)
 3. [Core Features Overview](#core-features-overview)
 4. [Vault Operations](#vault-operations)

@@ -8,7 +8,7 @@
 
 ## How to Delegate
 
-1. Visit the delegation portal at governance.conxian.defi/delegate
+1. Visit the delegation portal at governance.Conxian.defi/delegate
 2. Connect your wallet
 3. Enter the STX address of your chosen delegate
 4. Confirm delegation transaction
