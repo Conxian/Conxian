@@ -48,19 +48,6 @@
   )
 )
 
-;; (define-trait lending-system-trait
-  (
-    (deposit (asset principal) (amount uint) (response bool (err uint)))
-    (withdraw (asset principal) (amount uint) (response bool (err uint)))
-    (borrow (asset principal) (amount uint) (response bool (err uint)))
-    (repay (asset principal) (amount uint) (response bool (err uint)))
-    (liquidate (liquidator principal) (borrower principal) (repay-asset principal) (collateral-asset principal) (repay-amount uint) (response bool (err uint)))
-    (get-account-liquidity (user principal) (response (tuple (liquidity uint) (shortfall uint)) (err uint)))
-    (get-asset-price (asset principal) (response uint (err uint)))
-    (get-borrow-rate (asset principal) (response uint (err uint)))
-    (get-supply-rate (asset principal) (response uint (err uint)))
-  )
-)
 
 (define-trait sip-010-ft-trait
   (
@@ -168,7 +155,7 @@
 (define-trait access-control-trait
   (
     ;; Check if an account has a specific role
-    (has-role (account principal) (role (buff 32)) (response bool (err uint)))
+    (has-role (account principal) (role uint) (response bool (err uint)))
 
     ;; Get the admin address
     (get-admin () (response principal (err uint)))
@@ -177,16 +164,16 @@
     (set-admin (new-admin principal) (response bool (err uint)))
 
     ;; Grant a role to an account
-    (grant-role (role (buff 32)) (account principal) (response bool (err uint)))
+    (grant-role (role uint) (account principal) (response bool (err uint)))
 
     ;; Revoke a role from an account
-    (revoke-role (role (buff 32)) (account principal) (response bool (err uint)))
+    (revoke-role (role uint) (account principal) (response bool (err uint)))
 
     ;; Renounce a role (callable by role holder only)
-    (renounce-role (role (buff 32)) (response bool (err uint)))
+    (renounce-role (role uint) (response bool (err uint)))
 
     ;; Get role name by ID
-    (get-role-name (role (buff 32)) (response (string-ascii 64) (err uint)))
+    (get-role-name (role uint) (response (string-ascii 64) (err uint)))
 
     ;; Check if caller has admin role (convenience function)
     (is-admin (caller principal) (response bool (err uint)))
@@ -498,31 +485,6 @@
   )
 )
 
-(define-trait dao-trait
-  (
-    (has-voting-power (voter principal) (response bool (err uint)))
-    (get-voting-power (voter principal) (response uint (err uint)))
-    (get-total-voting-power () (response uint (err uint)))
-    (delegate (delegatee principal) (response bool (err uint)))
-    (undelegate () (response bool (err uint)))
-    (execute-proposal (proposal-id uint) (response bool (err uint)))
-    (vote (proposal-id uint) (support bool) (response bool (err uint)))
-    (get-proposal (proposal-id uint)
-      (response
-        (tuple
-          (proposer principal)
-          (start-block uint)
-          (end-block uint)
-          (votes-for uint)
-          (votes-against uint)
-          (executed bool)
-          (canceled bool)
-        )
-        (err uint)
-      )
-    )
-  )
-)
 
 (define-trait liquidation-trait
   (
