@@ -515,6 +515,38 @@ class ContractVerifier:
     # --------------------
     # Auto-fix utilities
     # --------------------
+    def autofix_unused_contracts(self) -> int:
+        """
+        Stub: Remove unused contracts from Clarinet.toml.
+        Currently not implemented; returns 0.
+        """
+        print("autofix_unused_contracts: not implemented; skipping.")
+        return 0
+
+    def autofix_pruned_dependencies(self) -> int:
+        """
+        Stub: Prune unused dependencies.
+        Currently not implemented; returns 0.
+        """
+        print("autofix_pruned_dependencies: not implemented; skipping.")
+        return 0
+
+    def autofix_formatting(self) -> int:
+        """
+        Stub: Format Clarity files.
+        Currently not implemented; returns 0.
+        """
+        print("autofix_formatting: not implemented; skipping.")
+        return 0
+
+    def autofix_traits(self) -> int:
+        """
+        Stub: Fix trait definitions.
+        Currently not implemented; returns 0.
+        """
+        print("autofix_traits: not implemented; skipping.")
+        return 0
+
     def _contracts_using_all_traits(self) -> List[Path]:
         results: List[Path] = []
         for f in self.contract_files:
