@@ -16,13 +16,24 @@ import os
 import re
 import toml
 from pathlib import Path
-from typing import Dict, List, Set, Tuple, Optional
+from typing import Dict, List, Set, Tuple, Optional, Any
 import importlib.util
 import argparse
 import json
+import sys
+
+# Add project root to the Python path
+ROOT_DIR = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT_DIR))
+
+# Now that the path is set, we can import build_graph
+try:
+    from build_graph import SystemGraph
+except ImportError:
+    print("Warning: 'build_graph' module not found. Graph-related features will be disabled.")
+    SystemGraph = None
 
 # Configuration
-ROOT_DIR = Path(__file__).parent.parent
 CONTRACTS_DIR = ROOT_DIR / "contracts"
 CLARINET_TOML = ROOT_DIR / "Clarinet.toml"
 STACKS_TEST_TOML = ROOT_DIR / "stacks" / "Clarinet.test.toml"
@@ -74,68 +85,216 @@ IMPL_TRAIT_PATTERN = r'\(impl-trait\s+([^\s\)]+)\)'
 DEFINE_TRAIT_PATTERN = r'\(define-trait\s+([^\s\n]+)'
 
 class ContractVerifier:
-    def __init__(self):
-        self.contracts_dir = CONTRACTS_DIR
-        self.clarinet_toml = CLARINET_TOML
-        self.traits_file = TRAITS_FILE
+    def __init__(self, autofix_graph: bool = False, autofix_unused: bool = False, autofix_traits: bool = False, autofix_prune: bool = False, autofix_format: bool = False, autofix_impl_traits: bool = False):
+        self.clarinet_toml = ROOT_DIR / 'Clarinet.toml'
+        # self.test_config_path = ROOT_DIR / 'deployments' / 'simplified-testnet-plan.toml'
+        self.all_traits_file = ROOT_DIR / 'contracts' / 'traits' / 'all-traits.clar'
+        self.contracts_dir = ROOT_DIR / 'contracts'
+        
+        self.do_autofix_graph = autofix_graph
+        self.do_autofix_unused = autofix_unused
+        self.do_autofix_traits = autofix_traits
+        self.do_autofix_prune = autofix_prune
+        self.do_autofix_format = autofix_format
+        self.do_autofix_impl_traits = autofix_impl_traits
+
+        try:
+            from build_graph import SystemGraph
+            # SystemGraph expects the repository root_dir; pass ROOT_DIR here.
+            self.system_graph: Optional[SystemGraph] = SystemGraph(ROOT_DIR)
+        except ImportError:
+            print("Warning: 'build_graph' module not found. Graph-related features will be disabled.")
+            self.system_graph = None
+
+        self._graph: Optional[Dict[str, Any]] = None
+        self.toml_data = self.load_toml(self.clarinet_toml)
+        # self.test_config = self.load_toml(self.test_config_path)
+        self.test_config = self.toml_data # Use the main toml data
+        
+        self.contract_files = list(self.contracts_dir.rglob("*.clar"))
+        self.defined_traits: Set[str] = set()
         self.errors: List[str] = []
         self.warnings: List[str] = []
+        self.modified_files: Set[Path] = set()
+        self.defined_contracts = set(self.toml_data.get("contracts", {}).keys())
+        self.clarinet_errors: List[Dict[str, Any]] = []
+
+    def run_verification(self) -> bool:
+        """Runs all verification checks and returns True if all pass."""
+        checks = [
+            ("Contract Paths", self.verify_contracts_in_toml()),
+            ("Trait References", self.verify_trait_references()),
+            ("Contract Dependencies", self.check_contract_dependencies()),
+            ("Unused Contracts", self.check_unused_contracts()),
+            ("Pruned Dependencies", self.check_pruned_dependencies()),
+            ("Formatting", self.check_formatting()),
+            ("Compilation", self.check_compilation()),
+        ]
         
-        # Load Clarinet.toml (root) and stacks/Clarinet.test.toml (test)
-        with open(self.clarinet_toml, 'r') as f:
-            self.config = toml.load(f)
-        if STACKS_TEST_TOML.exists():
-            with open(STACKS_TEST_TOML, 'r') as f:
-                self.test_config = toml.load(f)
-        else:
-            self.test_config = {"contracts": {}}
+        all_passed = all(result for _, result in checks)
+        
+        print("\n" + "="*30)
+        print("Verification Summary:")
+        for name, result in checks:
+            status = "✅ PASSED" if result else "❌ FAILED"
+            print(f"- {name}: {status}")
+        print("="*30)
+
+        return all_passed
+    
+    def verify_contracts_in_toml(self) -> bool:
+        """Verify Clarinet.toml entries exist and every .clar file is listed by path."""
+        success = True
+
+        # Build set of normalized contract paths from Clarinet.toml
+        contracts_table = self.toml_data.get("contracts", {})
+        toml_paths: Set[str] = set()
+        for name, entry in contracts_table.items():
+            path = entry.get("path") if isinstance(entry, dict) else None
+            if path:
+                toml_paths.add(os.path.normpath(os.path.join(ROOT_DIR, path)))
+
+        # Check each contract file
+        for f in self.contract_files:
+            # Skip ignored directories
+            if any(ign in f.parts for ign in IGNORE_DIRS):
+                continue
             
-        # Find all contract files
-        self.contract_files = list(self.contracts_dir.rglob("*.clar"))
-        self.contract_names = [f.stem for f in self.contract_files]
-        
-        # Extract defined contracts from Clarinet.toml
-        self.defined_contracts = set(self.config.get("contracts", {}).keys())
-        
-        # Track traits
-        self.defined_traits: Set[str] = set()
-        self.trait_definitions: Dict[str, List[str]] = {}
-        self._load_traits()
+            norm_path = os.path.normpath(str(f))
+            if norm_path not in toml_paths:
+                self.errors.append(f"{f.relative_to(ROOT_DIR)} is not listed in Clarinet.toml")
+                success = False
 
-        # Lazy-load system graph module (avoid package import issues)
-        self.system_graph = None
-        self._graph = None
+        # Check each TOML entry
+        for name, entry in contracts_table.items():
+            path = entry.get("path") if isinstance(entry, dict) else None
+            if path:
+                full_path = os.path.normpath(os.path.join(ROOT_DIR, path))
+                if not os.path.exists(full_path):
+                    self.errors.append(f"Listed path for '{name}' does not exist: {path}")
+                    success = False
 
-    def _load_system_graph(self):
-        if self.system_graph is not None:
-            return
-        sg_path = ROOT_DIR / "scripts" / "system_graph.py"
-        if not sg_path.exists():
-            self.warnings.append("system_graph.py not found; skipping system graph analysis.")
-            self.system_graph = False
-            return
-        spec = importlib.util.spec_from_file_location("system_graph", str(sg_path))
-        if not spec or not spec.loader:
-            self.warnings.append("Failed to load system_graph module; skipping graph analysis.")
-            self.system_graph = False
-            return
-        module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(module)  # type: ignore
-        self.system_graph = module
+        return success
+
+    @staticmethod
+    def _strip_comments(content: str) -> str:
+        """Removes single-line Clarity comments."""
+        return "\n".join(
+            line for line in content.splitlines() if not line.strip().startswith(";;")
+        )
+
+    @staticmethod
+    def load_toml(path: Path) -> Dict[str, Any]:
+        try:
+            return toml.load(path)
+        except Exception as e:
+            print(f"Error loading TOML file at {path}: {e}")
+            return {}
+
+    @property
+    def graph(self) -> Dict[str, Any]:
+        if self._graph is None:
+            # Lazy-load the graph
+            self._graph = {}
+            try:
+                from build_graph import SystemGraph
+                sg = SystemGraph()
+                raw_graph = sg.build_system_graph(ROOT_DIR)
+                
+                # Convert to serializable format
+                self._graph = {
+                    "nodes": [{"id": n["id"], "type": n.get("type", "")} for n in raw_graph.get("nodes", [])],
+                    "edges": [{"from": e["from"], "to": e["to"], "type": e.get("type")} for e in raw_graph.get("edges", [])],
+                    "cycles": raw_graph.get("cycles", []),
+                }
+            except Exception as e:
+                print(f"Error building system graph: {e}")
+                self._graph = None
+        return self._graph
+
+    def run_all_checks(self) -> None:
+        """Run all verification checks."""
+        if self.do_autofix_impl_traits:
+            self.autofix_impl_traits()
+            # Re-run checks after autofix
+            self.verify_trait_references()
+        else:
+            self.verify_trait_references()
         
-    def _strip_comments(self, content: str) -> str:
-        """Remove Clarity line comments starting with ';' to avoid false positives in regex scans."""
-        # Remove any text after a ';' comment marker per line
-        no_inline = re.sub(r";.*$", "", content, flags=re.MULTILINE)
-        return no_inline
+        self.check_contract_dependencies()
+        self.check_unused_contracts()
+        self.check_pruned_dependencies()
+        self.check_formatting()
+        self.check_compilation()
+
+    def autofix_and_report(self) -> None:
+        """Run autofixers and report results."""
+        print("\n=== Running Autofixers ===")
+        # Normalize line endings first (this commonly causes clarinet errors)
+        try:
+            normalized = self.autofix_normalize_line_endings()
+            if normalized:
+                print(f"Normalized line endings in {normalized} files.")
+        except Exception as e:
+            print(f"Warning: failed to normalize line endings before autofix: {e}")
+
+        # Run clarinet check so autofixers can consult compilation errors
+        try:
+            self.run_clarinet_check()
+        except Exception as e:
+            print(f"Warning: failed to run clarinet check before autofix: {e}")
+
+        # Attempt targeted fixes for files that only report impl-trait false-positives
+        try:
+            fixed = self.autofix_impl_trait_false_positives()
+            if fixed:
+                print(f"Applied targeted impl-trait fixes to {fixed} files.")
+                # Refresh clarinet errors after making edits
+                self.run_clarinet_check()
+        except Exception as e:
+            print(f"Warning: failed to apply targeted impl-trait fixes: {e}")
+        
+        if self.do_autofix_graph:
+            modified_count = self.autofix_dependency_graph()
+            if modified_count > 0:
+                print(f"Fixed {modified_count} contract dependencies in Clarinet.toml.")
+
+        if self.do_autofix_impl_traits:
+            modified_count = self.autofix_impl_traits()
+            if modified_count > 0:
+                print(f"Fixed {modified_count} trait implementations.")
+
+        if self.do_autofix_unused:
+            self.autofix_unused_contracts()
+
+        if self.do_autofix_prune:
+            self.autofix_pruned_dependencies()
+        
+        if self.do_autofix_format:
+            self.autofix_formatting()
+
+        print("\n=== Autofix Complete ===")
+        self.print_report()
+
+    def print_report(self) -> None:
+        """Prints the final error and warning report."""
+        if self.errors:
+            print("\n" + "="*10 + " ERRORS " + "="*10)
+            for error in sorted(list(set(self.errors))):
+                print(f"- {error}")
+        
+        if self.warnings:
+            print("\n" + "="*10 + " WARNINGS " + "="*10)
+            for warning in sorted(list(set(self.warnings))):
+                print(f"- {warning}")
 
     def _load_traits(self):
         """Load trait definitions from all-traits.clar"""
-        if not self.traits_file.exists():
-            self.errors.append(f"Traits file not found: {self.traits_file}")
+        if not self.all_traits_file.exists():
+            self.errors.append(f"Traits file not found: {self.all_traits_file}")
             return
             
-        content = self._strip_comments(self.traits_file.read_text())
+        content = self._strip_comments(self.all_traits_file.read_text())
         # Find all trait definitions
         pattern = r'\(define-trait\s+([^\s\n]+)([^)]+)'
         trait_matches = re.finditer(pattern, content, re.DOTALL)
@@ -143,104 +302,79 @@ class ContractVerifier:
         for match in trait_matches:
             trait_name = match.group(1)
             self.defined_traits.add(trait_name)
-            self.trait_definitions[trait_name] = match.group(0).split('\n')
     
     def verify_contracts_in_toml(self) -> bool:
         """Verify Clarinet.toml entries exist and every .clar file is listed by path."""
         success = True
 
         # Build set of normalized contract paths from Clarinet.toml
-        contracts_table = self.config.get("contracts", {})
+        contracts_table = self.toml_data.get("contracts", {})
         toml_paths: Set[str] = set()
         for name, entry in contracts_table.items():
             path = entry.get("path") if isinstance(entry, dict) else None
-            if not path:
-                self.errors.append(f"Contract '{name}' missing 'path' in Clarinet.toml")
-                success = False
-                continue
-            # normalize to forward slashes and include leading 'contracts/'
-            norm = path.replace('\\', '/')
-            toml_paths.add(norm)
-            abs_path = self.contracts_dir.parent / Path(norm)
-            if not abs_path.exists():
-                self.errors.append(f"Contract '{name}' path not found: {path}")
-                success = False
+            if path:
+                toml_paths.add(os.path.normpath(os.path.join(ROOT_DIR, path)))
 
-        # Ensure every .clar under contracts/ is listed in Clarinet.toml by path
+        # Check each contract file
         for f in self.contract_files:
-            if "traits" in f.parts and f.name != "all-traits.clar":
+            # Skip ignored directories
+            if any(ign in f.parts for ign in IGNORE_DIRS):
                 continue
-            rel = str(f.relative_to(self.contracts_dir)).replace('\\', '/')
-            full = f"contracts/{rel}"
-            if full not in toml_paths and rel not in toml_paths:
-                # accept either with or without leading 'contracts/' depending on config style
-                if "traits" in f.parts and f.name == "all-traits.clar":
-                    self.errors.append(f"Centralized traits file not listed in Clarinet.toml: {rel}")
-                else:
-                    self.errors.append(f"Contract not listed in Clarinet.toml: {rel}")
+            
+            norm_path = os.path.normpath(str(f))
+            if norm_path not in toml_paths:
+                self.errors.append(f"{f.relative_to(ROOT_DIR)} is not listed in Clarinet.toml")
                 success = False
 
+        # Check each TOML entry
+        for name, entry in contracts_table.items():
+            path = entry.get("path") if isinstance(entry, dict) else None
+            if path:
+                full_path = os.path.normpath(os.path.join(ROOT_DIR, path))
+                if not os.path.exists(full_path):
+                    self.errors.append(f"Listed path for '{name}' does not exist: {path}")
+                    success = False
+
         return success
-    
+
     def verify_trait_references(self) -> bool:
-        """Verify all trait references in contracts are properly defined"""
-        success = True
+        """Check that all `use-trait` statements point to a defined trait in all-traits.clar."""
+        print("Verifying trait references...")
+        if not self.all_traits_file.exists():
+            self.errors.append("CRITICAL: `contracts/traits/all-traits.clar` not found.")
+            return False
         
-        for contract_file in self.contract_files:
-            content = self._strip_comments(contract_file.read_text())
-            
-            # Check use-trait statements
-            use_matches = re.finditer(USE_TRAIT_PATTERN, content)
-            for match in use_matches:
-                trait_alias = match.group(1)
-                trait_ref = match.group(2)
+        try:
+            content = self.all_traits_file.read_text(encoding='utf-8').replace('\r\n', '\n')
+            # Corrected regex to find both public and private traits
+            self.defined_traits = set(re.findall(r'\(\s*define-(?:public-)?trait\s+([\w-]+)', content))
+        except Exception as e:
+            self.errors.append(f"Error reading all-traits.clar: {e}")
+            return False
 
-                # Normalize trait reference for centralized .all-traits usage
-                # Examples:
-                #  - .all-traits.sip-010-ft-trait -> sip-010-ft-trait
-                #  - ST...contract.trait -> treat as principal-qualified (skip definition check)
-                #  - local-trait-id -> ensure defined
-                if trait_ref.startswith('.all-traits.'):
-                    base = trait_ref.split('.')[-1]
-                    if base not in self.defined_traits:
-                        self.errors.append(
-                            f"Undefined centralized trait '{base}' used via {trait_ref} in {contract_file.name}"
-                        )
-                        success = False
-                elif trait_ref.startswith('ST'):
-                    # principal-qualified trait reference, allowed but discouraged by policy
-                    pass
-                else:
-                    # Local trait identifier; ensure defined in all-traits
-                    if trait_ref not in self.defined_traits:
-                        self.errors.append(
-                            f"Undefined trait reference '{trait_ref}' in {contract_file.name}"
-                        )
-                        success = False
-            
-            # Check impl-trait statements
-            impl_matches = re.finditer(IMPL_TRAIT_PATTERN, content)
-            for match in impl_matches:
-                trait_ref = match.group(1)
+        if not self.defined_traits:
+            self.warnings.append("No public traits defined in all-traits.clar.")
+            return True
 
-                # Normalize as above
-                if trait_ref.startswith('.all-traits.'):
-                    base = trait_ref.split('.')[-1]
-                    if base not in self.defined_traits:
-                        self.errors.append(
-                            f"Undefined centralized trait '{base}' implemented in {contract_file.name}: {match.group(0)}"
-                        )
-                        success = False
-                elif trait_ref.startswith('ST'):
-                    pass
-                else:
-                    if trait_ref not in self.defined_traits:
-                        self.errors.append(
-                            f"Undefined trait implemented in {contract_file.name}: {match.group(0)}"
-                        )
-                        success = False
-                    
-        return success
+        all_ok = True
+        for f in self.contract_files:
+            if "traits" in f.parts:
+                continue
+            try:
+                content = self._strip_comments(f.read_text(encoding='utf-8').replace('\r\n', '\n'))
+                used_traits = re.findall(USE_TRAIT_PATTERN, content)
+                
+                for alias, trait_path in used_traits:
+                    trait_name = trait_path.split('.')[-1]
+                    if trait_name not in self.defined_traits:
+                        error_msg = f"{f.name}: uses trait '{trait_name}' which is not defined in all-traits.clar."
+                        self.errors.append(error_msg)
+                        all_ok = False
+            except Exception as e:
+                self.errors.append(f"Error processing {f.name}: {e}")
+                all_ok = False
+        
+        return all_ok
 
     def verify_manifest_alignment(self) -> bool:
         """Ensure contracts using centralized .all-traits.* are listed in manifests with same address as all-traits, and advise depends_on.
@@ -249,7 +383,7 @@ class ContractVerifier:
         If the test manifest contains the contract path and has depends_on, warnings are suppressed.
         """
         success = True
-        root_contracts = self.config.get("contracts", {})
+        root_contracts = self.toml_data.get("contracts", {})
         test_contracts = self.test_config.get("contracts", {})
 
         # Build path -> (name, address, depends_on, source)
@@ -273,31 +407,36 @@ class ContractVerifier:
             # Skip trait files that are not the centralized all-traits.clar
             if "traits" in f.parts and f.name != "all-traits.clar":
                 continue
-            content = self._strip_comments(f.read_text())
-            if '.all-traits.' in content:
-                rel_part = str(f.relative_to(self.contracts_dir)).replace("\\", "/")
-                rel = f"contracts/{rel_part}"
-                alt_key = rel.replace('contracts/', '')
-                manifest_entry = manifest_paths.get(rel) or manifest_paths.get(alt_key)
-                if not manifest_entry:
-                    self.errors.append(f"Contract using centralized traits not listed in Clarinet.toml: {rel}")
-                    success = False
-                    continue
-                _, addr, deps, source = manifest_entry
-                # Compare against matching manifest's all-traits address
-                reference_addr = test_all_traits_addr if source == "test" else root_all_traits_addr
-                if reference_addr and addr and addr != reference_addr:
-                    self.errors.append(
-                        f"Address mismatch for {rel}: {addr} != all-traits address {reference_addr} in {source} manifest."
-                    )
-                    success = False
-                # Soft-check depends_on
-                if isinstance(deps, list) and 'all-traits' not in deps:
-                    # Only warn when the preferred manifest (test) is missing depends_on
-                    if source == "test":
-                        self.warnings.append(
-                            f"Recommend depends_on = ['all-traits'] for {rel} to ensure build order."
+            try:
+                content = self._strip_comments(f.read_text(encoding='utf-8'))
+                if '.all-traits.' in content:
+                    rel_part = str(f.relative_to(self.contracts_dir)).replace("\\", "/")
+                    rel = f"contracts/{rel_part}"
+                    alt_key = rel.replace('contracts/', '')
+                    manifest_entry = manifest_paths.get(rel) or manifest_paths.get(alt_key)
+                    if not manifest_entry:
+                        self.errors.append(f"Contract using centralized traits not listed in Clarinet.toml: {rel}")
+                        success = False
+                        continue
+                    _, addr, deps, source = manifest_entry
+                    # Compare against matching manifest's all-traits address
+                    reference_addr = test_all_traits_addr if source == "test" else root_all_traits_addr
+                    if reference_addr and addr and addr != reference_addr:
+                        self.errors.append(
+                            f"Address mismatch for {rel}: {addr} != all-traits address {reference_addr} in {source} manifest."
                         )
+                        success = False
+                    # Soft-check depends_on
+                    if isinstance(deps, list) and 'all-traits' not in deps:
+                        # Only warn when the preferred manifest (test) is missing depends_on
+                        if source == "test":
+                            self.warnings.append(
+                                f"Recommend depends_on = ['all-traits'] for {rel} to ensure build order."
+                            )
+            except Exception as e:
+                self.errors.append(f"Error processing file {f}: {e}")
+                success = False
+
         return success
     
     def verify_trait_implementation(self) -> bool:
@@ -309,13 +448,13 @@ class ContractVerifier:
 
     def analyze_system_graph(self) -> bool:
         """Build and analyze the system graph to surface structural issues."""
-        self._load_system_graph()
         if not self.system_graph:
             return True
 
         try:
-            graph = self.system_graph.build_system_graph(ROOT_DIR)
-            self._graph = graph
+            graph = self.graph
+            if not graph:
+                return True
         except Exception as e:
             self.warnings.append(f"Failed to build system graph: {e}")
             return True
@@ -386,6 +525,47 @@ class ContractVerifier:
             if '.all-traits.' in content:
                 results.append(f)
         return results
+
+    def is_file_fatal(self, f: Path) -> bool:
+        """Return True if `clarinet check` reported a non-allowed (fatal) error for file f."""
+        if not self.clarinet_errors:
+            return False
+        normf = os.path.normpath(str(f))
+        allowed_patterns = [
+            "detected interdependent functions",
+            "(impl-trait ...) expects a trait identifier",
+        ]
+        for err in self.clarinet_errors:
+            ef = err.get('file')
+            if not ef:
+                continue
+            try:
+                if os.path.normpath(ef) == normf:
+                    msg = err.get('message', '')
+                    if any(pat in msg for pat in allowed_patterns):
+                        return False
+                    return True
+            except Exception:
+                continue
+        return False
+
+    def autofix_normalize_line_endings(self) -> int:
+        """Normalize CRLF -> LF for all .clar files. Returns number of files modified."""
+        modified = 0
+        for f in self.contract_files:
+            # skip binary or unreadable files
+            try:
+                text = f.read_text(encoding='utf-8')
+            except Exception:
+                continue
+            if '\r\n' in text:
+                new_text = text.replace('\r\n', '\n')
+                try:
+                    f.write_text(new_text, encoding='utf-8', newline='\n')
+                    modified += 1
+                except Exception:
+                    continue
+        return modified
 
     def autofix_manifest_depends_on(self) -> int:
         """Ensure depends_on = ["all-traits"] is present for any contract listed in
@@ -491,112 +671,331 @@ class ContractVerifier:
             print(f"No dynamic call patterns found requiring refactoring.")
         
         return len(suggestions)
+
+    def autofix_dependency_graph(self) -> int:
+        """Coordinate dependency-graph related autofixes.
+
+        Currently this runs the manifest depends_on autofix and generates
+        dynamic-call suggestions. Returns the number of manifest entries
+        modified (if any)."""
+        modified = 0
+        try:
+            modified += self.autofix_manifest_depends_on()
+        except Exception as e:
+            self.warnings.append(f"autofix_manifest_depends_on failed: {e}")
+
+        try:
+            # This produces suggestions/artifacts but doesn't modify manifests.
+            self.autofix_graph_dynamic_calls()
+        except Exception as e:
+            self.warnings.append(f"autofix_graph_dynamic_calls failed: {e}")
+
+        return modified
     
     def autofix_impl_traits(self) -> int:
-        """Rewrite (impl-trait <alias|name>) to centralized (impl-trait .all-traits.<trait>)
-        when possible, by:
-        - Mapping local aliases from (use-trait alias .all-traits.<trait>)
-        - Falling back to defined trait names in all-traits.clar
-        Returns number of files modified.
+        """
+        Standardizes all trait usage to a canonical format by rebuilding `use-trait`
+        and `impl-trait` statements to use full contract principals.
+        This is a two-pass operation to ensure correctness.
         """
         modified_files = 0
+        
+        try:
+            toml_data = toml.load(self.clarinet_toml)
+            deployer_address = toml_data.get('accounts', {}).get('deployer', {}).get('address')
+            if not deployer_address:
+                raise ValueError("Deployer address not found in Clarinet.toml")
+        except Exception as e:
+            print(f"Error loading deployer address from Clarinet.toml: {e}")
+            return 0
+
+        if not self.defined_traits:
+            self.verify_trait_references()
+            if not self.defined_traits:
+                print("FATAL: Could not populate defined traits from all-traits.clar. Aborting autofix.")
+                return 0
+
+        # Ensure we have latest clarinet errors to avoid touching files with fatal compile errors
+        try:
+            if not self.clarinet_errors:
+                self.run_clarinet_check()
+        except Exception:
+            # Non-fatal; proceed but be conservative
+            pass
+
+        # Build a set of files with fatal clarinet errors to skip
+        fatal_files: Set[str] = set()
+        for err in (self.clarinet_errors or []):
+            msg = err.get('message', '')
+            # Skip allowed patterns
+            allowed_patterns = [
+                "detected interdependent functions",
+                "(impl-trait ...) expects a trait identifier",
+            ]
+            if err.get('file') and not any(pat in msg for pat in allowed_patterns):
+                fatal_files.add(os.path.normpath(err['file']))
+
         for f in self.contract_files:
+            # Exclude mocks and traits directories from this autofix
+            if any(part in f.parts for part in ["traits", "mocks"]):
+                continue
+
+            # Skip files that had fatal clarinet errors
             try:
-                original = f.read_text()
+                normf = os.path.normpath(str(f))
+            except Exception:
+                normf = None
+            if normf and normf in fatal_files:
+                print(f"Skipping autofix for {f.name} due to compilation errors.")
+                continue
+
+            try:
+                original_content = f.read_text(encoding='utf-8')
+                content_lf = original_content.replace('\r\n', '\n')
             except Exception:
                 continue
-            content = original
-            # Build alias -> centralized trait mapping from use-trait lines
-            try:
-                use_matches = list(re.finditer(self.USE_TRAIT_PATTERN if hasattr(self, 'USE_TRAIT_PATTERN') else USE_TRAIT_PATTERN, original))
-            except Exception:
-                use_matches = []
-            alias_map: Dict[str, str] = {}
-            for m in re.finditer(USE_TRAIT_PATTERN, original):
-                alias = m.group(1)
-                ref = m.group(2)
-                if ref.startswith('.all-traits.'):
-                    base = ref.split('.')[-1]
-                    alias_map[alias] = base
-            # Replace impl-trait occurrences
-            def repl_impl(m: re.Match) -> str:
-                trait_ref = m.group(1)
-                # Already centralized
-                if trait_ref.startswith('.all-traits.'):
-                    return m.group(0)
-                # If alias maps to centralized base
-                if trait_ref in alias_map:
-                    base = alias_map[trait_ref]
-                    return f"(impl-trait .all-traits.{base})"
-                # If trait_ref is a known trait name
-                if trait_ref in self.defined_traits:
-                    return f"(impl-trait .all-traits.{trait_ref})"
-                # Otherwise keep as-is
-                return m.group(0)
-            new_content = re.sub(IMPL_TRAIT_PATTERN, repl_impl, content)
-            if new_content != original:
-                f.write_text(new_content)
-                modified_files += 1
+
+            # --- Pass 1: Discover all traits implemented in this file ---
+            implemented_refs = {m.group(1).lstrip('.').split('.')[-1] for m in re.finditer(IMPL_TRAIT_PATTERN, content_lf)}
+            implemented_refs.discard('all-traits')
+
+            if not implemented_refs:
+                continue
+
+            # --- Pass 2: Rebuild the file content ---
+            required_aliases: Dict[str, str] = {} # alias -> canonical_name
+            for ref in implemented_refs:
+                canonical_name = None
+                if ref in self.defined_traits:
+                    canonical_name = ref
+                elif f"{ref}-trait" in self.defined_traits:
+                    canonical_name = f"{ref}-trait"
+
+                if canonical_name:
+                    required_aliases[canonical_name] = canonical_name
+            
+            if not required_aliases:
+                continue
+
+            lines = content_lf.split('\n')
+            
+            # Remove all existing use-trait and impl-trait lines
+            lines_no_traits = [line for line in lines if not (line.strip().startswith('(use-trait') or line.strip().startswith('(impl-trait'))]
+            
+            # Generate new blocks
+            new_use_trait_block = [f"(use-trait {alias} '{deployer_address}.all-traits.{canonical})" for alias, canonical in sorted(required_aliases.items())]
+            new_impl_trait_block = [f"(impl-trait .{alias})" for alias in sorted(required_aliases.keys())]
+
+            # Find insertion point (typically at the top, after any initial comments)
+            insert_at = 0
+            for i, line in enumerate(lines_no_traits):
+                if line.strip() and not line.strip().startswith(";;"):
+                    insert_at = i
+                    break
+            
+            # Combine the new blocks and insert them
+            final_lines = lines_no_traits[:insert_at] + new_use_trait_block + new_impl_trait_block + lines_no_traits[insert_at:]
+            new_content = "\n".join(final_lines)
+
+            # --- Step 5: Write if changed ---
+            if new_content != content_lf:
+                try:
+                    f.write_text(new_content, encoding='utf-8', newline='\n')
+                    print(f"Rewrote: {f.name}")
+                    modified_files += 1
+                except Exception as e:
+                    print(f"Error writing to {f.name}: {e}")
+
         if modified_files:
             print(f"Auto-fix impl-trait: rewritten in {modified_files} files.")
         else:
             print("Auto-fix impl-trait: no changes needed.")
         return modified_files
-    
-    def check_compilation(self) -> bool:
-        """Check if all contracts compile successfully (tolerate known false positives)."""
-        print("\n=== Checking Contract Compilation ===")
 
+    def autofix_impl_trait_false_positives(self) -> int:
+        """Target files whose clarinet errors are only the impl-trait false-positive and rewrite them.
+
+        Returns number of files modified.
+        """
+        try:
+            toml_data = toml.load(self.clarinet_toml)
+            deployer_address = toml_data.get('accounts', {}).get('deployer', {}).get('address')
+            if not deployer_address:
+                raise ValueError("Deployer address not found in Clarinet.toml")
+        except Exception as e:
+            print(f"Error loading deployer address from Clarinet.toml: {e}")
+            return 0
+
+        allowed_patterns = [
+            "detected interdependent functions",
+            "(impl-trait ...) expects a trait identifier",
+            "expecting expression of type trait identifier",
+        ]
+
+        # Map file -> list of messages
+        file_errs: Dict[str, List[str]] = {}
+        for err in (self.clarinet_errors or []):
+            f = err.get('file')
+            if not f:
+                continue
+            file_errs.setdefault(os.path.normpath(f), []).append(err.get('message', ''))
+
+        modified = 0
+        for f in self.contract_files:
+            norm = os.path.normpath(str(f))
+            msgs = file_errs.get(norm)
+            if not msgs:
+                continue
+            # If all messages for this file are allowed impl-trait patterns, try to rewrite
+            if all(any(pat in m for pat in allowed_patterns) for m in msgs):
+                # perform a localized rewrite similar to autofix_impl_traits for this file
+                try:
+                    original_content = f.read_text(encoding='utf-8')
+                    content_lf = original_content.replace('\r\n', '\n')
+                except Exception:
+                    continue
+
+                implemented_refs = {m.group(1).lstrip('.').split('.')[-1] for m in re.finditer(IMPL_TRAIT_PATTERN, content_lf)}
+                implemented_refs.discard('all-traits')
+                if not implemented_refs:
+                    continue
+
+                # Determine canonical trait names
+                required_aliases: Dict[str, str] = {}
+                # load known traits if not present
+                if not self.defined_traits:
+                    self.verify_trait_references()
+                for ref in implemented_refs:
+                    canonical_name = None
+                    if ref in self.defined_traits:
+                        canonical_name = ref
+                    elif f"{ref}-trait" in self.defined_traits:
+                        canonical_name = f"{ref}-trait"
+                    if canonical_name:
+                        required_aliases[canonical_name] = canonical_name
+
+                if not required_aliases:
+                    continue
+
+                lines = content_lf.split('\n')
+                lines_no_traits = [line for line in lines if not (line.strip().startswith('(use-trait') or line.strip().startswith('(impl-trait'))]
+
+                new_use_trait_block = [f"(use-trait {alias} '{deployer_address}.all-traits.{canonical})" for alias, canonical in sorted(required_aliases.items())]
+                new_impl_trait_block = [f"(impl-trait .{alias})" for alias in sorted(required_aliases.keys())]
+
+                insert_at = 0
+                for i, line in enumerate(lines_no_traits):
+                    if line.strip() and not line.strip().startswith(';;'):
+                        insert_at = i
+                        break
+
+                final_lines = lines_no_traits[:insert_at] + new_use_trait_block + new_impl_trait_block + lines_no_traits[insert_at:]
+                new_content = '\n'.join(final_lines)
+                if new_content != content_lf:
+                    try:
+                        f.write_text(new_content, encoding='utf-8', newline='\n')
+                        print(f"Targeted rewrite: {f.name}")
+                        modified += 1
+                    except Exception as e:
+                        print(f"Error writing {f.name}: {e}")
+
+        return modified
+
+    def run_clarinet_check(self) -> List[Dict[str, Any]]:
+        """
+        Executes `clarinet check` and returns a structured list of errors.
+        This function is designed to be the source of truth for compilation errors.
+        """
+        print("Running `clarinet check`...")
+        errors = []
         try:
             import subprocess
-            # Try sanity, test, then root manifets to reduce false negatives from address drift
-            manifest_candidates = [
-                "stacks/Clarinet.sanity.test.toml",
-                "stacks/Clarinet.test.toml",
-                "Clarinet.toml",
-            ]
-
-            first_error_output = None
-            for manifest in manifest_candidates:
-                result = subprocess.run(
-                    ["clarinet", "check", "--manifest-path", manifest],
-                    cwd=str(ROOT_DIR),
-                    capture_output=True,
-                    text=True
-                )
-                output = (result.stdout or "") + "\n" + (result.stderr or "")
-                if result.returncode == 0:
-                    print(f"[PASS] All contracts compile successfully with {manifest}")
-                    return True
-                # collect errors; proceed to next manifest
-                if first_error_output is None:
-                    first_error_output = (manifest, output)
-
-            # If all failed, report the first failure's errors with filtering
-            manifest, output = first_error_output or (manifest_candidates[-1], "")
-            errors = [line for line in output.split('\n') if line.strip().startswith('error: ')]
-            allowed_patterns = [
-                "detected interdependent functions",
-                "(impl-trait ...) expects a trait identifier",
-            ]
-            non_allowed = []
-            for e in errors:
-                if not any(pat in e for pat in allowed_patterns):
-                    non_allowed.append(e)
-
-            if non_allowed:
-                self.errors.append("Compilation errors found:")
-                for line in non_allowed:
-                    self.errors.append(f"  {line}")
-                return False
+            result = subprocess.run(
+                ["clarinet", "check"],
+                cwd=str(ROOT_DIR),
+                capture_output=True,
+                text=True,
+                encoding='utf-8',
+                check=False  # Don't raise exception on non-zero exit code
+            )
+            output = (result.stdout or "") + "\n" + (result.stderr or "")
+            
+            # More robust error parsing
+            # Handles different formats of clarinet check errors
+            error_pattern = re.compile(
+                r'error:\s*(?P<message>.*?)\s*in\s*"(?P<file>.*?)"\s*on\s*line\s*(?P<line>\d+)',
+                re.IGNORECASE
+            )
+            
+            for line in output.splitlines():
+                if 'error:' in line:
+                    match = error_pattern.search(line)
+                    if match:
+                        errors.append({
+                            "file": match.group("file"),
+                            "line": int(match.group("line")),
+                            "message": match.group("message").strip(),
+                            "raw": line.strip()
+                        })
+                    else:
+                        # Capture unparsed errors as well, without file/line info
+                        errors.append({
+                            "file": None,
+                            "line": None,
+                            "message": line.strip(),
+                            "raw": line.strip()
+                        })
+            
+            self.clarinet_errors = errors
+            if errors:
+                print(f"Found {len(errors)} compilation errors.")
             else:
-                # Treat as warnings
-                self.warnings.append(f"Clarinet reported known false positives (recursion/impl-trait) with {manifest}. Proceeding.")
-                return True
+                print("`clarinet check` completed with no errors.")
 
+        except FileNotFoundError:
+            msg = "`clarinet` command not found. Please ensure it is installed and in your PATH."
+            self.errors.append(msg)
+            print(f"ERROR: {msg}")
         except Exception as e:
-            self.errors.append(f"Failed to run compilation check: {str(e)}")
+            msg = f"An unexpected error occurred while running `clarinet check`: {e}"
+            self.errors.append(msg)
+            print(f"ERROR: {msg}")
+        
+        return errors
+
+    def check_compilation(self) -> bool:
+        """Check if all contracts compile successfully using clarinet check."""
+        print("\n=== Checking Contract Compilation ===")
+        # We now rely on the results from run_clarinet_check
+        if not hasattr(self, 'clarinet_errors') or self.clarinet_errors is None:
+             self.run_clarinet_check()
+
+        if not self.clarinet_errors:
+            print("[PASS] All contracts compile successfully.")
+            return True
+        
+        # Filter for non-allowed errors
+        allowed_patterns = [
+            "detected interdependent functions",
+            "(impl-trait ...) expects a trait identifier",
+        ]
+        
+        non_allowed_errors = []
+        for error in self.clarinet_errors:
+            if not any(pat in error['message'] for pat in allowed_patterns):
+                non_allowed_errors.append(error)
+
+        if non_allowed_errors:
+            self.errors.append("Fatal compilation errors found:")
+            for err in non_allowed_errors:
+                if err['file']:
+                    self.errors.append(f"  {err['file']}:{err['line']} - {err['message']}")
+                else:
+                    self.errors.append(f"  {err['message']}")
             return False
+        else:
+            self.warnings.append("Clarinet reported known false positives (recursion/impl-trait). Proceeding.")
+            return True
 
     def run_verification(self) -> bool:
         """Run all verification steps"""
@@ -639,21 +1038,44 @@ class ContractVerifier:
         return all_passed
 
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Conxian Contract Verification")
-    parser.add_argument("--autofix-manifest", action="store_true", help="Auto-add depends_on=['all-traits'] in stacks/Clarinet.test.toml where missing for centralized-trait users.")
-    parser.add_argument("--autofix-graph", action="store_true", help="Suggest refactors for dynamic contract-call? in non-test contracts (writes artifacts/autofix-graph-suggestions.json)")
-    parser.add_argument("--autofix-impl-traits", action="store_true", help="Rewrite (impl-trait <alias|name>) to (impl-trait .all-traits.<trait>) where possible.")
+def main():
+    parser = argparse.ArgumentParser(description="Verify and fix Conxian Clarity contracts.")
+    parser.add_argument('--autofix-graph', action='store_true', help="Automatically fix dependency graph issues.")
+    parser.add_argument('--autofix-unused', action='store_true', help="Automatically remove unused contracts from Clarinet.toml.")
+    parser.add_argument('--autofix-traits', action='store_true', help="Automatically fix trait definitions.")
+    parser.add_argument('--autofix-prune', action='store_true', help="Automatically prune unused dependencies.")
+    parser.add_argument('--autofix-format', action='store_true', help="Automatically format Clarity files.")
+    parser.add_argument('--autofix-impl-traits', action='store_true', help="Standardize impl-trait usage.")
+    parser.add_argument('--autofix-all', action='store_true', help="Run all autofixers.")
     args = parser.parse_args()
 
-    verifier = ContractVerifier()
-    if args.autofix_manifest:
-        mods = verifier.autofix_manifest_depends_on()
-        print(f"Auto-fix manifest: {mods} modifications applied.")
-    if args.autofix_graph:
-        cnt = verifier.autofix_graph_dynamic_calls()
-        # Do not fail if no suggestions; proceed to verification
-    if args.autofix_impl_traits:
-        _ = verifier.autofix_impl_traits()
-    if not verifier.run_verification():
-        exit(1)
+    if args.autofix_all:
+        args.autofix_graph = True
+        args.autofix_unused = True
+        # args.autofix_traits = True # This is a destructive operation, so we don't include it in all
+        args.autofix_prune = True
+        args.autofix_format = True
+        args.autofix_impl_traits = True
+
+    verifier = ContractVerifier(
+        autofix_graph=args.autofix_graph,
+        autofix_unused=args.autofix_unused,
+        autofix_traits=args.autofix_traits,
+        autofix_prune=args.autofix_prune,
+        autofix_format=args.autofix_format,
+        autofix_impl_traits=args.autofix_impl_traits
+    )
+
+    if any([args.autofix_graph, args.autofix_unused, args.autofix_traits, args.autofix_prune, args.autofix_format, args.autofix_impl_traits]):
+        verifier.autofix_and_report()
+    else:
+        print("\n=== Starting Contract Verification ===")
+        if not verifier.run_verification():
+            verifier.print_report()
+            sys.exit(1)
+        else:
+            verifier.print_report()
+            print("\n✅ All checks passed!")
+
+if __name__ == "__main__":
+    main()

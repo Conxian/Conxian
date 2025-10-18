@@ -231,31 +231,6 @@
       "recommendation": "Consider refactoring file:contracts/dex/cxlp-migration-queue.clar to accept cxd-token as a trait-typed parameter (<sip-010-ft-trait>) and use static contract-call? instead of dynamic dispatch."
     },
     {
-      "source": "file:contracts/dex/dex-factory-v2.clar",
-      "target": "access-control",
-      "recommendation": "Consider refactoring file:contracts/dex/dex-factory-v2.clar to accept access-control as a trait-typed parameter (<sip-010-ft-trait>) and use static contract-call? instead of dynamic dispatch."
-    },
-    {
-      "source": "file:contracts/dex/dex-factory-v2.clar",
-      "target": "token-a",
-      "recommendation": "Consider refactoring file:contracts/dex/dex-factory-v2.clar to accept token-a as a trait-typed parameter (<sip-010-ft-trait>) and use static contract-call? instead of dynamic dispatch."
-    },
-    {
-      "source": "file:contracts/dex/dex-factory-v2.clar",
-      "target": "token-b",
-      "recommendation": "Consider refactoring file:contracts/dex/dex-factory-v2.clar to accept token-b as a trait-typed parameter (<sip-010-ft-trait>) and use static contract-call? instead of dynamic dispatch."
-    },
-    {
-      "source": "file:contracts/dex/dex-factory-v2.clar",
-      "target": "pool-impl",
-      "recommendation": "Consider refactoring file:contracts/dex/dex-factory-v2.clar to accept pool-impl as a trait-typed parameter (<sip-010-ft-trait>) and use static contract-call? instead of dynamic dispatch."
-    },
-    {
-      "source": "file:contracts/dex/dex-factory-v2.clar",
-      "target": "pool-implementation",
-      "recommendation": "Consider refactoring file:contracts/dex/dex-factory-v2.clar to accept pool-implementation as a trait-typed parameter (<sip-010-ft-trait>) and use static contract-call? instead of dynamic dispatch."
-    },
-    {
       "source": "file:contracts/dex/dex-factory.clar",
       "target": "access-control",
       "recommendation": "Consider refactoring file:contracts/dex/dex-factory.clar to accept access-control as a trait-typed parameter (<sip-010-ft-trait>) and use static contract-call? instead of dynamic dispatch."
@@ -1321,5 +1296,5 @@
       "recommendation": "Consider refactoring file:contracts/vaults/sbtc-vault.clar to accept token-contract as a trait-typed parameter (<sip-010-ft-trait>) and use static contract-call? instead of dynamic dispatch."
     }
   ],
-  "count": 264
+  "count": 259
 }

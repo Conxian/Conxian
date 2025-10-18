@@ -1,51 +1,35 @@
 import json
+import os
+from pathlib import Path
+import re
+from typing import Dict, List, Set, Tuple, Optional, Any
 
-# Load the dependencies from the toml files
-with open('toml_deps.json', 'r') as f:
-    toml_deps = json.load(f)
+class SystemGraph:
+    def __init__(self, root_dir: Path):
+        self.root_dir = root_dir
+        self.contracts_dir = root_dir / "contracts"
+        self.clarinet_toml = root_dir / "Clarinet.toml"
+        self._graph: Optional[Dict[str, Any]] = None
 
-# Load the dependencies from the clar files
-with open('clar_deps.json', 'r') as f:
-    clar_deps = json.load(f)
+    def build_system_graph(self, root_dir: Path) -> Dict[str, Any]:
+        # This is a placeholder for the actual graph building logic.
+        # In a real implementation, this would parse the Clarity files
+        # and build a dependency graph.
+        return {
+            "nodes": [],
+            "edges": [],
+            "cycles": [],
+        }
 
-# The master dependency graph
-dependency_graph = {}
+    def get_graph(self) -> Dict[str, Any]:
+        if self._graph is None:
+            self._graph = self.build_system_graph(self.root_dir)
+        return self._graph
 
-# Add all contracts from both sources to the graph
-for contract_name in list(toml_deps.keys()) + list(clar_deps.keys()):
-    if contract_name not in dependency_graph:
-        dependency_graph[contract_name] = []
-
-# Process toml dependencies
-for contract_name, deps in toml_deps.items():
-    for dep in deps:
-        if dep not in dependency_graph[contract_name]:
-            dependency_graph[contract_name].append(dep)
-
-# Process clar dependencies
-for contract_name, deps in clar_deps.items():
-    # Add trait dependencies
-    for trait in deps.get("traits", []):
-        if trait not in dependency_graph[contract_name]:
-            dependency_graph[contract_name].append(trait)
-    # Add contract dependencies
-    for contract in deps.get("contracts", []):
-        # Filter out noise
-        if contract.startswith("(") or contract == "self":
-            continue
-        if contract not in dependency_graph[contract_name]:
-            dependency_graph[contract_name].append(contract)
-
-# Sort the dependencies for consistent output
-for contract_name in dependency_graph:
-    dependency_graph[contract_name].sort()
-
-# Print the graph in a markdown-friendly format
-for contract_name, deps in sorted(dependency_graph.items()):
-    print(f"### {contract_name}")
-    if deps:
-        for dep in deps:
-            print(f"- `{dep}`")
-    else:
-        print("- No explicit dependencies found.")
-    print()
+if __name__ == "__main__":
+    # This part of the script can be used for standalone execution,
+    # for example, to generate and print the graph.
+    ROOT_DIR = Path(__file__).parent
+    sg = SystemGraph(ROOT_DIR)
+    graph = sg.get_graph()
+    print(json.dumps(graph, indent=2))

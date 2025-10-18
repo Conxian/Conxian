@@ -172,8 +172,8 @@ function main() {
     console.log('\n✅ Files have been modified. Running validation...');
     
     try {
-      console.log('\nRunning: clarinet check...');
-      execSync('clarinet check', { 
+  console.log('\nRunning: clarinet check...');
+  execSync('clarinet check', {
         cwd: path.join(__dirname, '..'),
         stdio: 'inherit'
       });
