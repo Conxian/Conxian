@@ -48,6 +48,22 @@ Thumbs.db
 *.pem
 *.key
 *.p12
+
+# Stacks blockchain specific
+.stacks-chain/
+.stacks-db/
+.chainstate/
+
+# Clarinet specific
+**/settings/Mainnet.toml
+**/settings/Testnet.toml
+.clarinet/
+artifacts/
+
+# Temporary files
+*.tmp
+*.temp
+.history/
 *.pfx
 *.crt
 *.cert
@@ -174,3 +190,4 @@ btc-wallet*
 .secrets/
 clarinet-windows-x64.msi
 clarinet_check_output.txt
+.github/copilot-instructions.md

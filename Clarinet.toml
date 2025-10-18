@@ -1,7 +1,7 @@
 [project]
 name = "Conxian"
 description = "A comprehensive, standardized Clarinet configuration for the Conxian DeFi protocol."
-clarinet_version = "3.7.0"
+clarinet_version = "3.8.0"
 
 [network]
 api_endpoint = "https://api.hiro.so"
@@ -445,6 +445,10 @@ address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 path = "contracts/dex/yield-distribution-engine.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
+[contracts.yield-optimizer-dex]
+path = "contracts/dex/yield-optimizer.clar"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+
 [contracts.concentrated-liquidity-pool]
 path = "contracts/pools/concentrated-liquidity-pool.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
@@ -598,9 +602,6 @@ address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 path = "contracts/dex/wormhole-integration.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
-[contracts.yield-optimizer-dex]
-path = "contracts/dex/yield-optimizer.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.governance-access-control]
 path = "contracts/governance/access-control.clar"
