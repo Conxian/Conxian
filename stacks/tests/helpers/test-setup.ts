@@ -11,6 +11,8 @@ export interface MockSimnet {
   callPublicFn: (contractName: string, functionName: string, args: any[], sender: string) => any;
   callReadOnlyFn: (contractName: string, functionName: string, args: any[], sender: string) => any;
   getAccounts: () => Map<string, string>;
+  mineBlock: (txs?: any[]) => { blockHeight: number; transactions: any[] };
+  mineEmptyBlock: () => { blockHeight: number };
 }
 
 // Global test accounts
@@ -35,6 +37,7 @@ afterEach(() => {
 
 // Helper function to create mock simnet
 export function createMockSimnet(): MockSimnet {
+  let blockHeight = 1;
   return {
     callPublicFn: (contractName: string, functionName: string, args: any[], sender: string) => {
       return {
@@ -47,6 +50,14 @@ export function createMockSimnet(): MockSimnet {
         result: { type: 'ok', value: { type: 'bool', value: true } }
       };
     },
-    getAccounts: () => TEST_ACCOUNTS
+    getAccounts: () => TEST_ACCOUNTS,
+    mineBlock: (txs = []) => {
+      blockHeight++;
+      return { blockHeight, transactions: txs };
+    },
+    mineEmptyBlock: () => {
+      blockHeight++;
+      return { blockHeight };
+    }
   };
 }
