@@ -885,3 +885,13 @@
   )
 )
 
+(define-trait finance-metrics-trait
+  (
+    (record-ebitda (module-id (string-ascii 32)) (amount uint) (response bool (err uint)))
+    (record-capex (module-id (string-ascii 32)) (amount uint) (response bool (err uint)))
+    (record-opex (module-id (string-ascii 32)) (amount uint) (response bool (err uint)))
+    (get-aggregate (module-id (string-ascii 32)) (category (string-ascii 8)) (window uint) (response uint (err uint)))
+    (get-system-finance-summary (window uint) (response (tuple (ebitda uint) (capex uint) (opex uint)) (err uint)))
+  )
+)
+
