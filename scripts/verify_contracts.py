@@ -783,7 +783,7 @@ class ContractVerifier:
             lines_no_traits = [line for line in lines if not (line.strip().startswith('(use-trait') or line.strip().startswith('(impl-trait'))]
             
             # Generate new blocks
-            new_use_trait_block = [f"(use-trait {alias} '{deployer_address}.all-traits.{canonical})" for alias, canonical in sorted(required_aliases.items())]
+            new_use_trait_block = [f"(use-trait {alias} .all-traits.{canonical})" for alias, canonical in sorted(required_aliases.items())]
             new_impl_trait_block = [f"(impl-trait .{alias})" for alias in sorted(required_aliases.keys())]
 
             # Find insertion point (typically at the top, after any initial comments)
@@ -880,7 +880,7 @@ class ContractVerifier:
                 lines = content_lf.split('\n')
                 lines_no_traits = [line for line in lines if not (line.strip().startswith('(use-trait') or line.strip().startswith('(impl-trait'))]
 
-                new_use_trait_block = [f"(use-trait {alias} '{deployer_address}.all-traits.{canonical})" for alias, canonical in sorted(required_aliases.items())]
+                new_use_trait_block = [f"(use-trait {alias} .all-traits.{canonical})" for alias, canonical in sorted(required_aliases.items())]
                 new_impl_trait_block = [f"(impl-trait .{alias})" for alias in sorted(required_aliases.keys())]
 
                 insert_at = 0
