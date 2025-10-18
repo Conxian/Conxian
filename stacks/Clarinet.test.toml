@@ -85,7 +85,7 @@ address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 path = "contracts/dex/dex-factory.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
-[disabled.dex-router]
+[contracts.dex-router]
 path = "contracts/dex/dex-router.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 depends_on = [ "all-traits",]
@@ -126,7 +126,7 @@ address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 path = "contracts/dex/memory-pool-management.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
-[disabled.multi-hop-router-v3]
+[contracts.multi-hop-router-v3]
 path = "contracts/dimensional/multi-hop-router-v3.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
