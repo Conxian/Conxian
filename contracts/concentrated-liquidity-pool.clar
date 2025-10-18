@@ -29,15 +29,17 @@
 
 ;; Helper function to normalize token order(define-private (normalize-token-pair (token-a principal) (token-b principal))  (if (is-eq token-a token-b)    (err ERR_INVALID_TOKENS)    (let ((order-a (default-to u0 (map-get? token-order token-a)))          (order-b (default-to u0 (map-get? token-order token-b))))      (if (< order-a order-b)        (ok { token-a: token-a, token-b: token-b })        (ok { token-a: token-b, token-b: token-a })      )    )  ))
 
-;; --- Public Functions (Pool Creation Trait Implementation) ---(define-public (create-pool (token-a sip-010-ft-trait) (token-b sip-010-ft-trait) (fee-bps uint))  (begin{{ ... }}    (asserts! (is-ok (contract-call? token-a get-symbol)) (err ERR_INVALID_TOKENS))    (asserts! (is-ok (contract-call? token-b get-symbol)) (err ERR_INVALID_TOKENS))    (asserts! (not (is-eq (contract-of token-a) (contract-of token-b))) (err ERR_INVALID_TOKENS))    (let ((normalized-pair (unwrap! (normalize-token-pair (contract-of token-a) (contract-of token-b)) (err ERR_INVALID_TOKENS))))      (asserts! (is-none (map-get? pools normalized-pair)) ERR_POOL_ALREADY_EXISTS)      (map-set pools normalized-pair {        fee-bps: fee-bps,        token-a-addr: (contract-of token-a),        token-b-addr: (contract-of token-b)      })      (ok (as-contract tx-sender))    )  ))
+;; --- Public Functions (Pool Creation Trait Implementation) ---(define-public (create-pool (token-a sip-010-ft-trait) (token-b sip-010-ft-trait) (fee-bps uint))
+  (begin
+    (asserts! (is-ok (contract-call? token-a get-symbol)) (err ERR_INVALID_TOKENS))
+    (asserts! (is-ok (contract-call? token-b get-symbol)) (err ERR_INVALID_TOKENS))    (asserts! (not (is-eq (contract-of token-a) (contract-of token-b))) (err ERR_INVALID_TOKENS))    (let ((normalized-pair (unwrap! (normalize-token-pair (contract-of token-a) (contract-of token-b)) (err ERR_INVALID_TOKENS))))      (asserts! (is-none (map-get? pools normalized-pair)) ERR_POOL_ALREADY_EXISTS)      (map-set pools normalized-pair {        fee-bps: fee-bps,        token-a-addr: (contract-of token-a),        token-b-addr: (contract-of token-b)      })      (ok (as-contract tx-sender))    )  ))
 (define-public (get-pool (token-a sip-010-ft-trait) (token-b sip-010-ft-trait))  (let ((normalized-pair (unwrap! (normalize-token-pair (contract-of token-a) (contract-of token-b)) (err ERR_INVALID_TOKENS))))    (ok (map-get? pools normalized-pair))  ))
 (define-public (get-all-pools (start-index uint) (limit uint))  (ok (map-reduce pools                   (list)                   (func (key { token-a: principal, token-b: principal }) (value { fee-bps: uint, token-a-addr: principal, token-b-addr: principal }) (accumulator (list (tuple (token-a principal) (token-b principal) (fee-bps uint)))))                     (unwrap! (as-max-len? (append accumulator (tuple (token-a key) (token-b key) (fee-bps value))) u100) (err u1000))                   )  ))
 (define-public (set-pool-implementation (token-a sip-010-ft-trait) (token-b sip-010-ft-trait) (implementation-contract principal))  (err ERR_UNAUTHORIZED) 
 
 ;; Not applicable for concentrated liquidity pools)
-(define-public (get-pool-implementation (token-a sip-010-ft-trait) (token-b sip-010-ft-trait))  (ok (as-contract tx-sender)) 
-
-;; Returns itself as the implementation)
+(define-public (get-pool-implementation (token-a sip-010-ft-trait) (token-b sip-010-ft-trait))
+  (ok (as-contract tx-sender))) ;; Returns itself as the implementation
 
 ;; --- Public Functions (Concentrated Liquidity Specific) ---
 

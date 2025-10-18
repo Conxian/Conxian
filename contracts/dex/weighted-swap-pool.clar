@@ -23,9 +23,11 @@
 (define-public (add-liquidity (amount-x uint) (amount-y uint))  (let ((current-balance-x (var-get balance-x))        (current-balance-y (var-get balance-y)))    (asserts! (and (> amount-x u0) (> amount-y u0)) ERR_INVALID_AMOUNTS)        (try! (contract-call? (var-get token-x-trait) transfer amount-x tx-sender (as-contract tx-sender) none))    (try! (contract-call? (var-get token-y-trait) transfer amount-y tx-sender (as-contract tx-sender) none))        (var-set balance-x (+ current-balance-x amount-x))    (var-set balance-y (+ current-balance-y amount-y))        (ok true)  ))
 (define-public (swap-x-for-y (amount-in uint))  (let ((current-balance-x (var-get balance-x))        (current-balance-y (var-get balance-y))        (weight-x (var-get weight-x))        (weight-y (var-get weight-y)))        (try! (contract-call? (var-get token-x-trait) transfer amount-in tx-sender (as-contract tx-sender) none))        (let* ((new-balance-x (+ current-balance-x amount-in))           (amount-out (get-amount-out amount-in current-balance-x current-balance-y weight-x weight-y)))            (var-set balance-x new-balance-x)      (var-set balance-y (- current-balance-y amount-out))            (try! (as-contract (contract-call? (var-get token-y-trait) transfer amount-out tx-sender tx-sender none)))            (ok amount-out)    )  ))
 
-;; --- Private Helper Functions ---(define-private (get-amount-out (amount-in uint) (balance-in uint) (balance-out uint) (weight-in uint) (weight-out uint))  
-
-;; out = balanceOut * (1 - (balanceIn / (balanceIn + amountIn))^(weightIn/weightOut))  (let ((ratio (/ (* balance-in u100000000) (+ balance-in amount-in))))      (* balance-out (- u100000000 power))    )  ))
+;; --- Private Helper Functions ---(define-private (get-amount-out (amount-in uint) (balance-in uint) (balance-out uint) (weight-in uint) (weight-out uint))
+  ;; out = balanceOut * (1 - (balanceIn / (balanceIn + amountIn))^(weightIn/weightOut))
+  (let ((ratio (/ (* balance-in u100000000) (+ balance-in amount-in))))
+    (* balance-out (- u100000000 ratio))
+  )))
 (define-private (get-weights-from-params (params (buff 256)))  (if (>= (len params) u8)    (ok {       weight-x: (to-uint (buff-to-int-be (slice params 0 4))),      weight-y: (to-uint (buff-to-int-be (slice params 4 8)))    })    (err ERR_INVALID_WEIGHTS)  ))
 (define-private (pow-approx (base uint) (exp uint))  
 

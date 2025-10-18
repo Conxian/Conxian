@@ -33,7 +33,29 @@
 
 ;; ===== Batch Processing Functions =====
 
-;; Process batch liquidations(define-public (batch-liquidate (positions (list 100 {  user: principal,  debt-asset: principal,  collateral-asset: principal,  debt-amount: uint})))  (begin    (try! (check-is-processor))    (asserts! (>= (len positions) MIN_BATCH_SIZE) ERR_INVALID_BATCH)    (asserts! (<= (len positions) MAX_BATCH_SIZE) ERR_BATCH_FULL)        (let ((results (fold process-single-liquidation positions {      success: u0,      failed: u0,      total-liquidated: u0    })))            (var-set total-batches-processed (+ (var-get total-batches-processed) u1))      (var-set total-gas-saved (+ (var-get total-gas-saved) (* (len positions) u5000)))            (ok {        batch-size: (len positions),        successful: (get success results),        failed: (get failed results),        total-value: (get total-liquidated results)      }))))
+;; Process batch liquidations
+(define-public (batch-liquidate (positions (list 100 {  user: principal,  debt-asset: principal,  collateral-asset: principal,  debt-amount: uint})))
+  (begin
+    (try! (check-is-processor))
+    (asserts! (>= (len positions) MIN_BATCH_SIZE) ERR_INVALID_BATCH)
+    (asserts! (<= (len positions) MAX_BATCH_SIZE) ERR_BATCH_FULL)
+    
+    (let ((results (fold process-single-liquidation positions {
+      success: u0,
+      failed: u0,
+      total-liquidated: u0
+    })))
+    
+    (var-set total-batches-processed (+ (var-get total-batches-processed) u1))
+    (var-set total-gas-saved (+ (var-get total-gas-saved) (* (len positions) u5000)))
+    
+    (ok {
+      batch-size: (len positions),
+      successful: (get success results),
+      failed: (get failed results),
+      total-value: (get total-liquidated results)
+    }))
+  ))
 (define-private (process-single-liquidation   (position {user: principal, debt-asset: principal, collateral-asset: principal, debt-amount: uint})  (state {success: uint, failed: uint, total-liquidated: uint}))  
 
 ;; In production, call actual liquidation contract  

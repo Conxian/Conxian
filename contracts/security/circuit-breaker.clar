@@ -40,13 +40,39 @@
 ;; Return as basis points    )  ))
 (define-private (should-circuit-open (stats {success-count: uint, failure-count: uint, last-updated: uint,                                            is-open: bool, last-state-change: uint, rate-limit: uint,                                            rate-window: uint, rate-count: uint, rate-window-start: uint}))  (let ((failure-rate (calculate-failure-rate (get success-count stats) (get failure-count stats)))        (threshold (var-get global-failure-threshold)))    (>= failure-rate threshold)  ))
 (define-private (should-circuit-close (stats {success-count: uint, failure-count: uint, last-updated: uint,                                             is-open: bool, last-state-change: uint, rate-limit: uint,                                             rate-window: uint, rate-count: uint, rate-window-start: uint}))  (let ((timeout (var-get global-reset-timeout))        (time-since-change (- block-height (get last-state-change stats))))    (>= time-since-change timeout)  ))
-(define-private (update-rate-limit (stats {success-count: uint, failure-count: uint, last-updated: uint,                                         is-open: bool, last-state-change: uint, rate-limit: uint,                                         rate-window: uint, rate-count: uint, rate-window-start: uint})                                  (is-success bool))  (let ((current-time block-height)        (window-start (get rate-window-start stats))        (window (get rate-window stats)))        
+(define-private (update-rate-limit (stats {success-count: uint, failure-count: uint, last-updated: uint,
+                                         is-open: bool, last-state-change: uint, rate-limit: uint,
+                                         rate-window: uint, rate-count: uint, rate-window-start: uint})
+                                  (is-success bool))
+  (let ((current-time block-height)
+        (window-start (get rate-window-start stats))
+        (window (get rate-window stats)))        
 
-;; Reset rate count if window has passed    (if (and (> window u0) (> (- current-time window-start) window))      (merge stats {        rate-count: u1,        rate-window-start: current-time,        success-count: (if is-success (+ (get success-count stats) u1) (get success-count stats)),        failure-count: (if is-success (get failure-count stats) (+ (get failure-count stats) u1)),        last-updated: current-time      })      
+    ;; Reset rate count if window has passed
+    (if (and (> window u0) (> (- current-time window-start) window))
+      (merge stats {
+        rate-count: u1,
+        rate-window-start: current-time,
+        success-count: (if is-success (+ (get success-count stats) u1) (get success-count stats)),
+        failure-count: (if is-success (get failure-count stats) (+ (get failure-count stats) u1)),
+        last-updated: current-time
+      })
+      
+      ;; Otherwise increment count and check limits
+      (let ((new-count (+ (get rate-count stats) u1))
+            (rate-limit (get rate-limit stats)))                
 
-;; Otherwise increment count and check limits      (let ((new-count (+ (get rate-count stats) u1))            (rate-limit (get rate-limit stats)))                
-
-;; Check if rate limit is exceeded        (asserts! (or (is-eq rate-limit u0) (<= new-count rate-limit)) ERR_RATE_LIMIT_EXCEEDED)                (merge stats {          rate-count: new-count,          success-count: (if is-success (+ (get success-count stats) u1) (get success-count stats)),          failure-count: (if is-success (get failure-count stats) (+ (get failure-count stats) u1)),          last-updated: current-time        })      )    )  ))
+        ;; Check if rate limit is exceeded
+        (asserts! (or (is-eq rate-limit u0) (<= new-count rate-limit)) ERR_RATE_LIMIT_EXCEEDED)                
+        (merge stats {
+          rate-count: new-count,
+          success-count: (if is-success (+ (get success-count stats) u1) (get success-count stats)),
+          failure-count: (if is-success (get failure-count stats) (+ (get failure-count stats) u1)),
+          last-updated: current-time
+        })
+      )
+    )
+  ))
 (define-private (update-circuit-state (stats {success-count: uint, failure-count: uint, last-updated: uint,                                            is-open: bool, last-state-change: uint, rate-limit: uint,                                            rate-window: uint, rate-count: uint, rate-window-start: uint}))  (let ((current-open (get is-open stats)))    (if current-open      
 
 ;; Circuit is open, check if it should close      (if (should-circuit-close stats)        (merge stats {          is-open: false,          last-state-change: block-height,          success-count: u0,  

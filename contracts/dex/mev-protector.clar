@@ -44,14 +44,19 @@
 
 ;; Store for batch auction    (let (      (next-id (var-get next-reveal-id))    )      (map-set pending-reveals next-id { user: tx-sender, path: path, amount-in: amount-in, min-amount-out: min-amount-out, recipient: recipient, salt: salt })      (var-set next-reveal-id (+ next-id u1))    )    (ok true)  ))
 (define-public (process-batch)  (begin    (asserts! (>= (- block-height (var-get last-batch-execution)) (var-get batch-auction-period)) ERR_AUCTION_IN_PROGRESS)    (var-set last-batch-execution block-height)        (let ((reveals (map (lambda (id) (unwrap-panic (map-get? pending-reveals id))) (range (var-get next-reveal-id)))))      (var-set next-reveal-id u0)      (ok (map (lambda (r)        (begin          (try! (detect-sandwich-attack (get path r) (get amount-in r)))          (as-contract (contract-call? .multi-hop-router-v3 swap-exact-in-with-transfer (get path r) (get amount-in r) (get min-amount-out r) (get recipient r)))        )      ) reveals))    )  ))
-(define-private (detect-sandwich-attack (path (list 20 principal)) (amount-in uint))  
-
-;; Basic sandwich detection: check for significant price changes before and after the transaction  
-
-;; This is a simplified implementation. A more robust solution would involve more sophisticated analysis.  (let (    (price-before (try! (get-price path amount-in)))    (price-after (try! (get-price path amount-in))) 
-
-;; This should ideally be a simulated price after the transaction  )    (let ((deviation (/ (* (abs (- price-after price-before)) u10000) price-before)))      (if (> deviation u500) 
-
-;; 5% deviation        (err ERR_SANDWICH_ATTACK_DETECTED)        (ok true)      )    )  ))
+(define-private (detect-sandwich-attack (path (list 20 principal)) (amount-in uint))
+  ;; Basic sandwich detection: check for significant price changes before and after the transaction
+  ;; This is a simplified implementation. A more robust solution would involve more sophisticated analysis.
+  (let (
+    (price-before (try! (get-price path amount-in)))
+    (price-after (try! (get-price path amount-in))) ;; This should ideally be a simulated price after the transaction
+  )
+    (let ((deviation (/ (* (abs (- price-after price-before)) u10000) price-before)))
+      (if (> deviation u500) ;; 5% deviation
+        (err ERR_SANDWICH_ATTACK_DETECTED)
+        (ok true)
+      )
+    )
+  ))
 (define-private (get-price (path (list 20 principal)) (amount-in uint))    (as-contract (contract-call? .multi-hop-router-v3 get-amount-out path amount-in)))
 (define-public (cancel-commitment (commitment-hash (buff 32)))    (let ((commitment-entry (unwrap! (map-get? commitments { user: tx-sender, commitment-hash: commitment-hash }) ERR_COMMITMENT_NOT_FOUND)))        (asserts! (not (get revealed commitment-entry)) ERR_ALREADY_REVEALED)        (asserts! (> (- block-height (get block-height commitment-entry)) (var-get reveal-period)) ERR_REVEAL_PERIOD_NOT_EXPIRED)        (map-delete commitments { user: tx-sender, commitment-hash: commitment-hash })        (ok true)    ))

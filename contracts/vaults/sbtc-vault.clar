@@ -128,15 +128,30 @@
 ;; Record wrap history        (map-set wrap-history {user: tx-sender, timestamp: block-height} {          btc-amount: btc-amount,          sbtc-amount: sbtc-amount,          fee-paid: fee        })                (ok sbtc-amount))      ERR_BRIDGE_ERROR)))
 
 ;; Unwrap sBTC to BTC (placeholder - requires bridge integration)
-(define-public (unwrap-to-btc (sbtc-amount uint) (btc-address (buff 64)))  (begin    (try! (check-not-paused))    (asserts! (>= sbtc-amount MIN_UNWRAP_AMOUNT) ERR_INVALID_AMOUNT)        
-
-;; Validate BTC address format (simplified)    (asserts! (> (len btc-address) u0) ERR_INVALID_BTC_ADDRESS)        
-
-;; Calculate fee    (let ((fee (/ (* sbtc-amount (var-get unwrap-fee-bps)) u10000))          (btc-amount (- sbtc-amount fee)))            
-
-;; Record unwrap history      (map-set unwrap-history {user: tx-sender, timestamp: block-height} {        sbtc-amount: sbtc-amount,        btc-amount: btc-amount,        fee-paid: fee,        btc-address: btc-address      })            
-
-;; In production: initiate BTC withdrawal via bridge      (ok btc-amount))))
+(define-public (unwrap-to-btc (sbtc-amount uint) (btc-address (buff 64)))
+  (begin
+    (try! (check-not-paused))
+    (asserts! (>= sbtc-amount MIN_UNWRAP_AMOUNT) ERR_INVALID_AMOUNT)
+    
+    ;; Validate BTC address format (simplified)
+    (asserts! (> (len btc-address) u0) ERR_INVALID_BTC_ADDRESS)
+    
+    ;; Calculate fee
+    (let ((fee (/ (* sbtc-amount (var-get unwrap-fee-bps)) u10000))
+          (btc-amount (- sbtc-amount fee)))
+      
+      ;; Record unwrap history
+      (map-set unwrap-history {user: tx-sender, timestamp: block-height} {
+        sbtc-amount: sbtc-amount,
+        btc-amount: btc-amount,
+        fee-paid: fee,
+        btc-address: btc-address
+      })
+      
+      ;; In production: initiate BTC withdrawal via bridge
+      (ok btc-amount)
+    )
+  )))
 
 ;; ===== Yield Generation =====
 

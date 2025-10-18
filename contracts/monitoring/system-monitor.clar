@@ -27,9 +27,7 @@
 ;; Event storage(define-map events  { id: uint }  {    component: (string-ascii 32),    event-type: (string-ascii 32),    severity: uint,    message: (string-ascii 256),    block-height: uint,    data: (optional (string-utf8 256))  })
 
 ;; Component event index (for faster lookups)
-(define-map component-events  { component: (string-ascii 32), index: uint }  uint  
-
-;; event ID)
+(define-map component-events  { component: (string-ascii 32), index: uint }  uint)  ;; event ID
 
 ;; Alert thresholds(define-map alert-thresholds  { component: (string-ascii 32), alert-type: (string-ascii 32) }  uint)
 

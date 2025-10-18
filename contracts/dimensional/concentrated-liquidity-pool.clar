@@ -113,17 +113,44 @@
 
 ;; Transfer tokens      (try! (contract-call? token-in transfer (get amount-in result) tx-sender (as-contract tx-sender) none))      (try! (as-contract (contract-call? token-out transfer (get amount-out result) tx-sender tx-sender none)))            (ok result)    ))  )
 
-;; Internal: Execute swap calculation and state updates(define-private (execute-swap (zero-for-one bool) (amount-specified uint) (sqrt-price-limit uint))  (let ((current-sqrt-price (var-get sqrt-price-x64))        (current-tick (var-get current-tick))        (current-liquidity (var-get liquidity)))        
-
-;; Validate price limit    (asserts! (if zero-for-one                (< sqrt-price-limit current-sqrt-price)                (> sqrt-price-limit current-sqrt-price))              ERR_PRICE_LIMIT_REACHED)        
-
-;; Calculate swap amounts (simplified)    (let ((amount-in amount-specified)          (amount-out (calculate-output-amount amount-specified zero-for-one current-sqrt-price current-liquidity))          (new-sqrt-price (calculate-new-sqrt-price amount-specified zero-for-one current-sqrt-price current-liquidity))          (new-tick (contract-call? .concentrated-math sqrt-price-to-tick new-sqrt-price)))            
-
-;; Calculate fees      (let ((fee-amount (/ (* amount-in (var-get fee-tier)) u1000000))            (protocol-fee-amount (/ (* fee-amount (var-get protocol-fee)) u10000)))                
-
-;; Update global state        (var-set sqrt-price-x64 new-sqrt-price)        (var-set current-tick new-tick)                
-
-;; Update fee tracking        (if zero-for-one          (begin            (var-set fee-growth-global-x (+ (var-get fee-growth-global-x) (/ (* (- fee-amount protocol-fee-amount) PRECISION) current-liquidity)))            (var-set protocol-fees-x (+ (var-get protocol-fees-x) protocol-fee-amount)))          (begin            (var-set fee-growth-global-y (+ (var-get fee-growth-global-y) (/ (* (- fee-amount protocol-fee-amount) PRECISION) current-liquidity)))            (var-set protocol-fees-y (+ (var-get protocol-fees-y) protocol-fee-amount))))                (tuple (amount-in amount-in) (amount-out amount-out) (fee fee-amount) (new-sqrt-price new-sqrt-price))      ))    ))
+;; Internal: Execute swap calculation and state updates
+(define-private (execute-swap (zero-for-one bool) (amount-specified uint) (sqrt-price-limit uint))
+  (let ((current-sqrt-price (var-get sqrt-price-x64))
+        (current-tick (var-get current-tick))
+        (current-liquidity (var-get liquidity)))
+    
+    ;; Validate price limit
+    (asserts! (if zero-for-one
+                (< sqrt-price-limit current-sqrt-price)
+                (> sqrt-price-limit current-sqrt-price))
+              ERR_PRICE_LIMIT_REACHED)
+    
+    ;; Calculate swap amounts (simplified)
+    (let ((amount-in amount-specified)
+          (amount-out (calculate-output-amount amount-specified zero-for-one current-sqrt-price current-liquidity))
+          (new-sqrt-price (calculate-new-sqrt-price amount-specified zero-for-one current-sqrt-price current-liquidity))
+          (new-tick (contract-call? .concentrated-math sqrt-price-to-tick new-sqrt-price)))
+      
+      ;; Calculate fees
+      (let ((fee-amount (/ (* amount-in (var-get fee-tier)) u1000000))
+            (protocol-fee-amount (/ (* fee-amount (var-get protocol-fee)) u10000)))
+        
+        ;; Update global state
+        (var-set sqrt-price-x64 new-sqrt-price)
+        (var-set current-tick new-tick)
+        
+        ;; Update fee tracking
+        (if zero-for-one
+          (begin
+            (var-set fee-growth-global-x (+ (var-get fee-growth-global-x) (/ (* (- fee-amount protocol-fee-amount) PRECISION) current-liquidity)))
+            (var-set protocol-fees-x (+ (var-get protocol-fees-x) protocol-fee-amount)))
+          (begin
+            (var-set fee-growth-global-y (+ (var-get fee-growth-global-y) (/ (* (- fee-amount protocol-fee-amount) PRECISION) current-liquidity)))
+            (var-set protocol-fees-y (+ (var-get protocol-fees-y) protocol-fee-amount))))
+        
+        (tuple (amount-in amount-in) (amount-out amount-out) (fee fee-amount) (new-sqrt-price new-sqrt-price))
+      ))
+  ))
 
 ;; Internal: Calculate output amount for swap (simplified)
 (define-private (calculate-output-amount (amount-in uint) (zero-for-one bool) (sqrt-price uint) (liquidity-amount uint))  

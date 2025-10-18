@@ -21,9 +21,19 @@
 (define-public (add-liquidity (amount-x uint) (amount-y uint))  (let ((current-balance-x (var-get balance-x))        (current-balance-y (var-get balance-y)))    (asserts! (and (> amount-x u0) (> amount-y u0)) ERR_INVALID_AMOUNTS)        (try! (as-contract (contract-call? (var-get token-x-trait) transfer amount-x tx-sender (as-contract tx-sender) none)))    (try! (as-contract (contract-call? (var-get token-y-trait) transfer amount-y tx-sender (as-contract tx-sender) none)))        (var-set balance-x (+ current-balance-x amount-x))    (var-set balance-y (+ current-balance-y amount-y))        
 
 ;; In a real implementation, we would mint LP tokens here.    (ok true)  ))
-(define-public (remove-liquidity (lp-token-amount uint))  
-
-;; In a real implementation, we would calculate the amount of each token to return.  (let ((amount-x (/ (* lp-token-amount (var-get balance-x)) u100000000))        (amount-y (/ (* lp-token-amount (var-get balance-y)) u100000000)))            (try! (as-contract (contract-call? (var-get token-x-trait) transfer amount-x tx-sender tx-sender none)))    (try! (as-contract (contract-call? (var-get token-y-trait) transfer amount-y tx-sender tx-sender none)))        (var-set balance-x (- (var-get balance-x) amount-x))    (var-set balance-y (- (var-get balance-y) amount-y))        (ok (tuple (amount-x amount-x) (amount-y amount-y)))  ))
+(define-public (remove-liquidity (lp-token-amount uint))
+  ;; In a real implementation, we would calculate the amount of each token to return.
+  (let ((amount-x (/ (* lp-token-amount (var-get balance-x)) u100000000))
+        (amount-y (/ (* lp-token-amount (var-get balance-y)) u100000000)))
+    
+    (try! (as-contract (contract-call? (var-get token-x-trait) transfer amount-x tx-sender tx-sender none)))
+    (try! (as-contract (contract-call? (var-get token-y-trait) transfer amount-y tx-sender tx-sender none)))
+    
+    (var-set balance-x (- (var-get balance-x) amount-x))
+    (var-set balance-y (- (var-get balance-y) amount-y))
+    
+    (ok (tuple (amount-x amount-x) (amount-y amount-y)))
+  )))
 (define-public (swap-x-for-y (amount-in uint))  (let ((current-balance-x (var-get balance-x))        (current-balance-y (var-get balance-y))        (amp (var-get amp-factor)))        (try! (contract-call? (var-get token-x-trait) transfer amount-in tx-sender (as-contract tx-sender) none))        (let ((new-balance-x (+ current-balance-x amount-in))          (new-balance-y (get-y new-balance-x current-balance-x current-balance-y amp)))                (asserts! (> new-balance-y u0) ERR_INVARIANT_VIOLATION)            (let ((amount-out (- current-balance-y new-balance-y)))        (var-set balance-x new-balance-x)        (var-set balance-y new-balance-y)                (try! (as-contract (contract-call? (var-get token-y-trait) transfer amount-out tx-sender tx-sender none)))                (ok amount-out)      )    )  ))
 
 ;; --- Private Helper Functions ---(define-private (get-y (x1 uint) (x0 uint) (y0 uint) (amp uint))  

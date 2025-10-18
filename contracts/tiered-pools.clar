@@ -29,9 +29,10 @@
 (define-public (add-liquidity (pool-id principal) (token-x-amount uint) (token-y-amount uint) (min-lp-tokens uint))  (begin    (asserts! (is-some (map-get? pools {pool-id: pool-id})) ERR_POOL_NOT_FOUND)    
 
 ;; Call the actual pool contract to add liquidity    (ok true)  ))
-(define-public (remove-liquidity (pool-id principal) (lp-tokens uint) (min-token-x-amount uint) (min-token-y-amount uint))  (begin    (asserts! (is-some (map-get? pools {pool-id: pool-id})) ERR_POOL_NOT_FOUND)    
-
-;; Call the actual pool contract to remove liquidity    (ok true)  ))
+(define-public (remove-liquidity (pool-id principal) (lp-tokens uint) (min-token-x-amount uint) (min-token-y-amount uint))  (begin    (asserts! (is-some (map-get? pools {pool-id: pool-id})) ERR_POOL_NOT_FOUND)
+    
+    ;; Call the actual pool contract to remove liquidity    (ok true)
+  ))
 
 ;; ===== Read-Only Functions =====(define-read-only (get-pool (pool-id principal))  (ok (map-get? pools {pool-id: pool-id})))
 (define-read-only (get-contract-owner)  (ok (var-get contract-owner)))

@@ -34,7 +34,10 @@
 
 ;; Placeholder for actual proposal execution logic        
 
-;; This would involve calling other contracts based on the proposal details        (print { event: "proposal-executed", proposal-id: proposal-id })        (map-set proposals { proposal-id: proposal-id } (merge (unwrap-panic proposal) { executed: true }))        (ok true)      )    )  ))
+;; This would involve calling other contracts based on the proposal details        (print { event: "proposal-executed", proposal-id: proposal-id })        (map-set proposals { proposal-id: proposal-id } (merge (unwrap-panic proposal) { executed: true }))        (ok true)
+      )
+    )
+  ))
 
 ;; Read-only Functions(define-read-only (get-proposal (proposal-id uint))  (ok (map-get? proposals { proposal-id: proposal-id })))
 (define-read-only (get-vote (proposal-id uint) (voter principal))  (ok (map-get? votes { proposal-id: proposal-id, voter: voter })))

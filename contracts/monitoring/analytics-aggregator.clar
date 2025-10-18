@@ -233,4 +233,14 @@
 ;; ===== Update Functions =====(define-public (update-asset-tvl (asset principal) (amount uint) (usd-value uint))  (begin    (try! (check-is-updater))    (map-set asset-tvl asset {      amount: amount,      usd-value: usd-value,      last-updated: block-height    })    (ok true)))
 (define-public (update-pool-metrics  (pool principal)  (tvl uint)  (volume-24h uint)  (fee-revenue-24h uint)  (apy uint)  (utilization uint))  (begin    (try! (check-is-updater))    (map-set pool-metrics pool {      tvl: tvl,      volume-24h: volume-24h,      fee-revenue-24h: fee-revenue-24h,      apy: apy,      utilization: utilization,      last-updated: block-height    })    (ok true)))
 (define-public (update-vault-metrics  (vault principal)  (total-assets uint)  (total-shares uint)  (apy uint)  (performance-fee uint))  (begin    (try! (check-is-updater))    (map-set vault-metrics vault {      total-assets: total-assets,      total-shares: total-shares,      apy: apy,      performance-fee: performance-fee,      last-harvest: block-height    })    (ok true)))
-(define-public (record-user-activity  (user principal)  (deposit-amount uint)  (withdrawal-amount uint)  (fees-paid uint)  (rewards-earned uint))  (begin    (try! (check-is-updater))    (match (map-get? user-metrics user)      existing      (map-set user-metrics user {        total-deposits: (+ (get total-deposits existing) deposit-amount),        total-withdrawals: (+ (get total-withdrawals existing) withdrawal-amount),        total-fees-paid: (+ (get total-fees-paid existing) fees-paid),        total-rewards-earned: (+ (get total-rewards-earned existing) rewards-earned),       
+(define-public (record-user-activity  (user principal)  (deposit-amount uint)  (withdrawal-amount uint)  (fees-paid uint)  (rewards-earned uint))  (begin    (try! (check-is-updater))    (match (map-get? user-metrics user)      existing      (map-set user-metrics user {        total-deposits: (+ (get total-deposits existing) deposit-amount),        total-withdrawals: (+ (get total-withdrawals existing) withdrawal-amount),        total-fees-paid: (+ (get total-fees-paid existing) fees-paid),        total-rewards-earned: (+ (get total-rewards-earned existing) rewards-earned),        last-active: block-height      })
+      none      (map-set user-metrics user {
+        total-deposits: deposit-amount,
+        total-withdrawals: withdrawal-amount,
+        total-fees-paid: fees-paid,
+        total-rewards-earned: rewards-earned,
+        last-active: block-height
+      })
+    )
+    (ok true)
+  ))

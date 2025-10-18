@@ -212,15 +212,28 @@
 ;; Update collateral ratio        (map-set sbtc-bonds           { bond-id: bond-id }          (merge bond { collateral-ratio: current-ratio })        )                
 
 ;; Check if liquidation threshold is breached        (if (< current-ratio LIQUIDATION_THRESHOLD)          (begin            (print { event: "bond-undercollateralized", bond-id: bond-id, ratio: current-ratio })            (err ERR_LIQUIDATION_THRESHOLD_BREACHED)          )          (ok current-ratio)        )      )      (err ERR_INSUFFICIENT_COLLATERAL)    )    ERR_BOND_NOT_FOUND  ))
-(define-public (liquidate-undercollateralized-bond (bond-id uint))  "Liquidate bond with insufficient collateral"  (match (check-bond-collateralization bond-id)    ratio (err ERR_LIQUIDATION_THRESHOLD_BREACHED) 
-
-;; Not undercollateralized    (match (map-get? sbtc-bonds { bond-id: bond-id })      bond (begin        
-
-;; Transfer collateral to liquidator at discount        (let ((liquidation-amount (/ (* (get collateral-amount bond) u950000) u1000000))) 
-
-;; 5% discount          (try! (as-contract (contract-call? .sbtc-token transfer liquidation-amount tx-sender tx-sender none)))                    
-
-;; Mark bond as defaulted          (map-set sbtc-bonds             { bond-id: bond-id }            (merge bond { status: u3 })          )                    (print { event: "bond-liquidated", bond-id: bond-id, liquidator: tx-sender })          (ok liquidation-amount)        )      )      ERR_BOND_NOT_FOUND    )  ))
+(define-public (liquidate-undercollateralized-bond (bond-id uint))
+  "Liquidate bond with insufficient collateral"
+  (match (check-bond-collateralization bond-id)
+    ratio (err ERR_LIQUIDATION_THRESHOLD_BREACHED) ;; Not undercollateralized
+    (match (map-get? sbtc-bonds { bond-id: bond-id })
+      bond (begin        
+        ;; Transfer collateral to liquidator at discount
+        (let ((liquidation-amount (/ (* (get collateral-amount bond) u950000) u1000000))) ;; 5% discount
+          (try! (as-contract (contract-call? .sbtc-token transfer liquidation-amount tx-sender tx-sender none)))
+                    
+          ;; Mark bond as defaulted
+          (map-set sbtc-bonds 
+            { bond-id: bond-id }
+            (merge bond { status: u3 })
+          )
+          (print { event: "bond-liquidated", bond-id: bond-id, liquidator: tx-sender })
+          (ok liquidation-amount)
+        )
+      )
+      ERR_BOND_NOT_FOUND
+    )
+  ))
 
 ;; =============================================================================
 
