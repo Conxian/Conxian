@@ -132,6 +132,14 @@ The Conxian protocol uses a centralized trait system for consistency and maintai
 - `ERR_POSITION_NOT_UNDERWATER` (u1004)
 - `ERR_SLIPPAGE_TOO_HIGH` (u1005)
 
+## Error Code Usage
+
+Always reference errors from `errors.clar`:
+
+```clarity
+(asserts! (is-eq caller sender) ERR_UNAUTHORIZED)
+```
+
 ## Testing
 
 All traits should be tested using the protocol's testing framework. Ensure:
