@@ -895,3 +895,34 @@
   )
 )
 
+;; ===========================================
+;; NEW TRAITS FOR PHASE 1 COMPONENTS
+;; ===========================================
+
+(define-trait clp-pool-trait
+  (
+    (add-liquidity (position-id (buff 32)) (lower-tick int) (upper-tick int) (amount uint) (response (tuple (shares uint)) (err uint)))
+    (remove-liquidity (position-id (buff 32)) (amount uint) (response (tuple (amount-out uint)) (err uint)))
+    (swap (token-in (contract-of sip-010-ft-trait)) (token-out (contract-of sip-010-ft-trait)) (amount-in uint) (response (tuple (amount-out uint)) (err uint)))
+    (get-position (position-id (buff 32)) (response (tuple (lower int) (upper int) (shares uint)) (err uint)))
+    (get-current-tick () (response int (err uint)))
+    (get-fee-rate () (response uint (err uint)))
+  )
+)
+
+(define-trait multi-hop-router-v3-trait
+  (
+    (compute-best-route (token-in (contract-of sip-010-ft-trait)) (token-out (contract-of sip-010-ft-trait)) (amount-in uint) (response (tuple (route-id (buff 32)) (hops uint)) (err uint)))
+    (execute-route (route-id (buff 32)) (response (tuple (amount-out uint)) (err uint)))
+    (get-route-stats (route-id (buff 32)) (response (tuple (hops uint) (estimated-out uint)) (err uint)))
+  )
+)
+
+(define-trait dex-factory-v2-trait
+  (
+    (register-pool-type (type-id (string-ascii 32)) (impl principal) (response bool (err uint)))
+    (create-pool (type-id (string-ascii 32)) (token-a (contract-of sip-010-ft-trait)) (token-b (contract-of sip-010-ft-trait)) (response principal (err uint)))
+    (get-pool (token-a (contract-of sip-010-ft-trait)) (token-b (contract-of sip-010-ft-trait)) (response (optional principal) (err uint)))
+  )
+)
+
