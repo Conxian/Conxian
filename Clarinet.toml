@@ -126,7 +126,7 @@ path = "contracts/dex/memory-pool-management.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.multi-hop-router-v3]
-path = "contracts/dimensional/multi-hop-router-v3.clar"
+path = "contracts/dex/multi-hop-router-v3.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [disabled.nakamoto-compatibility]

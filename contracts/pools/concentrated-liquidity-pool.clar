@@ -1,4 +1,7 @@
+
+
 ;; concentrated-liquidity-pool.clar
+
 ;; Implements a concentrated liquidity pool for the Conxian DEX.
 
 (use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
@@ -41,7 +44,9 @@
   (nft-burn? position-nft position-id owner))
 
 ;; ---------------------------------------------------------------------------
+
 ;; Private helpers
+
 ;; ---------------------------------------------------------------------------
 (define-private (update-liquidity-and-fees (tick int) (liquidity-delta int) (fee-growth-global0 uint) (fee-growth-global1 uint) (current-tick int))
   (let ((info (default-to
@@ -63,14 +68,18 @@
     (ok true)))
 
 ;; ---------------------------------------------------------------------------
+
 ;; Public liquidity functions
+
 ;; ---------------------------------------------------------------------------
 (define-public (add-liquidity (pool-id uint) (amount-x-desired uint) (amount-y-desired uint)
                                (amount-x-min uint) (amount-y-min uint) (recipient principal)
                                (tick-lower int) (tick-upper int))
   (let ((pool (unwrap! (map-get? pools { pool-id: pool-id }) (err u404)))
         (pos-id (var-get next-position-id))
-        (liquidity u100)) ;; placeholder
+        (liquidity u100)) 
+
+;; placeholder
     (var-set next-position-id (+ pos-id u1))
     (map-set positions { position-id: pos-id }
       { owner: recipient, pool-id: pool-id, tick-lower: tick-lower, tick-upper: tick-upper,
@@ -98,10 +107,14 @@
       (try! (update-liquidity-and-fees (get tick-upper pos) (to-int (get liquidity pos))
                                        (get fee-growth-global-x pool) (get fee-growth-global-y pool)
                                        (get current-tick pool))))
-    (ok { amount-x: u100, amount-y: u100 }))) ;; placeholder
+    (ok { amount-x: u100, amount-y: u100 }))) 
+
+;; placeholder
 
 ;; ---------------------------------------------------------------------------
+
 ;; Swap
+
 ;; ---------------------------------------------------------------------------
 (define-public (swap (pool-id uint) (token-x <sip-010-ft-trait>) (token-y <sip-010-ft-trait>)
                      (zero-for-one bool) (amount-specified uint) (limit-sqrt-price uint))
@@ -120,7 +133,9 @@
     (if zero-for-one
       (asserts! (> current-sqrt-price limit-sqrt-price) (err u600))
       (asserts! (< current-sqrt-price limit-sqrt-price) (err u600)))
-    ;; placeholder swap logic
+    
+
+;; placeholder swap logic
     (let ((amount-in amount-specified)
           (amount-out u99)
           (total-fee (/ (* amount-in fee-bps) u10000)))
@@ -142,7 +157,9 @@
       (ok u1))))
 
 ;; ---------------------------------------------------------------------------
+
 ;; Pool trait adapters
+
 ;; ---------------------------------------------------------------------------
 (define-public (add-liquidity-trait-adapter (amount-a uint) (amount-b uint) (recipient principal))
   (let ((result (add-liquidity (var-get next-pool-id) amount-a amount-b u0 u0 recipient u0 u0)))
@@ -174,7 +191,9 @@
 (define-public (get-total-supply-trait-adapter) (ok u0))
 
 ;; ---------------------------------------------------------------------------
+
 ;; Pool creation
+
 ;; ---------------------------------------------------------------------------
 (define-public (create-pool (token-a <sip-010-ft-trait>) (token-b <sip-010-ft-trait>)
                             (factory-address principal) (fee-bps uint) (tick-spacing uint)
@@ -191,4 +210,5 @@
     (ok pool-id)))
 
 ;; ---------------------------------------------------------------------------
+
 ;; End of Selection

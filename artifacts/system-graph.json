@@ -6,6 +6,11 @@
       "name": "access-control-trait"
     },
     {
+      "id": "trait:advanced-router-dijkstra-trait",
+      "type": "trait",
+      "name": "advanced-router-dijkstra-trait"
+    },
+    {
       "id": "trait:asset-vault-trait",
       "type": "trait",
       "name": "asset-vault-trait"
@@ -74,6 +79,11 @@
       "id": "trait:fee-manager-trait",
       "type": "trait",
       "name": "fee-manager-trait"
+    },
+    {
+      "id": "trait:finance-metrics-trait",
+      "type": "trait",
+      "name": "finance-metrics-trait"
     },
     {
       "id": "trait:fixed-point-math-trait",
@@ -174,6 +184,11 @@
       "id": "trait:router-trait",
       "type": "trait",
       "name": "router-trait"
+    },
+    {
+      "id": "trait:signed-data-base-trait",
+      "type": "trait",
+      "name": "signed-data-base-trait"
     },
     {
       "id": "trait:sip-009-nft-trait",
@@ -736,6 +751,11 @@
       "name": "analytics-aggregator"
     },
     {
+      "id": "file:contracts/monitoring/finance-metrics.clar",
+      "type": "contract",
+      "name": "finance-metrics"
+    },
+    {
       "id": "file:contracts/monitoring/system-monitor.clar",
       "type": "contract",
       "name": "system-monitor"
@@ -946,12 +966,27 @@
     {
       "from": "file:contracts/governance/governance-token.clar",
       "to": "trait:governance-token-trait",
+      "type": "use-trait"
+    },
+    {
+      "from": "file:contracts/governance/governance-token.clar",
+      "to": "trait:governance-token-trait",
       "type": "impl-trait"
     },
     {
       "from": "file:contracts/security/mev-protector.clar",
       "to": "trait:mev-protector-trait",
+      "type": "use-trait"
+    },
+    {
+      "from": "file:contracts/security/mev-protector.clar",
+      "to": "trait:mev-protector-trait",
       "type": "impl-trait"
+    },
+    {
+      "from": "file:contracts/oracle/oracle.clar",
+      "to": "trait:oracle-trait",
+      "type": "use-trait"
     },
     {
       "from": "file:contracts/oracle/oracle.clar",
@@ -971,7 +1006,17 @@
     {
       "from": "file:contracts/dex/liquidation-manager.clar",
       "to": "trait:liquidation-trait",
+      "type": "use-trait"
+    },
+    {
+      "from": "file:contracts/dex/liquidation-manager.clar",
+      "to": "trait:liquidation-trait",
       "type": "impl-trait"
+    },
+    {
+      "from": "file:contracts/monitoring/performance-optimizer.clar",
+      "to": "trait:performance-optimizer-trait",
+      "type": "use-trait"
     },
     {
       "from": "file:contracts/monitoring/performance-optimizer.clar",
@@ -986,6 +1031,16 @@
     {
       "from": "file:contracts/dex/sbtc-flash-loan-extension.clar",
       "to": "trait:flash-loan-receiver-trait",
+      "type": "impl-trait"
+    },
+    {
+      "from": "file:contracts/dex/vault.clar",
+      "to": "trait:vault-trait",
+      "type": "use-trait"
+    },
+    {
+      "from": "file:contracts/dex/vault.clar",
+      "to": "trait:vault-trait",
       "type": "impl-trait"
     },
     {
@@ -1021,6 +1076,11 @@
     {
       "from": "file:contracts/lib/fixed-point-math.clar",
       "to": "trait:fixed-point-math-trait",
+      "type": "use-trait"
+    },
+    {
+      "from": "file:contracts/lib/fixed-point-math.clar",
+      "to": "trait:fixed-point-math-trait",
       "type": "impl-trait"
     },
     {
@@ -1041,6 +1101,16 @@
     {
       "from": "file:contracts/mocks/mock-oracle.clar",
       "to": "trait:oracle-trait",
+      "type": "impl-trait"
+    },
+    {
+      "from": "file:contracts/monitoring/finance-metrics.clar",
+      "to": "trait:finance-metrics-trait",
+      "type": "use-trait"
+    },
+    {
+      "from": "file:contracts/monitoring/finance-metrics.clar",
+      "to": "trait:finance-metrics-trait",
       "type": "impl-trait"
     },
     {
@@ -1055,19 +1125,29 @@
     },
     {
       "from": "file:contracts/security/Pausable.clar",
-      "to": "trait:'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.pausable-trait",
+      "to": "trait:pausable-trait",
       "type": "use-trait"
     },
     {
       "from": "file:contracts/security/Pausable.clar",
       "to": "trait:pausable-trait",
       "type": "impl-trait"
+    },
+    {
+      "from": "file:contracts/utils/utils.clar",
+      "to": "trait:utils-trait",
+      "type": "use-trait"
+    },
+    {
+      "from": "file:contracts/utils/utils.clar",
+      "to": "trait:utils-trait",
+      "type": "impl-trait"
     }
   ],
   "stats": {
-    "nodes": 178,
-    "edges": 34,
-    "traits": 46
+    "nodes": 182,
+    "edges": 46,
+    "traits": 49
   },
   "cycles": []
 }

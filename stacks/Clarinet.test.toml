@@ -65,6 +65,7 @@ address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 [contracts.concentrated-liquidity-pool-v2]
 path = "contracts/dimensional/concentrated-liquidity-pool-v2.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
 
 [contracts.position-nft]
 path = "contracts/dimensional/position-nft.clar"
@@ -106,6 +107,7 @@ address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 [contracts.enterprise-loan-manager]
 path = "contracts/dex/enterprise-loan-manager.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
 
 [contracts.interest-rate-model]
 path = "contracts/dex/interest-rate-model.clar"
@@ -129,7 +131,7 @@ path = "contracts/dex/memory-pool-management.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.multi-hop-router-v3]
-path = "contracts/dimensional/multi-hop-router-v3.clar"
+path = "contracts/dex/multi-hop-router-v3.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.oracle]
@@ -343,6 +345,7 @@ address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 [contracts.dex-factory-v2]
 path = "contracts/dex/dex-factory-v2.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
 
 [contracts.dex-pool]
 path = "contracts/dex/dex-pool.clar"
@@ -542,6 +545,7 @@ address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 [contracts.concentrated-liquidity-pool-dex]
 path = "contracts/dex/concentrated-liquidity-pool.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
 
 [contracts.concentrated-liquidity-pool-dimensional]
 path = "contracts/dimensional/concentrated-liquidity-pool.clar"
@@ -600,6 +604,7 @@ address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 [contracts.multi-hop-router-v3-dex]
 path = "contracts/dex/multi-hop-router-v3.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
 
 [contracts.nakamoto-compatibility]
 path = "contracts/dex/nakamoto-compatibility.clar"

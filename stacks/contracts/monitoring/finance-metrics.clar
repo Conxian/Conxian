@@ -1,5 +1,3 @@
-
-
 ;; finance-metrics.clar
 
 ;; Unified financial metrics (EBITDA, CAPEX, OPEX) tracking and reporting
@@ -38,7 +36,6 @@
   (begin
     (asserts! (is-eq tx-sender (var-get writer-principal)) ERR_UNAUTHORIZED)
     
-
 ;; Update module-level cumulative
     (let (
       (key { module-id: module-id, category: category })
@@ -49,7 +46,6 @@
       )
     )
     
-
 ;; Update system-level cumulative
     (let (
       (sys-key { module-id: SYSTEM_MODULE, category: category })

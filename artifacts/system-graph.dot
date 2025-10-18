@@ -2,6 +2,8 @@ digraph conxian {
   rankdir=LR;
   "trait:access-control-trait" [label="access-control-trait
 (trait)", shape=ellipse];
+  "trait:advanced-router-dijkstra-trait" [label="advanced-router-dijkstra-trait
+(trait)", shape=ellipse];
   "trait:asset-vault-trait" [label="asset-vault-trait
 (trait)", shape=ellipse];
   "trait:batch-auction-trait" [label="batch-auction-trait
@@ -29,6 +31,8 @@ digraph conxian {
   "trait:factory-trait" [label="factory-trait
 (trait)", shape=ellipse];
   "trait:fee-manager-trait" [label="fee-manager-trait
+(trait)", shape=ellipse];
+  "trait:finance-metrics-trait" [label="finance-metrics-trait
 (trait)", shape=ellipse];
   "trait:fixed-point-math-trait" [label="fixed-point-math-trait
 (trait)", shape=ellipse];
@@ -69,6 +73,8 @@ digraph conxian {
   "trait:position-nft-trait" [label="position-nft-trait
 (trait)", shape=ellipse];
   "trait:router-trait" [label="router-trait
+(trait)", shape=ellipse];
+  "trait:signed-data-base-trait" [label="signed-data-base-trait
 (trait)", shape=ellipse];
   "trait:sip-009-nft-trait" [label="sip-009-nft-trait
 (trait)", shape=ellipse];
@@ -294,6 +300,8 @@ digraph conxian {
 (contract)", shape=box];
   "file:contracts/monitoring/analytics-aggregator.clar" [label="analytics-aggregator
 (contract)", shape=box];
+  "file:contracts/monitoring/finance-metrics.clar" [label="finance-metrics
+(contract)", shape=box];
   "file:contracts/monitoring/system-monitor.clar" [label="system-monitor
 (contract)", shape=box];
   "file:contracts/oracle/dimensional-oracle.clar" [label="dimensional-oracle
@@ -366,28 +374,40 @@ digraph conxian {
   "file:contracts/pools/concentrated-liquidity-pool.clar" -> "token-y" [color="#ffaa00", label="dynamic-call"];
   "file:contracts/pools/concentrated-liquidity-pool.clar" -> "token-y" [color="#ffaa00", label="dynamic-call"];
   "file:contracts/pools/concentrated-liquidity-pool.clar" -> "token-x" [color="#ffaa00", label="dynamic-call"];
+  "file:contracts/governance/governance-token.clar" -> "trait:governance-token-trait" [color="#8888ff", label="use-trait"];
   "file:contracts/governance/governance-token.clar" -> "trait:governance-token-trait" [color="#3333ff", label="impl-trait"];
+  "file:contracts/security/mev-protector.clar" -> "trait:mev-protector-trait" [color="#8888ff", label="use-trait"];
   "file:contracts/security/mev-protector.clar" -> "trait:mev-protector-trait" [color="#3333ff", label="impl-trait"];
+  "file:contracts/oracle/oracle.clar" -> "trait:oracle-trait" [color="#8888ff", label="use-trait"];
   "file:contracts/oracle/oracle.clar" -> "trait:oracle-trait" [color="#3333ff", label="impl-trait"];
   "file:contracts/dex/dex-router.clar" -> "trait:router-trait" [color="#8888ff", label="use-trait"];
   "file:contracts/dex/dex-router.clar" -> "trait:router-trait" [color="#3333ff", label="impl-trait"];
+  "file:contracts/dex/liquidation-manager.clar" -> "trait:liquidation-trait" [color="#8888ff", label="use-trait"];
   "file:contracts/dex/liquidation-manager.clar" -> "trait:liquidation-trait" [color="#3333ff", label="impl-trait"];
+  "file:contracts/monitoring/performance-optimizer.clar" -> "trait:performance-optimizer-trait" [color="#8888ff", label="use-trait"];
   "file:contracts/monitoring/performance-optimizer.clar" -> "trait:performance-optimizer-trait" [color="#3333ff", label="impl-trait"];
   "file:contracts/dex/sbtc-flash-loan-extension.clar" -> "trait:flash-loan-receiver-trait" [color="#8888ff", label="use-trait"];
   "file:contracts/dex/sbtc-flash-loan-extension.clar" -> "trait:flash-loan-receiver-trait" [color="#3333ff", label="impl-trait"];
+  "file:contracts/dex/vault.clar" -> "trait:vault-trait" [color="#8888ff", label="use-trait"];
+  "file:contracts/dex/vault.clar" -> "trait:vault-trait" [color="#3333ff", label="impl-trait"];
   "file:contracts/dimensional/advanced-router-dijkstra.clar" -> "trait:advanced-router-dijkstra-trait" [color="#8888ff", label="use-trait"];
   "file:contracts/dimensional/advanced-router-dijkstra.clar" -> "trait:advanced-router-dijkstra-trait" [color="#3333ff", label="impl-trait"];
   "file:contracts/governance/governance-signature-verifier.clar" -> "trait:sip-018-trait" [color="#8888ff", label="use-trait"];
   "file:contracts/governance/governance-signature-verifier.clar" -> "trait:sip-018-trait" [color="#3333ff", label="impl-trait"];
   "file:contracts/governance/signed-data-base.clar" -> "trait:signed-data-base-trait" [color="#8888ff", label="use-trait"];
   "file:contracts/governance/signed-data-base.clar" -> "trait:signed-data-base-trait" [color="#3333ff", label="impl-trait"];
+  "file:contracts/lib/fixed-point-math.clar" -> "trait:fixed-point-math-trait" [color="#8888ff", label="use-trait"];
   "file:contracts/lib/fixed-point-math.clar" -> "trait:fixed-point-math-trait" [color="#3333ff", label="impl-trait"];
   "file:contracts/mocks/mock-dao.clar" -> "trait:dao-trait" [color="#8888ff", label="use-trait"];
   "file:contracts/mocks/mock-dao.clar" -> "trait:dao-trait" [color="#3333ff", label="impl-trait"];
   "file:contracts/mocks/mock-oracle.clar" -> "trait:oracle-trait" [color="#8888ff", label="use-trait"];
   "file:contracts/mocks/mock-oracle.clar" -> "trait:oracle-trait" [color="#3333ff", label="impl-trait"];
+  "file:contracts/monitoring/finance-metrics.clar" -> "trait:finance-metrics-trait" [color="#8888ff", label="use-trait"];
+  "file:contracts/monitoring/finance-metrics.clar" -> "trait:finance-metrics-trait" [color="#3333ff", label="impl-trait"];
   "file:contracts/oracle/oracle-aggregator.clar" -> "trait:oracle-aggregator-trait" [color="#8888ff", label="use-trait"];
   "file:contracts/oracle/oracle-aggregator.clar" -> "trait:oracle-aggregator-trait" [color="#3333ff", label="impl-trait"];
-  "file:contracts/security/Pausable.clar" -> "trait:'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.pausable-trait" [color="#8888ff", label="use-trait"];
+  "file:contracts/security/Pausable.clar" -> "trait:pausable-trait" [color="#8888ff", label="use-trait"];
   "file:contracts/security/Pausable.clar" -> "trait:pausable-trait" [color="#3333ff", label="impl-trait"];
+  "file:contracts/utils/utils.clar" -> "trait:utils-trait" [color="#8888ff", label="use-trait"];
+  "file:contracts/utils/utils.clar" -> "trait:utils-trait" [color="#3333ff", label="impl-trait"];
 }

@@ -17,7 +17,9 @@
 )
 
 (define-private (only-pauser)
-  ;; For now allow anyone; integrate access-control later
+  
+
+;; For now allow anyone; integrate access-control later
   (ok true)
 )
 

@@ -926,3 +926,171 @@
   )
 )
 
+;; ===========================================
+;; ADDITIONAL MISSING TRAITS
+;; ===========================================
+
+(define-trait rebalancing-rules-trait
+  (
+    (set-rebalancing-threshold (threshold uint) (response bool (err uint)))
+    (get-rebalancing-threshold () (response uint (err uint)))
+    (should-rebalance (pool principal) (response bool (err uint)))
+    (execute-rebalance (pool principal) (response bool (err uint)))
+  )
+)
+
+(define-trait revenue-distributor-trait
+  (
+    (distribute-revenue (amount uint) (recipients (list 10 principal)) (response bool (err uint)))
+    (set-distribution-ratio (recipient principal) (ratio uint) (response bool (err uint)))
+    (get-pending-revenue (recipient principal) (response uint (err uint)))
+    (claim-revenue () (response uint (err uint)))
+  )
+)
+
+(define-trait token-system-coordinator-trait
+  (
+    (coordinate-mint (token principal) (amount uint) (recipient principal) (response bool (err uint)))
+    (coordinate-burn (token principal) (amount uint) (owner principal) (response bool (err uint)))
+    (get-system-status () (response (tuple (active bool) (total-tokens uint)) (err uint)))
+  )
+)
+
+(define-trait enterprise-api-trait
+  (
+    (create-institutional-account (owner principal) (tier uint) (response uint (err uint)))
+    (update-account-tier (account-id uint) (new-tier uint) (response bool (err uint)))
+    (execute-twap-order (account-id uint) (token-in principal) (token-out principal) (amount uint) (duration uint) (response uint (err uint)))
+    (execute-block-trade (account-id uint) (token-in principal) (token-out principal) (amount-in uint) (min-amount-out uint) (recipient principal) (response uint (err uint)))
+    (get-account-info (account-id uint) (response (tuple (owner principal) (tier uint) (verified bool)) (err uint)))
+  )
+)
+
+(define-trait manipulation-detector-trait
+  (
+    (detect-manipulation (token principal) (price uint) (volume uint) (response bool (err uint)))
+    (set-detection-threshold (threshold uint) (response bool (err uint)))
+    (get-manipulation-score (token principal) (response uint (err uint)))
+    (report-suspicious-activity (token principal) (activity-type uint) (response bool (err uint)))
+  )
+)
+
+(define-trait auto-compounder-trait
+  (
+    (compound (user principal) (token (contract-of sip-010-ft-trait)) (response uint (err uint)))
+    (set-compound-frequency (frequency uint) (response bool (err uint)))
+    (get-compound-rewards (user principal) (token (contract-of sip-010-ft-trait)) (response uint (err uint)))
+    (enable-auto-compound (token (contract-of sip-010-ft-trait)) (response bool (err uint)))
+  )
+)
+
+(define-trait timelock-controller-trait
+  (
+    (schedule-operation (target principal) (value uint) (data (buff 1024)) (delay uint) (response uint (err uint)))
+    (execute-operation (operation-id uint) (response bool (err uint)))
+    (cancel-operation (operation-id uint) (response bool (err uint)))
+    (get-operation (operation-id uint) (response (tuple (target principal) (value uint) (ready-at uint) (executed bool)) (err uint)))
+  )
+)
+
+(define-trait sbtc-integration-trait
+  (
+    (peg-in (btc-tx-id (buff 32)) (amount uint) (recipient principal) (response uint (err uint)))
+    (peg-out (amount uint) (bitcoin-address (string-utf8 42)) (response bool (err uint)))
+    (get-sbtc-balance (user principal) (response uint (err uint)))
+    (get-peg-status (tx-id (buff 32)) (response (tuple (status uint) (amount uint)) (err uint)))
+  )
+)
+
+(define-trait lending-trait
+  (
+    (supply (asset principal) (amount uint) (response uint (err uint)))
+    (borrow (asset principal) (amount uint) (response uint (err uint)))
+    (repay (asset principal) (amount uint) (response uint (err uint)))
+    (withdraw (asset principal) (amount uint) (response uint (err uint)))
+    (get-account-liquidity (user principal) (response (tuple (liquidity uint) (shortfall uint)) (err uint)))
+    (liquidate (borrower principal) (asset-borrowed principal) (asset-collateral principal) (amount uint) (response uint (err uint)))
+  )
+)
+
+(define-trait rewards-distributor-trait
+  (
+    (distribute-rewards (token principal) (amount uint) (recipients (list 100 principal)) (response bool (err uint)))
+    (claim-rewards (token principal) (response uint (err uint)))
+    (set-reward-rate (token principal) (rate uint) (response bool (err uint)))
+    (get-pending-rewards (user principal) (token principal) (response uint (err uint)))
+  )
+)
+
+(define-trait system-monitor-trait
+  (
+    (record-metric (component (string-ascii 32)) (metric-name (string-ascii 32)) (value uint) (response bool (err uint)))
+    (get-system-health () (response (tuple (status uint) (uptime uint) (error-count uint)) (err uint)))
+    (trigger-alert (severity uint) (message (string-ascii 256)) (response bool (err uint)))
+    (get-component-status (component (string-ascii 32)) (response (tuple (active bool) (last-update uint)) (err uint)))
+  )
+)
+
+(define-trait analytics-aggregator-trait
+  (
+    (record-transaction (tx-type uint) (amount uint) (token principal) (user principal) (response bool (err uint)))
+    (get-volume-stats (token principal) (period uint) (response (tuple (volume uint) (tx-count uint)) (err uint)))
+    (get-user-stats (user principal) (response (tuple (total-volume uint) (tx-count uint)) (err uint)))
+    (generate-report (period uint) (response (tuple (total-volume uint) (unique-users uint) (avg-tx-size uint)) (err uint)))
+  )
+)
+
+(define-trait keeper-coordinator-trait
+  (
+    (register-keeper (keeper principal) (response bool (err uint)))
+    (assign-task (task-id uint) (keeper principal) (response bool (err uint)))
+    (complete-task (task-id uint) (response bool (err uint)))
+    (get-keeper-performance (keeper principal) (response (tuple (tasks-completed uint) (success-rate uint)) (err uint)))
+  )
+)
+
+(define-trait rate-limiter-trait
+  (
+    (check-rate-limit (user principal) (action (string-ascii 32)) (response bool (err uint)))
+    (set-rate-limit (action (string-ascii 32)) (limit uint) (window uint) (response bool (err uint)))
+    (get-remaining-quota (user principal) (action (string-ascii 32)) (response uint (err uint)))
+    (reset-user-limits (user principal) (response bool (err uint)))
+  )
+)
+
+(define-trait bond-issuance-trait
+  (
+    (issue-bond (amount uint) (maturity uint) (coupon-rate uint) (response uint (err uint)))
+    (purchase-bond (bond-id uint) (amount uint) (response bool (err uint)))
+    (redeem-bond (bond-id uint) (response uint (err uint)))
+    (get-bond-info (bond-id uint) (response (tuple (amount uint) (maturity uint) (coupon-rate uint) (issued bool)) (err uint)))
+  )
+)
+
+(define-trait dimensional-trait
+  (
+    (register-dimension (name (string-ascii 64)) (metadata (buff 256)) (response uint (err uint)))
+    (update-dimension (dim-id uint) (data (buff 512)) (response bool (err uint)))
+    (get-dimension-data (dim-id uint) (response (buff 512) (err uint)))
+    (link-dimensions (dim-id-1 uint) (dim-id-2 uint) (relationship uint) (response bool (err uint)))
+  )
+)
+
+(define-trait emergency-trait
+  (
+    (emergency-pause () (response bool (err uint)))
+    (emergency-unpause () (response bool (err uint)))
+    (emergency-withdraw (token principal) (amount uint) (recipient principal) (response bool (err uint)))
+    (is-emergency-mode () (response bool (err uint)))
+  )
+)
+
+(define-trait upgrade-trait
+  (
+    (propose-upgrade (new-implementation principal) (description (string-utf8 256)) (response uint (err uint)))
+    (execute-upgrade (proposal-id uint) (response bool (err uint)))
+    (get-current-implementation () (response principal (err uint)))
+    (get-upgrade-proposal (proposal-id uint) (response (tuple (implementation principal) (description (string-utf8 256)) (executed bool)) (err uint)))
+  )
+)
+
