@@ -64,7 +64,7 @@ Template JSON (fill per release cycle):
 
 ```json
 {
-  "conxian": {
+  "Conxian": {
     "fees_bps": {"deposit": 30, "withdraw": 10, "performance": 0},
     "tx_costs": {"deposit": null, "withdraw": null, "harvest": null},
     "governance": {"timelock": true, "dao_governor": false},

@@ -30,12 +30,12 @@
 - `monitor-trait`
 - `sip-010-trait`
 
-### cxlp-migration-queue
+### CXLP-migration-queue
 - `cxd-token`
-- `cxlp-token`
+- `CXLP-token`
 - `sip-010-trait`
 
-### cxlp-token
+### CXLP-token
 - `cxd`
 - `ft-mintable-trait`
 - `sip-010-trait`
@@ -218,7 +218,7 @@
 - `comprehensive-lending-system`
 - `cxd-staking`
 - `cxd-token`
-- `cxlp-migration-queue`
+- `CXLP-migration-queue`
 - `cxs-token`
 - `cxvg-utility`
 - `ft-mintable-trait`
