@@ -21,7 +21,7 @@ concurrency:
 
 env:
   NODE_VERSION: '20'
-  CLARINET_VERSION: '3.7.0'
+  CLARINET_VERSION: '3.8.0'
 
 jobs:
   # =============================================================================

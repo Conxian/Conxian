@@ -357,7 +357,7 @@ Conxian represents a **comprehensive DeFi ecosystem on Stacks** with **productio
 ```text
 🛠️ SMART CONTRACT DEVELOPMENT:
 ├── Language: Clarity (Stacks native)
-├── Framework: Clarinet SDK v3.7.0
+├── Framework: Clarinet SDK v3.8.0
 ├── Testing: Vitest with comprehensive suites
 ├── Deployment: Automated scripts and CI/CD
 └── Monitoring: Real-time health checks
