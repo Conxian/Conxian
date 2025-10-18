@@ -6,11 +6,6 @@
       "name": "access-control-trait"
     },
     {
-      "id": "trait:advanced-router-dijkstra-trait",
-      "type": "trait",
-      "name": "advanced-router-dijkstra-trait"
-    },
-    {
       "id": "trait:asset-vault-trait",
       "type": "trait",
       "name": "asset-vault-trait"
@@ -19,11 +14,6 @@
       "id": "trait:batch-auction-trait",
       "type": "trait",
       "name": "batch-auction-trait"
-    },
-    {
-      "id": "trait:bond-factory-trait",
-      "type": "trait",
-      "name": "bond-factory-trait"
     },
     {
       "id": "trait:bond-trait",
@@ -36,11 +26,6 @@
       "name": "btc-adapter-trait"
     },
     {
-      "id": "trait:budget-manager-trait",
-      "type": "trait",
-      "name": "budget-manager-trait"
-    },
-    {
       "id": "trait:circuit-breaker-trait",
       "type": "trait",
       "name": "circuit-breaker-trait"
@@ -49,11 +34,6 @@
       "id": "trait:compliance-hooks-trait",
       "type": "trait",
       "name": "compliance-hooks-trait"
-    },
-    {
-      "id": "trait:cross-protocol-integrator-trait",
-      "type": "trait",
-      "name": "cross-protocol-integrator-trait"
     },
     {
       "id": "trait:cross-protocol-trait",
@@ -69,11 +49,6 @@
       "id": "trait:dao-trait",
       "type": "trait",
       "name": "dao-trait"
-    },
-    {
-      "id": "trait:dex-factory-trait",
-      "type": "trait",
-      "name": "dex-factory-trait"
     },
     {
       "id": "trait:dim-registry-trait",
@@ -111,19 +86,14 @@
       "name": "flash-loan-receiver-trait"
     },
     {
-      "id": "trait:keeper-coordinator-trait",
+      "id": "trait:governance-token-trait",
       "type": "trait",
-      "name": "keeper-coordinator-trait"
+      "name": "governance-token-trait"
     },
     {
       "id": "trait:legacy-adapter-trait",
       "type": "trait",
       "name": "legacy-adapter-trait"
-    },
-    {
-      "id": "trait:lending-system-trait",
-      "type": "trait",
-      "name": "lending-system-trait"
     },
     {
       "id": "trait:liquidation-trait",
@@ -201,11 +171,6 @@
       "name": "position-nft-trait"
     },
     {
-      "id": "trait:proposal-trait",
-      "type": "trait",
-      "name": "proposal-trait"
-    },
-    {
       "id": "trait:router-trait",
       "type": "trait",
       "name": "router-trait"
@@ -219,6 +184,11 @@
       "id": "trait:sip-010-ft-mintable-trait",
       "type": "trait",
       "name": "sip-010-ft-mintable-trait"
+    },
+    {
+      "id": "trait:sip-010-ft-trait",
+      "type": "trait",
+      "name": "sip-010-ft-trait"
     },
     {
       "id": "trait:sip-018-trait",
@@ -261,14 +231,9 @@
       "name": "yield-optimizer-trait"
     },
     {
-      "id": "file:contracts/dex/concentrated-liquidity-pool.clar",
+      "id": "file:contracts/dex/batch-auction.clar",
       "type": "contract",
-      "name": "concentrated-liquidity-pool"
-    },
-    {
-      "id": "file:contracts/governance/proposal-engine.clar",
-      "type": "contract",
-      "name": "proposal-engine"
+      "name": "batch-auction"
     },
     {
       "id": "file:contracts/interfaces/btc-adapter.clar",
@@ -281,9 +246,14 @@
       "name": "budget-manager"
     },
     {
-      "id": "file:contracts/dex/rebalancing-rules.clar",
+      "id": "file:contracts/security/circuit-breaker.clar",
       "type": "contract",
-      "name": "rebalancing-rules"
+      "name": "circuit-breaker"
+    },
+    {
+      "id": "file:contracts/pools/concentrated-liquidity-pool.clar",
+      "type": "contract",
+      "name": "concentrated-liquidity-pool"
     },
     {
       "id": "file:contracts/governance/governance-token.clar",
@@ -291,19 +261,24 @@
       "name": "governance-token"
     },
     {
-      "id": "file:contracts/dex/oracle.clar",
-      "type": "contract",
-      "name": "oracle"
-    },
-    {
-      "id": "file:contracts/dex/mev-protector.clar",
+      "id": "file:contracts/security/mev-protector.clar",
       "type": "contract",
       "name": "mev-protector"
     },
     {
-      "id": "file:contracts/dex/batch-auction.clar",
+      "id": "file:contracts/oracle/oracle.clar",
       "type": "contract",
-      "name": "batch-auction"
+      "name": "oracle"
+    },
+    {
+      "id": "file:contracts/governance/proposal-engine.clar",
+      "type": "contract",
+      "name": "proposal-engine"
+    },
+    {
+      "id": "file:contracts/dex/rebalancing-rules.clar",
+      "type": "contract",
+      "name": "rebalancing-rules"
     },
     {
       "id": "file:contracts/pools/tiered-pools.clar",
@@ -311,29 +286,399 @@
       "name": "tiered-pools"
     },
     {
-      "id": "file:contracts/security/circuit-breaker.clar",
+      "id": "file:contracts/audit-registry/audit-badge-nft.clar",
       "type": "contract",
-      "name": "circuit-breaker"
+      "name": "audit-badge-nft"
     },
     {
-      "id": "file:contracts/dex/migration-manager.clar",
+      "id": "file:contracts/audit-registry/audit-registry.clar",
+      "type": "contract",
+      "name": "audit-registry"
+    },
+    {
+      "id": "file:contracts/automation/batch-processor.clar",
+      "type": "contract",
+      "name": "batch-processor"
+    },
+    {
+      "id": "file:contracts/automation/keeper-coordinator.clar",
+      "type": "contract",
+      "name": "keeper-coordinator"
+    },
+    {
+      "id": "file:contracts/dex/asset-vault.clar",
+      "type": "contract",
+      "name": "asset-vault"
+    },
+    {
+      "id": "file:contracts/dex/auto-compounder.clar",
+      "type": "contract",
+      "name": "auto-compounder"
+    },
+    {
+      "id": "file:contracts/dex/bond-factory.clar",
+      "type": "contract",
+      "name": "bond-factory"
+    },
+    {
+      "id": "file:contracts/dex/bond-issuance-system.clar",
+      "type": "contract",
+      "name": "bond-issuance-system"
+    },
+    {
+      "id": "file:contracts/dex/comprehensive-lending-system.clar",
+      "type": "contract",
+      "name": "comprehensive-lending-system"
+    },
+    {
+      "id": "file:contracts/interfaces/cross-protocol-integrator.clar",
+      "type": "contract",
+      "name": "cross-protocol-integrator"
+    },
+    {
+      "id": "file:contracts/dex/cxd-staking.clar",
+      "type": "contract",
+      "name": "cxd-staking"
+    },
+    {
+      "id": "file:contracts/dex/cxlp-migration-queue.clar",
+      "type": "contract",
+      "name": "cxlp-migration-queue"
+    },
+    {
+      "id": "file:contracts/dex/cxvg-utility.clar",
+      "type": "contract",
+      "name": "cxvg-utility"
+    },
+    {
+      "id": "file:contracts/dex/dex-factory-v2.clar",
+      "type": "contract",
+      "name": "dex-factory-v2"
+    },
+    {
+      "id": "file:contracts/dex/dex-factory.clar",
+      "type": "contract",
+      "name": "dex-factory"
+    },
+    {
+      "id": "file:contracts/dex/dex-pool.clar",
+      "type": "contract",
+      "name": "dex-pool"
+    },
+    {
+      "id": "file:contracts/dex/dex-router.clar",
+      "type": "contract",
+      "name": "dex-router"
+    },
+    {
+      "id": "file:contracts/dex/distributed-cache-manager.clar",
+      "type": "contract",
+      "name": "distributed-cache-manager"
+    },
+    {
+      "id": "file:contracts/dex/enhanced-yield-strategy.clar",
+      "type": "contract",
+      "name": "enhanced-yield-strategy"
+    },
+    {
+      "id": "file:contracts/dex/enterprise-loan-manager.clar",
+      "type": "contract",
+      "name": "enterprise-loan-manager"
+    },
+    {
+      "id": "file:contracts/dex/fee-manager.clar",
+      "type": "contract",
+      "name": "fee-manager"
+    },
+    {
+      "id": "file:contracts/dex/flash-loan-vault.clar",
+      "type": "contract",
+      "name": "flash-loan-vault"
+    },
+    {
+      "id": "file:contracts/dex/interest-rate-model.clar",
+      "type": "contract",
+      "name": "interest-rate-model"
+    },
+    {
+      "id": "file:contracts/interfaces/legacy-adapter.clar",
+      "type": "contract",
+      "name": "legacy-adapter"
+    },
+    {
+      "id": "file:contracts/dex/liquidation-manager.clar",
+      "type": "contract",
+      "name": "liquidation-manager"
+    },
+    {
+      "id": "file:contracts/dex/liquidity-manager.clar",
+      "type": "contract",
+      "name": "liquidity-manager"
+    },
+    {
+      "id": "file:contracts/dex/liquidity-optimization-engine.clar",
+      "type": "contract",
+      "name": "liquidity-optimization-engine"
+    },
+    {
+      "id": "file:contracts/dex/loan-liquidation-manager.clar",
+      "type": "contract",
+      "name": "loan-liquidation-manager"
+    },
+    {
+      "id": "file:contracts/dex/manipulation-detector.clar",
+      "type": "contract",
+      "name": "manipulation-detector"
+    },
+    {
+      "id": "file:contracts/dex/memory-pool-management.clar",
+      "type": "contract",
+      "name": "memory-pool-management"
+    },
+    {
+      "id": "file:contracts/utils/migration-manager.clar",
       "type": "contract",
       "name": "migration-manager"
     },
     {
-      "id": "file:contracts/utils/utils.clar",
+      "id": "file:contracts/monitoring/monitoring-dashboard.clar",
       "type": "contract",
-      "name": "utils"
+      "name": "monitoring-dashboard"
     },
     {
-      "id": "file:contracts/utils/encoding.clar",
+      "id": "file:contracts/dimensional/multi-hop-router-v3.clar",
       "type": "contract",
-      "name": "encoding"
+      "name": "multi-hop-router-v3"
     },
     {
-      "id": "file:contracts/test/test-access.clar",
+      "id": "file:contracts/dex/nakamoto-compatibility.clar",
       "type": "contract",
-      "name": "test-access"
+      "name": "nakamoto-compatibility"
+    },
+    {
+      "id": "file:contracts/monitoring/performance-optimizer.clar",
+      "type": "contract",
+      "name": "performance-optimizer"
+    },
+    {
+      "id": "file:contracts/dex/pool-factory-template.clar",
+      "type": "contract",
+      "name": "pool-factory-template"
+    },
+    {
+      "id": "file:contracts/dex/pool-template.clar",
+      "type": "contract",
+      "name": "pool-template"
+    },
+    {
+      "id": "file:contracts/dex/predictive-scaling-system.clar",
+      "type": "contract",
+      "name": "predictive-scaling-system"
+    },
+    {
+      "id": "file:contracts/dex/protocol-invariant-monitor.clar",
+      "type": "contract",
+      "name": "protocol-invariant-monitor"
+    },
+    {
+      "id": "file:contracts/dex/real-time-monitoring-dashboard.clar",
+      "type": "contract",
+      "name": "real-time-monitoring-dashboard"
+    },
+    {
+      "id": "file:contracts/dex/revenue-distributor.clar",
+      "type": "contract",
+      "name": "revenue-distributor"
+    },
+    {
+      "id": "file:contracts/dex/sbtc-bond-integration.clar",
+      "type": "contract",
+      "name": "sbtc-bond-integration"
+    },
+    {
+      "id": "file:contracts/dex/sbtc-flash-loan-extension.clar",
+      "type": "contract",
+      "name": "sbtc-flash-loan-extension"
+    },
+    {
+      "id": "file:contracts/dex/sbtc-flash-loan-vault.clar",
+      "type": "contract",
+      "name": "sbtc-flash-loan-vault"
+    },
+    {
+      "id": "file:contracts/dex/sbtc-integration.clar",
+      "type": "contract",
+      "name": "sbtc-integration"
+    },
+    {
+      "id": "file:contracts/dex/sbtc-lending-integration.clar",
+      "type": "contract",
+      "name": "sbtc-lending-integration"
+    },
+    {
+      "id": "file:contracts/dex/sbtc-lending-system.clar",
+      "type": "contract",
+      "name": "sbtc-lending-system"
+    },
+    {
+      "id": "file:contracts/dex/sbtc-oracle-adapter.clar",
+      "type": "contract",
+      "name": "sbtc-oracle-adapter"
+    },
+    {
+      "id": "file:contracts/dex/stable-swap-pool.clar",
+      "type": "contract",
+      "name": "stable-swap-pool"
+    },
+    {
+      "id": "file:contracts/dex/timelock-controller.clar",
+      "type": "contract",
+      "name": "timelock-controller"
+    },
+    {
+      "id": "file:contracts/dex/token-emission-controller.clar",
+      "type": "contract",
+      "name": "token-emission-controller"
+    },
+    {
+      "id": "file:contracts/tokens/token-system-coordinator.clar",
+      "type": "contract",
+      "name": "token-system-coordinator"
+    },
+    {
+      "id": "file:contracts/dex/transaction-batch-processor.clar",
+      "type": "contract",
+      "name": "transaction-batch-processor"
+    },
+    {
+      "id": "file:contracts/dex/vault.clar",
+      "type": "contract",
+      "name": "vault"
+    },
+    {
+      "id": "file:contracts/dex/weighted-swap-pool.clar",
+      "type": "contract",
+      "name": "weighted-swap-pool"
+    },
+    {
+      "id": "file:contracts/dex/wormhole-integration.clar",
+      "type": "contract",
+      "name": "wormhole-integration"
+    },
+    {
+      "id": "file:contracts/dex/yield-distribution-engine.clar",
+      "type": "contract",
+      "name": "yield-distribution-engine"
+    },
+    {
+      "id": "file:contracts/rewards/yield-optimizer.clar",
+      "type": "contract",
+      "name": "yield-optimizer"
+    },
+    {
+      "id": "file:contracts/dimensional/advanced-router-dijkstra.clar",
+      "type": "contract",
+      "name": "advanced-router-dijkstra"
+    },
+    {
+      "id": "file:contracts/dimensional/concentrated-liquidity-pool-v2.clar",
+      "type": "contract",
+      "name": "concentrated-liquidity-pool-v2"
+    },
+    {
+      "id": "file:contracts/dimensional/dim-graph.clar",
+      "type": "contract",
+      "name": "dim-graph"
+    },
+    {
+      "id": "file:contracts/dimensional/dim-metrics.clar",
+      "type": "contract",
+      "name": "dim-metrics"
+    },
+    {
+      "id": "file:contracts/dimensional/dim-oracle-automation.clar",
+      "type": "contract",
+      "name": "dim-oracle-automation"
+    },
+    {
+      "id": "file:contracts/dimensional/dim-registry.clar",
+      "type": "contract",
+      "name": "dim-registry"
+    },
+    {
+      "id": "file:contracts/dimensional/dim-revenue-adapter.clar",
+      "type": "contract",
+      "name": "dim-revenue-adapter"
+    },
+    {
+      "id": "file:contracts/dimensional/dim-yield-stake.clar",
+      "type": "contract",
+      "name": "dim-yield-stake"
+    },
+    {
+      "id": "file:contracts/dimensional/position-nft.clar",
+      "type": "contract",
+      "name": "position-nft"
+    },
+    {
+      "id": "file:contracts/dimensional/tokenized-bond-adapter.clar",
+      "type": "contract",
+      "name": "tokenized-bond-adapter"
+    },
+    {
+      "id": "file:contracts/dimensional/tokenized-bond.clar",
+      "type": "contract",
+      "name": "tokenized-bond"
+    },
+    {
+      "id": "file:contracts/enterprise/compliance-hooks.clar",
+      "type": "contract",
+      "name": "compliance-hooks"
+    },
+    {
+      "id": "file:contracts/enterprise/enterprise-api.clar",
+      "type": "contract",
+      "name": "enterprise-api"
+    },
+    {
+      "id": "file:contracts/interfaces/access-control.clar",
+      "type": "contract",
+      "name": "access-control"
+    },
+    {
+      "id": "file:contracts/governance/emergency-governance.clar",
+      "type": "contract",
+      "name": "emergency-governance"
+    },
+    {
+      "id": "file:contracts/governance/governance-signature-verifier.clar",
+      "type": "contract",
+      "name": "governance-signature-verifier"
+    },
+    {
+      "id": "file:contracts/governance/lending-protocol-governance.clar",
+      "type": "contract",
+      "name": "lending-protocol-governance"
+    },
+    {
+      "id": "file:contracts/governance/signed-data-base.clar",
+      "type": "contract",
+      "name": "signed-data-base"
+    },
+    {
+      "id": "file:contracts/governance/upgrade-controller.clar",
+      "type": "contract",
+      "name": "upgrade-controller"
+    },
+    {
+      "id": "file:contracts/interfaces/audit-registry-trait.clar",
+      "type": "contract",
+      "name": "audit-registry-trait"
+    },
+    {
+      "id": "file:contracts/lib/error-codes.clar",
+      "type": "contract",
+      "name": "error-codes"
     },
     {
       "id": "file:contracts/lib/fixed-point-math.clar",
@@ -351,159 +696,19 @@
       "name": "precision-calculator"
     },
     {
-      "id": "file:contracts/lib/error-codes.clar",
-      "type": "contract",
-      "name": "error-codes"
-    },
-    {
       "id": "file:contracts/libraries/concentrated-math.clar",
       "type": "contract",
       "name": "concentrated-math"
     },
     {
-      "id": "file:contracts/oracle/oracle-aggregator.clar",
+      "id": "file:contracts/math/math-lib-concentrated.clar",
       "type": "contract",
-      "name": "oracle-aggregator"
+      "name": "math-lib-concentrated"
     },
     {
-      "id": "file:contracts/oracle/external-oracle-adapter.clar",
+      "id": "file:contracts/mocks/mock-dao.clar",
       "type": "contract",
-      "name": "external-oracle-adapter"
-    },
-    {
-      "id": "file:contracts/oracle/oracle-aggregator-v2.clar",
-      "type": "contract",
-      "name": "oracle-aggregator-v2"
-    },
-    {
-      "id": "file:contracts/oracle/dimensional-oracle.clar",
-      "type": "contract",
-      "name": "dimensional-oracle"
-    },
-    {
-      "id": "file:contracts/dimensional/dim-oracle-automation.clar",
-      "type": "contract",
-      "name": "dim-oracle-automation"
-    },
-    {
-      "id": "file:contracts/dimensional/dim-graph.clar",
-      "type": "contract",
-      "name": "dim-graph"
-    },
-    {
-      "id": "file:contracts/dimensional/dim-revenue-adapter.clar",
-      "type": "contract",
-      "name": "dim-revenue-adapter"
-    },
-    {
-      "id": "file:contracts/dimensional/dim-registry.clar",
-      "type": "contract",
-      "name": "dim-registry"
-    },
-    {
-      "id": "file:contracts/dimensional/advanced-router-dijkstra.clar",
-      "type": "contract",
-      "name": "advanced-router-dijkstra"
-    },
-    {
-      "id": "file:contracts/dimensional/tokenized-bond-adapter.clar",
-      "type": "contract",
-      "name": "tokenized-bond-adapter"
-    },
-    {
-      "id": "file:contracts/dex/multi-hop-router-v3.clar",
-      "type": "contract",
-      "name": "multi-hop-router-v3"
-    },
-    {
-      "id": "file:contracts/dimensional/dim-metrics.clar",
-      "type": "contract",
-      "name": "dim-metrics"
-    },
-    {
-      "id": "file:contracts/dimensional/position-nft.clar",
-      "type": "contract",
-      "name": "position-nft"
-    },
-    {
-      "id": "file:contracts/dimensional/tokenized-bond.clar",
-      "type": "contract",
-      "name": "tokenized-bond"
-    },
-    {
-      "id": "file:contracts/dimensional/concentrated-liquidity-pool-v2.clar",
-      "type": "contract",
-      "name": "concentrated-liquidity-pool-v2"
-    },
-    {
-      "id": "file:contracts/dimensional/dim-yield-stake.clar",
-      "type": "contract",
-      "name": "dim-yield-stake"
-    },
-    {
-      "id": "file:contracts/vaults/sbtc-vault.clar",
-      "type": "contract",
-      "name": "sbtc-vault"
-    },
-    {
-      "id": "file:contracts/traits/all-traits.clar",
-      "type": "contract",
-      "name": "all-traits"
-    },
-    {
-      "id": "file:contracts/traits/errors.clar",
-      "type": "contract",
-      "name": "errors"
-    },
-    {
-      "id": "file:contracts/monitoring/analytics-aggregator.clar",
-      "type": "contract",
-      "name": "analytics-aggregator"
-    },
-    {
-      "id": "file:contracts/monitoring/system-monitor.clar",
-      "type": "contract",
-      "name": "system-monitor"
-    },
-    {
-      "id": "file:contracts/dex/performance-optimizer.clar",
-      "type": "contract",
-      "name": "performance-optimizer"
-    },
-    {
-      "id": "file:contracts/dex/monitoring-dashboard.clar",
-      "type": "contract",
-      "name": "monitoring-dashboard"
-    },
-    {
-      "id": "file:contracts/governance/governance-signature-verifier.clar",
-      "type": "contract",
-      "name": "governance-signature-verifier"
-    },
-    {
-      "id": "file:contracts/governance/upgrade-controller.clar",
-      "type": "contract",
-      "name": "upgrade-controller"
-    },
-    {
-      "id": "file:contracts/governance/lending-protocol-governance.clar",
-      "type": "contract",
-      "name": "lending-protocol-governance"
-    },
-    {
-      "id": "file:contracts/governance/signed-data-base.clar",
-      "type": "contract",
-      "name": "signed-data-base"
-    },
-    {
-      "id": "file:contracts/interfaces/access-control.clar",
-      "type": "contract",
-      "name": "access-control"
-    },
-    {
-      "id": "file:contracts/governance/emergency-governance.clar",
-      "type": "contract",
-      "name": "emergency-governance"
+      "name": "mock-dao"
     },
     {
       "id": "file:contracts/mocks/mock-metrics.clar",
@@ -516,11 +721,6 @@
       "name": "mock-oracle"
     },
     {
-      "id": "file:contracts/mocks/mock-dao.clar",
-      "type": "contract",
-      "name": "mock-dao"
-    },
-    {
       "id": "file:contracts/mocks/mock-strategy-a.clar",
       "type": "contract",
       "name": "mock-strategy-a"
@@ -531,104 +731,34 @@
       "name": "mock-strategy-b"
     },
     {
-      "id": "file:contracts/enterprise/enterprise-api.clar",
+      "id": "file:contracts/monitoring/analytics-aggregator.clar",
       "type": "contract",
-      "name": "enterprise-api"
+      "name": "analytics-aggregator"
     },
     {
-      "id": "file:contracts/enterprise/compliance-hooks.clar",
+      "id": "file:contracts/monitoring/system-monitor.clar",
       "type": "contract",
-      "name": "compliance-hooks"
+      "name": "system-monitor"
     },
     {
-      "id": "file:contracts/tokens/cxvg-token.clar",
+      "id": "file:contracts/oracle/dimensional-oracle.clar",
       "type": "contract",
-      "name": "cxvg-token"
+      "name": "dimensional-oracle"
     },
     {
-      "id": "file:contracts/tokens/cxtr-token.clar",
+      "id": "file:contracts/oracle/external-oracle-adapter.clar",
       "type": "contract",
-      "name": "cxtr-token"
+      "name": "external-oracle-adapter"
     },
     {
-      "id": "file:contracts/tokens/cxlp-token.clar",
+      "id": "file:contracts/oracle/oracle-aggregator-v2.clar",
       "type": "contract",
-      "name": "cxlp-token"
+      "name": "oracle-aggregator-v2"
     },
     {
-      "id": "file:contracts/dex/token-system-coordinator.clar",
+      "id": "file:contracts/oracle/oracle-aggregator.clar",
       "type": "contract",
-      "name": "token-system-coordinator"
-    },
-    {
-      "id": "file:contracts/tokens/cxd-token.clar",
-      "type": "contract",
-      "name": "cxd-token"
-    },
-    {
-      "id": "file:contracts/tokens/cxs-token.clar",
-      "type": "contract",
-      "name": "cxs-token"
-    },
-    {
-      "id": "file:contracts/audit-registry/audit-registry.clar",
-      "type": "contract",
-      "name": "audit-registry"
-    },
-    {
-      "id": "file:contracts/audit-registry/audit-badge-nft.clar",
-      "type": "contract",
-      "name": "audit-badge-nft"
-    },
-    {
-      "id": "file:contracts/math/math-lib-concentrated.clar",
-      "type": "contract",
-      "name": "math-lib-concentrated"
-    },
-    {
-      "id": "file:contracts/dex/cross-protocol-integrator.clar",
-      "type": "contract",
-      "name": "cross-protocol-integrator"
-    },
-    {
-      "id": "file:contracts/interfaces/audit-registry-trait.clar",
-      "type": "contract",
-      "name": "audit-registry-trait"
-    },
-    {
-      "id": "file:contracts/dex/legacy-adapter.clar",
-      "type": "contract",
-      "name": "legacy-adapter"
-    },
-    {
-      "id": "file:contracts/rewards/rewards-distributor.clar",
-      "type": "contract",
-      "name": "rewards-distributor"
-    },
-    {
-      "id": "file:contracts/dex/yield-optimizer.clar",
-      "type": "contract",
-      "name": "yield-optimizer"
-    },
-    {
-      "id": "file:contracts/security/rate-limiter.clar",
-      "type": "contract",
-      "name": "rate-limiter"
-    },
-    {
-      "id": "file:contracts/security/Pausable.clar",
-      "type": "contract",
-      "name": "Pausable"
-    },
-    {
-      "id": "file:contracts/automation/batch-processor.clar",
-      "type": "contract",
-      "name": "batch-processor"
-    },
-    {
-      "id": "file:contracts/automation/keeper-coordinator.clar",
-      "type": "contract",
-      "name": "keeper-coordinator"
+      "name": "oracle-aggregator"
     },
     {
       "id": "file:contracts/pools/stable-pool-enhanced.clar",
@@ -641,489 +771,89 @@
       "name": "weighted-pool"
     },
     {
-      "id": "file:contracts/dex/vault.clar",
+      "id": "file:contracts/rewards/rewards-distributor.clar",
       "type": "contract",
-      "name": "vault"
+      "name": "rewards-distributor"
     },
     {
-      "id": "file:contracts/dex/protocol-invariant-monitor.clar",
+      "id": "file:contracts/security/Pausable.clar",
       "type": "contract",
-      "name": "protocol-invariant-monitor"
+      "name": "Pausable"
     },
     {
-      "id": "file:contracts/dex/bond-factory.clar",
+      "id": "file:contracts/security/rate-limiter.clar",
       "type": "contract",
-      "name": "bond-factory"
+      "name": "rate-limiter"
     },
     {
-      "id": "file:contracts/dex/cxlp-migration-queue.clar",
+      "id": "file:contracts/test/test-access.clar",
       "type": "contract",
-      "name": "cxlp-migration-queue"
+      "name": "test-access"
     },
     {
-      "id": "file:contracts/dex/dex-pool.clar",
+      "id": "file:contracts/tokens/cxd-token.clar",
       "type": "contract",
-      "name": "dex-pool"
+      "name": "cxd-token"
     },
     {
-      "id": "file:contracts/dex/loan-liquidation-manager.clar",
+      "id": "file:contracts/tokens/cxlp-token.clar",
       "type": "contract",
-      "name": "loan-liquidation-manager"
+      "name": "cxlp-token"
     },
     {
-      "id": "file:contracts/dex/timelock-controller.clar",
+      "id": "file:contracts/tokens/cxs-token.clar",
       "type": "contract",
-      "name": "timelock-controller"
+      "name": "cxs-token"
     },
     {
-      "id": "file:contracts/dex/sbtc-bond-integration.clar",
+      "id": "file:contracts/tokens/cxtr-token.clar",
       "type": "contract",
-      "name": "sbtc-bond-integration"
+      "name": "cxtr-token"
     },
     {
-      "id": "file:contracts/dex/dex-factory-v2.clar",
+      "id": "file:contracts/tokens/cxvg-token.clar",
       "type": "contract",
-      "name": "dex-factory-v2"
+      "name": "cxvg-token"
     },
     {
-      "id": "file:contracts/dex/enhanced-yield-strategy.clar",
+      "id": "file:contracts/traits/all-traits.clar",
       "type": "contract",
-      "name": "enhanced-yield-strategy"
+      "name": "all-traits"
     },
     {
-      "id": "file:contracts/dex/sbtc-integration.clar",
+      "id": "file:contracts/traits/errors.clar",
       "type": "contract",
-      "name": "sbtc-integration"
+      "name": "errors"
     },
     {
-      "id": "file:contracts/dex/cxd-staking.clar",
+      "id": "file:contracts/utils/encoding.clar",
       "type": "contract",
-      "name": "cxd-staking"
+      "name": "encoding"
     },
     {
-      "id": "file:contracts/dex/yield-distribution-engine.clar",
+      "id": "file:contracts/utils/utils.clar",
       "type": "contract",
-      "name": "yield-distribution-engine"
+      "name": "utils"
     },
     {
-      "id": "file:contracts/dex/sbtc-flash-loan-extension.clar",
+      "id": "file:contracts/vaults/sbtc-vault.clar",
       "type": "contract",
-      "name": "sbtc-flash-loan-extension"
+      "name": "sbtc-vault"
     },
     {
-      "id": "file:contracts/dex/auto-compounder.clar",
-      "type": "contract",
-      "name": "auto-compounder"
-    },
-    {
-      "id": "file:contracts/dex/pool-template.clar",
-      "type": "contract",
-      "name": "pool-template"
-    },
-    {
-      "id": "file:contracts/dex/enterprise-loan-manager.clar",
-      "type": "contract",
-      "name": "enterprise-loan-manager"
-    },
-    {
-      "id": "file:contracts/dex/sbtc-lending-integration.clar",
-      "type": "contract",
-      "name": "sbtc-lending-integration"
-    },
-    {
-      "id": "file:contracts/dex/wormhole-integration.clar",
-      "type": "contract",
-      "name": "wormhole-integration"
-    },
-    {
-      "id": "file:contracts/dex/interest-rate-model.clar",
-      "type": "contract",
-      "name": "interest-rate-model"
-    },
-    {
-      "id": "file:contracts/dex/weighted-swap-pool.clar",
-      "type": "contract",
-      "name": "weighted-swap-pool"
-    },
-    {
-      "id": "file:contracts/dex/pool-factory-template.clar",
-      "type": "contract",
-      "name": "pool-factory-template"
-    },
-    {
-      "id": "file:contracts/dex/fee-manager.clar",
-      "type": "contract",
-      "name": "fee-manager"
-    },
-    {
-      "id": "file:contracts/dex/asset-vault.clar",
-      "type": "contract",
-      "name": "asset-vault"
-    },
-    {
-      "id": "file:contracts/dex/sbtc-oracle-adapter.clar",
-      "type": "contract",
-      "name": "sbtc-oracle-adapter"
-    },
-    {
-      "id": "file:contracts/dex/flash-loan-vault.clar",
-      "type": "contract",
-      "name": "flash-loan-vault"
-    },
-    {
-      "id": "file:contracts/dex/liquidation-manager.clar",
-      "type": "contract",
-      "name": "liquidation-manager"
-    },
-    {
-      "id": "file:contracts/dex/memory-pool-management.clar",
-      "type": "contract",
-      "name": "memory-pool-management"
-    },
-    {
-      "id": "file:contracts/dex/real-time-monitoring-dashboard.clar",
-      "type": "contract",
-      "name": "real-time-monitoring-dashboard"
-    },
-    {
-      "id": "file:contracts/dex/predictive-scaling-system.clar",
-      "type": "contract",
-      "name": "predictive-scaling-system"
-    },
-    {
-      "id": "file:contracts/dex/dex-router.clar",
-      "type": "contract",
-      "name": "dex-router"
-    },
-    {
-      "id": "file:contracts/dex/revenue-distributor.clar",
-      "type": "contract",
-      "name": "revenue-distributor"
-    },
-    {
-      "id": "file:contracts/dex/sbtc-flash-loan-vault.clar",
-      "type": "contract",
-      "name": "sbtc-flash-loan-vault"
-    },
-    {
-      "id": "file:contracts/dex/cxvg-utility.clar",
-      "type": "contract",
-      "name": "cxvg-utility"
-    },
-    {
-      "id": "file:contracts/dex/comprehensive-lending-system.clar",
-      "type": "contract",
-      "name": "comprehensive-lending-system"
-    },
-    {
-      "id": "file:contracts/dex/transaction-batch-processor.clar",
-      "type": "contract",
-      "name": "transaction-batch-processor"
-    },
-    {
-      "id": "file:contracts/dex/distributed-cache-manager.clar",
-      "type": "contract",
-      "name": "distributed-cache-manager"
-    },
-    {
-      "id": "file:contracts/dex/manipulation-detector.clar",
-      "type": "contract",
-      "name": "manipulation-detector"
-    },
-    {
-      "id": "file:contracts/dex/liquidity-manager.clar",
-      "type": "contract",
-      "name": "liquidity-manager"
-    },
-    {
-      "id": "file:contracts/dex/stable-swap-pool.clar",
-      "type": "contract",
-      "name": "stable-swap-pool"
-    },
-    {
-      "id": "file:contracts/dex/bond-issuance-system.clar",
-      "type": "contract",
-      "name": "bond-issuance-system"
-    },
-    {
-      "id": "file:contracts/dex/token-emission-controller.clar",
-      "type": "contract",
-      "name": "token-emission-controller"
-    },
-    {
-      "id": "file:contracts/dex/nakamoto-compatibility.clar",
-      "type": "contract",
-      "name": "nakamoto-compatibility"
-    },
-    {
-      "id": "file:contracts/dex/sbtc-lending-system.clar",
-      "type": "contract",
-      "name": "sbtc-lending-system"
-    },
-    {
-      "id": "file:contracts/dex/dex-factory.clar",
-      "type": "contract",
-      "name": "dex-factory"
-    },
-    {
-      "id": "file:contracts/dex/liquidity-optimization-engine.clar",
-      "type": "contract",
-      "name": "liquidity-optimization-engine"
-    },
-    {
-      "id": "file:contracts/traits/sips/sip-010-ft-mintable-trait.clar",
-      "type": "contract",
-      "name": "sip-010-ft-mintable-trait"
-    },
-    {
-      "id": "file:contracts/traits/sips/sip-018-trait.clar",
-      "type": "contract",
-      "name": "sip-018-trait"
-    },
-    {
-      "id": "file:contracts/traits/sips/sip-009-nft-trait.clar",
-      "type": "contract",
-      "name": "sip-009-nft-trait"
-    },
-    {
-      "id": "file:contracts/traits/sips/sip-010-ft-trait.clar",
-      "type": "contract",
-      "name": "sip-010-ft-trait"
-    },
-    {
-      "id": "file:contracts/traits/dimensional/dim-registry-trait.clar",
-      "type": "contract",
-      "name": "dim-registry-trait"
-    },
-    {
-      "id": "file:contracts/traits/dimensional/dimensional-oracle-trait.clar",
-      "type": "contract",
-      "name": "dimensional-oracle-trait"
-    },
-    {
-      "id": "file:contracts/traits/dimensional/position-nft-trait.clar",
-      "type": "contract",
-      "name": "position-nft-trait"
-    },
-    {
-      "id": "file:contracts/traits/defi/router-trait.clar",
-      "type": "contract",
-      "name": "router-trait"
-    },
-    {
-      "id": "file:contracts/traits/defi/lending-system-trait.clar",
-      "type": "contract",
-      "name": "lending-system-trait"
-    },
-    {
-      "id": "file:contracts/traits/defi/batch-auction-trait.clar",
-      "type": "contract",
-      "name": "batch-auction-trait"
-    },
-    {
-      "id": "file:contracts/traits/defi/pool-trait.clar",
-      "type": "contract",
-      "name": "pool-trait"
-    },
-    {
-      "id": "file:contracts/traits/defi/vault-admin-trait.clar",
-      "type": "contract",
-      "name": "vault-admin-trait"
-    },
-    {
-      "id": "file:contracts/traits/defi/liquidation-trait.clar",
-      "type": "contract",
-      "name": "liquidation-trait"
-    },
-    {
-      "id": "file:contracts/traits/defi/staking-trait.clar",
-      "type": "contract",
-      "name": "staking-trait"
-    },
-    {
-      "id": "file:contracts/traits/defi/yield-optimizer-trait.clar",
-      "type": "contract",
-      "name": "yield-optimizer-trait"
-    },
-    {
-      "id": "file:contracts/traits/defi/liquidity-manager-trait.clar",
-      "type": "contract",
-      "name": "liquidity-manager-trait"
-    },
-    {
-      "id": "file:contracts/traits/defi/factory-trait.clar",
-      "type": "contract",
-      "name": "factory-trait"
-    },
-    {
-      "id": "file:contracts/traits/defi/vault-trait.clar",
-      "type": "contract",
-      "name": "vault-trait"
-    },
-    {
-      "id": "file:contracts/traits/defi/fee-manager-trait.clar",
-      "type": "contract",
-      "name": "fee-manager-trait"
-    },
-    {
-      "id": "file:contracts/traits/defi/strategy-trait.clar",
-      "type": "contract",
-      "name": "strategy-trait"
-    },
-    {
-      "id": "file:contracts/traits/defi/performance-optimizer-trait.clar",
-      "type": "contract",
-      "name": "performance-optimizer-trait"
-    },
-    {
-      "id": "file:contracts/traits/defi/asset-vault-trait.clar",
-      "type": "contract",
-      "name": "asset-vault-trait"
-    },
-    {
-      "id": "file:contracts/traits/defi/bond-trait.clar",
-      "type": "contract",
-      "name": "bond-trait"
-    },
-    {
-      "id": "file:contracts/traits/defi/flash-loan-receiver-trait.clar",
-      "type": "contract",
-      "name": "flash-loan-receiver-trait"
-    },
-    {
-      "id": "file:contracts/traits/defi/pool-creation-trait.clar",
-      "type": "contract",
-      "name": "pool-creation-trait"
-    },
-    {
-      "id": "file:contracts/traits/governance/dao-trait.clar",
-      "type": "contract",
-      "name": "dao-trait"
-    },
-    {
-      "id": "file:contracts/traits/governance/governance-token-trait.clar",
-      "type": "contract",
-      "name": "governance-token-trait"
-    },
-    {
-      "id": "file:contracts/traits/core/standard-constants-trait.clar",
-      "type": "contract",
-      "name": "standard-constants-trait"
-    },
-    {
-      "id": "file:contracts/traits/core/utils-trait.clar",
-      "type": "contract",
-      "name": "utils-trait"
-    },
-    {
-      "id": "file:contracts/traits/core/metrics-trait.clar",
-      "type": "contract",
-      "name": "metrics-trait"
-    },
-    {
-      "id": "file:contracts/traits/core/ownable-trait.clar",
-      "type": "contract",
-      "name": "ownable-trait"
-    },
-    {
-      "id": "file:contracts/traits/core/error-codes-trait.clar",
-      "type": "contract",
-      "name": "error-codes-trait"
-    },
-    {
-      "id": "file:contracts/traits/core/migration-manager-trait.clar",
-      "type": "contract",
-      "name": "migration-manager-trait"
-    },
-    {
-      "id": "file:contracts/traits/math/fixed-point-math-trait.clar",
-      "type": "contract",
-      "name": "fixed-point-math-trait"
-    },
-    {
-      "id": "file:contracts/traits/math/math-trait.clar",
-      "type": "contract",
-      "name": "math-trait"
-    },
-    {
-      "id": "file:contracts/traits/security/circuit-breaker-trait.clar",
-      "type": "contract",
-      "name": "circuit-breaker-trait"
-    },
-    {
-      "id": "file:contracts/traits/security/pausable-trait.clar",
-      "type": "contract",
-      "name": "pausable-trait"
-    },
-    {
-      "id": "file:contracts/traits/security/compliance-hooks-trait.clar",
-      "type": "contract",
-      "name": "compliance-hooks-trait"
-    },
-    {
-      "id": "file:contracts/traits/security/mev-protector-trait.clar",
-      "type": "contract",
-      "name": "mev-protector-trait"
-    },
-    {
-      "id": "file:contracts/traits/security/access-control-trait.clar",
-      "type": "contract",
-      "name": "access-control-trait"
-    },
-    {
-      "id": "file:contracts/traits/security/monitoring-trait.clar",
-      "type": "contract",
-      "name": "monitoring-trait"
-    },
-    {
-      "id": "file:contracts/traits/protocol/oracle-aggregator-trait.clar",
-      "type": "contract",
-      "name": "oracle-aggregator-trait"
-    },
-    {
-      "id": "file:contracts/traits/protocol/oracle-trait.clar",
-      "type": "contract",
-      "name": "oracle-trait"
-    },
-    {
-      "id": "file:contracts/traits/protocol/btc-adapter-trait.clar",
-      "type": "contract",
-      "name": "btc-adapter-trait"
-    },
-    {
-      "id": "file:contracts/traits/protocol/cxlp-migration-queue-trait.clar",
-      "type": "contract",
-      "name": "cxlp-migration-queue-trait"
-    },
-    {
-      "id": "file:contracts/traits/protocol/legacy-adapter-trait.clar",
-      "type": "contract",
-      "name": "legacy-adapter-trait"
-    },
-    {
-      "id": "file:contracts/traits/protocol/cross-protocol-trait.clar",
-      "type": "contract",
-      "name": "cross-protocol-trait"
-    },
-    {
-      "id": "file:tests/yield-optimizer.test.clar",
+      "id": "file:tests/enhanced-contracts-test-suite.clar",
       "type": "test",
-      "name": "yield-optimizer.test"
-    },
-    {
-      "id": "file:tests/tokenomics-unit-tests.clar",
-      "type": "test",
-      "name": "tokenomics-unit-tests"
-    },
-    {
-      "id": "file:tests/revenue-distributor-hysteresis-tests.clar",
-      "type": "test",
-      "name": "revenue-distributor-hysteresis-tests"
+      "name": "enhanced-contracts-test-suite"
     },
     {
       "id": "file:tests/enterprise-integration-tests.clar",
       "type": "test",
       "name": "enterprise-integration-tests"
+    },
+    {
+      "id": "file:tests/revenue-distributor-hysteresis-tests.clar",
+      "type": "test",
+      "name": "revenue-distributor-hysteresis-tests"
     },
     {
       "id": "file:tests/system-validation-tests.clar",
@@ -1136,9 +866,19 @@
       "name": "tokenomics-integration-tests"
     },
     {
-      "id": "file:tests/enhanced-contracts-test-suite.clar",
+      "id": "file:tests/tokenomics-unit-tests.clar",
       "type": "test",
-      "name": "enhanced-contracts-test-suite"
+      "name": "tokenomics-unit-tests"
+    },
+    {
+      "id": "file:tests/yield-optimizer.test.clar",
+      "type": "test",
+      "name": "yield-optimizer.test"
+    },
+    {
+      "id": "file:tests/mocks/test-flash-loan-receiver.clar",
+      "type": "test",
+      "name": "test-flash-loan-receiver"
     },
     {
       "id": "file:tests/mocks/test-token-a.clar",
@@ -1149,109 +889,9 @@
       "id": "file:tests/mocks/test-token-b.clar",
       "type": "test",
       "name": "test-token-b"
-    },
-    {
-      "id": "file:tests/mocks/test-flash-loan-receiver.clar",
-      "type": "test",
-      "name": "test-flash-loan-receiver"
     }
   ],
   "edges": [
-    {
-      "from": "file:contracts/dex/concentrated-liquidity-pool.clar",
-      "to": "file:contracts/math/math-lib-concentrated.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:contracts/dex/concentrated-liquidity-pool.clar",
-      "to": "file:contracts/math/math-lib-concentrated.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:contracts/dex/concentrated-liquidity-pool.clar",
-      "to": "file:contracts/math/math-lib-concentrated.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:contracts/dex/concentrated-liquidity-pool.clar",
-      "to": "file:contracts/math/math-lib-concentrated.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:contracts/dex/concentrated-liquidity-pool.clar",
-      "to": "(var-get",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/concentrated-liquidity-pool.clar",
-      "to": "(var-get",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/concentrated-liquidity-pool.clar",
-      "to": "file:contracts/math/math-lib-concentrated.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:contracts/dex/concentrated-liquidity-pool.clar",
-      "to": "(var-get",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/concentrated-liquidity-pool.clar",
-      "to": "(var-get",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/batch-auction.clar",
-      "to": "trait:batch-auction-trait",
-      "type": "use-trait"
-    },
-    {
-      "from": "file:contracts/dex/batch-auction.clar",
-      "to": "trait:batch-auction-trait",
-      "type": "use-trait"
-    },
-    {
-      "from": "file:contracts/interfaces/btc-adapter.clar",
-      "to": "trait:btc-adapter-trait",
-      "type": "use-trait"
-    },
-    {
-      "from": "file:contracts/interfaces/btc-adapter.clar",
-      "to": "trait:btc-adapter-trait",
-      "type": "use-trait"
-    },
-    {
-      "from": "file:contracts/interfaces/btc-adapter.clar",
-      "to": "trait:all-traits",
-      "type": "use-trait"
-    },
-    {
-      "from": "file:contracts/budget-manager.clar",
-      "to": "trait:proposal-trait",
-      "type": "use-trait"
-    },
-    {
-      "from": "file:contracts/budget-manager.clar",
-      "to": "trait:budget-manager-trait",
-      "type": "use-trait"
-    },
-    {
-      "from": "file:contracts/budget-manager.clar",
-      "to": "trait:all-traits",
-      "type": "use-trait"
-    },
-    {
-      "from": "file:contracts/budget-manager.clar",
-      "to": "trait:budget-manager-trait",
-      "type": "impl-trait"
-    },
     {
       "from": "file:contracts/pools/concentrated-liquidity-pool.clar",
       "to": "trait:sip-010-ft-trait",
@@ -1285,60 +925,6 @@
     },
     {
       "from": "file:contracts/pools/concentrated-liquidity-pool.clar",
-      "to": "file:contracts/math/math-lib-concentrated.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:contracts/pools/concentrated-liquidity-pool.clar",
-      "to": "file:contracts/math/math-lib-concentrated.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:contracts/pools/concentrated-liquidity-pool.clar",
-      "to": "file:contracts/math/math-lib-concentrated.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:contracts/pools/concentrated-liquidity-pool.clar",
-      "to": "file:contracts/math/math-lib-concentrated.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:contracts/pools/concentrated-liquidity-pool.clar",
-      "to": "file:contracts/math/math-lib-concentrated.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:contracts/pools/concentrated-liquidity-pool.clar",
-      "to": "file:contracts/math/math-lib-concentrated.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:contracts/pools/concentrated-liquidity-pool.clar",
-      "to": "file:contracts/math/math-lib-concentrated.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:contracts/pools/concentrated-liquidity-pool.clar",
-      "to": "file:contracts/math/math-lib-concentrated.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:contracts/pools/concentrated-liquidity-pool.clar",
-      "to": "file:contracts/math/math-lib-concentrated.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:contracts/pools/concentrated-liquidity-pool.clar",
       "to": "token-x",
       "type": "dynamic-call"
     },
@@ -1356,542 +942,21 @@
       "from": "file:contracts/pools/concentrated-liquidity-pool.clar",
       "to": "token-x",
       "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/pools/concentrated-liquidity-pool.clar",
-      "to": "file:contracts/math/math-lib-concentrated.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:contracts/pools/concentrated-liquidity-pool.clar",
-      "to": "file:contracts/math/math-lib-concentrated.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:contracts/pools/concentrated-liquidity-pool.clar",
-      "to": "file:contracts/math/math-lib-concentrated.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:contracts/pools/concentrated-liquidity-pool.clar",
-      "to": "file:contracts/math/math-lib-concentrated.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:contracts/pools/concentrated-liquidity-pool.clar",
-      "to": "token-x",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/pools/concentrated-liquidity-pool.clar",
-      "to": "token-y",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/pools/concentrated-liquidity-pool.clar",
-      "to": "file:contracts/math/math-lib-concentrated.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:contracts/pools/concentrated-liquidity-pool.clar",
-      "to": "file:contracts/math/math-lib-concentrated.clar",
-      "type": "calls",
-      "resolved": true
     },
     {
       "from": "file:contracts/governance/governance-token.clar",
       "to": "trait:governance-token-trait",
-      "type": "use-trait"
-    },
-    {
-      "from": "file:contracts/governance/governance-token.clar",
-      "to": "trait:governance-token-trait",
-      "type": "use-trait"
-    },
-    {
-      "from": "file:contracts/governance/proposal-engine.clar",
-      "to": "file:contracts/governance/governance-token.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:contracts/governance/proposal-engine.clar",
-      "to": "file:contracts/governance/governance-token.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:contracts/pools/tiered-pools.clar",
-      "to": "file:contracts/dex/fee-manager.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:contracts/pools/tiered-pools.clar",
-      "to": "file:contracts/dex/fee-manager.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:contracts/audit-registry/audit-registry.clar",
-      "to": "dc",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/audit-registry/audit-registry.clar",
-      "to": "file:contracts/audit-registry/audit-badge-nft.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:contracts/dimensional/dim-oracle-automation.clar",
-      "to": "trait:dimensional-oracle-trait",
-      "type": "use-trait"
-    },
-    {
-      "from": "file:contracts/dimensional/dim-oracle-automation.clar",
-      "to": "trait:dimensional-oracle-trait",
-      "type": "use-trait"
-    },
-    {
-      "from": "file:contracts/automation/keeper-coordinator.clar",
-      "to": "trait:keeper-coordinator-trait",
       "type": "impl-trait"
     },
     {
-      "from": "file:contracts/dex/asset-vault.clar",
-      "to": "trait:asset-vault-trait",
-      "type": "use-trait"
+      "from": "file:contracts/security/mev-protector.clar",
+      "to": "trait:mev-protector-trait",
+      "type": "impl-trait"
     },
     {
-      "from": "file:contracts/dimensional/dim-oracle-automation.clar",
-      "to": "file:contracts/dimensional/dim-registry.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:contracts/dimensional/dim-revenue-adapter.clar",
-      "to": "trait:sip-010-ft-trait",
-      "type": "use-trait"
-    },
-    {
-      "from": "file:contracts/dex/asset-vault.clar",
-      "to": "trait:asset-vault-trait",
-      "type": "use-trait"
-    },
-    {
-      "from": "file:contracts/dex/asset-vault.clar",
-      "to": "token",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/asset-vault.clar",
-      "to": "token",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/asset-vault.clar",
-      "to": "token",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/asset-vault.clar",
-      "to": "token",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/auto-compounder.clar",
-      "to": "cb",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/auto-compounder.clar",
-      "to": "token",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/auto-compounder.clar",
-      "to": "token",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/auto-compounder.clar",
-      "to": "(var-get",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/auto-compounder.clar",
-      "to": "(var-get",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/auto-compounder.clar",
-      "to": "strategy",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/auto-compounder.clar",
-      "to": "token",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/auto-compounder.clar",
-      "to": "(var-get",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/auto-compounder.clar",
-      "to": "(var-get",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dimensional/advanced-router-dijkstra.clar",
-      "to": "trait:advanced-router-dijkstra-trait",
-      "type": "use-trait"
-    },
-    {
-      "from": "file:contracts/dex/bond-factory.clar",
-      "to": "trait:bond-factory-trait",
-      "type": "use-trait"
-    },
-    {
-      "from": "file:contracts/dex/bond-factory.clar",
-      "to": "trait:bond-factory-trait",
-      "type": "use-trait"
-    },
-    {
-      "from": "file:contracts/dex/bond-factory.clar",
-      "to": "collateral-token",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/bond-factory.clar",
-      "to": "contract-ref:.token-soft-launch",
-      "type": "calls",
-      "resolved": false
-    },
-    {
-      "from": "file:contracts/dex/bond-factory.clar",
-      "to": "bond-contract",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/bond-factory.clar",
-      "to": "collateral-token",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/bond-factory.clar",
-      "to": "(get",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/comprehensive-lending-system.clar",
-      "to": "(var-get",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/comprehensive-lending-system.clar",
-      "to": "(var-get",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/comprehensive-lending-system.clar",
-      "to": "breaker",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/comprehensive-lending-system.clar",
-      "to": "breaker",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/comprehensive-lending-system.clar",
-      "to": "breaker",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/comprehensive-lending-system.clar",
-      "to": "asset-trait",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/comprehensive-lending-system.clar",
-      "to": "breaker",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/comprehensive-lending-system.clar",
-      "to": "asset-trait",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/comprehensive-lending-system.clar",
-      "to": "breaker",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/comprehensive-lending-system.clar",
-      "to": "asset-trait",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/comprehensive-lending-system.clar",
-      "to": "breaker",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/comprehensive-lending-system.clar",
-      "to": "asset-trait",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/comprehensive-lending-system.clar",
-      "to": "repay-asset",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/comprehensive-lending-system.clar",
-      "to": "collateral-asset",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/multi-hop-router-v3.clar",
-      "to": "(var-get",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/interfaces/cross-protocol-integrator.clar",
-      "to": "trait:cross-protocol-trait",
-      "type": "use-trait"
-    },
-    {
-      "from": "file:contracts/interfaces/cross-protocol-integrator.clar",
-      "to": "trait:cross-protocol-trait",
-      "type": "use-trait"
-    },
-    {
-      "from": "file:contracts/dimensional/tokenized-bond.clar",
-      "to": "payment-token",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/cxd-staking.clar",
-      "to": "(as-contract",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/cxd-staking.clar",
-      "to": "cxd-token",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/cxd-staking.clar",
-      "to": "revenue-token",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/cxd-staking.clar",
-      "to": "revenue-token",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/cxlp-migration-queue.clar",
-      "to": "trait:cxlp-migration-queue-trait",
-      "type": "use-trait"
-    },
-    {
-      "from": "file:contracts/dimensional/concentrated-liquidity-pool-v2.clar",
-      "to": "file:contracts/libraries/concentrated-math.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:contracts/dimensional/concentrated-liquidity-pool-v2.clar",
-      "to": "token-x",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/cxlp-migration-queue.clar",
-      "to": "trait:cxlp-migration-queue-trait",
-      "type": "use-trait"
-    },
-    {
-      "from": "file:contracts/dex/cxlp-migration-queue.clar",
-      "to": "(var-get",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/cxlp-migration-queue.clar",
-      "to": "(var-get",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/cxlp-migration-queue.clar",
-      "to": "(var-get",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/cxlp-migration-queue.clar",
-      "to": "cxd-token",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/dex-factory-v2.clar",
-      "to": "access-control",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/dex-factory-v2.clar",
-      "to": "file:contracts/security/circuit-breaker.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:contracts/dex/dex-factory-v2.clar",
-      "to": "token-a",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/dex-factory-v2.clar",
-      "to": "token-b",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/dex-factory-v2.clar",
-      "to": "pool-impl",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/dex-factory-v2.clar",
-      "to": "pool-implementation",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/dex-factory.clar",
-      "to": "trait:factory-trait",
-      "type": "use-trait"
-    },
-    {
-      "from": "file:contracts/dex/dex-factory.clar",
-      "to": "trait:sip-010-ft-trait",
-      "type": "use-trait"
-    },
-    {
-      "from": "file:contracts/dex/dex-factory.clar",
-      "to": "trait:access-control-trait",
-      "type": "use-trait"
-    },
-    {
-      "from": "file:contracts/dex/dex-factory.clar",
-      "to": "trait:factory-trait",
-      "type": "use-trait"
-    },
-    {
-      "from": "file:contracts/dex/dex-factory.clar",
-      "to": "trait:pool-creation-trait",
-      "type": "use-trait"
-    },
-    {
-      "from": "file:contracts/dex/dex-factory.clar",
-      "to": "trait:circuit-breaker-trait",
-      "type": "use-trait"
-    },
-    {
-      "from": "file:contracts/dex/dex-factory.clar",
-      "to": "trait:factory-trait",
-      "type": "use-trait"
-    },
-    {
-      "from": "file:contracts/dex/dex-factory.clar",
-      "to": "access-control",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/dex-factory.clar",
-      "to": "file:contracts/security/circuit-breaker.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:contracts/dex/dex-factory.clar",
-      "to": "token-a",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/dex-factory.clar",
-      "to": "token-b",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/dex-factory.clar",
-      "to": "pool-impl",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/dex-pool.clar",
-      "to": "(as-contract",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/dex-pool.clar",
-      "to": "(as-contract",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/dex-pool.clar",
-      "to": "(as-contract",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/dex-pool.clar",
-      "to": "(as-contract",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/dex-pool.clar",
-      "to": "(as-contract",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/dex-pool.clar",
-      "to": "(as-contract",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/dex-pool.clar",
-      "to": "(as-contract",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/dex-pool.clar",
-      "to": "(as-contract",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/dex-router.clar",
-      "to": "trait:router-trait",
-      "type": "use-trait"
-    },
-    {
-      "from": "file:contracts/governance/signed-data-base.clar",
-      "to": "trait:sip-018-trait",
-      "type": "use-trait"
-    },
-    {
-      "from": "file:contracts/governance/signed-data-base.clar",
-      "to": "trait:sip-018-trait",
-      "type": "use-trait"
-    },
-    {
-      "from": "file:contracts/mocks/mock-oracle.clar",
+      "from": "file:contracts/oracle/oracle.clar",
       "to": "trait:oracle-trait",
-      "type": "use-trait"
+      "type": "impl-trait"
     },
     {
       "from": "file:contracts/dex/dex-router.clar",
@@ -1900,761 +965,28 @@
     },
     {
       "from": "file:contracts/dex/dex-router.clar",
-      "to": "bond-contract",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/dex-router.clar",
-      "to": "bond-in",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/dex-router.clar",
-      "to": "bond-out",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/dex-router.clar",
-      "to": "bond-contract",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/dex-router.clar",
-      "to": "token-contract",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/dex-router.clar",
-      "to": "factory",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/dex-router.clar",
-      "to": "pool-principal",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/dex-router.clar",
-      "to": "factory",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/dex-router.clar",
-      "to": "new-pool",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/dex-router.clar",
-      "to": "(var-get",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/dex-router.clar",
-      "to": "pool",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/dex-router.clar",
-      "to": "pool",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/dex-router.clar",
-      "to": "token-in",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/dex-router.clar",
-      "to": "token-in",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/dex-router.clar",
-      "to": "token-in",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/dex-router.clar",
-      "to": "new-owner",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/enhanced-yield-strategy.clar",
-      "to": "(var-get",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/enhanced-yield-strategy.clar",
-      "to": "(var-get",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/enterprise-loan-manager.clar",
-      "to": "trait:sip-010-ft-trait",
-      "type": "use-trait"
-    },
-    {
-      "from": "file:contracts/dex/enterprise-loan-manager.clar",
-      "to": "trait:lending-system-trait",
-      "type": "use-trait"
-    },
-    {
-      "from": "file:contracts/dex/enterprise-loan-manager.clar",
-      "to": "bond-issuance-system",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/enterprise-loan-manager.clar",
-      "to": "collateral-asset",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/enterprise-loan-manager.clar",
-      "to": "bond-issuance-system",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/cross-protocol-integrator.clar",
-      "to": "protocol-contract",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/flash-loan-vault.clar",
-      "to": "receiver",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/flash-loan-vault.clar",
-      "to": "asset",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/flash-loan-vault.clar",
-      "to": "asset",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/flash-loan-vault.clar",
-      "to": "token-principal",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/flash-loan-vault.clar",
-      "to": "asset",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/interest-rate-model.clar",
-      "to": "trait:sip-010-ft-trait",
-      "type": "use-trait"
-    },
-    {
-      "from": "file:contracts/automation/keeper-coordinator.clar",
-      "to": "trait:keeper-coordinator-trait",
-      "type": "use-trait"
-    },
-    {
-      "from": "file:contracts/interfaces/legacy-adapter.clar",
-      "to": "trait:legacy-adapter-trait",
-      "type": "use-trait"
-    },
-    {
-      "from": "file:contracts/interfaces/legacy-adapter.clar",
-      "to": "trait:legacy-adapter-trait",
-      "type": "use-trait"
-    },
-    {
-      "from": "file:contracts/pools/stable-pool-enhanced.clar",
-      "to": "trait:sip-010-ft-trait",
-      "type": "use-trait"
+      "to": "trait:router-trait",
+      "type": "impl-trait"
     },
     {
       "from": "file:contracts/dex/liquidation-manager.clar",
       "to": "trait:liquidation-trait",
-      "type": "use-trait"
-    },
-    {
-      "from": "file:contracts/dex/liquidation-manager.clar",
-      "to": "trait:liquidation-trait",
-      "type": "use-trait"
-    },
-    {
-      "from": "file:contracts/dex/liquidation-manager.clar",
-      "to": "lending-system",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/liquidation-manager.clar",
-      "to": "lending-system",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/liquidation-manager.clar",
-      "to": "lending-system",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/liquidation-manager.clar",
-      "to": "lending-system",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/vault.clar",
-      "to": "(var-get",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/loan-liquidation-manager.clar",
-      "to": "lending-system",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/manipulation-detector.clar",
-      "to": "breaker",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/manipulation-detector.clar",
-      "to": "breaker",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/protocol-invariant-monitor.clar",
-      "to": "lending-system",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/utils/migration-manager.clar",
-      "to": "trait:migration-manager-trait",
-      "type": "use-trait"
-    },
-    {
-      "from": "file:contracts/utils/migration-manager.clar",
-      "to": "trait:migration-manager-trait",
-      "type": "use-trait"
-    },
-    {
-      "from": "file:contracts/dex/bond-factory.clar",
-      "to": "trait:bond-factory-trait",
-      "type": "use-trait"
-    },
-    {
-      "from": "file:contracts/dimensional/multi-hop-router-v3.clar",
-      "to": "pool",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dimensional/multi-hop-router-v3.clar",
-      "to": "pool",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dimensional/multi-hop-router-v3.clar",
-      "to": "pool",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dimensional/multi-hop-router-v3.clar",
-      "to": "pool",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dimensional/multi-hop-router-v3.clar",
-      "to": "pool",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dimensional/multi-hop-router-v3.clar",
-      "to": "pool",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dimensional/multi-hop-router-v3.clar",
-      "to": "pool",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dimensional/multi-hop-router-v3.clar",
-      "to": "pool",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dimensional/multi-hop-router-v3.clar",
-      "to": "pool",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dimensional/multi-hop-router-v3.clar",
-      "to": "pool",
-      "type": "dynamic-call"
+      "type": "impl-trait"
     },
     {
       "from": "file:contracts/monitoring/performance-optimizer.clar",
       "to": "trait:performance-optimizer-trait",
-      "type": "use-trait"
-    },
-    {
-      "from": "file:contracts/dex/cxlp-migration-queue.clar",
-      "to": "(var-get",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/cxlp-migration-queue.clar",
-      "to": "cxd-token",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/dex-pool.clar",
-      "to": "(as-contract",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/pool-factory-template.clar",
-      "to": "trait:all-traits",
-      "type": "use-trait"
-    },
-    {
-      "from": "file:contracts/dex/dex-pool.clar",
-      "to": "(as-contract",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/dex-pool.clar",
-      "to": "(as-contract",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/dex-pool.clar",
-      "to": "(as-contract",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/pool-template.clar",
-      "to": "a",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/pool-template.clar",
-      "to": "b",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/protocol-invariant-monitor.clar",
-      "to": "staking-contract",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/protocol-invariant-monitor.clar",
-      "to": "lending-system",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/loan-liquidation-manager.clar",
-      "to": "trait:sip-010-ft-trait",
-      "type": "use-trait"
-    },
-    {
-      "from": "file:contracts/dex/revenue-distributor.clar",
-      "to": "revenue-token",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/revenue-distributor.clar",
-      "to": "revenue-token",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/revenue-distributor.clar",
-      "to": "revenue-token",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/revenue-distributor.clar",
-      "to": "revenue-token",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/sbtc-bond-integration.clar",
-      "to": "trait:sip-010-ft-trait",
-      "type": "use-trait"
-    },
-    {
-      "from": "file:contracts/dex/sbtc-bond-integration.clar",
-      "to": "file:contracts/dex/sbtc-integration.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:contracts/dex/sbtc-bond-integration.clar",
-      "to": "contract-ref:.sbtc-token",
-      "type": "calls",
-      "resolved": false
-    },
-    {
-      "from": "file:contracts/dex/sbtc-bond-integration.clar",
-      "to": "contract-ref:.sbtc-token",
-      "type": "calls",
-      "resolved": false
-    },
-    {
-      "from": "file:contracts/dex/sbtc-bond-integration.clar",
-      "to": "contract-ref:.sbtc-token",
-      "type": "calls",
-      "resolved": false
-    },
-    {
-      "from": "file:contracts/dex/sbtc-bond-integration.clar",
-      "to": "file:contracts/dex/enhanced-yield-strategy.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:contracts/dex/sbtc-bond-integration.clar",
-      "to": "contract-ref:.sbtc-token",
-      "type": "calls",
-      "resolved": false
-    },
-    {
-      "from": "file:contracts/dex/sbtc-bond-integration.clar",
-      "to": "contract-ref:.sbtc-token",
-      "type": "calls",
-      "resolved": false
-    },
-    {
-      "from": "file:contracts/dex/sbtc-bond-integration.clar",
-      "to": "file:contracts/dex/sbtc-integration.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:contracts/dex/sbtc-bond-integration.clar",
-      "to": "contract-ref:.sbtc-token",
-      "type": "calls",
-      "resolved": false
-    },
-    {
-      "from": "file:contracts/dex/sbtc-flash-loan-extension.clar",
-      "to": "trait:flash-loan-receiver-trait",
-      "type": "use-trait"
-    },
-    {
-      "from": "file:contracts/dex/sbtc-flash-loan-extension.clar",
-      "to": "trait:flash-loan-receiver-trait",
-      "type": "use-trait"
-    },
-    {
-      "from": "file:contracts/dex/sbtc-flash-loan-extension.clar",
-      "to": "trait:sip-010-ft-trait",
-      "type": "use-trait"
-    },
-    {
-      "from": "file:contracts/dex/sbtc-flash-loan-extension.clar",
-      "to": "trait:all-traits",
-      "type": "use-trait"
-    },
-    {
-      "from": "file:contracts/dex/sbtc-flash-loan-extension.clar",
-      "to": "asset",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/sbtc-flash-loan-extension.clar",
-      "to": "asset",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/sbtc-flash-loan-extension.clar",
-      "to": "receiver",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/sbtc-flash-loan-extension.clar",
-      "to": "asset",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/sbtc-flash-loan-extension.clar",
-      "to": "asset",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/sbtc-flash-loan-extension.clar",
-      "to": "file:contracts/dex/bond-issuance-system.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:contracts/dex/sbtc-flash-loan-extension.clar",
-      "to": "asset",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/sbtc-flash-loan-extension.clar",
-      "to": "asset",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/sbtc-flash-loan-extension.clar",
-      "to": "asset",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/sbtc-flash-loan-extension.clar",
-      "to": "asset",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/sbtc-flash-loan-vault.clar",
-      "to": "asset",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/sbtc-flash-loan-vault.clar",
-      "to": "receiver",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/sbtc-flash-loan-vault.clar",
-      "to": "asset",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/sbtc-flash-loan-vault.clar",
-      "to": "asset",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/sbtc-flash-loan-vault.clar",
-      "to": "asset",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/sbtc-integration.clar",
-      "to": "contract-ref:.sbtc-token",
-      "type": "calls",
-      "resolved": false
-    },
-    {
-      "from": "file:contracts/dex/sbtc-integration.clar",
-      "to": "contract-ref:.sbtc-token",
-      "type": "calls",
-      "resolved": false
-    },
-    {
-      "from": "file:contracts/dex/sbtc-integration.clar",
-      "to": "contract-ref:.sbtc-token",
-      "type": "calls",
-      "resolved": false
-    },
-    {
-      "from": "file:contracts/dex/sbtc-lending-integration.clar",
-      "to": "trait:all-traits",
-      "type": "use-trait"
-    },
-    {
-      "from": "file:contracts/dex/wormhole-integration.clar",
-      "to": "trait:sip-010-ft-trait",
-      "type": "use-trait"
-    },
-    {
-      "from": "file:contracts/dex/sbtc-lending-system.clar",
-      "to": "asset",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/sbtc-lending-system.clar",
-      "to": "asset",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/sbtc-lending-system.clar",
-      "to": "asset",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/sbtc-lending-system.clar",
-      "to": "asset",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/sbtc-lending-system.clar",
-      "to": "repay-asset",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/sbtc-lending-system.clar",
-      "to": "collateral-asset",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/stable-swap-pool.clar",
-      "to": "(var-get",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/stable-swap-pool.clar",
-      "to": "(var-get",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/stable-swap-pool.clar",
-      "to": "(var-get",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/stable-swap-pool.clar",
-      "to": "(var-get",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/stable-swap-pool.clar",
-      "to": "(var-get",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/stable-swap-pool.clar",
-      "to": "(var-get",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/timelock-controller.clar",
-      "to": "(get",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/token-emission-controller.clar",
-      "to": "trait:sip-010-ft-mintable-trait",
-      "type": "use-trait"
-    },
-    {
-      "from": "file:contracts/dex/token-emission-controller.clar",
-      "to": "token-contract",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/tokens/token-system-coordinator.clar",
-      "to": "(var-get",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/vault.clar",
-      "to": "trait:vault-trait",
-      "type": "use-trait"
-    },
-    {
-      "from": "file:contracts/dex/vault.clar",
-      "to": "trait:vault_trait",
       "type": "impl-trait"
     },
     {
-      "from": "file:contracts/dex/vault.clar",
-      "to": "asset",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/vault.clar",
-      "to": "(var-get",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/vault.clar",
-      "to": "strategy-contract",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/vault.clar",
-      "to": "strategy-contract",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/vault.clar",
-      "to": "(var-get",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/vault.clar",
-      "to": "asset",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/vault.clar",
-      "to": "(var-get",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/weighted-swap-pool.clar",
-      "to": "(var-get",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/weighted-swap-pool.clar",
-      "to": "(var-get",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/weighted-swap-pool.clar",
-      "to": "(var-get",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/weighted-swap-pool.clar",
-      "to": "(var-get",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/liquidation-manager.clar",
-      "to": "trait:liquidation-trait",
+      "from": "file:contracts/dex/sbtc-flash-loan-extension.clar",
+      "to": "trait:flash-loan-receiver-trait",
       "type": "use-trait"
     },
     {
-      "from": "file:contracts/dex/wormhole-integration.clar",
-      "to": "token",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/wormhole-integration.clar",
-      "to": "token",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/rewards/yield-optimizer.clar",
-      "to": "trait:sip-010-ft-trait",
-      "type": "use-trait"
-    },
-    {
-      "from": "file:contracts/rewards/yield-optimizer.clar",
-      "to": "(var-get",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/rewards/yield-optimizer.clar",
-      "to": "(var-get",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/rewards/yield-optimizer.clar",
-      "to": "(var-get",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/rewards/yield-optimizer.clar",
-      "to": "vault",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/rewards/yield-optimizer.clar",
-      "to": "vault",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/rewards/yield-optimizer.clar",
-      "to": "vault",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/dex-router.clar",
-      "to": "trait:router-trait",
-      "type": "use-trait"
+      "from": "file:contracts/dex/sbtc-flash-loan-extension.clar",
+      "to": "trait:flash-loan-receiver-trait",
+      "type": "impl-trait"
     },
     {
       "from": "file:contracts/dimensional/advanced-router-dijkstra.clar",
@@ -2664,292 +996,7 @@
     {
       "from": "file:contracts/dimensional/advanced-router-dijkstra.clar",
       "to": "trait:advanced-router-dijkstra-trait",
-      "type": "use-trait"
-    },
-    {
-      "from": "file:contracts/dimensional/concentrated-liquidity-pool-v2.clar",
-      "to": "file:contracts/libraries/concentrated-math.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:contracts/dimensional/concentrated-liquidity-pool-v2.clar",
-      "to": "(var-get",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dimensional/concentrated-liquidity-pool-v2.clar",
-      "to": "file:contracts/libraries/concentrated-math.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:contracts/dimensional/concentrated-liquidity-pool-v2.clar",
-      "to": "file:contracts/libraries/concentrated-math.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:contracts/dimensional/concentrated-liquidity-pool-v2.clar",
-      "to": "file:contracts/libraries/concentrated-math.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:contracts/dimensional/concentrated-liquidity-pool-v2.clar",
-      "to": "token-x",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dimensional/concentrated-liquidity-pool-v2.clar",
-      "to": "token-y",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dimensional/concentrated-liquidity-pool-v2.clar",
-      "to": "(var-get",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dimensional/concentrated-liquidity-pool-v2.clar",
-      "to": "token-x",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dimensional/concentrated-liquidity-pool-v2.clar",
-      "to": "token-y",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dimensional/concentrated-liquidity-pool-v2.clar",
-      "to": "token-in",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dimensional/concentrated-liquidity-pool-v2.clar",
-      "to": "token-out",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dimensional/concentrated-liquidity-pool-v2.clar",
-      "to": "file:contracts/libraries/concentrated-math.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:contracts/dimensional/concentrated-liquidity-pool-v2.clar",
-      "to": "file:contracts/libraries/concentrated-math.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:contracts/dimensional/concentrated-liquidity-pool-v2.clar",
-      "to": "file:contracts/libraries/concentrated-math.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:contracts/dimensional/concentrated-liquidity-pool-v2.clar",
-      "to": "file:contracts/libraries/concentrated-math.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:contracts/dex/revenue-distributor.clar",
-      "to": "revenue-token",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dimensional/dim-oracle-automation.clar",
-      "to": "trait:dimensional-oracle-trait",
-      "type": "use-trait"
-    },
-    {
-      "from": "file:contracts/dimensional/dim-oracle-automation.clar",
-      "to": "trait:dimensional-oracle-trait",
-      "type": "use-trait"
-    },
-    {
-      "from": "file:contracts/dimensional/dim-oracle-automation.clar",
-      "to": "file:contracts/dimensional/dim-registry.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:contracts/dex/sbtc-flash-loan-vault.clar",
-      "to": "receiver",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/sbtc-flash-loan-vault.clar",
-      "to": "asset",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dimensional/dim-registry.clar",
-      "to": "trait:dim-registry-trait",
-      "type": "use-trait"
-    },
-    {
-      "from": "file:contracts/dex/sbtc-flash-loan-vault.clar",
-      "to": "asset",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dimensional/dim-revenue-adapter.clar",
-      "to": "monitor-contract",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dimensional/dim-revenue-adapter.clar",
-      "to": "reward-token",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dimensional/dim-revenue-adapter.clar",
-      "to": "distributor-contract",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dimensional/dim-revenue-adapter.clar",
-      "to": "coordinator-contract",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dimensional/dim-revenue-adapter.clar",
-      "to": "metrics-contract",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dimensional/dim-revenue-adapter.clar",
-      "to": "metrics-contract",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dimensional/dim-revenue-adapter.clar",
-      "to": "payment-token",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dimensional/dim-revenue-adapter.clar",
-      "to": "distributor-contract",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dimensional/dim-yield-stake.clar",
-      "to": "token",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dimensional/dim-yield-stake.clar",
-      "to": "token",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dimensional/dim-yield-stake.clar",
-      "to": "token",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dimensional/dim-yield-stake.clar",
-      "to": "file:contracts/dimensional/dim-metrics.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:contracts/dex/comprehensive-lending-system.clar",
-      "to": "repay-asset",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dimensional/tokenized-bond-adapter.clar",
-      "to": "monitor-contract",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dimensional/tokenized-bond-adapter.clar",
-      "to": "payment-token",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dimensional/tokenized-bond-adapter.clar",
-      "to": "distributor-contract",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dimensional/tokenized-bond-adapter.clar",
-      "to": "coordinator-contract",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dimensional/tokenized-bond-adapter.clar",
-      "to": "monitor-contract",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dimensional/tokenized-bond-adapter.clar",
-      "to": "payment-token",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dimensional/tokenized-bond-adapter.clar",
-      "to": "distributor-contract",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dimensional/tokenized-bond-adapter.clar",
-      "to": "coordinator-contract",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dimensional/tokenized-bond-adapter.clar",
-      "to": "monitor-contract",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dimensional/tokenized-bond-adapter.clar",
-      "to": "coordinator-contract",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dimensional/tokenized-bond-adapter.clar",
-      "to": "token",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dimensional/tokenized-bond.clar",
-      "to": "payment-token",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dimensional/tokenized-bond.clar",
-      "to": "payment-token",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/enterprise/enterprise-api.clar",
-      "to": "hook",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/enterprise/enterprise-api.clar",
-      "to": "breaker",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/enterprise/enterprise-api.clar",
-      "to": "router",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/enterprise/enterprise-api.clar",
-      "to": "router",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/dex/dex-factory.clar",
-      "to": "trait:factory-trait",
-      "type": "use-trait"
+      "type": "impl-trait"
     },
     {
       "from": "file:contracts/governance/governance-signature-verifier.clar",
@@ -2959,203 +1006,22 @@
     {
       "from": "file:contracts/governance/governance-signature-verifier.clar",
       "to": "trait:sip-018-trait",
-      "type": "use-trait"
+      "type": "impl-trait"
     },
     {
-      "from": "file:contracts/governance/governance-signature-verifier.clar",
-      "to": "governance",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/governance/governance-signature-verifier.clar",
-      "to": "signed-data-base",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/governance/governance-signature-verifier.clar",
-      "to": "governance",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/governance/governance-signature-verifier.clar",
-      "to": "signed-data-base",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/governance/governance-signature-verifier.clar",
-      "to": "signed-data-base",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/governance/governance-signature-verifier.clar",
-      "to": "signed-data-base",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/governance/governance-signature-verifier.clar",
-      "to": "signed-data-base",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/governance/lending-protocol-governance.clar",
-      "to": "target-contract",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/governance/lending-protocol-governance.clar",
-      "to": "token-contract",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/governance/lending-protocol-governance.clar",
-      "to": "utility-contract",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/governance/lending-protocol-governance.clar",
-      "to": "utility-contract",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/governance/lending-protocol-governance.clar",
-      "to": "file:contracts/interfaces/access-control.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:contracts/governance/lending-protocol-governance.clar",
-      "to": "file:contracts/interfaces/access-control.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:contracts/governance/lending-protocol-governance.clar",
-      "to": "file:contracts/interfaces/access-control.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:contracts/governance/lending-protocol-governance.clar",
-      "to": "file:contracts/interfaces/access-control.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:contracts/governance/lending-protocol-governance.clar",
-      "to": "file:contracts/interfaces/access-control.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:contracts/governance/lending-protocol-governance.clar",
-      "to": "file:contracts/interfaces/access-control.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:contracts/traits/defi/pool-creation-trait.clar",
-      "to": "trait:sip-010-ft-trait",
+      "from": "file:contracts/governance/signed-data-base.clar",
+      "to": "trait:signed-data-base-trait",
       "type": "use-trait"
     },
     {
       "from": "file:contracts/governance/signed-data-base.clar",
-      "to": "trait:sip-018-trait",
-      "type": "use-trait"
-    },
-    {
-      "from": "file:contracts/governance/signed-data-base.clar",
-      "to": "trait:sip-018-trait",
-      "type": "use-trait"
-    },
-    {
-      "from": "file:tests/yield-optimizer.test.clar",
-      "to": "trait:sip-010-ft-trait",
-      "type": "use-trait"
-    },
-    {
-      "from": "file:tests/yield-optimizer.test.clar",
-      "to": "trait:sip-010-ft-trait",
-      "type": "use-trait"
+      "to": "trait:signed-data-base-trait",
+      "type": "impl-trait"
     },
     {
       "from": "file:contracts/lib/fixed-point-math.clar",
       "to": "trait:fixed-point-math-trait",
-      "type": "use-trait"
-    },
-    {
-      "from": "file:contracts/lib/fixed-point-math.clar",
-      "to": "trait:fixed_point_math_trait",
       "type": "impl-trait"
-    },
-    {
-      "from": "file:contracts/lib/fixed-point-math.clar",
-      "to": "file:contracts/lib/math-lib-advanced.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:contracts/lib/precision-calculator.clar",
-      "to": "file:contracts/lib/math-lib-advanced.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:contracts/lib/precision-calculator.clar",
-      "to": "file:contracts/lib/math-lib-advanced.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:contracts/lib/precision-calculator.clar",
-      "to": "file:contracts/lib/math-lib-advanced.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:contracts/lib/precision-calculator.clar",
-      "to": "file:contracts/lib/math-lib-advanced.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:contracts/libraries/concentrated-math.clar",
-      "to": "math-addr",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/libraries/concentrated-math.clar",
-      "to": "math-addr",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/libraries/concentrated-math.clar",
-      "to": "math-addr",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/libraries/concentrated-math.clar",
-      "to": "math-addr",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/libraries/concentrated-math.clar",
-      "to": "math-addr",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/libraries/concentrated-math.clar",
-      "to": "math-addr",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/libraries/concentrated-math.clar",
-      "to": "math-addr",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:tests/yield-optimizer.test.clar",
-      "to": "optimizer",
-      "type": "dynamic-call"
     },
     {
       "from": "file:contracts/mocks/mock-dao.clar",
@@ -3165,12 +1031,7 @@
     {
       "from": "file:contracts/mocks/mock-dao.clar",
       "to": "trait:dao-trait",
-      "type": "use-trait"
-    },
-    {
-      "from": "file:tests/yield-optimizer.test.clar",
-      "to": "optimizer",
-      "type": "dynamic-call"
+      "type": "impl-trait"
     },
     {
       "from": "file:contracts/mocks/mock-oracle.clar",
@@ -3180,76 +1041,7 @@
     {
       "from": "file:contracts/mocks/mock-oracle.clar",
       "to": "trait:oracle-trait",
-      "type": "use-trait"
-    },
-    {
-      "from": "file:contracts/mocks/mock-strategy-a.clar",
-      "to": "asset",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/mocks/mock-strategy-a.clar",
-      "to": "asset",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/mocks/mock-strategy-b.clar",
-      "to": "asset",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/mocks/mock-strategy-b.clar",
-      "to": "asset",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:tests/tokenomics-unit-tests.clar",
-      "to": "trait:sip-010-ft-trait",
-      "type": "use-trait"
-    },
-    {
-      "from": "file:tests/tokenomics-unit-tests.clar",
-      "to": "trait:sip-010-ft-mintable-trait",
-      "type": "use-trait"
-    },
-    {
-      "from": "file:contracts/oracle/dimensional-oracle.clar",
-      "to": "trait:oracle-trait",
-      "type": "use-trait"
-    },
-    {
-      "from": "file:contracts/oracle/dimensional-oracle.clar",
-      "to": "file:contracts/monitoring/system-monitor.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:contracts/oracle/dimensional-oracle.clar",
-      "to": "file:contracts/monitoring/system-monitor.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:contracts/oracle/dimensional-oracle.clar",
-      "to": "file:contracts/monitoring/system-monitor.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:contracts/oracle/oracle-aggregator-v2.clar",
-      "to": "(var-get",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/oracle/oracle-aggregator-v2.clar",
-      "to": "source",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:tests/tokenomics-unit-tests.clar",
-      "to": "file:contracts/tokens/cxd-token.clar",
-      "type": "calls",
-      "resolved": true
+      "type": "impl-trait"
     },
     {
       "from": "file:contracts/oracle/oracle-aggregator.clar",
@@ -3259,1797 +1051,23 @@
     {
       "from": "file:contracts/oracle/oracle-aggregator.clar",
       "to": "trait:oracle-aggregator-trait",
-      "type": "use-trait"
-    },
-    {
-      "from": "file:contracts/oracle/oracle-aggregator.clar",
-      "to": "file:contracts/security/circuit-breaker.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:contracts/pools/stable-pool-enhanced.clar",
-      "to": "trait:sip-010-ft-trait",
-      "type": "use-trait"
-    },
-    {
-      "from": "file:tests/tokenomics-unit-tests.clar",
-      "to": "file:contracts/dex/cxd-staking.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:contracts/rewards/rewards-distributor.clar",
-      "to": "file:contracts/security/circuit-breaker.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:contracts/rewards/rewards-distributor.clar",
-      "to": "(var-get",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/test/test-access.clar",
-      "to": "file:contracts/traits/security/access-control-trait.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:contracts/test/test-access.clar",
-      "to": "file:contracts/traits/security/access-control-trait.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:contracts/tokens/cxd-token.clar",
-      "to": "monitor",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/tokens/cxd-token.clar",
-      "to": "controller",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/tokens/cxd-token.clar",
-      "to": "coordinator",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/tokens/cxd-token.clar",
-      "to": "coordinator",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/tokens/cxd-token.clar",
-      "to": "coordinator",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/tokens/cxlp-token.clar",
-      "to": "queue-contract",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/tokens/cxlp-token.clar",
-      "to": "queue-contract",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/tokens/cxlp-token.clar",
-      "to": "cxd",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/traits/all-traits.clar",
-      "to": "trait:sip-010-ft-trait",
-      "type": "use-trait"
-    },
-    {
-      "from": "file:contracts/traits/all-traits.clar",
-      "to": "trait:.governance.governance-token-trait",
-      "type": "use-trait"
-    },
-    {
-      "from": "file:tests/tokenomics-unit-tests.clar",
-      "to": "file:contracts/tokens/cxlp-token.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-unit-tests.clar",
-      "to": "file:contracts/tokens/cxlp-token.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-unit-tests.clar",
-      "to": "file:contracts/tokens/cxlp-token.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-unit-tests.clar",
-      "to": "file:contracts/tokens/cxtr-token.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-unit-tests.clar",
-      "to": "file:contracts/tokens/cxtr-token.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-unit-tests.clar",
-      "to": "file:contracts/tokens/cxtr-token.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-unit-tests.clar",
-      "to": "file:contracts/dex/revenue-distributor.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-unit-tests.clar",
-      "to": "file:contracts/dex/revenue-distributor.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-unit-tests.clar",
-      "to": "file:contracts/dex/revenue-distributor.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:contracts/utils/utils.clar",
-      "to": "trait:utils-trait",
-      "type": "use-trait"
-    },
-    {
-      "from": "file:contracts/utils/utils.clar",
-      "to": "trait:utils-trait",
-      "type": "use-trait"
-    },
-    {
-      "from": "file:contracts/vaults/sbtc-vault.clar",
-      "to": "token-contract",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:contracts/vaults/sbtc-vault.clar",
-      "to": "token-contract",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:tests/enhanced-contracts-test-suite.clar",
-      "to": "trait:sip-010-ft-trait",
-      "type": "use-trait"
-    },
-    {
-      "from": "file:tests/enhanced-contracts-test-suite.clar",
-      "to": "contract-ref:.enhanced-batch-processing",
-      "type": "calls",
-      "resolved": false
-    },
-    {
-      "from": "file:tests/enhanced-contracts-test-suite.clar",
-      "to": "contract-ref:.enhanced-batch-processing",
-      "type": "calls",
-      "resolved": false
-    },
-    {
-      "from": "file:tests/enhanced-contracts-test-suite.clar",
-      "to": "contract-ref:.advanced-caching-system",
-      "type": "calls",
-      "resolved": false
-    },
-    {
-      "from": "file:tests/enhanced-contracts-test-suite.clar",
-      "to": "contract-ref:.advanced-caching-system",
-      "type": "calls",
-      "resolved": false
-    },
-    {
-      "from": "file:tests/enhanced-contracts-test-suite.clar",
-      "to": "contract-ref:.advanced-caching-system",
-      "type": "calls",
-      "resolved": false
-    },
-    {
-      "from": "file:tests/enhanced-contracts-test-suite.clar",
-      "to": "contract-ref:.advanced-caching-system",
-      "type": "calls",
-      "resolved": false
-    },
-    {
-      "from": "file:tests/enhanced-contracts-test-suite.clar",
-      "to": "contract-ref:.advanced-caching-system",
-      "type": "calls",
-      "resolved": false
-    },
-    {
-      "from": "file:tests/enhanced-contracts-test-suite.clar",
-      "to": "contract-ref:.dynamic-load-distribution",
-      "type": "calls",
-      "resolved": false
-    },
-    {
-      "from": "file:tests/enhanced-contracts-test-suite.clar",
-      "to": "contract-ref:.vault-enhanced",
-      "type": "calls",
-      "resolved": false
-    },
-    {
-      "from": "file:tests/enhanced-contracts-test-suite.clar",
-      "to": "contract-ref:.oracle-aggregator-enhanced",
-      "type": "calls",
-      "resolved": false
-    },
-    {
-      "from": "file:tests/enhanced-contracts-test-suite.clar",
-      "to": "contract-ref:.dex-factory-enhanced",
-      "type": "calls",
-      "resolved": false
-    },
-    {
-      "from": "file:tests/enhanced-contracts-test-suite.clar",
-      "to": "contract-ref:.advanced-caching-system",
-      "type": "calls",
-      "resolved": false
-    },
-    {
-      "from": "file:tests/enhanced-contracts-test-suite.clar",
-      "to": "contract-ref:.advanced-caching-system",
-      "type": "calls",
-      "resolved": false
-    },
-    {
-      "from": "file:tests/enhanced-contracts-test-suite.clar",
-      "to": "contract-ref:.dynamic-load-distribution",
-      "type": "calls",
-      "resolved": false
-    },
-    {
-      "from": "file:tests/enhanced-contracts-test-suite.clar",
-      "to": "contract-ref:.dynamic-load-distribution",
-      "type": "calls",
-      "resolved": false
-    },
-    {
-      "from": "file:tests/enhanced-contracts-test-suite.clar",
-      "to": "contract-ref:.vault-enhanced",
-      "type": "calls",
-      "resolved": false
-    },
-    {
-      "from": "file:tests/enhanced-contracts-test-suite.clar",
-      "to": "contract-ref:.oracle-aggregator-enhanced",
-      "type": "calls",
-      "resolved": false
-    },
-    {
-      "from": "file:tests/enhanced-contracts-test-suite.clar",
-      "to": "contract-ref:.dex-factory-enhanced",
-      "type": "calls",
-      "resolved": false
-    },
-    {
-      "from": "file:tests/enterprise-integration-tests.clar",
-      "to": "trait:sip-010-ft-trait",
-      "type": "use-trait"
-    },
-    {
-      "from": "file:tests/enterprise-integration-tests.clar",
-      "to": "trait:flash-loan-receiver-trait",
-      "type": "use-trait"
-    },
-    {
-      "from": "file:tests/enterprise-integration-tests.clar",
-      "to": "file:contracts/lib/math-lib-advanced.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/enterprise-integration-tests.clar",
-      "to": "file:contracts/lib/math-lib-advanced.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/enterprise-integration-tests.clar",
-      "to": "file:contracts/lib/precision-calculator.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/enterprise-integration-tests.clar",
-      "to": "file:contracts/dex/flash-loan-vault.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/enterprise-integration-tests.clar",
-      "to": "file:contracts/dex/flash-loan-vault.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/enterprise-integration-tests.clar",
-      "to": "file:contracts/dex/flash-loan-vault.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/enterprise-integration-tests.clar",
-      "to": "file:contracts/dex/enterprise-loan-manager.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/enterprise-integration-tests.clar",
-      "to": "file:contracts/dex/enterprise-loan-manager.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/enterprise-integration-tests.clar",
-      "to": "file:contracts/dex/enterprise-loan-manager.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/enterprise-integration-tests.clar",
-      "to": "file:contracts/dex/enterprise-loan-manager.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/enterprise-integration-tests.clar",
-      "to": "file:contracts/dex/bond-issuance-system.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/enterprise-integration-tests.clar",
-      "to": "file:contracts/dex/bond-issuance-system.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/enterprise-integration-tests.clar",
-      "to": "file:contracts/dex/bond-issuance-system.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/enterprise-integration-tests.clar",
-      "to": "file:contracts/dex/yield-distribution-engine.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/enterprise-integration-tests.clar",
-      "to": "file:contracts/dex/yield-distribution-engine.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/enterprise-integration-tests.clar",
-      "to": "file:contracts/dex/yield-distribution-engine.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/enterprise-integration-tests.clar",
-      "to": "file:contracts/dex/liquidity-optimization-engine.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/enterprise-integration-tests.clar",
-      "to": "file:contracts/dex/liquidity-optimization-engine.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/enterprise-integration-tests.clar",
-      "to": "file:contracts/dex/liquidity-optimization-engine.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/enterprise-integration-tests.clar",
-      "to": "file:contracts/dex/enterprise-loan-manager.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/enterprise-integration-tests.clar",
-      "to": "file:contracts/dex/yield-distribution-engine.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/enterprise-integration-tests.clar",
-      "to": "file:contracts/dex/yield-distribution-engine.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/enterprise-integration-tests.clar",
-      "to": "file:contracts/dex/liquidity-optimization-engine.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/enterprise-integration-tests.clar",
-      "to": "file:contracts/dex/enterprise-loan-manager.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/enterprise-integration-tests.clar",
-      "to": "file:contracts/dex/enterprise-loan-manager.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/enterprise-integration-tests.clar",
-      "to": "file:contracts/dex/bond-issuance-system.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/enterprise-integration-tests.clar",
-      "to": "file:contracts/dex/liquidity-optimization-engine.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/enterprise-integration-tests.clar",
-      "to": "file:contracts/lib/math-lib-advanced.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/enterprise-integration-tests.clar",
-      "to": "file:contracts/dex/flash-loan-vault.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/enterprise-integration-tests.clar",
-      "to": "file:contracts/dex/enterprise-loan-manager.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/enterprise-integration-tests.clar",
-      "to": "file:contracts/dex/bond-issuance-system.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/enterprise-integration-tests.clar",
-      "to": "file:contracts/dex/yield-distribution-engine.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/enterprise-integration-tests.clar",
-      "to": "file:contracts/dex/liquidity-optimization-engine.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/revenue-distributor-hysteresis-tests.clar",
-      "to": "file:contracts/dex/revenue-distributor.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/revenue-distributor-hysteresis-tests.clar",
-      "to": "file:contracts/dex/revenue-distributor.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/revenue-distributor-hysteresis-tests.clar",
-      "to": "file:contracts/dex/revenue-distributor.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/revenue-distributor-hysteresis-tests.clar",
-      "to": "file:contracts/dex/revenue-distributor.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/revenue-distributor-hysteresis-tests.clar",
-      "to": "file:contracts/dex/revenue-distributor.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/revenue-distributor-hysteresis-tests.clar",
-      "to": "file:contracts/dex/revenue-distributor.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/revenue-distributor-hysteresis-tests.clar",
-      "to": "file:contracts/dex/revenue-distributor.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/revenue-distributor-hysteresis-tests.clar",
-      "to": "file:contracts/dex/revenue-distributor.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/revenue-distributor-hysteresis-tests.clar",
-      "to": "file:contracts/dex/revenue-distributor.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/system-validation-tests.clar",
-      "to": "file:contracts/tokens/cxd-token.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/system-validation-tests.clar",
-      "to": "file:contracts/tokens/cxvg-token.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/system-validation-tests.clar",
-      "to": "file:contracts/tokens/cxlp-token.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/system-validation-tests.clar",
-      "to": "file:contracts/tokens/cxtr-token.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/system-validation-tests.clar",
-      "to": "file:contracts/dex/cxd-staking.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/system-validation-tests.clar",
-      "to": "file:contracts/dex/revenue-distributor.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/system-validation-tests.clar",
-      "to": "file:contracts/dex/token-emission-controller.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/system-validation-tests.clar",
-      "to": "file:contracts/dex/protocol-invariant-monitor.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/system-validation-tests.clar",
-      "to": "file:contracts/tokens/token-system-coordinator.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/system-validation-tests.clar",
-      "to": "file:contracts/dimensional/dim-revenue-adapter.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/system-validation-tests.clar",
-      "to": "file:contracts/dimensional/tokenized-bond-adapter.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/system-validation-tests.clar",
-      "to": "file:contracts/tokens/token-system-coordinator.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/system-validation-tests.clar",
-      "to": "file:contracts/dex/token-emission-controller.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/system-validation-tests.clar",
-      "to": "file:contracts/dex/revenue-distributor.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/system-validation-tests.clar",
-      "to": "file:contracts/dex/protocol-invariant-monitor.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/system-validation-tests.clar",
-      "to": "file:contracts/dex/protocol-invariant-monitor.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/system-validation-tests.clar",
-      "to": "file:contracts/dex/token-emission-controller.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/system-validation-tests.clar",
-      "to": "file:contracts/dex/token-emission-controller.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/system-validation-tests.clar",
-      "to": "file:contracts/dex/revenue-distributor.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/system-validation-tests.clar",
-      "to": "file:contracts/dex/revenue-distributor.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/system-validation-tests.clar",
-      "to": "file:contracts/tokens/cxd-token.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/system-validation-tests.clar",
-      "to": "file:contracts/dex/cxd-staking.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/system-validation-tests.clar",
-      "to": "file:contracts/tokens/cxvg-token.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/system-validation-tests.clar",
-      "to": "file:contracts/dex/cxvg-utility.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/system-validation-tests.clar",
-      "to": "file:contracts/tokens/cxd-token.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/system-validation-tests.clar",
-      "to": "file:contracts/dex/revenue-distributor.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/system-validation-tests.clar",
-      "to": "file:contracts/dex/revenue-distributor.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/system-validation-tests.clar",
-      "to": "file:contracts/tokens/cxvg-token.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/system-validation-tests.clar",
-      "to": "file:contracts/dex/cxvg-utility.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/system-validation-tests.clar",
-      "to": "file:contracts/dex/cxvg-utility.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/system-validation-tests.clar",
-      "to": "file:contracts/tokens/cxlp-token.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/system-validation-tests.clar",
-      "to": "file:contracts/tokens/cxlp-token.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/system-validation-tests.clar",
-      "to": "file:contracts/tokens/cxlp-token.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/system-validation-tests.clar",
-      "to": "file:contracts/tokens/cxd-token.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/system-validation-tests.clar",
-      "to": "file:contracts/dex/cxd-staking.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/system-validation-tests.clar",
-      "to": "file:contracts/dex/protocol-invariant-monitor.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/system-validation-tests.clar",
-      "to": "file:contracts/tokens/cxd-token.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/system-validation-tests.clar",
-      "to": "file:contracts/tokens/cxd-token.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/system-validation-tests.clar",
-      "to": "file:contracts/dex/cxd-staking.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/system-validation-tests.clar",
-      "to": "file:contracts/tokens/cxd-token.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/system-validation-tests.clar",
-      "to": "file:contracts/dex/revenue-distributor.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/system-validation-tests.clar",
-      "to": "file:contracts/tokens/cxd-token.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/system-validation-tests.clar",
-      "to": "file:contracts/dex/revenue-distributor.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/system-validation-tests.clar",
-      "to": "file:contracts/dimensional/dim-revenue-adapter.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/system-validation-tests.clar",
-      "to": "file:contracts/dex/revenue-distributor.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/system-validation-tests.clar",
-      "to": "file:contracts/dex/revenue-distributor.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/system-validation-tests.clar",
-      "to": "file:contracts/dex/cxd-staking.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/system-validation-tests.clar",
-      "to": "file:contracts/tokens/cxd-token.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/system-validation-tests.clar",
-      "to": "file:contracts/dex/token-emission-controller.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/system-validation-tests.clar",
-      "to": "file:contracts/dex/protocol-invariant-monitor.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/system-validation-tests.clar",
-      "to": "file:contracts/dex/protocol-invariant-monitor.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/system-validation-tests.clar",
-      "to": "file:contracts/dex/protocol-invariant-monitor.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/system-validation-tests.clar",
-      "to": "file:contracts/tokens/cxd-token.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/system-validation-tests.clar",
-      "to": "file:contracts/tokens/cxd-token.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/system-validation-tests.clar",
-      "to": "file:contracts/tokens/cxvg-token.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/system-validation-tests.clar",
-      "to": "file:contracts/tokens/cxtr-token.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/system-validation-tests.clar",
-      "to": "file:contracts/dex/protocol-invariant-monitor.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/system-validation-tests.clar",
-      "to": "file:contracts/tokens/token-system-coordinator.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/system-validation-tests.clar",
-      "to": "file:contracts/dex/revenue-distributor.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/system-validation-tests.clar",
-      "to": "file:contracts/dex/cxd-staking.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/system-validation-tests.clar",
-      "to": "file:contracts/dex/token-emission-controller.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/system-validation-tests.clar",
-      "to": "file:contracts/dex/protocol-invariant-monitor.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/system-validation-tests.clar",
-      "to": "file:contracts/tokens/token-system-coordinator.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/system-validation-tests.clar",
-      "to": "file:contracts/dex/revenue-distributor.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/system-validation-tests.clar",
-      "to": "file:contracts/dex/cxvg-utility.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/system-validation-tests.clar",
-      "to": "file:contracts/dex/protocol-invariant-monitor.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-integration-tests.clar",
-      "to": "trait:sip-010-ft-trait",
-      "type": "use-trait"
-    },
-    {
-      "from": "file:tests/tokenomics-integration-tests.clar",
-      "to": "file:contracts/dex/protocol-invariant-monitor.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-integration-tests.clar",
-      "to": "file:contracts/dex/protocol-invariant-monitor.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-integration-tests.clar",
-      "to": "file:contracts/dex/protocol-invariant-monitor.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-integration-tests.clar",
-      "to": "file:contracts/dex/token-emission-controller.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-integration-tests.clar",
-      "to": "file:contracts/dex/token-emission-controller.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-integration-tests.clar",
-      "to": "file:contracts/dex/revenue-distributor.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-integration-tests.clar",
-      "to": "file:contracts/dex/revenue-distributor.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-integration-tests.clar",
-      "to": "file:contracts/dex/revenue-distributor.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-integration-tests.clar",
-      "to": "file:contracts/tokens/token-system-coordinator.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-integration-tests.clar",
-      "to": "file:contracts/tokens/cxd-token.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-integration-tests.clar",
-      "to": "file:contracts/tokens/cxvg-token.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-integration-tests.clar",
-      "to": "file:contracts/tokens/cxtr-token.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-integration-tests.clar",
-      "to": "file:contracts/tokens/cxlp-token.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-integration-tests.clar",
-      "to": "file:contracts/tokens/cxlp-token.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-integration-tests.clar",
-      "to": "file:contracts/tokens/cxd-token.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-integration-tests.clar",
-      "to": "file:contracts/dex/cxd-staking.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-integration-tests.clar",
-      "to": "file:contracts/tokens/cxd-token.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-integration-tests.clar",
-      "to": "file:contracts/dex/revenue-distributor.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-integration-tests.clar",
-      "to": "file:contracts/dex/revenue-distributor.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-integration-tests.clar",
-      "to": "file:contracts/tokens/cxd-token.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-integration-tests.clar",
-      "to": "file:contracts/dex/revenue-distributor.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-integration-tests.clar",
-      "to": "file:contracts/tokens/cxlp-token.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-integration-tests.clar",
-      "to": "file:contracts/tokens/cxd-token.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-integration-tests.clar",
-      "to": "file:contracts/dex/revenue-distributor.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-integration-tests.clar",
-      "to": "file:contracts/dimensional/dim-revenue-adapter.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-integration-tests.clar",
-      "to": "file:contracts/tokens/cxd-token.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-integration-tests.clar",
-      "to": "file:contracts/dimensional/dim-revenue-adapter.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-integration-tests.clar",
-      "to": "file:contracts/dimensional/tokenized-bond-adapter.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-integration-tests.clar",
-      "to": "file:contracts/dimensional/tokenized-bond-adapter.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-integration-tests.clar",
-      "to": "file:contracts/tokens/cxd-token.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-integration-tests.clar",
-      "to": "file:contracts/dimensional/tokenized-bond-adapter.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-integration-tests.clar",
-      "to": "file:contracts/tokens/cxd-token.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-integration-tests.clar",
-      "to": "file:contracts/dex/cxd-staking.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-integration-tests.clar",
-      "to": "file:contracts/tokens/cxd-token.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-integration-tests.clar",
-      "to": "file:contracts/dex/revenue-distributor.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-integration-tests.clar",
-      "to": "file:contracts/dex/revenue-distributor.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-integration-tests.clar",
-      "to": "file:contracts/dex/cxd-staking.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-integration-tests.clar",
-      "to": "file:contracts/tokens/cxvg-token.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-integration-tests.clar",
-      "to": "file:contracts/dex/cxvg-utility.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-integration-tests.clar",
-      "to": "file:contracts/dex/cxvg-utility.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-integration-tests.clar",
-      "to": "file:contracts/dex/cxvg-utility.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-integration-tests.clar",
-      "to": "file:contracts/tokens/cxd-token.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-integration-tests.clar",
-      "to": "file:contracts/dex/token-emission-controller.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-integration-tests.clar",
-      "to": "file:contracts/tokens/cxd-token.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-integration-tests.clar",
-      "to": "file:contracts/dex/protocol-invariant-monitor.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-integration-tests.clar",
-      "to": "file:contracts/tokens/cxd-token.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-integration-tests.clar",
-      "to": "file:contracts/dex/protocol-invariant-monitor.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-integration-tests.clar",
-      "to": "file:contracts/dex/protocol-invariant-monitor.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-integration-tests.clar",
-      "to": "file:contracts/dex/protocol-invariant-monitor.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-integration-tests.clar",
-      "to": "file:contracts/tokens/cxd-token.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-integration-tests.clar",
-      "to": "file:contracts/dex/cxd-staking.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-integration-tests.clar",
-      "to": "file:contracts/tokens/cxvg-token.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-integration-tests.clar",
-      "to": "file:contracts/dex/cxvg-utility.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-integration-tests.clar",
-      "to": "file:contracts/tokens/cxd-token.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-integration-tests.clar",
-      "to": "file:contracts/dex/revenue-distributor.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-integration-tests.clar",
-      "to": "file:contracts/dex/revenue-distributor.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-integration-tests.clar",
-      "to": "file:contracts/dex/cxvg-utility.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-integration-tests.clar",
-      "to": "file:contracts/dex/cxd-staking.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-integration-tests.clar",
-      "to": "file:contracts/tokens/cxd-token.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-integration-tests.clar",
-      "to": "file:contracts/tokens/cxd-token.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-integration-tests.clar",
-      "to": "file:contracts/tokens/cxd-token.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-integration-tests.clar",
-      "to": "file:contracts/dex/revenue-distributor.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-integration-tests.clar",
-      "to": "file:contracts/dex/revenue-distributor.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-integration-tests.clar",
-      "to": "file:contracts/dex/revenue-distributor.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-integration-tests.clar",
-      "to": "file:contracts/dex/protocol-invariant-monitor.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-unit-tests.clar",
-      "to": "trait:sip-010-ft-trait",
-      "type": "use-trait"
-    },
-    {
-      "from": "file:tests/tokenomics-unit-tests.clar",
-      "to": "trait:sip-010-ft-mintable-trait",
-      "type": "use-trait"
-    },
-    {
-      "from": "file:tests/tokenomics-unit-tests.clar",
-      "to": "file:contracts/tokens/cxd-token.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-unit-tests.clar",
-      "to": "file:contracts/tokens/cxd-token.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-unit-tests.clar",
-      "to": "file:contracts/tokens/cxd-token.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-unit-tests.clar",
-      "to": "file:contracts/tokens/cxd-token.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-unit-tests.clar",
-      "to": "file:contracts/tokens/cxd-token.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-unit-tests.clar",
-      "to": "file:contracts/tokens/cxd-token.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-unit-tests.clar",
-      "to": "file:contracts/tokens/cxd-token.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-unit-tests.clar",
-      "to": "file:contracts/tokens/cxd-token.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-unit-tests.clar",
-      "to": "file:contracts/dex/cxd-staking.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-unit-tests.clar",
-      "to": "file:contracts/dex/cxd-staking.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-unit-tests.clar",
-      "to": "file:contracts/tokens/cxd-token.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-unit-tests.clar",
-      "to": "file:contracts/dex/cxd-staking.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-unit-tests.clar",
-      "to": "file:contracts/dex/cxd-staking.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-unit-tests.clar",
-      "to": "file:contracts/tokens/cxvg-token.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-unit-tests.clar",
-      "to": "file:contracts/tokens/cxvg-token.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-unit-tests.clar",
-      "to": "file:contracts/tokens/cxvg-token.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-unit-tests.clar",
-      "to": "file:contracts/tokens/cxvg-token.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-unit-tests.clar",
-      "to": "file:contracts/dex/cxvg-utility.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-unit-tests.clar",
-      "to": "file:contracts/dex/cxvg-utility.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-unit-tests.clar",
-      "to": "file:contracts/dex/cxvg-utility.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-unit-tests.clar",
-      "to": "file:contracts/tokens/cxvg-token.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-unit-tests.clar",
-      "to": "file:contracts/dex/cxvg-utility.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-unit-tests.clar",
-      "to": "file:contracts/dex/cxvg-utility.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-unit-tests.clar",
-      "to": "file:contracts/tokens/cxlp-token.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-unit-tests.clar",
-      "to": "file:contracts/tokens/cxlp-token.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-unit-tests.clar",
-      "to": "file:contracts/tokens/cxlp-token.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-unit-tests.clar",
-      "to": "file:contracts/tokens/cxlp-token.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-unit-tests.clar",
-      "to": "file:contracts/tokens/cxtr-token.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-unit-tests.clar",
-      "to": "file:contracts/tokens/cxtr-token.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-unit-tests.clar",
-      "to": "file:contracts/tokens/cxtr-token.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-unit-tests.clar",
-      "to": "file:contracts/dex/revenue-distributor.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-unit-tests.clar",
-      "to": "file:contracts/dex/revenue-distributor.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-unit-tests.clar",
-      "to": "file:contracts/dex/revenue-distributor.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-unit-tests.clar",
-      "to": "file:contracts/dex/revenue-distributor.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-unit-tests.clar",
-      "to": "file:contracts/dex/revenue-distributor.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-unit-tests.clar",
-      "to": "file:contracts/dex/revenue-distributor.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-unit-tests.clar",
-      "to": "file:contracts/dex/revenue-distributor.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-unit-tests.clar",
-      "to": "file:contracts/dex/revenue-distributor.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-unit-tests.clar",
-      "to": "file:contracts/dex/revenue-distributor.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-unit-tests.clar",
-      "to": "file:contracts/dex/revenue-distributor.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-unit-tests.clar",
-      "to": "file:contracts/dex/revenue-distributor.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-unit-tests.clar",
-      "to": "file:contracts/dex/token-emission-controller.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-unit-tests.clar",
-      "to": "file:contracts/dex/token-emission-controller.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-unit-tests.clar",
-      "to": "file:contracts/dex/protocol-invariant-monitor.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-unit-tests.clar",
-      "to": "file:contracts/dex/protocol-invariant-monitor.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-unit-tests.clar",
-      "to": "file:contracts/tokens/token-system-coordinator.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/tokenomics-unit-tests.clar",
-      "to": "file:contracts/tokens/token-system-coordinator.clar",
-      "type": "calls",
-      "resolved": true
-    },
-    {
-      "from": "file:tests/yield-optimizer.test.clar",
-      "to": "trait:sip-010-ft-trait",
-      "type": "use-trait"
-    },
-    {
-      "from": "file:tests/yield-optimizer.test.clar",
-      "to": "trait:sip-010-ft-trait",
-      "type": "use-trait"
-    },
-    {
-      "from": "file:tests/yield-optimizer.test.clar",
-      "to": "trait:yield-optimizer-trait",
-      "type": "use-trait"
-    },
-    {
-      "from": "file:tests/yield-optimizer.test.clar",
-      "to": "trait:sip-010-ft-trait",
-      "type": "use-trait"
-    },
-    {
-      "from": "file:tests/yield-optimizer.test.clar",
-      "to": "trait:sip-010-ft-trait",
-      "type": "use-trait"
-    },
-    {
-      "from": "file:tests/yield-optimizer.test.clar",
-      "to": "trait:sip-010-ft-trait",
-      "type": "use-trait"
-    },
-    {
-      "from": "file:tests/yield-optimizer.test.clar",
-      "to": "trait:sip-010-ft-trait",
       "type": "impl-trait"
     },
     {
-      "from": "file:tests/yield-optimizer.test.clar",
-      "to": "vault",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:tests/yield-optimizer.test.clar",
-      "to": "optimizer",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:tests/yield-optimizer.test.clar",
-      "to": "optimizer",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:tests/yield-optimizer.test.clar",
-      "to": "optimizer",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:tests/yield-optimizer.test.clar",
-      "to": "vault",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:tests/yield-optimizer.test.clar",
-      "to": "contract-ref:.faucet",
-      "type": "calls",
-      "resolved": false
-    },
-    {
-      "from": "file:tests/yield-optimizer.test.clar",
-      "to": "vault",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:tests/yield-optimizer.test.clar",
-      "to": "metrics",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:tests/yield-optimizer.test.clar",
-      "to": "metrics",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:tests/yield-optimizer.test.clar",
-      "to": "optimizer",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:tests/yield-optimizer.test.clar",
-      "to": "metrics",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:tests/yield-optimizer.test.clar",
-      "to": "metrics",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:tests/yield-optimizer.test.clar",
-      "to": "optimizer",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:tests/yield-optimizer.test.clar",
-      "to": "token",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:tests/yield-optimizer.test.clar",
-      "to": "auto-compounder",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:tests/yield-optimizer.test.clar",
-      "to": "contract-ref:.faucet",
-      "type": "calls",
-      "resolved": false
-    },
-    {
-      "from": "file:tests/yield-optimizer.test.clar",
-      "to": "wstx-token",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:tests/yield-optimizer.test.clar",
-      "to": "wstx-token",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:tests/yield-optimizer.test.clar",
-      "to": "auto-compounder",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:tests/mocks/test-flash-loan-receiver.clar",
-      "to": "trait:sip-010-ft-trait",
+      "from": "file:contracts/security/Pausable.clar",
+      "to": "trait:'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.pausable-trait",
       "type": "use-trait"
     },
     {
-      "from": "file:tests/mocks/test-flash-loan-receiver.clar",
-      "to": "asset",
-      "type": "dynamic-call"
-    },
-    {
-      "from": "file:tests/mocks/test-token-a.clar",
-      "to": "trait:sip-010-ft-trait",
-      "type": "use-trait"
-    },
-    {
-      "from": "file:tests/mocks/test-token-a.clar",
-      "to": "trait:sip-010-ft-trait",
-      "type": "impl-trait"
-    },
-    {
-      "from": "file:tests/mocks/test-token-b.clar",
-      "to": "trait:sip-010-ft-trait",
-      "type": "use-trait"
-    },
-    {
-      "from": "file:tests/mocks/test-token-b.clar",
-      "to": "trait:sip-010-ft-trait",
+      "from": "file:contracts/security/Pausable.clar",
+      "to": "trait:pausable-trait",
       "type": "impl-trait"
     }
   ],
   "stats": {
-    "nodes": 231,
-    "edges": 739,
-    "traits": 52
+    "nodes": 178,
+    "edges": 34,
+    "traits": 46
   },
   "cycles": []
 }

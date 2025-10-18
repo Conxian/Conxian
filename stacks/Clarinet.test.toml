@@ -36,6 +36,7 @@ address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 [contracts.vault]
 path = "contracts/dex/vault.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
 
 [contracts.tokenized-bond]
 path = "contracts/dimensional/tokenized-bond.clar"
@@ -113,6 +114,7 @@ address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 [contracts.liquidation-manager]
 path = "contracts/dex/liquidation-manager.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
 
 [contracts.liquidity-optimization-engine]
 path = "contracts/dex/liquidity-optimization-engine.clar"
@@ -133,6 +135,7 @@ address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 [contracts.oracle]
 path = "contracts/oracle/oracle.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
 
 [contracts.pool-factory-template]
 path = "contracts/dex/pool-factory-template.clar"
@@ -364,6 +367,7 @@ address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 [contracts.mev-protector]
 path = "contracts/security/mev-protector.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
 
 [contracts.migration-manager]
 path = "contracts/utils/migration-manager.clar"
@@ -376,6 +380,7 @@ address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 [contracts.performance-optimizer]
 path = "contracts/monitoring/performance-optimizer.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
 
 [contracts.rebalancing-rules]
 path = "contracts/dex/rebalancing-rules.clar"
@@ -458,6 +463,7 @@ address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 [contracts.governance-token]
 path = "contracts/governance/governance-token.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
 
 [contracts.proposal-engine]
 path = "contracts/governance/proposal-engine.clar"
@@ -474,6 +480,7 @@ address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 [contracts.fixed-point-math]
 path = "contracts/lib/fixed-point-math.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
 
 [contracts.precision-calculator]
 path = "contracts/lib/precision-calculator.clar"
@@ -550,10 +557,12 @@ address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 [contracts.oracle-root]
 path = "contracts/oracle.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
 
 [contracts.oracle-dex]
 path = "contracts/dex/oracle.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
 
 [contracts.proposal-engine-root]
 path = "contracts/proposal-engine.clar"
@@ -627,14 +636,11 @@ address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.utils]
 path = "contracts/utils/utils.clar"
-clarity_version = 3
-epoch = "3.0"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
 
 [contracts.encoding]
 path = "contracts/utils/encoding.clar"
-clarity_version = 3
-epoch = "3.0"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [disabled.nakamoto-compatibility]
