@@ -1,4 +1,4 @@
-(use-trait pausable-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.pausable-trait)
+(use-trait pausable-trait .all-traits.pausable-trait)
 
 (impl-trait pausable-trait)
 

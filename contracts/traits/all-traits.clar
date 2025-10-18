@@ -19,6 +19,35 @@
   )
 )
 
+;; ===========================================
+;; ADVANCED ROUTER (DIJKSTRA) TRAIT
+;; ===========================================
+(define-trait advanced-router-dijkstra-trait
+  (
+    (add-token (token principal) (response uint (err uint)))
+    (add-edge (token-from principal) (token-to principal) (pool principal) (pool-type (string-ascii 20)) (liquidity uint) (fee uint) (response bool (err uint)))
+    (find-optimal-path (token-in principal) (token-out principal) (amount-in uint) (response (tuple (path (list 20 principal)) (distance uint) (hops uint)) (err uint)))
+    (swap-optimal-path (token-in principal) (token-out principal) (amount-in uint) (min-amount-out uint) (response (tuple (amount-out uint) (path (list 20 principal)) (hops uint) (distance uint)) (err uint)))
+    (get-graph-stats () (response (tuple (nodes uint) (edges uint)) (err uint)))
+    (get-token-index (token principal) (response (optional uint) (err uint)))
+    (get-edge-info (from-token principal) (to-token principal) (response (optional (tuple (pool principal) (pool-type (string-ascii 20)) (weight uint) (liquidity uint) (fee uint) (active bool))) (err uint)))
+    (estimate-output (token-in principal) (token-out principal) (amount-in uint) (response (tuple (path (list 20 principal)) (distance uint) (hops uint)) (err uint)))
+  )
+)
+
+;; ===========================================
+;; SIGNED DATA BASE TRAIT
+;; ===========================================
+(define-trait signed-data-base-trait
+  (
+    (get-domain-separator () (response (buff 32) (err uint)))
+    (get-structured-data-version () (response (string-ascii 16) (err uint)))
+    (verify-signature (message (buff 1024)) (signature (buff 65)) (signer principal) (response bool (err uint)))
+    (verify-structured-data (structured-data (buff 1024)) (signature (buff 65)) (signer principal) (response bool (err uint)))
+    (initialize-domain-separator (new-separator (buff 32)) (response bool (err uint)))
+  )
+)
+
 ;; (define-trait lending-system-trait
   (
     (deposit (asset principal) (amount uint) (response bool (err uint)))
@@ -873,6 +902,22 @@
     (div-fixed (a uint) (b uint) (precision uint) (response uint (err uint)))
     (pow-fixed (base uint) (exp uint) (precision uint) (response uint (err uint)))
     (sqrt-fixed (a uint) (precision uint) (response uint (err uint)))
+  )
+)
+
+;; ===========================================
+;; DAO TRAIT (for mocks and governance integration)
+;; ===========================================
+(define-trait dao-trait
+  (
+    (has-voting-power (user principal) (response bool (err uint)))
+    (get-voting-power (user principal) (response uint (err uint)))
+    (get-total-voting-power () (response uint (err uint)))
+    (delegate (delegatee principal) (response bool (err uint)))
+    (undelegate () (response bool (err uint)))
+    (execute-proposal (proposal-id uint) (response bool (err uint)))
+    (vote (proposal-id uint) (support bool) (response bool (err uint)))
+    (get-proposal (proposal-id uint) (response (tuple (id uint) (proposer principal) (start-block uint) (end-block uint) (for-votes uint) (against-votes uint) (executed bool) (canceled bool)) (err uint)))
   )
 )
 
