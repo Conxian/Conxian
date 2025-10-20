@@ -3,9 +3,15 @@
 
 ;; Implements vault-trait and vault-admin-trait with full system integration
 
+<<<<<<< HEAD
 ;; Constants(use-trait vault-trait .all-traits.vault-trait)
 (use-trait vault-trait .all-traits.vault-trait)
 (impl-trait vault-trait)
+=======
+
+
+;; Constants
+>>>>>>> 8bce9a06227aa3d139e549a8bea28e27bd6665af
 (define-constant ERR_UNAUTHORIZED (err u1001))
 (define-constant ERR_PAUSED (err u1002))
 (define-constant ERR_INSUFFICIENT_BALANCE (err u1003))

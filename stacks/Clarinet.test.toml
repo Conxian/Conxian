@@ -28,6 +28,629 @@ address = "ST2NEB84ASENDXKYGJPQW86YXQCEFEX2ZQPG87ND"
 
 [accounts.wallet_3]
 address = "ST2REHHS5J3CERCRBEPMGH7921Q6PYKAADT7JP2VB"
+[contracts.concentrated-math]
+path = "../contracts/libraries/concentrated-math.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.math-lib-concentrated]
+path = "../contracts/math/math-lib-concentrated.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.btc-adapter-trait]
+path = "../contracts/traits/protocol/btc-adapter-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.batch-auction-trait]
+path = "../contracts/traits/defi/batch-auction-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.fee-manager]
+path = "../contracts/dex/fee-manager.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.circuit-breaker]
+path = "../contracts/security/circuit-breaker.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.access-control-trait]
+path = "../contracts/traits/security/access-control-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.math-lib-advanced]
+path = "../contracts/lib/math-lib-advanced.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.system-monitor]
+path = "../contracts/monitoring/system-monitor.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.dim-revenue-adapter]
+path = "../contracts/dimensional/dim-revenue-adapter.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.tokenized-bond-adapter]
+path = "../contracts/dimensional/tokenized-bond-adapter.clar"
+clarity_version = 3
+epoch = "3.0"
+depends_on = [ "all-traits", "tokenized-bond",]
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+
+[contracts.dim-metrics]
+path = "../contracts/dimensional/dim-metrics.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.tokenized-bond]
+path = "../contracts/dimensional/tokenized-bond.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.sip-010-ft-mintable-trait]
+path = "../contracts/traits/sips/sip-010-ft-mintable-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.sip-018-trait]
+path = "../contracts/traits/sips/sip-018-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.sip-009-nft-trait]
+path = "../contracts/traits/sips/sip-009-nft-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.sip-010-ft-trait]
+path = "../contracts/traits/sips/sip-010-ft-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.dim-registry-trait]
+path = "../contracts/traits/dimensional/dim-registry-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.dimensional-oracle-trait]
+path = "../contracts/traits/dimensional/dimensional-oracle-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.position-nft-trait]
+path = "../contracts/traits/dimensional/position-nft-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.router-trait]
+path = "../contracts/traits/defi/router-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.lending-system-trait]
+path = "../contracts/traits/defi/lending-system-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.pool-trait]
+path = "../contracts/traits/defi/pool-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.vault-admin-trait]
+path = "../contracts/traits/defi/vault-admin-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.liquidation-trait]
+path = "../contracts/traits/defi/liquidation-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.staking-trait]
+path = "../contracts/traits/defi/staking-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.yield-optimizer-trait]
+path = "../contracts/traits/defi/yield-optimizer-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.liquidity-manager-trait]
+path = "../contracts/traits/defi/liquidity-manager-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.factory-trait]
+path = "../contracts/traits/defi/factory-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.vault-trait]
+path = "../contracts/traits/defi/vault-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.fee-manager-trait]
+path = "../contracts/traits/defi/fee-manager-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.strategy-trait]
+path = "../contracts/traits/defi/strategy-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.performance-optimizer-trait]
+path = "../contracts/traits/defi/performance-optimizer-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.asset-vault-trait]
+path = "../contracts/traits/defi/asset-vault-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.bond-trait]
+path = "../contracts/traits/defi/bond-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.flash-loan-receiver-trait]
+path = "../contracts/traits/defi/flash-loan-receiver-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.pool-creation-trait]
+path = "../contracts/traits/defi/pool-creation-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.dao-trait]
+path = "../contracts/traits/governance/dao-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.governance-token-trait]
+path = "../contracts/traits/governance/governance-token-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.standard-constants-trait]
+path = "../contracts/traits/core/standard-constants-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.utils-trait]
+path = "../contracts/traits/core/utils-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.metrics-trait]
+path = "../contracts/traits/core/metrics-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.ownable-trait]
+path = "../contracts/traits/core/ownable-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.error-codes-trait]
+path = "../contracts/traits/core/error-codes-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.migration-manager-trait]
+path = "../contracts/traits/core/migration-manager-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.fixed-point-math-trait]
+path = "../contracts/traits/math/fixed-point-math-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.math-trait]
+path = "../contracts/traits/math/math-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.circuit-breaker-trait]
+path = "../contracts/traits/security/circuit-breaker-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.pausable-trait]
+path = "../contracts/traits/security/pausable-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.compliance-hooks-trait]
+path = "../contracts/traits/security/compliance-hooks-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.mev-protector-trait]
+path = "../contracts/traits/security/mev-protector-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.monitoring-trait]
+path = "../contracts/traits/security/monitoring-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.oracle-aggregator-trait]
+path = "../contracts/traits/protocol/oracle-aggregator-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.oracle-trait]
+path = "../contracts/traits/protocol/oracle-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.cxlp-migration-queue-trait]
+path = "../contracts/traits/protocol/cxlp-migration-queue-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.legacy-adapter-trait]
+path = "../contracts/traits/protocol/legacy-adapter-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.cross-protocol-trait]
+path = "../contracts/traits/protocol/cross-protocol-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.dex-pool]
+path = "../contracts/dex/dex-pool.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.cxvg-token]
+path = "../contracts/tokens/cxvg-token.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.cxtr-token]
+path = "../contracts/tokens/cxtr-token.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.cxlp-token]
+path = "../contracts/tokens/cxlp-token.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.protocol-invariant-monitor]
+path = "../contracts/dex/protocol-invariant-monitor.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.cxd-token]
+path = "../contracts/tokens/cxd-token.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.cxs-token]
+path = "../contracts/tokens/cxs-token.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.audit-badge-nft]
+path = "../contracts/audit-registry/audit-badge-nft.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.enhanced-yield-strategy]
+path = "../contracts/dex/enhanced-yield-strategy.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.cxd-staking]
+path = "../contracts/dex/cxd-staking.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.yield-distribution-engine]
+path = "../contracts/dex/yield-distribution-engine.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.bond-issuance-system]
+path = "../contracts/dex/bond-issuance-system.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.enterprise-loan-manager]
+path = "../contracts/dex/enterprise-loan-manager.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.flash-loan-vault]
+path = "../contracts/dex/flash-loan-vault.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.revenue-distributor]
+path = "../contracts/dex/revenue-distributor.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.comprehensive-lending-system]
+path = "../contracts/dex/comprehensive-lending-system.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.token-emission-controller]
+path = "../contracts/dex/token-emission-controller.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.liquidity-optimization-engine]
+path = "../contracts/dex/liquidity-optimization-engine.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.token-b]
+path = "../tests/mocks/test-token-b.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.token-a]
+path = "../tests/mocks/test-token-a.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.tokenomics-integration-tests]
+path = "../tests/tokenomics-integration-tests.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.ft-mintable-trait]
+path = "../contracts/traits/sips/sip-010-ft-mintable-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.ft-trait]
+path = "../contracts/traits/sips/sip-010-ft-trait.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.tokenomics-unit-tests]
+path = "../tests/tokenomics-unit-tests.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.test-token-b]
+path = "../tests/mocks/test-token-b.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.revenue-distributor-hysteresis-tests]
+path = "../tests/revenue-distributor-hysteresis-tests.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.enterprise-integration-tests]
+path = "../tests/enterprise-integration-tests.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.test-flash-loan-receiver]
+path = "../tests/mocks/test-flash-loan-receiver.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.system-validation-tests]
+path = "../tests/system-validation-tests.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.test-token-a]
+path = "../tests/mocks/test-token-a.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.precision-calculator]
+path = "../contracts/lib/precision-calculator.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.dim-yield-stake]
+path = "../contracts/dimensional/dim-yield-stake.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+>>>>>>> 8bce9a06227aa3d139e549a8bea28e27bd6665af
 
 [contracts.all-traits]
 path = "contracts/traits/all-traits.clar"
@@ -83,9 +706,122 @@ address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 path = "contracts/dex/cxvg-utility.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
+[contracts.access-control]
+path = "../contracts/governance/access-control.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.cxvg-utility]
+path = "../contracts/dex/cxvg-utility.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.token-system-coordinator]
+path = "../contracts/dex/token-system-coordinator.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.audit-registry]
+path = "../contracts/audit-registry/audit-registry.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.vault]
+path = "../contracts/dex/vault.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.sbtc-integration]
+path = "../contracts/dex/sbtc-integration.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.btc-adapter]
+path = "../contracts/interfaces/btc-adapter.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.governance-token]
+path = "../contracts/governance/governance-token.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.batch-auction]
+path = "../contracts/dex/batch-auction.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.dim-registry]
+path = "../contracts/dimensional/dim-registry.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.multi-hop-router-v3]
+path = "../contracts/dex/multi-hop-router-v3.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.signed-data-base]
+path = "../contracts/governance/signed-data-base.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.yield-optimizer]
+path = "../contracts/dex/yield-optimizer.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.bond-factory]
+path = "../contracts/dex/bond-factory.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.cxlp-migration-queue]
+path = "../contracts/dex/cxlp-migration-queue.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits",]
+
+[contracts.dex-router]
+path = "../contracts/dex/dex-router.clar"
+clarity_version = 3
+epoch = "3.0"
+depends_on = [ "all-traits", "dex-factory", "dex-pool",]
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+
 [contracts.dex-factory]
 path = "contracts/dex/dex-factory.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+<<<<<<< HEAD
 
 [contracts.dex-router]
 path = "contracts/dex/dex-router.clar"
@@ -190,11 +926,14 @@ address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 [contracts.governance-signature-verifier]
 path = "contracts/governance/governance-signature-verifier.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+=======
+>>>>>>> 8bce9a06227aa3d139e549a8bea28e27bd6665af
 depends_on = [ "all-traits",]
 
 [contracts.lending-protocol-governance]
 path = "contracts/governance/lending-protocol-governance.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+<<<<<<< HEAD
 
 [contracts.signed-data-base]
 path = "contracts/governance/signed-data-base.clar"

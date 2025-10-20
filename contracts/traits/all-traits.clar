@@ -13,9 +13,16 @@
 ;; CORE TRAITS
 ;; ===========================================
 
-(define-trait utils-trait
+;; SIP-010: Fungible Token Standard
+(define-trait sip-010-ft-trait
   (
-    (principal-to-buff (p principal) (response (buff 32) (err uint)))
+    (transfer (amount uint) (sender principal) (recipient principal) (memo (optional (buff 34))) (response bool (err uint)))
+    (get-balance (account principal) (response uint (err uint)))
+    (get-total-supply () (response uint (err uint)))
+    (get-decimals () (response uint (err uint)))
+    (get-name () (response (string-ascii 32) (err uint)))
+    (get-symbol () (response (string-ascii 10) (err uint)))
+    (get-token-uri () (response (optional (string-utf8 256)) (err uint)))
   )
 )
 
@@ -94,6 +101,288 @@
   )
 )
 
+;; =============================================================================
+;; SECURITY TRAITS
+;; =============================================================================
+
+;; Access Control Trait - Role-based access control
+(define-trait access-control-trait
+  (
+    (has-role (account principal) (role uint) (response bool uint))
+    (get-admin () (response principal uint))
+    (set-admin (new-admin principal) (response bool uint))
+    (grant-role (role uint) (account principal) (response bool uint))
+    (revoke-role (role uint) (account principal) (response bool uint))
+    (renounce-role (role uint) (response bool uint))
+    (get-role-name (role uint) (response (string-ascii 64) uint))
+    (is-admin (caller principal) (response bool uint))
+  )
+)
+
+;; Circuit Breaker Trait - Enhanced circuit breaker controls
+(define-trait circuit-breaker-trait
+  (
+    (is-circuit-open () (response bool uint))
+    (check-circuit-state (operation (string-ascii 64)) (response bool uint))
+    (record-success (operation (string-ascii 64)) (response bool uint))
+    (record-failure (operation (string-ascii 64)) (response bool uint))
+    (get-failure-rate (operation (string-ascii 64)) (response uint uint))
+    (get-circuit-state (operation (string-ascii 64))
+      (response
+        (tuple
+          (state uint)
+          (last-checked uint)
+          (failure-rate uint)
+          (failure-count uint)
+          (success-count uint)
+        )
+        uint
+      )
+    )
+    (set-circuit-state (operation (string-ascii 64)) (state bool) (response bool uint))
+    (set-failure-threshold (threshold uint) (response bool uint))
+    (set-reset-timeout (timeout uint) (response bool uint))
+    (get-admin () (response principal uint))
+    (set-admin (new-admin principal) (response bool uint))
+    (set-rate-limit (operation (string-ascii 64)) (limit uint) (window uint) (response bool uint))
+    (get-rate-limit (operation (string-ascii 64))
+      (response
+        (tuple
+          (limit uint)
+          (window uint)
+          (current uint)
+          (reset-time uint)
+        )
+        uint
+      )
+    )
+    (batch-record-success (operations (list 20 (string-ascii 64))) (response bool uint))
+    (batch-record-failure (operations (list 20 (string-ascii 64))) (response bool uint))
+    (get-health-status ()
+      (response
+        (tuple
+          (is_operational bool)
+          (total_failure_rate uint)
+          (last_checked uint)
+          (uptime uint)
+          (total_operations uint)
+          (failed_operations uint)
+        )
+        uint
+      )
+    )
+    (set-circuit-mode (mode (optional bool)) (response bool uint))
+    (get-circuit-mode () (response (optional bool) uint))
+    (emergency-shutdown () (response bool uint))
+    (recover-from-shutdown () (response bool uint))
+  )
+)
+
+;; Monitoring Trait - System monitoring and alerting
+(define-trait monitoring-trait
+  (
+    (log-event (component (string-ascii 32)) (event-type (string-ascii 32)) (severity uint) (message (string-ascii 256)) (data (optional (buff 256))) (response bool uint))
+    (get-events (component (string-ascii 32)) (limit uint) (offset uint)
+      (response (list 100 (tuple (id uint) (event-type (string-ascii 32)) (severity uint) (message (string-ascii 256)) (block-height uint) (data (optional (buff 256))))) uint))
+    (get-event (event-id uint)
+      (response (tuple (id uint) (component (string-ascii 32)) (event-type (string-ascii 32)) (severity uint) (message (string-ascii 256)) (block-height uint) (data (optional (buff 256)))) uint))
+    (get-health-status (component (string-ascii 32))
+      (response (tuple (status uint) (last-updated uint) (uptime uint) (error-count uint) (warning-count uint)) uint))
+    (set-alert-threshold (component (string-ascii 32)) (alert-type (string-ascii 32)) (threshold uint) (response bool uint))
+    (get-admin () (response principal uint))
+    (set-admin (new-admin principal) (response bool uint))
+  )
+)
+
+;; Pausable Trait - Standard pause controls
+(define-trait pausable-trait
+  (
+    (pause () (response bool uint))
+    (unpause () (response bool uint))
+    (is-paused () (response bool uint))
+    (when-not-paused () (response bool uint))
+    (when-paused () (response bool uint))
+  )
+)
+
+;; Compliance Hooks Trait - Pre/post transfer hooks
+(define-trait compliance-hooks-trait
+  (
+    (before-transfer (sender principal) (recipient principal) (amount uint) (memo (optional (buff 34))) (response bool uint))
+    (after-transfer (sender principal) (recipient principal) (amount uint) (memo (optional (buff 34))) (response bool uint))
+  )
+)
+
+;; MEV Protector Trait - Front-running protection
+(define-trait mev-protector-trait
+  (
+    (check-front-running (tx-hash (buff 32)) (block-height uint) (response bool uint))
+    (record-transaction (tx-hash (buff 32)) (block-height uint) (amount uint) (response bool uint))
+    (is-protected (user principal) (response bool uint))
+  )
+)
+
+;; =============================================================================
+;; DEFI TRAITS
+;; =============================================================================
+
+;; Pool Trait - AMM Pool Interface
+(define-trait pool-trait
+  (
+    (add-liquidity (amount-a uint) (amount-b uint) (recipient principal) (response (tuple (tokens-minted uint) (token-a-used uint) (token-b-used uint)) uint))
+    (remove-liquidity (amount uint) (recipient principal) (response (tuple (token-a-returned uint) (token-b-returned uint)) uint))
+    (swap (token-in principal) (amount-in uint) (recipient principal) (response uint uint))
+    (get-reserves () (response (tuple (reserve-a uint) (reserve-b uint)) uint))
+    (get-total-supply () (response uint uint))
+  )
+)
+
+;; Factory Trait - Pool Factory Interface
+(define-trait factory-trait
+  (
+    (create-pool (token-a <sip-010-ft-trait>) (token-b <sip-010-ft-trait>) (fee-bps uint) (pool-type (string-ascii 64)) (response principal uint))
+    (get-pool (token-a <sip-010-ft-trait>) (token-b <sip-010-ft-trait>) (fee-bps uint) (response (optional principal) uint))
+    (get-pool-count () (response uint uint))
+    (register-pool-implementation (pool-type (string-ascii 64)) (implementation-contract principal) (response bool uint))
+  )
+)
+
+;; Vault Trait - Yield Vault Interface
+(define-trait vault-trait
+  (
+    (deposit (token-contract <sip-010-ft-trait>) (amount uint) (response uint uint))
+    (withdraw (token-contract <sip-010-ft-trait>) (amount uint) (response uint uint))
+    (get-total-shares (token-contract <sip-010-ft-trait>) (response uint uint))
+    (get-amount-out-from-shares (token-contract <sip-010-ft-trait>) (shares uint) (response uint uint))
+    (get-shares-from-amount-in (token-contract <sip-010-ft-trait>) (amount uint) (response uint uint))
+    (harvest (token-contract <sip-010-ft-trait>) (response bool uint))
+    (set-strategy (token-contract <sip-010-ft-trait>) (strategy-contract principal) (response bool uint))
+    (get-strategy (token-contract <sip-010-ft-trait>) (response (optional principal) uint))
+    (get-apy (token-contract <sip-010-ft-trait>) (response uint uint))
+    (get-tvl (token-contract <sip-010-ft-trait>) (response uint uint))
+  )
+)
+
+;; Strategy Trait - Yield Strategy Interface
+(define-trait strategy-trait
+  (
+    (deposit (token-contract <sip-010-ft-trait>) (amount uint) (response uint uint))
+    (withdraw (token-contract <sip-010-ft-trait>) (amount uint) (response uint uint))
+    (harvest () (response bool uint))
+    (rebalance () (response bool uint))
+    (get-apy () (response uint uint))
+    (get-tvl () (response uint uint))
+    (get-underlying-token () (response principal uint))
+    (get-vault () (response principal uint))
+  )
+)
+
+;; Staking Trait - Staking Interface
+(define-trait staking-trait
+  (
+    (stake (token-contract <sip-010-ft-trait>) (amount uint) (response uint uint))
+    (unstake (token-contract <sip-010-ft-trait>) (amount uint) (response uint uint))
+    (claim-rewards (token-contract <sip-010-ft-trait>) (response uint uint))
+    (get-staked-balance (token-contract <sip-010-ft-trait>) (user principal) (response uint uint))
+    (get-available-rewards (token-contract <sip-010-ft-trait>) (user principal) (response uint uint))
+    (get-total-staked (token-contract <sip-010-ft-trait>) (response uint uint))
+    (set-reward-rate (token-contract <sip-010-ft-trait>) (rate uint) (response bool uint))
+    (get-reward-rate (token-contract <sip-010-ft-trait>) (response uint uint))
+  )
+)
+
+;; Lending System Trait - Lending Protocol Interface
+(define-trait lending-system-trait
+  (
+    (deposit (asset principal) (amount uint) (response bool uint))
+    (withdraw (asset principal) (amount uint) (response bool uint))
+    (borrow (asset principal) (amount uint) (response bool uint))
+    (repay (asset principal) (amount uint) (response bool uint))
+    (liquidate (liquidator principal) (borrower principal) (repay-asset principal) (collateral-asset principal) (repay-amount uint) (response bool uint))
+    (get-account-liquidity (user principal) (response (tuple (liquidity uint) (shortfall uint)) uint))
+    (get-asset-price (asset principal) (response uint uint))
+    (get-borrow-rate (asset principal) (response uint uint))
+    (get-supply-rate (asset principal) (response uint uint))
+  )
+)
+
+;; =============================================================================
+;; MATH TRAITS
+;; =============================================================================
+
+;; Math Trait - Mathematical Operations
+(define-trait math-trait
+  (
+    ;; Basic arithmetic
+    (add (a uint) (b uint) (response uint uint))
+    (sub (a uint) (b uint) (response uint uint))
+    (mul (a uint) (b uint) (response uint uint))
+    (div (a uint) (b uint) (response uint uint))
+    (pow (base uint) (exp uint) (response uint uint))
+    (sqrt (a uint) (response uint uint))
+    
+    ;; Percentages and ratios
+    (get-percentage (value uint) (percentage uint) (response uint uint))
+    (get-ratio (numerator uint) (denominator uint) (response uint uint))
+    
+    ;; Min/Max
+    (min (a uint) (b uint) (response uint uint))
+    (max (a uint) (b uint) (response uint uint))
+    
+    ;; Absolute value
+    (abs (a int) (response uint uint))
+    
+    ;; Rounding
+    (ceil (a uint) (b uint) (response uint uint))
+    (floor (a uint) (b uint) (response uint uint))
+    
+    ;; Logarithms
+    (log2 (a uint) (response uint uint))
+    (log10 (a uint) (response uint uint))
+    (ln (a uint) (response uint uint))
+    
+    ;; Exponentials
+    (exp (a uint) (response uint uint))
+    
+    ;; Statistical functions
+    (average (a uint) (b uint) (response uint uint))
+    (weighted-average (value1 uint) (weight1 uint) (value2 uint) (weight2 uint) (response uint uint))
+    (geometric-mean (a uint) (b uint) (response uint uint))
+    (std-dev (values (list 100 uint)) (response uint uint))
+    
+    ;; Interpolation
+    (linear-interpolate (x uint) (x0 uint) (y0 uint) (x1 uint) (y1 uint) (response uint uint))
+    
+    ;; Fixed-point arithmetic
+    (fpow (base uint) (exp uint) (precision uint) (response uint uint))
+    (fsqrt (a uint) (precision uint) (response uint uint))
+    (fmul (a uint) (b uint) (precision uint) (response uint uint))
+    (fdiv (a uint) (b uint) (precision uint) (response uint uint))
+  )
+)
+
+;; =============================================================================
+;; ADDITIONAL TRAITS
+;; =============================================================================
+
+;; Governance Traits
+(define-trait dao-trait
+  (
+    (has-voting-power (voter principal) (response bool uint))
+    (get-voting-power (voter principal) (response uint uint))
+    (get-total-voting-power () (response uint uint))
+    (delegate (delegatee principal) (response bool uint))
+    (undelegate () (response bool uint))
+    (execute-proposal (proposal-id uint) (response bool uint))
+    (vote (proposal-id uint) (support bool) (response bool uint))
+    (get-proposal (proposal-id uint)
+      (response (tuple (proposer principal) (start-block uint) (end-block uint) (votes-for uint) (votes-against uint) (executed bool) (canceled bool)) uint)
+    )
+  )
+)
+
+
+;; DeFi Traits (additional)
 (define-trait bond-trait
   (
     (issue-bond (name (string-ascii 32)) (symbol (string-ascii 10)) (decimals uint) (initial-supply uint) (maturity-in-blocks uint) (coupon-rate-scaled uint) (frequency-in-blocks uint) (payment-token-address principal) (response bool (err uint)))

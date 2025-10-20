@@ -1,282 +1,86 @@
 {
-  "access-control": {
-    "traits": [],
-    "contracts": [
-      "self",
-      "(get"
-    ]
-  },
-  "lending-protocol-governance": {
-    "traits": [],
-    "contracts": [
-      "access-control"
-    ]
-  },
-  "cxd-staking": {
-    "traits": [],
-    "contracts": [
-      "cxd-token",
-      "revenue-token"
-    ]
-  },
-  "sbtc-flash-loan-vault": {
-    "traits": [],
-    "contracts": [
-      "asset",
-      "receiver"
-    ]
-  },
-  "sbtc-lending-integration": {
-    "traits": [],
-    "contracts": [
-      "sbtc-integration",
-      "asset",
-      "collateral-asset"
-    ]
-  },
-  "enterprise-loan-manager": {
-    "traits": [
-      "sip-010-trait",
-      "lending-system-trait",
-      "precision-calculator-trait"
-    ],
-    "contracts": [
-      "collateral-asset",
-      "loan-asset",
-      "bond-contract-ref",
-      "(get",
-      "(unwrap-panic",
-      "yield-contract"
-    ]
-  },
-  "token-emission-controller": {
-    "traits": [],
-    "contracts": [
-      "token-contract"
-    ]
-  },
-  "sbtc-flash-loan-extension": {
-    "traits": [],
-    "contracts": [
-      "asset",
-      "receiver",
-      "bond-issuance-system"
-    ]
-  },
-  "liquidity-optimization-engine": {
-    "traits": [
-      "sip-010-trait"
-    ],
-    "contracts": []
-  },
-  "liquidation-manager": {
-    "traits": [],
-    "contracts": [
-      "lending-system"
-    ]
-  },
-  "sbtc-integration": {
-    "traits": [],
-    "contracts": [
-      "sbtc-token"
-    ]
-  },
-  "sbtc-bond-integration": {
-    "traits": [],
-    "contracts": [
-      "sbtc-integration",
-      "SBTC_MAINNET",
-      "enhanced-yield-strategy"
-    ]
-  },
-  "timelock-controller": {
-    "traits": [],
-    "contracts": [
-      "(get"
-    ]
-  },
-  "vault": {
-    "traits": [],
-    "contracts": [
-      "asset"
-    ]
-  },
-  "enhanced-yield-strategy": {
-    "traits": [
-      "sip-010-trait"
-    ],
-    "contracts": [
-      "token-system-coordinator"
-    ]
-  },
-  "cxlp-migration-queue": {
-    "traits": [],
-    "contracts": [
-      "cxlp-token",
-      "cxd-token"
-    ]
-  },
-  "wormhole-integration": {
-    "traits": [
-      "sip-010-trait"
-    ],
-    "contracts": [
-      "token"
-    ]
-  },
-  "enhanced-flash-loan-vault": {
-    "traits": [],
-    "contracts": [
-      "receiver",
-      "asset",
-      "(as-contract"
-    ]
-  },
-  "comprehensive-lending-system": {
-    "traits": [],
-    "contracts": [
-      "oracle",
-      "access-control",
-      "interest-rate-model",
-      "asset"
-    ]
-  },
-  "revenue-distributor": {
-    "traits": [],
-    "contracts": [
-      "revenue-token"
-    ]
-  },
-  "protocol-invariant-monitor": {
-    "traits": [
-      "staking-trait"
-    ],
-    "contracts": []
-  },
-  "sbtc-lending-system": {
-    "traits": [],
-    "contracts": [
-      "asset",
-      "repay-asset",
-      "collateral-asset"
-    ]
-  },
-  "bond-issuance-system": {
-    "traits": [],
-    "contracts": [
-      "payment-token",
-      "yield-token",
-      "backing-asset"
-    ]
-  },
-  "token-system-coordinator": {
-    "traits": [],
-    "contracts": [
-      "protocol-invariant-monitor"
-    ]
-  },
-  "yield-distribution-engine": {
-    "traits": [],
-    "contracts": [
-      "(get"
-    ]
-  },
-  "dex-router": {
-    "traits": [],
-    "contracts": [
-      "pool-ctr",
-      "token"
-    ]
-  },
-  "loan-liquidation-manager": {
-    "traits": [],
-    "contracts": [
-      "lending-system",
-      "(unwrap-panic"
-    ]
-  },
-  "dex-factory": {
-    "traits": [],
-    "contracts": [
-      "access-control",
-      "dex-pool",
-      "access-principal"
-    ]
-  },
-  "cxvg-utility": {
-    "traits": [],
-    "contracts": [
-      "cxvg-token"
-    ]
-  },
-  "liquidation-trait": {
-    "traits": [
-      "standard-constants-trait"
-    ],
-    "contracts": []
-  },
-  "precision-calculator": {
-    "traits": [],
-    "contracts": [
-      "math-lib-advanced"
-    ]
-  },
-  "fixed-point-math": {
-    "traits": [],
-    "contracts": [
-      "math-lib-advanced"
-    ]
-  },
-  "cxlp-token": {
-    "traits": [],
-    "contracts": [
-      "cxd"
-    ]
-  },
-  "dim-revenue-adapter": {
-    "traits": [],
-    "contracts": [
-      "monitor-contract",
-      "reward-token",
-      "distributor-contract",
-      "coordinator-contract",
-      "metrics-contract",
-      "payment-token"
-    ]
-  },
-  "tokenized-bond": {
-    "traits": [
-      "sip-010-trait"
-    ],
-    "contracts": [
-      "payment-token"
-    ]
-  },
-  "dim-oracle-automation": {
-    "traits": [],
-    "contracts": [
-      "dim-registry"
-    ]
-  },
-  "tokenized-bond-adapter": {
-    "traits": [
-      "sip-010-trait"
-    ],
-    "contracts": [
-      "monitor-contract",
-      "payment-token",
-      "distributor-contract",
-      "coordinator-contract",
-      "token"
-    ]
-  },
-  "dim-yield-stake": {
-    "traits": [
-      "sip-010-trait"
-    ],
-    "contracts": [
-      "token",
-      "dim-metrics"
-    ]
-  }
+  "concentrated-liquidity-pool": [
+    "concentrated-math",
+    "math-lib-concentrated"
+  ],
+  "proposal-engine": [
+    "governance-token"
+  ],
+  "mev-protector": [
+    "multi-hop-router-v3"
+  ],
+  "tiered-pools": [
+    "fee-manager"
+  ],
+  "test-access": [
+    "access-control-trait"
+  ],
+  "fixed-point-math": [
+    "math-lib-advanced"
+  ],
+  "precision-calculator": [
+    "math-lib-advanced"
+  ],
+  "oracle-aggregator": [
+    "circuit-breaker"
+  ],
+  "dimensional-oracle": [
+    "system-monitor"
+  ],
+  "dim-oracle-automation": [
+    "dim-registry"
+  ],
+  "concentrated-liquidity-pool-v2": [
+    "concentrated-math"
+  ],
+  "dim-yield-stake": [
+    "dim-metrics"
+  ],
+  "performance-optimizer": [
+    "dex-pool"
+  ],
+  "lending-protocol-governance": [
+    "access-control"
+  ],
+  "access-control": [
+    "self"
+  ],
+  "token-system-coordinator": [
+    "protocol-invariant-monitor"
+  ],
+  "audit-registry": [
+    "audit-badge-nft"
+  ],
+  "rewards-distributor": [
+    "circuit-breaker"
+  ],
+  "yield-optimizer": [
+    "all-traits"
+  ],
+  "bond-factory": [
+    "token-soft-launch"
+  ],
+  "sbtc-bond-integration": [
+    "enhanced-yield-strategy",
+    "sbtc-integration",
+    "sbtc-token"
+  ],
+  "dex-factory-v2": [
+    "circuit-breaker"
+  ],
+  "sbtc-integration": [
+    "sbtc-token"
+  ],
+  "sbtc-flash-loan-extension": [
+    "bond-issuance-system"
+  ],
+  "auto-compounder": [
+    "all-traits"
+  ],
+  "cxvg-utility": [
+    "cxvg-token"
+  ],
+  "dex-factory": [
+    "circuit-breaker"
+  ]
 }
