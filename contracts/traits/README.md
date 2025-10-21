@@ -1,20 +1,50 @@
-# Conxian Protocol - Traits
+# Conxian Protocol - Traits & Error System
 
-## ⚠️ IMPORTANT DEPRECATION NOTICE
+## ⚠️ IMPORTANT NOTICE
 
-**As of SDK 3.7.0 (October 2025)**: All trait definitions are centralized in `all-traits.clar`. Individual trait files in subdirectories (`core/`, `defi/`, `security/`, etc.) are **DEPRECATED** and maintained only for reference.
+**As of SDK 3.7.0 (October 2025)**:
+
+- All trait definitions are centralized in `all-traits.clar`
+- Standardized error codes are defined in `errors.clar`
+- Individual trait files in subdirectories are **DEPRECATED**
 
 ## Overview
 
-The Conxian protocol uses a centralized trait system for consistency and maintainability. All trait definitions are contained in `all-traits.clar`, ensuring standardized interfaces across the entire protocol.
+The Conxian protocol uses:
 
-## Current Status ✅
+1. **Centralized Traits**: All interfaces in `all-traits.clar`
+1. **Standardized Errors**: Comprehensive error codes in `errors.clar`
+1. **Consistent Patterns**: Unified approach across all contracts
 
-- ✅ **Centralized**: All traits defined in `all-traits.clar` (718 lines, 40+ traits)
-- ✅ **No Duplicates**: Individual trait files deprecated
-- ✅ **Well Organized**: Traits categorized by functionality within `all-traits.clar`
-- ✅ **Enhanced Features**: Comprehensive trait definitions with advanced functionality
-- ⚠️ **Legacy Files**: Individual trait files in subdirectories are deprecated (for removal in future version)
+## Current Status
+
+### Traits
+
+- **Centralized**: 40+ traits in `all-traits.clar`
+- **Well Organized**: Grouped by functionality
+- **Documented**: Each trait has usage examples
+- **Legacy Files**: Individual trait files are deprecated
+
+### Error System
+
+- **Comprehensive**: 100+ error codes
+- **Categorized**: Grouped by error type
+- **Documented**: Clear usage guidelines
+
+## Error Code Ranges
+
+| Range | Category | Example Errors |
+|-------|----------|----------------|
+| 1000-1999 | General | `ERR_UNAUTHORIZED`, `ERR_INVALID_INPUT` |
+| 2000-2999 | Arithmetic | `ERR_OVERFLOW`, `ERR_UNDERFLOW` |
+| 3000-3999 | Token Ops | `ERR_TOKEN_TRANSFER_FAILED` |
+| 4000-4999 | Protocol | `ERR_EMISSION_LIMIT_EXCEEDED` |
+| 5000-5999 | Oracle | `ERR_ORACLE_STALE_PRICE` |
+| 6000-6999 | Governance | `ERR_PROPOSAL_NOT_FOUND` |
+| 7000-7999 | Access | `ERR_ROLE_REQUIRED` |
+| 8000-8999 | Validation | `ERR_INVALID_ADDRESS` |
+| 9000-9999 | System | `ERR_INTEGRATION_DISABLED` |
+| 10000+ | Advanced | `ERR_CIRCUIT_TRIPPED` |
 
 ## Trait Categories
 
@@ -100,10 +130,10 @@ The Conxian protocol uses a centralized trait system for consistency and maintai
 ### Adding New Traits
 
 1. Add new trait definitions to `all-traits.clar`
-2. Organize by category using comments
-3. Include comprehensive function signatures
-4. Add appropriate error codes
-5. Update this README
+1. Organize by category using comments
+1. Include comprehensive function signatures
+1. Add appropriate error codes
+1. Update this README
 
 ### Trait Standards
 
