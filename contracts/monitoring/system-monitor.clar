@@ -31,10 +31,10 @@
 
 ;; Alert thresholds(define-map alert-thresholds  { component: (string-ascii 32), alert-type: (string-ascii 32) }  uint)
 
-;; ========== Admin Functions ==========(define-public (set-admin (new-admin principal))  (begin    (asserts! (is-eq tx-sender (var-get admin)) ERR_NOT_AUTHORIZED)    (var-set admin new-admin)    (ok true)  ))
+;; === Admin Functions ===(define-public (set-admin (new-admin principal))  (begin    (asserts! (is-eq tx-sender (var-get admin)) ERR_NOT_AUTHORIZED)    (var-set admin new-admin)    (ok true)  ))
 (define-public (set-alert-threshold (component (string-ascii 32))                                   (alert-type (string-ascii 32))                                   (threshold uint))  (begin    (asserts! (is-eq tx-sender (var-get admin)) ERR_NOT_AUTHORIZED)    (map-set alert-thresholds {component: component, alert-type: alert-type} threshold)    (ok true)  ))
 
-;; ========== Event Logging ==========(define-public (log-event (component (string-ascii 32))                          (event-type (string-ascii 32))                          (severity uint)                          (message (string-ascii 256))                          (data (optional {})))  (let (      (event-id (var-get event-counter))      (current-block block-height)    )    
+;; === Event Logging ===(define-public (log-event (component (string-ascii 32))                          (event-type (string-ascii 32))                          (severity uint)                          (message (string-ascii 256))                          (data (optional {})))  (let (      (event-id (var-get event-counter))      (current-block block-height)    )    
 
 ;; Validate severity level    (asserts! (<= severity SEVERITY_CRITICAL) ERR_INVALID_SEVERITY)        
 
@@ -51,7 +51,7 @@
 ;; Increment event counter    (var-set event-counter (+ event-id u1))        (ok true)  ))
 (define-private (calculate-status (severity uint) (current-status uint))  (if (>= severity SEVERITY_CRITICAL)      STATUS_OUTAGE      (if (and (>= severity SEVERITY_ERROR) (not (is-eq current-status STATUS_OUTAGE)))          STATUS_ISSUE          (if (and (>= severity SEVERITY_WARNING)                   (not (is-eq current-status STATUS_ISSUE))                   (not (is-eq current-status STATUS_OUTAGE)))              STATUS_DEGRADED              current-status          )      )  ))
 
-;; ========== Read-Only Functions ==========(define-read-only (get-events (component (string-ascii 32)) (limit uint) (offset uint))  (begin    (asserts! (<= limit u100) ERR_INVALID_LIMIT)  
+;; === Read-Only Functions ===(define-read-only (get-events (component (string-ascii 32)) (limit uint) (offset uint))  (begin    (asserts! (<= limit u100) ERR_INVALID_LIMIT)  
 
 ;; Max 100 events per request        (let ((events (list)))      (let ((collected-events (list)))        (ok (unwrap-panic (as-max-len? collected-events u100)))      )    )  ))
 (define-read-only (get-event (event-id uint))  (match (map-get? events {id: event-id})    event-data (ok event-data)    (err ERR_EVENT_NOT_FOUND)  ))

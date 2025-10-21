@@ -85,18 +85,18 @@
 ;; ===== Emergency Action Execution =====(define-private (execute-emergency-action (proposal {  action-type: uint,  target: principal,  parameter: (string-ascii 64),  value: uint,  proposer: principal,  created-at: uint,  execute-after: uint,  executed: bool,  approvals: uint,  description: (string-utf8 256)}))  (let ((action-type (get action-type proposal)))    (if (is-eq action-type ACTION_PAUSE_PROTOCOL)        (pause-protocol)        (if (is-eq action-type ACTION_UNPAUSE_PROTOCOL)            (unpause-protocol)            (if (is-eq action-type ACTION_UPDATE_PARAMETER)                (update-parameter proposal)                (if (is-eq action-type ACTION_EMERGENCY_WITHDRAWAL)                    (emergency-withdraw proposal)                    (if (is-eq action-type ACTION_BLACKLIST_ADDRESS)                        (blacklist-address proposal)                        (if (is-eq action-type ACTION_UPDATE_ORACLE)                            (update-oracle proposal)                            ERR_UNAUTHORIZED))))))))
 (define-private (pause-protocol)  (begin    (var-set protocol-paused true)    (ok true)))
 (define-private (unpause-protocol)  (begin    (var-set protocol-paused false)    (ok true)))
-(define-private (update-parameter (proposal {  action-type: uint,  target: principal,  parameter: (string-ascii 64),  value: uint,  proposer: principal,  created-at: uint,  execute-after: uint,  executed: bool,  approvals: uint,  description: (string-utf8 256)}))  
-
-;; In production, call target contract to update parameter  (ok true))
-(define-private (emergency-withdraw (proposal {  action-type: uint,  target: principal,  parameter: (string-ascii 64),  value: uint,  proposer: principal,  created-at: uint,  execute-after: uint,  executed: bool,  approvals: uint,  description: (string-utf8 256)}))  
-
-;; In production, execute emergency withdrawal  (ok true))
-(define-private (blacklist-address (proposal {  action-type: uint,  target: principal,  parameter: (string-ascii 64),  value: uint,  proposer: principal,  created-at: uint,  execute-after: uint,  executed: bool,  approvals: uint,  description: (string-utf8 256)}))  
-
-;; In production, add address to blacklist  (ok true))
-(define-private (update-oracle (proposal {  action-type: uint,  target: principal,  parameter: (string-ascii 64),  value: uint,  proposer: principal,  created-at: uint,  execute-after: uint,  executed: bool,  approvals: uint,  description: (string-utf8 256)}))  
-
-;; In production, update oracle price  (ok true))
+(define-private (update-parameter (proposal { action-type: uint, target: principal, parameter: (string-ascii 64), value: uint, proposer: principal, created-at: uint, execute-after: uint, executed: bool, approvals: uint, description: (string-utf8 256)}))
+  ;; In production, call target contract to update parameter
+  (ok true))
+(define-private (emergency-withdraw (proposal { action-type: uint, target: principal, parameter: (string-ascii 64), value: uint, proposer: principal, created-at: uint, execute-after: uint, executed: bool, approvals: uint, description: (string-utf8 256)}))
+  ;; In production, execute emergency withdrawal
+  (ok true))
+(define-private (blacklist-address (proposal { action-type: uint, target: principal, parameter: (string-ascii 64), value: uint, proposer: principal, created-at: uint, execute-after: uint, executed: bool, approvals: uint, description: (string-utf8 256)}))
+  ;; In production, add address to blacklist
+  (ok true))
+(define-private (update-oracle (proposal { action-type: uint, target: principal, parameter: (string-ascii 64), value: uint, proposer: principal, created-at: uint, execute-after: uint, executed: bool, approvals: uint, description: (string-utf8 256)}))
+  ;; In production, update oracle price
+  (ok true))
 
 ;; ===== Read-Only Functions =====(define-read-only (get-proposal (proposal-id uint))  (map-get? emergency-proposals proposal-id))
 (define-read-only (has-approved (proposal-id uint) (signer principal))  (default-to false (map-get? proposal-approvals {proposal-id: proposal-id, signer: signer})))

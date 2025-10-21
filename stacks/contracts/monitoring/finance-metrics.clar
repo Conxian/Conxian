@@ -4,7 +4,7 @@
 
 ;; Errors
 (use-trait finance-metrics-trait .all-traits.finance-metrics-trait)
-(impl-trait finance-metrics-trait)
+(impl-trait .all-traits.finance-metrics-trait)
 (define-constant ERR_UNAUTHORIZED (err u900))
 (define-constant ERR_INVALID_CATEGORY (err u901))
 

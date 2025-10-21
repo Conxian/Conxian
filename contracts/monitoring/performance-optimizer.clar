@@ -5,4 +5,4 @@
 
 ;; Optimizes transaction performance and gas usage
 
-;; ===== Constants =====(use-trait performance-optimizer-trait .all-traits.performance-optimizer-trait)
+;; ===== Constants =====

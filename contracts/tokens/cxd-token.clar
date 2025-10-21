@@ -3,10 +3,10 @@
 ;; Enhanced with integration hooks for staking, revenue distribution, and system monitoring
 
 ;; --- Traits ---
-(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
-(impl-trait sip-010-ft-trait)
 
 ;; --- Errors ---
+(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
+(impl-trait sip-010-ft-trait)
 (define-constant ERR_UNAUTHORIZED u100)
 (define-constant ERR_NOT_ENOUGH_BALANCE u101)
 (define-constant ERR_SYSTEM_PAUSED u102)
@@ -58,7 +58,6 @@
 
 ;; --- System Integration Helpers ---
 ;; Import the protocol monitor trait
-(use-trait protocol-monitor .all-traits.protocol-monitor-trait)
 
 (define-private (check-system-pause)
   (if (var-get system-integration-enabled)

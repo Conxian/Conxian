@@ -37,16 +37,10 @@
 (define-data-var system-integration-enabled bool false)
 (define-data-var initialization-complete bool false)
 
-;; System status tracking(define-map component-status  uint 
-
-;; component-id  {    active: bool,    last-health-check: uint,    error-count: uint  })
+;; System status tracking(define-map component-status uint { active: bool, last-health-check: uint, error-count: uint })
 
 ;; Cross-system operation tracking(define-data-var next-operation-id uint u1)
-(define-map cross-system-operations  uint 
-
-;; operation-id  {    operation-type: uint,    initiator: principal,    components-involved: (list 10 uint),    status: uint, 
-
-;; 0=pending, 1=success, 2=failed    timestamp: uint  })
+(define-map cross-system-operations uint { operation-type: uint, initiator: principal, components-involved: (list 10 uint), status: uint, timestamp: uint })
 
 ;; --- Admin Functions ---(define-public (set-contract-owner (new-owner principal))  (begin    (asserts! (is-eq tx-sender (var-get contract-owner)) (err ERR_UNAUTHORIZED))    (var-set contract-owner new-owner)    (ok true)))
 (define-public (initialize-system)  (begin    (asserts! (is-eq tx-sender (var-get contract-owner)) (err ERR_UNAUTHORIZED))    (asserts! (not (var-get system-initialized)) (err ERR_INITIALIZATION_FAILED))        

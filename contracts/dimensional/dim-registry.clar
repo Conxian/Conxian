@@ -57,4 +57,4 @@
     (asserts! (is-some (map-get? dimension-weights {dim-id: dim-id})) (err ERR_DIMENSION_NOT_FOUND))
     (map-set dimension-weights {dim-id: dim-id} {weight: new-wt})
     (ok new-wt)))
->>>>>>> 8bce9a06227aa3d139e549a8bea28e27bd6665af
+8bce9a06227aa3d139e549a8bea28e27bd6665af

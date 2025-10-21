@@ -1,6 +1,6 @@
-;; ===========================================
+;; =
 ;; CONXIAN PROTOCOL ERROR CODES
-;; ===========================================
+;; =
 ;; Error codes are grouped by category with 1000s increments
 
 ;; --- General Errors (1000-1999) ---
@@ -79,7 +79,7 @@
 (define-constant ERR_MIGRATION_NOT_STARTED u11002)
 (define-constant ERR_INVALID_MIGRATION_TARGET u11003)
 
-;; ===========================================
+;; =
 ;; ERROR CODE RANGES:
 ;; 1000-1999: General Errors
 ;; 2000-2999: Arithmetic Errors
@@ -92,4 +92,4 @@
 ;; 9000-9999: System Integration
 ;; 10000-10999: Circuit Breaker
 ;; 11000-11999: Migration & Upgrade
-;; ===========================================
+;; =

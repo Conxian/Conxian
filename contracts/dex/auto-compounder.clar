@@ -25,16 +25,43 @@
 (define-public (set-circuit-breaker (cb principal))    (begin        (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)        (var-set circuit-breaker (some cb))        (ok true)    ))
 (define-public (deposit (token principal) (amount uint))  (begin    (try! (check-circuit-breaker))    (try! (contract-call? token transfer amount tx-sender (as-contract tx-sender)))    (let ((position (unwrap! (map-get? user-positions (tuple (user tx-sender) (token token))) (tuple (amount u0) (last-compounded block-height)))))      (map-set user-positions (tuple (user tx-sender) (token token)) (merge position (tuple (amount (+ (get amount position) amount)))))      (var-set total-deposited (+ (var-get total-deposited) amount))      (ok true)    )  ))
 (define-public (withdraw (token principal) (amount uint))  (let ((position (unwrap! (map-get? user-positions (tuple (user tx-sender) (token token))) (err ERR_NOTHING_TO_COMPOUND))))    (asserts! (>= (get amount position) amount) (err ERR_NOTHING_TO_COMPOUND))    (try! (as-contract (contract-call? token transfer amount tx-sender)))    (map-set user-positions (tuple (user tx-sender) (token token)) (merge position (tuple (amount (- (get amount position) amount)))))    (var-set total-deposited (- (var-get total-deposited) amount))    (ok true)  ))
-(define-public (auto-compound (token-a (contract-of sip-010-ft-trait)) (token-b (contract-of sip-010-ft-trait)))  (begin    (asserts! (is-none (var-get circuit-breaker)) ERR_CIRCUIT_BREAKER_ACTIVE)    (let      ((best-strategy (contract-call? (var-get yield-optimizer) find-best-strategy token-a token-b))       (current-strategy (get-strategy-for-pair token-a token-b)))      (asserts! (is-ok best-strategy) (unwrap-err best-strategy))      (asserts! (is-some current-strategy) ERR_NO_STRATEGY_FOR_PAIR)      (if (is-eq (unwrap-panic best-strategy) (unwrap-panic current-strategy))        (ok true)        (begin          
+(define-public (auto-compound (token-a (contract-of sip-010-ft-trait)) (token-b (contract-of sip-010-ft-trait)))
+  (begin
+    (asserts! (is-none (var-get circuit-breaker)) ERR_CIRCUIT_BREAKER_ACTIVE)
+    (let
+      ((best-strategy (contract-call? (var-get yield-optimizer) find-best-strategy token-a token-b))
+       (current-strategy (get-strategy-for-pair token-a token-b)))
+      (asserts! (is-ok best-strategy) (unwrap-err best-strategy))
+      (asserts! (is-some current-strategy) ERR_NO_STRATEGY_FOR_PAIR)
+      (if (is-eq (unwrap-panic best-strategy) (unwrap-panic current-strategy))
+        (ok true)
+        (begin
+          (try! (contract-call? (var-get yield-optimizer) optimize-and-rebalance token-a token-b (unwrap-panic best-strategy)))
+          (ok true))))))
 
-;; Rebalance to the best strategy          (try! (contract-call? (var-get yield-optimizer) optimize-and-rebalance token-a token-b (unwrap-panic best-strategy)))          (ok true))))))
-
-;; Aggregate compounding for a set of users(define-public (compound-all (users (list 100 principal)) (token principal))  (let ((strategy (unwrap! (map-get? strategies token) (err ERR_STRATEGY_NOT_FOUND))))    (let ((total-rewards (try! (contract-call? strategy harvest-rewards))))      (asserts! (> total-rewards u0) ERR_NOTHING_TO_COMPOUND)      (let ((fee (/ (* total-rewards (var-get compounding-fee-bps)) u10000)))        (try! (as-contract (contract-call? token transfer fee tx-sender)))        (let ((net-rewards (- total-rewards fee)))          (fold (lambda (user-principal (current-net-rewards uint))                  (let ((position (unwrap! (map-get? user-positions (tuple (user user-principal) (token token))) (err ERR_NOTHING_TO_COMPOUND))))                    (let ((user-share (/ (* (get amount position) current-net-rewards) (unwrap-panic (get-total-deployed)))))                      (map-set user-positions (tuple (user user-principal) (token token)) (tuple (amount (+ (get amount position) user-share)) (last-compounded block-height)))                      (- current-net-rewards user-share))))                users                net-rewards)          (ok true))))))
-(define-public (compound (user principal) (token (contract-of sip-010-ft-trait)))  (begin    (try! (check-circuit-breaker))    
-
-;; Delegate compounding logic to yield-optimizer    (let ((compounded-amount (try! (contract-call? (var-get yield-optimizer) compound-user-rewards user token))))      
-
-;; Log metrics      (try! (contract-call? (var-get metrics-contract) log-compounding-event user token compounded-amount))      (ok compounded-amount))))
+;; Aggregate compounding for a set of users
+(define-public (compound-all (users (list 100 principal)) (token principal))
+  (let ((strategy (unwrap! (map-get? strategies token) (err ERR_STRATEGY_NOT_FOUND))))
+    (let ((total-rewards (try! (contract-call? strategy harvest-rewards))))
+      (asserts! (> total-rewards u0) ERR_NOTHING_TO_COMPOUND)
+      (let ((fee (/ (* total-rewards (var-get compounding-fee-bps)) u10000)))
+        (try! (as-contract (contract-call? token transfer fee tx-sender)))
+        (let ((net-rewards (- total-rewards fee)))
+          (fold
+            (lambda (user-principal (current-net-rewards uint))
+              (let ((position (unwrap! (map-get? user-positions (tuple (user user-principal) (token token))) (err ERR_NOTHING_TO_COMPOUND))))
+                (let ((user-share (/ (* (get amount position) current-net-rewards) (unwrap-panic (get-total-deployed)))))
+                  (map-set user-positions (tuple (user user-principal) (token token)) (tuple (amount (+ (get amount position) user-share)) (last-compounded block-height)))
+                  (- current-net-rewards user-share))))
+            users
+            net-rewards)
+          (ok true))))))
+(define-public (compound (user principal) (token (contract-of sip-010-ft-trait)))
+  (begin
+    (try! (check-circuit-breaker))
+    (let ((compounded-amount (try! (contract-call? (var-get yield-optimizer) compound-user-rewards user token))))
+      (try! (contract-call? (var-get metrics-contract) log-compounding-event user token compounded-amount))
+      (ok compounded-amount))))
 
 ;; Remove duplicate conflicting definition of compound-all with traited token(define-read-only (get-position (user principal) (token principal))  (map-get? user-positions (tuple (user user) (token token))))
 (define-public (set-yield-optimizer-contract (optimizer (contract-of yield-optimizer-trait)))  (begin    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)    (var-set yield-optimizer optimizer)    (ok true)))

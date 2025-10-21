@@ -6,11 +6,11 @@
 
 ;; Provides enterprise bond structuring, sBTC yield distribution, and risk management(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
 
-;; =============================================================================
+;; 
 
 ;; CONSTANTS AND ERROR CODES
 
-;; =============================================================================(define-constant CONTRACT_OWNER tx-sender)
+;; (define-constant CONTRACT_OWNER tx-sender)
 (define-constant ERR_NOT_AUTHORIZED (err u5000))
 (define-constant ERR_INVALID_BOND_TERMS (err u5001))
 (define-constant ERR_INSUFFICIENT_COLLATERAL (err u5002))
@@ -44,11 +44,11 @@
 
 ;; 6 decimal precision
 
-;; =============================================================================
+;; 
 
 ;; DATA STRUCTURES
 
-;; =============================================================================(define-map sbtc-bonds  { bond-id: uint }  {    issuer: principal,         
+;; (define-map sbtc-bonds  { bond-id: uint }  {    issuer: principal,         
 
 ;; Bond issuer    principal-amount: uint,    
 
@@ -115,11 +115,11 @@
 (define-data-var total-sbtc-bonds uint u0)
 (define-data-var total-yield-distributed uint u0)
 
-;; =============================================================================
+;; 
 
 ;; BOND ISSUANCE
 
-;; =============================================================================(define-public (issue-sbtc-backed-bond   (principal-amount uint)  (coupon-rate uint)  (maturity-blocks uint)  (collateral-amount uint)  (is-callable bool)  (call-premium uint))  "Issue new sBTC-backed bond"  (let ((bond-id (var-get next-bond-id)))    (begin      
+;; (define-public (issue-sbtc-backed-bond   (principal-amount uint)  (coupon-rate uint)  (maturity-blocks uint)  (collateral-amount uint)  (is-callable bool)  (call-premium uint))  "Issue new sBTC-backed bond"  (let ((bond-id (var-get next-bond-id)))    (begin      
 
 ;; Validate bond terms      (asserts! (>= principal-amount MIN_BOND_AMOUNT) ERR_INVALID_BOND_TERMS)      (asserts! (<= principal-amount MAX_BOND_AMOUNT) ERR_INVALID_BOND_TERMS)      (asserts! (>= maturity-blocks MIN_MATURITY_BLOCKS) ERR_INVALID_BOND_TERMS)      (asserts! (<= maturity-blocks MAX_MATURITY_BLOCKS) ERR_INVALID_BOND_TERMS)      (asserts! (<= coupon-rate MAX_YIELD_RATE) ERR_INVALID_BOND_TERMS)            
 
@@ -138,11 +138,11 @@
 
 ;; Record bond holding        (let ((existing-holding (default-to                                  { amount-held: u0, purchase-block: u0, purchase-price: u0, accrued-interest: u0, last-interest-claim: u0 }                                 (map-get? bond-holders { bond-id: bond-id, holder: tx-sender }))))          (map-set bond-holders             { bond-id: bond-id, holder: tx-sender }            {              amount-held: (+ (get amount-held existing-holding) amount),              purchase-block: block-height,              purchase-price: (+ (get purchase-price existing-holding) purchase-price),              accrued-interest: (get accrued-interest existing-holding),              last-interest-claim: (max (get last-interest-claim existing-holding) block-height)            }          )        )                (print { event: "bond-purchased", bond-id: bond-id, buyer: tx-sender, amount: amount })        (ok true)      )    )    ERR_BOND_NOT_FOUND  ))
 
-;; =============================================================================
+;; 
 
 ;; YIELD DISTRIBUTION POOLS
 
-;; =============================================================================(define-public (create-yield-pool (initial-sbtc-amount uint))  "Create new yield distribution pool"  (let ((pool-id (var-get next-pool-id)))    (begin      (asserts! (> initial-sbtc-amount u0) ERR_INVALID_YIELD_DISTRIBUTION)            
+;; (define-public (create-yield-pool (initial-sbtc-amount uint))  "Create new yield distribution pool"  (let ((pool-id (var-get next-pool-id)))    (begin      (asserts! (> initial-sbtc-amount u0) ERR_INVALID_YIELD_DISTRIBUTION)            
 
 ;; Transfer sBTC to contract for yield generation      (try! (contract-call? .sbtc-token transfer initial-sbtc-amount tx-sender (as-contract tx-sender) none))            
 
@@ -175,11 +175,11 @@
 
 ;; For now, well mark the yield as available for claiming  (begin    (print { event: "yield-available-for-claim", pool-id: pool-id, amount: total-yield })    (ok true)  ))
 
-;; =============================================================================
+;; 
 
 ;; BOND SERVICING AND REDEMPTION
 
-;; =============================================================================(define-public (claim-bond-interest (bond-id uint))  "Claim accrued interest on bond holdings"  (match (map-get? bond-holders { bond-id: bond-id, holder: tx-sender })    holding (match (map-get? sbtc-bonds { bond-id: bond-id })      bond (let ((blocks-since-claim (- block-height (get last-interest-claim holding)))                 (annual-blocks u52560)                 (interest-amount (/ (* (get amount-held holding) (get coupon-rate bond) blocks-since-claim) (* annual-blocks u1000000))))                
+;; (define-public (claim-bond-interest (bond-id uint))  "Claim accrued interest on bond holdings"  (match (map-get? bond-holders { bond-id: bond-id, holder: tx-sender })    holding (match (map-get? sbtc-bonds { bond-id: bond-id })      bond (let ((blocks-since-claim (- block-height (get last-interest-claim holding)))                 (annual-blocks u52560)                 (interest-amount (/ (* (get amount-held holding) (get coupon-rate bond) blocks-since-claim) (* annual-blocks u1000000))))                
 
 ;; Transfer interest to bond holder        (try! (as-contract (contract-call? .sbtc-token transfer interest-amount tx-sender tx-sender none)))                
 
@@ -203,11 +203,11 @@
 
 ;; In full implementation, would process all bond holders        (print { event: "bond-called", bond-id: bond-id, call-price: call-price })        (ok call-price)      )    )    ERR_BOND_NOT_FOUND  ))
 
-;; =============================================================================
+;; 
 
 ;; RISK MANAGEMENT
 
-;; =============================================================================(define-public (check-bond-collateralization (bond-id uint))  "Check and update bond collateralization ratio"  (match (map-get? sbtc-bonds { bond-id: bond-id })    bond (match (contract-call? .sbtc-integration get-sbtc-price)      sbtc-price (let ((current-collateral-value (* (get collateral-amount bond) sbtc-price))                       (current-ratio (/ (* current-collateral-value u1000000) (get principal-amount bond))))                
+;; (define-public (check-bond-collateralization (bond-id uint))  "Check and update bond collateralization ratio"  (match (map-get? sbtc-bonds { bond-id: bond-id })    bond (match (contract-call? .sbtc-integration get-sbtc-price)      sbtc-price (let ((current-collateral-value (* (get collateral-amount bond) sbtc-price))                       (current-ratio (/ (* current-collateral-value u1000000) (get principal-amount bond))))                
 
 ;; Update collateral ratio        (map-set sbtc-bonds           { bond-id: bond-id }          (merge bond { collateral-ratio: current-ratio })        )                
 
@@ -235,11 +235,11 @@
     )
   ))
 
-;; =============================================================================
+;; 
 
 ;; ENTERPRISE LOAN INTEGRATION
 
-;; =============================================================================(define-public (create-enterprise-loan-bond (loan-id uint) (bond-structure (list 10 { amount: uint, coupon: uint, maturity: uint })))  "Create multiple bonds to back enterprise loan"  (begin    (asserts! (is-eq tx-sender CONTRACT_OWNER) ERR_NOT_AUTHORIZED) 
+;; (define-public (create-enterprise-loan-bond (loan-id uint) (bond-structure (list 10 { amount: uint, coupon: uint, maturity: uint })))  "Create multiple bonds to back enterprise loan"  (begin    (asserts! (is-eq tx-sender CONTRACT_OWNER) ERR_NOT_AUTHORIZED) 
 
 ;; Or loan manager        
 
@@ -255,17 +255,22 @@
 ;; Simplified implementation - would iterate and create each bond  (list (var-get next-bond-id)))
 (define-private (sum-bond-amounts (bond-spec { amount: uint, coupon: uint, maturity: uint }) (acc uint))  "Sum bond amounts"  (+ acc (get amount bond-spec)))
 
-;; =============================================================================
+;; 
 
 ;; READ-ONLY FUNCTIONS
 
-;; =============================================================================(define-read-only (get-bond-details (bond-id uint))  "Get comprehensive bond details"  (match (map-get? sbtc-bonds { bond-id: bond-id })    bond (ok bond)    (err ERR_BOND_NOT_FOUND)  ))
+;; (define-read-only (get-bond-details (bond-id uint))  "Get comprehensive bond details"  (match (map-get? sbtc-bonds { bond-id: bond-id })    bond (ok bond)    (err ERR_BOND_NOT_FOUND)  ))
 (define-read-only (get-bond-holding (bond-id uint) (holder principal))  "Get bond holding details"  (map-get? bond-holders { bond-id: bond-id, holder: holder }))
 (define-read-only (get-yield-pool-info (pool-id uint))  "Get yield pool information"  (map-get? yield-distribution-pools { pool-id: pool-id }))
 (define-read-only (get-bond-yield-allocation (bond-id uint) (pool-id uint))  "Get bond yield allocation details"  (map-get? bond-yield-allocations { bond-id: bond-id, pool-id: pool-id }))
-(define-read-only (calculate-bond-value (bond-id uint))  "Calculate current bond market value"  (match (map-get? sbtc-bonds { bond-id: bond-id })    bond (let ((remaining-blocks (if (> (get maturity-block bond) block-height)                                   (- (get maturity-block bond) block-height)                                   u0)))      
-
-;; Simplified present value calculation      (ok (/ (* (get principal-amount bond) u950000) u1000000)) 
-
-;; 5% discount    )    (err ERR_BOND_NOT_FOUND)  ))
+(define-read-only (calculate-bond-value (bond-id uint))  "Calculate current bond market value"  (match (map-get? sbtc-bonds { bond-id: bond-id })
+    bond (let ((remaining-blocks (if (> (get maturity-block bond) block-height)
+                                   (- (get maturity-block bond) block-height)
+                                   u0)))
+      
+      ;; Simplified present value calculation
+      (ok (/ (* (get principal-amount bond) u950000) u1000000)) ;; 5% discount
+    )
+    (err ERR_BOND_NOT_FOUND)
+  ))
 (define-read-only (get-global-bond-stats)  "Get global bond statistics"  {    total-bonds-issued: (- (var-get next-bond-id) u1),    total-bond-value: (var-get total-sbtc-bonds),    total-yield-distributed: (var-get total-yield-distributed),    active-yield-pools: (- (var-get next-pool-id) u1)  })

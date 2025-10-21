@@ -24,9 +24,10 @@
 (define-data-var total-batches-processed uint u0)
 (define-data-var total-gas-saved uint u0)
 
-;; ===== Batch Storage =====(define-map liquidation-batch (list 100 {  user: principal,  debt-asset: principal,  collateral-asset: principal,  debt-amount: uint}))
-(define-map fee-distribution-batch (list 100 {  recipient: principal,  token: principal,  amount: uint}))
-(define-map transfer-batch (list 100 {  from: principal,  to: principal,  token: principal,  amount: uint}))
+;; ===== Batch Storage =====
+(define-map liquidation-batch (list 100 { user: principal, debt-asset: principal, collateral-asset: principal, debt-amount: uint }) uint)
+(define-map fee-distribution-batch (list 100 { recipient: principal, token: principal, amount: uint }) uint)
+(define-map transfer-batch (list 100 { from: principal, to: principal, token: principal, amount: uint }) uint)
 
 ;; ===== Authorization =====(define-private (check-is-owner)  (ok (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)))
 (define-private (check-is-processor)  (ok (asserts! (or (is-eq tx-sender (var-get contract-owner))                    (is-eq tx-sender (var-get batch-processor)))                ERR_UNAUTHORIZED)))
@@ -56,26 +57,50 @@
       total-value: (get total-liquidated results)
     }))
   ))
-(define-private (process-single-liquidation   (position {user: principal, debt-asset: principal, collateral-asset: principal, debt-amount: uint})  (state {success: uint, failed: uint, total-liquidated: uint}))  
-
-;; In production, call actual liquidation contract  
-
-;; For now, track state  {    success: (+ (get success state) u1),    failed: (get failed state),    total-liquidated: (+ (get total-liquidated state) (get debt-amount position))  })
+(define-private (process-single-liquidation
+  (position {user: principal, debt-asset: principal, collateral-asset: principal, debt-amount: uint})
+  (state {success: uint, failed: uint, total-liquidated: uint}))
+  {
+    success: (+ (get success state) u1),
+    failed: (get failed state),
+    total-liquidated: (+ (get total-liquidated state) (get debt-amount position))
+  })
 
 ;; Process batch fee distributions(define-public (batch-distribute-fees (distributions (list 100 {  recipient: principal,  token: principal,  amount: uint})))  (begin    (try! (check-is-processor))    (asserts! (>= (len distributions) MIN_BATCH_SIZE) ERR_INVALID_BATCH)    (asserts! (<= (len distributions) MAX_BATCH_SIZE) ERR_BATCH_FULL)        (let ((results (fold process-single-distribution distributions {      success: u0,      failed: u0,      total-distributed: u0    })))            (var-set total-batches-processed (+ (var-get total-batches-processed) u1))            (ok {        batch-size: (len distributions),        successful: (get success results),        failed: (get failed results),        total-amount: (get total-distributed results)      }))))
 (define-private (process-single-distribution  (dist {recipient: principal, token: principal, amount: uint})  (state {success: uint, failed: uint, total-distributed: uint}))  {    success: (+ (get success state) u1),    failed: (get failed state),    total-distributed: (+ (get total-distributed state) (get amount dist))  })
 
-;; Process batch token transfers(define-public (batch-transfer (transfers (list 100 {  from: principal,  to: principal,  token: principal,  amount: uint})))  (begin    (try! (check-is-processor))    (asserts! (>= (len transfers) MIN_BATCH_SIZE) ERR_INVALID_BATCH)    (asserts! (<= (len transfers) MAX_BATCH_SIZE) ERR_BATCH_FULL)        (let ((results (fold process-single-transfer transfers {      success: u0,      failed: u0    })))            (ok {        batch-size: (len transfers),        successful: (get success results),        failed: (get failed results)      }))))
+;; Process batch token transfers
+(define-public (batch-transfer (transfers (list 100 {  from: principal,  to: principal,  token: principal,  amount: uint})))  (begin    (try! (check-is-processor))    (asserts! (>= (len transfers) MIN_BATCH_SIZE) ERR_INVALID_BATCH)    (asserts! (<= (len transfers) MAX_BATCH_SIZE) ERR_BATCH_FULL)        (let ((results (fold process-single-transfer transfers {      success: u0,      failed: u0    })))            (ok {        batch-size: (len transfers),        successful: (get success results),        failed: (get failed results)      }))  ))
 (define-private (process-single-transfer  (transfer {from: principal, to: principal, token: principal, amount: uint})  (state {success: uint, failed: uint}))  {    success: (+ (get success state) u1),    failed: (get failed state)  })
 
-;; Process batch multi-hop swaps(define-public (batch-swap (swaps (list 50 {  input-token: principal,  output-token: principal,  amount-in: uint,  min-amount-out: uint,  path: (list 5 principal)})))  (begin    (try! (check-is-processor))    (asserts! (>= (len swaps) MIN_BATCH_SIZE) ERR_INVALID_BATCH)    (asserts! (<= (len swaps) u50) ERR_BATCH_FULL) 
+;; Process batch multi-hop swaps
+(define-public (batch-swap (swaps (list 50 {  input-token: principal,  output-token: principal,  amount-in: uint,  min-amount-out: uint,  path: (list 5 principal)})))
+  (begin
+    (try! (check-is-processor))
+    (asserts! (>= (len swaps) MIN_BATCH_SIZE) ERR_INVALID_BATCH)
+    (asserts! (<= (len swaps) u50) ERR_BATCH_FULL)
 
-;; Lower limit for swaps        (let ((results (fold process-single-swap swaps {      success: u0,      failed: u0,      total-volume: u0    })))            (ok {        batch-size: (len swaps),        successful: (get success results),        total-volume: (get total-volume results)      }))))
+    ;; Lower limit for swaps
+    (let ((results (fold process-single-swap swaps {
+      success: u0,
+      failed: u0,
+      total-volume: u0
+    })))
+      (ok {
+        batch-size: (len swaps),
+        successful: (get success results),
+        total-volume: (get total-volume results)
+      })
+    )
+  )
+)
 (define-private (process-single-swap  (swap {input-token: principal, output-token: principal, amount-in: uint, min-amount-out: uint, path: (list 5 principal)})  (state {success: uint, failed: uint, total-volume: uint}))  {    success: (+ (get success state) u1),    failed: (get failed state),    total-volume: (+ (get total-volume state) (get amount-in swap))  })
 
-;; ===== Admin Functions =====(define-public (set-batch-processor (processor principal))  (begin    (try! (check-is-owner))    (var-set batch-processor processor)    (ok true)))
+;; ===== Admin Functions =====
+(define-public (set-batch-processor (processor principal))  (begin    (try! (check-is-owner))    (var-set batch-processor processor)    (ok true)))
 
-;; ===== Read-Only Functions =====(define-read-only (get-batch-stats)  {    total-batches: (var-get total-batches-processed),    total-gas-saved: (var-get total-gas-saved),    estimated-cost-reduction: (if (> (var-get total-batches-processed) u0)                                   (/ (* (var-get total-gas-saved) u100)                                      (var-get total-batches-processed))                                   u0)  })
+;; ===== Read-Only Functions =====
+(define-read-only (get-batch-stats)  {    total-batches: (var-get total-batches-processed),    total-gas-saved: (var-get total-gas-saved),    estimated-cost-reduction: (if (> (var-get total-batches-processed) u0)                                   (/ (* (var-get total-gas-saved) u100)                                      (var-get total-batches-processed))                                   u0)  })
 (define-read-only (get-max-batch-size)  MAX_BATCH_SIZE)
 (define-read-only (get-min-batch-size)  MIN_BATCH_SIZE)
 (define-read-only (estimate-gas-savings (batch-size uint))  (* batch-size u5000)) 

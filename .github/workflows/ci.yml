@@ -15,6 +15,9 @@ jobs:
   test:
     name: Test
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        test-type: [unit, integration, security, load, invariant]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -22,23 +25,60 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
           cache-dependency-path: package-lock.json
-      - name: Install deps
-        run: npm ci --no-audit --no-fund
+      - name: Install Dependencies
+        run: |
+          npm ci --no-audit --no-fund
+          pip install -r requirements-dev.txt
       - name: Install Clarinet
         run: |
           curl -L https://github.com/hirosystems/clarinet/releases/download/v${{ env.CLARINET_VERSION }}/clarinet-linux-x64-glibc.tar.gz | tar xz
           sudo mv clarinet /usr/local/bin/clarinet
           chmod +x /usr/local/bin/clarinet
-      - name: Verify Clarinet Installation
-        run: clarinet --version
+      - name: Verify Installation
+        run: |
+          node --version
+          npm --version
+          clarinet --version
+          python --version
+      - name: Lint and Format
+        run: |
+          npm run lint
+          npm run format:check
       - name: Contract Compilation
         run: npm run clarinet:check
-      - name: Docs and Naming Guard
-        run: npm run validate:docs
-      - name: Validate trait implementations
+      - name: Validate Trait Implementations
         run: python scripts/validate-trait-implementation.py
-      - name: Run Tests
-        run: npm test
+      - name: Run ${{ matrix.test-type }} Tests
+        run: |
+          case ${{ matrix.test-type }} in
+            unit)
+              npm test -- --testPathPattern="\.(test|spec)\.ts" --testPathIgnorePatterns="(integration|security|load|invariant)"
+              ;;
+            integration)
+              npm test -- --testPathPattern="integration"
+              ;;
+            security)
+              npm test -- --testPathPattern="security"
+              npm run test:security
+              ;;
+            load)
+              npm test -- --testPathPattern="load" --testTimeout=120000
+              ;;
+            invariant)
+              npm test -- --testPathPattern="invariant"
+              ;;
+          esac
+        env:
+          NODE_OPTIONS: --max_old_space_size=4096
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ matrix.test-type }}
+          path: |
+            test-results/
+            coverage/
+          retention-days: 7
 
   build:
     name: Build

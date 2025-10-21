@@ -1,11 +1,11 @@
-(use-trait cxlp-migration-queue .all-traits.cxlp-migration-queue-trait)
+(use-trait cxlp-migration-queue-trait .all-traits.cxlp-migration-queue-trait)
 ;; Traits
 ;; cxlp-migration-queue.clar
 ;; Intent queue system for CXLP to CXD migration with pro-rata settlement
 ;; Prevents FCFS races and enables fair distribution based on duration-weighted requests
 
 (use-trait ft-mintable .all-traits.sip-010-ft-mintable-trait)
-(impl-trait cxlp-migration-queue)
+(impl-trait cxlp-migration-queue-trait)
 
 ;; --- Constants ---
 (define-constant CONTRACT_OWNER tx-sender)
@@ -299,4 +299,4 @@
 
 
 
->>>>>>> 8bce9a06227aa3d139e549a8bea28e27bd6665af
+8bce9a06227aa3d139e549a8bea28e27bd6665af

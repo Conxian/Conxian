@@ -26,10 +26,32 @@
 
 ;; 50% quorum (50 * 100)
 
-;; Public Functions(define-public (create-proposal (details (string-ascii 256)))  (begin    (let (      (proposal-id (var-get next-proposal-id))      (start-block block-height)      (end-block (+ block-height (var-get voting-period-blocks)))    )      (map-set proposals { proposal-id: proposal-id } {        proposer: tx-sender,        start-block: start-block,        end-block: end-block,        votes-for: u0,        votes-against: u0,        executed: false,        details: details      })      (var-set next-proposal-id (+ proposal-id u1))      (print { event: "proposal-created", proposal-id: proposal-id, proposer: tx-sender, start-block: start-block, end-block: end-block })      (ok proposal-id)    )  ))
-(define-public (vote (proposal-id uint) (support bool) (amount uint))  (begin    (let ((proposal (map-get? proposals { proposal-id: proposal-id })))      (asserts! (is-some proposal) ERR_PROPOSAL_NOT_FOUND)      (asserts! (not (get executed (unwrap-panic proposal))) ERR_VOTING_CLOSED)      (asserts! (and (>= block-height (get start-block (unwrap-panic proposal))) (<= block-height (get end-block (unwrap-panic proposal)))) ERR_VOTING_CLOSED)      (asserts! (is-none (map-get? votes { proposal-id: proposal-id, voter: tx-sender })) ERR_ALREADY_VOTED)      
+;; Public Functions
+(define-public (create-proposal (details (string-ascii 256)))  (begin    (let (      (proposal-id (var-get next-proposal-id))      (start-block block-height)      (end-block (+ block-height (var-get voting-period-blocks)))    )      (map-set proposals { proposal-id: proposal-id } {        proposer: tx-sender,        start-block: start-block,        end-block: end-block,        votes-for: u0,        votes-against: u0,        executed: false,        details: details      })      (var-set next-proposal-id (+ proposal-id u1))      (print { event: "proposal-created", proposal-id: proposal-id, proposer: tx-sender, start-block: start-block, end-block: end-block })      (ok proposal-id)    )  ))
+(define-public (vote (proposal-id uint) (support bool) (amount uint))
+  (begin
+    (let ((proposal (map-get? proposals { proposal-id: proposal-id })))
+      (asserts! (is-some proposal) ERR_PROPOSAL_NOT_FOUND)
+      (asserts! (not (get executed (unwrap-panic proposal))) ERR_VOTING_CLOSED)
+      (asserts! (and (>= block-height (get start-block (unwrap-panic proposal)))
+                     (<= block-height (get end-block (unwrap-panic proposal)))) ERR_VOTING_CLOSED)
+      (asserts! (is-none (map-get? votes { proposal-id: proposal-id, voter: tx-sender })) ERR_ALREADY_VOTED)
 
-;; Transfer governance tokens to the contract for voting      (try! (contract-call? .governance-token transfer amount tx-sender (as-contract tx-sender) none))      (map-set votes { proposal-id: proposal-id, voter: tx-sender } { amount: amount, support: support })      (if support        (map-set proposals { proposal-id: proposal-id } (merge (unwrap-panic proposal) { votes-for: (+ (get votes-for (unwrap-panic proposal)) amount) }))        (map-set proposals { proposal-id: proposal-id } (merge (unwrap-panic proposal) { votes-against: (+ (get votes-against (unwrap-panic proposal)) amount) }))      )      (print { event: "vote-cast", proposal-id: proposal-id, voter: tx-sender, support: support, amount: amount })      (ok true)    )  ))
+      (try! (contract-call? .governance-token transfer amount tx-sender (as-contract tx-sender) none))
+      (map-set votes { proposal-id: proposal-id, voter: tx-sender } { amount: amount, support: support })
+
+      (if support
+        (map-set proposals { proposal-id: proposal-id }
+          (merge (unwrap-panic proposal) {
+            votes-for: (+ (get votes-for (unwrap-panic proposal)) amount)
+          }))
+        (map-set proposals { proposal-id: proposal-id }
+          (merge (unwrap-panic proposal) {
+            votes-against: (+ (get votes-against (unwrap-panic proposal)) amount)
+          })))
+
+      (print { event: "vote-cast", proposal-id: proposal-id, voter: tx-sender, support: support, amount: amount })
+      (ok true))))
 (define-public (execute-proposal (proposal-id uint))  (begin    (let ((proposal (map-get? proposals { proposal-id: proposal-id })))      (asserts! (is-some proposal) ERR_PROPOSAL_NOT_FOUND)      (asserts! (not (get executed (unwrap-panic proposal))) ERR_PROPOSAL_ALREADY_ACTIVE)      (asserts! (> block-height (get end-block (unwrap-panic proposal))) ERR_PROPOSAL_NOT_ACTIVE)      (let (        (total-votes (+ (get votes-for (unwrap-panic proposal)) (get votes-against (unwrap-panic proposal))))        (governance-token-supply (unwrap-panic (contract-call? .governance-token get-total-supply)))        (quorum-reached (>= (* total-votes u10000) (* governance-token-supply (var-get quorum-percentage))))        (proposal-passed (> (get votes-for (unwrap-panic proposal)) (get votes-against (unwrap-panic proposal))))      )        (asserts! quorum-reached ERR_QUORUM_NOT_REACHED)        (asserts! proposal-passed ERR_PROPOSAL_FAILED)        
 
 ;; Placeholder for actual proposal execution logic        

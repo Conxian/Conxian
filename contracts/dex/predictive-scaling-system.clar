@@ -61,24 +61,79 @@
 
 ;; 5-minute windows    (utilization (if (> capacity-limit u0)                    (/ (* current-usage u100) capacity-limit)                    u0))    (trend (if (> predicted-usage current-usage) SCALE_UP             (if (< predicted-usage current-usage) SCALE_DOWN SCALE_MAINTAIN)))  )    (map-set resource-metrics      { resource-type: resource-type, time-window: time-window }      {        current-usage: current-usage,        predicted-usage: predicted-usage,        capacity-limit: capacity-limit,        utilization-percentage: utilization,        trend-direction: trend      }    )    (ok true)  ))
 
-;; === PREDICTION ENGINE ===(define-public (generate-scaling-prediction (prediction-id (string-ascii 64)) (horizon uint))  (let (    (current-time (unwrap-panic (get-block-info? time (- block-height u1))))    
+;; === PREDICTION ENGINE ===
 
-;; Simplified prediction logic - in reality this would use ML models    (predicted-tps (+ u1000 (* (/ horizon u300) u100))) 
+(define-public (generate-scaling-prediction (prediction-id (string-ascii 64)) (horizon uint))
+  (let (
+    (current-time (unwrap-panic (get-block-info? time (- block-height u1))))
+    
+
+    ;; Simplified prediction logic - in reality this would use ML models
+    (predicted-tps (+ u1000 (* (/ horizon u300) u100)))
+    
 
 ;; Simple linear prediction    (confidence (if (>= horizon HORIZON_LONG) CONFIDENCE_HIGH                  (if (>= horizon HORIZON_MEDIUM) CONFIDENCE_MEDIUM CONFIDENCE_LOW)))    (scaling-rec (if (> predicted-tps u2000) SCALE_UP                   (if (< predicted-tps u500) SCALE_DOWN SCALE_MAINTAIN)))    (target-cap (+ predicted-tps (* predicted-tps u20 (/ u100)))) 
 
-;; 20% buffer  )    (if (var-get prediction-enabled)      (begin        (map-set scaling-predictions          { prediction-id: prediction-id }          {            predicted-tps: predicted-tps,            confidence-level: confidence,            scaling-recommendation: scaling-rec,            target-capacity: target-cap,            prediction-horizon: horizon,            created-at: current-time,            expires-at: (+ current-time horizon),            accuracy-score: u0 
+    ;; 20% buffer
+    )
+    
+    (if (var-get prediction-enabled)
+      (begin
+        (map-set scaling-predictions
+          { prediction-id: prediction-id }
+          {
+            predicted-tps: predicted-tps,
+            confidence-level: confidence,
+            scaling-recommendation: scaling-rec,
+            target-capacity: target-cap,
+            prediction-horizon: horizon,
+            created-at: current-time,
+            expires-at: (+ current-time horizon),
+            accuracy-score: u0
+          }
+        )
+        (var-set total-predictions (+ (var-get total-predictions) u1))
+        (ok scaling-rec)
+      )
+      (ok SCALE_MAINTAIN)
+    )
+  )
+)
 
 ;; Will be updated after validation          }        )        (var-set total-predictions (+ (var-get total-predictions) u1))        (ok scaling-rec)      )      (ok SCALE_MAINTAIN)    )  ))
-(define-public (validate-prediction-accuracy (prediction-id (string-ascii 64)) (actual-tps uint))  (let (    (prediction (unwrap! (map-get? scaling-predictions { prediction-id: prediction-id }) ERR_PREDICTION_NOT_FOUND))    (predicted-tps (get predicted-tps prediction))    (accuracy (if (> predicted-tps actual-tps)                (- u100 (/ (* (- predicted-tps actual-tps) u100) predicted-tps))                (- u100 (/ (* (- actual-tps predicted-tps) u100) actual-tps))))  )    
-
-;; Update prediction with accuracy score    (map-set scaling-predictions      { prediction-id: prediction-id }      (merge prediction { accuracy-score: accuracy })    )        
-
-;; Update global accuracy metrics    (if (>= accuracy u80) 
-
-;; Consider 80%+ as successful      (var-set successful-predictions (+ (var-get successful-predictions) u1))      true    )        
-
-;; Update overall accuracy score    (let (      (total (var-get total-predictions))      (successful (var-get successful-predictions))    )      (if (> total u0)        (var-set prediction-accuracy-score (/ (* successful u100) total))        (var-set prediction-accuracy-score u0)      )    )    (ok accuracy)  ))
+(define-public (validate-prediction-accuracy (prediction-id (string-ascii 64)) (actual-tps uint))
+  (let (
+    (prediction (unwrap! (map-get? scaling-predictions { prediction-id: prediction-id }) ERR_PREDICTION_NOT_FOUND))
+    (predicted-tps (get predicted-tps prediction))
+    (accuracy (if (> predicted-tps actual-tps)
+                (- u100 (/ (* (- predicted-tps actual-tps) u100) predicted-tps))
+                (- u100 (/ (* (- actual-tps predicted-tps) u100) actual-tps))))
+  )
+    
+    ;; Update prediction with accuracy score
+    (map-set scaling-predictions
+      { prediction-id: prediction-id }
+      (merge prediction { accuracy-score: accuracy })
+    )
+        
+    ;; Update global accuracy metrics
+    (if (>= accuracy u80) ;; Consider 80%+ as successful
+      (var-set successful-predictions (+ (var-get successful-predictions) u1))
+      true
+    )
+        
+    ;; Update overall accuracy score
+    (let (
+      (total (var-get total-predictions))
+      (successful (var-get successful-predictions))
+    )
+      (if (> total u0)
+        (var-set prediction-accuracy-score (/ (* successful u100) total))
+        (var-set prediction-accuracy-score u0)
+      )
+    )
+    (ok accuracy)
+  ))
 
 ;; === SCALING ACTIONS ===(define-public (execute-scaling-action (prediction-id (string-ascii 64)) (current-capacity uint))  (begin    (try! (only-owner-guard))    (let (      (prediction (unwrap! (map-get? scaling-predictions { prediction-id: prediction-id }) ERR_PREDICTION_NOT_FOUND))      (action-id (var-get total-scaling-actions))      (current-time (unwrap-panic (get-block-info? time (- block-height u1))))    )      (asserts! (>= (get confidence-level prediction) (var-get min-confidence-threshold)) ERR_INSUFFICIENT_DATA)            (map-set scaling-actions        { action-id: action-id }        {          triggered-by-prediction: prediction-id,          scaling-decision: (get scaling-recommendation prediction),          previous-capacity: current-capacity,          new-capacity: (get target-capacity prediction),          execution-time: current-time,          effectiveness-score: u0 
 
