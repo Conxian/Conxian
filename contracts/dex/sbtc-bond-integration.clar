@@ -263,9 +263,14 @@
 (define-read-only (get-bond-holding (bond-id uint) (holder principal))  "Get bond holding details"  (map-get? bond-holders { bond-id: bond-id, holder: holder }))
 (define-read-only (get-yield-pool-info (pool-id uint))  "Get yield pool information"  (map-get? yield-distribution-pools { pool-id: pool-id }))
 (define-read-only (get-bond-yield-allocation (bond-id uint) (pool-id uint))  "Get bond yield allocation details"  (map-get? bond-yield-allocations { bond-id: bond-id, pool-id: pool-id }))
-(define-read-only (calculate-bond-value (bond-id uint))  "Calculate current bond market value"  (match (map-get? sbtc-bonds { bond-id: bond-id })    bond (let ((remaining-blocks (if (> (get maturity-block bond) block-height)                                   (- (get maturity-block bond) block-height)                                   u0)))      
-
-;; Simplified present value calculation      (ok (/ (* (get principal-amount bond) u950000) u1000000)) 
-
-;; 5% discount    )    (err ERR_BOND_NOT_FOUND)  ))
+(define-read-only (calculate-bond-value (bond-id uint))  "Calculate current bond market value"  (match (map-get? sbtc-bonds { bond-id: bond-id })
+    bond (let ((remaining-blocks (if (> (get maturity-block bond) block-height)
+                                   (- (get maturity-block bond) block-height)
+                                   u0)))
+      
+      ;; Simplified present value calculation
+      (ok (/ (* (get principal-amount bond) u950000) u1000000)) ;; 5% discount
+    )
+    (err ERR_BOND_NOT_FOUND)
+  ))
 (define-read-only (get-global-bond-stats)  "Get global bond statistics"  {    total-bonds-issued: (- (var-get next-bond-id) u1),    total-bond-value: (var-get total-sbtc-bonds),    total-yield-distributed: (var-get total-yield-distributed),    active-yield-pools: (- (var-get next-pool-id) u1)  })

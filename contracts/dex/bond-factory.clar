@@ -1,8 +1,8 @@
-(use-trait bond-factory .all-traits.bond-factory-trait)
+(use-trait bond-factory-trait .all-traits.bond-factory-trait)
 ;; bond-factory.clar
 ;; Factory contract for creating and managing bond tokens
 
-(impl-trait bond-factory)
+(impl-trait bond-factory-trait)
 (define-constant ERR_UNAUTHORIZED (err u5000))
 (define-constant ERR_INVALID_TERMS (err u5001))
 (define-constant ERR_INSUFFICIENT_COLLATERAL (err u5002))

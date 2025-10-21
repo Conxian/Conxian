@@ -1,4 +1,5 @@
 import { defineConfig } from 'vitest/config';
+import { fileURLToPath } from 'url';
 
 export default defineConfig({
   test: {
@@ -12,5 +13,12 @@ export default defineConfig({
       './stacks/global-vitest.setup.ts',
       './node_modules/@hirosystems/clarinet-sdk/vitest-helpers/src/vitest.setup.ts',
     ],
+    // Enable ESM support
+    environmentOptions: {
+      environment: 'node',
+      transformMode: {
+        web: [/.[tj]sx?$/],
+      },
+    },
   },
 });

@@ -120,33 +120,42 @@
 ;; --- Proposal Bonding ---
 
 ;; Create proposal with bond (called by governance system)
-(define-public (create-bonded-proposal (bond-amount uint) (is-risk-proposal bool))  (let ((proposal-id (var-get next-proposal-id))        (required-bond (if is-risk-proposal RISK_PROPOSAL_BOND MIN_PROPOSAL_BOND))        (bond-type (if is-risk-proposal u1 u0)))    (begin      (asserts! (>= bond-amount required-bond) (err ERR_INSUFFICIENT_BOND))            
+(define-public (create-bonded-proposal (bond-amount uint) (is-risk-proposal bool))
+  (let ((proposal-id (var-get next-proposal-id))
+        (required-bond (if is-risk-proposal RISK_PROPOSAL_BOND MIN_PROPOSAL_BOND))
+        (bond-type (if is-risk-proposal u1 u0)))
+    (begin
+      (asserts! (>= bond-amount required-bond) (err ERR_INSUFFICIENT_BOND))
 
-;; Check user has sufficient voting power (anti-spam)      (try! (match (map-get? user-locks tx-sender)              lock-info              (if (>= (get voting-power lock-info) required-bond)                (ok true)                (err ERR_INSUFFICIENT_BOND))              (err ERR_NO_LOCK_FOUND)))            
+      (try! (match (map-get? user-locks tx-sender)
+              lock-info
+              (if (>= (get voting-power lock-info) required-bond)
+                (ok true)
+                (err ERR_INSUFFICIENT_BOND))
+              (err ERR_NO_LOCK_FOUND)))
 
-;; Lock additional CXVG as bond - simplified for enhanced deployment      
+      (map-set proposal-bonds proposal-id
+        {
+          creator: tx-sender,
+          bond-amount: bond-amount,
+          bond-type: bond-type,
+          slashed: false,
+          created-at: block-height
+        })
 
-;; (try! (contract-call? .cxvg-token transfer bond-amount tx-sender (as-contract tx-sender) none))      
-
-;; Assume bond is locked successfully for enhanced deployment            
-
-;; Store proposal bond      (map-set proposal-bonds proposal-id        {          creator: tx-sender,          bond-amount: bond-amount,          bond-type: bond-type,          slashed: false,          created-at: block-height        })            
-
-;; Increment proposal counter      (var-set next-proposal-id (+ proposal-id u1))            (ok proposal-id))))
+      (var-set next-proposal-id (+ proposal-id u1))
+      (ok proposal-id))))
 
 ;; Slash bond for failed/malicious proposal(define-public (slash-proposal-bond (proposal-id uint))  (begin    (asserts! (is-eq tx-sender (var-get contract-owner)) (err ERR_UNAUTHORIZED))        (match (map-get? proposal-bonds proposal-id)      bond-info      (begin        (asserts! (not (get slashed bond-info)) (err ERR_BOND_ALREADY_SLASHED))                
 
 ;; Mark as slashed (CXVG stays in contract as penalty)        (map-set proposal-bonds proposal-id          (merge bond-info { slashed: true }))                (ok (get bond-amount bond-info)))      (err ERR_PROPOSAL_NOT_FOUND))))
 
-;; Return bond for successful proposal(define-public (return-proposal-bond (proposal-id uint))  (begin    (asserts! (is-eq tx-sender (var-get contract-owner)) (err ERR_UNAUTHORIZED))        (match (map-get? proposal-bonds proposal-id)      bond-info      (begin        (asserts! (not (get slashed bond-info)) (err ERR_BOND_ALREADY_SLASHED))                (let ((creator (get creator bond-info))              (amount (get bond-amount bond-info)))                    
+;; Return bond for successful proposal(define-public (return-proposal-bond (proposal-id uint))  (begin    (asserts! (is-eq tx-sender (var-get contract-owner)) (err ERR_UNAUTHORIZED))        (match (map-get? proposal-bonds proposal-id)      bond-info      (begin        (asserts! (not (get slashed bond-info)) (err ERR_BOND_ALREADY_SLASHED))                (let ((creator (get creator bond-info))
+              (amount (get bond-amount bond-info)))
 
-;; Return CXVG to creator - simplified for enhanced deployment          
-
-;; (try! (as-contract (contract-call? .cxvg-token transfer amount (as-contract tx-sender) creator none)))          
-
-;; Assume bond is returned successfully                    
-
-;; Remove bond record          (map-delete proposal-bonds proposal-id)                    (ok amount)))      (err ERR_PROPOSAL_NOT_FOUND))))
+          (map-delete proposal-bonds proposal-id)
+          (ok amount)))
+      (err ERR_PROPOSAL_NOT_FOUND))))
 
 ;; --- Utility Benefits ---
 
@@ -161,13 +170,11 @@
 ;; --- Helper Functions ---(define-read-only (get-lock-tier (duration uint))  (if (>= duration TIER4_DURATION) u4    (if (>= duration TIER3_DURATION) u3      (if (>= duration TIER2_DURATION) u2 u1))))
 (define-read-only (get-tier-multiplier (tier uint))  (if (is-eq tier u4) TIER4_MULTIPLIER    (if (is-eq tier u3) TIER3_MULTIPLIER        (if (is-eq tier u2) TIER2_MULTIPLIER TIER1_MULTIPLIER))))
 (define-read-only (get-fee-discount (tier uint))  (if (is-eq tier u4) FEE_DISCOUNT_TIER4    (if (is-eq tier u3) FEE_DISCOUNT_TIER3      (if (is-eq tier u2) FEE_DISCOUNT_TIER2 FEE_DISCOUNT_TIER1))))
-(define-read-only (get-vault-boost (tier uint))  
+(define-read-only (get-vault-boost (tier uint))
+  (* tier u50)) 
 
-;; Small boosts for vault allocations (basis points)  (* tier u50)) 
-
-;; 0.5% per tier max 2%(define-read-only (get-farm-boost (tier uint))    
-
-;; Small boosts for farming rewards (basis points)  (* tier u100)) 
+;; 0.5% per tier max 2%(define-read-only (get-farm-boost (tier uint))
+  (* tier u100)) 
 
 ;; 1% per tier max 4%
 

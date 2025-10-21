@@ -1,223 +1,638 @@
+;; ===========================================
+;; CONXIAN CONCENTRATED LIQUIDITY POOL
+;; ===========================================
+;; Implements tick-based concentrated liquidity positions
+;; with NFT position management and advanced fee tracking
+;;
+;; This contract provides Uniswap V3-style concentrated liquidity
+;; functionality for the Conxian DEX protocol.
 
+;; Use centralized traits
+(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
+(use-trait ownable-trait .all-traits.ownable-trait)
+(use-trait pausable-trait .all-traits.pausable-trait)
+(use-trait pool-trait .all-traits.pool-trait)
 
-;; Concentrated Liquidity Pool (v1)
+;; Implement required traits
+(impl-trait pool-trait)
+(impl-trait ownable-trait)
+(impl-trait pausable-trait)
 
-;; Implements tick-based liquidity positions with customizable fee tiers
+;; ===========================================
+;; CONSTANTS
+;; ===========================================
 
-;; Implements the pool-trait interface for compatibility with the DEX router
+;; Fee tiers (in basis points)
+(define-constant FEE_TIER_LOW u3000)      ;; 0.3%
+(define-constant FEE_TIER_MEDIUM u10000)  ;; 1.0%
+(define-constant FEE_TIER_HIGH u30000)    ;; 3.0%
 
-;; --- Constants ---(define-constant FEE_TIER_LOW u3000)   
+;; Tick bounds
+(define-constant MIN_TICK -887272)
+(define-constant MAX_TICK 887272)
 
-;; 0.3%(define-constant FEE_TIER_MEDIUM u10000) 
+;; Protocol fee (1/6 of swap fee)
+(define-constant PROTOCOL_FEE u1667)
 
-;; 1.0%(define-constant FEE_TIER_HIGH u30000)  
+;; Precision for calculations
+(define-constant PRECISION u1000000000000000000) ;; 10^18
 
-;; 3.0%(define-constant TRAIT_REGISTRY .trait-registry)
-(define-constant ERR_UNAUTHORIZED (err u100))
-(define-constant ERR_INVALID_FEE_TIER (err u101))
-(define-constant ERR_INVALID_TICK_RANGE (err u102))
-(define-constant ERR_ZERO_LIQUIDITY (err u103))
-(define-constant ERR_INSUFFICIENT_FUNDS (err u104))
-(define-constant ERR_SLIPPAGE_EXCEEDED (err u105))
-(define-constant ERR_INVALID_TOKEN (err u106))
-(define-constant ERR_POSITION_NOT_FOUND (err u107))
-(define-constant ERR_POOL_NOT_INITIALIZED (err u108))
-(define-constant ERR_PRICE_LIMIT_REACHED (err u109))
-(define-constant ERR_MATH_OVERFLOW (err u110))
-(define-constant PRECISION u1000000000000000000) 
+;; Q96 constant for sqrt price
+(define-constant Q96 u79228162514264337593543950336)
 
-;; 18 decimals
+;; ===========================================
+;; ERROR CODES (from standardized errors.clar)
+;; ===========================================
 
-;; --- Traits ---
+(define-constant ERR_UNAUTHORIZED (err u1001))
+(define-constant ERR_INVALID_INPUT (err u1005))
+(define-constant ERR_INVALID_FEE_TIER (err u4001))
+(define-constant ERR_INVALID_TICK_RANGE (err u4002))
+(define-constant ERR_ZERO_LIQUIDITY (err u4004))
+(define-constant ERR_INSUFFICIENT_LIQUIDITY (err u4004))
+(define-constant ERR_SLIPPAGE_EXCEEDED (err u4005))
+(define-constant ERR_POSITION_NOT_FOUND (err u6000))
+(define-constant ERR_CONTRACT_PAUSED (err u1003))
 
-;; Implement the standard pool trait
+;; ===========================================
+;; DATA VARIABLES
+;; ===========================================
 
-;; --- Contract State ---(define-data-var contract-owner principal tx-sender)
+(define-data-var contract-owner principal tx-sender)
 (define-data-var position-nft-contract principal tx-sender)
-(define-data-var protocol-fee uint u1667) 
+(define-data-var is-paused bool false)
 
-;; 1/6 of the fee (0.05% for 0.3% pools)
-(define-data-var is-initialized bool false)
-
-;; Initialize data variables with default values(define-data-var pool-token-x principal tx-sender)
+;; Pool configuration
+(define-data-var pool-token-x principal tx-sender)
 (define-data-var pool-token-y principal tx-sender)
 (define-data-var fee-tier uint u0)
-(define-data-var tick-spacing uint u60)  
+(define-data-var tick-spacing uint u60)
+(define-data-var is-initialized bool false)
 
-;; 0.05% tick spacing(define-data-var liquidity uint u0)
-(define-data-var sqrt-price-x64 uint u0)
+;; Pool state
+(define-data-var liquidity uint u0)
+(define-data-var sqrt-price-x96 uint u0)
 (define-data-var current-tick int i0)
+
+;; Fee tracking
 (define-data-var fee-growth-global-x uint u0)
 (define-data-var fee-growth-global-y uint u0)
 (define-data-var protocol-fees-x uint u0)
 (define-data-var protocol-fees-y uint u0)
 
-;; Tracks individual positions(define-map positions   {position-id: uint}  {owner: principal,   tick-lower: int,   tick-upper: int,   liquidity: uint,   fee-growth-inside-x: uint,   fee-growth-inside-y: uint,   tokens-owed-x: uint,   tokens-owed-y: uint})
+;; ===========================================
+;; DATA MAPS
+;; ===========================================
 
-;; Tracks tick data(define-map ticks  {tick: int}  {liquidity-gross: uint,   liquidity-net: int,   fee-growth-outside-x: uint,   fee-growth-outside-y: uint,   initialized: bool})
+;; Position data
+(define-map positions
+  { position-id: uint }
+  {
+    owner: principal,
+    tick-lower: int,
+    tick-upper: int,
+    liquidity: uint,
+    fee-growth-inside-x: uint,
+    fee-growth-inside-y: uint,
+    tokens-owed-x: uint,
+    tokens-owed-y: uint
+  }
+)
 
-;; Initialize pool with two tokens and fee tier(define-public (initialize (token-x principal) (token-y principal) (fee uint) (initial-sqrt-price uint))  (begin    
+;; Tick data
+(define-map ticks
+  { tick: int }
+  {
+    liquidity-gross: uint,
+    liquidity-net: int,
+    fee-growth-outside-x: uint,
+    fee-growth-outside-y: uint,
+    initialized: bool
+  }
+)
 
-;; Validate tokens and fee tier    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)    (asserts! (is-valid-fee-tier fee) ERR_INVALID_FEE_TIER)    (asserts! (not (var-get is-initialized)) ERR_UNAUTHORIZED)        
+;; ===========================================
+;; OWNABLE TRAIT IMPLEMENTATION
+;; ===========================================
 
-;; Set initial state    (var-set pool-token-x token-x)    (var-set pool-token-y token-y)    (var-set fee-tier fee)    (var-set tick-spacing (get-tick-spacing fee))    (var-set sqrt-price-x64 initial-sqrt-price)    (var-set current-tick (contract-call? .concentrated-math sqrt-price-to-tick initial-sqrt-price))    (var-set is-initialized true)        (ok true)))
-(define-public (set-position-nft-contract (contract-address principal))    (begin        (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)        (var-set position-nft-contract contract-address)        (ok true)    ))
+(define-read-only (get-owner)
+  (ok (var-get contract-owner))
+)
 
-;; Create a new position within a tick range(define-public (mint-position   (recipient principal)  (tick-lower int)   (tick-upper int)   (amount-x-desired uint)   (amount-y-desired uint)  (amount-x-min uint)  (amount-y-min uint))    (let ((position-id (try! (contract-call? (var-get position-nft-contract) mint recipient)))        (token-x (var-get pool-token-x))        (token-y (var-get pool-token-y)))        
+(define-public (transfer-ownership (new-owner principal))
+  (begin
+    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
+    (asserts! (not (is-eq new-owner tx-sender)) ERR_INVALID_INPUT)
+    (var-set contract-owner new-owner)
+    (ok true)
+  )
+)
 
-;; Validate inputs    (asserts! (var-get is-initialized) ERR_POOL_NOT_INITIALIZED)    (asserts! (< tick-lower tick-upper) ERR_INVALID_TICK_RANGE)    (asserts! (is-valid-tick tick-lower) ERR_INVALID_TICK_RANGE)    (asserts! (is-valid-tick tick-upper) ERR_INVALID_TICK_RANGE)        
+;; ===========================================
+;; PAUSABLE TRAIT IMPLEMENTATION
+;; ===========================================
 
-;; Calculate liquidity from amounts    (let ((liquidity-amount (contract-call? .concentrated-math                               get-liquidity-for-amounts                               (var-get sqrt-price-x64)                               (contract-call? .concentrated-math tick-to-sqrt-price tick-lower)                              (contract-call? .concentrated-math tick-to-sqrt-price tick-upper)                              amount-x-desired                              amount-y-desired)))            
+(define-read-only (is-paused)
+  (var-get is-paused)
+)
 
-;; Ensure non-zero liquidity      (asserts! (> liquidity-amount u0) ERR_ZERO_LIQUIDITY)            
+(define-public (pause)
+  (begin
+    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
+    (var-set is-paused true)
+    (ok true)
+  )
+)
 
-;; Calculate actual token amounts needed      (let ((amounts (calculate-amounts-for-liquidity                        (var-get current-tick)                       tick-lower                       tick-upper                       liquidity-amount)))                (let ((amount-x (get amount-x amounts))              (amount-y (get amount-y amounts)))                    
+(define-public (unpause)
+  (begin
+    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
+    (var-set is-paused false)
+    (ok true)
+  )
+)
 
-;; Check slippage          (asserts! (>= amount-x amount-x-min) ERR_SLIPPAGE_EXCEEDED)          (asserts! (>= amount-y amount-y-min) ERR_SLIPPAGE_EXCEEDED)                    
+;; ===========================================
+;; INTERNAL VALIDATION FUNCTIONS
+;; ===========================================
 
-;; Transfer tokens to pool          (try! (contract-call? token-x transfer amount-x tx-sender (as-contract tx-sender) none))          (try! (contract-call? token-y transfer amount-y tx-sender (as-contract tx-sender) none))                    
+(define-private (check-not-paused)
+  (asserts! (not (var-get is-paused)) ERR_CONTRACT_PAUSED)
+)
 
-;; Update ticks          (update-tick tick-lower (to-int liquidity-amount))          (update-tick tick-upper (to-int (- u0 liquidity-amount)))                    
+(define-private (is-valid-fee-tier (fee uint))
+  (or (is-eq fee FEE_TIER_LOW)
+      (is-eq fee FEE_TIER_MEDIUM)
+      (is-eq fee FEE_TIER_HIGH))
+)
 
-;; Create position          (map-set positions             {position-id: position-id}            {owner: recipient,             tick-lower: tick-lower,             tick-upper: tick-upper,             liquidity: liquidity-amount,             fee-growth-inside-x: u0,             fee-growth-inside-y: u0,             tokens-owed-x: u0,             tokens-owed-y: u0})                    
+(define-private (get-tick-spacing-by-fee (fee uint))
+  (if (is-eq fee FEE_TIER_LOW)
+    u10
+    (if (is-eq fee FEE_TIER_MEDIUM)
+      u60
+      u200)) ;; FEE_TIER_HIGH
+)
 
-;; Update global state          (var-set liquidity (+ (var-get liquidity) liquidity-amount))                    (ok (tuple (position-id position-id) (liquidity liquidity-amount) (amount-x amount-x) (amount-y amount-y)))))))  ))
+(define-private (is-valid-tick (tick int))
+  (and (>= tick MIN_TICK) (<= tick MAX_TICK))
+)
 
-;; Remove liquidity from a position(define-public (burn-position (position-id uint))  (let ((position (unwrap! (map-get? positions {position-id: position-id}) ERR_POSITION_NOT_FOUND)))        
+;; ===========================================
+;; POOL INITIALIZATION
+;; ===========================================
 
-;; Verify ownership and burn NFT    (asserts! (is-eq tx-sender (get owner position)) ERR_UNAUTHORIZED)    (try! (contract-call? (var-get position-nft-contract) burn position-id (get owner position)))        
+(define-public (initialize
+  (token-x principal)
+  (token-y principal)
+  (fee uint)
+  (initial-sqrt-price-x96 uint)
+)
+  (begin
+    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
+    (asserts! (is-valid-fee-tier fee) ERR_INVALID_FEE_TIER)
+    (asserts! (not (var-get is-initialized)) ERR_UNAUTHORIZED)
+    (asserts! (not (is-eq token-x token-y)) ERR_INVALID_INPUT)
 
-;; Calculate fees earned    (let ((fees (calculate-fees-earned position)))            
+    ;; Set pool configuration
+    (var-set pool-token-x token-x)
+    (var-set pool-token-y token-y)
+    (var-set fee-tier fee)
+    (var-set tick-spacing (get-tick-spacing-by-fee fee))
+    (var-set sqrt-price-x96 initial-sqrt-price-x96)
 
-;; Update ticks      (update-tick (get tick-lower position) (to-int (- u0 (get liquidity position))))      (update-tick (get tick-upper position) (to-int (get liquidity position)))            
+    ;; Calculate initial tick
+    (let ((initial-tick (unwrap! (contract-call? .concentrated-math-lib sqrt-price-x96-to-tick initial-sqrt-price-x96) ERR_INVALID_INPUT)))
+      (var-set current-tick initial-tick)
+      (var-set is-initialized true)
+      (ok true)
+    )
+  )
+)
 
-;; Update global liquidity      (var-set liquidity (- (var-get liquidity) (get liquidity position)))            
+(define-public (set-position-nft-contract (contract-address principal))
+  (begin
+    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
+    (var-set position-nft-contract contract-address)
+    (ok true)
+  )
+)
 
-;; Update position with fees owed      (map-set positions         {position-id: position-id}        (merge position           {liquidity: u0,           tokens-owed-x: (+ (get tokens-owed-x position) (get fees-x fees)),           tokens-owed-y: (+ (get tokens-owed-y position) (get fees-y fees))}))            (ok (tuple (fees-x (get fees-x fees)) (fees-y (get fees-y fees))))    ))  )
+;; ===========================================
+;; POSITION MANAGEMENT
+;; ===========================================
 
-;; Collect fees and tokens from a burned position(define-public (collect-position (position-id uint) (recipient principal))  (let ((position (unwrap! (map-get? positions {position-id: position-id}) ERR_POSITION_NOT_FOUND))        (token-x (var-get pool-token-x))        (token-y (var-get pool-token-y)))        
+(define-public (mint-position
+  (recipient principal)
+  (tick-lower int)
+  (tick-upper int)
+  (amount-x-desired uint)
+  (amount-y-desired uint)
+  (amount-x-min uint)
+  (amount-y-min uint)
+)
+  (begin
+    (check-not-paused)
+    (asserts! (var-get is-initialized) ERR_INVALID_INPUT)
+    (asserts! (< tick-lower tick-upper) ERR_INVALID_TICK_RANGE)
+    (asserts! (is-valid-tick tick-lower) ERR_INVALID_TICK_RANGE)
+    (asserts! (is-valid-tick tick-upper) ERR_INVALID_TICK_RANGE)
 
-;; Verify ownership    (asserts! (is-eq tx-sender (get owner position)) ERR_UNAUTHORIZED)        
+    ;; Mint NFT position
+    (let ((position-id (unwrap! (contract-call? (var-get position-nft-contract) mint recipient) ERR_UNAUTHORIZED)))
+      ;; Calculate liquidity
+      (let ((sqrt-price-lower (unwrap! (contract-call? .concentrated-math-lib tick-to-sqrt-price-x96 tick-lower) ERR_INVALID_INPUT))
+            (sqrt-price-upper (unwrap! (contract-call? .concentrated-math-lib tick-to-sqrt-price-x96 tick-upper) ERR_INVALID_INPUT)))
+        (let ((liquidity-amount (unwrap! (contract-call? .concentrated-math-lib get-liquidity-for-amounts
+                                                          (var-get sqrt-price-x96)
+                                                          sqrt-price-lower
+                                                          sqrt-price-upper
+                                                          amount-x-desired
+                                                          amount-y-desired) ERR_INVALID_INPUT)))
 
-;; Get amounts to collect    (let ((amount-x (get tokens-owed-x position))          (amount-y (get tokens-owed-y position)))            
+          (asserts! (> liquidity-amount u0) ERR_ZERO_LIQUIDITY)
 
-;; Transfer tokens to recipient      (if (> amount-x u0)        (try! (as-contract (contract-call? token-x transfer amount-x tx-sender recipient none)))        true)            (if (> amount-y u0)        (try! (as-contract (contract-call? token-y transfer amount-y tx-sender recipient none)))        true)            
+          ;; Calculate actual amounts needed
+          (let ((amounts (unwrap! (contract-call? .concentrated-math-lib get-amounts-for-liquidity
+                                                   (var-get sqrt-price-x96)
+                                                   sqrt-price-lower
+                                                   sqrt-price-upper
+                                                   liquidity-amount) ERR_INVALID_INPUT)))
+            (let ((amount-x (get amount0 amounts))
+                  (amount-y (get amount1 amounts)))
 
-;; Update position      (map-set positions         {position-id: position-id}        (merge position {tokens-owed-x: u0, tokens-owed-y: u0}))            (ok (tuple (amount-x amount-x) (amount-y amount-y)))    ))  )
+              ;; Check slippage
+              (asserts! (>= amount-x amount-x-min) ERR_SLIPPAGE_EXCEEDED)
+              (asserts! (>= amount-y amount-y-min) ERR_SLIPPAGE_EXCEEDED)
 
-;; Swap tokens(define-public (swap   (zero-for-one bool)   (amount-specified uint)   (sqrt-price-limit uint))    (let ((token-in (if zero-for-one (var-get pool-token-x) (var-get pool-token-y)))        (token-out (if zero-for-one (var-get pool-token-y) (var-get pool-token-x))))        
+              ;; Transfer tokens to pool
+              (try! (contract-call? (var-get pool-token-x) transfer amount-x tx-sender (as-contract tx-sender) none))
+              (try! (contract-call? (var-get pool-token-y) transfer amount-y tx-sender (as-contract tx-sender) none))
 
-;; Validate inputs    (asserts! (var-get is-initialized) ERR_POOL_NOT_INITIALIZED)    (asserts! (> amount-specified u0) ERR_INVALID_TICK_RANGE)        
+              ;; Update ticks
+              (update-tick tick-lower liquidity-amount)
+              (update-tick tick-upper (- u0 liquidity-amount))
 
-;; Execute swap    (let ((result (execute-swap zero-for-one amount-specified sqrt-price-limit)))            
+              ;; Create position
+              (map-set positions
+                { position-id: position-id }
+                {
+                  owner: recipient,
+                  tick-lower: tick-lower,
+                  tick-upper: tick-upper,
+                  liquidity: liquidity-amount,
+                  fee-growth-inside-x: u0,
+                  fee-growth-inside-y: u0,
+                  tokens-owed-x: u0,
+                  tokens-owed-y: u0
+                }
+              )
 
-;; Transfer tokens      (try! (contract-call? token-in transfer (get amount-in result) tx-sender (as-contract tx-sender) none))      (try! (as-contract (contract-call? token-out transfer (get amount-out result) tx-sender tx-sender none)))            (ok result)    ))  )
+              ;; Update global liquidity
+              (var-set liquidity (+ (var-get liquidity) liquidity-amount))
 
-;; Internal: Execute swap calculation and state updates
-(define-private (execute-swap (zero-for-one bool) (amount-specified uint) (sqrt-price-limit uint))
-  (let ((current-sqrt-price (var-get sqrt-price-x64))
-        (current-tick (var-get current-tick))
+              (ok (tuple (position-id position-id) (liquidity liquidity-amount) (amount-x amount-x) (amount-y amount-y)))
+            )
+          )
+        )
+      )
+    )
+  )
+)
+
+(define-public (burn-position (position-id uint))
+  (let ((position (unwrap! (map-get? positions { position-id: position-id }) ERR_POSITION_NOT_FOUND)))
+    (begin
+      (check-not-paused)
+      (asserts! (is-eq tx-sender (get owner position)) ERR_UNAUTHORIZED)
+
+      ;; Calculate fees earned
+      (let ((fees (calculate-fees-earned position)))
+        ;; Burn NFT
+        (try! (contract-call? (var-get position-nft-contract) burn position-id (get owner position)))
+
+        ;; Update ticks
+        (update-tick (get tick-lower position) (- u0 (get liquidity position)))
+        (update-tick (get tick-upper position) (get liquidity position))
+
+        ;; Update global liquidity
+        (var-set liquidity (- (var-get liquidity) (get liquidity position)))
+
+        ;; Update position with fees owed
+        (map-set positions
+          { position-id: position-id }
+          (merge position {
+            liquidity: u0,
+            tokens-owed-x: (+ (get tokens-owed-x position) (get fees-x fees)),
+            tokens-owed-y: (+ (get tokens-owed-y position) (get fees-y fees))
+          })
+        )
+
+        (ok (tuple (fees-x (get fees-x fees)) (fees-y (get fees-y fees))))
+      )
+    )
+  )
+)
+
+(define-public (collect-position (position-id uint) (recipient principal))
+  (let ((position (unwrap! (map-get? positions { position-id: position-id }) ERR_POSITION_NOT_FOUND)))
+    (begin
+      (check-not-paused)
+      (asserts! (is-eq tx-sender (get owner position)) ERR_UNAUTHORIZED)
+
+      (let ((amount-x (get tokens-owed-x position))
+            (amount-y (get tokens-owed-y position)))
+
+        ;; Transfer tokens
+        (if (> amount-x u0)
+          (try! (as-contract (contract-call? (var-get pool-token-x) transfer amount-x tx-sender recipient none)))
+          true
+        )
+        (if (> amount-y u0)
+          (try! (as-contract (contract-call? (var-get pool-token-y) transfer amount-y tx-sender recipient none)))
+          true
+        )
+
+        ;; Reset owed amounts
+        (map-set positions
+          { position-id: position-id }
+          (merge position { tokens-owed-x: u0, tokens-owed-y: u0 })
+        )
+
+        (ok (tuple (amount-x amount-x) (amount-y amount-y)))
+      )
+    )
+  )
+)
+
+;; ===========================================
+;; SWAPPING
+;; ===========================================
+
+(define-public (swap
+  (token-in principal)
+  (token-out principal)
+  (amount-in uint)
+  (min-amount-out uint)
+  (recipient principal)
+)
+  (begin
+    (check-not-paused)
+    (asserts! (var-get is-initialized) ERR_INVALID_INPUT)
+    (asserts! (> amount-in u0) ERR_INVALID_INPUT)
+
+    (let ((zero-for-one (is-eq token-in (var-get pool-token-x))))
+      (asserts! (if zero-for-one
+                   (is-eq token-out (var-get pool-token-y))
+                   (is-eq token-out (var-get pool-token-x))) ERR_INVALID_INPUT)
+
+      ;; Execute swap
+      (let ((result (try! (execute-swap zero-for-one amount-in u0))))
+        (let ((amount-out (get amount-out result)))
+          (asserts! (>= amount-out min-amount-out) ERR_SLIPPAGE_EXCEEDED)
+
+          ;; Transfer tokens
+          (try! (contract-call? token-in transfer amount-in tx-sender (as-contract tx-sender) none))
+          (try! (as-contract (contract-call? token-out transfer amount-out tx-sender recipient none)))
+
+          (ok amount-out)
+        )
+      )
+    )
+  )
+)
+
+(define-private (execute-swap (zero-for-one bool) (amount-specified uint) (sqrt-price-limit-x96 uint))
+  (let ((current-sqrt-price (var-get sqrt-price-x96))
         (current-liquidity (var-get liquidity)))
-    
+
     ;; Validate price limit
+    (let ((min-sqrt-price (unwrap! (contract-call? .concentrated-math-lib tick-to-sqrt-price-x96 MIN_TICK) ERR_INVALID_INPUT))
+          (max-sqrt-price (unwrap! (contract-call? .concentrated-math-lib tick-to-sqrt-price-x96 MAX_TICK) ERR_INVALID_INPUT)))
+
+      (asserts! (if zero-for-one
+                   (or (is-eq sqrt-price-limit-x96 u0) (> sqrt-price-limit-x96 min-sqrt-price))
+                   (or (is-eq sqrt-price-limit-x96 u0) (< sqrt-price-limit-x96 max-sqrt-price))) ERR_INVALID_INPUT)
+
+      ;; Calculate swap result
+      (let ((amount-out (unwrap! (contract-call? .concentrated-math-lib get-amount-out
+                                                 current-sqrt-price
+                                                 current-liquidity
+                                                 amount-specified
+                                                 zero-for-one) ERR_INVALID_INPUT))
+            (new-sqrt-price (unwrap! (contract-call? .concentrated-math-lib get-next-sqrt-price-from-input
+                                                     current-sqrt-price
+                                                     current-liquidity
+                                                     amount-specified
+                                                     zero-for-one) ERR_INVALID_INPUT)))
+
+        ;; Calculate fees
+        (let ((fee-amount (/ (* amount-specified (var-get fee-tier)) u10000))
+              (protocol-fee-amount (/ (* fee-amount PROTOCOL_FEE) u10000))
+              (new-tick (unwrap! (contract-call? .concentrated-math-lib sqrt-price-x96-to-tick new-sqrt-price) ERR_INVALID_INPUT)))
+
+          ;; Update state
+          (var-set sqrt-price-x96 new-sqrt-price)
+          (var-set current-tick new-tick)
+
+          ;; Update fee tracking
+          (if zero-for-one
+            (begin
+              (var-set fee-growth-global-x (+ (var-get fee-growth-global-x)
+                                            (/ (* (- fee-amount protocol-fee-amount) PRECISION) current-liquidity)))
+              (var-set protocol-fees-x (+ (var-get protocol-fees-x) protocol-fee-amount)))
+            (begin
+              (var-set fee-growth-global-y (+ (var-get fee-growth-global-y)
+                                            (/ (* (- fee-amount protocol-fee-amount) PRECISION) current-liquidity)))
+              (var-set protocol-fees-y (+ (var-get protocol-fees-y) protocol-fee-amount))))
+
+          (ok (tuple (amount-in amount-specified) (amount-out amount-out) (fee fee-amount)))
+        )
+      )
+    )
+  )
+)
+
+;; ===========================================
+;; POOL TRAIT IMPLEMENTATION
+;; ===========================================
+
+(define-read-only (get-tokens)
+  (ok (tuple (token-x (var-get pool-token-x)) (token-y (var-get pool-token-y))))
+)
+
+(define-read-only (get-fee)
+  (ok (var-get fee-tier))
+)
+
+(define-read-only (get-liquidity (token principal))
+  (let ((token-x (var-get pool-token-x))
+        (token-y (var-get pool-token-y)))
+    (asserts! (or (is-eq token token-x) (is-eq token token-y)) ERR_INVALID_INPUT)
+    (if (is-eq token token-x)
+      (ok (var-get protocol-fees-x)) ;; Simplified - should calculate actual reserves
+      (ok (var-get protocol-fees-y))
+    )
+  )
+)
+
+(define-read-only (get-amount-out (token-in principal) (token-out principal) (amount-in uint))
+  (let ((zero-for-one (is-eq token-in (var-get pool-token-x))))
     (asserts! (if zero-for-one
-                (< sqrt-price-limit current-sqrt-price)
-                (> sqrt-price-limit current-sqrt-price))
-              ERR_PRICE_LIMIT_REACHED)
-    
-    ;; Calculate swap amounts (simplified)
-    (let ((amount-in amount-specified)
-          (amount-out (calculate-output-amount amount-specified zero-for-one current-sqrt-price current-liquidity))
-          (new-sqrt-price (calculate-new-sqrt-price amount-specified zero-for-one current-sqrt-price current-liquidity))
-          (new-tick (contract-call? .concentrated-math sqrt-price-to-tick new-sqrt-price)))
-      
-      ;; Calculate fees
-      (let ((fee-amount (/ (* amount-in (var-get fee-tier)) u1000000))
-            (protocol-fee-amount (/ (* fee-amount (var-get protocol-fee)) u10000)))
-        
-        ;; Update global state
-        (var-set sqrt-price-x64 new-sqrt-price)
-        (var-set current-tick new-tick)
-        
-        ;; Update fee tracking
-        (if zero-for-one
-          (begin
-            (var-set fee-growth-global-x (+ (var-get fee-growth-global-x) (/ (* (- fee-amount protocol-fee-amount) PRECISION) current-liquidity)))
-            (var-set protocol-fees-x (+ (var-get protocol-fees-x) protocol-fee-amount)))
-          (begin
-            (var-set fee-growth-global-y (+ (var-get fee-growth-global-y) (/ (* (- fee-amount protocol-fee-amount) PRECISION) current-liquidity)))
-            (var-set protocol-fees-y (+ (var-get protocol-fees-y) protocol-fee-amount))))
-        
-        (tuple (amount-in amount-in) (amount-out amount-out) (fee fee-amount) (new-sqrt-price new-sqrt-price))
-      ))
+                 (is-eq token-out (var-get pool-token-y))
+                 (is-eq token-out (var-get pool-token-x))) ERR_INVALID_INPUT)
+    (contract-call? .concentrated-math-lib get-amount-out
+                    (var-get sqrt-price-x96)
+                    (var-get liquidity)
+                    amount-in
+                    zero-for-one)
+  )
+)
+
+(define-read-only (get-amount-in (token-in principal) (token-out principal) (amount-out uint))
+  ;; Simplified - should implement proper calculation
+  (ok amount-out)
+)
+
+(define-public (add-liquidity
+  (token-x-amount uint)
+  (token-y-amount uint)
+  (min-token-x-amount uint)
+  (min-token-y-amount uint)
+  (recipient principal)
+)
+  ;; For concentrated liquidity, use mint-position instead
+  (ok (tuple (liquidity u0) (token-x-amount u0) (token-y-amount u0)))
+)
+
+(define-public (remove-liquidity
+  (liquidity-amount uint)
+  (min-token-x-amount uint)
+  (min-token-y-amount uint)
+  (recipient principal)
+)
+  ;; For concentrated liquidity, use burn-position and collect-position instead
+  (ok (tuple (token-x-amount u0) (token-y-amount u0)))
+)
+
+;; ===========================================
+;; TICK MANAGEMENT
+;; ===========================================
+
+(define-private (update-tick (tick-idx int) (liquidity-delta uint))
+  (let ((tick-data (default-to
+                    {
+                      liquidity-gross: u0,
+                      liquidity-net: i0,
+                      fee-growth-outside-x: u0,
+                      fee-growth-outside-y: u0,
+                      initialized: false
+                    }
+                    (map-get? ticks { tick: tick-idx }))))
+    (let ((new-liquidity-gross (+ (get liquidity-gross tick-data) liquidity-delta))
+          (new-liquidity-net (+ (get liquidity-net tick-data) (to-int liquidity-delta))))
+
+      (map-set ticks
+        { tick: tick-idx }
+        {
+          liquidity-gross: new-liquidity-gross,
+          liquidity-net: new-liquidity-net,
+          fee-growth-outside-x: (get fee-growth-outside-x tick-data),
+          fee-growth-outside-y: (get fee-growth-outside-y tick-data),
+          initialized: true
+        }
+      )
+    )
+  )
+)
+
+;; ===========================================
+;; FEE CALCULATIONS
+;; ===========================================
+
+(define-private (calculate-fees-earned (position {owner: principal, tick-lower: int, tick-upper: int, liquidity: uint, fee-growth-inside-x: uint, fee-growth-inside-y: uint, tokens-owed-x: uint, tokens-owed-y: uint}))
+  (let ((fee-growth-inside-x-new (get-fee-growth-inside (get tick-lower position) (get tick-upper position) true))
+        (fee-growth-inside-y-new (get-fee-growth-inside (get tick-lower position) (get tick-upper position) false)))
+
+    (let ((fees-x (/ (* (get liquidity position) (- fee-growth-inside-x-new (get fee-growth-inside-x position))) PRECISION))
+          (fees-y (/ (* (get liquidity position) (- fee-growth-inside-y-new (get fee-growth-inside-y position))) PRECISION)))
+
+      (tuple (fees-x fees-x) (fees-y fees-y))
+    )
+  )
+)
+
+(define-private (get-fee-growth-inside (tick-lower int) (tick-upper int) (is-token-x bool))
+  (let ((global-growth (if is-token-x (var-get fee-growth-global-x) (var-get fee-growth-global-y)))
+        (lower-outside (get-fee-growth-outside tick-lower is-token-x))
+        (upper-outside (get-fee-growth-outside tick-upper is-token-x))
+        (current-tick (var-get current-tick)))
+
+    (let ((growth-below (if (< current-tick tick-lower)
+                          (- global-growth lower-outside)
+                          lower-outside))
+          (growth-above (if (>= current-tick tick-upper)
+                          (- global-growth upper-outside)
+                          upper-outside)))
+
+      (- (- global-growth growth-below) growth-above)
+    )
+  )
+)
+
+(define-private (get-fee-growth-outside (tick int) (is-token-x bool))
+  (let ((tick-data (default-to
+                    {
+                      liquidity-gross: u0,
+                      liquidity-net: i0,
+                      fee-growth-outside-x: u0,
+                      fee-growth-outside-y: u0,
+                      initialized: false
+                    }
+                    (map-get? ticks { tick: tick }))))
+    (if is-token-x
+      (get fee-growth-outside-x tick-data)
+      (get fee-growth-outside-y tick-data)
+    )
+  )
+)
+
+;; ===========================================
+;; READ-ONLY FUNCTIONS
+;; ===========================================
+
+(define-read-only (get-pool-info)
+  (ok (tuple
+    (token-x (var-get pool-token-x))
+    (token-y (var-get pool-token-y))
+    (fee-tier (var-get fee-tier))
+    (liquidity (var-get liquidity))
+    (sqrt-price-x96 (var-get sqrt-price-x96))
+    (current-tick (var-get current-tick))
+    (tick-spacing (var-get tick-spacing))
   ))
+)
 
-;; Internal: Calculate output amount for swap (simplified)
-(define-private (calculate-output-amount (amount-in uint) (zero-for-one bool) (sqrt-price uint) (liquidity-amount uint))  
+(define-read-only (get-position (position-id uint))
+  (match (map-get? positions { position-id: position-id })
+    position (ok position)
+    (err ERR_POSITION_NOT_FOUND)
+  )
+)
 
-;; Simplified calculation - in production would use more precise math  (let ((price (/ (* sqrt-price sqrt-price) PRECISION)))    (if zero-for-one      (/ (* amount-in price) PRECISION)  
+(define-read-only (get-tick (tick-idx int))
+  (match (map-get? ticks { tick: tick-idx })
+    tick-data (ok tick-data)
+    (ok {
+      liquidity-gross: u0,
+      liquidity-net: i0,
+      fee-growth-outside-x: u0,
+      fee-growth-outside-y: u0,
+      initialized: false
+    })
+  )
+)
 
-;; x to y      (/ (* amount-in PRECISION) price)  
-
-;; y to x    )))
-
-;; Internal: Calculate new sqrt price after swap (simplified)
-(define-private (calculate-new-sqrt-price (amount-in uint) (zero-for-one bool) (sqrt-price uint) (liquidity-amount uint))  
-
-;; Simplified calculation - in production would use more precise math  (let ((price-impact (/ (* amount-in u100) liquidity-amount)))    (if zero-for-one      (- sqrt-price (/ (* sqrt-price price-impact) u10000))  
-
-;; Price decreases      (+ sqrt-price (/ (* sqrt-price price-impact) u10000))  
-
-;; Price increases    )))
-
-;; Internal: Update tick data(define-private (update-tick (tick-idx int) (liquidity-delta int))  (let ((tick-data (default-to                      {liquidity-gross: u0, liquidity-net: i0,                       fee-growth-outside-x: u0, fee-growth-outside-y: u0,                       initialized: false}                     (map-get? ticks {tick: tick-idx}))))        (let ((new-liquidity-gross (if (> liquidity-delta i0)                                 (+ (get liquidity-gross tick-data) (to-uint liquidity-delta))                                 (+ (get liquidity-gross tick-data) (to-uint (- i0 liquidity-delta)))))          (new-liquidity-net (+ (get liquidity-net tick-data) liquidity-delta)))            (map-set ticks        {tick: tick-idx}        {liquidity-gross: new-liquidity-gross,         liquidity-net: new-liquidity-net,         fee-growth-outside-x: (get fee-growth-outside-x tick-data),         fee-growth-outside-y: (get fee-growth-outside-y tick-data),         initialized: true})            true    )))
-
-;; Internal: Calculate amounts for liquidity(define-private (calculate-amounts-for-liquidity (current-tick int) (tick-lower int) (tick-upper int) (liquidity uint))  (let ((sqrt-price-current (var-get sqrt-price-x64))        (sqrt-price-lower (contract-call? .concentrated-math tick-to-sqrt-price tick-lower))        (sqrt-price-upper (contract-call? .concentrated-math tick-to-sqrt-price tick-upper)))        (let ((amount-x (if (< current-tick tick-lower)                       
-
-;; Current price below range - only token X                       (/ (* liquidity (- sqrt-price-upper sqrt-price-lower)) sqrt-price-lower)                       (if (< current-tick tick-upper)                         
-
-;; Current price in range                         (/ (* liquidity (- sqrt-price-upper sqrt-price-current)) sqrt-price-current)                         
-
-;; Current price above range - no token X                         u0)))          (amount-y (if (< current-tick tick-lower)                       
-
-;; Current price below range - no token Y                       u0                       (if (< current-tick tick-upper)                         
-
-;; Current price in range                         (* liquidity (- sqrt-price-current sqrt-price-lower))                         
-
-;; Current price above range - only token Y                         (* liquidity (- sqrt-price-upper sqrt-price-lower))))))            (tuple (amount-x amount-x) (amount-y amount-y))    )))
-
-;; Internal: Calculate fees earned by a position(define-private (calculate-fees-earned (position {owner: principal, tick-lower: int, tick-upper: int, liquidity: uint, fee-growth-inside-x: uint, fee-growth-inside-y: uint, tokens-owed-x: uint, tokens-owed-y: uint}))  (let ((fee-growth-inside-x-new (get-fee-growth-inside (get tick-lower position) (get tick-upper position) true))        (fee-growth-inside-y-new (get-fee-growth-inside (get tick-lower position) (get tick-upper position) false)))        (let ((fees-x (/ (* (get liquidity position) (- fee-growth-inside-x-new (get fee-growth-inside-x position))) PRECISION))          (fees-y (/ (* (get liquidity position) (- fee-growth-inside-y-new (get fee-growth-inside-y position))) PRECISION)))            (tuple (fees-x fees-x) (fees-y fees-y))    )))
-
-;; Internal: Get fee growth inside a tick range(define-private (get-fee-growth-inside (tick-lower int) (tick-upper int) (is-token-x bool))  (let ((global-growth (if is-token-x (var-get fee-growth-global-x) (var-get fee-growth-global-y)))        (lower-outside (get-fee-growth-outside tick-lower is-token-x))        (upper-outside (get-fee-growth-outside tick-upper is-token-x))        (current-tick (var-get current-tick)))        (let ((growth-below (if (< current-tick tick-lower) (- global-growth lower-outside) lower-outside))          (growth-above (if (>= current-tick tick-upper) (- global-growth upper-outside) upper-outside)))            (- (- global-growth growth-below) growth-above)    )))
-
-;; Internal: Get fee growth outside a tick(define-private (get-fee-growth-outside (tick int) (is-token-x bool))  (let ((tick-data (default-to                      {liquidity-gross: u0, liquidity-net: i0,                       fee-growth-outside-x: u0, fee-growth-outside-y: u0,                       initialized: false}                     (map-get? ticks {tick: tick}))))        (if is-token-x      (get fee-growth-outside-x tick-data)      (get fee-growth-outside-y tick-data))  ))
-
-;; Internal: Validate fee tier(define-private (is-valid-fee-tier (fee uint))  (or     (is-eq fee FEE_TIER_LOW)    (is-eq fee FEE_TIER_MEDIUM)    (is-eq fee FEE_TIER_HIGH)))
-
-;; Internal: Calculate tick spacing based on fee tier(define-private (get-tick-spacing (fee uint))  (if (is-eq fee FEE_TIER_LOW)    u10    (if (is-eq fee FEE_TIER_MEDIUM)      u60      (if (is-eq fee FEE_TIER_HIGH)        u200        u60)))) 
-
-;; Default to medium spacing if no match
-
-;; Internal: Validate tick is within allowed range(define-private (is-valid-tick (tick int))  (and     (>= tick (- 887272))  
-
-;; Min tick    (<= tick 887272)))    
-
-;; Max tick
-
-;; Read-only functions for external queries
-
-;; Get pool information(define-read-only (get-pool-info)  (ok (tuple     (token-x (var-get pool-token-x))    (token-y (var-get pool-token-y))    (fee-tier (var-get fee-tier))    (liquidity (var-get liquidity))    (sqrt-price (var-get sqrt-price-x64))    (current-tick (var-get current-tick))    (tick-spacing (var-get tick-spacing)))))
-
-;; Get position information(define-read-only (get-position (position-id uint))  (match (map-get? positions {position-id: position-id})    position (ok position)    (err ERR_POSITION_NOT_FOUND)))
-
-;; Get tick information(define-read-only (get-tick (tick-idx int))  (match (map-get? ticks {tick: tick-idx})    tick-data (ok tick-data)    (ok {liquidity-gross: u0, liquidity-net: i0,          fee-growth-outside-x: u0, fee-growth-outside-y: u0,          initialized: false})))
-
-;; Get current price(define-read-only (get-current-price)  (let ((sqrt-price (var-get sqrt-price-x64)))    (ok (/ (* sqrt-price sqrt-price) PRECISION))))
-
-;; Get protocol fees collected(define-read-only (get-protocol-fees)  (ok (tuple (fees-x (var-get protocol-fees-x)) (fees-y (var-get protocol-fees-y)))))
-
-;; Get owner(define-read-only (get-owner)  (ok (var-get contract-owner)))
-
-;; Implement pool-trait functions(define-public (swap-exact-tokens-for-tokens (token-x-in principal) (token-y-out principal) (amount-in uint) (min-amount-out uint) (recipient principal))  (let ((zero-for-one (is-eq token-x-in (var-get pool-token-x))))    (asserts! (or (and zero-for-one (is-eq token-y-out (var-get pool-token-y)))                 (and (not zero-for-one) (is-eq token-x-in (var-get pool-token-y)) (is-eq token-y-out (var-get pool-token-x))))              ERR_INVALID_TOKEN)        (let ((result (try! (swap zero-for-one amount-in u0))))      (asserts! (>= (get amount-out result) min-amount-out) ERR_SLIPPAGE_EXCEEDED)      (ok (get amount-out result)))))
-
-;; Additional pool-trait variants are implemented by the canonical pool trait file.
+(define-read-only (get-protocol-fees)
+  (ok (tuple (fees-x (var-get protocol-fees-x)) (fees-y (var-get protocol-fees-y))))
+)

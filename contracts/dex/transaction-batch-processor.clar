@@ -65,21 +65,21 @@
 ;; Lower gas for failed tx        })))
 
 ;; Transaction processors (simplified for enhanced deployment)
-(define-private (process-transfer-tx (tx {  tx-type: uint,  sender: principal,  recipient: principal,  amount: uint,  token: principal,  timestamp: uint}))  
-
-;; Simplified transfer processing  (ok true))
-(define-private (process-mint-tx (tx {  tx-type: uint,  sender: principal,  recipient: principal,  amount: uint,  token: principal,  timestamp: uint}))  
-
-;; Simplified mint processing  (ok true))
-(define-private (process-stake-tx (tx {  tx-type: uint,  sender: principal,  recipient: principal,  amount: uint,  token: principal,  timestamp: uint}))  
-
-;; Simplified staking processing  (ok true))
-(define-private (process-unstake-tx (tx {  tx-type: uint,  sender: principal,  recipient: principal,  amount: uint,  token: principal,  timestamp: uint}))  
-
-;; Simplified unstaking processing  (ok true))
-(define-private (process-revenue-tx (tx {  tx-type: uint,  sender: principal,  recipient: principal,  amount: uint,  token: principal,  timestamp: uint}))  
-
-;; Simplified revenue collection processing  (ok true))
+(define-private (process-transfer-tx (tx { tx-type: uint, sender: principal, recipient: principal, amount: uint, token: principal, timestamp: uint }))
+  ;; Simplified transfer processing
+  (ok true))
+(define-private (process-mint-tx (tx { tx-type: uint, sender: principal, recipient: principal, amount: uint, token: principal, timestamp: uint }))
+  ;; Simplified mint processing
+  (ok true))
+(define-private (process-stake-tx (tx { tx-type: uint, sender: principal, recipient: principal, amount: uint, token: principal, timestamp: uint }))
+  ;; Simplified staking processing
+  (ok true))
+(define-private (process-unstake-tx (tx { tx-type: uint, sender: principal, recipient: principal, amount: uint, token: principal, timestamp: uint }))
+  ;; Simplified unstaking processing
+  (ok true))
+(define-private (process-revenue-tx (tx { tx-type: uint, sender: principal, recipient: principal, amount: uint, token: principal, timestamp: uint }))
+  ;; Simplified revenue collection processing
+  (ok true))
 
 ;; Auto-process batch when ready(define-public (auto-process-if-ready)  (if (is-batch-ready)      (process-batch)      (ok u0)))
 

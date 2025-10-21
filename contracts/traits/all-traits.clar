@@ -184,7 +184,7 @@
     ;; Unstake tokens from the contract
     ;; @param amount: number of tokens to unstake
     ;; @return (response bool uint): success flag and error code
-    (unstake (amount uint) (response bool uint))
+    (unstake (uint) (response bool uint))
     
     ;; Claim accumulated staking rewards
     ;; @return (response uint uint): amount of rewards claimed and error code
@@ -193,12 +193,12 @@
     ;; Get the staked balance for a user
     ;; @param user: principal to check balance for
     ;; @return (response uint uint): staked amount and error code
-    (get-staked-balance (user principal) (response uint uint))
+    (get-staked-balance (principal) (response uint uint))
     
     ;; Get pending rewards for a user
     ;; @param user: principal to check rewards for
     ;; @return (response uint uint): pending reward amount and error code
-    (get-pending-rewards (user principal) (response uint uint))
+    (get-pending-rewards (principal) (response uint uint))
   )
 )
 
@@ -492,17 +492,562 @@
     ;; Get details about a bond
     ;; @param bond-id: ID of the bond
     ;; @return (response (tuple ...) uint): bond details and error code
-    (get-bond-details (bond-id uint) (response (tuple (issuer principal) (name (string-ascii 32)) (symbol (string-ascii 10)) (decimals uint) (total-supply uint) (maturity-block uint) (coupon-rate uint) (payment-token principal) (is-mature bool)) uint))
+  )
+)
+
+;; ===========================================
+;; BOND FACTORY TRAIT
+;; ===========================================
+;; Interface for creating and managing bond tokens
+;;
+;; This trait provides functions to create bond tokens with specific terms
+;; and manage the bond creation process.
+;;
+;; Example usage:
+;;   (use-trait bond-factory .all-traits.bond-factory-trait)
+(define-trait bond-factory-trait
+  (
+    ;; Create a new bond token
+    ;; @param name: bond name
+    ;; @param symbol: bond symbol
+    ;; @param decimals: number of decimals
+    ;; @param total-supply: total supply of bonds
+    ;; @param maturity-date: maturity date in blocks
+    ;; @param coupon-rate: coupon rate in basis points
+    ;; @param face-value: face value per bond
+    ;; @return (response principal uint): bond contract address and error code
+    (create-bond (name (string-ascii 32)) (symbol (string-ascii 10)) (decimals uint) (total-supply uint) (maturity-date uint) (coupon-rate uint) (face-value uint) (response principal uint))
+    
+    ;; Get bond details by address
+    ;; @param bond-address: bond contract address
+    ;; @return (response (tuple ...) uint): bond details and error code
+    (get-bond-details (bond-address principal) (response (tuple (name (string-ascii 32)) (symbol (string-ascii 10)) (decimals uint) (total-supply uint) (maturity-date uint) (coupon-rate uint) (face-value uint)) uint))
+    
+    ;; List all bonds created by this factory
+    ;; @return (response (list 100 principal) uint): list of bond addresses and error code
+    (get-all-bonds () (response (list 100 principal) uint))
+  )
+)
+
+;; ===========================================
+;; BOND ISSUANCE TRAIT
+;; ===========================================
+;; Interface for issuing tokenized bonds
+;;
+;; This trait provides functions to issue bonds backed by underlying assets
+;; and manage the issuance process.
+;;
+;; Example usage:
+;;   (use-trait bond-issuance .all-traits.bond-issuance-trait)
+(define-trait bond-issuance-trait
+  (
+    ;; Issue new bonds backed by collateral
+    ;; @param collateral-amount: amount of collateral to back bonds
+    ;; @param bond-amount: number of bonds to issue
+    ;; @param maturity-blocks: maturity period in blocks
+    ;; @param coupon-rate: coupon rate in basis points
+    ;; @return (response uint uint): bond ID and error code
+    (issue-bonds (collateral-amount uint) (bond-amount uint) (maturity-blocks uint) (coupon-rate uint) (response uint uint))
+    
+    ;; Redeem bonds at maturity
+    ;; @param bond-id: bond identifier
+    ;; @param amount: amount of bonds to redeem
+    ;; @return (response uint uint): collateral returned and error code
+    (redeem-bonds (bond-id uint) (amount uint) (response uint uint))
+    
+    ;; Claim coupon payments
+    ;; @param bond-id: bond identifier
+    ;; @return (response uint uint): coupon amount and error code
+    (claim-coupon (bond-id uint) (response uint uint))
+    
+    ;; Get bond information
+    ;; @param bond-id: bond identifier
+    ;; @return (response (tuple ...) uint): bond details and error code
+    (get-bond-info (bond-id uint) (response (tuple (collateral-amount uint) (bond-amount uint) (maturity-blocks uint) (coupon-rate uint) (issued-at uint) (issuer principal)) uint))
+  )
+)
+
+;; ===========================================
+;; CXLP MIGRATION QUEUE TRAIT
+;; ===========================================
+;; Interface for managing CXLP to CXD token migration queues
+;;
+;; This trait provides functions to queue migration requests and process
+;; them in a fair, duration-weighted manner.
+;;
+;; Example usage:
+;;   (use-trait migration-queue .all-traits.cxlp-migration-queue-trait)
+(define-trait cxlp-migration-queue-trait
+  (
+    ;; Queue a migration request
+    ;; @param cxlp-amount: amount of CXLP tokens to migrate
+    ;; @return (response uint uint): queue position and error code
+    (queue-migration (cxlp-amount uint) (response uint uint))
+    
+    ;; Cancel a queued migration request
+    ;; @param queue-id: queue entry identifier
+    ;; @return (response uint uint): refunded amount and error code
+    (cancel-migration (queue-id uint) (response uint uint))
+    
+    ;; Process pending migration requests
+    ;; @param max-process: maximum number of requests to process
+    ;; @return (response uint uint): number processed and error code
+    (process-migrations (max-process uint) (response uint uint))
+    
+    ;; Get migration queue statistics
+    ;; @return (response (tuple ...) uint): queue statistics and error code
+    (get-queue-stats () (response (tuple (total-queued uint) (processed uint) (average-wait uint)) uint))
+    
+    ;; Get user's queued migrations
+    ;; @return (response (list 10 uint) uint): list of queue IDs and error code
+    (get-user-migrations (user principal) (response (list 10 uint) uint))
+  )
+)
+
+;; ===========================================
+;; ROUTER TRAIT
+;; ===========================================
+;; Interface for DEX routing functionality
+;;
+;; This trait provides functions to route token swaps across multiple pools
+;; and find optimal execution paths.
+;;
+;; Example usage:
+;;   (use-trait router .all-traits.router-trait)
+(define-trait router-trait
+  (
+    ;; Swap exact tokens for tokens
+    ;; @param amount-in: amount of input tokens
+    ;; @param amount-out-min: minimum output amount
+    ;; @param path: swap path (token addresses)
+    ;; @param to: recipient address
+    ;; @param deadline: transaction deadline
+    ;; @return (response (list uint) uint): amounts and error code
+    (swap-exact-tokens-for-tokens (amount-in uint) (amount-out-min uint) (path (list 10 principal)) (to principal) (deadline uint) (response (list uint) uint))
+    
+    ;; Swap tokens for exact tokens
+    ;; @param amount-out: desired output amount
+    ;; @param amount-in-max: maximum input amount
+    ;; @param path: swap path (token addresses)
+    ;; @param to: recipient address
+    ;; @param deadline: transaction deadline
+    ;; @return (response (list uint) uint): amounts and error code
+    (swap-tokens-for-exact-tokens (amount-out uint) (amount-in-max uint) (path (list 10 principal)) (to principal) (deadline uint) (response (list uint) uint))
+    
+    ;; Get amounts out for a given path
+    ;; @param amount-in: input amount
+    ;; @param path: swap path
+    ;; @return (response (list uint) uint): output amounts and error code
+    (get-amounts-out (amount-in uint) (path (list 10 principal)) (response (list uint) uint))
+    
+    ;; Get amounts in for a desired output
+    ;; @param amount-out: desired output amount
+    ;; @param path: swap path
+    ;; @return (response (list uint) uint): input amounts and error code
+    (get-amounts-in (amount-out uint) (path (list 10 principal)) (response (list uint) uint))
+    
+    ;; Remove liquidity from a pool
+    ;; @param token-a: first token
+    ;; @param token-b: second token
+    ;; @param liquidity: liquidity amount
+    ;; @param amount-a-min: minimum amount of token A
+    ;; @param amount-b-min: minimum amount of token B
+    ;; @param to: recipient address
+    ;; @param deadline: transaction deadline
+    ;; @return (response (tuple (amount-a uint) (amount-b uint)) uint): removed amounts and error code
+    (remove-liquidity (token-a principal) (token-b principal) (liquidity uint) (amount-a-min uint) (amount-b-min uint) (to principal) (deadline uint) (response (tuple (amount-a uint) (amount-b uint)) uint))
+  )
+)
+
+;; ===========================================
+;; YIELD DISTRIBUTION TRAIT
+;; ===========================================
+;; Interface for yield distribution and optimization
+;;
+;; This trait provides functions to distribute yields from various sources
+;; and optimize yield allocation across different strategies.
+;;
+;; Example usage:
+;;   (use-trait yield-distribution .all-traits.yield-distribution-trait)
+(define-trait yield-distribution-trait
+  (
+    ;; Distribute yields to stakeholders
+    ;; @param total-yield: total yield available for distribution
+    ;; @return (response uint uint): distributed amount and error code
+    (distribute-yields (total-yield uint) (response uint uint))
+    
+    ;; Calculate optimal yield allocation
+    ;; @param available-yield: yield available for allocation
+    ;; @param strategies: list of yield strategies
+    ;; @return (response (list 10 uint) uint): allocation amounts and error code
+    (calculate-optimal-allocation (available-yield uint) (strategies (list 10 principal)) (response (list 10 uint) uint))
+    
+    ;; Claim yields for a user
+    ;; @param user: user principal
+    ;; @return (response uint uint): claimed amount and error code
+    (claim-yields (user principal) (response uint uint))
+    
+    ;; Get yield statistics
+    ;; @return (response (tuple ...) uint): yield statistics and error code
+    (get-yield-stats () (response (tuple (total-distributed uint) (total-claimed uint) (pending-claims uint)) uint))
+  )
+)
+
+;; ===========================================
+;; MEV PROTECTOR TRAIT
+;; ===========================================
+;; Interface for MEV (Miner Extractable Value) protection
+;;
+;; This trait provides functions to protect against front-running,
+;; sandwich attacks, and other MEV exploits.
+;;
+;; Example usage:
+;;   (use-trait mev-protector .all-traits.mev-protector-trait)
+(define-trait mev-protector-trait
+  (
+    ;; Submit a commitment for a transaction
+    ;; @param commitment: hash commitment for the transaction
+    ;; @return (response uint uint): commitment ID and error code
+    (submit-commitment (commitment (buff 32)) (response uint uint))
+    
+    ;; Reveal and execute a committed transaction
+    ;; @param commitment-id: commitment identifier
+    ;; @param transaction-data: actual transaction data
+    ;; @return (response bool uint): success flag and error code
+    (reveal-and-execute (commitment-id uint) (transaction-data (buff 1024)) (response bool uint))
+    
+    ;; Check if a commitment is valid
+    ;; @param commitment-id: commitment identifier
+    ;; @return (response bool uint): validity flag and error code
+    (is-commitment-valid (commitment-id uint) (response bool uint))
+    
+    ;; Get MEV protection statistics
+    ;; @return (response (tuple ...) uint): protection statistics and error code
+    (get-mev-stats () (response (tuple (total-protected uint) (attacks-prevented uint) (gas-saved uint)) uint))
+  )
+)
+
+;; ===========================================
+;; AUDIT REGISTRY TRAIT
+;; ===========================================
+;; Interface for audit registry and voting system
+;;
+;; This trait provides functions to submit audits, vote on them,
+;; and manage the audit approval process.
+;;
+;; Example usage:
+;;   (use-trait audit-registry .all-traits.audit-registry-trait)
+(define-trait audit-registry-trait
+  (
+    ;; Submit a new audit
+    ;; @param contract-address: address of contract being audited
+    ;; @param audit-hash: hash of the audit report
+    ;; @param report-uri: URI to the full audit report
+    ;; @return (response uint uint): audit ID and error code
+    (submit-audit (contract-address principal) (audit-hash (string-ascii 64)) (report-uri (string-utf8 256)) (response uint uint))
+
+    ;; Vote on an audit
+    ;; @param audit-id: ID of the audit to vote on
+    ;; @param approve: true to approve, false to reject
+    ;; @return (response bool uint): success flag and error code
+    (vote (audit-id uint) (approve bool) (response bool uint))
+
+    ;; Finalize audit after voting period
+    ;; @param audit-id: ID of the audit to finalize
+    ;; @return (response bool uint): success flag and error code
+    (finalize-audit (audit-id uint) (response bool uint))
+
+    ;; Get audit details
+    ;; @param audit-id: ID of the audit
+    ;; @return (response (tuple ...) uint): audit details and error code
+    (get-audit (audit-id uint) (response (tuple
+      (contract-address principal)
+      (audit-hash (string-ascii 64))
+      (auditor principal)
+      (report-uri (string-utf8 256))
+      (timestamp uint)
+      (status (tuple (status (string-ascii 20)) (reason (optional (string-utf8 500)))))
+      (votes (tuple (for uint) (against uint) (voters (list 100 principal))))
+      (voting-ends uint)
+    ) uint))
+
+    ;; Get audit status
+    ;; @param audit-id: ID of the audit
+    ;; @return (response (tuple ...) uint): audit status and error code
+    (get-audit-status (audit-id uint) (response (tuple
+      (status (string-ascii 20))
+      (reason (optional (string-utf8 500)))
+    ) uint))
+
+    ;; Get audit votes
+    ;; @param audit-id: ID of the audit
+    ;; @return (response (tuple ...) uint): vote details and error code
+    (get-audit-votes (audit-id uint) (response (tuple
+      (for uint)
+      (against uint)
+      (voters (list 100 principal))
+    ) uint))
+
+    ;; Admin: Set voting period
+    ;; @param blocks: voting period in blocks
+    ;; @return (response bool uint): success flag and error code
+    (set-voting-period (blocks uint) (response bool uint))
+
+    ;; Admin: Emergency pause an audit
+    ;; @param audit-id: ID of the audit to pause
+    ;; @param reason: reason for pausing
+    ;; @return (response bool uint): success flag and error code
+    (emergency-pause-audit (audit-id uint) (reason (string-utf8 500)) (response bool uint))
   )
 )
 
 ;; ===========================================
 ;; CIRCUIT BREAKER TRAIT
 ;; ===========================================
-;; Interface for circuit breaker pattern
+;; Interface for circuit breaker functionality
 ;;
 ;; This trait provides functions to trip and reset circuit breakers
 ;; for individual services or the entire protocol.
 ;;
 ;; Example usage:
 ;;   (use-trait breaker .all-traits.circuit-breaker-trait)
+(define-trait circuit-breaker-trait
+  (
+    ;; Check if the circuit breaker is currently tripped
+    ;; @return (response bool uint): true if tripped, false otherwise, and error code
+    (is-circuit-open () (response bool uint))
+    
+    ;; Trip the circuit breaker (admin only)
+    ;; @return (response bool uint): success flag and error code
+    (trip-circuit () (response bool uint))
+    
+    ;; Reset the circuit breaker (admin only)
+    ;; @return (response bool uint): success flag and error code
+    (reset-circuit () (response bool uint))
+    
+    ;; Get circuit breaker statistics
+    ;; @return (response (tuple (trips uint) (last-trip uint) (resets uint)) uint): statistics and error code
+    (get-circuit-stats () (response (tuple (trips uint) (last-trip uint) (resets uint)) uint))
+  )
+)
+
+;; ===========================================
+;; OWNABLE TRAIT
+;; ===========================================
+;; Interface for contracts that can be owned and transferred
+;;
+;; This trait provides functions to manage contract ownership.
+;;
+;; Example usage:
+;;   (use-trait ownable .all-traits.ownable-trait)
+;;   (impl-trait .all-traits.ownable-trait)
+(define-trait ownable-trait
+  (
+    ;; Get the current owner of the contract
+    ;; @return (response principal uint): owner principal and error code
+    (get-owner () (response principal uint))
+    
+    ;; Transfer ownership to a new principal
+    ;; @param new-owner: new owner principal
+    ;; @return (response bool uint): success flag and error code
+    (transfer-ownership (new-owner principal) (response bool uint))
+  )
+)
+
+;; ===========================================
+;; PAUSABLE TRAIT
+;; ===========================================
+;; Interface for contracts that can be paused and unpaused
+;;
+;; This trait provides functions to pause and resume contract operations.
+;;
+;; Example usage:
+;;   (use-trait pausable .all-traits.pausable-trait)
+;;   (impl-trait .all-traits.pausable-trait)
+(define-trait pausable-trait
+  (
+    ;; Check if the contract is currently paused
+    ;; @return bool: true if paused, false otherwise
+    (is-paused () bool)
+    
+    ;; Pause contract operations (admin only)
+    ;; @return (response bool uint): success flag and error code
+    (pause () (response bool uint))
+    
+    ;; Resume contract operations (admin only)
+    ;; @return (response bool uint): success flag and error code
+    (unpause () (response bool uint))
+  )
+)
+
+;; ===========================================
+;; MULTI-HOP ROUTER V3 TRAIT
+;; ===========================================
+;; Interface for multi-hop routing across multiple DEX pools
+;;
+;; This trait provides functions to compute and execute optimal
+;; swap paths across multiple liquidity pools.
+;;
+;; Example usage:
+;;   (use-trait router .all-traits.multi-hop-router-v3-trait)
+(define-trait multi-hop-router-v3-trait
+  (
+    ;; Compute the best route for a token swap
+    ;; @param token-in: input token
+    ;; @param token-out: output token
+    ;; @param amount-in: amount of input token
+    ;; @return (response (tuple (route-id (buff 32)) (hops uint)) uint): route data and error code
+    (compute-best-route (token-in principal) (token-out principal) (amount-in uint) (response (tuple (route-id (buff 32)) (hops uint)) uint))
+    
+    ;; Execute a pre-computed route
+    ;; @param route-id: route identifier
+    ;; @param recipient: recipient of output tokens
+    ;; @return (response uint uint): output amount and error code
+    (execute-route (route-id (buff 32)) (recipient principal) (response uint uint))
+    
+    ;; Get statistics about a route
+    ;; @param route-id: route identifier
+    ;; @return (response (tuple (hops uint) (estimated-out uint) (expires-at uint)) uint): route stats and error code
+    (get-route-stats (route-id (buff 32)) (response (tuple (hops uint) (estimated-out uint) (expires-at uint)) uint))
+  )
+)
+
+;; ===========================================
+;; CLP POOL TRAIT
+;; ===========================================
+;; Interface for Concentrated Liquidity Pool operations
+;;
+;; This trait provides functions specific to concentrated liquidity pools
+;; with tick-based positioning and NFT management.
+;;
+;; Example usage:
+;;   (use-trait clp-pool .all-traits.clp-pool-trait)
+(define-trait clp-pool-trait
+  (
+    ;; Initialize the pool with token pair and fee
+    ;; @param token-a: first token
+    ;; @param token-b: second token
+    ;; @param fee-rate: fee in basis points
+    ;; @param tick: initial tick
+    ;; @return (response bool uint): success flag and error code
+    (initialize (token-a principal) (token-b principal) (fee-rate uint) (tick int) (response bool uint))
+    
+    ;; Set the NFT contract for position management
+    ;; @param contract-address: NFT contract address
+    ;; @return (response bool uint): success flag and error code
+    (set-position-nft-contract (contract-address principal) (response bool uint))
+    
+    ;; Mint a new concentrated liquidity position
+    ;; @param recipient: position owner
+    ;; @param tick-lower: lower tick bound
+    ;; @param tick-upper: upper tick bound
+    ;; @param amount: liquidity amount
+    ;; @return (response (tuple (position-id uint) (liquidity uint) (amount-x uint) (amount-y uint)) uint): position data and error code
+    (mint-position (recipient principal) (tick-lower int) (tick-upper int) (amount uint) (response (tuple (position-id uint) (liquidity uint) (amount-x uint) (amount-y uint)) uint))
+    
+    ;; Burn a concentrated liquidity position
+    ;; @param position-id: position identifier
+    ;; @return (response (tuple (fees-x uint) (fees-y uint)) uint): fees earned and error code
+    (burn-position (position-id uint) (response (tuple (fees-x uint) (fees-y uint)) uint))
+    
+    ;; Collect fees from a position
+    ;; @param position-id: position identifier
+    ;; @param recipient: fee recipient
+    ;; @return (response (tuple (amount-x uint) (amount-y uint)) uint): collected amounts and error code
+    (collect-position (position-id uint) (recipient principal) (response (tuple (amount-x uint) (amount-y uint)) uint))
+  )
+)
+;; ===========================================
+;; Interface for DEX liquidity pools
+;;
+;; This trait defines the standard interface that all DEX pools must implement
+;; to be compatible with the Conxian DEX router and factory.
+;;
+;; Example usage:
+;;   (impl-trait .all-traits.pool-trait)
+(define-trait pool-trait
+  (
+    ;; Get the pool's token pair
+    ;; @return (response (tuple (token-x principal) (token-y principal)) uint): token pair and error code
+    (get-tokens () (response (tuple (token-x principal) (token-y principal)) uint))
+    
+    ;; Get the pool's fee tier
+    ;; @return (response uint uint): fee in basis points and error code
+    (get-fee () (response uint uint))
+    
+    ;; Get pool liquidity for a token
+    ;; @param token: token to check liquidity for
+    ;; @return (response uint uint): liquidity amount and error code
+    (get-liquidity (token principal) (response uint uint))
+    
+    ;; Swap tokens in the pool
+    ;; @param token-in: input token
+    ;; @param token-out: output token  
+    ;; @param amount-in: amount of input token
+    ;; @param min-amount-out: minimum acceptable output amount
+    ;; @param recipient: recipient of output tokens
+    ;; @return (response uint uint): output amount and error code
+    (swap (token-in principal) (token-out principal) (amount-in uint) (min-amount-out uint) (recipient principal) (response uint uint))
+    
+    ;; Add liquidity to the pool
+    ;; @param token-x-amount: amount of token-x to add
+    ;; @param token-y-amount: amount of token-y to add
+    ;; @param min-token-x-amount: minimum token-x amount (slippage protection)
+    ;; @param min-token-y-amount: minimum token-y amount (slippage protection)
+    ;; @param recipient: recipient of liquidity tokens/shares
+    ;; @return (response (tuple (liquidity uint) (token-x-amount uint) (token-y-amount uint)) uint): liquidity added and error code
+    (add-liquidity (token-x-amount uint) (token-y-amount uint) (min-token-x-amount uint) (min-token-y-amount uint) (recipient principal) (response (tuple (liquidity uint) (token-x-amount uint) (token-y-amount uint)) uint))
+    
+    ;; Remove liquidity from the pool
+    ;; @param liquidity: amount of liquidity to remove
+    ;; @param min-token-x-amount: minimum token-x amount (slippage protection)
+    ;; @param min-token-y-amount: minimum token-y amount (slippage protection)
+    ;; @param recipient: recipient of removed tokens
+    ;; @return (response (tuple (token-x-amount uint) (token-y-amount uint)) uint): tokens removed and error code
+    (remove-liquidity (liquidity uint) (min-token-x-amount uint) (min-token-y-amount uint) (recipient principal) (response (tuple (token-x-amount uint) (token-y-amount uint)) uint))
+    
+    ;; Get amount out for a given amount in
+    ;; @param token-in: input token
+    ;; @param token-out: output token
+    ;; @param amount-in: amount of input token
+    ;; @return (response uint uint): expected output amount and error code
+    (get-amount-out (token-in principal) (token-out principal) (amount-in uint) (response uint uint))
+    
+    ;; Get amount in for a desired amount out
+    ;; @param token-in: input token
+    ;; @param token-out: output token
+    ;; @param amount-out: desired amount of output token
+    ;; @return (response uint uint): required input amount and error code
+    (get-amount-in (token-in principal) (token-out principal) (amount-out uint) (response uint uint))
+  )
+)
+;; ===========================================
+;; BTC ADAPTER TRAIT
+;; ===========================================
+;; Interface for Bitcoin integration functionality
+;;
+;; This trait provides functions to wrap and unwrap Bitcoin
+;; for use within the Stacks ecosystem.
+;;
+;; Example usage:
+;;   (use-trait btc-adapter .all-traits.btc-adapter-trait)
+(define-trait btc-adapter-trait
+  (
+    ;; Wrap Bitcoin into a Stacks token
+    ;; @param amount: amount of BTC to wrap
+    ;; @param btc-tx-id: Bitcoin transaction ID
+    ;; @return (response uint uint): wrapped amount and error code
+    (wrap-btc (amount uint) (btc-tx-id (buff 32)) (response uint uint))
+    
+    ;; Unwrap Stacks token back to Bitcoin
+    ;; @param amount: amount to unwrap
+    ;; @param btc-address: Bitcoin address to send to
+    ;; @return (response bool uint): success flag and error code
+    (unwrap-btc (amount uint) (btc-address (buff 64)) (response bool uint))
+    
+    ;; Get wrapped Bitcoin balance for a user
+    ;; @param user: user principal
+    ;; @return (response uint uint): wrapped balance and error code
+    (get-wrapped-balance (user principal) (response uint uint))
+  )
+)

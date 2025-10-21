@@ -1,9 +1,12 @@
 
 
 ;; Oracle - Minimal implementation of oracle-trait
+;; Provides price feed functionality for assets
 
-(use-trait oracle-trait .all-traits.oracle-trait)
-(impl-trait oracle-trait)
+(use-trait dimensional-oracle-trait .all-traits.dimensional-oracle-trait)
+(impl-trait dimensional-oracle-trait)
+
+;; Error codes
 (define-constant ERR_ASSET_NOT_FOUND (err u404))
 (define-constant ERR_UNAUTHORIZED (err u401))
 
@@ -29,6 +32,18 @@
 (define-read-only (get-price (asset principal))
   (match (map-get? asset-prices { asset: asset })
     entry (ok (get price entry))
+    (err ERR_ASSET_NOT_FOUND)
+  )
+);; Update
+ price function (alias for set-price to match trait)
+(define-public (update-price (asset principal) (price uint))
+  (set-price asset price)
+)
+
+;; Get price with timestamp
+(define-read-only (get-price-with-timestamp (asset principal))
+  (match (map-get? asset-prices { asset: asset })
+    entry (ok { price: (get price entry), timestamp: block-height })
     (err ERR_ASSET_NOT_FOUND)
   )
 )
