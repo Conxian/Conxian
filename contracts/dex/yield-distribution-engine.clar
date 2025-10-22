@@ -1,12 +1,12 @@
 ;; ===== Traits =====
+(use-trait yield-distribution-trait .all-traits.yield-distribution-trait)
+(impl-trait yield-distribution-trait)
 
 ;; yield-distribution-engine.clar
 ;; Advanced yield distribution system for enterprise loans and bonds
 ;; Handles complex yield calculations, distribution schedules, and optimization
 
 ;; ===== Error Codes =====
-(use-trait yield-distribution-trait .all-traits.yield-distribution-trait)
-(impl-trait yield-distribution-trait)
 (define-constant ERR_UNAUTHORIZED (err u9001))
 (define-constant ERR_POOL_NOT_FOUND (err u9002))
 (define-constant ERR_INSUFFICIENT_BALANCE (err u9003))

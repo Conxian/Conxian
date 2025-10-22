@@ -1,6 +1,6 @@
-;; =
+;; ===========================================
 ;; CONXIAN CONCENTRATED LIQUIDITY POOL
-;; =
+;; ===========================================
 ;; Implements tick-based concentrated liquidity positions
 ;; with NFT position management and advanced fee tracking
 ;;
@@ -8,20 +8,21 @@
 ;; functionality for the Conxian DEX protocol.
 
 ;; Use centralized traits
-
-;; Implement required traits
-
-;; =
-;; CONSTANTS
-;; =
-
-;; Fee tiers (in basis points)
+(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
 (use-trait ownable-trait .all-traits.ownable-trait)
 (use-trait pausable-trait .all-traits.pausable-trait)
 (use-trait pool-trait .all-traits.pool-trait)
+
+;; Implement required traits
+(impl-trait pool-trait)
 (impl-trait ownable-trait)
 (impl-trait pausable-trait)
-(impl-trait pool-trait)
+
+;; ===========================================
+;; CONSTANTS
+;; ===========================================
+
+;; Fee tiers (in basis points)
 (define-constant FEE_TIER_LOW u3000)      ;; 0.3%
 (define-constant FEE_TIER_MEDIUM u10000)  ;; 1.0%
 (define-constant FEE_TIER_HIGH u30000)    ;; 3.0%
@@ -39,9 +40,9 @@
 ;; Q96 constant for sqrt price
 (define-constant Q96 u79228162514264337593543950336)
 
-;; =
+;; ===========================================
 ;; ERROR CODES (from standardized errors.clar)
-;; =
+;; ===========================================
 
 (define-constant ERR_UNAUTHORIZED (err u1001))
 (define-constant ERR_INVALID_INPUT (err u1005))
@@ -53,9 +54,9 @@
 (define-constant ERR_POSITION_NOT_FOUND (err u6000))
 (define-constant ERR_CONTRACT_PAUSED (err u1003))
 
-;; =
+;; ===========================================
 ;; DATA VARIABLES
-;; =
+;; ===========================================
 
 (define-data-var contract-owner principal tx-sender)
 (define-data-var position-nft-contract principal tx-sender)
@@ -79,9 +80,9 @@
 (define-data-var protocol-fees-x uint u0)
 (define-data-var protocol-fees-y uint u0)
 
-;; =
+;; ===========================================
 ;; DATA MAPS
-;; =
+;; ===========================================
 
 ;; Position data
 (define-map positions
@@ -110,9 +111,9 @@
   }
 )
 
-;; =
+;; ===========================================
 ;; OWNABLE TRAIT IMPLEMENTATION
-;; =
+;; ===========================================
 
 (define-read-only (get-owner)
   (ok (var-get contract-owner))
@@ -127,9 +128,9 @@
   )
 )
 
-;; =
+;; ===========================================
 ;; PAUSABLE TRAIT IMPLEMENTATION
-;; =
+;; ===========================================
 
 (define-read-only (is-paused)
   (var-get is-paused)
@@ -151,9 +152,9 @@
   )
 )
 
-;; =
+;; ===========================================
 ;; INTERNAL VALIDATION FUNCTIONS
-;; =
+;; ===========================================
 
 (define-private (check-not-paused)
   (asserts! (not (var-get is-paused)) ERR_CONTRACT_PAUSED)
@@ -177,9 +178,9 @@
   (and (>= tick MIN_TICK) (<= tick MAX_TICK))
 )
 
-;; =
+;; ===========================================
 ;; POOL INITIALIZATION
-;; =
+;; ===========================================
 
 (define-public (initialize
   (token-x principal)
@@ -217,9 +218,9 @@
   )
 )
 
-;; =
+;; ===========================================
 ;; POSITION MANAGEMENT
-;; =
+;; ===========================================
 
 (define-public (mint-position
   (recipient principal)
@@ -364,9 +365,9 @@
   )
 )
 
-;; =
+;; ===========================================
 ;; SWAPPING
-;; =
+;; ===========================================
 
 (define-public (swap
   (token-in principal)
@@ -452,9 +453,9 @@
   )
 )
 
-;; =
+;; ===========================================
 ;; POOL TRAIT IMPLEMENTATION
-;; =
+;; ===========================================
 
 (define-read-only (get-tokens)
   (ok (tuple (token-x (var-get pool-token-x)) (token-y (var-get pool-token-y))))
@@ -514,9 +515,9 @@
   (ok (tuple (token-x-amount u0) (token-y-amount u0)))
 )
 
-;; =
+;; ===========================================
 ;; TICK MANAGEMENT
-;; =
+;; ===========================================
 
 (define-private (update-tick (tick-idx int) (liquidity-delta uint))
   (let ((tick-data (default-to
@@ -545,9 +546,9 @@
   )
 )
 
-;; =
+;; ===========================================
 ;; FEE CALCULATIONS
-;; =
+;; ===========================================
 
 (define-private (calculate-fees-earned (position {owner: principal, tick-lower: int, tick-upper: int, liquidity: uint, fee-growth-inside-x: uint, fee-growth-inside-y: uint, tokens-owed-x: uint, tokens-owed-y: uint}))
   (let ((fee-growth-inside-x-new (get-fee-growth-inside (get tick-lower position) (get tick-upper position) true))
@@ -596,9 +597,9 @@
   )
 )
 
-;; =
+;; ===========================================
 ;; READ-ONLY FUNCTIONS
-;; =
+;; ===========================================
 
 (define-read-only (get-pool-info)
   (ok (tuple

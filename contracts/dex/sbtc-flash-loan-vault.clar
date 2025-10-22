@@ -6,9 +6,9 @@
 (use-trait ft-trait .all-traits.sip-010-trait)
 (use-trait flash-loan-receiver-trait .all-traits.flash-loan-receiver-trait)
 
-;; 
+;; =============================================================================
 ;; CONSTANTS
-;; 
+;; =============================================================================
 (define-constant CONTRACT_OWNER tx-sender)
 (define-constant ERR_UNAUTHORIZED (err u200))
 (define-constant ERR_INVALID_ASSET (err u201))
@@ -35,9 +35,9 @@
 (define-constant BLOCKS_PER_HOUR u144) ;; ~24 hours at 1 block/10min
 (define-constant REPAYMENT_DEADLINE_BLOCKS u10) ;; 10 blocks to repay
 
-;; 
+;; =============================================================================
 ;; DATA STRUCTURES
-;; 
+;; =============================================================================
 (define-map flash-loan-config
   { asset: principal }
   {
@@ -97,9 +97,9 @@
 ;; Circuit breaker integration
 (define-data-var circuit-breaker principal .circuit-breaker)
 
-;; 
+;; =============================================================================
 ;; CORE FLASH LOAN FUNCTIONS
-;; 
+;; =============================================================================
 (define-public (flash-loan (asset <ft-trait>)
                           (amount uint)
                           (receiver <flash-loan-receiver-trait>)
@@ -243,9 +243,9 @@
     
     ERR_FLASH_LOAN_NOT_REPAID))
 
-;; 
+;; =============================================================================
 ;; LIQUIDITY MANAGEMENT
-;; 
+;; =============================================================================
 (define-public (add-liquidity (asset <ft-trait>) (amount uint))
   (let ((asset-contract (contract-of asset)))
     (asserts! (not (var-get vault-paused)) ERR_ASSET_PAUSED)
@@ -312,9 +312,9 @@
         (ok amount))
       ERR_INVALID_ASSET)))
 
-;; 
+;; =============================================================================
 ;; VALIDATION AND UTILITY FUNCTIONS
-;; 
+;; =============================================================================
 (define-private (validate-flash-loan (asset-contract principal) 
                                      (amount uint)
                                      (config (tuple (enabled bool) (fee-rate uint) (max-loan-amount uint) 

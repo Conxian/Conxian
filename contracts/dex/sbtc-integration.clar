@@ -6,9 +6,9 @@
 ;; sBTC Integration Module for Conxian Protocol
 ;; Provides sBTC asset management, risk parameters, and oracle integration
 
-;; 
+;; =============================================================================
 ;; CONSTANTS AND ERROR CODES
-;; 
+;; =============================================================================
 
 (define-constant ERR-NOT-AUTHORIZED (err u1000))
 (define-constant ERR-INVALID-PARAMS (err u1001))
@@ -38,9 +38,9 @@
 (define-constant ORACLE-STALE-THRESHOLD u17280)   ;; ~24 hours (Nakamoto blocks)
 (define-constant MIN-CONFIRMATION-BLOCKS u6)      ;; Min confirmations for peg-in
 
-;; 
+;; =============================================================================
 ;; STORAGE
-;; 
+;; =============================================================================
 
 (define-data-var contract-owner (optional principal) none)
 (define-data-var sbtc-asset (optional principal) none)
@@ -110,9 +110,9 @@
   }
 )
 
-;; 
+;; =============================================================================
 ;; INTERNAL HELPERS
-;; 
+;; =============================================================================
 
 (define-read-only (require-owner)
   (match (var-get contract-owner)
@@ -135,9 +135,9 @@
   (if (is-eq b u0) (ok u0) (ok (/ a b)))
 )
 
-;; 
+;; =============================================================================
 ;; READ-ONLY FUNCTIONS
-;; 
+;; =============================================================================
 
 (define-read-only (get-asset-config (token principal))
   (map-get? asset-config { token: token })

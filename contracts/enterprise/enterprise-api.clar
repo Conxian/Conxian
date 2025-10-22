@@ -1,11 +1,12 @@
 ;; Conxian Enterprise API - Institutional features
 
 ;; Traits
+(use-trait governance-trait .all-traits.governance-token-trait)
+(use-trait access-control-trait .all-traits.access-control-trait)
 
+(impl-trait access-control-trait)
 
 ;; --- Constants ---
-(use-trait access-control-trait .all-traits.access-control-trait)
-(impl-trait access-control-trait)
 (define-constant ERR_UNAUTHORIZED (err u401))
 (define-constant ERR_ACCOUNT_NOT_FOUND (err u404))
 (define-constant ERR_INVALID_TIER (err u405))

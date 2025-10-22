@@ -2,9 +2,9 @@
 ;; sBTC Oracle Adapter - Advanced price feeds and circuit breaker integration
 ;; Handles multiple oracle sources, price validation, and emergency controls
 
-;; 
+;; =============================================================================
 ;; CONSTANTS AND ERROR CODES
-;; 
+;; =============================================================================
 (define-constant CONTRACT_OWNER tx-sender)
 (define-constant ERR_NOT_AUTHORIZED (err u3000))
 (define-constant ERR_INVALID_ORACLE (err u3001))
@@ -26,9 +26,9 @@
 (define-constant CIRCUIT_BREAKER_DEVIATION u200000) ;; 20% price movement
 (define-constant CIRCUIT_BREAKER_WINDOW u6) ;; 6 blocks window
 
-;; 
+;; =============================================================================
 ;; DATA STRUCTURES
-;; 
+;; =============================================================================
 (define-map oracle-config
   { oracle: principal }
   {
@@ -79,9 +79,9 @@
 (define-data-var emergency-pause bool false)
 (define-data-var circuit-breaker-contract principal .circuit-breaker)
 
-;; 
+;; =============================================================================
 ;; ORACLE MANAGEMENT
-;; 
+;; =============================================================================
 (define-public (add-oracle (oracle principal) (weight uint))
   (begin
     (asserts! (is-eq tx-sender CONTRACT_OWNER) ERR_NOT_AUTHORIZED)
@@ -148,9 +148,9 @@
   )
 )
 
-;; 
+;; =============================================================================
 ;; PRICE FEED FUNCTIONS
-;; 
+;; =============================================================================
 (define-public (update-price (asset principal) (price uint) (confidence uint) (volume uint))
   (let ((oracle tx-sender))
     (try! (check-circuit-breaker-status))
@@ -246,9 +246,9 @@
   )
 )
 
-;; 
+;; =============================================================================
 ;; PRICE AGGREGATION
-;; 
+;; =============================================================================
 (define-private (aggregate-prices (asset principal))
   (let (
     (oracle-list (get-active-oracles))
@@ -363,9 +363,9 @@
   )
 )
 
-;; 
+;; =============================================================================
 ;; CIRCUIT BREAKER
-;; 
+;; =============================================================================
 (define-private (check-circuit-breaker-status)
   (match (contract-call? (var-get circuit-breaker-contract) check-and-update-breaker "sbtc-oracle-adapter")
     success (if success (ok true) ERR_CIRCUIT_OPEN)
@@ -435,9 +435,9 @@
   )
 )
 
-;; 
+;; =============================================================================
 ;; READ-ONLY FUNCTIONS
-;; 
+;; =============================================================================
 (define-read-only (get-price (asset principal))
   (match (map-get? aggregated-prices { asset: asset })
     price-data (if (get circuit-breaker-active price-data)

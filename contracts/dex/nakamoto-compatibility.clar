@@ -2,9 +2,9 @@
 ;; Nakamoto Upgrade Compatibility Module for Conxian Protocol
 ;; Provides fast block timing, Bitcoin finality detection, and enhanced security
 
-;; 
+;; =============================================================================
 ;; CONSTANTS AND ERROR CODES
-;; 
+;; =============================================================================
 
 (define-constant ERR_NOT_AUTHORIZED (err u2000))
 (define-constant ERR_BITCOIN_REORG_DETECTED (err u2001))
@@ -39,9 +39,9 @@
 (define-constant NAKAMOTO_MIGRATION_BAND_2_END u241920)  ;; Week 2: 108% rate
 (define-constant NAKAMOTO_MIGRATION_BAND_3_END u518400)  ;; Week 3-4: 105% rate
 
-;; 
+;; =============================================================================
 ;; STATE
-;; 
+;; =============================================================================
 
 (define-data-var contract-owner principal 'SP000000000000000000002Q6VF78)
 (define-data-var nakamoto-activated bool false)
@@ -67,9 +67,9 @@
   }
 )
 
-;; 
+;; =============================================================================
 ;; HELPERS
-;; 
+;; =============================================================================
 
 (define-private (only-owner)
   (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_NOT_AUTHORIZED)
@@ -79,9 +79,9 @@
   (var-get nakamoto-activated)
 )
 
-;; 
+;; =============================================================================
 ;; NAKAMOTO TIMING FUNCTIONS
-;; 
+;; =============================================================================
 
 (define-read-only (get-blocks-per-time-unit (unit (string-ascii 10)))
   (if (is-nakamoto-active)
@@ -122,9 +122,9 @@
   (if (is-nakamoto-active) NAKAMOTO_ORACLE_STALE_THRESHOLD u144) ;; Legacy 24h
 )
 
-;; 
+;; =============================================================================
 ;; BITCOIN FINALITY FUNCTIONS
-;; 
+;; =============================================================================
 
 (define-read-only (get-bitcoin-finality-depth)
   BITCOIN_FINALITY_DEPTH

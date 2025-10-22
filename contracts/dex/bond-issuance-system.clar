@@ -1,14 +1,16 @@
 ;; ===== Imports =====
+(use-trait bond-issuance-trait .all-traits.bond-issuance-trait)
+(use-trait ft-trait .all-traits.sip-010-ft-trait)
 
 ;; ===== Traits =====
+(impl-trait bond-issuance-trait)
+(impl-trait ft-trait)
 
 ;; bond-issuance-system.clar
 ;; Tokenized bond system for backing large enterprise loans
 ;; Issues ERC-1155 style bonds representing shares in loan portfolios
 
 ;; ===== Constants =====
-(use-trait bond-issuance-trait .all-traits.bond-issuance-trait)
-(impl-trait bond-issuance-trait)
 (define-constant ERR_UNAUTHORIZED (err u8001))
 (define-constant ERR_BOND_NOT_FOUND (err u8002))
 (define-constant ERR_INSUFFICIENT_BALANCE (err u8003))
@@ -23,7 +25,6 @@
 (define-constant TOKEN_NAME "Conxian Enterprise Bonds")
 (define-constant TOKEN_SYMBOL "CXB")
 (define-constant TOKEN_DECIMALS u6)
-
 ;; ===== Data Variables =====
 (define-data-var contract-owner principal tx-sender)
 (define-data-var next-series-id uint u1)

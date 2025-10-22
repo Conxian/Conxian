@@ -4,9 +4,9 @@
 
 (use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
 
-;; 
+;; =============================================================================
 ;; CONSTANTS AND ERROR CODES
-;; 
+;; =============================================================================
 
 (define-constant CONTRACT_OWNER tx-sender)
 (define-constant sbtc-integration .sbtc-integration)
@@ -26,9 +26,9 @@
 (define-constant MIN_BORROW_AMOUNT u100000)     ;; 0.001 BTC
 (define-constant LIQUIDATION_CLOSE_FACTOR u500000)  ;; 50% max liquidation
 
-;; 
+;; =============================================================================
 ;; DATA STRUCTURES
-;; 
+;; =============================================================================
 
 (define-map user-positions
   { user: principal, asset: principal }
@@ -52,9 +52,9 @@
   }
 )
 
-;; 
+;; =============================================================================
 ;; READ-ONLY FUNCTIONS
-;; 
+;; =============================================================================
 
 (define-read-only (get-user-position (user principal) (asset principal))
   "Get user's lending position for asset"
@@ -199,9 +199,9 @@
   )
 )
 
-;; 
+;; =============================================================================
 ;; SUPPLY FUNCTIONS
-;; 
+;; =============================================================================
 
 (define-public (supply (asset <sip-010-ft-trait>) (amount uint))
   "Supply sBTC to earn interest"
@@ -326,9 +326,9 @@
   )
 )
 
-;; 
+;; =============================================================================
 ;; BORROW FUNCTIONS
-;; 
+;; =============================================================================
 
 (define-public (borrow (asset <sip-010-ft-trait>) (amount uint))
   "Borrow sBTC against collateral"

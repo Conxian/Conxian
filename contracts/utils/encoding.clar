@@ -1,6 +1,6 @@
-;; =
+;; ===========================================
 ;; ENCODING UTILITIES
-;; =
+;; ===========================================
 ;; Fixed-width, deterministic encodings for commitments and numeric values.
 ;;
 ;; This module provides encoding utilities for creating deterministic hashes

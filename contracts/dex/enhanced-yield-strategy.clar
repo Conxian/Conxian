@@ -2,16 +2,18 @@
 ;; Implements strategy-trait for vault integration
 
 ;; Trait imports
+(use-trait strategy-trait .all-traits.strategy-trait)
+(use-trait pausable-trait .all-traits.pausable-trait)
+(use-trait ownable-trait .all-traits.ownable-trait)
+(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
 
 ;; Implement required traits
+(impl-trait strategy-trait)
+(impl-trait pausable-trait)
+(impl-trait ownable-trait)
+(impl-trait sip-010-ft-trait)
 
 ;; Constants
-(use-trait ownable-trait .all-traits.ownable-trait)
-(use-trait pausable-trait .all-traits.pausable-trait)
-(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
-(impl-trait ownable-trait)
-(impl-trait pausable-trait)
-(impl-trait sip-010-ft-trait)
 (define-constant ERR_UNAUTHORIZED (err u1001))
 (define-constant ERR_PAUSED (err u1002))
 (define-constant ERR_INSUFFICIENT_FUNDS (err u5001))

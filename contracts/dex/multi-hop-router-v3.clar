@@ -1,7 +1,7 @@
 
-;; =
+;; ===========================================
 ;; MULTI-HOP ROUTER V3
-;; =
+;; ===========================================
 ;; Advanced routing engine for optimal path finding across multiple DEX pools
 ;;
 ;; This contract implements multi-hop routing with support for:
@@ -14,17 +14,17 @@
 (use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
 (use-trait pool-trait .all-traits.pool-trait)
 
-;; =
+;; ===========================================
 ;; CONSTANTS
-;; =
+;; ===========================================
 
 (define-constant MAX_HOPS u5)
 (define-constant MAX_SLIPPAGE u1000) ;; 10% max slippage
 (define-constant ROUTE_TIMEOUT u100) ;; blocks
 
-;; =
+;; ===========================================
 ;; ERROR CODES
-;; =
+;; ===========================================
 
 (define-constant ERR_INVALID_ROUTE (err u7001))
 (define-constant ERR_ROUTE_NOT_FOUND (err u7002))
@@ -33,16 +33,16 @@
 (define-constant ERR_INVALID_TOKEN (err u7005))
 (define-constant ERR_ROUTE_EXPIRED (err u7006))
 
-;; =
+;; ===========================================
 ;; DATA VARIABLES
-;; =
+;; ===========================================
 
 (define-data-var route-counter uint u0)
 (define-data-var max-hops uint MAX_HOPS)
 
-;; =
+;; ===========================================
 ;; DATA MAPS
-;; =
+;; ===========================================
 
 ;; Store computed routes
 (define-map routes
@@ -58,9 +58,9 @@
   }
 )
 
-;; =
+;; ===========================================
 ;; ROUTE COMPUTATION
-;; =
+;; ===========================================
 
 (define-read-only (compute-best-route (token-in principal) (token-out principal) (amount-in uint))
   (let ((route-id (generate-route-id token-in token-out amount-in)))
@@ -89,9 +89,9 @@
   )
 )
 
-;; =
+;; ===========================================
 ;; ROUTE EXECUTION
-;; =
+;; ===========================================
 
 (define-public (execute-route (route-id (buff 32)) (recipient principal))
   (let ((route (unwrap! (map-get? routes { route-id: route-id }) ERR_INVALID_ROUTE)))
@@ -116,9 +116,9 @@
   )
 )
 
-;; =
+;; ===========================================
 ;; ROUTE STATISTICS
-;; =
+;; ===========================================
 
 (define-read-only (get-route-stats (route-id (buff 32)))
   (match (map-get? routes { route-id: route-id })
@@ -130,9 +130,9 @@
   )
 )
 
-;; =
+;; ===========================================
 ;; INTERNAL FUNCTIONS
-;; =
+;; ===========================================
 
 (define-private (find-best-route (token-in principal) (token-out principal) (amount-in uint))
   (let ((direct-route (try-direct-route token-in token-out amount-in)))
@@ -252,9 +252,9 @@
   ))
 )
 
-;; =
+;; ===========================================
 ;; UTILITY FUNCTIONS
-;; =
+;; ===========================================
 
 (define-public (set-max-hops (new-max uint))
   (begin

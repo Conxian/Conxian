@@ -1,6 +1,6 @@
-;; =
+;; ===========================================
 ;; CONXIAN PROTOCOL - CENTRALIZED TRAIT DEFINITIONS
-;; =
+;; ===========================================
 ;;
 ;; This file is the single source of truth for all trait definitions in the
 ;; Conxian protocol. All contracts should reference traits from this file
@@ -14,15 +14,15 @@
 ;;   (impl-trait .all-traits.<trait-name>)
 ;;
 ;; ERROR CODES: See errors.clar for standardized error codes
-;; =
+;; ===========================================
 
-;; =
+;; ===========================================
 ;; CORE PROTOCOL TRAITS
-;; =
+;; ===========================================
 
-;; =
+;; ===========================================
 ;; SIP-010 FUNGIBLE TOKEN TRAIT (FT)
-;; =
+;; ===========================================
 ;; Standard interface for fungible tokens implementing SIP-010
 ;;
 ;; Required for all token contracts in the Conxian ecosystem
@@ -67,9 +67,9 @@
     (get-token-uri () (response (optional (string-utf8 256)) uint))
   )
 )
-;; =
+;; ===========================================
 ;; SIP-009 NON-FUNGIBLE TOKEN TRAIT (NFT)
-;; =
+;; ===========================================
 ;; Standard interface for non-fungible tokens implementing SIP-009
 ;;
 ;; Required for all NFT contracts in the Conxian ecosystem
@@ -102,9 +102,9 @@
     (get-owner (uint) (response (optional principal) uint))
   )
 )
-;; =
+;; ===========================================
 ;; FUNGIBLE TOKEN MINTABLE TRAIT
-;; =
+;; ===========================================
 ;; Extension trait for fungible tokens that can be minted and burned
 ;;
 ;; This trait should be implemented alongside sip-010-ft-trait for tokens
@@ -129,9 +129,9 @@
     (burn (principal uint) (response bool uint))
   )
 )
-;; =
+;; ===========================================
 ;; PROTOCOL MONITOR TRAIT
-;; =
+;; ===========================================
 ;; Interface for monitoring and controlling protocol state
 ;;
 ;; This trait provides functions to monitor protocol health, check invariants,
@@ -162,9 +162,9 @@
     (resume-normal-ops () (response bool uint))
   )
 )
-;; =
+;; ===========================================
 ;; STAKING TRAIT
-;; =
+;; ===========================================
 ;; Interface for staking tokens and earning rewards
 ;;
 ;; This trait provides functions for users to stake tokens, unstake them,
@@ -202,9 +202,9 @@
   )
 )
 
-;; =
+;; ===========================================
 ;; ACCESS CONTROL TRAIT
-;; =
+;; ===========================================
 ;; Interface for role-based access control
 ;;
 ;; This trait provides functions to manage roles and permissions within the protocol.
@@ -235,9 +235,9 @@
   )
 )
 
-;; =
+;; ===========================================
 ;; FLASH LOAN RECEIVER TRAIT
-;; =
+;; ===========================================
 ;; Interface for contracts that can receive flash loans
 ;;
 ;; This trait must be implemented by any contract that wants to receive
@@ -258,9 +258,9 @@
   )
 )
 
-;; =
+;; ===========================================
 ;; DIMENSIONAL ORACLE TRAIT
-;; =
+;; ===========================================
 ;; Interface for price oracle functionality
 ;;
 ;; This trait provides functions to get and update asset prices.
@@ -289,9 +289,9 @@
   )
 )
 
-;; =
+;; ===========================================
 ;; DIM REGISTRY TRAIT
-;; =
+;; ===========================================
 ;; Interface for managing oracle registrations
 ;;
 ;; This trait provides functions to register and manage oracle contracts.
@@ -317,9 +317,9 @@
   )
 )
 
-;; =
+;; ===========================================
 ;; UTILS TRAIT
-;; =
+;; ===========================================
 ;; Interface for utility functions
 ;;
 ;; This trait provides conversion functions between different data types.
@@ -350,9 +350,9 @@
   )
 )
 
-;; =
+;; ===========================================
 ;; ADVANCED ROUTER (DIJKSTRA) TRAIT
-;; =
+;; ===========================================
 ;; Interface for optimal path routing using Dijkstra's algorithm
 ;;
 ;; This trait provides functions to build a token graph and find optimal
@@ -416,9 +416,9 @@
   )
 )
 
-;; =
+;; ===========================================
 ;; SIGNED DATA BASE TRAIT
-;; =
+;; ===========================================
 ;; Interface for EIP-712 style structured data signing
 ;;
 ;; This trait provides functions for signature verification with domain separation.
@@ -456,9 +456,9 @@
   )
 )
 
-;; =
+;; ===========================================
 ;; BOND TRAIT
-;; =
+;; ===========================================
 ;; Interface for fixed-income bond instruments
 ;;
 ;; This trait provides functions to issue bonds, claim coupon payments,
@@ -495,9 +495,9 @@
   )
 )
 
-;; =
+;; ===========================================
 ;; BOND FACTORY TRAIT
-;; =
+;; ===========================================
 ;; Interface for creating and managing bond tokens
 ;;
 ;; This trait provides functions to create bond tokens with specific terms
@@ -529,9 +529,9 @@
   )
 )
 
-;; =
+;; ===========================================
 ;; BOND ISSUANCE TRAIT
-;; =
+;; ===========================================
 ;; Interface for issuing tokenized bonds
 ;;
 ;; This trait provides functions to issue bonds backed by underlying assets
@@ -567,9 +567,9 @@
   )
 )
 
-;; =
+;; ===========================================
 ;; CXLP MIGRATION QUEUE TRAIT
-;; =
+;; ===========================================
 ;; Interface for managing CXLP to CXD token migration queues
 ;;
 ;; This trait provides functions to queue migration requests and process
@@ -604,9 +604,9 @@
   )
 )
 
-;; =
+;; ===========================================
 ;; ROUTER TRAIT
-;; =
+;; ===========================================
 ;; Interface for DEX routing functionality
 ;;
 ;; This trait provides functions to route token swaps across multiple pools
@@ -659,9 +659,9 @@
   )
 )
 
-;; =
+;; ===========================================
 ;; YIELD DISTRIBUTION TRAIT
-;; =
+;; ===========================================
 ;; Interface for yield distribution and optimization
 ;;
 ;; This trait provides functions to distribute yields from various sources
@@ -693,9 +693,9 @@
   )
 )
 
-;; =
+;; ===========================================
 ;; MEV PROTECTOR TRAIT
-;; =
+;; ===========================================
 ;; Interface for MEV (Miner Extractable Value) protection
 ;;
 ;; This trait provides functions to protect against front-running,
@@ -727,9 +727,9 @@
   )
 )
 
-;; =
+;; ===========================================
 ;; AUDIT REGISTRY TRAIT
-;; =
+;; ===========================================
 ;; Interface for audit registry and voting system
 ;;
 ;; This trait provides functions to submit audits, vote on them,
@@ -801,9 +801,9 @@
   )
 )
 
-;; =
+;; ===========================================
 ;; CIRCUIT BREAKER TRAIT
-;; =
+;; ===========================================
 ;; Interface for circuit breaker functionality
 ;;
 ;; This trait provides functions to trip and reset circuit breakers
@@ -831,9 +831,9 @@
   )
 )
 
-;; =
+;; ===========================================
 ;; OWNABLE TRAIT
-;; =
+;; ===========================================
 ;; Interface for contracts that can be owned and transferred
 ;;
 ;; This trait provides functions to manage contract ownership.
@@ -854,9 +854,9 @@
   )
 )
 
-;; =
+;; ===========================================
 ;; PAUSABLE TRAIT
-;; =
+;; ===========================================
 ;; Interface for contracts that can be paused and unpaused
 ;;
 ;; This trait provides functions to pause and resume contract operations.
@@ -880,9 +880,9 @@
   )
 )
 
-;; =
+;; ===========================================
 ;; MULTI-HOP ROUTER V3 TRAIT
-;; =
+;; ===========================================
 ;; Interface for multi-hop routing across multiple DEX pools
 ;;
 ;; This trait provides functions to compute and execute optimal
@@ -912,9 +912,9 @@
   )
 )
 
-;; =
+;; ===========================================
 ;; CLP POOL TRAIT
-;; =
+;; ===========================================
 ;; Interface for Concentrated Liquidity Pool operations
 ;;
 ;; This trait provides functions specific to concentrated liquidity pools
@@ -957,7 +957,7 @@
     (collect-position (position-id uint) (recipient principal) (response (tuple (amount-x uint) (amount-y uint)) uint))
   )
 )
-;; =
+;; ===========================================
 ;; Interface for DEX liquidity pools
 ;;
 ;; This trait defines the standard interface that all DEX pools must implement
@@ -1021,9 +1021,9 @@
     (get-amount-in (token-in principal) (token-out principal) (amount-out uint) (response uint uint))
   )
 )
-;; =
+;; ===========================================
 ;; BTC ADAPTER TRAIT
-;; =
+;; ===========================================
 ;; Interface for Bitcoin integration functionality
 ;;
 ;; This trait provides functions to wrap and unwrap Bitcoin

@@ -1,10 +1,10 @@
 ;; MEV Protector Contract
 ;; Implements protection against front-running and sandwich attacks
 
-
-;; --- Constants ---
 (use-trait mev-protector-trait .all-traits.mev-protector-trait)
 (impl-trait mev-protector-trait)
+
+;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED (err u6000))
 (define-constant ERR_COMMITMENT_NOT_FOUND (err u6001))
 (define-constant ERR_REVEAL_PERIOD_EXPIRED (err u6002))
