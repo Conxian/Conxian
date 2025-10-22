@@ -3,10 +3,10 @@
 ;; Enhanced with staking, yield distribution, and system integration hooks
 
 ;; --- Traits ---
-
-;; --- Errors ---
 (use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
 (impl-trait sip-010-ft-trait)
+
+;; --- Errors ---
 (define-constant ERR_UNAUTHORIZED u100)
 (define-constant ERR_NOT_ENOUGH_BALANCE u101)
 (define-constant ERR_MIGRATION_NOT_SET u102)
