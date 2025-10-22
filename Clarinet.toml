@@ -398,10 +398,6 @@ address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.enterprise-enterprise-api"
 path = "contracts/governance-token.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.governance-token"
 
-[contracts.governance-access-control]
-path = "contracts/governance/access-control.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.governance-access-control"
-
 [contracts.governance-emergency-governance]
 path = "contracts/governance/emergency-governance.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.governance-emergency-governance"
@@ -429,10 +425,6 @@ address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.governance-signed-data-base
 [contracts.governance-upgrade-controller]
 path = "contracts/governance/upgrade-controller.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.governance-upgrade-controller"
-
-[contracts.interfaces-access-control]
-path = "contracts/interfaces/access-control.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.interfaces-access-control"
 
 [contracts.interfaces-btc-adapter]
 path = "contracts/interfaces/btc-adapter.clar"

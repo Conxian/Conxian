@@ -1,64 +1,271 @@
-
-
-;; math-lib-advanced.clar
-
+;; ===========================================
+;; ADVANCED MATHEMATICAL LIBRARY
+;; ===========================================
+;; 
 ;; Advanced mathematical library with essential DeFi functions
+;; Implements fixed-point arithmetic with 18-decimal precision
+;; Provides safe math operations with overflow protection
+;;
+;; VERSION: 2.0
+;; PRECISION: 18 decimals (1e18)
 
-;; Implements math-trait for standard interface
+;; ===========================================
+;; CONSTANTS
+;; ===========================================
 
-;; Square root implementation using Newton's method (Babylonian method)
+;; Mathematical constants (scaled by 1e18)
+(define-constant PRECISION u1000000000000000000) ;; 1e18
+(define-constant E_FIXED u2718281828459045235) ;; e * 1e18
+(define-constant PI_FIXED u3141592653589793238) ;; π * 1e18
+(define-constant LN2_FIXED u693147180559945309) ;; ln(2) * 1e18
+(define-constant Q64 u18446744073709551616) ;; 2^64
 
-;; Standardized trait references(define-read-only (pow-fixed (base uint) (exp uint))  (let ((result (var-init PRECISION)))    (let ((b base))      (let ((e exp))        (begin          (while (> e u0)            (if (is-eq (mod e u2) u1)              (var-set result (unwrap! (mul-down (var-get result) b) (err ERR_OVERFLOW))))            (var-set b (unwrap! (mul-down b b) (err ERR_OVERFLOW)))            (var-set e (div-down e u2)))          (ok (var-get result)))))))
-(define-read-only (pow (base uint) (exp uint))  (pow-fixed base exp))
+;; Error constants
+(define-constant ERR_OVERFLOW (err u1001))
+(define-constant ERR_UNDERFLOW (err u1002))
+(define-constant ERR_DIVISION_BY_ZERO (err u1003))
+(define-constant ERR_INVALID_INPUT (err u1004))
 
-;; =
+;; ===========================================
+;; BASIC ARITHMETIC OPERATIONS
+;; ===========================================
 
-;; Power Function
+;; Safe addition with overflow check
+(define-read-only (add (a uint) (b uint))
+  (let ((result (+ a b)))
+    (if (< result a)
+      ERR_OVERFLOW
+      (ok result))))
 
-;; =(define-read-only (add (a uint) (b uint))  (ok (+ a b)))
-(define-read-only (subtract (a uint) (b uint))  (if (>= a b)    (ok (- a b))    (err ERR_UNDERFLOW)))
-(define-read-only (multiply (a uint) (b uint))  (ok (* a b)))
-(define-read-only (divide (a uint) (b uint))  (if (is-eq b u0)    (err ERR_DIVISION_BY_ZERO)    (ok (/ a b))))
-(define-read-only (abs (x uint))  (ok x))
+;; Safe subtraction with underflow check
+(define-read-only (subtract (a uint) (b uint))
+  (if (>= a b)
+    (ok (- a b))
+    ERR_UNDERFLOW))
 
-;; =
+;; Safe multiplication with overflow check
+(define-read-only (multiply (a uint) (b uint))
+  (let ((result (* a b)))
+    (if (and (> a u0) (< (/ result a) b))
+      ERR_OVERFLOW
+      (ok result))))
 
-;; Constants
+;; Safe division with zero check
+(define-read-only (divide (a uint) (b uint))
+  (if (is-eq b u0)
+    ERR_DIVISION_BY_ZERO
+    (ok (/ a b))))
 
-;; =(define-constant E_FIXED 2718281828459045235)  
+;; Absolute value (for uint, always positive)
+(define-read-only (abs (x uint))
+  (ok x))
 
-;; e * 1e18(define-constant AUDIT_REGISTRY (concat CONTRACT_OWNER .audit-registry))
-(define-public (validate-mathematical-constants))
+;; ===========================================
+;; FIXED-POINT ARITHMETIC
+;; ===========================================
 
-;; =
+;; Multiply two fixed-point numbers and scale down
+(define-read-only (mul-down (a uint) (b uint))
+  (let ((product (* a b)))
+    (if (and (> a u0) (< (/ product a) b))
+      ERR_OVERFLOW
+      (ok (/ product PRECISION)))))
 
-;; Square Root Function
+;; Divide two fixed-point numbers and scale up
+(define-read-only (div-down (a uint) (b uint))
+  (if (is-eq b u0)
+    ERR_DIVISION_BY_ZERO
+    (let ((scaled (* a PRECISION)))
+      (if (< (/ scaled a) PRECISION)
+        ERR_OVERFLOW
+        (ok (/ scaled b))))))
 
-;; =(define-read-only (sqrt (n uint))  (if (is-eq n u0)    (ok u0)    (let (      (x (var-init n))      (y (var-init (div (+ n u1) u2)))    )      (while (> (var-get y) (var-get x))        (var-set x (var-get y))        (var-set y (div (+ (div n (var-get y)) (var-get y)) u2))      )      (ok (var-get x))    )  ))
+;; ===========================================
+;; POWER FUNCTIONS
+;; ===========================================
 
-;; =
+;; Binary exponentiation for integer powers
+(define-read-only (pow-fixed (base uint) (exp uint))
+  (if (is-eq exp u0)
+    (ok PRECISION) ;; base^0 = 1
+    (if (is-eq exp u1)
+      (ok base) ;; base^1 = base
+      (let ((result PRECISION)
+            (current-base base)
+            (current-exp exp))
+        (begin
+          ;; Use binary exponentiation algorithm
+          (fold pow-step (list u0 u1 u2 u3 u4 u5 u6 u7 u8 u9 u10 u11 u12 u13 u14 u15 u16 u17 u18 u19 u20 u21 u22 u23 u24 u25 u26 u27 u28 u29 u30 u31)
+                {result: result, base: current-base, exp: current-exp})
+          (ok result))))))
 
-;; Log2 Function
+;; Helper function for binary exponentiation
+(define-private (pow-step (i uint) (state {result: uint, base: uint, exp: uint}))
+  (let ((result (get result state))
+        (base (get base state))
+        (exp (get exp state)))
+    (if (is-eq exp u0)
+      state
+      (if (is-eq (mod exp u2) u1)
+        {result: (unwrap-panic (mul-down result base)),
+         base: (unwrap-panic (mul-down base base)),
+         exp: (/ exp u2)}
+        {result: result,
+         base: (unwrap-panic (mul-down base base)),
+         exp: (/ exp u2)}))))
 
-;; =(define-read-only (log2 (n uint))  (if (is-eq n u0)    (err ERR_DIVISION_BY_ZERO) 
+;; Power function (alias for pow-fixed)
+(define-read-only (pow (base uint) (exp uint))
+  (pow-fixed base exp))
 
-;; Or another appropriate error    (let ((result u0))      (let ((temp n))        (while (> temp u1)          (var-set temp (div temp u2))          (var-set result (+ result u1))        )        (ok result)      )    )  ))
+;; ===========================================
+;; SQUARE ROOT FUNCTION
+;; ===========================================
 
-;; =
+;; Newton-Raphson method for square root
+(define-read-only (sqrt (n uint))
+  (if (is-eq n u0)
+    (ok u0)
+    (if (is-eq n PRECISION)
+      (ok PRECISION) ;; sqrt(1) = 1
+      (let ((x n)
+            (iterations u0))
+        (sqrt-iter x n iterations)))))
 
-;; Swap Calculation Functions
+;; Iterative square root calculation
+(define-private (sqrt-iter (x uint) (n uint) (iterations uint))
+  (if (> iterations u20) ;; Max 20 iterations for safety
+    (ok x)
+    (let ((new-x (/ (+ x (/ n x)) u2)))
+      (if (or (is-eq new-x x) (< (abs-diff new-x x) u1))
+        (ok new-x)
+        (sqrt-iter new-x n (+ iterations u1))))))
 
-;; =(define-read-only (calculate-swap-amount-out-x-to-y (sqrt-price-current uint) (liquidity uint) (amount-in uint))  (let (    (numerator (* liquidity sqrt-price-current))    (denominator (+ numerator (* amount-in Q64)))    (new-sqrt-price (div numerator denominator))  )    (ok (div (* liquidity (- sqrt-price-current new-sqrt-price)) new-sqrt-price))  ))
-(define-read-only (calculate-new-sqrt-price-x-to-y (sqrt-price-current uint) (liquidity uint) (amount-in uint))  (let (    (numerator (* liquidity sqrt-price-current))    (denominator (+ numerator (* amount-in Q64)))  )    (ok (div numerator denominator))  ))
-(define-read-only (calculate-swap-amount-out-y-to-x (sqrt-price-current uint) (liquidity uint) (amount-in uint))  (let (    (numerator (* liquidity sqrt-price-current))    (denominator (+ numerator (* amount-in Q64)))    (new-sqrt-price (div numerator denominator))  )    (ok (div (* liquidity (- sqrt-price-current new-sqrt-price)) new-sqrt-price))  ))
-(define-read-only (calculate-new-sqrt-price-y-to-x (sqrt-price-current uint) (liquidity uint) (amount-in uint))  (let (    (numerator (* liquidity sqrt-price-current))    (denominator (+ numerator (* amount-in Q64)))  )    (ok (div numerator denominator))  ))
-(define-read-only (abs (x uint))  (ok x))
+;; Helper function for absolute difference
+(define-private (abs-diff (a uint) (b uint))
+  (if (>= a b) (- a b) (- b a)))
 
-;; =
+;; ===========================================
+;; LOGARITHM FUNCTIONS
+;; ===========================================
 
-;; Constants
+;; Natural logarithm using Taylor series approximation
+(define-read-only (ln (x uint))
+  (if (is-eq x u0)
+    ERR_DIVISION_BY_ZERO
+    (if (is-eq x PRECISION)
+      (ok u0) ;; ln(1) = 0
+      (ln-taylor x u0 PRECISION u1))))
 
-;; =(define-constant E_FIXED 2718281828459045235)  
+;; Taylor series for ln(1+x) where x is small
+(define-private (ln-taylor (x uint) (result uint) (term uint) (n uint))
+  (if (> n u10) ;; Limit iterations
+    (ok result)
+    (let ((new-term (/ (* term x) n))
+          (new-result (if (is-eq (mod n u2) u1)
+                       (+ result new-term)
+                       (- result new-term))))
+      (if (< new-term u1000) ;; Convergence check
+        (ok new-result)
+        (ln-taylor x new-result new-term (+ n u1))))))
 
-;; e * 1e18(define-constant AUDIT_REGISTRY (concat CONTRACT_OWNER .audit-registry))
-(define-public (validate-mathematical-constants))
+;; Base-2 logarithm
+(define-read-only (log2 (n uint))
+  (if (is-eq n u0)
+    ERR_DIVISION_BY_ZERO
+    (if (is-eq n PRECISION)
+      (ok u0) ;; log2(1) = 0
+      (let ((ln-n (unwrap! (ln n) ERR_DIVISION_BY_ZERO))
+            (ln-2 LN2_FIXED))
+        (div-down ln-n ln-2)))))
+
+;; ===========================================
+;; EXPONENTIAL FUNCTIONS
+;; ===========================================
+
+;; Exponential function using Taylor series
+(define-read-only (exp (x uint))
+  (if (is-eq x u0)
+    (ok PRECISION) ;; e^0 = 1
+    (exp-taylor x PRECISION PRECISION u1)))
+
+;; Taylor series for e^x
+(define-private (exp-taylor (x uint) (result uint) (term uint) (n uint))
+  (if (> n u20) ;; Limit iterations
+    (ok result)
+    (let ((new-term (/ (* term x) n))
+          (new-result (+ result new-term)))
+      (if (< new-term u1000) ;; Convergence check
+        (ok new-result)
+        (exp-taylor x new-result new-term (+ n u1))))))
+
+;; ===========================================
+;; SWAP CALCULATION FUNCTIONS
+;; ===========================================
+
+;; Calculate swap amount out for X to Y
+(define-read-only (calculate-swap-amount-out-x-to-y (sqrt-price-current uint) (liquidity uint) (amount-in uint))
+  (let ((numerator (* liquidity sqrt-price-current))
+        (denominator (+ numerator (* amount-in Q64))))
+    (if (is-eq denominator u0)
+      ERR_DIVISION_BY_ZERO
+      (let ((new-sqrt-price (/ numerator denominator)))
+        (ok (/ (* liquidity (- sqrt-price-current new-sqrt-price)) new-sqrt-price))))))
+
+;; Calculate new sqrt price for X to Y swap
+(define-read-only (calculate-new-sqrt-price-x-to-y (sqrt-price-current uint) (liquidity uint) (amount-in uint))
+  (let ((numerator (* liquidity sqrt-price-current))
+        (denominator (+ numerator (* amount-in Q64))))
+    (if (is-eq denominator u0)
+      ERR_DIVISION_BY_ZERO
+      (ok (/ numerator denominator)))))
+
+;; Calculate swap amount out for Y to X
+(define-read-only (calculate-swap-amount-out-y-to-x (sqrt-price-current uint) (liquidity uint) (amount-in uint))
+  (let ((delta-sqrt-price (/ amount-in liquidity)))
+    (if (< sqrt-price-current delta-sqrt-price)
+      ERR_UNDERFLOW
+      (let ((new-sqrt-price (- sqrt-price-current delta-sqrt-price)))
+        (ok (* liquidity delta-sqrt-price))))))
+
+;; Calculate new sqrt price for Y to X swap
+(define-read-only (calculate-new-sqrt-price-y-to-x (sqrt-price-current uint) (liquidity uint) (amount-in uint))
+  (let ((delta-sqrt-price (/ amount-in liquidity)))
+    (if (< sqrt-price-current delta-sqrt-price)
+      ERR_UNDERFLOW
+      (ok (- sqrt-price-current delta-sqrt-price)))))
+
+;; ===========================================
+;; VALIDATION FUNCTIONS
+;; ===========================================
+
+;; Validate mathematical constants
+(define-public (validate-mathematical-constants)
+  (begin
+    (asserts! (> PRECISION u0) ERR_INVALID_INPUT)
+    (asserts! (> E_FIXED u0) ERR_INVALID_INPUT)
+    (asserts! (> PI_FIXED u0) ERR_INVALID_INPUT)
+    (asserts! (> LN2_FIXED u0) ERR_INVALID_INPUT)
+    (ok true)))
+
+;; Check if number is within safe range
+(define-read-only (is-safe-uint (n uint))
+  (< n u340282366920938463463374607431768211455)) ;; Max safe uint
+
+;; ===========================================
+;; UTILITY FUNCTIONS
+;; ===========================================
+
+;; Get precision constant
+(define-read-only (get-precision)
+  PRECISION)
+
+;; Get mathematical constants
+(define-read-only (get-e)
+  E_FIXED)
+
+(define-read-only (get-pi)
+  PI_FIXED)
+
+(define-read-only (get-ln2)
+  LN2_FIXED)

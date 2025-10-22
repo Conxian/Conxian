@@ -184,7 +184,7 @@
     ;; Unstake tokens from the contract
     ;; @param amount: number of tokens to unstake
     ;; @return (response bool uint): success flag and error code
-    (unstake (uint) (response bool uint))
+    (unstake (amount uint) (response bool uint))
     
     ;; Claim accumulated staking rewards
     ;; @return (response uint uint): amount of rewards claimed and error code

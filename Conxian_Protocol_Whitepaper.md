@@ -32,13 +32,13 @@ the protocol creates a bridge between the traditional financial world and
 the decentralized future, enabling:
 
 - **Bitcoin-Native Finance**: Full integration with SBTC for
-    collateralized lending, yield generation, and cross-protocol liquidity
+  collateralized lending, yield generation, and cross-protocol liquidity
 - **Institutional Adoption**: Enterprise-grade features including
-    compliance hooks, audit registries, and regulatory reporting
+  compliance hooks, audit registries, and regulatory reporting
 - **Multi-Dimensional DeFi**: Advanced financial instruments including
-    concentrated liquidity, tokenized bonds, and complex yield strategies
+  concentrated liquidity, tokenized bonds, and complex yield strategies
 - **Seamless User Experience**: Unified interfaces across lending, DEX,
-    and yield products with atomic cross-protocol operations
+  and yield products with atomic cross-protocol operations
 
 ### 1.3. Core Principles
 
@@ -50,18 +50,18 @@ Every component is engineered with defense-in-depth security:
 - **Access Control**: Granular permission systems with role-based access
 - **Audit Registry**: On-chain audit tracking and compliance verification
 - **Invariant Monitoring**: Continuous protocol health checking and
-                            automated risk mitigation
+  automated risk mitigation
 
 #### Modular Composability
 
 The protocol implements a trait-driven architecture enabling:
 
 - **Interchangeable Components**: Swappable oracles, interest rate models,
-                                  and strategy implementations
+  and strategy implementations
 - **Cross-Protocol Integration**: Atomic operations across DEX, lending,
-                                  and yield systems
-- **Future Extensibility**: New financial instruments can be added 
-                            without core protocol changes
+  and yield systems
+- **Future Extensibility**: New financial instruments can be added
+  without core protocol changes
 
 #### Bitcoin-Centric Design
 
@@ -81,34 +81,34 @@ of concerns:
 #### Foundation Layer
 
 - **Mathematical Libraries**: `math-lib-advanced.clar`, `fixed-point-math.clar`,
-                              `precision-calculator.clar`
+  `precision-calculator.clar`
 - **Core Utilities**: Encoding, error handling, and fundamental financial primitives
 - **Security Primitives**: Circuit breakers, rate limiters, and access controls
 
 #### Protocol Layer
 
 - **DEX Infrastructure**: Multi-pool factory system with concentrated liquidity,
-    stable swaps, and weighted pools
+  stable swaps, and weighted pools
 - **Lending Protocol**: Comprehensive money market with health factors,
-    liquidation, and interest rate models
+  liquidation, and interest rate models
 - **Yield System**: Advanced yield optimization with strategy registration
-    and automated rebalancing
+  and automated rebalancing
 - **Token System**: Multi-token architecture with emission controls and
-    treasury management
+  treasury management
 
 #### Integration Layer
 
 - **SBTC Ecosystem**: Complete SBTC integration across lending, DEX, and yield functions
 - **Dimensional DeFi**: Concentrated liquidity, tokenized bonds, and
-                        advanced financial instruments
+  advanced financial instruments
 - **Enterprise Features**: Compliance hooks, audit registries, and
-                           institutional tooling
+  institutional tooling
 
 #### Governance Layer
 
 - **Access Control**: Multi-role permission system with timelocks and emergency governance
-- **Monitoring**: Real-time system monitoring, performance analytics, 
-                  and invariant checking
+- **Monitoring**: Real-time system monitoring, performance analytics,
+  and invariant checking
 
 ### 2.2. Contract Ecosystem
 
@@ -120,7 +120,7 @@ The protocol comprises over 100 specialized contracts:
 - **dex-router.clar**: Path finding and multi-hop routing
 - **multi-hop-router-v3.clar**: Advanced routing algorithms
 - **Pool Implementations**: concentrated-liquidity-pool.clar,
-                            stable-swap-pool.clar, weighted-swap-pool.clar
+  stable-swap-pool.clar, weighted-swap-pool.clar
 
 #### Lending System
 

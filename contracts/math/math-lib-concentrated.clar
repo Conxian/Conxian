@@ -1,14 +1,27 @@
+;; ===========================================
+;; CONCENTRATED LIQUIDITY MATH LIBRARY
+;; ===========================================
+;;
 ;; Enhanced Math Library for Concentrated Liquidity
 ;; Provides advanced mathematical functions for tick calculations and price conversions
 ;; Supports high-precision calculations for DeFi applications
+;;
+;; VERSION: 2.0
 
-;; Constants - using valid uint values instead of hex buffers
-(define-constant Q96 u79228162514264337593543950336) ;; 2^96 as uint
-(define-constant Q128 u340282366920938463463374607431768211455) ;; 2^128 - 1 as uint
+;; ===========================================
+;; CONSTANTS
+;; ===========================================
+
+;; Fixed-point constants
+(define-constant Q96 u79228162514264337593543950336) ;; 2^96
+(define-constant Q128 u340282366920938463463374607431768211455) ;; 2^128 - 1
+(define-constant PRECISION u1000000000000000000) ;; 1e18
+
+;; Tick range constants
 (define-constant MIN_TICK -887272)
 (define-constant MAX_TICK 887272)
 (define-constant MIN_SQRT_RATIO u4295128739) ;; sqrt(0.000000000000000001)
-(define-constant MAX_SQRT_RATIO u18446744073709551615) ;; sqrt(2^128 - 1) - 1, approximately 2^64 - 1
+(define-constant MAX_SQRT_RATIO u18446744073709551615) ;; Safe max value
 
 ;; Error constants
 (define-constant ERR_INVALID_INPUT (err u4001))
@@ -16,195 +29,259 @@
 (define-constant ERR_TICK_OUT_OF_BOUNDS (err u4003))
 (define-constant ERR_DIVISION_BY_ZERO (err u4004))
 
-;; Math functions
+;; ===========================================
+;; BASIC MATH FUNCTIONS
+;; ===========================================
+
+;; Safe multiplication and division
 (define-read-only (mul-div (a uint) (b uint) (denominator uint))
-  ;; Multiply a * b and divide by denominator with overflow protection
+  (asserts! (> denominator u0) ERR_DIVISION_BY_ZERO)
   (let ((result (* a b)))
-    (asserts! (> denominator u0) ERR_DIVISION_BY_ZERO)
     (asserts! (or (is-eq a u0) (is-eq (/ result a) b)) ERR_OVERFLOW)
     (ok (/ result denominator))))
 
+;; Multiplication and division with rounding up
 (define-read-only (mul-div-rounding-up (a uint) (b uint) (denominator uint))
-  ;; Multiply a * b and divide by denominator, rounding up
   (asserts! (> denominator u0) ERR_DIVISION_BY_ZERO)
-  (let ((result (* a b)))
-    (let ((quotient (/ result denominator))
-          (remainder (mod result denominator)))
-      (ok (if (> remainder u0) (+ quotient u1) quotient)))))
+  (let ((result (* a b))
+        (quotient (/ result denominator))
+        (remainder (mod result denominator)))
+    (ok (if (> remainder u0) (+ quotient u1) quotient))))
 
-;; get-sqrt-ratio-at-tick
-;; Calculates the sqrt price at a given tick.
-;; This function is critical for concentrated liquidity, determining the price boundaries of a position.
+;; ===========================================
+;; UTILITY FUNCTIONS
+;; ===========================================
+
+;; Absolute value for integers
+(define-private (abs (x int))
+  (if (< x 0) (- 0 x) x))
+
+;; Minimum of two values
+(define-private (min (a uint) (b uint))
+  (if (< a b) a b))
+
+;; Maximum of two values
+(define-private (max (a uint) (b uint))
+  (if (> a b) a b))
+
+;; ===========================================
+;; SQUARE ROOT FUNCTIONS (NON-CIRCULAR)
+;; ===========================================
+
+;; Babylonian method for square root - iterative implementation
+(define-read-only (sqrt-babylonian (x uint))
+  (if (is-eq x u0)
+    (ok u0)
+    (if (is-eq x u1)
+      (ok u1)
+      (let ((initial-guess (/ (+ x u1) u2)))
+        (sqrt-babylonian-iter x initial-guess u0)))))
+
+;; Iterative square root helper
+(define-private (sqrt-babylonian-iter (x uint) (guess uint) (iterations uint))
+  (if (> iterations u20) ;; Max iterations for safety
+    (ok guess)
+    (let ((new-guess (/ (+ guess (/ x guess)) u2)))
+      (if (or (is-eq new-guess guess) (< (abs-diff new-guess guess) u1))
+        (ok new-guess)
+        (sqrt-babylonian-iter x new-guess (+ iterations u1))))))
+
+;; Helper for absolute difference
+(define-private (abs-diff (a uint) (b uint))
+  (if (>= a b) (- a b) (- b a)))
+
+;; ===========================================
+;; TICK AND PRICE CONVERSION FUNCTIONS
+;; ===========================================
+
+;; Calculate sqrt ratio at a given tick
 (define-read-only (get-sqrt-ratio-at-tick (tick int))
   (asserts! (and (>= tick MIN_TICK) (<= tick MAX_TICK)) ERR_TICK_OUT_OF_BOUNDS)
-  ;; Simplified implementation: linear approximation for demonstration
+  
+  ;; Simplified implementation using linear approximation
   (let ((tick-uint (to-uint (abs tick)))
-        (base-ratio (/ Q96 u1000)))
+        (base-ratio (/ Q96 u1000000))) ;; Base scaling factor
     (ok (if (>= tick 0)
       (+ Q96 (* base-ratio tick-uint))
-      (- Q96 (* base-ratio tick-uint))))))
+      (if (> Q96 (* base-ratio tick-uint))
+        (- Q96 (* base-ratio tick-uint))
+        MIN_SQRT_RATIO)))))
 
-;; @desc Get the tick for a given sqrt-ratio
-;; @param sqrt-ratio The sqrt-ratio to convert to a tick
-;; @returns (response int uint)
+;; Get tick for a given sqrt ratio
 (define-read-only (get-tick-at-sqrt-ratio (sqrt-ratio uint))
   (asserts! (and (>= sqrt-ratio MIN_SQRT_RATIO) (<= sqrt-ratio MAX_SQRT_RATIO)) ERR_INVALID_INPUT)
-  ;; Simplified implementation: reverse linear approximation
-  (let ((diff (if (>= sqrt-ratio Q96)
-                (- sqrt-ratio Q96)
-                (- Q96 sqrt-ratio)))
-        (base-ratio (/ Q96 u1000))
-        (tick-magnitude (/ diff base-ratio)))
-    (ok (if (>= sqrt-ratio Q96)
-      (to-int tick-magnitude)
-      (- 0 (to-int tick-magnitude))))))
+  
+  ;; Simplified reverse calculation
+  (let ((base-ratio (/ Q96 u1000000)))
+    (if (>= sqrt-ratio Q96)
+      (let ((diff (- sqrt-ratio Q96)))
+        (ok (to-int (/ diff base-ratio))))
+      (let ((diff (- Q96 sqrt-ratio)))
+        (ok (- 0 (to-int (/ diff base-ratio))))))))
 
-(define-private (round-tick (tick int) (tick-spacing int))
-  ;; Round tick to nearest valid tick spacing
-  (let ((rounded (/ tick tick-spacing)))
-    (* rounded tick-spacing)))
+;; Convert tick to price (token1/token0)
+(define-read-only (tick-to-price (tick int))
+  (match (get-sqrt-ratio-at-tick tick)
+    sqrt-ratio (ok (/ (* sqrt-ratio sqrt-ratio) Q128))
+    error error))
 
+;; Convert price to nearest tick
+(define-read-only (price-to-tick (price uint))
+  (let ((sqrt-price-result (sqrt-babylonian (* price Q128))))
+    (match sqrt-price-result
+      sqrt-price (get-tick-at-sqrt-ratio sqrt-price)
+      error error)))
+
+;; ===========================================
+;; LIQUIDITY CALCULATION FUNCTIONS
+;; ===========================================
+
+;; Calculate amount0 delta for given price range and liquidity
 (define-read-only (get-amount0-delta
   (sqrt-ratio-a uint)
   (sqrt-ratio-b uint)
   (liquidity uint)
   (round-up bool))
-  ;; Calculate amount0 delta for given price range and liquidity
+  
   (let ((sqrt-ratio-lower (min sqrt-ratio-a sqrt-ratio-b))
         (sqrt-ratio-upper (max sqrt-ratio-a sqrt-ratio-b)))
     (if round-up
       (mul-div-rounding-up liquidity (- sqrt-ratio-upper sqrt-ratio-lower) Q96)
       (mul-div liquidity (- sqrt-ratio-upper sqrt-ratio-lower) Q96))))
 
+;; Calculate amount1 delta for given price range and liquidity
 (define-read-only (get-amount1-delta
   (sqrt-ratio-a uint)
   (sqrt-ratio-b uint)
   (liquidity uint)
   (round-up bool))
-  ;; Calculate amount1 delta for given price range and liquidity
+  
   (let ((sqrt-ratio-lower (min sqrt-ratio-a sqrt-ratio-b))
         (sqrt-ratio-upper (max sqrt-ratio-a sqrt-ratio-b)))
     (if round-up
       (mul-div-rounding-up liquidity Q96 (- sqrt-ratio-upper sqrt-ratio-lower))
       (mul-div liquidity Q96 (- sqrt-ratio-upper sqrt-ratio-lower)))))
 
+;; ===========================================
+;; SWAP CALCULATION FUNCTIONS
+;; ===========================================
+
+;; Calculate next sqrt price from input amount
 (define-read-only (get-next-sqrt-price-from-input
   (sqrt-price-x96 uint)
   (liquidity uint)
   (amount-in uint)
   (zero-for-one bool))
-  ;; Calculate next sqrt price after input amount
-  (let ((amount-in-with-fee (* amount-in u997)) ;; 0.3% fee
-        (numerator (* amount-in-with-fee sqrt-price-x96))
-        (denominator (+ (* liquidity u1000) amount-in-with-fee)))
-    (ok (if zero-for-one
-      (- sqrt-price-x96 (/ numerator denominator))
-      (+ sqrt-price-x96 (/ numerator denominator))))))
+  
+  (asserts! (> liquidity u0) ERR_DIVISION_BY_ZERO)
+  (asserts! (> sqrt-price-x96 u0) ERR_DIVISION_BY_ZERO)
+  
+  (let ((amount-in-with-fee (* amount-in u997))) ;; 0.3% fee (997/1000)
+    (if zero-for-one
+      ;; Swapping token0 for token1 (price decreases)
+      (let ((numerator (* liquidity sqrt-price-x96))
+            (denominator (+ (* liquidity u1000) amount-in-with-fee)))
+        (ok (/ numerator denominator)))
+      ;; Swapping token1 for token0 (price increases)
+      (let ((delta-sqrt-price (/ amount-in-with-fee liquidity)))
+        (ok (+ sqrt-price-x96 delta-sqrt-price))))))
 
+;; Calculate next sqrt price from output amount
 (define-read-only (get-next-sqrt-price-from-output
   (sqrt-price-x96 uint)
   (liquidity uint)
   (amount-out uint)
   (zero-for-one bool))
-  ;; Calculate next sqrt price after output amount
-  (let ((amount-out-with-fee (* amount-out u1003)) ;; 0.3% fee
-        (numerator (* amount-out-with-fee sqrt-price-x96))
-        (denominator (- (* liquidity u1000) amount-out-with-fee)))
-    (asserts! (> denominator u0) ERR_INVALID_INPUT)
-    (ok (if zero-for-one
-      (- sqrt-price-x96 (/ numerator denominator))
-      (+ sqrt-price-x96 (/ numerator denominator))))))
+  
+  (asserts! (> liquidity u0) ERR_DIVISION_BY_ZERO)
+  (asserts! (> sqrt-price-x96 u0) ERR_DIVISION_BY_ZERO)
+  
+  (let ((amount-out-with-fee (* amount-out u1003))) ;; Add 0.3% fee
+    (if zero-for-one
+      ;; Swapping token0 for token1
+      (let ((delta-sqrt-price (/ amount-out-with-fee liquidity)))
+        (if (> sqrt-price-x96 delta-sqrt-price)
+          (ok (- sqrt-price-x96 delta-sqrt-price))
+          ERR_INVALID_INPUT))
+      ;; Swapping token1 for token0
+      (let ((delta-sqrt-price (/ amount-out-with-fee liquidity)))
+        (ok (+ sqrt-price-x96 delta-sqrt-price))))))
 
-;; Utility functions
-(define-private (abs (x int))
-  (if (< x 0) (- 0 x) x))
+;; ===========================================
+;; FEE CALCULATION FUNCTIONS
+;; ===========================================
 
-(define-private (min (a uint) (b uint))
-  (if (< a b) a b))
-
-(define-private (max (a uint) (b uint))
-  (if (> a b) a b))
-
-;; Advanced tick manipulation functions
-(define-read-only (tick-to-price (tick int))
-  ;; Convert tick to price (token1/token0)
-  (match (get-sqrt-ratio-at-tick tick)
-    success (ok (/ (* success success) Q128))
-    error (err error)))
-
-(define-read-only (price-to-tick (price uint))
-  ;; Convert price to nearest tick - simplified implementation
-  (let ((sqrt-price (sqrt-approx (* price Q128))))
-    (get-tick-at-sqrt-ratio sqrt-price)))
-
-(define-private (sqrt-approx (x uint))
-  ;; Babylonian method for square root approximation
-  (if (is-eq x u0)
-    u0
-    (let ((z (/ (+ x u1) u2)))
-      (let ((y x))
-        (if (< z y)
-          (sqrt-iter z x u10)
-          y)))))
-
-(define-private (sqrt-iter (z uint) (x uint) (iterations uint))
-  (if (is-eq iterations u0)
-    z
-    (let ((new-z (/ (+ z (/ x z)) u2)))
-      (if (< new-z z)
-        (sqrt-iter new-z x (- iterations u1))
-        z))))
-
-;; @desc Calculate the fee growth inside a tick range
-;; @param tick-lower Lower tick boundary
-;; @param tick-upper Upper tick boundary
-;; @param tick-current Current tick
-;; @param fee-growth-global0 Global fee growth for token0
-;; @param fee-growth-global1 Global fee growth for token1
-;; @returns (response (tuple (fee-growth-inside0 uint) (fee-growth-inside1 uint)) uint)
+;; Calculate fee growth inside a tick range
 (define-read-only (get-fee-growth-inside
   (tick-lower int)
   (tick-upper int)
   (tick-current int)
   (fee-growth-global0 uint)
   (fee-growth-global1 uint))
-  (match (get-fee-growth-below tick-lower fee-growth-global0 tick-current)
-    fee-below0 (match (get-fee-growth-below tick-lower fee-growth-global1 tick-current)
-      fee-below1 (match (get-fee-growth-above tick-upper fee-growth-global0 tick-current)
-        fee-above0 (match (get-fee-growth-above tick-upper fee-growth-global1 tick-current)
-          fee-above1 (ok (tuple
-            (fee-growth-inside0 (- fee-growth-global0 (+ fee-below0 fee-above0)))
-            (fee-growth-inside1 (- fee-growth-global1 (+ fee-below1 fee-above1)))))
-          error1 (err error1))
-        error0 (err error0))
-      error-below1 (err error-below1))
-    error-below0 (err error-below0)))
+  
+  (let ((fee-below0 (unwrap! (get-fee-growth-below tick-lower fee-growth-global0 tick-current) ERR_INVALID_INPUT))
+        (fee-below1 (unwrap! (get-fee-growth-below tick-lower fee-growth-global1 tick-current) ERR_INVALID_INPUT))
+        (fee-above0 (unwrap! (get-fee-growth-above tick-upper fee-growth-global0 tick-current) ERR_INVALID_INPUT))
+        (fee-above1 (unwrap! (get-fee-growth-above tick-upper fee-growth-global1 tick-current) ERR_INVALID_INPUT)))
+    
+    (ok {
+      fee-growth-inside0: (- fee-growth-global0 (+ fee-below0 fee-above0)),
+      fee-growth-inside1: (- fee-growth-global1 (+ fee-below1 fee-above1))
+    })))
 
-;; Helper functions for fee growth calculations
-(define-private (get-lower-tick (tick int) (tick-spacing uint))
-  (* (/ tick (to-int tick-spacing)) (to-int tick-spacing)))
-
-(define-private (get-upper-tick (tick int) (tick-spacing uint))
-  (* (+ (/ tick (to-int tick-spacing)) 1) (to-int tick-spacing)))
-
-(define-private (get-fee-growth-outside (tick int))
-  ;; Placeholder for actual implementation to retrieve fee growth outside a tick
-  u0)
-
-(define-private (get-current-tick)
-  ;; Placeholder for actual implementation to retrieve the current tick
-  i0)
-
+;; Get fee growth below a tick
 (define-read-only (get-fee-growth-below (tick int) (fee-growth-global uint) (current-tick int))
-  (let ((lower-tick (get-lower-tick tick u60))
-        (fee-growth-outside (get-fee-growth-outside lower-tick)))
+  (let ((fee-growth-outside (get-fee-growth-outside tick)))
     (ok (if (>= tick current-tick)
       (- fee-growth-global fee-growth-outside)
       fee-growth-outside))))
 
+;; Get fee growth above a tick
 (define-read-only (get-fee-growth-above (tick int) (fee-growth-global uint) (current-tick int))
-  (let ((upper-tick (get-upper-tick tick u60))
-        (fee-growth-outside (get-fee-growth-outside upper-tick)))
+  (let ((fee-growth-outside (get-fee-growth-outside tick)))
     (ok (if (< tick current-tick)
       (- fee-growth-global fee-growth-outside)
       fee-growth-outside))))
+
+;; ===========================================
+;; HELPER FUNCTIONS
+;; ===========================================
+
+;; Get fee growth outside a tick (placeholder implementation)
+(define-private (get-fee-growth-outside (tick int))
+  u0) ;; In production, this would query tick data
+
+;; Round tick to nearest valid tick spacing
+(define-private (round-tick (tick int) (tick-spacing int))
+  (* (/ tick tick-spacing) tick-spacing))
+
+;; Get lower tick boundary
+(define-private (get-lower-tick (tick int) (tick-spacing uint))
+  (* (/ tick (to-int tick-spacing)) (to-int tick-spacing)))
+
+;; Get upper tick boundary
+(define-private (get-upper-tick (tick int) (tick-spacing uint))
+  (* (+ (/ tick (to-int tick-spacing)) 1) (to-int tick-spacing)))
+
+;; ===========================================
+;; VALIDATION FUNCTIONS
+;; ===========================================
+
+;; Validate tick is within bounds
+(define-read-only (is-valid-tick (tick int))
+  (and (>= tick MIN_TICK) (<= tick MAX_TICK)))
+
+;; Validate sqrt price is within bounds
+(define-read-only (is-valid-sqrt-price (sqrt-price uint))
+  (and (>= sqrt-price MIN_SQRT_RATIO) (<= sqrt-price MAX_SQRT_RATIO)))
+
+;; Get constants for external use
+(define-read-only (get-constants)
+  {
+    q96: Q96,
+    q128: Q128,
+    min-tick: MIN_TICK,
+    max-tick: MAX_TICK,
+    min-sqrt-ratio: MIN_SQRT_RATIO,
+    max-sqrt-ratio: MAX_SQRT_RATIO
+  })
