@@ -5,7 +5,6 @@
 ;; =============================================================================
 ;; CONSTANTS AND ERROR CODES
 ;; =============================================================================
-
 (define-constant CONTRACT_OWNER tx-sender)
 (define-constant ERR_NOT_AUTHORIZED (err u3000))
 (define-constant ERR_INVALID_ORACLE (err u3001))
@@ -18,81 +17,78 @@
 (define-constant ERR_CIRCUIT_OPEN (err u5000))
 
 ;; Price validation constants
-(define-constant MAX_PRICE_DEVIATION u100000)    ;; 10% max deviation
-(define-constant MAX_STALENESS_BLOCKS u144)      ;; ~24 hours (assuming 10 min blocks)
-(define-constant MIN_ORACLES_REQUIRED u2)        ;; Minimum oracles for consensus
-(define-constant PRICE_PRECISION u1000000)       ;; 6 decimal places
+(define-constant MAX_PRICE_DEVIATION u100000) ;; 10% max deviation
+(define-constant MAX_STALENESS_BLOCKS u144) ;; ~24 hours (assuming 10 min blocks)
+(define-constant MIN_ORACLES_REQUIRED u2) ;; Minimum oracles for consensus
+(define-constant PRICE_PRECISION u1000000) ;; 6 decimal places
 
 ;; Circuit breaker thresholds
 (define-constant CIRCUIT_BREAKER_DEVIATION u200000) ;; 20% price movement
-(define-constant CIRCUIT_BREAKER_WINDOW u6)          ;; 6 blocks window
+(define-constant CIRCUIT_BREAKER_WINDOW u6) ;; 6 blocks window
 
 ;; =============================================================================
 ;; DATA STRUCTURES
 ;; =============================================================================
-
 (define-map oracle-config
   { oracle: principal }
   {
     is-active: bool,
-    weight: uint,              ;; Oracle weight in price calculation
-    last-update: uint,         ;; Last price update block
-    total-updates: uint,       ;; Total number of price updates
-    failed-updates: uint,      ;; Number of failed updates
-    deviation-count: uint      ;; Number of high deviation updates
+    weight: uint,
+    last-update: uint,
+    total-updates: uint,
+    failed-updates: uint,
+    deviation-count: uint
   }
 )
 
 (define-map price-feeds
   { oracle: principal, asset: principal }
   {
-    price: uint,               ;; Latest price from oracle
-    timestamp: uint,           ;; When price was set
-    confidence: uint,          ;; Price confidence score
-    volume: uint,              ;; Trading volume
-    block-height: uint         ;; Block when price was set
+    price: uint,
+    timestamp: uint,
+    confidence: uint,
+    volume: uint,
+    block-height: uint
   }
 )
 
 (define-map aggregated-prices
   { asset: principal }
   {
-    price: uint,               ;; Weighted average price
-    last-update: uint,         ;; Last aggregation update
-    participating-oracles: uint, ;; Number of oracles in aggregation
-    confidence-score: uint,    ;; Overall confidence
-    deviation: uint,           ;; Price deviation from previous
-    circuit-breaker-active: bool ;; Circuit breaker status
+    price: uint,
+    last-update: uint,
+    participating-oracles: uint,
+    confidence-score: uint,
+    deviation: uint,
+    circuit-breaker-active: bool
   }
 )
 
 (define-map circuit-breaker-state
   { asset: principal }
   {
-    is-triggered: bool,        ;; Circuit breaker status
-    trigger-block: uint,       ;; When circuit breaker was triggered
-    trigger-price: uint,       ;; Price that triggered circuit breaker
-    recovery-threshold: uint,  ;; Price threshold for recovery
-    manual-override: bool      ;; Manual override flag
+    is-triggered: bool,
+    trigger-block: uint,
+    trigger-price: uint,
+    recovery-threshold: uint,
+    manual-override: bool
   }
 )
 
 (define-data-var oracle-count uint u0)
 (define-data-var emergency-pause bool false)
-(define-data-var circuit-breaker principal .circuit-breaker)
+(define-data-var circuit-breaker-contract principal .circuit-breaker)
 
 ;; =============================================================================
 ;; ORACLE MANAGEMENT
 ;; =============================================================================
-
 (define-public (add-oracle (oracle principal) (weight uint))
-  "Add new oracle with specified weight"
   (begin
     (asserts! (is-eq tx-sender CONTRACT_OWNER) ERR_NOT_AUTHORIZED)
     (asserts! (> weight u0) ERR_INVALID_ORACLE)
     (asserts! (is-none (map-get? oracle-config { oracle: oracle })) ERR_ORACLE_ALREADY_EXISTS)
     
-    (map-set oracle-config 
+    (map-set oracle-config
       { oracle: oracle }
       {
         is-active: true,
@@ -111,12 +107,11 @@
 )
 
 (define-public (update-oracle-weight (oracle principal) (new-weight uint))
-  "Update oracle weight"
   (begin
     (asserts! (is-eq tx-sender CONTRACT_OWNER) ERR_NOT_AUTHORIZED)
     (match (map-get? oracle-config { oracle: oracle })
       config (begin
-        (map-set oracle-config 
+        (map-set oracle-config
           { oracle: oracle }
           (merge config { weight: new-weight })
         )
@@ -129,12 +124,11 @@
 )
 
 (define-public (deactivate-oracle (oracle principal))
-  "Deactivate oracle"
   (begin
     (asserts! (is-eq tx-sender CONTRACT_OWNER) ERR_NOT_AUTHORIZED)
     (match (map-get? oracle-config { oracle: oracle })
       config (begin
-        (map-set oracle-config 
+        (map-set oracle-config
           { oracle: oracle }
           (merge config { is-active: false })
         )
@@ -149,7 +143,7 @@
 (define-public (set-circuit-breaker (new-circuit-breaker principal))
   (begin
     (asserts! (is-eq tx-sender CONTRACT_OWNER) ERR_NOT_AUTHORIZED)
-    (var-set circuit-breaker new-circuit-breaker)
+    (var-set circuit-breaker-contract new-circuit-breaker)
     (ok true)
   )
 )
@@ -157,11 +151,9 @@
 ;; =============================================================================
 ;; PRICE FEED FUNCTIONS
 ;; =============================================================================
-
 (define-public (update-price (asset principal) (price uint) (confidence uint) (volume uint))
-  "Update price from oracle (called by registered oracles)"
   (let ((oracle tx-sender))
-    (asserts! (not (try! (check-circuit-breaker))) ERR_CIRCUIT_OPEN)
+    (try! (check-circuit-breaker-status))
     (match (map-get? oracle-config { oracle: oracle })
       config (begin
         (asserts! (get is-active config) ERR_NOT_AUTHORIZED)
@@ -176,45 +168,40 @@
           previous-feed (let ((deviation (calculate-price-deviation price (get price previous-feed))))
             (if (> deviation MAX_PRICE_DEVIATION)
               (begin
-                ;; Update deviation counter
-                (map-set oracle-config 
+                (map-set oracle-config
                   { oracle: oracle }
-                  (merge config { 
+                  (merge config {
                     deviation-count: (+ (get deviation-count config) u1),
                     last-update: block-height,
                     total-updates: (+ (get total-updates config) u1)
                   })
                 )
-                ;; Still update price but flag high deviation
-                (update-price-feed oracle asset price confidence volume true)
+                (try! (update-price-feed oracle asset price confidence volume true))
               )
               (begin
-                ;; Normal price update
-                (map-set oracle-config 
+                (map-set oracle-config
                   { oracle: oracle }
-                  (merge config { 
+                  (merge config {
                     last-update: block-height,
                     total-updates: (+ (get total-updates config) u1)
                   })
                 )
-                (update-price-feed oracle asset price confidence volume false)
+                (try! (update-price-feed oracle asset price confidence volume false))
               )
             )
           )
-          ;; First price update for this oracle-asset pair
           (begin
-            (map-set oracle-config 
+            (map-set oracle-config
               { oracle: oracle }
-              (merge config { 
+              (merge config {
                 last-update: block-height,
                 total-updates: (+ (get total-updates config) u1)
               })
             )
-            (update-price-feed oracle asset price confidence volume false)
+            (try! (update-price-feed oracle asset price confidence volume false))
           )
         )
         
-        ;; Trigger price aggregation
         (try! (aggregate-prices asset))
         (ok true)
       )
@@ -224,9 +211,8 @@
 )
 
 (define-private (update-price-feed (oracle principal) (asset principal) (price uint) (confidence uint) (volume uint) (high-deviation bool))
-  "Internal function to update price feed"
   (begin
-    (map-set price-feeds 
+    (map-set price-feeds
       { oracle: oracle, asset: asset }
       {
         price: price,
@@ -237,10 +223,10 @@
       }
     )
     
-    (print { 
-      event: "price-updated", 
-      oracle: oracle, 
-      asset: asset, 
+    (print {
+      event: "price-updated",
+      oracle: oracle,
+      asset: asset,
       price: price,
       confidence: confidence,
       high-deviation: high-deviation
@@ -250,11 +236,10 @@
 )
 
 (define-private (calculate-price-deviation (new-price uint) (old-price uint))
-  "Calculate percentage deviation between prices"
   (if (is-eq old-price u0)
     u0
-    (let ((difference (if (> new-price old-price) 
-                        (- new-price old-price) 
+    (let ((difference (if (> new-price old-price)
+                        (- new-price old-price)
                         (- old-price new-price))))
       (/ (* difference PRICE_PRECISION) old-price)
     )
@@ -264,24 +249,23 @@
 ;; =============================================================================
 ;; PRICE AGGREGATION
 ;; =============================================================================
-
 (define-private (aggregate-prices (asset principal))
-  "Aggregate prices from all active oracles"
-  (let ((oracle-list (get-active-oracles))
-        (valid-prices (get-valid-prices asset oracle-list)))
+  (let (
+    (oracle-list (get-active-oracles))
+    (valid-prices (get-valid-prices asset oracle-list))
+  )
     (if (>= (len valid-prices) MIN_ORACLES_REQUIRED)
-      (let ((weighted-price (calculate-weighted-average valid-prices))
-            (confidence-score (calculate-confidence-score valid-prices))
-            (price-deviation (calculate-aggregation-deviation asset weighted-price)))
-        
-        ;; Check circuit breaker conditions
+      (let (
+        (weighted-price (calculate-weighted-average valid-prices))
+        (confidence-score (calculate-confidence-score valid-prices))
+        (price-deviation (calculate-aggregation-deviation asset weighted-price))
+      )
         (if (> price-deviation CIRCUIT_BREAKER_DEVIATION)
           (try! (trigger-circuit-breaker asset weighted-price price-deviation))
           true
         )
         
-        ;; Update aggregated price
-        (map-set aggregated-prices 
+        (map-set aggregated-prices
           { asset: asset }
           {
             price: weighted-price,
@@ -293,9 +277,9 @@
           }
         )
         
-        (print { 
-          event: "price-aggregated", 
-          asset: asset, 
+        (print {
+          event: "price-aggregated",
+          asset: asset,
           price: weighted-price,
           oracles: (len valid-prices),
           confidence: confidence-score
@@ -308,24 +292,17 @@
 )
 
 (define-private (get-active-oracles)
-  (begin
-    "Get list of active oracles (simplified - in full implementation would iterate)"
-  ;; In a full implementation, this would iterate through all oracles
-  ;; For now, return a placeholder list
-  (list .oracle-1 .oracle-2 .oracle-3)
-  ))
+  (list)
+)
 
 (define-private (get-valid-prices (asset principal) (oracles (list 10 principal)))
-  "Get valid price feeds from oracles"
-  ;; Filter prices that are not stale and from active oracles
   (fold validate-oracle-price oracles (list))
 )
 
 (define-private (validate-oracle-price (oracle principal) (valid-prices (list 10 { oracle: principal, price: uint, weight: uint, confidence: uint })))
-  "Validate individual oracle price"
   (match (map-get? oracle-config { oracle: oracle })
     config (if (get is-active config)
-      (match (map-get? price-feeds { oracle: oracle, asset: .sbtc-integration.SBTC-MAINNET }) ;; Simplified asset reference
+      (match (map-get? price-feeds { oracle: oracle, asset: .sbtc-integration.SBTC-MAINNET })
         feed (if (< (- block-height (get block-height feed)) MAX_STALENESS_BLOCKS)
           (unwrap-panic (as-max-len? (append valid-prices {
             oracle: oracle,
@@ -344,7 +321,6 @@
 )
 
 (define-private (calculate-weighted-average (prices (list 10 { oracle: principal, price: uint, weight: uint, confidence: uint })))
-  "Calculate weighted average price"
   (let ((totals (fold sum-weighted-prices prices { sum: u0, weight-sum: u0 })))
     (if (> (get weight-sum totals) u0)
       (/ (get sum totals) (get weight-sum totals))
@@ -353,10 +329,9 @@
   )
 )
 
-(define-private (sum-weighted-prices 
+(define-private (sum-weighted-prices
   (price-info { oracle: principal, price: uint, weight: uint, confidence: uint })
   (acc { sum: uint, weight-sum: uint }))
-  "Sum weighted prices for average calculation"
   {
     sum: (+ (get sum acc) (* (get price price-info) (get weight price-info))),
     weight-sum: (+ (get weight-sum acc) (get weight price-info))
@@ -364,9 +339,10 @@
 )
 
 (define-private (calculate-confidence-score (prices (list 10 { oracle: principal, price: uint, weight: uint, confidence: uint })))
-  "Calculate overall confidence score"
-  (let ((confidence-sum (fold sum-confidence prices u0))
-        (count (len prices)))
+  (let (
+    (confidence-sum (fold sum-confidence prices u0))
+    (count (len prices))
+  )
     (if (> count u0)
       (/ confidence-sum count)
       u0
@@ -374,15 +350,13 @@
   )
 )
 
-(define-private (sum-confidence 
+(define-private (sum-confidence
   (price-info { oracle: principal, price: uint, weight: uint, confidence: uint })
   (acc uint))
-  "Sum confidence scores"
   (+ acc (get confidence price-info))
 )
 
 (define-private (calculate-aggregation-deviation (asset principal) (new-price uint))
-  "Calculate deviation from previous aggregated price"
   (match (map-get? aggregated-prices { asset: asset })
     previous (calculate-price-deviation new-price (get price previous))
     u0
@@ -392,11 +366,16 @@
 ;; =============================================================================
 ;; CIRCUIT BREAKER
 ;; =============================================================================
+(define-private (check-circuit-breaker-status)
+  (match (contract-call? (var-get circuit-breaker-contract) check-and-update-breaker "sbtc-oracle-adapter")
+    success (if success (ok true) ERR_CIRCUIT_OPEN)
+    error ERR_CIRCUIT_OPEN
+  )
+)
 
 (define-private (trigger-circuit-breaker (asset principal) (trigger-price uint) (deviation uint))
-  "Trigger circuit breaker for asset"
   (begin
-    (map-set circuit-breaker-state 
+    (map-set circuit-breaker-state
       { asset: asset }
       {
         is-triggered: true,
@@ -407,9 +386,9 @@
       }
     )
     
-    (print { 
-      event: "circuit-breaker-triggered", 
-      asset: asset, 
+    (print {
+      event: "circuit-breaker-triggered",
+      asset: asset,
       price: trigger-price,
       deviation: deviation
     })
@@ -418,7 +397,6 @@
 )
 
 (define-public (reset-circuit-breaker (asset principal))
-  "Reset circuit breaker (admin only)"
   (begin
     (asserts! (is-eq tx-sender CONTRACT_OWNER) ERR_NOT_AUTHORIZED)
     (map-delete circuit-breaker-state { asset: asset })
@@ -428,24 +406,23 @@
 )
 
 (define-public (manual-price-override (asset principal) (price uint))
-  "Manual price override during circuit breaker"
   (begin
     (asserts! (is-eq tx-sender CONTRACT_OWNER) ERR_NOT_AUTHORIZED)
     (match (map-get? circuit-breaker-state { asset: asset })
       cb-state (begin
-        (map-set aggregated-prices 
+        (map-set aggregated-prices
           { asset: asset }
           {
             price: price,
             last-update: block-height,
             participating-oracles: u0,
-            confidence-score: u500000, ;; 50% confidence for manual override
+            confidence-score: u500000,
             deviation: u0,
             circuit-breaker-active: true
           }
         )
         
-        (map-set circuit-breaker-state 
+        (map-set circuit-breaker-state
           { asset: asset }
           (merge cb-state { manual-override: true })
         )
@@ -453,7 +430,7 @@
         (print { event: "manual-price-override", asset: asset, price: price })
         (ok true)
       )
-      ERR_CIRCUIT_BREAKER_TRIGGERED
+      (err ERR_CIRCUIT_BREAKER_TRIGGERED)
     )
   )
 )
@@ -461,75 +438,11 @@
 ;; =============================================================================
 ;; READ-ONLY FUNCTIONS
 ;; =============================================================================
-
 (define-read-only (get-price (asset principal))
-  "Get latest aggregated price for asset"
   (match (map-get? aggregated-prices { asset: asset })
     price-data (if (get circuit-breaker-active price-data)
       (err ERR_CIRCUIT_BREAKER_TRIGGERED)
-      (ok (get price price-data))
-    )
-    (err ERR_PRICE_STALE)
+      (ok (get price price-data)))
+    none (err ERR_PRICE_NOT_AVAILABLE)
   )
 )
-
-(define-read-only (get-price-with-metadata (asset principal))
-  "Get price with full metadata"
-  (map-get? aggregated-prices { asset: asset })
-)
-
-(define-read-only (get-oracle-config (oracle principal))
-  "Get oracle configuration"
-  (map-get? oracle-config { oracle: oracle })
-)
-
-(define-read-only (is-circuit-breaker-active (asset principal))
-  "Check if circuit breaker is active for asset"
-  (match (map-get? circuit-breaker-state { asset: asset })
-    cb-state (get is-triggered cb-state)
-    false
-  )
-)
-
-(define-read-only (get-oracle-price (oracle principal) (asset principal))
-  "Get individual oracle price"
-  (map-get? price-feeds { oracle: oracle, asset: asset })
-)
-
-(define-read-only (is-price-stale (asset principal))
-  "Check if aggregated price is stale"
-  (match (map-get? aggregated-prices { asset: asset })
-    price-data (> (- block-height (get last-update price-data)) MAX_STALENESS_BLOCKS)
-    true
-  )
-)
-
-;; =============================================================================
-;; EMERGENCY CONTROLS
-;; =============================================================================
-
-(define-public (emergency-pause)
-  "Emergency pause all price updates"
-  (begin
-    (asserts! (is-eq tx-sender CONTRACT_OWNER) ERR_NOT_AUTHORIZED)
-    (var-set emergency-pause true)
-    (print { event: "emergency-pause" })
-    (ok true)
-  )
-)
-
-(define-public (resume-operations)
-  "Resume normal operations"
-  (begin
-    (asserts! (is-eq tx-sender CONTRACT_OWNER) ERR_NOT_AUTHORIZED)
-    (var-set emergency-pause false)
-    (print { event: "operations-resumed" })
-    (ok true)
-  )
-)
-
-
-
-
-
-

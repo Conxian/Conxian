@@ -1,10 +1,11 @@
 {
   "name": "conxian",
   "version": "0.1.1",
+  "type": "module",
   "description": "Conxian is a sophisticated DeFi yield optimization protocol on Stacks, designed to automate and enhance returns from liquidity provision and yield farming.",
   "scripts": {
     "test": "vitest --config vitest.config.enhanced.ts",
-    "test:tokens": "node tests/cx-tokens-simple.test.ts",
+    "test:tokens": "node tests/cx-tokens-simple.test.js",
     "test:watch": "vitest --watch --config vitest.config.enhanced.ts",
     "test:ui": "vitest --ui --config vitest.config.enhanced.ts",
     "test:coverage": "vitest run --coverage --config vitest.config.enhanced.ts",
@@ -23,11 +24,11 @@
     "clarinet:check": "clarinet check",
     "check": "clarinet check",
     "clarinet:console": "clarinet console",
-    "align": "python3 align_contracts.py",
     "validate:docs": "node ./scripts/validate-docs.js",
     "ci": "node ./scripts/ensure-deps.js && node ./scripts/validate-docs.js && npx vitest run",
     "coverage": "vitest run --coverage",
-    "update-autonomics": "tsx scripts/sdk_update_autonomics.ts"
+    "update-autonomics": "tsx scripts/sdk_update_autonomics.ts",
+    "load-test": "artillery run load-test.yml"
   },
   "dependencies": {
     "@stacks/blockchain-api-client": "8.13.1",
@@ -38,9 +39,10 @@
     "node-fetch": "^3.3.2"
   },
   "devDependencies": {
-    "@hirosystems/clarinet-sdk": "^3.7.0",
+    "@hirosystems/clarinet-sdk": "3.8.0",
     "@types/node": "^24.5.2",
     "@vitest/coverage-v8": "3.2.4",
+    "artillery": "^2.0.0",
     "ts-node": "^10.9.2",
     "tsx": "^4.7.1",
     "typescript": "^5.4.5",

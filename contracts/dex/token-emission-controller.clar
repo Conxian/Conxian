@@ -1,8 +1,8 @@
 ;; token-emission-controller.clar
 ;; Hard-coded emission rails with governance guards to prevent inflation abuse
-;; Implements supply discipline across all 4 tokens with supermajority + timelock requirements
 
-(use-trait ft-mintable .all-traits.sip-010-ft-mintable-trait)
+;; --- Trait Imports ---
+(use-trait ft-mintable-trait .all-traits.ft-mintable-trait)
 
 ;; --- Constants ---
 (define-constant CONTRACT_OWNER tx-sender)
@@ -11,7 +11,7 @@
 ;; Emission limits (annual inflation caps)
 (define-constant CXD_MAX_ANNUAL_INFLATION u2000) ;; 2% max annual inflation for CXD
 (define-constant CXVG_MAX_ANNUAL_INFLATION u500) ;; 0.5% max for governance token
-(define-constant CXLP_MAX_ANNUAL_INFLATION u1000) ;; 1% max for LP token  
+(define-constant CXLP_MAX_ANNUAL_INFLATION u1000) ;; 1% max for LP token
 (define-constant CXTR_MAX_ANNUAL_INFLATION u10000) ;; 10% max for creator token
 
 ;; Hard caps per epoch (blocks)
@@ -48,7 +48,7 @@
 
 ;; Current epoch tracking
 (define-data-var current-epoch uint u0)
-(define-data-var epoch-start-height uint u0)
+(define-data-var epoch-start-height uint block-height)
 
 ;; Emission tracking per token per epoch
 (define-map epoch-emissions
@@ -62,7 +62,7 @@
 
 ;; Pending governance changes
 (define-map pending-limit-changes
-  principal ;; token
+  principal
   {
     new-annual-bps: uint,
     new-single-mint-bps: uint,
@@ -127,23 +127,23 @@
     (asserts! (var-get system-integration-enabled) (err ERR_UNAUTHORIZED))
     
     ;; Set initial limits for configured contracts
-    (if (is-some (var-get cxd-contract))
-      (map-set token-emission-limits (unwrap-panic (var-get cxd-contract))
+    (match (var-get cxd-contract)
+      cxd-addr (map-set token-emission-limits cxd-addr
         { max-annual-bps: CXD_MAX_ANNUAL_INFLATION, max-single-mint-bps: MAX_SINGLE_MINT_BPS })
       true)
     
-    (if (is-some (var-get cxvg-contract))
-      (map-set token-emission-limits (unwrap-panic (var-get cxvg-contract))
+    (match (var-get cxvg-contract)
+      cxvg-addr (map-set token-emission-limits cxvg-addr
         { max-annual-bps: CXVG_MAX_ANNUAL_INFLATION, max-single-mint-bps: MAX_SINGLE_MINT_BPS })
       true)
     
-    (if (is-some (var-get cxlp-contract))
-      (map-set token-emission-limits (unwrap-panic (var-get cxlp-contract))
+    (match (var-get cxlp-contract)
+      cxlp-addr (map-set token-emission-limits cxlp-addr
         { max-annual-bps: CXLP_MAX_ANNUAL_INFLATION, max-single-mint-bps: MAX_SINGLE_MINT_BPS })
       true)
     
-    (if (is-some (var-get cxtr-contract))
-      (map-set token-emission-limits (unwrap-panic (var-get cxtr-contract))
+    (match (var-get cxtr-contract)
+      cxtr-addr (map-set token-emission-limits cxtr-addr
         { max-annual-bps: CXTR_MAX_ANNUAL_INFLATION, max-single-mint-bps: MAX_SINGLE_MINT_BPS })
       true)
     
@@ -173,24 +173,28 @@
 
 ;; Get current token supply
 (define-private (get-token-supply (token-contract principal))
-  (if (and (is-some (var-get cxd-contract)) (is-eq token-contract (unwrap-panic (var-get cxd-contract))))
-    u1000000000 ;; Simplified for enhanced deployment - return default supply
-    (if (and (is-some (var-get cxvg-contract)) (is-eq token-contract (unwrap-panic (var-get cxvg-contract))))
-      u500000000 ;; Simplified for enhanced deployment
-      (if (and (is-some (var-get cxlp-contract)) (is-eq token-contract (unwrap-panic (var-get cxlp-contract))))
-        u200000000 ;; Simplified for enhanced deployment
-        (if (and (is-some (var-get cxtr-contract)) (is-eq token-contract (unwrap-panic (var-get cxtr-contract))))
-          u100000000 ;; Simplified for enhanced deployment
-          u0)))))
+  (match (var-get cxd-contract)
+    cxd-addr (if (is-eq token-contract cxd-addr) u1000000000
+      (match (var-get cxvg-contract)
+        cxvg-addr (if (is-eq token-contract cxvg-addr) u500000000
+          (match (var-get cxlp-contract)
+            cxlp-addr (if (is-eq token-contract cxlp-addr) u200000000
+              (match (var-get cxtr-contract)
+                cxtr-addr (if (is-eq token-contract cxtr-addr) u100000000 u0)
+                u0))
+            u0))
+        u0))
+    u0))
 
 ;; Authorized mint with emission controls
-(define-public (controlled-mint (token-contract <ft-mintable>) (recipient principal) (amount uint))
+(define-public (controlled-mint (token-contract <ft-mintable-trait>) (recipient principal) (amount uint))
   (let ((token-principal (contract-of token-contract))
         (current-epoch-num (var-get current-epoch)))
     (begin
       ;; Only governance or owner can mint
       (asserts! (or (is-eq tx-sender (var-get contract-owner))
-                   (is-some (var-get governance-contract))) (err ERR_UNAUTHORIZED))
+                   (is-some (var-get governance-contract)))
+               (err ERR_UNAUTHORIZED))
       
       ;; Validate token is supported
       (let ((limits (unwrap! (map-get? token-emission-limits token-principal) (err ERR_INVALID_TOKEN))))
@@ -211,12 +215,12 @@
           ;; Check annual emission cap
           (asserts! (<= (+ (get minted epoch-data) amount) annual-cap) (err ERR_EMISSION_CAP_EXCEEDED))
           
-          ;; Execute mint (mint (amount uint) (recipient principal))
+          ;; Execute mint
           (try! (as-contract (contract-call? token-contract mint amount recipient)))
           
           ;; Update epoch emissions
           (map-set epoch-emissions { token: token-principal, epoch: current-epoch-num }
-            { 
+            {
               minted: (+ (get minted epoch-data) amount),
               supply-at-start: (get supply-at-start epoch-data)
             })
@@ -231,7 +235,7 @@
         (timelock (if is-emergency EMERGENCY_TIMELOCK TIMELOCK_BLOCKS)))
     (begin
       (asserts! (is-eq tx-sender governance) (err ERR_UNAUTHORIZED))
-      (asserts! (and (<= new-annual-bps u20000) (<= new-single-mint-bps u1000)) (err ERR_INVALID_PARAMETERS)) ;; Max 20% annual, 10% single
+      (asserts! (and (<= new-annual-bps u20000) (<= new-single-mint-bps u1000)) (err ERR_INVALID_PARAMETERS))
       
       ;; Store pending change
       (map-set pending-limit-changes token-contract
@@ -257,12 +261,12 @@
       
       (let ((updated-info
               (if support
-                (merge change-info 
+                (merge change-info
                   { votes-for: (+ (get votes-for change-info) voting-power),
-                    total-voting-power: (+ (get total-voting-power change-info) voting-power) })
+                   total-voting-power: (+ (get total-voting-power change-info) voting-power) })
                 (merge change-info
                   { votes-against: (+ (get votes-against change-info) voting-power),
-                    total-voting-power: (+ (get total-voting-power change-info) voting-power) }))))
+                   total-voting-power: (+ (get total-voting-power change-info) voting-power) }))))
         
         (map-set pending-limit-changes token-contract updated-info)
         (ok true)))
@@ -284,7 +288,7 @@
         
         ;; Update emission limits
         (map-set token-emission-limits token-contract
-          { 
+          {
             max-annual-bps: (get new-annual-bps change-info),
             max-single-mint-bps: (get new-single-mint-bps change-info)
           })
@@ -303,62 +307,28 @@
   (let ((current-limits (unwrap! (map-get? token-emission-limits token-contract) (err ERR_INVALID_TOKEN))))
     (begin
       (asserts! (is-eq tx-sender (var-get contract-owner)) (err ERR_UNAUTHORIZED))
+      
       ;; Can only reduce, not increase
       (asserts! (and (<= new-annual-bps (get max-annual-bps current-limits))
-                    (<= new-single-mint-bps (get max-single-mint-bps current-limits))) (err ERR_INVALID_PARAMETERS))
-      
-      ;; Update immediately (emergency powers)
+                     (<= new-single-mint-bps (get max-single-mint-bps current-limits)))
+               (err ERR_INVALID_AMOUNT))
+
+      ;; Update the limits immediately (emergency)
       (map-set token-emission-limits token-contract
-        {
+        (merge current-limits {
           max-annual-bps: new-annual-bps,
-          max-single-mint-bps: new-single-mint-bps
-        })
-      
-      (ok true))))
+          max-single-mint-bps: new-single-mint-bps,
+          last-updated: block-height
+        }))
 
-;; --- Read-Only Functions ---
+      (print {
+        event: "emergency-limits-reduced",
+        token: token-contract,
+        new-annual-bps: new-annual-bps,
+        new-single-mint-bps: new-single-mint-bps
+      })
 
-(define-read-only (get-emission-info (token-contract principal))
-  (let ((current-epoch-num (var-get current-epoch))
-        (limits (map-get? token-emission-limits token-contract))
-        (epoch-data (map-get? epoch-emissions { token: token-contract, epoch: current-epoch-num })))
-    {
-      limits: limits,
-      current-epoch: current-epoch-num,
-      epoch-data: epoch-data,
-      epoch-progress: (- block-height (var-get epoch-start-height)),
-      blocks-remaining: (- EPOCH_BLOCKS (- block-height (var-get epoch-start-height)))
-    }))
-
-(define-read-only (get-remaining-mint-capacity (token-contract principal))
-  (let ((current-epoch-num (var-get current-epoch))
-        (limits (unwrap! (map-get? token-emission-limits token-contract) (err ERR_INVALID_TOKEN)))
-        (epoch-data (default-to { minted: u0, supply-at-start: u0 }
-                                (map-get? epoch-emissions { token: token-contract, epoch: current-epoch-num })))
-        (annual-cap (/ (* (get supply-at-start epoch-data) (get max-annual-bps limits)) u10000)))
-    
-    (ok {
-      annual-remaining: (- annual-cap (get minted epoch-data)),
-      annual-cap: annual-cap,
-      epoch-minted: (get minted epoch-data)
-    })))
-
-(define-read-only (get-pending-change (token-contract principal))
-  (map-get? pending-limit-changes token-contract))
-
-(define-read-only (get-protocol-emission-status)
-  {
-    current-epoch: (var-get current-epoch),
-    epoch-start-height: (var-get epoch-start-height),
-    epoch-progress: (- block-height (var-get epoch-start-height)),
-    cxd-info: (get-emission-info (default-to .cxd-token (var-get cxd-contract))),
-    cxvg-info: (get-emission-info (default-to .cxvg-token (var-get cxvg-contract))),
-    cxlp-info: (get-emission-info (default-to .cxlp-token (var-get cxlp-contract))),
-    cxtr-info: (get-emission-info (default-to .cxtr-token (var-get cxtr-contract)))
-  })
-
-
-
-
-
-
+      (ok true)
+    )
+  )
+)

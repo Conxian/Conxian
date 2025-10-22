@@ -1,0 +1,40 @@
+# <type>(<scope>): <subject>
+# |<---- Using a maximum of 50 characters ---->|
+
+# <body>
+# |<---- Using a maximum of 72 characters per line ---->|
+
+# <footer>
+
+# Types:
+#   feat     (new feature)
+#   fix      (bug fix)
+#   docs     (documentation changes)
+#   style    (formatting, missing semicolons, etc; no code change)
+#   refactor (refactoring production code)
+#   test     (adding tests, refactoring tests; no production code change)
+#   chore    (updating build tasks, package manager configs, etc; no production code change)
+#   perf     (performance improvements)
+#   security (security fixes)
+#
+# Scopes:
+#   contracts   (smart contracts)
+#   dex         (decentralized exchange components)
+#   oracle      (oracle system)
+#   math        (mathematical libraries)
+#   traits      (trait definitions)
+#   utils       (utility functions)
+#   vaults      (vault implementations)
+#   tests       (test files)
+#   docs        (documentation)
+#   ci          (continuous integration)
+#   deps        (dependencies)
+#   all         (multiple scopes)
+#
+# Example:
+#   feat(contracts): implement concentrated liquidity pool
+#
+# Footer should contain references to issue numbers or breaking changes
+# Example:
+#   Fixes #123
+#   BREAKING CHANGE: changes API interface

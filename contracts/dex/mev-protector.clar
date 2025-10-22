@@ -1,3 +1,8 @@
+;; MEV Protector Contract
+;; Implements protection against front-running and sandwich attacks
+
+(use-trait mev-protector-trait .all-traits.mev-protector-trait)
+(impl-trait mev-protector-trait)
 
 ;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED (err u6000))
@@ -9,59 +14,80 @@
 (define-constant ERR_AUCTION_IN_PROGRESS (err u6006))
 (define-constant ERR_SANDWICH_ATTACK_DETECTED (err u6007))
 (define-constant ERR_CIRCUIT_OPEN (err u6008))
+
 ;; --- Data Variables ---
 (define-data-var contract-owner principal tx-sender)
-(define-data-var reveal-period uint u10) ;; Number of blocks for reveal period
+(define-data-var reveal-period uint u10)  ;; Number of blocks for reveal period
 (define-data-var batch-auction-period uint u5)
 (define-data-var last-batch-execution uint u0)
 (define-data-var circuit-breaker (optional principal) none)
+(define-data-var next-reveal-id uint u0)
 
-(define-map commitments
+;; Storage maps
+(define-map commitments 
   { user: principal, commitment-hash: (buff 32) }
   { block-height: uint, revealed: bool }
 )
 
-(define-map pending-reveals uint { user: principal, path: (list 20 principal), amount-in: uint, min-amount-out: (optional uint), recipient: principal, salt: (buff 32) })
+(define-map pending-reveals 
+  uint 
+  { 
+    user: principal, 
+    path: (list 20 principal), 
+    amount-in: uint, 
+    min-amount-out: (optional uint), 
+    recipient: principal, 
+    salt: (buff 32) 
+  }
+)
 
 ;; Deterministic encoding: map principals to numeric indices
 (define-map principal-index principal uint)
 
-;; Helper: get index for principal (defaults to 0 if not set)
+;; --- Helper Functions ---
+
+;; Get index for principal (defaults to 0 if not set)
 (define-private (principal->index (p principal))
   (default-to u0 (map-get? principal-index p))
-  ;; Helper: convert path of principals into a list of indices
-  (define-private (path->index-list (path (list 20 principal)))
-    (map (lambda (p) (principal->index p)) path)
-  )
-
-  (define-private (get-commitment-hash (path (list 20 principal)) (amount-in uint) (min-amount-out (optional uint)) (recipient principal) (salt (buff 32)))
-    (let (
-      (payload {
-        path: (path->index-list path),
-        amount: amount-in,
-        min: min-amount-out,
-        rcpt: (principal->index recipient),
-        salt: salt
-      })
-    )
-      (sha256 (to-consensus-buff payload))
-    )
-  )
-
-(define-private (accumulate-path (p principal) (acc (buff 800)))
-  ;; Simplified - in production this would properly serialize the principal
-  acc
 )
 
+;; Convert path of principals into a list of indices
+(define-private (path->to-index-list (path (list 20 principal)))
+  (map (lambda (p) (principal->index p)) path)
+)
+
+;; Calculate commitment hash
+(define-private (get-commitment-hash 
+  (path (list 20 principal)) 
+  (amount-in uint) 
+  (min-amount-out (optional uint)) 
+  (recipient principal) 
+  (salt (buff 32))
+)
+  (let (
+    (payload { 
+      path: (path->to-index-list path),
+      amount: amount-in, 
+      min: min-amount-out, 
+      rcpt: (principal->index recipient), 
+      salt: salt 
+    })
+  )
+    (sha256 (to-consensus-buff payload))
+  )
+)
+
+;; Check circuit breaker status
 (define-private (check-circuit-breaker)
   (match (var-get circuit-breaker)
-    (breaker (let ((is-tripped (try! (contract-call? breaker is-circuit-open))))
+    breaker (let ((is-tripped (try! (contract-call? breaker is-circuit-open))))
           (if is-tripped (err ERR_CIRCUIT_OPEN) (ok true))))
     (ok true)
   )
 )
 
 ;; --- Admin Functions ---
+
 (define-public (set-reveal-period (period uint))
   (begin
     (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
@@ -96,6 +122,7 @@
 )
 
 ;; --- Commit-Reveal Functions ---
+
 (define-public (commit (commitment-hash (buff 32)))
   (begin
     (try! (check-circuit-breaker))
@@ -107,7 +134,13 @@
   )
 )
 
-(define-public (reveal (path (list 20 principal)) (amount-in uint) (min-amount-out (optional uint)) (recipient principal) (salt (buff 32)))
+(define-public (reveal 
+  (path (list 20 principal)) 
+  (amount-in uint) 
+  (min-amount-out (optional uint)) 
+  (recipient principal) 
+  (salt (buff 32))
+)
   (let (
     (calculated-hash (get-commitment-hash path amount-in min-amount-out recipient salt))
     (commitment-key { user: tx-sender, commitment-hash: calculated-hash })
@@ -116,15 +149,24 @@
     (asserts! (is-some commitment) ERR_COMMITMENT_NOT_FOUND)
     (asserts! (not (get revealed (unwrap-panic commitment))) ERR_ALREADY_REVEALED)
     (asserts! (>= block-height (+ (get block-height (unwrap-panic commitment)) (var-get reveal-period))) ERR_REVEAL_PERIOD_NOT_EXPIRED)
-
+    
     ;; Mark as revealed
     (map-set commitments commitment-key (merge (unwrap-panic commitment) { revealed: true }))
-
+    
     ;; Store for batch auction
     (let (
       (next-id (var-get next-reveal-id))
     )
-      (map-set pending-reveals next-id { user: tx-sender, path: path, amount-in: amount-in, min-amount-out: min-amount-out, recipient: recipient, salt: salt })
+      (map-set pending-reveals next-id 
+        { 
+          user: tx-sender, 
+          path: path, 
+          amount-in: amount-in, 
+          min-amount-out: min-amount-out, 
+          recipient: recipient, 
+          salt: salt 
+        }
+      )
       (var-set next-reveal-id (+ next-id u1))
     )
     (ok true)
@@ -165,14 +207,50 @@
 )
 
 (define-private (get-price (path (list 20 principal)) (amount-in uint))
-    (as-contract (contract-call? .multi-hop-router-v3 get-amount-out path amount-in))
+  (as-contract (contract-call? .multi-hop-router-v3 get-amount-out path amount-in))
 )
 
 (define-public (cancel-commitment (commitment-hash (buff 32)))
-    (let ((commitment-entry (unwrap! (map-get? commitments { user: tx-sender, commitment-hash: commitment-hash }) ERR_COMMITMENT_NOT_FOUND)))
-        (asserts! (not (get revealed commitment-entry)) ERR_ALREADY_REVEALED)
-        (asserts! (> (- block-height (get block-height commitment-entry)) (var-get reveal-period)) ERR_REVEAL_PERIOD_NOT_EXPIRED)
-        (map-delete commitments { user: tx-sender, commitment-hash: commitment-hash })
-        (ok true)
+  (let ((commitment-entry (unwrap! (map-get? commitments { user: tx-sender, commitment-hash: commitment-hash }) ERR_COMMITMENT_NOT_FOUND)))
+    (asserts! (not (get revealed commitment-entry)) ERR_ALREADY_REVEALED)
+    (asserts! (> (- block-height (get block-height commitment-entry)) (var-get reveal-period)) ERR_REVEAL_PERIOD_NOT_EXPIRED)
+    (map-delete commitments { user: tx-sender, commitment-hash: commitment-hash })
+    (ok true)
+  )
+)
+
+;; --- View Functions ---
+
+(define-read-only (is-batch-ready (batch-id uint))
+  (let ((batch (map-get? pending-reveals batch-id)))
+    (if (is-none batch)
+      (ok false)
+      (ok (>= block-height (+ (get block-height (unwrap-panic (map-get? commitments 
+        { 
+          user: (get user (unwrap-panic batch)), 
+          commitment-hash: (get-commitment-hash 
+            (get path (unwrap-panic batch))
+            (get amount-in (unwrap-panic batch))
+            (get min-amount-out (unwrap-panic batch))
+            (get recipient (unwrap-panic batch))
+            (get salt (unwrap-panic batch))
+          )
+        }
+      ))) (var-get reveal-period))))
     )
+  )
+)
+
+(define-read-only (get-commitment-info (commitment-hash (buff 32)))
+  (let ((commitment (unwrap! (map-get? commitments { user: tx-sender, commitment-hash: commitment-hash }) ERR_COMMITMENT_NOT_FOUND)))
+    (ok commitment)
+  )
+)
+
+(define-read-only (get-pending-reveal-count)
+  (ok (var-get next-reveal-id))
+)
+
+(define-read-only (is-protected (user principal))
+  (ok true) ;; In a real implementation, check if user has any pending commitments
 )

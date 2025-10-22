@@ -1,4 +1,3 @@
-
 (define-public (get-utilization) (ok u0))
 (define-public (get-yield-rate) (ok u0))
 (define-public (get-risk-score) (ok u0))

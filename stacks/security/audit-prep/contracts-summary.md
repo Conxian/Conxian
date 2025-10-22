@@ -7,7 +7,7 @@ Last updated: August 16, 2025
 - analytics.clar
 - automated-bounty-system.clar
 - cxvg-token.clar
-- cxlp-token.clar
+- CXLP-token.clar
 - bounty-system.clar
 - creator-token.clar
 - dao-automation.clar

@@ -288,7 +288,7 @@ Network Security
 
 ### Reporting Security Issues
 
-- **Email**: <security@conxian.org> (when available)
+- **Email**: <security@Conxian.org> (when available)
 - **GitHub**: Private security advisories
 - **Discord**: #security channel (when available)
 - **PGP Key**: Available on request
@@ -337,5 +337,5 @@ _Summary of findings and how they were addressed._
 
 ### Security Contacts
 
-- security@conxian.defi
-- [Bug Bounty Program](https://bugbounty.conxian.defi)
+- security@Conxian.defi
+- [Bug Bounty Program](https://bugbounty.Conxian.defi)

@@ -1,19 +1,23 @@
+
 ;; oracle.clar
 ;; Provides price feeds for various assets
 
 ;; Traits
+(use-trait oracle-trait .all-traits.oracle-trait)
+(impl-trait oracle-trait)
 
 ;; Constants
 (define-constant ERR_UNAUTHORIZED (err u100))
 (define-constant ERR_INVALID_PRICE (err u101))
 
 ;; Data Maps
-(define-map asset-prices {
-  asset: principal
-} {
-  price: uint,
-  last-updated: uint
-})
+(define-map asset-prices 
+  { asset: principal } 
+  { 
+    price: uint, 
+    last-updated: uint 
+  }
+)
 
 ;; Data Variables
 (define-data-var contract-owner principal tx-sender)
@@ -22,7 +26,13 @@
 (define-public (set-price (asset principal) (price uint))
   (begin
     (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
-    (map-set asset-prices { asset: asset } { price: price, last-updated: block-height })
+    (map-set asset-prices 
+      { asset: asset } 
+      { 
+        price: price, 
+        last-updated: block-height 
+      }
+    )
     (ok true)
   )
 )
@@ -31,7 +41,4 @@
 (define-read-only (get-price (asset principal))
   (ok (map-get? asset-prices { asset: asset }))
 )
-
-(define-read-only (get-contract-owner)
-  (ok (var-get contract-owner))
-)
+(define-read-only (get-contract-owner)  (ok (var-get contract-owner)))

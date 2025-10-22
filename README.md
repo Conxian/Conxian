@@ -11,7 +11,7 @@ A comprehensive DeFi platform on Stacks featuring 65+ smart contracts with advan
 
 🔄 **Core Framework Implemented** – The core lending and DEX systems are implemented and near production quality. The repository also contains experimental and in-development contracts for advanced features like sBTC integration, which are not yet part of the deployable system.
 
-[View Complete Status](./documentation/STATUS.md)
+[View Complete Status](./documentation/architecture/ARCHITECTURE.md)
 
 ## Development Setup
 
@@ -79,7 +79,7 @@ The protocol uses a dedicated system account for privileged operations. The curr
 - **Bond System**: Tokenized bond contracts with basic functionality
 - **Yield Framework**: Structure for yield optimization strategies
 
-[Complete Feature Documentation](./documentation/)
+[Complete Feature Documentation](./documentation/README.md)
 
 ## 🚀 Deployment
 
@@ -156,7 +156,7 @@ clarinet test
 
 ### For Users
 
-**New to Conxian?** → [**User Manual**](./documentation/USER_MANUAL.md) | [Quick Start Guide](./documentation/QUICK_START.md)
+**New to Conxian?** → [**User Manual**](./documentation/user/USER_MANUAL.md) | [Quick Start Guide](./documentation/user/QUICK_START.md)
 
 ### For Developers
 
@@ -165,7 +165,7 @@ clarinet test
 - Node.js (v18+)
 - Clarinet CLI v3.7.0 (install locally or use `bin/clarinet`); CI installs on runners
 
-Note: This repo uses Clarinet SDK v3.7.0. Local development can use `npx clarinet` or the Clarinet CLI; deployment uses the Clarinet binary in CI.
+Note: This repo uses Clarinet SDK v3.8.0. Local development can use `npx clarinet` or the Clarinet CLI; deployment uses the Clarinet binary in CI.
 
 #### Setup
 
@@ -215,9 +215,9 @@ clarinet deployments generate --testnet
 bash scripts/deploy-testnet.sh
 ```
 
-[Complete Setup Guide](./documentation/DEVELOPER_GUIDE.md)
+[Complete Setup Guide](./documentation/developer/DEVELOPER_GUIDE.md)
 
-📚 **[Complete Documentation](./documentation/)**
+📚 **[Complete Documentation](./documentation/README.md)**
 
 ## 📚 Documentation (Updated September 23, 2025)
 
@@ -240,7 +240,7 @@ All documentation has been reorganized into a clear, structured system:
 
 - [**User Manual**](./documentation/user/USER_MANUAL.md) - Complete user guide
 - [**Developer Guide**](./documentation/developer/DEVELOPER_GUIDE.md) - Development setup
-- [**API Reference**](./documentation/api/API_REFERENCE.md) - Contract functions
+- [**API Reference**](./documentation/api) - Contract functions
 - [**Architecture**](./documentation/architecture/ARCHITECTURE.md) - System design
 
 ## License

@@ -1,5 +1,4 @@
 (use-trait dim-registry .all-traits.dim-registry-trait)
-(use-trait dim-registry-trait .all-traits.dim-registry-trait)
 ;; dim-registry.clar
 ;; Dimensional Registry & Weight Updates
 ;; Registry for dimensional contracts and their associated metrics
@@ -8,7 +7,7 @@
 
 ;; --- Traits ---
 
-(impl-trait .all-traits.dim-registry-trait)
+(impl-trait dim-registry)
 
 ;; Constants
 (define-constant TRAIT_REGISTRY .trait-registry)
@@ -58,3 +57,4 @@
     (asserts! (is-some (map-get? dimension-weights {dim-id: dim-id})) (err ERR_DIMENSION_NOT_FOUND))
     (map-set dimension-weights {dim-id: dim-id} {weight: new-wt})
     (ok new-wt)))
+8bce9a06227aa3d139e549a8bea28e27bd6665af

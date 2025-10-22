@@ -1,5 +1,6 @@
 import { defineConfig } from 'vitest/config';
 import { resolve } from 'path';
+import { fileURLToPath } from 'url';
 
 /**
  * Enhanced Vitest Configuration for Conxian Tokenomics System
@@ -16,7 +17,9 @@ export default defineConfig({
     include: [
       'stacks/tests/**/*.test.ts',
       'stacks/sdk-tests/**/*.spec.ts',
-      'tests/load-testing/**/*.test.ts'
+      'tests/load-testing/**/*.test.ts',
+      'tests/**/*.test.ts',
+      'tests/**/*.spec.ts'
     ],
     exclude: [
       'stacks/tests/helpers/**',
@@ -26,6 +29,13 @@ export default defineConfig({
     
     // Enhanced test environment
     environment: 'node',
+    // ESM support
+    environmentOptions: {
+      environment: 'node',
+      transformMode: {
+        web: [/\.[tj]sx?$/],
+      },
+    },
     testTimeout: 60000, // Extended timeout for load tests
     hookTimeout: 30000,
     
@@ -48,6 +58,7 @@ export default defineConfig({
       reportsDirectory: './coverage',
       include: [
         'stacks/tests/**/*.ts',
+        'tests/**/*.ts',
         'contracts/**/*.clar'
       ],
       exclude: [

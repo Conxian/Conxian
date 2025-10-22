@@ -1,37 +1,49 @@
-;; oracle.clar
-;; Provides price feeds for various assets
 
-;; Traits
 
-;; Constants
-(define-constant ERR_UNAUTHORIZED (err u100))
-(define-constant ERR_INVALID_PRICE (err u101))
+;; Oracle - Minimal implementation of oracle-trait
+;; Provides price feed functionality for assets
 
-;; Data Maps
-(define-map asset-prices {
-  asset: principal
-} {
-  price: uint,
-  last-updated: uint
-})
+(use-trait dimensional-oracle-trait .all-traits.dimensional-oracle-trait)
+(impl-trait dimensional-oracle-trait)
 
-;; Data Variables
-(define-data-var contract-owner principal tx-sender)
+;; Error codes
+(define-constant ERR_ASSET_NOT_FOUND (err u404))
+(define-constant ERR_UNAUTHORIZED (err u401))
 
-;; Public Functions
-(define-public (set-price (asset principal) (price uint))
+(define-data-var admin principal tx-sender)
+(define-map asset-prices { asset: principal } { price: uint })
+
+(define-public (set-admin (new-admin principal))
   (begin
-    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
-    (map-set asset-prices { asset: asset } { price: price, last-updated: block-height })
+    (asserts! (is-eq tx-sender (var-get admin)) ERR_UNAUTHORIZED)
+    (var-set admin new-admin)
     (ok true)
   )
 )
 
-;; Read-only Functions
-(define-read-only (get-price (asset principal))
-  (ok (map-get? asset-prices { asset: asset }))
+(define-public (set-price (asset principal) (price uint))
+  (begin
+    (asserts! (is-eq tx-sender (var-get admin)) ERR_UNAUTHORIZED)
+    (map-set asset-prices { asset: asset } { price: price })
+    (ok true)
+  )
 )
 
-(define-read-only (get-contract-owner)
-  (ok (var-get contract-owner))
+(define-read-only (get-price (asset principal))
+  (match (map-get? asset-prices { asset: asset })
+    entry (ok (get price entry))
+    (err ERR_ASSET_NOT_FOUND)
+  )
+);; Update
+ price function (alias for set-price to match trait)
+(define-public (update-price (asset principal) (price uint))
+  (set-price asset price)
+)
+
+;; Get price with timestamp
+(define-read-only (get-price-with-timestamp (asset principal))
+  (match (map-get? asset-prices { asset: asset })
+    entry (ok { price: (get price entry), timestamp: block-height })
+    (err ERR_ASSET_NOT_FOUND)
+  )
 )

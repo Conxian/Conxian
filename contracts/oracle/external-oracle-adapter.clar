@@ -1,3 +1,7 @@
+;; ===== Traits =====
+(use-trait oracle-adapter-trait .all-traits.oracle-adapter-trait)
+(impl-trait oracle-adapter-trait)
+
 ;; external-oracle-adapter.clar
 ;; Adapter for integrating external oracle providers (Chainlink, Pyth, Redstone)
 ;; Provides multi-source price aggregation with manipulation detection
@@ -108,18 +112,25 @@
     (map-set trusted-operators operator false)
     (ok true)))
 
+(define-public (set-aggregation-enabled (enabled bool))
+  (begin
+    (try! (check-is-owner))
+    (var-set aggregation-enabled enabled)
+    (ok true)))
+
 ;; ===== Price Feed Functions =====
 
 ;; Submit price from external oracle
-(define-public (submit-external-price 
-  (asset principal) 
-  (source-id uint) 
-  (price uint) 
-  (decimals uint) 
+(define-public (submit-external-price
+  (asset principal)
+  (source-id uint)
+  (price uint)
+  (decimals uint)
   (confidence uint)
   (signature (optional (buff 65))))
   (begin
     (try! (check-is-operator))
+    (asserts! (var-get aggregation-enabled) ERR_UNAUTHORIZED)
     
     ;; Validate source
     (let ((source (unwrap! (map-get? oracle-sources source-id) ERR_INVALID_SOURCE)))
@@ -155,7 +166,7 @@
     (redstone-price (get-source-price asset SOURCE_REDSTONE))
     (internal-price (get-source-price asset SOURCE_INTERNAL))
     
-    ;; Calculate weighted average
+    ;; Build list of valid prices with weights
     (prices-list (filter is-valid-price-data (list
       {price: chainlink-price, weight: (get-source-weight SOURCE_CHAINLINK)}
       {price: pyth-price, weight: (get-source-weight SOURCE_PYTH)}
@@ -195,7 +206,6 @@
       (ok aggregated))))
 
 ;; ===== Helper Functions =====
-
 (define-private (get-source-price (asset principal) (source-id uint))
   (match (map-get? external-prices {asset: asset, source: source-id})
     price-data
@@ -214,18 +224,41 @@
   (and (is-some (get price data)) (> (get weight data) u0)))
 
 (define-private (calculate-weighted-average (prices (list 10 {price: (optional uint), weight: uint})))
-  ;; Simplified weighted average calculation
-  ;; In production, implement proper weighted average with fold
-  u100000000) ;; Placeholder
+  (let ((result (fold calculate-weighted-sum prices {total: u0, weight-sum: u0})))
+    (if (> (get weight-sum result) u0)
+        (/ (get total result) (get weight-sum result))
+        u0)))
+
+(define-private (calculate-weighted-sum 
+  (item {price: (optional uint), weight: uint})
+  (acc {total: uint, weight-sum: uint}))
+  (match (get price item)
+    price-val
+    {
+      total: (+ (get total acc) (* price-val (get weight item))),
+      weight-sum: (+ (get weight-sum acc) (get weight item))
+    }
+    acc))
 
 (define-private (calculate-price-deviation (prices (list 10 {price: (optional uint), weight: uint})))
-  ;; Calculate standard deviation between prices
-  ;; Returns basis points deviation
-  u0) ;; Placeholder
+  (let ((avg (calculate-weighted-average prices))
+        (valid-prices (filter is-valid-price-data prices)))
+    (if (is-eq (len valid-prices) u0)
+        u0
+        (fold calculate-max-deviation valid-prices {avg: avg, max-dev: u0}))))
+
+(define-private (calculate-max-deviation
+  (item {price: (optional uint), weight: uint})
+  (acc {avg: uint, max-dev: uint}))
+  (match (get price item)
+    price-val
+    (let ((deviation (if (> price-val (get avg acc))
+                         (/ (* (- price-val (get avg acc)) u10000) (get avg acc))
+                         (/ (* (- (get avg acc) price-val) u10000) (get avg acc)))))
+      {avg: (get avg acc), max-dev: (if (> deviation (get max-dev acc)) deviation (get max-dev acc))})
+    acc))
 
 (define-private (calculate-confidence-level (prices (list 10 {price: (optional uint), weight: uint})) (deviation uint))
-  ;; Calculate confidence based on source agreement and deviation
-  ;; Returns confidence level 0-10000 (0-100%)
   (if (< deviation u100)
       u10000 ;; Very high confidence
       (if (< deviation u300)
@@ -233,12 +266,10 @@
           u5000))) ;; Medium confidence
 
 (define-private (verify-oracle-signature (asset principal) (price uint) (signature (buff 65)))
-  ;; Verify cryptographic signature from oracle
   ;; In production, implement actual signature verification
   (ok true))
 
 ;; ===== Read-Only Functions =====
-
 (define-read-only (get-price (asset principal))
   (match (map-get? aggregated-prices asset)
     price-data
@@ -302,7 +333,6 @@
     }))
 
 (define-private (calculate-risk-score (price-data {price: uint, timestamp: uint, sources-count: uint, deviation: uint, confidence-level: uint}))
-  ;; Calculate overall manipulation risk score (0-10000, higher = more risk)
   (+ (get deviation price-data)
      (if (< (get sources-count price-data) MIN_SOURCES_REQUIRED) u2000 u0)
      (if (< (get confidence-level price-data) u5000) u1000 u0)))

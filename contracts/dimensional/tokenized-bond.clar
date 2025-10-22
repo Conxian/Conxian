@@ -1,13 +1,18 @@
+
+
 ;; tokenized-bond.clar
+
 ;;
+
 ;; This contract implements a SIP-010 tokenized bond.
+
 ;; It represents a single series of bonds with uniform characteristics.
+
 ;; Import traits from the all-traits.clar file
 
 ;; Implement the traits for this contract
 
-;; Error codes
-(define-constant ERR_UNAUTHORIZED (err u100))
+;; Error codes(define-constant ERR_UNAUTHORIZED (err u100))
 (define-constant ERR_INVALID_AMOUNT (err u101))
 (define-constant ERR_INSUFFICIENT_BALANCE (err u102))
 (define-constant ERR_BOND_NOT_ISSUED (err u104))
@@ -24,16 +29,11 @@
 (define-constant ERR_REENTRANCY (err u115))
 (define-constant ERR_CONTRACT_PAUSED (err u116))
 (define-constant ERR_INVALID_TIMING (err u117))
-
-(define-read-only (get-token-uri)
-  (ok (var-get token-uri))
-)
-
+(define-read-only (get-token-uri)  (ok (var-get token-uri)))
 (define-data-var token-name (string-ascii 32) "Tokenized Bond")
 (define-data-var token-symbol (string-ascii 10) "BOND")
 (define-data-var token-decimals uint u8)
 (define-data-var token-uri (optional (string-utf8 256)) none)
-
 (define-data-var bond-issued bool false)
 (define-data-var issue-block uint u0)
 (define-data-var maturity-block uint u0)
@@ -43,239 +43,20 @@
 (define-data-var payment-token-contract (optional principal) none)
 (define-data-var contract-owner principal tx-sender)
 (define-data-var total-supply uint u0)
-
 (define-map last-claimed-coupon { user: principal } { period: uint })
+(define-private (is-valid-principal (who principal))  (is-eq (len (unwrap-panic (principal-destruct who))) 28))
+(define-public (issue-bond    (name (string-ascii 32))    (symbol (string-ascii 10))    (decimals uint)    (initial-supply uint)    (maturity-in-blocks uint)    (coupon-rate-scaled uint)    (frequency-in-blocks uint)    (bond-face-value uint)    (payment-token-address principal)  )  (begin    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)    (asserts! (not (var-get bond-issued)) ERR_ALREADY_ISSUED)    (asserts! (<= decimals MAX_DECIMALS) ERR_INVALID_DECIMALS)    (asserts! (>= (len name) 1) ERR_INVALID_AMOUNT)    (asserts! (>= (len symbol) 1) ERR_INVALID_AMOUNT)    (asserts! (> initial-supply u0) ERR_INVALID_AMOUNT)    (asserts! (>= maturity-in-blocks MIN_MATURITY_BLOCKS) ERR_INVALID_MATURITY)    (asserts! (<= coupon-rate-scaled MAX_COUPON_RATE) ERR_INVALID_COUPON_RATE)    (asserts! (>= frequency-in-blocks MIN_COUPON_FREQUENCY) ERR_INVALID_FREQUENCY)    (asserts! (> bond-face-value u0) ERR_INVALID_FACE_VALUE)    (asserts! (is-valid-principal payment-token-address) ERR_INVALID_AMOUNT)    (asserts! (<= (len (unwrap-panic (principal-destruct payment-token-address))) 28) ERR_INVALID_AMOUNT)    (var-set token-name name)    (var-set token-symbol symbol)    (var-set token-decimals decimals)    (var-set issue-block block-height)    (var-set maturity-block (safe-add block-height maturity-in-blocks))    (var-set coupon-rate coupon-rate-scaled)    (var-set coupon-frequency frequency-in-blocks)    (var-set face-value bond-face-value)    (var-set payment-token-contract (some payment-token-address))    (try! (mint-internal initial-supply (var-get contract-owner)))    (var-set total-supply initial-supply)    (var-set bond-issued true)        (print {      event: "bond-issued",      name: name,      symbol: symbol,      decimals: decimals,      initial-supply: initial-supply,      maturity-block: (var-get maturity-block),      coupon-rate: coupon-rate-scaled,      frequency: frequency-in-blocks,      face-value: bond-face-value,      payment-token: payment-token-address    })        (ok true)  ))
+(define-private (safe-add (a uint) (b uint))  (let ((sum (+ a b)))    (asserts! (>= sum a) (err ERR_INVALID_AMOUNT))    (ok sum)  ))
+(define-private (safe-mul (a uint) (b uint))  (let ((product (* a b)))    (asserts! (or (is-eq a (/ product b)) (is-eq b u0)) (err ERR_INVALID_AMOUNT))    (ok product)  ))
+(define-private (safe-sub (a uint) (b uint))  (asserts! (>= a b) (err ERR_INVALID_AMOUNT))  (ok (- a b)))
+(define-private (safe-div (a uint) (b uint))  (asserts! (> b u0) (err ERR_INVALID_AMOUNT))  (ok (/ a b)))
+(define-public (claim-coupons (payment-token principal))  (let (      (user tx-sender)      (last-period (default-to u0 (get period (map-get? last-claimed-coupon { user: user }))))      (current-period (unwrap! (safe-div (unwrap! (safe-sub block-height (var-get issue-block)) (err ERR_INVALID_AMOUNT)) (var-get coupon-frequency)) (err ERR_INVALID_AMOUNT)))      (balance (unwrap-panic (ft-get-balance tokenized-bond user)))    )    (asserts! (var-get bond-issued) ERR_BOND_NOT_ISSUED)    (asserts! (< block-height (var-get maturity-block)) ERR_ALREADY_MATURED)    (asserts! (> current-period last-period) ERR_NO_COUPONS_DUE)    (asserts! (is-eq payment-token (unwrap! (var-get payment-token-contract) ERR_INVALID_AMOUNT)) ERR_INVALID_AMOUNT)    (let (        (periods-to-claim (unwrap! (safe-sub current-period last-period) (err ERR_INVALID_AMOUNT)))        (coupon-per-token-per-period (unwrap! (safe-div           (unwrap! (safe-mul             (var-get face-value)            (unwrap! (safe-mul (var-get coupon-rate) (var-get coupon-frequency)) (err ERR_INVALID_AMOUNT))          ) (err ERR_INVALID_AMOUNT))          u525600000        ) (err ERR_INVALID_AMOUNT)))        (total-coupon-payment (unwrap! (safe-mul balance (unwrap! (safe-mul periods-to-claim coupon-per-token-per-period) (err ERR_INVALID_AMOUNT))) (err ERR_INVALID_AMOUNT)))      )      (asserts! (> total-coupon-payment u0) ERR_INVALID_AMOUNT)            (match (contract-call? payment-token transfer total-coupon-payment tx-sender user none)        (ok true)         (begin           (map-set last-claimed-coupon { user: user } { period: current-period })          (print {            event: "coupons-claimed",            user: user,            amount: total-coupon-payment,            periods: periods-to-claim,            current-period: current-period          })          (ok total-coupon-payment)        )        (err error) (err error)      )    )  )) (define-public (redeem-at-maturity (payment-token principal))  (let (      (user tx-sender)      (balance (unwrap-panic (ft-get-balance tokenized-bond user)))      (maturity (var-get maturity-block))    )    (asserts! (var-get bond-issued) ERR_BOND_NOT_ISSUED)    (asserts! (>= block-height maturity) ERR_NOT_YET_MATURED)    (asserts! (> balance u0) ERR_INVALID_AMOUNT)    (asserts! (is-eq payment-token (unwrap! (var-get payment-token-contract) ERR_INVALID_AMOUNT)) ERR_INVALID_AMOUNT)    (let (        (last-claim-period (default-to u0 (get period (map-get? last-claimed-coupon { user: user }))))        (maturity-period (unwrap! (safe-div (unwrap! (safe-sub maturity (var-get issue-block)) (err ERR_INVALID_AMOUNT)) (var-get coupon-frequency)) (err ERR_INVALID_AMOUNT)))        (periods-to-claim (if (> maturity-period last-claim-period)          (unwrap! (safe-sub maturity-period last-claim-period) (err ERR_INVALID_AMOUNT))          u0        ))        (coupon-per-token-per-period (unwrap! (safe-div           (unwrap! (safe-mul             (var-get face-value)            (unwrap! (safe-mul (var-get coupon-rate) (var-get coupon-frequency)) (err ERR_INVALID_AMOUNT))          ) (err ERR_INVALID_AMOUNT))          u525600000        ) (err ERR_INVALID_AMOUNT)))        (final-coupon-payment (unwrap! (safe-mul balance (unwrap! (safe-mul periods-to-claim coupon-per-token-per-period) (err ERR_INVALID_AMOUNT))) (err ERR_INVALID_AMOUNT)))        (principal-payment (unwrap! (safe-mul balance (var-get face-value)) (err ERR_INVALID_AMOUNT)))        (total-payment (unwrap! (safe-add final-coupon-payment principal-payment) (err ERR_INVALID_AMOUNT)))      )      (match (as-contract (contract-call? payment-token transfer total-payment tx-sender user none))        (ok true)        (begin          (try! (burn-internal balance user))          (var-set total-supply (unwrap! (safe-sub (var-get total-supply) balance) (err ERR_INVALID_AMOUNT)))          (map-set last-claimed-coupon { user: user } { period: maturity-period })                    (print {            event: "bond-redeemed",            user: user,            principal: principal-payment,            coupon: final-coupon-payment,            total: total-payment,            balance: balance          })                    (ok {            principal: principal-payment,            coupon: final-coupon-payment,          })        )        (err error) (err error)      )    )  ))
 
-(define-private (is-valid-principal (who principal))
-  (is-eq (len (unwrap-panic (principal-destruct who))) 28)
-)
-
-(define-public (issue-bond
-    (name (string-ascii 32))
-    (symbol (string-ascii 10))
-    (decimals uint)
-    (initial-supply uint)
-    (maturity-in-blocks uint)
-    (coupon-rate-scaled uint)
-    (frequency-in-blocks uint)
-    (bond-face-value uint)
-    (payment-token-address principal)
-  )
-  (begin
-    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
-    (asserts! (not (var-get bond-issued)) ERR_ALREADY_ISSUED)
-    (asserts! (<= decimals MAX_DECIMALS) ERR_INVALID_DECIMALS)
-    (asserts! (>= (len name) 1) ERR_INVALID_AMOUNT)
-    (asserts! (>= (len symbol) 1) ERR_INVALID_AMOUNT)
-    (asserts! (> initial-supply u0) ERR_INVALID_AMOUNT)
-    (asserts! (>= maturity-in-blocks MIN_MATURITY_BLOCKS) ERR_INVALID_MATURITY)
-    (asserts! (<= coupon-rate-scaled MAX_COUPON_RATE) ERR_INVALID_COUPON_RATE)
-    (asserts! (>= frequency-in-blocks MIN_COUPON_FREQUENCY) ERR_INVALID_FREQUENCY)
-    (asserts! (> bond-face-value u0) ERR_INVALID_FACE_VALUE)
-    (asserts! (is-valid-principal payment-token-address) ERR_INVALID_AMOUNT)
-    (asserts! (<= (len (unwrap-panic (principal-destruct payment-token-address))) 28) ERR_INVALID_AMOUNT)
-
-    (var-set token-name name)
-    (var-set token-symbol symbol)
-    (var-set token-decimals decimals)
-    (var-set issue-block block-height)
-    (var-set maturity-block (safe-add block-height maturity-in-blocks))
-    (var-set coupon-rate coupon-rate-scaled)
-    (var-set coupon-frequency frequency-in-blocks)
-    (var-set face-value bond-face-value)
-    (var-set payment-token-contract (some payment-token-address))
-
-    (try! (mint-internal initial-supply (var-get contract-owner)))
-    (var-set total-supply initial-supply)
-    (var-set bond-issued true)
-    
-    (print {
-      event: "bond-issued",
-      name: name,
-      symbol: symbol,
-      decimals: decimals,
-      initial-supply: initial-supply,
-      maturity-block: (var-get maturity-block),
-      coupon-rate: coupon-rate-scaled,
-      frequency: frequency-in-blocks,
-      face-value: bond-face-value,
-      payment-token: payment-token-address
-    })
-    
-    (ok true)
-  )
-)
-
-(define-private (safe-add (a uint) (b uint))
-  (let ((sum (+ a b)))
-    (asserts! (>= sum a) (err ERR_INVALID_AMOUNT))
-    (ok sum)
-  )
-)
-
-(define-private (safe-mul (a uint) (b uint))
-  (let ((product (* a b)))
-    (asserts! (or (is-eq a (/ product b)) (is-eq b u0)) (err ERR_INVALID_AMOUNT))
-    (ok product)
-  )
-)
-
-(define-private (safe-sub (a uint) (b uint))
-  (asserts! (>= a b) (err ERR_INVALID_AMOUNT))
-  (ok (- a b))
-)
-
-(define-private (safe-div (a uint) (b uint))
-  (asserts! (> b u0) (err ERR_INVALID_AMOUNT))
-  (ok (/ a b)))
-
-(define-public (claim-coupons (payment-token principal))
-  (let (
-      (user tx-sender)
-      (last-period (default-to u0 (get period (map-get? last-claimed-coupon { user: user }))))
-      (current-period (unwrap! (safe-div (unwrap! (safe-sub block-height (var-get issue-block)) (err ERR_INVALID_AMOUNT)) (var-get coupon-frequency)) (err ERR_INVALID_AMOUNT)))
-      (balance (unwrap-panic (ft-get-balance tokenized-bond user)))
-    )
-    (asserts! (var-get bond-issued) ERR_BOND_NOT_ISSUED)
-    (asserts! (< block-height (var-get maturity-block)) ERR_ALREADY_MATURED)
-    (asserts! (> current-period last-period) ERR_NO_COUPONS_DUE)
-    (asserts! (is-eq payment-token (unwrap! (var-get payment-token-contract) ERR_INVALID_AMOUNT)) ERR_INVALID_AMOUNT)
-
-    (let (
-        (periods-to-claim (unwrap! (safe-sub current-period last-period) (err ERR_INVALID_AMOUNT)))
-        (coupon-per-token-per-period (unwrap! (safe-div 
-          (unwrap! (safe-mul 
-            (var-get face-value)
-            (unwrap! (safe-mul (var-get coupon-rate) (var-get coupon-frequency)) (err ERR_INVALID_AMOUNT))
-          ) (err ERR_INVALID_AMOUNT))
-          u525600000
-        ) (err ERR_INVALID_AMOUNT)))
-        (total-coupon-payment (unwrap! (safe-mul balance (unwrap! (safe-mul periods-to-claim coupon-per-token-per-period) (err ERR_INVALID_AMOUNT))) (err ERR_INVALID_AMOUNT)))
-      )
-      (asserts! (> total-coupon-payment u0) ERR_INVALID_AMOUNT)
-      
-      (match (contract-call? payment-token transfer total-coupon-payment tx-sender user none)
-        (ok true) 
-        (begin 
-          (map-set last-claimed-coupon { user: user } { period: current-period })
-          (print {
-            event: "coupons-claimed",
-            user: user,
-            amount: total-coupon-payment,
-            periods: periods-to-claim,
-            current-period: current-period
-          })
-          (ok total-coupon-payment)
-        )
-        (err error) (err error)
-      )
-    )
-  )
-)
-
- (define-public (redeem-at-maturity (payment-token principal))
-  (let (
-      (user tx-sender)
-      (balance (unwrap-panic (ft-get-balance tokenized-bond user)))
-      (maturity (var-get maturity-block))
-    )
-    (asserts! (var-get bond-issued) ERR_BOND_NOT_ISSUED)
-    (asserts! (>= block-height maturity) ERR_NOT_YET_MATURED)
-    (asserts! (> balance u0) ERR_INVALID_AMOUNT)
-    (asserts! (is-eq payment-token (unwrap! (var-get payment-token-contract) ERR_INVALID_AMOUNT)) ERR_INVALID_AMOUNT)
-
-    (let (
-        (last-claim-period (default-to u0 (get period (map-get? last-claimed-coupon { user: user }))))
-        (maturity-period (unwrap! (safe-div (unwrap! (safe-sub maturity (var-get issue-block)) (err ERR_INVALID_AMOUNT)) (var-get coupon-frequency)) (err ERR_INVALID_AMOUNT)))
-        (periods-to-claim (if (> maturity-period last-claim-period)
-          (unwrap! (safe-sub maturity-period last-claim-period) (err ERR_INVALID_AMOUNT))
-          u0
-        ))
-        (coupon-per-token-per-period (unwrap! (safe-div 
-          (unwrap! (safe-mul 
-            (var-get face-value)
-            (unwrap! (safe-mul (var-get coupon-rate) (var-get coupon-frequency)) (err ERR_INVALID_AMOUNT))
-          ) (err ERR_INVALID_AMOUNT))
-          u525600000
-        ) (err ERR_INVALID_AMOUNT)))
-        (final-coupon-payment (unwrap! (safe-mul balance (unwrap! (safe-mul periods-to-claim coupon-per-token-per-period) (err ERR_INVALID_AMOUNT))) (err ERR_INVALID_AMOUNT)))
-        (principal-payment (unwrap! (safe-mul balance (var-get face-value)) (err ERR_INVALID_AMOUNT)))
-        (total-payment (unwrap! (safe-add final-coupon-payment principal-payment) (err ERR_INVALID_AMOUNT)))
-      )
-      (match (as-contract (contract-call? payment-token transfer total-payment tx-sender user none))
-        (ok true)
-        (begin
-          (try! (burn-internal balance user))
-          (var-set total-supply (unwrap! (safe-sub (var-get total-supply) balance) (err ERR_INVALID_AMOUNT)))
-          (map-set last-claimed-coupon { user: user } { period: maturity-period })
-          
-          (print {
-            event: "bond-redeemed",
-            user: user,
-            principal: principal-payment,
-            coupon: final-coupon-payment,
-            total: total-payment,
-            balance: balance
-          })
-          
-          (ok {
-            principal: principal-payment,
-            coupon: final-coupon-payment,
-          })
-        )
-        (err error) (err error)
-      )
-    )
-  )
-)
-
-
-;; --- SIP-010 and helper read-only/public functions ---
-
-(define-read-only (get-balance (who principal))
-  (ok (ft-get-balance tokenized-bond who))
-)
-
-(define-read-only (get-total-supply)
-  (ok (var-get total-supply))
-)
-
-(define-read-only (get-decimals)
-  (ok (var-get token-decimals))
-)
-
-(define-read-only (get-name)
-  (ok (var-get token-name))
-)
-
-(define-read-only (get-symbol)
-  (ok (var-get token-symbol))
-)
-
-(define-read-only (get-token-uri)
-  (ok (var-get token-uri))
-)
-
-(define-public (set-token-uri (value (optional (string-utf8 256))))
-  (begin
-    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
-    (match value
-      (some uri) (asserts! (<= (len uri) 256) ERR_INVALID_TOKEN_URI)
-      none true
-    )
-    (var-set token-uri value)
-    
-    (print {
-      event: "token-uri-updated",
-      by: tx-sender,
-      new-uri: value
-    })
-    
-    (ok true)
-  )
-)
-
-(define-read-only (get-payment-token-contract)
-  (ok (var-get payment-token-contract))
-)
-
+;; --- SIP-010 and helper read-only/public functions ---(define-read-only (get-balance (who principal))  (ok (ft-get-balance tokenized-bond who)))
+(define-read-only (get-total-supply)  (ok (var-get total-supply)))
+(define-read-only (get-decimals)  (ok (var-get token-decimals)))
+(define-read-only (get-name)  (ok (var-get token-name)))
+(define-read-only (get-symbol)  (ok (var-get token-symbol)))
+(define-read-only (get-token-uri)  (ok (var-get token-uri)))
+(define-public (set-token-uri (value (optional (string-utf8 256))))  (begin    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)    (match value      (some uri) (asserts! (<= (len uri) 256) ERR_INVALID_TOKEN_URI)      none true    )    (var-set token-uri value)        (print {      event: "token-uri-updated",      by: tx-sender,      new-uri: value    })        (ok true)  ))
+(define-read-only (get-payment-token-contract)  (ok (var-get payment-token-contract)))

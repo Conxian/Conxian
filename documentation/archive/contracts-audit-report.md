@@ -24,7 +24,7 @@ Top findings
 - contracts/lib/math-lib-advanced.clar
 - contracts/lib/precision-calculator.clar
 - contracts/traits/* (many canonical trait files)
-- contracts/tokens/* (cxvg/cxd/cxtr/cxlp/cxs)
+- contracts/tokens/* (cxvg/cxd/cxtr/CXLP/cxs)
 - contracts/dimensional/* (tokenized-bond etc.)
 
 (Full 178-file list is recorded in the run history and workspace; see file-search outputs.)

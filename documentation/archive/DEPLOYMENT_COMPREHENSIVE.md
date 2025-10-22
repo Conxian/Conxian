@@ -40,7 +40,7 @@ Core system contracts that depend on foundation layer.
 ```bash
 # Core Tokens
 clarinet deploy --network testnet contracts/cxd-token.clar
-clarinet deploy --network testnet contracts/cxlp-token.clar
+clarinet deploy --network testnet contracts/CXLP-token.clar
 clarinet deploy --network testnet contracts/cxs-token.clar
 clarinet deploy --network testnet contracts/cxtr-token.clar  
 clarinet deploy --network testnet contracts/cxvg-token.clar
@@ -49,7 +49,7 @@ clarinet deploy --network testnet contracts/cxvg-utility.clar
 # Core Infrastructure
 clarinet deploy --network testnet contracts/vault.clar
 clarinet deploy --network testnet contracts/cxd-staking.clar
-clarinet deploy --network testnet contracts/cxlp-migration-queue.clar
+clarinet deploy --network testnet contracts/CXLP-migration-queue.clar
 ```
 
 ### Lending System Layer (Deploy Third)
@@ -150,7 +150,7 @@ clarinet console --network testnet
 # Create initial trading pairs
 >>> (contract-call? .dex-factory create-pair 
     'ST1234...cxd-token
-    'ST1234...cxlp-token)
+    'ST1234...CXLP-token)
 ```
 
 ### Governance System Setup

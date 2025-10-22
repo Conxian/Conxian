@@ -1,21 +1,16 @@
-(use-trait utils .all-traits.utils-trait)
-;; utils.clar
-;; Utility contract implementing `utils-trait` to provide a placeholder
-;; principal-to-buff serialization for SDK 3.7.0 compatibility.
-;;
-;; NOTE: Clarity 3.0 does not provide a native principal->buff conversion.
-;; This implementation returns a constant 32-byte buffer as a placeholder to
-;; unblock compilation and allow downstream contracts to be type-correct.
-;;
-;; WARNING: Do NOT rely on this for production ordering or hashing logic.
-;; Replace call sites with a deterministic and supported approach, or
-;; migrate to an approved serialization scheme once available.
+(use-trait sip-010-trait 'SP3FBR2AGK5H9QBDH3EEN6DF8EK8JY7RX8QJ5SVTE.sip-010-trait-ft-standard.sip-010-trait)
 
-(use-trait utils-trait .all-traits.utils-trait)
-(use-trait utils_trait .all-traits.utils-trait)
- .all-traits.utils-trait)
+(define-constant contract-owner tx-sender)
+(define-constant err-owner-only (err u100))
+(define-constant err-not-token-owner (err u101))
 
-(define-public (principal-to-buff (p principal))
-  (ok 0x0000000000000000000000000000000000000000000000000000000000000000)
-)
+(define-data-var contract-enabled bool false)
 
+(define-public (enable-contract)
+  (begin
+    (asserts! (is-eq tx-sender contract-owner) err-owner-only)
+    (var-set contract-enabled true)
+    (ok true)))
+
+(define-read-only (is-enabled)
+  (var-get contract-enabled))

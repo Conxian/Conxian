@@ -5,10 +5,9 @@
   ;; --- Traits ---
   (use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
   (use-trait access-control-trait .all-traits.access-control-trait)
-  (use-trait factory-trait .all-traits.factory-trait)
   (use-trait pool-creation-trait .all-traits.pool-creation-trait)
   (use-trait circuit-breaker-trait .all-traits.circuit-breaker-trait)
-(impl-trait .all-traits.factory-trait)
+(impl-trait factory)
 
 ;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED (err u1003))
@@ -282,3 +281,4 @@
   )
 )
 
+8bce9a06227aa3d139e549a8bea28e27bd6665af

@@ -10,7 +10,6 @@
 ;; - User status aggregation
 ;; - Revenue distribution triggers
 
-
 ;; Error codes
 (define-constant ERR_UNAUTHORIZED (err u100))
 (define-constant ERR_INVALID_TOKEN (err u101))
@@ -21,6 +20,13 @@
 ;; Constants
 (define-constant MAX_TOKENS u5)
 (define-constant COORDINATOR_VERSION "1.0.0")
+
+;; Token addresses (hardcoded for production)
+(define-constant CXD_TOKEN .cxd-token)
+(define-constant CXVG_TOKEN .cxvg-token)
+(define-constant CXLP_TOKEN .cxlp-token)
+(define-constant CXTR_TOKEN .cxtr-token)
+(define-constant CXS_TOKEN .cxs-token)
 
 ;; Data variables
 (define-data-var contract-owner principal tx-sender)
@@ -65,13 +71,6 @@
   )
 )
 
-;; Token addresses (hardcoded for production)
-(define-constant CXD_TOKEN .cxd-token)
-(define-constant CXVG_TOKEN .cxvg-token)
-(define-constant CXLP_TOKEN .cxlp-token)
-(define-constant CXTR_TOKEN .cxtr-token)
-(define-constant CXS_TOKEN .cxs-token)
-
 ;; Read-only functions
 (define-read-only (get-contract-owner)
   (var-get contract-owner)
@@ -97,6 +96,16 @@
   (map-get? user-activity user)
 )
 
+(define-read-only (get-system-health)
+  (tuple
+    (is-paused (var-get paused))
+    (emergency-mode (var-get emergency-mode))
+    (total-registered-tokens (var-get total-registered-tokens))
+    (total-users (var-get total-users))
+    (coordinator-version COORDINATOR_VERSION)
+  )
+)
+
 ;; Private functions
 (define-private (is-contract-owner)
   (is-eq tx-sender (var-get contract-owner))
@@ -111,22 +120,24 @@
 )
 
 (define-private (validate-token (token principal))
-  (asserts! (map-get? registered-tokens token) ERR_INVALID_TOKEN)
+  (asserts! (default-to false (map-get? registered-tokens token)) ERR_INVALID_TOKEN)
 )
 
 (define-private (update-user-activity (user principal) (volume uint))
-  (let ((current-activity (default-to
-    (tuple
-      (last-interaction block-height)
-      (total-volume u0)
-      (token-count u0)
-      (reputation-score u1000)
-    )
-    (map-get? user-activity user)
-  )))
+  (let (
+    (current-activity (default-to
+      (tuple
+        (last-interaction block-height)
+        (total-volume u0)
+        (token-count u0)
+        (reputation-score u1000)
+      )
+      (map-get? user-activity user)
+    ))
+  )
     (if (is-none (map-get? user-activity user))
-        (var-set total-users (+ (var-get total-users) u1))
-        true
+      (var-set total-users (+ (var-get total-users) u1))
+      true
     )
     (map-set user-activity user
       (tuple
@@ -136,18 +147,20 @@
         (reputation-score (get reputation-score current-activity))
       )
     )
+    (ok true)
   )
 )
 
 ;; Core coordination functions
 (define-public (register-token (token principal) (symbol (string-ascii 10)) (decimals uint))
-  (let ((is-owner (is-contract-owner)))
+  (let (
+    (is-owner (is-contract-owner))
+  )
     (asserts! is-owner ERR_UNAUTHORIZED)
-    (asserts! (not (var-get paused)) ERR_SYSTEM_PAUSED)
-
+    (try! (when-not-paused))
     (if (is-none (map-get? registered-tokens token))
-        (var-set total-registered-tokens (+ (var-get total-registered-tokens) u1))
-        true
+      (var-set total-registered-tokens (+ (var-get total-registered-tokens) u1))
+      true
     )
     (map-set registered-tokens token true)
     (map-set token-metadata token
@@ -165,9 +178,8 @@
 
 (define-public (update-token-activity (token principal) (supply uint))
   (begin
-    (when-not-paused)
-    (validate-token token)
-
+    (try! (when-not-paused))
+    (try! (validate-token token))
     (map-set token-metadata token
       (merge
         (unwrap-panic (map-get? token-metadata token))
@@ -188,54 +200,52 @@
     (operation-type (string-ascii 32))
     (total-value uint)
   )
-  (let ((new-op-id (+ (var-get last-operation-id) u1)))
-    (begin
-      (when-not-paused)
-      (when-not-emergency)
-
-      ;; Validate all tokens are registered
-      (asserts! (>= (len tokens) u1) ERR_INVALID_AMOUNT)
-      (asserts! (<= (len tokens) MAX_TOKENS) ERR_INVALID_AMOUNT)
-
-      ;; Record the operation
-      (map-set cross-token-operations new-op-id
-        (tuple
-          (user user)
-          (tokens tokens)
-          (operation-type operation-type)
-          (timestamp block-height)
-          (total-value total-value)
-          (status "initiated")
-        )
+  (let (
+    (new-op-id (+ (var-get last-operation-id) u1))
+  )
+    (try! (when-not-paused))
+    (try! (when-not-emergency))
+    
+    ;; Validate all tokens are registered
+    (asserts! (>= (len tokens) u1) ERR_INVALID_AMOUNT)
+    (asserts! (<= (len tokens) MAX_TOKENS) ERR_INVALID_AMOUNT)
+    
+    ;; Record the operation
+    (map-set cross-token-operations new-op-id
+      (tuple
+        (user user)
+        (tokens tokens)
+        (operation-type operation-type)
+        (timestamp block-height)
+        (total-value total-value)
+        (status "initiated")
       )
-      (var-set last-operation-id new-op-id)
-
-      ;; Update user activity
-      (update-user-activity user total-value)
-
-      ;; Trigger revenue distribution if applicable
-      (if (is-eq operation-type "yield-claim")
-          (try! (trigger-revenue-distribution (unwrap-panic (element-at tokens u0)) total-value))
-          true
-      )
-
-      (ok new-op-id)
     )
+    (var-set last-operation-id new-op-id)
+    
+    ;; Update user activity
+    (try! (update-user-activity user total-value))
+    
+    ;; Trigger revenue distribution if applicable
+    (if (is-eq operation-type "yield-claim")
+      (try! (trigger-revenue-distribution (unwrap-panic (element-at tokens u0)) total-value))
+      true
+    )
+    (ok new-op-id)
   )
 )
 
 ;; Revenue distribution coordination
 (define-public (trigger-revenue-distribution (token principal) (amount uint))
   (begin
-    (when-not-paused)
-    (validate-token token)
-
+    (try! (when-not-paused))
+    (try! (validate-token token))
+    
     ;; Call revenue distributor
     (try! (contract-call? (var-get revenue-distributor) distribute-revenue token amount))
-
+    
     ;; Update token activity
     (try! (update-token-activity token amount))
-
     (ok true)
   )
 )
@@ -273,31 +283,20 @@
   )
 )
 
-;; System health check
-(define-read-only (get-system-health)
-  (tuple
-    (is-paused (var-get paused))
-    (emergency-mode (var-get emergency-mode))
-    (total-registered-tokens (var-get total-registered-tokens))
-    (total-users (var-get total-users))
-    (coordinator-version COORDINATOR_VERSION)
-  )
-)
-
 ;; Initialize system with core tokens
 (define-public (initialize-system)
-  (let ((is-owner (is-contract-owner)))
+  (let (
+    (is-owner (is-contract-owner))
+  )
     (asserts! is-owner ERR_UNAUTHORIZED)
-    (asserts! (not (var-get paused)) ERR_SYSTEM_PAUSED)
-
+    (try! (when-not-paused))
+    
     ;; Register core tokens
     (try! (register-token CXD_TOKEN "CXD" u6))
     (try! (register-token CXVG_TOKEN "CXVG" u6))
     (try! (register-token CXLP_TOKEN "CXLP" u6))
     (try! (register-token CXTR_TOKEN "CXTR" u6))
     (try! (register-token CXS_TOKEN "CXS" u6))
-
     (ok "System initialized with 5 core tokens")
   )
 )
-

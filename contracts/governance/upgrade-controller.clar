@@ -1,25 +1,31 @@
 ;; upgrade-controller.clar
+
 ;; Manages safe protocol upgrades with timelock and approval mechanisms
-;; Enables contract migrations and parameter updates with rollback capability
 
+;; ===== Traits =====
+(use-trait upgrade-controller-trait .all-traits.upgrade-controller-trait)
+(impl-trait upgrade-controller-trait)
 
-;; ===== Constants =====
+;; ===== Error Codes =====
 (define-constant ERR_UNAUTHORIZED (err u4001))
 (define-constant ERR_UPGRADE_NOT_READY (err u4002))
 (define-constant ERR_UPGRADE_EXPIRED (err u4003))
 (define-constant ERR_INVALID_UPGRADE (err u4004))
 (define-constant ERR_ALREADY_EXECUTED (err u4005))
 (define-constant ERR_INSUFFICIENT_APPROVALS (err u4006))
+(define-constant ERR_ALREADY_APPROVED (err u4007))
 
-;; Upgrade types
+;; ===== Upgrade Types =====
 (define-constant UPGRADE_CONTRACT u1)
 (define-constant UPGRADE_PARAMETER u2)
 (define-constant UPGRADE_IMPLEMENTATION u3)
 
-;; Timelock settings
+;; ===== Timelock Settings =====
 (define-constant UPGRADE_TIMELOCK_BLOCKS u1008) ;; ~16.8 hours
 (define-constant APPROVAL_WINDOW_BLOCKS u4320) ;; ~3 days
 (define-constant REQUIRED_APPROVALS u3)
+(define-constant EMERGENCY_TIMELOCK u2) ;; ~20 minutes
+(define-constant ROLLBACK_WINDOW u144) ;; ~24 hours
 
 ;; ===== Data Variables =====
 (define-data-var contract-owner principal tx-sender)
@@ -76,6 +82,12 @@
                 ERR_UNAUTHORIZED)))
 
 ;; ===== Admin Functions =====
+(define-public (set-owner (new-owner principal))
+  (begin
+    (try! (check-is-owner))
+    (var-set contract-owner new-owner)
+    (ok true)))
+
 (define-public (add-authorized-upgrader (upgrader principal))
   (begin
     (try! (check-is-owner))
@@ -95,7 +107,6 @@
     (ok true)))
 
 ;; ===== Upgrade Proposal Functions =====
-
 (define-public (propose-contract-upgrade
   (target-contract principal)
   (new-implementation principal)
@@ -104,7 +115,7 @@
     (try! (check-is-upgrader))
     
     (let ((upgrade-id (+ (var-get upgrade-counter) u1))
-          (timelock (if (var-get emergency-mode) u2 UPGRADE_TIMELOCK_BLOCKS)))
+          (timelock (if (var-get emergency-mode) EMERGENCY_TIMELOCK UPGRADE_TIMELOCK_BLOCKS)))
       
       (map-set upgrade-proposals upgrade-id {
         upgrade-type: UPGRADE_CONTRACT,
@@ -135,7 +146,9 @@
   (begin
     (try! (check-is-upgrader))
     
-    (let ((upgrade-id (+ (var-get upgrade-counter) u1)))
+    (let ((upgrade-id (+ (var-get upgrade-counter) u1))
+          (timelock (if (var-get emergency-mode) EMERGENCY_TIMELOCK UPGRADE_TIMELOCK_BLOCKS)))
+      
       (map-set upgrade-proposals upgrade-id {
         upgrade-type: UPGRADE_PARAMETER,
         target-contract: target-contract,
@@ -145,7 +158,7 @@
         description: description,
         proposer: tx-sender,
         created-at: block-height,
-        execute-after: (+ block-height UPGRADE_TIMELOCK_BLOCKS),
+        execute-after: (+ block-height timelock),
         expires-at: (+ block-height APPROVAL_WINDOW_BLOCKS),
         executed: false,
         approvals: u1,
@@ -167,12 +180,12 @@
       (asserts! (not (get executed proposal)) ERR_ALREADY_EXECUTED)
       (asserts! (< block-height (get expires-at proposal)) ERR_UPGRADE_EXPIRED)
       (asserts! (not (default-to false (map-get? upgrade-approvals {upgrade-id: upgrade-id, approver: tx-sender})))
-                ERR_UNAUTHORIZED)
+                ERR_ALREADY_APPROVED)
       
       ;; Record approval
       (map-set upgrade-approvals {upgrade-id: upgrade-id, approver: tx-sender} true)
-      (map-set upgrade-proposals upgrade-id 
-               (merge proposal {approvals: (+ (get approvals proposal) u1)}))
+      (map-set upgrade-proposals upgrade-id
+                (merge proposal {approvals: (+ (get approvals proposal) u1)}))
       
       (ok true))))
 
@@ -224,8 +237,7 @@
   expires-at: uint,
   executed: bool,
   approvals: uint,
-  rollback-data: (optional (buff 1024))
-}))
+  rollback-data: (optional (buff 1024))}))
   (let ((upgrade-type (get upgrade-type proposal)))
     (if (is-eq upgrade-type UPGRADE_CONTRACT)
         (execute-contract-upgrade proposal)
@@ -246,9 +258,8 @@
   expires-at: uint,
   executed: bool,
   approvals: uint,
-  rollback-data: (optional (buff 1024))
-}))
-  ;; In production, call target contract's upgrade function
+  rollback-data: (optional (buff 1024))}))
+  ;; Implementation would call target contract's upgrade function
   (ok true))
 
 (define-private (execute-parameter-upgrade (proposal {
@@ -264,9 +275,8 @@
   expires-at: uint,
   executed: bool,
   approvals: uint,
-  rollback-data: (optional (buff 1024))
-}))
-  ;; In production, call target contract's parameter update function
+  rollback-data: (optional (buff 1024))}))
+  ;; Implementation would call target contract's parameter update function
   (ok true))
 
 (define-private (update-contract-version (contract principal) (implementation principal))
@@ -305,17 +315,21 @@
         description: u"Rollback",
         proposer: tx-sender,
         created-at: block-height,
-        execute-after: (+ block-height u2), ;; Fast-track
-        expires-at: (+ block-height u144), ;; Short window
+        execute-after: (+ block-height EMERGENCY_TIMELOCK),
+        expires-at: (+ block-height ROLLBACK_WINDOW),
         executed: false,
         approvals: u1,
         rollback-data: (get rollback-data original)
       })
       
+      (map-set upgrade-approvals {upgrade-id: rollback-id, approver: tx-sender} true)
       (var-set upgrade-counter rollback-id)
       (ok rollback-id))))
 
 ;; ===== Read-Only Functions =====
+(define-read-only (get-owner)
+  (var-get contract-owner))
+
 (define-read-only (get-upgrade-proposal (upgrade-id uint))
   (map-get? upgrade-proposals upgrade-id))
 
@@ -344,5 +358,6 @@
 (define-read-only (get-upgrade-stats)
   {
     total-upgrades: (var-get upgrade-counter),
-    emergency-mode: (var-get emergency-mode)
+    emergency-mode: (var-get emergency-mode),
+    contract-owner: (var-get contract-owner)
   })

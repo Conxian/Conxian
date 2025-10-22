@@ -179,7 +179,7 @@ const yieldDeposit = await simnet.callPublicFn(
   'wormhole-integration',
   'deposit-for-yield',
   [
-    Cl.contractPrincipal(deployer, 'cxlp-token'),
+    Cl.contractPrincipal(deployer, 'CXLP-token'),
     Cl.uint(1000000), // 1 CXLP
     Cl.uint(2), // Ethereum (framework only)
     Cl.stringAscii('placeholder-strategy')

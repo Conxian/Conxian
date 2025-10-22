@@ -22,9 +22,9 @@
 (define-constant ERR_HEALTH_FACTOR_OK (err u2009))
 
 ;; Minimum amounts
-(define-constant MIN_SUPPLY_AMOUNT u100000)    ;; 0.001 BTC
-(define-constant MIN_BORROW_AMOUNT u100000)    ;; 0.001 BTC
-(define-constant LIQUIDATION_CLOSE_FACTOR u500000) ;; 50% max liquidation
+(define-constant MIN_SUPPLY_AMOUNT u100000)     ;; 0.001 BTC
+(define-constant MIN_BORROW_AMOUNT u100000)     ;; 0.001 BTC
+(define-constant LIQUIDATION_CLOSE_FACTOR u500000)  ;; 50% max liquidation
 
 ;; =============================================================================
 ;; DATA STRUCTURES
@@ -33,8 +33,8 @@
 (define-map user-positions
   { user: principal, asset: principal }
   {
-    supply-balance: uint,        ;; Users supply balance
-    borrow-balance: uint,        ;; Users borrow balance
+    supply-balance: uint,        ;; User's supply balance
+    borrow-balance: uint,        ;; User's borrow balance
     supply-index: uint,          ;; Interest index at last supply action
     borrow-index: uint,          ;; Interest index at last borrow action
     last-interaction: uint       ;; Last interaction block
@@ -57,18 +57,22 @@
 ;; =============================================================================
 
 (define-read-only (get-user-position (user principal) (asset principal))
-  "Get users lending position for asset"
+  "Get user's lending position for asset"
   (map-get? user-positions { user: user, asset: asset })
 )
 
 (define-read-only (get-user-supply-balance (user principal) (asset principal))
-  "Get users current supply balance with accrued interest"
+  "Get user's current supply balance with accrued interest"
   (match (get-user-position user asset)
-    position (let ((supply-balance (get supply-balance position))
-                   (supply-index (get supply-index position)))
+    position (let (
+      (supply-balance (get supply-balance position))
+      (supply-index (get supply-index position))
+    )
       ;; Calculate accrued interest based on current supply rate
       (match (contract-call? sbtc-integration calculate-interest-rates asset)
-        rates (let ((current-index (+ supply-index u1))) ;; Simplified - should use actual index calculation
+        rates (let (
+          (current-index (+ supply-index u1))  ;; Simplified - should use actual index calculation
+        )
           (* supply-balance (/ current-index supply-index))
         )
         supply-balance
@@ -79,13 +83,17 @@
 )
 
 (define-read-only (get-user-borrow-balance (user principal) (asset principal))
-  "Get users current borrow balance with accrued interest"
+  "Get user's current borrow balance with accrued interest"
   (match (get-user-position user asset)
-    position (let ((borrow-balance (get borrow-balance position))
-                   (borrow-index (get borrow-index position)))
+    position (let (
+      (borrow-balance (get borrow-balance position))
+      (borrow-index (get borrow-index position))
+    )
       ;; Calculate accrued interest on borrows
       (match (contract-call? sbtc-integration calculate-interest-rates asset)
-        rates (let ((current-index (+ borrow-index u1))) ;; Simplified calculation
+        rates (let (
+          (current-index (+ borrow-index u1))  ;; Simplified calculation
+        )
           (* borrow-balance (/ current-index borrow-index))
         )
         borrow-balance
@@ -96,15 +104,20 @@
 )
 
 (define-read-only (calculate-account-liquidity (user principal))
-  "Calculate users account liquidity (collateral value - borrowed value)"
-  (let ((sbtc-supply (get-user-supply-balance user (get-constant sbtc-integration SBTC-MAINNET)))
-        (sbtc-borrow (get-user-borrow-balance user (get-constant sbtc-integration SBTC-MAINNET))))
-    (match (contract-call? sbtc-integration calculate-collateral-value (get-constant sbtc-integration SBTC-MAINNET) sbtc-supply)
+  "Calculate user's account liquidity (collateral value - borrowed value)"
+  (let (
+    (sbtc-supply (get-user-supply-balance user (contract-call? sbtc-integration get-sbtc-mainnet)))
+    (sbtc-borrow (get-user-borrow-balance user (contract-call? sbtc-integration get-sbtc-mainnet)))
+  )
+    (match (contract-call? sbtc-integration calculate-collateral-value 
+      (contract-call? sbtc-integration get-sbtc-mainnet) sbtc-supply)
       collateral-value (match (contract-call? sbtc-integration get-sbtc-price)
-        price (let ((borrow-value (* sbtc-borrow price)))
+        price (let (
+          (borrow-value (* sbtc-borrow price))
+        )
           (if (>= collateral-value borrow-value)
             (ok (- collateral-value borrow-value))
-            (ok u0) ;; Account is underwater
+            (ok u0)  ;; Account is underwater
           )
         )
         (ok u0)
@@ -115,14 +128,19 @@
 )
 
 (define-read-only (calculate-health-factor (user principal))
-  "Calculate users health factor (>1.0 = healthy, <1.0 = can be liquidated)"
-  (let ((sbtc-supply (get-user-supply-balance user (get-constant sbtc-integration SBTC-MAINNET)))
-        (sbtc-borrow (get-user-borrow-balance user (get-constant sbtc-integration SBTC-MAINNET))))
+  "Calculate user's health factor (>1.0 = healthy, <1.0 = can be liquidated)"
+  (let (
+    (sbtc-supply (get-user-supply-balance user (contract-call? sbtc-integration get-sbtc-mainnet)))
+    (sbtc-borrow (get-user-borrow-balance user (contract-call? sbtc-integration get-sbtc-mainnet)))
+  )
     (if (is-eq sbtc-borrow u0)
-      (ok u2000000) ;; Very high health factor if no borrows
-      (match (contract-call? sbtc-integration calculate-liquidation-threshold (get-constant sbtc-integration SBTC-MAINNET) sbtc-supply)
+      (ok u2000000)  ;; Very high health factor if no borrows
+      (match (contract-call? sbtc-integration calculate-liquidation-threshold 
+        (contract-call? sbtc-integration get-sbtc-mainnet) sbtc-supply)
         liquidation-value (match (contract-call? sbtc-integration get-sbtc-price)
-          price (let ((borrow-value (* sbtc-borrow price)))
+          price (let (
+            (borrow-value (* sbtc-borrow price))
+          )
             (if (> borrow-value u0)
               (ok (/ (* liquidation-value u1000000) borrow-value))
               (ok u2000000)
@@ -153,9 +171,11 @@
 (define-read-only (get-liquidation-info (borrower principal))
   "Get liquidation information for borrower"
   (match (calculate-health-factor borrower)
-    health-factor (if (< health-factor u1000000) ;; Health factor < 1.0
-      (let ((sbtc-supply (get-user-supply-balance borrower (get-constant sbtc-integration SBTC-MAINNET)))
-            (sbtc-borrow (get-user-borrow-balance borrower (get-constant sbtc-integration SBTC-MAINNET))))
+    health-factor (if (< health-factor u1000000)  ;; Health factor < 1.0
+      (let (
+        (sbtc-supply (get-user-supply-balance borrower (contract-call? sbtc-integration get-sbtc-mainnet)))
+        (sbtc-borrow (get-user-borrow-balance borrower (contract-call? sbtc-integration get-sbtc-mainnet)))
+      )
         (ok {
           can-liquidate: true,
           health-factor: health-factor,
@@ -183,9 +203,11 @@
 ;; SUPPLY FUNCTIONS
 ;; =============================================================================
 
-(define-public (supply (asset ft-trait) (amount uint))
+(define-public (supply (asset <sip-010-ft-trait>) (amount uint))
   "Supply sBTC to earn interest"
-  (let ((asset-principal (contract-of asset)))
+  (let (
+    (asset-principal (contract-of asset))
+  )
     (begin
       ;; Validate operation
       (try! (contract-call? sbtc-integration validate-operation asset-principal "supply"))
@@ -210,16 +232,19 @@
       (try! (contract-call? asset transfer amount tx-sender (as-contract tx-sender) none))
       
       ;; Update user position
-      (let ((current-position (default-to 
-                               { 
-                                 supply-balance: u0, 
-                                 borrow-balance: u0, 
-                                 supply-index: u1000000, 
-                                 borrow-index: u1000000,
-                                 last-interaction: block-height 
-                               }
-                               (get-user-position tx-sender asset-principal))))
-        (map-set user-positions 
+      (let (
+        (current-position (default-to
+          {
+            supply-balance: u0,
+            borrow-balance: u0,
+            supply-index: u1000000,
+            borrow-index: u1000000,
+            last-interaction: block-height
+          }
+          (get-user-position tx-sender asset-principal)
+        ))
+      )
+        (map-set user-positions
           { user: tx-sender, asset: asset-principal }
           (merge current-position {
             supply-balance: (+ (get supply-balance current-position) amount),
@@ -228,10 +253,10 @@
         )
       )
       
-      (print { 
-        event: "supply", 
-        user: tx-sender, 
-        asset: asset-principal, 
+      (print {
+        event: "supply",
+        user: tx-sender,
+        asset: asset-principal,
         amount: amount,
         block: block-height
       })
@@ -240,9 +265,11 @@
   )
 )
 
-(define-public (withdraw (asset ft-trait) (amount uint))
+(define-public (withdraw (asset <sip-010-ft-trait>) (amount uint))
   "Withdraw supplied sBTC"
-  (let ((asset-principal (contract-of asset)))
+  (let (
+    (asset-principal (contract-of asset))
+  )
     (begin
       ;; Validate operation
       (try! (contract-call? sbtc-integration validate-operation asset-principal "supply"))
@@ -252,19 +279,23 @@
       (try! (contract-call? sbtc-integration accrue-interest asset-principal))
       
       ;; Check user has sufficient balance
-      (let ((current-supply (get-user-supply-balance tx-sender asset-principal)))
+      (let (
+        (current-supply (get-user-supply-balance tx-sender asset-principal))
+      )
         (asserts! (>= current-supply amount) ERR_INSUFFICIENT_LIQUIDITY)
         
         ;; Check account liquidity after withdrawal
         (match (calculate-account-liquidity tx-sender)
           liquidity (match (contract-call? sbtc-integration get-sbtc-price)
-            price (let ((withdrawal-value (* amount price)))
+            price (let (
+              (withdrawal-value (* amount price))
+            )
               (asserts! (>= liquidity withdrawal-value) ERR_INSUFFICIENT_COLLATERAL)
               
               ;; Update user position
               (match (get-user-position tx-sender asset-principal)
                 position (begin
-                  (map-set user-positions 
+                  (map-set user-positions
                     { user: tx-sender, asset: asset-principal }
                     (merge position {
                       supply-balance: (- (get supply-balance position) amount),
@@ -275,11 +306,11 @@
                   ;; Transfer tokens to user
                   (try! (as-contract (contract-call? asset transfer amount tx-sender tx-sender none)))
                   
-                  (print { 
-                    event: "withdraw", 
-                    user: tx-sender, 
-                    asset: asset-principal, 
-                    amount: amount 
+                  (print {
+                    event: "withdraw",
+                    user: tx-sender,
+                    asset: asset-principal,
+                    amount: amount
                   })
                   (ok true)
                 )
@@ -299,9 +330,11 @@
 ;; BORROW FUNCTIONS
 ;; =============================================================================
 
-(define-public (borrow (asset ft-trait) (amount uint))
+(define-public (borrow (asset <sip-010-ft-trait>) (amount uint))
   "Borrow sBTC against collateral"
-  (let ((asset-principal (contract-of asset)))
+  (let (
+    (asset-principal (contract-of asset))
+  )
     (begin
       ;; Validate operation
       (try! (contract-call? sbtc-integration validate-operation asset-principal "borrow"))
@@ -328,16 +361,19 @@
           (asserts! (>= max-borrow amount) ERR_INSUFFICIENT_COLLATERAL)
           
           ;; Update user position
-          (let ((current-position (default-to 
-                                   { 
-                                     supply-balance: u0, 
-                                     borrow-balance: u0, 
-                                     supply-index: u1000000, 
-                                     borrow-index: u1000000,
-                                     last-interaction: block-height 
-                                   }
-                                   (get-user-position tx-sender asset-principal))))
-            (map-set user-positions 
+          (let (
+            (current-position (default-to
+              {
+                supply-balance: u0,
+                borrow-balance: u0,
+                supply-index: u1000000,
+                borrow-index: u1000000,
+                last-interaction: block-height
+              }
+              (get-user-position tx-sender asset-principal)
+            ))
+          )
+            (map-set user-positions
               { user: tx-sender, asset: asset-principal }
               (merge current-position {
                 borrow-balance: (+ (get borrow-balance current-position) amount),
@@ -349,11 +385,11 @@
           ;; Transfer tokens to user
           (try! (as-contract (contract-call? asset transfer amount tx-sender tx-sender none)))
           
-          (print { 
-            event: "borrow", 
-            user: tx-sender, 
-            asset: asset-principal, 
-            amount: amount 
+          (print {
+            event: "borrow",
+            user: tx-sender,
+            asset: asset-principal,
+            amount: amount
           })
           (ok true)
         )
@@ -363,166 +399,59 @@
   )
 )
 
-(define-public (repay (asset ft-trait) (amount uint))
+(define-public (repay (asset <sip-010-ft-trait>) (amount uint))
   "Repay borrowed sBTC"
-  (let ((asset-principal (contract-of asset)))
+  (let (
+    (asset-principal (contract-of asset))
+    (user tx-sender)
+  )
     (begin
       ;; Validate operation
       (try! (contract-call? sbtc-integration validate-operation asset-principal "borrow"))
       (asserts! (> amount u0) ERR_INVALID_AMOUNT)
-      
+
       ;; Accrue interest
       (try! (contract-call? sbtc-integration accrue-interest asset-principal))
       
-      ;; Check user has borrow balance
-      (let ((current-borrow (get-user-borrow-balance tx-sender asset-principal)))
-        (asserts! (> current-borrow u0) ERR_POSITION_NOT_FOUND)
-        
-        ;; Calculate actual repay amount (min of amount and balance)
-        (let ((repay-amount (if (<= amount current-borrow) amount current-borrow)))
+      ;; Get user position
+      (let ((position (unwrap! (map-get? user-positions { user: user, asset: asset-principal }) 
+                             (err ERR_POSITION_NOT_FOUND))))
+        (let ((borrow-balance (get borrow-balance position)))
+          (asserts! (<= amount borrow-balance) ERR_INVALID_AMOUNT)
           
-          ;; Transfer tokens from user
-          (try! (contract-call? asset transfer repay-amount tx-sender (as-contract tx-sender) none))
+          ;; Transfer tokens from user to contract
+          (try! (contract-call? asset transfer amount user (as-contract tx-sender) (none)))
           
           ;; Update user position
-          (match (get-user-position tx-sender asset-principal)
-            position (begin
-              (map-set user-positions 
-                { user: tx-sender, asset: asset-principal }
-                (merge position {
-                  borrow-balance: (- (get borrow-balance position) repay-amount),
-                  last-interaction: block-height
-                })
-              )
-              
-              (print { 
-                event: "repay", 
-                user: tx-sender, 
-                asset: asset-principal, 
-                amount: repay-amount 
-              })
-              (ok repay-amount)
-            )
-            ERR_POSITION_NOT_FOUND
+          (map-set! user-positions { user: user, asset: asset-principal }
+            {
+              supply-balance: (get supply-balance position),
+              borrow-balance: (- borrow-balance amount),
+              supply-index: (get supply-index position),
+              borrow-index: (get borrow-index position),
+              last-interaction: block-height
+            }
           )
+          
+          ;; Update global borrow state
+          (let ((market (unwrap! (map-get? market-state { asset: asset-principal })
+                               (err ERR_POSITION_NOT_FOUND))))
+            (map-set! market-state { asset: asset-principal }
+              {
+                total-supply: (get total-supply market),
+                total-borrows: (- (get total-borrows market) amount),
+                supply-rate: (get supply-rate market),
+                borrow-rate: (get borrow-rate market),
+                supply-index: (get supply-index market),
+                borrow-index: (get borrow-index market),
+                last-updated: block-height
+              }
+            )
+          )
+          
+          (ok true)
         )
       )
     )
   )
 )
-
-;; =============================================================================
-;; LIQUIDATION FUNCTIONS
-;; =============================================================================
-
-(define-public (liquidate (borrower principal) (asset ft-trait) (repay-amount uint) (collateral-asset ft-trait))
-  "Liquidate undercollateralized position"
-  (let ((asset-principal (contract-of asset))
-        (collateral-principal (contract-of collateral-asset)))
-    (begin
-      ;; Check if borrower can be liquidated
-      (match (get-liquidation-info borrower)
-        liq-info (begin
-          (asserts! (get can-liquidate liq-info) ERR_LIQUIDATION_NOT_AVAILABLE)
-          (asserts! (<= repay-amount (get max-liquidation-amount liq-info)) ERR_INVALID_AMOUNT)
-          
-          ;; Accrue interest for both assets
-          (try! (contract-call? sbtc-integration accrue-interest asset-principal))
-          (try! (contract-call? sbtc-integration accrue-interest collateral-principal))
-          
-          ;; Calculate collateral to seize
-          (match (contract-call? sbtc-integration get-sbtc-price)
-            price (match (contract-call? sbtc-integration get-asset-config collateral-principal)
-              collateral-config (let ((liquidation-penalty (get liquidation-penalty collateral-config))
-                                     (collateral-to-seize (* repay-amount (+ u1000000 liquidation-penalty))))
-                
-                ;; Verify borrower has sufficient collateral
-                (let ((borrower-collateral (get-user-supply-balance borrower collateral-principal)))
-                  (asserts! (>= borrower-collateral collateral-to-seize) ERR_INSUFFICIENT_COLLATERAL)
-                  
-                  ;; Transfer repayment from liquidator
-                  (try! (contract-call? asset transfer repay-amount tx-sender (as-contract tx-sender) none))
-                  
-                  ;; Transfer collateral to liquidator
-                  (try! (as-contract (contract-call? collateral-asset transfer collateral-to-seize tx-sender tx-sender none)))
-                  
-                  ;; Update borrower positions
-                  (match (get-user-position borrower asset-principal)
-                    borrow-position (begin
-                      (map-set user-positions 
-                        { user: borrower, asset: asset-principal }
-                        (merge borrow-position {
-                          borrow-balance: (- (get borrow-balance borrow-position) repay-amount),
-                          last-interaction: block-height
-                        })
-                      )
-                      
-                      ;; Update borrower collateral position
-                      (match (get-user-position borrower collateral-principal)
-                        collateral-position (begin
-                          (map-set user-positions 
-                            { user: borrower, asset: collateral-principal }
-                            (merge collateral-position {
-                              supply-balance: (- (get supply-balance collateral-position) collateral-to-seize),
-                              last-interaction: block-height
-                            })
-                          )
-                          
-                          (print { 
-                            event: "liquidation", 
-                            liquidator: tx-sender,
-                            borrower: borrower,
-                            debt-asset: asset-principal,
-                            repay-amount: repay-amount,
-                            collateral-asset: collateral-principal,
-                            collateral-seized: collateral-to-seize
-                          })
-                          (ok true)
-                        )
-                        ERR_POSITION_NOT_FOUND
-                      )
-                    )
-                    ERR_POSITION_NOT_FOUND
-                  )
-                )
-              )
-              ERR_LIQUIDATION_NOT_AVAILABLE
-            )
-            ERR_LIQUIDATION_NOT_AVAILABLE
-          )
-        )
-        ERR_HEALTH_FACTOR_OK
-      )
-    )
-  )
-)
-
-;; =============================================================================
-;; INTEGRATION FUNCTIONS
-;; =============================================================================
-
-(define-public (get-account-summary (user principal))
-  "Get comprehensive account summary"
-  (let ((sbtc-supply (get-user-supply-balance user (get-constant sbtc-integration SBTC-MAINNET)))
-        (sbtc-borrow (get-user-borrow-balance user (get-constant sbtc-integration SBTC-MAINNET))))
-    (match (calculate-health-factor user)
-      health-factor (match (calculate-account-liquidity user)
-        liquidity (ok {
-          supply-balance: sbtc-supply,
-          borrow-balance: sbtc-borrow,
-          health-factor: health-factor,
-          account-liquidity: liquidity,
-          can-be-liquidated: (< health-factor u1000000)
-        })
-        (err u0)
-      )
-      (err u0)
-    )
-  )
-)
-
-
-
-
-
-

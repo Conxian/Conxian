@@ -1,6 +1,6 @@
 # Contract Guide: Protocol Tokens (SIP-010)
 
-**Primary Contracts:** `contracts/cxvg-token.clar`, `contracts/cxd-token.clar`, `contracts/cxlp-token.clar`, `contracts/cxtr-token.clar`, `contracts/cxs-token.clar`
+**Primary Contracts:** `contracts/cxvg-token.clar`, `contracts/cxd-token.clar`, `contracts/CXLP-token.clar`, `contracts/cxtr-token.clar`, `contracts/cxs-token.clar`
 
 ## 1. Introduction
 
@@ -10,7 +10,7 @@ The primary tokens are:
 
 - **CXVG Token (`cxvg-token`):** The core governance token (no direct revenue share).
 - **CXD Token (`cxd-token`):** The main token; accrues protocol revenue to holders.
-- **CXLP Token (`cxlp-token`):** The liquidity provider (LP) token.
+- **CXLP Token (`CXLP-token`):** The liquidity provider (LP) token.
 - **CXTR Token (`cxtr-token`):** A merit-based rewards token for contributors.
 - **CXS Token (`cxs-token`):** A soulbound (non-transferable) reputation token for contributors (SIP-009 NFT).
 
@@ -38,11 +38,11 @@ The primary tokens are:
   - DAO emissions/reserve allocations (if approved).
   - Secondary markets (DEX).
 
-### CXLP Token (`cxlp-token.clar`)
+### CXLP Token (`CXLP-token.clar`)
 
 - **Purpose:** `CXLP` is a reward token for users who provide liquidity to the Conxian protocol, either by depositing into the main vault or by adding liquidity to the DEX.
 - **Utility:**
-  - **Migration to CXD:** `CXLP` tokens can be converted into `CXD` tokens across 4 epoch bands (1.0x → up to 2.0x), bounded and timelocked. Requires `cxlp-token` configuration and authorizing the `cxlp-token` contract as a minter in `cxd-token`.
+  - **Migration to CXD:** `CXLP` tokens can be converted into `CXD` tokens across 4 epoch bands (1.0x → up to 2.0x), bounded and timelocked. Requires `CXLP-token` configuration and authorizing the `CXLP-token` contract as a minter in `cxd-token`.
   - **Yield Farming:** `CXLP` can be staked in yield farms to earn additional rewards.
 - **How to Acquire:**
   - Automatically earned by depositing assets into the `vault.clar` contract.

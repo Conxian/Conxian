@@ -46,8 +46,8 @@ Conxian represents a **comprehensive DeFi ecosystem on Stacks** with **productio
 ├── vault.clar - Core user asset vault with an internal, metrics-driven yield engine.
 ├── cxd-staking.clar - Staking contract for CXD tokens
 ├── cxd-token.clar - Main CXD token contract
-├── cxlp-migration-queue.clar - CXLP token migration management
-├── cxlp-token.clar - Liquidity pool token
+├── CXLP-migration-queue.clar - CXLP token migration management
+├── CXLP-token.clar - Liquidity pool token
 ├── cxs-token.clar - Secondary system token
 ├── cxtr-token.clar - Tertiary system token
 ├── cxvg-token.clar - Governance token
@@ -106,7 +106,7 @@ Conxian represents a **comprehensive DeFi ecosystem on Stacks** with **productio
 🛡️ SECURITY & MONITORING (15)
 ├── advanced-caching-system.clar
 ├── analytics.clar
-├── conxian-health-monitor.clar
+├── Conxian-health-monitor.clar
 ├── circuit-breaker-simple.clar
 ├── circuit-breaker.clar
 ├── enhanced-analytics.clar
@@ -125,7 +125,7 @@ Conxian represents a **comprehensive DeFi ecosystem on Stacks** with **productio
 └── bounty-system.clar
 
 🔧 INFRASTRUCTURE & UTILITIES (25)
-├── conxian-registry.clar
+├── Conxian-registry.clar
 ├── deployment-orchestrator.clar
 ├── dynamic-load-distribution.clar
 ├── enhanced-batch-processing.clar
@@ -357,7 +357,7 @@ Conxian represents a **comprehensive DeFi ecosystem on Stacks** with **productio
 ```text
 🛠️ SMART CONTRACT DEVELOPMENT:
 ├── Language: Clarity (Stacks native)
-├── Framework: Clarinet SDK v3.7.0
+├── Framework: Clarinet SDK v3.8.0
 ├── Testing: Vitest with comprehensive suites
 ├── Deployment: Automated scripts and CI/CD
 └── Monitoring: Real-time health checks

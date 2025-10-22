@@ -1,8 +1,9 @@
+;; ===== Traits =====
+(use-trait sip-010-ft-trait .sip-010-trait-ft-standard.sip-010-trait)
+
 ;; sbtc-vault.clar
 ;; Bitcoin asset management vault with sBTC wrapping/unwrapping
 ;; Provides secure custody, yield generation, and cross-chain bridging for BTC
-
-
 
 ;; ===== Constants =====
 (define-constant ERR_UNAUTHORIZED (err u2001))
@@ -14,7 +15,6 @@
 (define-constant ERR_WRAP_FAILED (err u2007))
 (define-constant ERR_BRIDGE_ERROR (err u2008))
 (define-constant ERR_INVALID_BTC_ADDRESS (err u2009))
-
 (define-constant PRECISION u100000000) ;; 8 decimals for BTC
 (define-constant MIN_WRAP_AMOUNT u100000) ;; 0.001 BTC
 (define-constant MIN_UNWRAP_AMOUNT u100000) ;; 0.001 BTC
@@ -133,10 +133,10 @@
     (var-set performance-fee-bps fee-bps)
     (ok true)))
 
-;; ===== Core Vault Functions (trait impl placeholder; centralized all-traits used where applicable) =====
+;; ===== Core Vault Functions =====
 
 ;; Deposit sBTC into vault
-(define-public (deposit (token-contract (contract-of sip-010-ft-trait)) (amount uint))
+(define-public (deposit (token-contract <sip-010-ft-trait>) (amount uint))
   (begin
     (try! (check-not-paused))
     (asserts! (>= amount MIN_WRAP_AMOUNT) ERR_INVALID_AMOUNT)
@@ -166,8 +166,8 @@
         }))
       
       ;; Update share balance
-      (map-set share-balances tx-sender 
-               (+ (default-to u0 (map-get? share-balances tx-sender)) shares))
+      (map-set share-balances tx-sender
+        (+ (default-to u0 (map-get? share-balances tx-sender)) shares))
       
       ;; Update totals
       (var-set total-sbtc-deposited (+ (var-get total-sbtc-deposited) amount))
@@ -176,7 +176,7 @@
       (ok shares))))
 
 ;; Request withdrawal (timelock)
-(define-public (withdraw (token-contract (contract-of sip-010-ft-trait)) (shares uint))
+(define-public (withdraw (token-contract <sip-010-ft-trait>) (shares uint))
   (begin
     (try! (check-not-paused))
     
@@ -202,7 +202,7 @@
         (ok sbtc-amount)))))
 
 ;; Complete withdrawal after timelock
-(define-public (complete-withdrawal (token-contract (contract-of sip-010-ft-trait)))
+(define-public (complete-withdrawal (token-contract <sip-010-ft-trait>))
   (begin
     (let ((request (unwrap! (map-get? withdrawal-requests tx-sender) ERR_UNAUTHORIZED)))
       
@@ -214,10 +214,10 @@
             (amount-after-fee (- (get amount request) fee)))
         
         ;; Transfer sBTC back to user
-        (try! (as-contract (contract-call? token-contract transfer 
-                                          amount-after-fee 
-                                          tx-sender 
-                                          tx-sender 
+        (try! (as-contract (contract-call? token-contract transfer
+                                          amount-after-fee
+                                          tx-sender
+                                          tx-sender
                                           none)))
         
         ;; Remove withdrawal request
@@ -229,7 +229,7 @@
         (ok amount-after-fee)))))
 
 ;; Get total balance of vault
-(define-public (get-total-balance (token-contract (contract-of sip-010-ft-trait)))
+(define-public (get-total-balance (token-contract <sip-010-ft-trait>))
   (ok (var-get total-sbtc-deposited)))
 
 ;; ===== Bitcoin Wrapping/Unwrapping =====
@@ -322,7 +322,6 @@
       ERR_UNAUTHORIZED)))
 
 ;; ===== Helper Functions =====
-
 (define-private (calculate-shares-to-mint (sbtc-amount uint))
   (let ((total-sbtc (var-get total-sbtc-deposited))
         (total-shares (var-get total-shares-minted)))
@@ -338,7 +337,6 @@
         (/ (* shares total-sbtc) total-shares))))
 
 ;; ===== Read-Only Functions =====
-
 (define-read-only (get-user-position (user principal))
   (map-get? user-deposits user))
 
@@ -358,47 +356,3 @@
                      PRECISION),
     paused: (var-get vault-paused)
   })
-
-(define-read-only (get-fee-config)
-  {
-    wrap-fee-bps: (var-get wrap-fee-bps),
-    unwrap-fee-bps: (var-get unwrap-fee-bps),
-    performance-fee-bps: (var-get performance-fee-bps),
-    management-fee-bps: (var-get management-fee-bps)
-  })
-
-(define-read-only (get-strategy-allocation (strategy principal))
-  (map-get? strategy-allocations strategy))
-
-(define-read-only (estimate-shares (sbtc-amount uint))
-  (ok (calculate-shares-to-mint sbtc-amount)))
-
-(define-read-only (estimate-withdrawal (shares uint))
-  (let ((sbtc-amount (calculate-sbtc-from-shares shares))
-        (fee (/ (* sbtc-amount (var-get unwrap-fee-bps)) u10000)))
-    {
-      gross-amount: sbtc-amount,
-      fee: fee,
-      net-amount: (- sbtc-amount fee)
-    }))
-
-;; ===== Vault Admin Trait Functions =====
-
-(define-public (set-deposit-fee (fee-bps uint))
-  (set-wrap-fee fee-bps))
-
-(define-public (set-withdrawal-fee (fee-bps uint))
-  (set-unwrap-fee fee-bps))
-
-(define-public (emergency-pause)
-  (set-vault-paused true))
-
-(define-public (emergency-unpause)
-  (set-vault-paused false))
-
-;; Placeholder implementations for strategy functions
-(define-public (deposit-to-strategy (asset (contract-of sip-010-ft-trait)) (amount uint) (strategy principal))
-  (allocate-to-strategy strategy amount))
-
-(define-public (withdraw-from-strategy (asset (contract-of sip-010-ft-trait)) (amount uint) (strategy principal))
-  (ok true))

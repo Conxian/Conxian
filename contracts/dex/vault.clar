@@ -1,9 +1,12 @@
 ;; Conxian Vault - Core yield-bearing vault with enhanced tokenomics integration
 ;; Implements vault-trait and vault-admin-trait with full system integration
 
+;; Traits
+(use-trait vault-trait .all-traits.vault-trait)
+(use-trait ft-trait .all-traits.sip-010-trait)
+(impl-trait vault-trait)
 
-
-;; Constants
+;; Error Constants
 (define-constant ERR_UNAUTHORIZED (err u1001))
 (define-constant ERR_PAUSED (err u1002))
 (define-constant ERR_INSUFFICIENT_BALANCE (err u1003))
@@ -11,16 +14,24 @@
 (define-constant ERR_CAP_EXCEEDED (err u1005))
 (define-constant ERR_INVALID_ASSET (err u1006))
 (define-constant ERR_STRATEGY_FAILED (err u1007))
+(define-constant ERR_TRANSFER_FAILED (err u1008))
 
+;; Configuration Constants
 (define-constant MAX_BPS u10000)
 (define-constant PRECISION u100000000) ;; 8 decimals
+(define-constant DEFAULT_DEPOSIT_FEE u50) ;; 0.5%
+(define-constant DEFAULT_WITHDRAWAL_FEE u100) ;; 1%
+(define-constant DEFAULT_REVENUE_SHARE u2000) ;; 20%
+(define-constant MAX_DEPOSIT_FEE u500) ;; 5%
+(define-constant MAX_WITHDRAWAL_FEE u1000) ;; 10%
+(define-constant MAX_REVENUE_SHARE u5000) ;; 50%
 
-;; Data variables
+;; State Variables
 (define-data-var admin principal tx-sender)
 (define-data-var paused bool false)
-(define-data-var deposit-fee-bps uint u50) ;; 0.5% default
-(define-data-var withdrawal-fee-bps uint u100) ;; 1% default
-(define-data-var revenue-share-bps uint u2000) ;; 20% to protocol
+(define-data-var deposit-fee-bps uint DEFAULT_DEPOSIT_FEE)
+(define-data-var withdrawal-fee-bps uint DEFAULT_WITHDRAWAL_FEE)
+(define-data-var revenue-share-bps uint DEFAULT_REVENUE_SHARE)
 (define-data-var monitor-enabled bool true)
 (define-data-var emission-enabled bool true)
 
@@ -40,39 +51,22 @@
 (define-map performance-metrics principal (tuple (total-volume uint) (total-fees uint)))
 
 ;; Read-only functions
-(define-public (get-admin)
-  (ok (var-get admin)))
-
-(define-read-only (is-paused)
-  (ok (var-get paused)))
-
-(define-read-only (get-deposit-fee)
-  (ok (var-get deposit-fee-bps)))
-
-(define-read-only (get-withdrawal-fee)
-  (ok (var-get withdrawal-fee-bps)))
-
-(define-read-only (get-revenue-share)
-  (ok (var-get revenue-share-bps)))
-
-(define-read-only (get-total-balance (asset principal))
-  (ok (default-to u0 (map-get? vault-balances asset))))
-
-(define-read-only (get-total-shares (asset principal))
-  (ok (default-to u0 (map-get? vault-shares asset))))
-
-(define-read-only (get-user-shares (user principal) (asset principal))
-  (ok (default-to u0 (map-get? user-shares (tuple (user user) (asset asset))))))
-
-(define-read-only (get-vault-cap (asset principal))
-  (ok (default-to u0 (map-get? vault-caps asset))))
-
-(define-read-only (is-asset-supported (asset principal))
-  (default-to false (map-get? supported-assets asset)))
+(define-public (get-admin) (ok (var-get admin)))
+(define-read-only (is-paused) (ok (var-get paused)))
+(define-read-only (get-deposit-fee) (ok (var-get deposit-fee-bps)))
+(define-read-only (get-withdrawal-fee) (ok (var-get withdrawal-fee-bps)))
+(define-read-only (get-revenue-share) (ok (var-get revenue-share-bps)))
+(define-read-only (get-total-balance (asset principal)) (ok (default-to u0 (map-get? vault-balances asset))))
+(define-read-only (get-total-shares (asset principal)) (ok (default-to u0 (map-get? vault-shares asset))))
+(define-read-only (get-user-shares (user principal) (asset principal)) (ok (default-to u0 (map-get? user-shares (tuple (user user) (asset asset))))))
+(define-read-only (get-vault-cap (asset principal)) (ok (default-to u0 (map-get? vault-caps asset))))
+(define-read-only (is-asset-supported (asset principal)) (default-to false (map-get? supported-assets asset)))
+(define-read-only (get-strategy (token-contract principal)) (ok (map-get? asset-strategies token-contract)))
+(define-read-only (get-apy (token-contract principal)) (ok u800)) ;; 8% APY placeholder
+(define-read-only (get-tvl (token-contract principal)) (ok (default-to u0 (map-get? vault-balances token-contract))))
 
 ;; Private functions
-(define-private (is-admin (user principal))
-  (is-eq user (var-get admin)))
+(define-private (is-admin (user principal)) (is-eq user (var-get admin)))
 
 (define-private (calculate-shares (asset principal) (amount uint))
   (let ((total-balance (unwrap-panic (get-total-balance asset)))
@@ -95,7 +89,7 @@
   ;; Simplified monitoring - just return true for now
   (and (var-get monitor-enabled) true))
 
-;; Core vault functions  
+;; Core vault functions
 (define-public (deposit (asset principal) (amount uint))
   (let ((user tx-sender)
         (fee (calculate-fee amount (var-get deposit-fee-bps)))
@@ -112,7 +106,7 @@
     (asserts! (is-asset-supported asset) ERR_INVALID_ASSET)
     (asserts! (or (is-eq vault-cap u0) (<= (+ current-balance net-amount) vault-cap)) ERR_CAP_EXCEEDED)
     
-    ;; Transfer tokens from user to vault - PRODUCTION IMPLEMENTATION
+    ;; Transfer tokens from user to vault
     (try! (contract-call? asset transfer amount user (as-contract tx-sender) none))
     
     ;; Update vault state
@@ -123,21 +117,15 @@
     ;; Handle protocol fees
     (if (> fee u0)
         (begin
-          (map-set collected-fees asset 
-                   (+ (default-to u0 (map-get? collected-fees asset)) fee))
-          ;; Notify revenue distributor - PRODUCTION IMPLEMENTATION
-          (try! (contract-call? (var-get token-system-coordinator)
-                               trigger-revenue-distribution
-                               asset
-                               fee))
+          (map-set collected-fees asset (+ (default-to u0 (map-get? collected-fees asset)) fee))
+          (try! (contract-call? (var-get token-system-coordinator) trigger-revenue-distribution asset fee))
           true)
         true)
     
-;; Deploy funds to strategy if available - PRODUCTION IMPLEMENTATION
+    ;; Deploy funds to strategy if available
     (match (map-get? asset-strategies asset)
       strategy-contract
         (let ((deploy-result (try! (contract-call? strategy-contract deploy-funds net-amount))))
-          ;; Verify deployment was successful
           (asserts! (>= deploy-result net-amount) ERR_STRATEGY_FAILED)
           (ok deploy-result))
       (begin
@@ -148,9 +136,7 @@
     (notify-protocol-monitor "deposit" (tuple (asset asset) (amount net-amount)))
     
     ;; Emit event
-    (print (tuple (event "vault-deposit") (user user) (asset asset) 
-                  (amount amount) (shares shares) (fee fee)))
-    
+    (print (tuple (event "vault-deposit") (user user) (asset asset) (amount amount) (shares shares) (fee fee)))
     (ok (tuple (shares shares) (fee fee)))))
 
 (define-public (withdraw (asset principal) (shares uint))
@@ -168,11 +154,10 @@
     (asserts! (>= user-current-shares shares) ERR_INSUFFICIENT_BALANCE)
     (asserts! (>= current-balance amount) ERR_INSUFFICIENT_BALANCE)
     
-    ;; Withdraw from strategy if needed - PRODUCTION IMPLEMENTATION
+    ;; Withdraw from strategy if needed
     (match (map-get? asset-strategies asset)
       strategy-contract
         (let ((withdraw-result (try! (contract-call? strategy-contract withdraw-funds amount))))
-          ;; Verify withdrawal was successful
           (asserts! (>= withdraw-result amount) ERR_STRATEGY_FAILED)
           (ok withdraw-result))
       (begin
@@ -187,33 +172,24 @@
     ;; Handle protocol fees
     (if (> fee u0)
         (begin
-          (map-set collected-fees asset 
-                   (+ (default-to u0 (map-get? collected-fees asset)) fee))
-          ;; Notify revenue distributor - PRODUCTION IMPLEMENTATION
-          (try! (contract-call? (var-get token-system-coordinator)
-                               trigger-revenue-distribution
-                               asset
-                               fee))
+          (map-set collected-fees asset (+ (default-to u0 (map-get? collected-fees asset)) fee))
+          (try! (contract-call? (var-get token-system-coordinator) trigger-revenue-distribution asset fee))
           true)
         true)
     
-    ;; Transfer tokens to user - PRODUCTION IMPLEMENTATION
-    (try! (as-contract (contract-call? asset transfer net-amount 
-                                     (as-contract tx-sender) user none)))
+    ;; Transfer tokens to user
+    (try! (as-contract (contract-call? asset transfer net-amount (as-contract tx-sender) user none)))
     
     ;; Notify monitoring system
     (notify-protocol-monitor "withdraw" (tuple (asset asset) (amount net-amount)))
     
     ;; Emit event
-    (print (tuple (event "vault-withdraw") (user user) (asset asset) 
-                  (amount net-amount) (shares shares) (fee fee)))
-    
+    (print (tuple (event "vault-withdraw") (user user) (asset asset) (amount net-amount) (shares shares) (fee fee)))
     (ok (tuple (amount net-amount) (fee fee)))))
 
 (define-public (flash-loan (amount uint) (recipient principal))
   (let ((asset-principal SP000000000000000000002Q6VF78) ;; STX for flash loans
         (fee (calculate-fee amount u30))) ;; 0.3% flash loan fee
-    
     (asserts! (not (var-get paused)) ERR_PAUSED)
     (asserts! (> amount u0) ERR_INVALID_AMOUNT)
     
@@ -230,11 +206,8 @@
     ;; Reset collected fees
     (map-set collected-fees asset u0)
     
-    ;; Notify revenue distributor - PRODUCTION IMPLEMENTATION
-    (try! (contract-call? (var-get token-system-coordinator)
-                         trigger-revenue-distribution
-                         asset
-                         collected))
+    ;; Notify revenue distributor
+    (try! (contract-call? (var-get token-system-coordinator) trigger-revenue-distribution asset collected))
     
     (ok collected)))
 
@@ -296,17 +269,32 @@
 
 (define-public (emergency-withdraw (asset principal) (amount uint) (recipient principal))
   (begin
-    (asserts! (is-admin tx-sender) (err u401))
-    ;; Emergency withdrawal implementation
+    (asserts! (is-admin tx-sender) ERR_UNAUTHORIZED)
+    (asserts! (> amount u0) ERR_INVALID_AMOUNT)
+    
+    ;; Emergency withdrawal - transfer assets directly
+    (try! (as-contract (contract-call? asset transfer amount (as-contract tx-sender) recipient none)))
+    
+    ;; Update vault balance
+    (let ((current-balance (default-to u0 (map-get? vault-balances asset))))
+      (map-set vault-balances asset (if (>= current-balance amount) (- current-balance amount) u0)))
+    
+    (print (tuple (event "emergency-withdraw") (asset asset) (amount amount) (recipient recipient)))
     (ok amount)))
 
 (define-public (rebalance-vault (asset principal))
   (begin
     (asserts! (is-admin tx-sender) ERR_UNAUTHORIZED)
-    ;; Rebalancing logic implementation
-    (ok true)))
-
-;; Initialize default supported asset (STX)
-(map-set supported-assets SP000000000000000000002Q6VF78 true)
-
-(impl-trait vault_trait)
+    (asserts! (is-asset-supported asset) ERR_INVALID_ASSET)
+    
+    ;; Rebalancing logic - withdraw from strategy and redeploy
+    (match (map-get? asset-strategies asset)
+      strategy-contract
+        (let ((total-balance (default-to u0 (map-get? vault-balances asset))))
+          ;; Withdraw all from strategy
+          (try! (contract-call? strategy-contract withdraw-funds total-balance))
+          ;; Redeploy to strategy
+          (try! (contract-call? strategy-contract deploy-funds total-balance))
+          (print (tuple (event "vault-rebalanced") (asset asset) (amount total-balance)))
+          (ok true))
+      ERR_INVALID_ASSET)))

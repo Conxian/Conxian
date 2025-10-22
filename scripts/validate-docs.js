@@ -9,8 +9,8 @@
   - documentation/contract-guides (legacy/outdated)
 */
 
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
 
 const ROOT = process.cwd();
 

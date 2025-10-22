@@ -1,14 +1,10 @@
-;; Pausable Contract
-;; Provides emergency stop mechanism that can be triggered by authorized accounts
 
 
-
+(use-trait pausable-trait .all-traits.pausable-trait)
+(impl-trait pausable-trait)
 (define-constant ERR_PAUSED (err u200))
 (define-constant ERR_NOT_PAUSED (err u201))
-
 (define-data-var paused bool false)
-
-;; ========== Modifiers ==========
 
 (define-private (when-not-paused)
   (asserts! (not (var-get paused)) ERR_PAUSED)
@@ -21,11 +17,11 @@
 )
 
 (define-private (only-pauser)
-  ;; This would typically check access control, for now just allow anyone
+  
+
+;; For now allow anyone; integrate access-control later
   (ok true)
 )
-
-;; ========== External Functions ==========
 
 (define-read-only (is-paused)
   (ok (var-get paused))
@@ -46,8 +42,6 @@
     (ok true)
   )
 )
-
-;; ========== Test Helpers ==========
 
 (define-public (test-when-not-paused)
   (begin

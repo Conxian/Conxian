@@ -5,27 +5,9 @@
 
 import { describe, expect, it, beforeAll } from 'vitest';
 import { Cl } from '@stacks/transactions';
+import { createMockSimnet } from './helpers/test-setup';
 
-// Mock simnet for testing
-const mockSimnet = {
-  getAccounts: () => new Map([
-    ['deployer', 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6'],
-    ['wallet_1', 'ST1SJ3DTE5DN7X54YDH5D64R3BCB6A2AG2ZQ8YPD5'],
-    ['wallet_2', 'ST2CY5V39NHDPWSXMW9QDT3HC3GD6Q6XX4CFRK9AG']
-  ]),
-  callReadOnlyFn: (contract: string, method: string, args: any[], caller: string) => ({
-    result: Cl.ok(Cl.tuple({
-      'total-batches': Cl.uint(0),
-      'current-batch-size': Cl.uint(0),
-      'processing-enabled': Cl.bool(true),
-      'batch-ready': Cl.bool(false)
-    }))
-  }),
-  callPublicFn: (contract: string, method: string, args: any[], caller: string) => ({
-    result: Cl.ok(Cl.bool(true))
-  }),
-  mineEmptyBlocks: (count: number) => {}
-};
+const mockSimnet = createMockSimnet();
 
 describe('Transaction Batch Processor', () => {
   let accounts: Map<string, string>;
