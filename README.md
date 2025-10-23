@@ -156,7 +156,7 @@ clarinet test
 
 ### For Users
 
-**New to Conxian?** → [**User Manual**](./documentation/user/USER_MANUAL.md) | [Quick Start Guide](./documentation/user/QUICK_START.md)
+**New to Conxian?** → [**User Manual**](./documentation/retail/USER_MANUAL.md) | [Quick Start Guide](./documentation/retail/QUICK_START.md)
 
 ### For Developers
 
@@ -227,21 +227,19 @@ All documentation has been reorganized into a clear, structured system:
 
 | Audience | Location | Description |
 |----------|----------|-------------|
-| **👥 Users** | [`./documentation/user/`](./documentation/user/) | User guides and quick start |
+| **🛍️ Retail Users** | [`./documentation/retail/`](./documentation/retail/) | User guides and quick start |
+| **🏢 Enterprise** | [`./documentation/enterprise/`](./documentation/enterprise/) | Guides for institutions |
 | **👨‍💻 Developers** | [`./documentation/developer/`](./documentation/developer/) | Development setup and standards |
 | **🏗️ Architecture** | [`./documentation/architecture/`](./documentation/architecture/) | System design and specifications |
-| **🚀 Deployment** | [`./documentation/deployment/`](./documentation/deployment/) | Deployment and operations |
-| **🔒 Security** | [`./documentation/security/`](./documentation/security/) | Security and compliance |
-| **📖 API Reference** | [`./documentation/api/`](./documentation/api/) | Smart contract functions |
 
 **[📚 View Complete Documentation](./documentation/)**
 
 ### Quick Access
 
-- [**User Manual**](./documentation/user/USER_MANUAL.md) - Complete user guide
+- [**Retail User Onboarding**](./documentation/retail/ONBOARDING.md) - Complete user guide
+- [**Enterprise Onboarding**](./documentation/enterprise/ONBOARDING.md) - Technical guide for institutions
 - [**Developer Guide**](./documentation/developer/DEVELOPER_GUIDE.md) - Development setup
-- [**API Reference**](./documentation/api) - Contract functions
-- [**Architecture**](./documentation/architecture/ARCHITECTURE.md) - System design
+- [**Dimensional System Architecture**](./documentation/architecture/DIMENSIONAL_SYSTEM.md) - System design
 
 ## License
 

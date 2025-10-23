@@ -3,6 +3,8 @@
 This guide provides everything you need to develop, test, and deploy
 Conxian smart contracts.
 
+> **Note for Institutional Developers:** If you are building on top of our enterprise features, please see our [Enterprise Onboarding Guide](../enterprise/ONBOARDING.md) for more specific information.
+
 ## Quick Start
 
 ### Prerequisites

@@ -4,9 +4,13 @@ This is the central documentation hub for the Conxian DeFi platform. All documen
 
 ## 📚 Documentation Structure
 
-### 👥 For Users
-- [`user/USER_MANUAL.md`](./user/USER_MANUAL.md) - **Complete user guide and onboarding**
-- [`user/QUICK_START.md`](./user/QUICK_START.md) - **5-minute getting started guide**
+### 🛍️ For Retail Users
+- [`retail/ONBOARDING.md`](./retail/ONBOARDING.md) - **Complete user guide and onboarding**
+- [`retail/QUICK_START.md`](./retail/QUICK_START.md) - **5-minute getting started guide**
+
+### 🏢 For Enterprise & Institutions
+- [`enterprise/ONBOARDING.md`](./enterprise/ONBOARDING.md) - **Technical guide for developers and institutions**
+- [`enterprise/API_REFERENCE.md`](./enterprise/API_REFERENCE.md) - **Enterprise API and contract functions**
 
 ### 👨‍💻 For Developers
 - [`developer/DEVELOPER_GUIDE.md`](./developer/DEVELOPER_GUIDE.md) - **Development setup and contributing**
@@ -19,6 +23,7 @@ This is the central documentation hub for the Conxian DeFi platform. All documen
 
 ### 🏗️ Architecture & Design
 - [`architecture/ARCHITECTURE.md`](./architecture/ARCHITECTURE.md) - **System architecture and design**
+- [`architecture/DIMENSIONAL_SYSTEM.md`](./architecture/DIMENSIONAL_SYSTEM.md) - **Dimensional DeFi System Architecture**
 - [`architecture/system_spec.md`](./architecture/system_spec.md) - **Complete system specification**
 - [`architecture/TOKENOMICS.md`](./architecture/TOKENOMICS.md) - **Economic model and token design**
 - [`architecture/NAKAMOTO_SBTC_INTEGRATION.md`](./architecture/NAKAMOTO_SBTC_INTEGRATION.md) - **sBTC integration details**
@@ -55,19 +60,12 @@ This is the central documentation hub for the Conxian DeFi platform. All documen
 
 | I want to... | Read this |
 |---------------|-----------|
-| Get started as a user | [User Manual](./user/USER_MANUAL.md) |
-| Quick 5-minute setup | [Quick Start](./user/QUICK_START.md) |
-| Integrate with contracts | [API Reference](./api/API_REFERENCE.md) |
+| Get started as a retail user | [Retail Onboarding](./retail/ONBOARDING.md) |
+| Integrate as an institution | [Enterprise Onboarding](./enterprise/ONBOARDING.md) |
+| Understand the Dimensional architecture | [Dimensional System](./architecture/DIMENSIONAL_SYSTEM.md) |
 | Contribute code | [Developer Guide](./developer/DEVELOPER_GUIDE.md) |
 | Understand the economics | [Tokenomics](./architecture/TOKENOMICS.md) |
 | Review security | [Security](./security/SECURITY.md) |
-| Check current status | [Status](./project-management/STATUS.md) |
-| Deploy to production | [Deployment](./deployment/DEPLOYMENT.md) |
-| **Use lending & flash loans** | [**System Specification**](./architecture/system_spec.md) |
-| **Understand mathematics** | [**Mathematical Libraries Guide**](./guides/contract-guides/README.md) |
-| **Set up CI/CD** | [**CI/CD Pipeline**](./developer/CI_CD_PIPELINE.md) |
-| **Bitcoin integration** | [**sBTC Integration**](./architecture/NAKAMOTO_SBTC_INTEGRATION.md) |
-| **Cross-chain features** | [**Wormhole Integration**](./architecture/WORMHOLE_INTEGRATION.md) |
 
 ## 📋 Documentation Standards
 
@@ -84,7 +82,8 @@ All documentation follows these principles:
 ```
 documentation/
 ├── README.md (this file)
-├── user/                    # User-focused documentation
+├── retail/                  # Retail user-focused documentation
+├── enterprise/              # Enterprise & institutional documentation
 ├── developer/               # Developer guides and standards
 ├── architecture/            # System design and specifications
 ├── deployment/              # Deployment and operations
