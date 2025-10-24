@@ -6,7 +6,7 @@
 (use-trait governance-trait .all-traits.governance-trait)
 
 (use-trait governance_trait .all-traits.governance-trait)
- .all-traits.governance-trait)
+(use-trait governance-trait .all-traits.governance-trait)
 
 ;; ===== Constants =====
 (define-constant ERR_UNAUTHORIZED (err u5000))

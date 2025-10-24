@@ -8,7 +8,7 @@
 (use-trait circuit-breaker-trait .all-traits.circuit-breaker-trait)
 (use-trait dim-registry-trait .all-traits.dim-registry-trait)
 (use-trait factory_trait .all-traits.factory-trait)
- .all-traits.factory-trait)
+(use-trait factory-trait .all-traits.factory-trait)
 
 ;; --- Dimensional Integration ---
 (define-data-var dimensional-registry principal tx-sender) ;; Will be set to dim-registry.clar

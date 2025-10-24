@@ -1,7 +1,7 @@
 ;; position-nft.clar
 ;; NFT representation of dimensional positions
 
-(use-trait sip-009-nft-trait .all-traits.sip-009-nft-trait)
+(use-trait sip-009-nft-trait .all-traits.
 (use-trait dimensional-core-trait .all-traits.dimensional-core-trait)
 (use-trait position-nft-trait .all-traits.position-nft-trait)
 

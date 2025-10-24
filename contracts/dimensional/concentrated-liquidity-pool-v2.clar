@@ -3,7 +3,7 @@
 (use-trait clp-pool-trait .all-traits.clp-pool-trait)
 (use-trait sip-010-ft-trait .all-traits.sip-010-trait)
 (use-trait clp_pool_trait .all-traits.clp-pool-trait)
- .all-traits.clp-pool-trait)
+(use-trait clp-pool-trait .all-traits.clp-pool-trait)
 
 (define-constant ERR_UNAUTHORIZED (err u1101))
 (define-constant ERR_INVALID_TICK (err u1102))

@@ -1,6 +1,4 @@
 (use-trait fixed-point-math-trait .all-traits.fixed-point-math-trait)
-(use-trait fixed_point_math_trait .all-traits.fixed-point-math-trait)
- .all-traits.fixed-point-math-trait)
 
 ;; fixed-point-math.clar
 ;; Base fixed-point arithmetic utilities without external dependencies

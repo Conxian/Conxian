@@ -4,7 +4,6 @@
 ;; --- Traits ---
 (use-trait lending-system-trait .all-traits.lending-system-trait)
 (use-trait lending_system_trait .all-traits.lending-system-trait)
- .all-traits.lending-system-trait this)
 
 ;; --- Constants ---
 (define-constant LENDING_SERVICE "lending-service")

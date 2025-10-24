@@ -1,11 +1,9 @@
 ;; oracle-adapter.clar
 ;; Oracle adapter for the dimensional engine
 
+;; Consolidated trait imports – one canonical oracle-trait is enough
 (use-trait oracle-trait .all-traits.oracle-trait)
 (use-trait dimensional-trait .all-traits.dimensional-trait)
-
-(use-trait oracle_trait .all-traits.oracle-trait)
- .all-traits.oracle-trait)
 
 ;; ===== Constants =====
 (define-constant ERR_UNAUTHORIZED (err u3000))

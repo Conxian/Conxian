@@ -1,12 +1,9 @@
 ;; dimensional-vault.clar
 ;; Unified lending vault with risk-adjusted parameters
 
-(use-trait vault .all-traits.vault-trait)
+(use-trait vault-trait .all-traits.vault-trait)
 (use-trait dimensional-core .all-traits.dimensional-core-trait)
 (use-trait risk-oracle .all-traits.risk-oracle-trait)
-(use-trait vault_trait .all-traits.vault-trait)
- .all-traits.vault-trait)
-
 ;; ===== Constants =====
 (define-constant ERR_UNAUTHORIZED (err u9000))
 (define-constant ERR_INVALID_ASSET (err u9001))

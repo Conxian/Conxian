@@ -1,12 +1,9 @@
 ;; ===== Traits =====
 (use-trait sbtc-integration-trait .all-traits.sbtc-integration-trait)
-(use-trait sbtc_integration_trait .all-traits.sbtc-integration-trait)
- .all-traits.sbtc-integration-trait)
 
 ;; sbtc-integration.clar
 ;; sBTC Integration Module for Conxian Protocol
 ;; Provides sBTC asset management, risk parameters, and oracle integration
-
 ;; =============================================================================
 ;; CONSTANTS AND ERROR CODES
 ;; =============================================================================

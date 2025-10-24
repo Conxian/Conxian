@@ -4,7 +4,7 @@
 
 (use-trait utils-trait .all-traits.utils-trait)
 (use-trait utils_trait .all-traits.utils-trait)
- .all-traits.utils-trait)
+(use-trait utils-trait .all-traits.utils-trait)
 
 (define-public (principal-to-buff (p principal))
   ;; Convert principal to buffer using standard Clarity functions

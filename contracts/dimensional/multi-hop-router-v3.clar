@@ -1,12 +1,9 @@
-(use-trait pool-trait .all-traits.pool-trait)
-(use-trait multi-hop-router-v3-trait .all-traits.multi-hop-router-v3-trait)
-
 ;; multi-hop-router-v3.clar
 ;; Advanced Multi-Hop Router for Conxian DEX with optimized path finding
 ;; Supports all pool types including concentrated liquidity pools
 
-(use-trait multi_hop_router_v3_trait .all-traits.multi-hop-router-v3-trait)
- .all-traits.multi-hop-router-v3-trait)
+(use-trait pool-trait .all-traits.pool-trait)
+(use-trait multi-hop-router-v3-trait .all-traits.multi-hop-router-v3-trait)
 
 ;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED (err u5000))

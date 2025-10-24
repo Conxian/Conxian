@@ -10,7 +10,7 @@
 ;; to be called by a whitelisted keeper principal.
 
 (use-trait dimensional_oracle_trait .all-traits.dimensional-oracle-trait)
- .all-traits.dimensional-oracle-trait)
+(use-trait dimensional-oracle-trait .all-traits.dimensional-oracle-trait)
 
 (define-constant ERR_UNAUTHORIZED u101)
 

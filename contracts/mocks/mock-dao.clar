@@ -3,7 +3,7 @@
 
 (use-trait dao-trait .all-traits.dao-trait)
 (use-trait dao_trait .all-traits.dao-trait)
- .all-traits.dao-trait)
+(use-trait dao-trait .all-traits.dao-trait)
 
 ;; ===== Constants =====
 (define-constant CONTRACT_OWNER tx-sender)

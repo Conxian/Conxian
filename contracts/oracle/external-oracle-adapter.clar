@@ -1,7 +1,7 @@
 ;; ===== Traits =====
 (use-trait oracle-adapter-trait .all-traits.oracle-adapter-trait)
 (use-trait oracle_adapter_trait .all-traits.oracle-adapter-trait)
- .all-traits.oracle-adapter-trait)
+(use-trait oracle-adapter-trait .all-traits.oracle-adapter-trait)
 
 ;; external-oracle-adapter.clar
 ;; Adapter for integrating external oracle providers (Chainlink, Pyth, Redstone)
