@@ -300,7 +300,7 @@ class ContractVerifier:
         If the test manifest contains the contract path and has depends_on, warnings are suppressed.
         """
         success = True
-        root_contracts = self.config.get("contracts", {})
+        root_contracts = self.toml_data.get("contracts", {})
         test_contracts = self.test_config.get("contracts", {})
 
         # Build path -> (name, address, depends_on, source)

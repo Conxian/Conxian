@@ -17,7 +17,7 @@ bitcoin_node_rpc_address = "https://blockstream.info/api"
 
 [contracts.all-traits]
 path = "contracts/traits/all-traits.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.oracle"
 
 [accounts.wallet_1]
 address = "ST1SJ3DTE5DN7X54YDH5D64R3BCB6A2AG2ZQ8YPD5"
@@ -112,15 +112,15 @@ address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.automation-keeper-coordinat
 
 [contracts.batch-auction]
 path = "contracts/batch-auction.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.batch-auction"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.oracle"
 
 [contracts.btc-adapter]
 path = "contracts/btc-adapter.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.btc-adapter"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.position-nft"
 
 [contracts.budget-manager]
 path = "contracts/budget-manager.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.budget-manager"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits"
 
 [contracts.circuit-breaker]
 path = "contracts/circuit-breaker.clar"
@@ -128,7 +128,7 @@ address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.circuit-breaker"
 
 [contracts.concentrated-liquidity-pool]
 path = "contracts/concentrated-liquidity-pool.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.concentrated-liquidity-pool"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits"
 
 [contracts.dex-auto-compounder]
 path = "contracts/dex/auto-compounder.clar"
@@ -197,6 +197,34 @@ address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dex-enterprise-loan-manager
 [contracts.dex-fee-manager]
 path = "contracts/dex/fee-manager.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dex-fee-manager"
+
+[contracts.position-nft]
+path = "contracts/position-nft.clar"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.position-nft"
+
+[contracts.dex-dimensional-router]
+path = "contracts/dex/dimensional-router.clar"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dex-dimensional-router"
+
+[contracts.dimensional-dimensional-core]
+path = "contracts/dimensional/dimensional-core.clar"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dimensional-dimensional-core"
+
+[contracts.dimensional-governance]
+path = "contracts/dimensional/governance.clar"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dimensional-governance"
+
+[contracts.lending-dimensional-vault]
+path = "contracts/lending/dimensional-vault.clar"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.lending-dimensional-vault"
+
+[contracts.lending-enterprise-module]
+path = "contracts/lending/enterprise-module.clar"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.lending-enterprise-module"
+
+[contracts.risk-risk-oracle]
+path = "contracts/risk/risk-oracle.clar"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.risk-risk-oracle"
 
 [contracts.dex-interest-rate-model]
 path = "contracts/dex/interest-rate-model.clar"
@@ -500,7 +528,7 @@ address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.monitoring-system-monitor"
 
 [contracts.oracle]
 path = "contracts/oracle.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.oracle"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits"
 
 [contracts.oracle-dimensional-oracle]
 path = "contracts/oracle/dimensional-oracle.clar"
