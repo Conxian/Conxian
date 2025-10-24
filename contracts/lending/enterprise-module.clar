@@ -4,7 +4,8 @@
 (use-trait enterprise .all-traits.enterprise-trait)
 (use-trait dimensional-core .all-traits.dimensional-core-trait)
 (use-trait risk-oracle .all-traits.risk-oracle-trait)
-(impl-trait enterprise)
+(use-trait enterprise_trait .all-traits.enterprise-trait)
+ .all-traits.enterprise-trait)
 
 ;; ===== Constants =====
 (define-constant ERR_UNAUTHORIZED (err u9500))

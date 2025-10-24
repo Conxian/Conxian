@@ -4,7 +4,8 @@
 
 ;; --- Traits ---
 (use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
-(impl-trait sip-010-ft-trait)
+(use-trait sip_010_ft_trait .all-traits.sip-010-ft-trait)
+ .all-traits.sip-010-ft-trait)
 
 ;; --- Errors ---
 (define-constant ERR_UNAUTHORIZED u100)
@@ -337,4 +338,6 @@
       ;; Compute band and multiplier
       (let (
           (band (unwrap! (current-band) (err u999)))
-          (mult (unwrap! (band-multiplier band) (err u
+          (mult (unwrap! (band-multiplier band) (err ERR_OVERFLOW)))
+          (cxd-to-mint (/ (* amount mult) u10000))
+        )))))

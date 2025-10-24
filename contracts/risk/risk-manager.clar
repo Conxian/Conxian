@@ -5,7 +5,8 @@
 (use-trait oracle-trait .all-traits.oracle-trait)
 (use-trait dimensional-trait .all-traits.dimensional-trait)
 
-(impl-trait risk-trait)
+(use-trait risk_trait .all-traits.risk-trait)
+ .all-traits.risk-trait)
 
 ;; ===== Type Definitions =====
 (define-types

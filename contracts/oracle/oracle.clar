@@ -4,7 +4,8 @@
 ;; Provides price feed functionality for assets
 
 (use-trait dimensional-oracle-trait .all-traits.dimensional-oracle-trait)
-(impl-trait dimensional-oracle-trait)
+(use-trait dimensional_oracle_trait .all-traits.dimensional-oracle-trait)
+ .all-traits.dimensional-oracle-trait)
 
 ;; Error codes
 (define-constant ERR_ASSET_NOT_FOUND (err u404))

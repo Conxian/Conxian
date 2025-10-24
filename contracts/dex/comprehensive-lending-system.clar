@@ -3,7 +3,8 @@
 
 ;; --- Traits ---
 (use-trait lending-system-trait .all-traits.lending-system-trait)
-(impl-trait lending-system-trait)
+(use-trait lending_system_trait .all-traits.lending-system-trait)
+ .all-traits.lending-system-trait this)
 
 ;; --- Constants ---
 (define-constant LENDING_SERVICE "lending-service")
@@ -234,7 +235,8 @@
       (try! (accrue-interest collateral-asset-principal))
       (let ((health (try! (get-health-factor borrower))))
         (asserts! (< health PRECISION) ERR_POSITION_HEALTHY)
-        (let ((borrow-balance (default-to u0 (get balance (map-get? user-borrow-balances { user: borrower, asset: repay-asset-principal }))))
+        (let (
+              (borrow-balance (default-to u0 (get balance (map-get? user-borrow-balances { user: borrower, asset: repay-asset-principal }))))
               (close-factor u500000000000000000)
               (max-repayable (/ (* borrow-balance close-factor) PRECISION))
               (actual-repay-amount (min repay-amount max-repayable))
@@ -247,3 +249,11 @@
               (seize-value-in-usd (+ repay-value-in-usd bonus-value))
               (collateral-to-seize (/ (* seize-value-in-usd PRECISION) collateral-price))
               (borrower-collateral (default-to u0 (get balance (map-get? user-supply-balances { user: borrower, asset: collateral-asset-principal }))))
+            )
+          )
+        )
+      )
+    )
+  )
+)
+            ) ;; Closing parenthesis for the let expression

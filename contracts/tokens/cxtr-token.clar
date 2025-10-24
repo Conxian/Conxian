@@ -7,7 +7,8 @@
 
 ;; --- Constants ---
 (use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
-(impl-trait sip-010-ft-trait)
+(use-trait sip_010_ft_trait .all-traits.sip-010-ft-trait)
+ .all-traits.sip-010-ft-trait)
 (define-constant TRAIT_REGISTRY .trait-registry)
 
 ;; --- Errors ---

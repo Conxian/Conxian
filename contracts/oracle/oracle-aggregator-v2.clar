@@ -70,7 +70,7 @@
           (lambda (source acc)
             (match (contract-call? source get-price token-a token-b)
               price (unwrap-panic (as-max-len? (append acc price) u20))
-              _ acc))
+              (err u0)))
           sources
           (list))))
     (asserts! (> (len collected) u0) ERR_NO_SOURCES)

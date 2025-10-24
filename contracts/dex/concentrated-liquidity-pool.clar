@@ -1,7 +1,8 @@
 ;; Concentrated Liquidity Pool (CLP) - Minimal adapter implementation for trait compliance and compilation
 
 (use-trait clp-pool-trait .all-traits.clp-pool-trait)
-(impl-trait clp-pool-trait)
+(use-trait clp_pool_trait .all-traits.clp-pool-trait)
+ .all-traits.clp-pool-trait)
 (define-constant ERR_UNAUTHORIZED (err u1001))
 (define-constant ERR_INVALID_TICK (err u3001))
 (define-constant ERR_INVALID_AMOUNT (err u3004))

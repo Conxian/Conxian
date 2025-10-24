@@ -230,7 +230,7 @@
       (if (>= usage-percentage (var-get gc-threshold))
         (match (trigger-gc-internal pool-name)
           okv okv
-          _ true
+          (ok true)
         )
         true
       )

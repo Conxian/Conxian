@@ -1,5 +1,3 @@
-<<<<<<< Updated upstream
-=======
 (use-trait sip-010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
 ;; yield-optimizer.clar
 ;; The central brain of the Conxian yield system.
@@ -145,4 +143,3 @@
     )
   )
 )
->>>>>>> Stashed changes

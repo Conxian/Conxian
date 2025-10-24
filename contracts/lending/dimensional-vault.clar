@@ -4,7 +4,8 @@
 (use-trait vault .all-traits.vault-trait)
 (use-trait dimensional-core .all-traits.dimensional-core-trait)
 (use-trait risk-oracle .all-traits.risk-oracle-trait)
-(impl-trait vault)
+(use-trait vault_trait .all-traits.vault-trait)
+ .all-traits.vault-trait)
 
 ;; ===== Constants =====
 (define-constant ERR_UNAUTHORIZED (err u9000))

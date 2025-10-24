@@ -296,13 +296,13 @@
 )
 
 (define-private (get-valid-prices (asset principal) (oracles (list 10 principal)))
-  (fold validate-oracle-price oracles (list))
+  (fold (validate-oracle-price asset) oracles (list))
 )
 
-(define-private (validate-oracle-price (oracle principal) (valid-prices (list 10 { oracle: principal, price: uint, weight: uint, confidence: uint })))
+(define-private (validate-oracle-price (asset principal) (oracle principal) (valid-prices (list 10 { oracle: principal, price: uint, weight: uint, confidence: uint })))
   (match (map-get? oracle-config { oracle: oracle })
     config (if (get is-active config)
-      (match (map-get? price-feeds { oracle: oracle, asset: .sbtc-integration.SBTC-MAINNET })
+      (match (map-get? price-feeds { oracle: oracle, asset: asset })
         feed (if (< (- block-height (get block-height feed)) MAX_STALENESS_BLOCKS)
           (unwrap-panic (as-max-len? (append valid-prices {
             oracle: oracle,

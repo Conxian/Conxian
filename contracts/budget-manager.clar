@@ -5,8 +5,10 @@
 (use-trait budget-manager-trait .all-traits.budget-manager-trait)
 (use-trait proposal-trait .all-traits.proposal-trait)
 
-(impl-trait budget-manager-trait)
-(impl-trait proposal-trait)
+(use-trait budget_manager_trait .all-traits.budget-manager-trait)
+ .all-traits.budget-manager-trait)
+(use-trait proposal_trait .all-traits.proposal-trait)
+ .all-traits.proposal-trait)
 
 ;; Constants
 (define-constant ERR_UNAUTHORIZED (err u100))
@@ -64,5 +66,3 @@
 (define-read-only (get-contract-owner)
   (ok (var-get contract-owner))
 )
-
->>>>>>> Stashed changes

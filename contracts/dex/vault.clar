@@ -3,8 +3,9 @@
 
 ;; Traits
 (use-trait vault-trait .all-traits.vault-trait)
-(use-trait ft-trait .all-traits.sip-010-trait)
-(impl-trait vault-trait)
+(use-trait ft-trait .all-traits.sip-010-ft-trait)
+(use-trait vault_trait .all-traits.vault-trait)
+ .all-traits.vault-trait)
 
 ;; Error Constants
 (define-constant ERR_UNAUTHORIZED (err u1001))

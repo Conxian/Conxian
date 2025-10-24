@@ -2,7 +2,8 @@
 ;; Unified financial metrics (EBITDA, CAPEX, OPEX) tracking and reporting
 
 (use-trait finance-metrics-trait .all-traits.finance-metrics-trait)
-(impl-trait finance-metrics-trait)
+(use-trait finance_metrics_trait .all-traits.finance-metrics-trait)
+ .all-traits.finance-metrics-trait)
 
 ;; ===== Constants =====
 (define-constant ERR_UNAUTHORIZED (err u900))

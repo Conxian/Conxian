@@ -1,7 +1,8 @@
 ;; DEX Oracle - Minimal implementation of oracle-trait
 
 (use-trait oracle-trait .all-traits.oracle-trait)
-(impl-trait oracle-trait)
+(use-trait oracle_trait .all-traits.oracle-trait)
+ .all-traits.oracle-trait)
 
 (define-constant ERR_ASSET_NOT_FOUND (err u404))
 (define-constant ERR_UNAUTHORIZED (err u401))
@@ -17,7 +18,7 @@
 (define-constant MAX_PRICE (* u1000000000000000000 u1000000))  ;; $1M with 18 decimals
 
 ;; Contract state
->>>>>>> Stashed changes
+
 (define-data-var admin principal tx-sender)
 (define-map asset-prices { asset: principal } { price: uint })
 

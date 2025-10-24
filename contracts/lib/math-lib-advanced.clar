@@ -16,7 +16,7 @@
 ;; Mathematical constants (scaled by 1e18)
 (define-constant PRECISION u1000000000000000000) ;; 1e18
 (define-constant E_FIXED u2718281828459045235) ;; e * 1e18
-(define-constant PI_FIXED u3141592653589793238) ;; π * 1e18
+(define-constant PI_FIXED u3141592653589793238) ;; PI * 1e18
 (define-constant LN2_FIXED u693147180559945309) ;; ln(2) * 1e18
 (define-constant Q64 u18446744073709551616) ;; 2^64
 

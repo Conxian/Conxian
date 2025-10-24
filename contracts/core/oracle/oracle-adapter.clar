@@ -4,7 +4,8 @@
 (use-trait oracle-trait .all-traits.oracle-trait)
 (use-trait dimensional-trait .all-traits.dimensional-trait)
 
-(impl-trait oracle-trait)
+(use-trait oracle_trait .all-traits.oracle-trait)
+ .all-traits.oracle-trait)
 
 ;; ===== Constants =====
 (define-constant ERR_UNAUTHORIZED (err u3000))
@@ -58,9 +59,8 @@
     ;; Get current price data
     (let (
       (price-data (default-to
-        {price: u0, last-updated: u0, twap: u0, twap-interval: u0, price-history: []}
+        {price: u0, last-updated: u0, twap: u0, twap-interval: u0, price-history: (list )}
         (map-get? asset-prices {asset: asset})
-      ))
       (price-diff (abs (- price (get price-data price))))
       (price-diff-percent (if (> (get price-data price) u0)
         (/ (* price-diff u10000) (get price-data price))
@@ -107,8 +107,8 @@
 
 ;; ===== Oracle Management =====
 (define-public (add-oracle
-    (oracle principal)
-    (weight uint)
+    (oracle: principal)
+    (weight: uint)
   )
   (begin
     (asserts! (is-eq tx-sender (var-get owner)) ERR_UNAUTHORIZED)

@@ -25,9 +25,9 @@
 (define-data-var oracle (optional principal) none)
 
 ;; Events
-(define-event PriceInitialized (price:uint min-price:uint block:uint))
-(define-event PriceUpdated (old-price:uint new-price:uint block:uint))
-(define-event MinPriceUpdated (old-min-price:uint new-min-price:uint block:uint))
+(define-event PriceInitialized (price: uint min-price: uint block: uint))
+(define-event PriceUpdated (old-price: uint new-price: uint block: uint))
+(define-event MinPriceUpdated (old-min-price: uint new-min-price: uint block: uint))
 
 ;; Initialization function - can only be called once
 (define-public (initialize 

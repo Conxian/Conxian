@@ -5,8 +5,9 @@
 (use-trait dimensional-core-trait .all-traits.dimensional-core-trait)
 (use-trait position-nft-trait .all-traits.position-nft-trait)
 
-(impl-trait sip-009-nft-trait)
-(impl-trait position-nft-trait)
+(use-trait position_nft_trait .all-traits.position-nft-trait)
+ sip-009-nft-trait)
+(impl-trait position_nft_trait)
 
 ;; ===== Constants =====
 (define-constant ERR_UNAUTHORIZED (err u7000))

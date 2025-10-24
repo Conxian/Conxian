@@ -1,7 +1,8 @@
 ;; bond-factory.clar
 ;; Factory contract for creating and managing bond tokens
 (use-trait bond-factory-trait .all-traits.bond-factory-trait)
-(impl-trait bond-factory-trait)
+(use-trait bond_factory_trait .all-traits.bond-factory-trait)
+ .all-traits.bond-factory-trait)
 (define-constant ERR_UNAUTHORIZED (err u5000))
 (define-constant ERR_INVALID_TERMS (err u5001))
 (define-constant ERR_INSUFFICIENT_COLLATERAL (err u5002))
@@ -15,6 +16,10 @@
 (define-constant ERR_ZERO_DIVISION (err u5010))
 
 ;; --- Safe Math Functions ---
+;; @desc Safely adds two unsigned integers, returning an error on overflow.
+;; @param a The first unsigned integer.
+;; @param b The second unsigned integer.
+;; @returns (response uint uint) The sum or an error code.
 (define-private (safe-add (a uint) (b uint))
   (if (>= (unwrap! (- u340282366920938463463374607431768211455 b) (err ERR_OVERFLOW)) a)
     (ok (+ a b))
@@ -22,6 +27,10 @@
   )
 )
 
+;; @desc Safely subtracts two unsigned integers, returning an error on underflow.
+;; @param a The first unsigned integer (minuend).
+;; @param b The second unsigned integer (subtrahend).
+;; @returns (response uint uint) The difference or an error code.
 (define-private (safe-sub (a uint) (b uint))
   (if (>= a b)
     (ok (- a b))
@@ -29,28 +38,57 @@
   )
 )
 
+;; @desc Safely multiplies two unsigned integers, returning an error on overflow.
+;; @param a The first unsigned integer.
+;; @param b The second unsigned integer.
+;; @returns (response uint uint) The product or an error code.
 (define-private (safe-mul (a uint) (b uint))
   (let ((c (* a b)))
-    (if (or (is-eq a u0) (is-eq c (/ c a)))
+    (if (is-eq a u0) (is-eq c (/ c a)))
       (ok c)
       (err ERR_OVERFLOW)
     )
   )
 )
 
+;; @desc Safely divides two unsigned integers, returning an error on division by zero.
+;; @param a The dividend.
+;; @param b The divisor.
+;; @returns (response uint uint) The quotient or an error code.
 (define-private (safe-div (a uint) (b uint))
   (if (is-eq b u0)
     (err ERR_ZERO_DIVISION)
     (ok (/ a b))
   )
 )
-
 ;; --- Data Variables ---
+;; @desc Stores the contract owner's principal.
 (define-data-var contract-owner principal tx-sender)
+;; @desc Stores the next available bond ID.
 (define-data-var next-bond-id uint u1)
+;; @desc Stores the Clarity code for the bond token contract.
 (define-data-var bond-token-code (string-utf8 100000) "")  ;; Will store the bond token contract code
 
 ;; Bond registry
+;; @desc Maps bond IDs to bond details.
+;; @map-key bond-id uint The unique identifier for the bond.
+;; @map-value (tuple
+;;   (issuer principal) The principal of the bond issuer.
+;;   (principal-amount uint) The principal amount of the bond.
+;;   (coupon-rate uint) The coupon rate of the bond.
+;;   (issue-block uint) The block height at which the bond was issued.
+;;   (maturity-block uint) The block height at which the bond matures.
+;;   (collateral-amount uint) The amount of collateral held for the bond.
+;;   (collateral-token principal) The principal of the collateral token contract.
+;;   (status (string-ascii 20)) The current status of the bond (e.g., "active", "matured").
+;;   (is-callable bool) Indicates if the bond is callable.
+;;   (call-premium uint) The premium to be paid if the bond is called.
+;;   (bond-contract principal) The principal of the deployed bond token contract.
+;;   (name (string-ascii 32)) The name of the bond token.
+;;   (symbol (string-ascii 10)) The symbol of the bond token.
+;;   (decimals uint) The number of decimals for the bond token.
+;;   (face-value uint) The face value of the bond token.
+;; )
 (define-map bonds
   uint  ;; bond-id
   (tuple
@@ -65,12 +103,61 @@
     (is-callable bool)
     (call-premium uint)
     (bond-contract principal)
+    (name (string-ascii 32))
+    (symbol (string-ascii 10))
+    (decimals uint)
+    (face-value uint)
+  )
+)
+
+;; @desc Maps bond contract principals to bond details for reverse lookup.
+;; @map-key bond-contract-principal principal The principal of the deployed bond token contract.
+;; @map-value (tuple
+;;   (issuer principal) The principal of the bond issuer.
+;;   (principal-amount uint) The principal amount of the bond.
+;;   (coupon-rate uint) The coupon rate of the bond.
+;;   (issue-block uint) The block height at which the bond was issued.
+;;   (maturity-block uint) The block height at which the bond matures.
+;;   (collateral-amount uint) The amount of collateral held for the bond.
+;;   (collateral-token principal) The principal of the collateral token contract.
+;;   (status (string-ascii 20)) The current status of the bond (e.g., "active", "matured").
+;;   (is-callable bool) Indicates if the bond is callable.
+;;   (call-premium uint) The premium to be paid if the bond is called.
+;;   (bond-contract principal) The principal of the deployed bond token contract.
+;;   (name (string-ascii 32)) The name of the bond token.
+;;   (symbol (string-ascii 10)) The symbol of the bond token.
+;;   (decimals uint) The number of decimals for the bond token.
+;;   (face-value uint) The face value of the bond token.
+;; )
+(define-map bonds-by-contract
+  principal ;; bond-contract-principal
+  (tuple
+    (issuer principal)
+    (principal-amount uint)
+    (coupon-rate uint)
+    (issue-block uint)
+    (maturity-block uint)
+    (collateral-amount uint)
+    (collateral-token principal)
+    (status (string-ascii 20))
+    (is-callable bool)
+    (call-premium uint)
+    (bond-contract principal)
+    (name (string-ascii 32))
+    (symbol (string-ascii 10))
+    (decimals uint)
+    (face-value uint)
   )
 )
 
 ;; --- Events ---
+;; @desc Stores a nonce for event emission to ensure uniqueness.
 (define-data-var event-nonce uint u0)
 
+;; @desc Emits a structured event for off-chain indexing and monitoring.
+;; @param event-type (string-ascii 50) A string describing the type of event (e.g., "bond_created", "bond_redeemed").
+;; @param event-data (tuple (issuer principal) (bond-id uint) (amount uint) (timestamp uint)) A tuple containing event-specific data.
+;; @returns (response bool uint) Returns (ok true) on successful emission.
 (define-private (emit-event (event-type (string-ascii 50)) (event-data (tuple (issuer principal) (bond-id uint) (amount uint) (timestamp uint))))
   (let ((nonce (var-get event-nonce)))
     (var-set event-nonce (+ nonce u1))
@@ -84,6 +171,9 @@
 )
 
 ;; --- Admin Functions ---
+;; @desc Sets the Clarity code for the bond token contract. Only callable by the contract owner.
+;; @param code (string-utf8 100000) The Clarity code for the bond token contract.
+;; @returns (response bool uint) Returns (ok true) on success, (err ERR_UNAUTHORIZED) if not called by the owner.
 (define-public (set-bond-token-code (code (string-utf8 100000)))
   (begin
     (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
@@ -92,6 +182,9 @@
   )
 )
 
+;; @desc Transfers ownership of the contract to a new principal. Only callable by the current contract owner.
+;; @param new-owner principal The principal of the new contract owner.
+;; @returns (response bool uint) Returns (ok true) on success, (err ERR_UNAUTHORIZED) if not called by the owner.
 (define-public (transfer-ownership (new-owner principal))
   (begin
     (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
@@ -101,16 +194,37 @@
 )
 
 ;; --- Bond Constants ---
+;; @desc Minimum principal amount for a bond (1.0 token with 6 decimals).
 (define-constant MIN_BOND_AMOUNT u1000000)  ;; 1.0 token with 6 decimals
+;; @desc Maximum principal amount for a bond (1,000,000 tokens with 6 decimals).
 (define-constant MAX_BOND_AMOUNT u1000000000000)  ;; 1,000,000 tokens with 6 decimals
+;; @desc Minimum bond duration in blocks (~1 day).
 (define-constant MIN_BOND_DURATION u144)  ;; ~1 day in blocks
+;; @desc Maximum bond duration in blocks (~4 years).
 (define-constant MAX_BOND_DURATION u2102400)  ;; ~4 years in blocks (assuming 1 block = 30s)
+;; @desc Bond status: active.
 (define-constant BOND_STATUS_ACTIVE "active")
+;; @desc Bond status: matured.
 (define-constant BOND_STATUS_MATURED "matured")
+;; @desc Bond status: called.
 (define-constant BOND_STATUS_CALLED "called")
+;; @desc Bond status: defaulted.
 (define-constant BOND_STATUS_DEFAULTED "defaulted")
 
 ;; --- Bond Creation ---
+;; @desc Creates a new bond with specified parameters.
+;; @param principal-amount uint The principal amount of the bond.
+;; @param coupon-rate uint The coupon rate of the bond (in basis points, e.g., u100 for 1%).
+;; @param maturity-blocks uint The duration of the bond in blocks.
+;; @param collateral-amount uint The amount of collateral to be provided.
+;; @param collateral-token principal The principal of the collateral token contract.
+;; @param is-callable bool Indicates if the bond can be called early.
+;; @param call-premium uint The premium to be paid if the bond is called.
+;; @param name (string-ascii 32) The name of the bond token.
+;; @param symbol (string-ascii 10) The symbol of the bond token.
+;; @param decimals uint The number of decimals for the bond token.
+;; @param face-value uint The face value of the bond token.
+;; @returns (response (tuple (bond-id uint) (bond-contract principal) (maturity-block uint)) uint) Returns bond details on success, or an error code.
 (define-public (create-bond
     (principal-amount uint)
     (coupon-rate uint)
@@ -119,6 +233,10 @@
     (collateral-token principal)
     (is-callable bool)
     (call-premium uint)
+    (name (string-ascii 32))
+    (symbol (string-ascii 10))
+    (decimals uint)
+    (face-value uint)
   )
   (let (
       (issuer tx-sender)
@@ -128,17 +246,17 @@
       (bond-status BOND_STATUS_ACTIVE)
     )
     ;; Input validation with safe math
-    (asserts! (>= principal-amount MIN_BOND_AMOUNT) (err "Bond amount below minimum"))
-    (asserts! (<= principal-amount MAX_BOND_AMOUNT) (err "Bond amount above maximum"))
-    (asserts! (>= maturity-blocks MIN_BOND_DURATION) (err "Maturity too short"))
-    (asserts! (<= maturity-blocks MAX_BOND_DURATION) (err "Maturity too long"))
-    (asserts! (>= coupon-rate u0) (err "Invalid coupon rate"))
-    (asserts! (<= coupon-rate u5000) (err "Coupon rate too high"))  ;; Max 50%
-    (asserts! (not (is-eq collateral-amount u0)) (err "Collateral amount cannot be zero"))
+    (asserts! (>= principal-amount MIN_BOND_AMOUNT) (err ERR_INVALID_AMOUNT))
+    (asserts! (<= principal-amount MAX_BOND_AMOUNT) (err ERR_INVALID_AMOUNT))
+    (asserts! (>= maturity-blocks MIN_BOND_DURATION) (err ERR_INVALID_TERMS))
+    (asserts! (<= maturity-blocks MAX_BOND_DURATION) (err ERR_INVALID_TERMS))
+    (asserts! (>= coupon-rate u0) (err ERR_INVALID_TERMS))
+    (asserts! (<= coupon-rate u5000) (err ERR_INVALID_TERMS))  ;; Max 50%
+    (asserts! (not (is-eq collateral-amount u0)) (err ERR_INSUFFICIENT_COLLATERAL))
     
     ;; Calculate total payout to ensure no overflow
     (let ((total-payout (unwrap! (safe-add principal-amount (unwrap! (safe-mul principal-amount coupon-rate) (err ERR_OVERFLOW))) (err ERR_OVERFLOW))))
-      (asserts! (>= collateral-amount total-payout) (err "Insufficient collateral"))
+      (asserts! (>= collateral-amount total-payout) (err ERR_INSUFFICIENT_COLLATERAL))
       
       ;; Transfer collateral from issuer
       (try! (contract-call? collateral-token transfer collateral-amount issuer (as-contract tx-sender) none))
@@ -162,6 +280,27 @@
         (is-callable is-callable)
         (call-premium call-premium)
         (bond-contract bond-contract)
+        (name name)
+        (symbol symbol)
+        (decimals decimals)
+        (face-value face-value)
+      ))
+      (map-set bonds-by-contract bond-contract (tuple
+        (issuer issuer)
+        (principal-amount principal-amount)
+        (coupon-rate coupon-rate)
+        (issue-block issue-block)
+        (maturity-block maturity-block)
+        (collateral-amount collateral-amount)
+        (collateral-token collateral-token)
+        (status bond-status)
+        (is-callable is-callable)
+        (call-premium call-premium)
+        (bond-contract bond-contract)
+        (name name)
+        (symbol symbol)
+        (decimals decimals)
+        (face-value face-value)
       ))
       
       ;; Increment bond ID for next issue
@@ -185,6 +324,9 @@
 )
 
 ;; --- Bond Utility Functions ---
+;; @desc Calculates the accrued interest for a given bond ID.
+;; @param bond-id uint The ID of the bond.
+;; @returns (response uint uint) Returns the accrued interest on success, or an error code.
 (define-read-only (get-accrued-interest (bond-id uint))
   (let (
       (bond (unwrap! (map-get? bonds bond-id) ERR_BOND_NOT_FOUND))
@@ -215,6 +357,9 @@
 )
 
 ;; --- Bond Management ---
+;; @desc Redeems a matured bond, transferring principal and interest to the bond holder.
+;; @param bond-id uint The ID of the bond to redeem.
+;; @returns (response (tuple (principal uint) (interest uint) (total-payout uint)) uint) Returns payout details on success, or an error code.
 (define-public (redeem-bond (bond-id uint))
   (let (
       (caller tx-sender)
@@ -273,6 +418,10 @@
 )
 
 
+;; @desc Reports a coupon payment made by the bond issuer.
+;; @param bond-id uint The ID of the bond for which the coupon payment is made.
+;; @param payment-amount uint The amount of the coupon payment.
+;; @returns (response bool uint) Returns (ok true) on success, or an error code.
 (define-public (report-coupon-payment (bond-id uint) (payment-amount uint))
   (let (
       (caller tx-sender)
@@ -313,6 +462,9 @@
   )
 )
 
+;; @desc Retrieves the current status of a bond.
+;; @param bond-id uint The ID of the bond.
+;; @returns (response (tuple (bond-id uint) (status (string-ascii 20)) (is-mature bool) (blocks-until-maturity uint) (current-block uint) (maturity-block uint)) uint) Returns bond status details on success, or an error code.
 (define-read-only (get-bond-status (bond-id uint))
   (let ((bond (unwrap! (map-get? bonds bond-id) ERR_BOND_NOT_FOUND)))
     (ok (tuple
@@ -326,25 +478,67 @@
   )
 )
 
+;; @desc Retrieves the total number of bonds created.
+;; @returns (response uint uint) Returns the total bond count on success.
 (define-read-only (get-bond-count)
   (ok (var-get next-bond-id))
 )
 
-;; --- View Functions ---
+;; @desc Get all bond contract principals.
+;; @returns (list (principal))
+(define-read-only (get-all-bonds)
+  (map-keys bonds-by-contract)
+)
+
+;; @desc Get bond details by bond ID.
+;; @param bond-id The ID of the bond.
+;; @returns (response (tuple
+;;   (issuer principal)
+;;   (principal-amount uint)
+;;   (coupon-rate uint)
+;;   (issue-block uint)
+;;   (maturity-block uint)
+;;   (collateral-amount uint)
+;;   (collateral-token principal)
+;;   (status (string-ascii 20))
+;;   (is-callable bool)
+;;   (call-premium uint)
+;;   (bond-contract principal)
+;;   (name (string-ascii 32))
+;;   (symbol (string-ascii 10))
+;;   (decimals uint)
+;;   (face-value uint)
+;; ) (err uint))
 (define-read-only (get-bond (bond-id uint))
-  (match (map-get? bonds bond-id)
-    (some bond) (ok (merge bond (tuple (bond-id bond-id))))
-    none (err ERR_BOND_NOT_FOUND)
-  )
+  (ok (unwrap! (map-get? bonds bond-id) (err ERR_BOND_NOT_FOUND))))
+
+;; @desc Get bond details by bond contract principal.
+;; @param bond-contract The principal of the bond contract.
+;; @returns (response (tuple
+;;   (issuer principal)
+;;   (principal-amount uint)
+;;   (coupon-rate uint)
+;;   (issue-block uint)
+;;   (maturity-block uint)
+;;   (collateral-amount uint)
+;;   (collateral-token principal)
+;;   (status (string-ascii 20))
+;;   (is-callable bool)
+;;   (call-premium uint)
+;;   (bond-contract principal)
+;;   (name (string-ascii 32))
+;;   (symbol (string-ascii 10))
+;;   (decimals uint)
+;;   (face-value uint)
+;; ) (err uint))
+(define-read-only (get-bond-details (bond-contract principal))
+  (ok (unwrap! (map-get? bonds-by-contract bond-contract) (err ERR_BOND_NOT_FOUND)))
 )
 
-(define-read-only (get-bond-contract (bond-id uint))
-  (match (map-get? bonds bond-id)
-    (some bond) (ok (get bond-contract bond))
-    none (err ERR_BOND_NOT_FOUND)
-  )
-)
-
+;; @desc Retrieves a paginated list of all bonds.
+;; @param offset uint The starting index for the list.
+;; @param limit uint The maximum number of bonds to return.
+;; @returns (response (list (tuple (bond-id uint) ...)) uint) Returns a list of bond details on success, or an error code.
 (define-read-only (list-bonds (offset uint) (limit uint))
   (let (
       (max-id (var-get next-bond-id))
@@ -358,4 +552,3 @@
       )
     )))
 )
-8bce9a06227aa3d139e549a8bea28e27bd6665af

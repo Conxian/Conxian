@@ -5,7 +5,8 @@
 ;; sBTC Flash Loan Extension - Advanced flash loan functionality with sBTC support
 ;; Provides flash loans with enhanced security, multi-asset support, and bond integration
 
-(impl-trait flash-loan-receiver-trait)
+(use-trait flash_loan_receiver_trait .all-traits.flash-loan-receiver-trait)
+ .all-traits.flash-loan-receiver-trait)
 
 ;; =============================================================================
 ;; CONSTANTS AND ERROR CODES
@@ -506,11 +507,3 @@
     )
   )
 )
-
-
-
-
-
-
-
->>>>>>> Stashed changes

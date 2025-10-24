@@ -25,7 +25,7 @@
 (define-data-var volatility-history (list 20 uint) (list))
 
 ;; Events
-(define-event PriceDeviation (current:uint, average:uint, deviation:uint, block:uint))
+(define-event PriceDeviation (current: uint, average: uint, deviation: uint, block: uint))
 (define-event ParameterAdjustment (parameter: (string-ascii 32), old-value: uint, new-value: uint, reason: (string-ascii 128)))
 
 ;; ===== Initialization =====

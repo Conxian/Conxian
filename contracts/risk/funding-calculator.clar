@@ -5,7 +5,8 @@
 (use-trait oracle-trait .all-traits.oracle-trait)
 (use-trait dimensional-trait .all-traits.dimensional-trait)
 
-(impl-trait funding-trait)
+(use-trait funding_trait .all-traits.funding-trait)
+ .all-traits.funding-trait)
 
 ;; ===== Constants =====
 (define-constant ERR_UNAUTHORIZED (err u5000))
@@ -112,9 +113,9 @@
   (let (
     (position (unwrap! (contract-call? (var-get position-manager-contract) get-position-by-owner position-owner position-id) (err u5005)))
     (current-time block-height)
-    (asset (get position.asset))
+    (asset (get asset position))
     (last-update (unwrap! (map-get? last-funding-update {asset: asset}) (err u5006)))
-    (position-type (get position.status))
+    (position-type (get status position))
   )
     ;; Only perpetuals have funding
     (asserts! (is-eq position-type PERPETUAL) (err u5007))

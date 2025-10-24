@@ -3,8 +3,10 @@
 (use-trait ft-trait .all-traits.sip-010-ft-trait)
 
 ;; ===== Traits =====
-(impl-trait bond-issuance-trait)
-(impl-trait ft-trait)
+(use-trait sip_010_ft_trait .all-traits.sip-010-ft-trait)
+ .all-traits.bond-issuance-trait)
+(use-trait bond_issuance_trait .all-traits.bond-issuance-trait)
+ sip_010_ft_trait)
 
 ;; bond-issuance-system.clar
 ;; Tokenized bond system for backing large enterprise loans

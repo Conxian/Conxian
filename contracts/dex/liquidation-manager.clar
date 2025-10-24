@@ -215,6 +215,6 @@
 
 
 
->>>>>>> Stashed changes
+
 
 ;; Implements liquidation functionality for the lending protocol

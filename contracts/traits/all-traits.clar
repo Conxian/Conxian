@@ -11,7 +11,8 @@
 ;;
 ;; USAGE:
 ;;   (use-trait <trait-name> .all-traits.<trait-name>)
-;;   (impl-trait .all-traits.<trait-name>)
+;;   (use-trait flash_loan_receiver_trait .all-traits.flash-loan-receiver-trait)
+ .all-traits.<trait-name>)
 ;;
 ;; ERROR CODES: See errors.clar for standardized error codes
 ;; ===========================================
@@ -29,9 +30,11 @@
 ;;
 ;; Example usage:
 ;;   (use-trait ft .all-traits.sip-010-ft-trait)
-;;   (define-public (transfer (amount uint) (sender principal) (recipient principal) (memo (optional (buff 34))))
+;;   (use-trait ownable_trait .all-traits.ownable-trait)
+-public (transfer (amount uint) (sender principal) (recipient principal) (memo (optional (buff 34))))
 ;;     (contract-call? .token-contract transfer amount sender recipient memo))
-(define-trait sip-010-ft-trait
+(use-trait pausable_trait .all-traits.pausable-trait)
+-trait sip-010-ft-trait
   (
     ;; Transfer tokens between principals
     ;; @param amount: number of tokens to transfer
@@ -76,7 +79,8 @@
 ;;
 ;; Example usage:
 ;;   (use-trait nft .all-traits.sip-009-nft-trait)
-;;   (define-public (transfer (token-id uint) (sender principal) (recipient principal))
+;;   (use-trait pool_trait .all-traits.pool-trait)
+-public (transfer (token-id uint) (sender principal) (recipient principal))
 ;;     (contract-call? .nft-contract transfer token-id sender recipient))
 (define-trait sip-009-nft-trait
   (
@@ -244,7 +248,7 @@
 ;; flash loans from the protocol.
 ;;
 ;; Example usage:
-;;   (impl-trait .all-traits.flash-loan-receiver-trait)
+;;   (impl-trait flash_loan_receiver_trait)
 (define-trait flash-loan-receiver-trait
   (
     ;; Execute operations with borrowed funds
@@ -522,16 +526,16 @@
     ;; @param coupon-rate: coupon rate in basis points
     ;; @param face-value: face value per bond
     ;; @return (response principal uint): bond contract address and error code
-    (create-bond (name (string-ascii 32)) (symbol (string-ascii 10)) (decimals uint) (total-supply uint) (maturity-date uint) (coupon-rate uint) (face-value uint) (response principal uint))
+    (create-bond (principal-amount uint) (coupon-rate uint) (maturity-blocks uint) (collateral-amount uint) (collateral-token principal) (is-callable bool) (call-premium uint) (name (string-ascii 32)) (symbol (string-ascii 10)) (decimals uint) (face-value uint) (response (tuple (bond-id uint) (bond-contract principal) (maturity-block uint)) uint))
     
     ;; Get bond details by address
     ;; @param bond-address: bond contract address
     ;; @return (response (tuple ...) uint): bond details and error code
-    (get-bond-details (bond-address principal) (response (tuple (name (string-ascii 32)) (symbol (string-ascii 10)) (decimals uint) (total-supply uint) (maturity-date uint) (coupon-rate uint) (face-value uint)) uint))
+    (get-bond-details (bond-contract principal) (response (tuple (issuer principal) (principal-amount uint) (coupon-rate uint) (issue-block uint) (maturity-block uint) (collateral-amount uint) (collateral-token principal) (status (string-ascii 20)) (is-callable bool) (call-premium uint) (bond-contract principal) (name (string-ascii 32)) (symbol (string-ascii 10)) (decimals uint) (face-value uint)) uint))
     
     ;; List all bonds created by this factory
     ;; @return (response (list 100 principal) uint): list of bond addresses and error code
-    (get-all-bonds () (response (list 100 principal) uint))
+    (get-all-bonds () (response (list principal) uint))
   )
 )
 
@@ -846,7 +850,7 @@
 ;;
 ;; Example usage:
 ;;   (use-trait ownable .all-traits.ownable-trait)
-;;   (impl-trait .all-traits.ownable-trait)
+;;   (impl-trait ownable_trait)
 (define-trait ownable-trait
   (
     ;; Get the current owner of the contract
@@ -869,7 +873,7 @@
 ;;
 ;; Example usage:
 ;;   (use-trait pausable .all-traits.pausable-trait)
-;;   (impl-trait .all-traits.pausable-trait)
+;;   (impl-trait pausable_trait)
 (define-trait pausable-trait
   (
     ;; Check if the contract is currently paused
@@ -970,7 +974,7 @@
 ;; to be compatible with the Conxian DEX router and factory.
 ;;
 ;; Example usage:
-;;   (impl-trait .all-traits.pool-trait)
+;;   (impl-trait pool_trait)
 (define-trait pool-trait
   (
     ;; Get the pool's token pair

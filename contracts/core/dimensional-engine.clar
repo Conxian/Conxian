@@ -5,7 +5,8 @@
 (use-trait oracle-trait .all-traits.oracle-trait)
 (use-trait token-trait .all-traits.sip-010-ft-trait)
 
-(impl-trait dimensional-trait)
+(use-trait dimensional_trait .all-traits.dimensional-trait)
+ .all-traits.dimensional-trait)
 
 ;; ===== Type Definitions =====
 (define-types

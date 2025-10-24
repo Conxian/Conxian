@@ -31,10 +31,10 @@
 (define-map reserves { token: principal } { amount: uint })
 
 ;; Events
-(define-event Swap (sender:principal, token-in:principal, amount-in:uint, token-out:principal, amount-out:uint, fee:uint))
-(define-event AddLiquidity (provider:principal, token:principal, amount:uint, shares:uint)
-(define-event RemoveLiquidity (provider:principal, token:principal, amount:uint, shares:uint))
-(define-event FeeCollected (amount:uint, token:principal))
+    (define-event Swap (sender: principal, token-in: principal, amount-in: uint, token-out: principal, amount-out: uint, fee: uint))
+    (define-event AddLiquidity (provider: principal, token: principal, amount: uint, shares: uint))
+    (define-event RemoveLiquidity (provider: principal, token: principal, amount: uint, shares: uint))
+    (define-event FeeCollected (amount: uint, token: principal))
 
 ;; ===== Initialization =====
 

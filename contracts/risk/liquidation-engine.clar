@@ -6,7 +6,8 @@
 (use-trait oracle-trait .all-traits.oracle-trait)
 (use-trait dimensional-trait .all-traits.dimensional-trait)
 
-(impl-trait liquidation-trait)
+(use-trait liquidation_trait .all-traits.liquidation-trait)
+ .all-traits.liquidation-trait)
 
 ;; ===== Constants =====
 (define-constant ERR_UNAUTHORIZED (err u4000))

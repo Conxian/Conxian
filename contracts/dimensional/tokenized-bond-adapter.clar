@@ -1,5 +1,3 @@
-<<<<<<< Updated upstream
-=======
 (use-trait sip-010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
 ;; tokenized-bond-adapter.clar
 ;; Integration adapter for tokenized bonds to connect with enhanced tokenomics system
@@ -295,10 +293,3 @@
     ;; Emergency withdrawal function
     (try! (as-contract (contract-call? token transfer amount (as-contract tx-sender) tx-sender none)))
     (ok amount)))
-
-
-
-
-
-
->>>>>>> Stashed changes

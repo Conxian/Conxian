@@ -2,7 +2,8 @@
 
 ;; ===== Traits =====
 (use-trait pool-factory-trait .all-traits.pool-factory-trait)
-(impl-trait pool-factory-trait)
+(use-trait pool_factory_trait .all-traits.pool-factory-trait)
+ .all-traits.pool-factory-trait)
 
 ;; ===== Constants =====
 (define-constant ERR_UNAUTHORIZED (err u100))

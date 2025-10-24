@@ -5,7 +5,8 @@
 ;; Intent queue system for CXLP to CXD migration with pro-rata settlement
 ;; Prevents FCFS races and enables fair distribution based on duration-weighted requests
 
-(impl-trait cxlp-migration-queue-trait)
+(use-trait cxlp_migration_queue_trait .all-traits.cxlp-migration-queue-trait)
+ .all-traits.cxlp-migration-queue-trait)
 
 ;; --- Constants ---
 (define-constant CONTRACT_OWNER tx-sender)

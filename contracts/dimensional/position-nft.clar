@@ -3,7 +3,8 @@
 ;; position-nft.clar
 ;; NFT representation of dimensional positions
 
-(impl-trait position-nft-trait)
+(use-trait position_nft_trait .all-traits.position-nft-trait)
+ .all-traits.position-nft-trait)
 
 ;; SIP-009 Non-Fungible Token for Concentrated Liquidity Positions
 (define-non-fungible-token concentrated-liquidity-positions uint)

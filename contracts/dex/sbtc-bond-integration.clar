@@ -1,20 +1,10 @@
 
 
 ;; sbtc-bond-integration.clar
-
 ;; sBTC Bond Integration - Advanced bond issuance with sBTC collateral and yields
-
-<<<<<<< Updated upstream
-;; Provides enterprise bond structuring, sBTC yield distribution, and risk management(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
-
-;; 
-=======
 (use-trait sip-010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
->>>>>>> Stashed changes
-
 ;; CONSTANTS AND ERROR CODES
-
-;; (define-constant CONTRACT_OWNER tx-sender)
+(define-constant CONTRACT_OWNER tx-sender)
 (define-constant ERR_NOT_AUTHORIZED (err u5000))
 (define-constant ERR_INVALID_BOND_TERMS (err u5001))
 (define-constant ERR_INSUFFICIENT_COLLATERAL (err u5002))
@@ -24,39 +14,24 @@
 (define-constant ERR_EARLY_REDEMPTION_NOT_ALLOWED (err u5006))
 (define-constant ERR_LIQUIDATION_THRESHOLD_BREACHED (err u5007))
 (define-constant ERR_INVALID_YIELD_DISTRIBUTION (err u5008))
-
-;; Bond parameters(define-constant MIN_BOND_AMOUNT u10000000000)    
-
-;; 100 BTC minimum(define-constant MAX_BOND_AMOUNT u500000000000)   
-
-;; 5000 BTC maximum(define-constant MIN_MATURITY_BLOCKS u52560)      
-
-;; ~1 year (10min blocks)
-(define-constant MAX_MATURITY_BLOCKS u262800)     
-
-;; ~5 years(define-constant COLLATERAL_RATIO u1200000)       
-
-;; 120% collateralization(define-constant LIQUIDATION_THRESHOLD u1100000)  
-
-;; 110% liquidation threshold
-
-;; Yield parameters(define-constant BASE_YIELD_RATE u50000)          
-
-;; 5% base yield(define-constant MAX_YIELD_RATE u200000)          
-
-;; 20% max yield(define-constant YIELD_PRECISION u1000000)        
-
-;; 6 decimal precision
-
-;; 
-
+;; Bond parameters
+(define-constant MIN_BOND_AMOUNT u10000000000)     ;; 100 BTC minimum
+(define-constant MAX_BOND_AMOUNT u500000000000)    ;; 5000 BTC maximum
+(define-constant MIN_MATURITY_BLOCKS u52560)      ;; ~1 year (10min blocks)
+(define-constant MAX_MATURITY_BLOCKS u262800)     ;; ~5 years
+(define-constant COLLATERAL_RATIO u1200000)        ;; 120% collateralization
+(define-constant LIQUIDATION_THRESHOLD u1100000)   ;; 110% liquidation threshold
+;; Yield parameters
+(define-constant BASE_YIELD_RATE u50000)          ;; 5% base yield
+(define-constant MAX_YIELD_RATE u200000)          ;; 20% max yield
+(define-constant YIELD_PRECISION u1000000)        ;; 6 decimal precision
 ;; DATA STRUCTURES
-
-;; (define-map sbtc-bonds  { bond-id: uint }  {    issuer: principal,         
-
-;; Bond issuer    principal-amount: uint,    
-
-;; Bond principal in satoshis    coupon-rate: uint,         
+(define-map sbtc-bonds
+  { bond-id: uint }
+  {
+    issuer: principal,         ;; Bond issuer
+    principal-amount: uint,     ;; Bond principal in satoshis
+    coupon-rate: uint,         ;;
 
 ;; Annual coupon rate    maturity-block: uint,      
 
@@ -183,31 +158,26 @@
 
 ;; BOND SERVICING AND REDEMPTION
 
-;; (define-public (claim-bond-interest (bond-id uint))  "Claim accrued interest on bond holdings"  (match (map-get? bond-holders { bond-id: bond-id, holder: tx-sender })    holding (match (map-get? sbtc-bonds { bond-id: bond-id })      bond (let ((blocks-since-claim (- block-height (get last-interest-claim holding)))                 (annual-blocks u52560)                 (interest-amount (/ (* (get amount-held holding) (get coupon-rate bond) blocks-since-claim) (* annual-blocks u1000000))))                
 
-;; Transfer interest to bond holder        (try! (as-contract (contract-call? .sbtc-token transfer interest-amount tx-sender tx-sender none)))                
-
-;; Update holding record        (map-set bond-holders           { bond-id: bond-id, holder: tx-sender }          (merge holding {            accrued-interest: (+ (get accrued-interest holding) interest-amount),            last-interest-claim: block-height          })        )                (print { event: "interest-claimed", bond-id: bond-id, holder: tx-sender, amount: interest-amount })        (ok interest-amount)      )      ERR_BOND_NOT_FOUND    )    ERR_BOND_NOT_FOUND  ))
 (define-public (redeem-matured-bond (bond-id uint))  "Redeem bond at maturity"  (match (map-get? sbtc-bonds { bond-id: bond-id })    bond (match (map-get? bond-holders { bond-id: bond-id, holder: tx-sender })      holding (begin        (asserts! (>= block-height (get maturity-block bond)) ERR_EARLY_REDEMPTION_NOT_ALLOWED)        (asserts! (is-eq (get status bond) u0) ERR_BOND_ALREADY_MATURED)                
-
 ;; Calculate redemption amount (principal + final interest)        (let ((redemption-amount (get amount-held holding)))                    
-
 ;; Transfer redemption amount to holder          (try! (as-contract (contract-call? .sbtc-token transfer redemption-amount tx-sender tx-sender none)))                    
-
 ;; Mark bond portion as redeemed          (map-delete bond-holders { bond-id: bond-id, holder: tx-sender })                    
-
 ;; Check if all bond units have been redeemed and update status          
-
 ;; (Simplified - in full implementation would check all holders)          (map-set sbtc-bonds             { bond-id: bond-id }            (merge bond { status: u1 })          )                    (print { event: "bond-redeemed", bond-id: bond-id, holder: tx-sender, amount: redemption-amount })          (ok redemption-amount)        )      )      ERR_BOND_NOT_FOUND    )    ERR_BOND_NOT_FOUND  ))
 (define-public (early-call-bond (bond-id uint))  "Call bond early (issuer only)"  (match (map-get? sbtc-bonds { bond-id: bond-id })    bond (begin      (asserts! (is-eq tx-sender (get issuer bond)) ERR_NOT_AUTHORIZED)      (asserts! (get is-callable bond) ERR_EARLY_REDEMPTION_NOT_ALLOWED)      (asserts! (is-eq (get status bond) u0) ERR_BOND_ALREADY_MATURED)            
+      (let ((call-price (+ (get principal-amount bond) (get call-premium bond))))
+        ;; Mark bond as called
+        (map-set sbtc-bonds
+          { bond-id: bond-id }
+          (merge bond { status: u2 })
+        )
 
-;; Calculate call price (principal + call premium)      (let ((call-price (+ (get principal-amount bond) (get call-premium bond))))                
-
-;; Mark bond as called        (map-set sbtc-bonds           { bond-id: bond-id }          (merge bond { status: u2 })        )                
-
-;; In full implementation, would process all bond holders        (print { event: "bond-called", bond-id: bond-id, call-price: call-price })        (ok call-price)      )    )    ERR_BOND_NOT_FOUND  ))
-
-;; 
+        ;; In full implementation, would process all bond holders
+      ))
+        (print { event: "bond-called", bond-id: bond-id, call-price: call-price })
+        (ok call-price)
+      ))
 
 ;; RISK MANAGEMENT
 
@@ -243,18 +213,7 @@
 
 ;; ENTERPRISE LOAN INTEGRATION
 
-;; (define-public (create-enterprise-loan-bond (loan-id uint) (bond-structure (list 10 { amount: uint, coupon: uint, maturity: uint })))  "Create multiple bonds to back enterprise loan"  (begin    (asserts! (is-eq tx-sender CONTRACT_OWNER) ERR_NOT_AUTHORIZED) 
-
-;; Or loan manager        
-
-;; Create bonds for loan structure    (let ((bond-ids (create-loan-bonds bond-structure)))            
-
-;; Calculate total bond value      (let ((total-value (fold sum-bond-amounts bond-structure u0)))        (map-set enterprise-loan-bonds           { loan-id: loan-id }          {            bond-ids: bond-ids,            total-bond-value: total-value,            loan-to-bond-ratio: u800000, 
-
-;; 80% loan-to-value            risk-tier: u3 
-
-;; Medium risk          }        )                (print { event: "enterprise-loan-bonds-created", loan-id: loan-id, total-value: total-value })        (ok bond-ids)      )    )  ))
-(define-private (create-loan-bonds (bond-structure (list 10 { amount: uint, coupon: uint, maturity: uint })))  "Create bonds for loan structure"  
+(define-private (create-loan-bonds (bond-structure (list 10 { amount: uint, coupon: uint, maturity: uint })))  "Create bonds for loan structure"  (list (var-get next-bond-id)))
 
 ;; Simplified implementation - would iterate and create each bond  (list (var-get next-bond-id)))
 (define-private (sum-bond-amounts (bond-spec { amount: uint, coupon: uint, maturity: uint }) (acc uint))  "Sum bond amounts"  (+ acc (get amount bond-spec)))

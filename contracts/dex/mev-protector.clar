@@ -2,7 +2,8 @@
 ;; Implements protection against front-running and sandwich attacks
 
 (use-trait mev-protector-trait .all-traits.mev-protector-trait)
-(impl-trait mev-protector-trait)
+(use-trait mev_protector_trait .all-traits.mev-protector-trait)
+ .all-traits.mev-protector-trait)
 
 ;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED (err u6000))
@@ -49,8 +50,6 @@
 ;; Get index for principal (defaults to 0 if not set)
 (define-private (principal->index (p principal))
   (default-to u0 (map-get? principal-index p))
-<<<<<<< Updated upstream
-=======
 )
 
 ;; Helper: convert path of principals into a list of indices
@@ -75,33 +74,11 @@
 (define-private (accumulate-path (p principal) (acc (buff 800)))
   ;; Simplified - in production this would properly serialize the principal
   acc
->>>>>>> Stashed changes
 )
 
 ;; Convert path of principals into a list of indices
 (define-private (path->to-index-list (path (list 20 principal)))
   (map (lambda (p) (principal->index p)) path)
-)
-
-;; Calculate commitment hash
-(define-private (get-commitment-hash 
-  (path (list 20 principal)) 
-  (amount-in uint) 
-  (min-amount-out (optional uint)) 
-  (recipient principal) 
-  (salt (buff 32))
-)
-  (let (
-    (payload { 
-      path: (path->to-index-list path),
-      amount: amount-in, 
-      min: min-amount-out, 
-      rcpt: (principal->index recipient), 
-      salt: salt 
-    })
-  )
-    (sha256 (to-consensus-buff payload))
-  )
 )
 
 ;; Check circuit breaker status

@@ -6,17 +6,20 @@
 
 ;; Provides unified interface and orchestrates interactions between all token subsystems
 
-;; --- Constants ---(define-constant CONTRACT_OWNER tx-sender)
+;; --- Constants ---
+(define-constant CONTRACT_OWNER tx-sender)
 (define-constant PRECISION u100000000)
 
-;; System component identifiers(define-constant COMPONENT_CXD_STAKING u1)
+;; System component identifiers
+(define-constant COMPONENT_CXD_STAKING u1)
 (define-constant COMPONENT_MIGRATION_QUEUE u2)
 (define-constant COMPONENT_CXVG_UTILITY u3)
 (define-constant COMPONENT_EMISSION_CONTROLLER u4)
 (define-constant COMPONENT_REVENUE_DISTRIBUTOR u5)
 (define-constant COMPONENT_INVARIANT_MONITOR u6)
 
-;; --- Errors ---(define-constant ERR_UNAUTHORIZED u1000)
+;; --- Errors ---
+(define-constant ERR_UNAUTHORIZED u1000)
 (define-constant ERR_SYSTEM_PAUSED u1001)
 (define-constant ERR_COMPONENT_UNAVAILABLE u1002)
 (define-constant ERR_INVALID_AMOUNT u1003)
@@ -24,11 +27,13 @@
 (define-constant ERR_COORDINATION_FAILED u1005)
 (define-constant ERR_COMPONENT_UPDATE_FAILED u1006)
 
-;; --- Storage ---(define-data-var contract-owner principal CONTRACT_OWNER)
+;; --- Storage ---
+(define-data-var contract-owner principal CONTRACT_OWNER)
 (define-data-var system-initialized bool false)
 (define-data-var system-paused bool false)
 
-;; --- Optional Contract References (Dependency Injection) ---(define-data-var cxd-staking-contract (optional principal) none)
+;; --- Optional Contract References (Dependency Injection) ---
+(define-data-var cxd-staking-contract (optional principal) none)
 (define-data-var migration-queue-contract (optional principal) none)
 (define-data-var cxvg-utility-contract (optional principal) none)
 (define-data-var emission-controller-contract (optional principal) none)
@@ -37,12 +42,15 @@
 (define-data-var system-integration-enabled bool false)
 (define-data-var initialization-complete bool false)
 
-;; System status tracking(define-map component-status uint { active: bool, last-health-check: uint, error-count: uint })
+;; System status tracking
+(define-map component-status uint { active: bool, last-health-check: uint, error-count: uint })
 
-;; Cross-system operation tracking(define-data-var next-operation-id uint u1)
+;; Cross-system operation tracking
+(define-data-var next-operation-id uint u1)
 (define-map cross-system-operations uint { operation-type: uint, initiator: principal, components-involved: (list 10 uint), status: uint, timestamp: uint })
 
-;; --- Admin Functions ---(define-public (set-contract-owner (new-owner principal))  (begin    (asserts! (is-eq tx-sender (var-get contract-owner)) (err ERR_UNAUTHORIZED))    (var-set contract-owner new-owner)    (ok true)))
+;; --- Admin Functions ---
+(define-public (set-contract-owner (new-owner principal))  (begin    (asserts! (is-eq tx-sender (var-get contract-owner)) (err ERR_UNAUTHORIZED))    (var-set contract-owner new-owner)    (ok true)))
 (define-public (initialize-system)  (begin    (asserts! (is-eq tx-sender (var-get contract-owner)) (err ERR_UNAUTHORIZED))    (asserts! (not (var-get system-initialized)) (err ERR_INITIALIZATION_FAILED))        
 
 ;; Initialize component status tracking    (map-set component-status COMPONENT_CXD_STAKING { active: true, last-health-check: block-height, error-count: u0 })    (map-set component-status COMPONENT_MIGRATION_QUEUE { active: true, last-health-check: block-height, error-count: u0 })    (map-set component-status COMPONENT_CXVG_UTILITY { active: true, last-health-check: block-height, error-count: u0 })    (map-set component-status COMPONENT_EMISSION_CONTROLLER { active: true, last-health-check: block-height, error-count: u0 })    (map-set component-status COMPONENT_REVENUE_DISTRIBUTOR { active: true, last-health-check: block-height, error-count: u0 })    (map-set component-status COMPONENT_INVARIANT_MONITOR { active: true, last-health-check: block-height, error-count: u0 })        (var-set system-initialized true)    (ok true)))
@@ -64,10 +72,13 @@
 ;; Simplified for enhanced deployment - return default boost      u0)    u0))
 (define-private (execute-staking-safe (amount uint))  (if (and (var-get system-integration-enabled) (is-some (var-get cxd-staking-contract)))    (match (var-get cxd-staking-contract)      staking-ref        (ok true) 
 
-;; Simplified for enhanced deployment      (err ERR_COMPONENT_UNAVAILABLE))    (err ERR_COMPONENT_UNAVAILABLE)))
-(define-private (execute-migration-safe (amount uint))  (if (and (var-get system-integration-enabled) (is-some (var-get migration-queue-contract)))    (match (var-get migration-queue-contract)      queue-ref        (ok true) 
-
-;; Simplified for enhanced deployment      (err ERR_COMPONENT_UNAVAILABLE))    (err ERR_COMPONENT_UNAVAILABLE)))
+;; Simplified for enhanced deployment      (err ERR_COMPONENT_UNAVAILABLE)))    (err ERR_COMPONENT_UNAVAILABLE)))(define-private (execute-migration-safe (amount uint))  (if (and (var-get system-integration-enabled) (is-some (var-get migration-queue-contract)))    (match (var-get migration-queue-contract)      queue-ref
+        (ok true)
+        (err ERR_COMPONENT_UNAVAILABLE)
+      )
+    (err ERR_COMPONENT_UNAVAILABLE)
+  )
+)
 
 ;; --- Unified Token Operations ---
 
@@ -87,13 +98,15 @@
 
 ;; migration operation          initiator: tx-sender,          components-involved: (list COMPONENT_MIGRATION_QUEUE COMPONENT_REVENUE_DISTRIBUTOR),          status: u0,          timestamp: block-height        })      (var-set next-operation-id (+ operation-id u1))            
 
-;; Execute migration through queue with safe contract call      (match (execute-migration-safe amount)        success (begin          
+;; Execute migration through queue with safe contract call
+      (match (execute-migration-safe amount)        success (begin          
 
 ;; Notify revenue distributor of potential new revenue via safe call - simplified          (if (and (var-get system-integration-enabled) (is-some (var-get revenue-distributor-contract)))            (match (var-get revenue-distributor-contract)              revenue-contract-principal true 
 
 ;; Simplified - assume fee recorded if distributor exists              true)            true)          (map-set cross-system-operations operation-id            (merge (unwrap-panic (map-get? cross-system-operations operation-id)) { status: u1 }))          (ok success))        error (begin          (map-set cross-system-operations operation-id            (merge (unwrap-panic (map-get? cross-system-operations operation-id)) { status: u2 }))          (err error))))))
 
-;; Coordinated governance participation with utility rewards(define-public (participate-in-governance (proposal-id uint) (vote bool) (cxvg-amount uint))  (let ((operation-id (var-get next-operation-id)))    (begin      (asserts! (not (var-get system-paused)) (err ERR_SYSTEM_PAUSED))            
+;; Coordinated governance participation with utility rewards
+(define-public (participate-in-governance (proposal-id uint) (vote bool) (cxvg-amount uint))  (let ((operation-id (var-get next-operation-id)))    (begin      (asserts! (not (var-get system-paused)) (err ERR_SYSTEM_PAUSED))            
 
 ;; Record operation      (map-set cross-system-operations operation-id        {          operation-type: u3, 
 
@@ -107,7 +120,8 @@
 
 ;; --- System Health and Coordination ---
 
-;; Comprehensive system health check(define-public (run-system-health-check)  (begin    (asserts! (var-get system-initialized) (err ERR_INITIALIZATION_FAILED))        
+;; Comprehensive system health check
+(define-public (run-system-health-check)  (begin    (asserts! (var-get system-initialized) (err ERR_INITIALIZATION_FAILED))        
 
 ;; Run health checks on all components    (let ((monitor-health (ok true)) 
 
@@ -124,7 +138,8 @@
 ;; Update component status based on health checks - enhanced deployment simplification      (let ((staking-status (if (is-ok staking-info) true false))            (migration-status (if (is-ok migration-info) true false))            (revenue-status (if (is-ok revenue-stats) true false))            (monitor-status (if (is-ok monitor-health) true false)))        (unwrap! (update-component-status COMPONENT_CXD_STAKING staking-status) (err ERR_COMPONENT_UPDATE_FAILED))        (unwrap! (update-component-status COMPONENT_MIGRATION_QUEUE migration-status) (err ERR_COMPONENT_UPDATE_FAILED))        (unwrap! (update-component-status COMPONENT_REVENUE_DISTRIBUTOR revenue-status) (err ERR_COMPONENT_UPDATE_FAILED))        (unwrap! (update-component-status COMPONENT_INVARIANT_MONITOR monitor-status) (err ERR_COMPONENT_UPDATE_FAILED)))            (ok {        overall-health: (if (and (is-ok monitor-health) (is-ok staking-info) (is-ok migration-info) (is-ok revenue-stats)) u10000 u7000),        monitor-status: (is-ok monitor-health),        staking-status: (is-ok staking-info),        migration-status: (is-ok migration-info),        revenue-status: (is-ok revenue-stats)      }))))
 (define-private (update-component-status (component-id uint) (is-healthy bool))  (let ((current-status (unwrap-panic (map-get? component-status component-id))))    (map-set component-status component-id      {        active: is-healthy,        last-health-check: block-height,        error-count: (if is-healthy (get error-count current-status) (+ (get error-count current-status) u1))      })    (ok true)))
 
-;; Coordinated revenue distribution(define-public (trigger-revenue-distribution)  (let ((operation-id (var-get next-operation-id)))    (begin      (asserts! (not (var-get system-paused)) (err ERR_SYSTEM_PAUSED))            
+;; Coordinated revenue distribution
+(define-public (trigger-revenue-distribution)  (let ((operation-id (var-get next-operation-id)))    (begin      (asserts! (not (var-get system-paused)) (err ERR_SYSTEM_PAUSED))            
 
 ;; Record operation      (map-set cross-system-operations operation-id        {          operation-type: u4, 
 
@@ -136,7 +151,8 @@
 
 ;; --- Emergency Coordination ---
 
-;; System-wide emergency pause(define-public (emergency-pause-system)  (begin    (asserts! (is-eq tx-sender (var-get contract-owner)) (err ERR_UNAUTHORIZED))        
+;; System-wide emergency pause
+(define-public (emergency-pause-system)  (begin    (asserts! (is-eq tx-sender (var-get contract-owner)) (err ERR_UNAUTHORIZED))        
 
 ;; Pause all subsystems - simplified for enhanced deployment    (begin      (match (var-get cxd-staking-contract)        staking-ref true 
 

@@ -28,8 +28,8 @@ address = "ST2NEB84ASENDXKYGJPQW86YXQCEFEX2ZQPG87ND"
 
 [accounts.wallet_3]
 address = "ST2REHHS5J3CERCRBEPMGH7921Q6PYKAADT7JP2VB"
-[contracts.concentrated-math]
-path = "../contracts/libraries/concentrated-math.clar"
+[contracts.math-lib-concentrated]
+path = "../contracts/math/math-lib-concentrated.clar"
 clarity_version = 3
 epoch = "3.0"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
@@ -943,8 +943,8 @@ address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 path = "contracts/math/math-lib-concentrated.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
-[contracts.concentrated-math]
-path = "contracts/libraries/concentrated-math.clar"
+[contracts.math-lib-concentrated]
+path = "contracts/math/math-lib-concentrated.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.cxd-token]

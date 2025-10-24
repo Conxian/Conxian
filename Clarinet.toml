@@ -442,9 +442,9 @@ address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.lib-precision-calculator"
 path = "contracts/libraries/concentrated-math.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.libraries-concentrated-math"
 
-[contracts.math-concentrated-math-lib]
-path = "contracts/math/concentrated-math-lib.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math-concentrated-math-lib"
+[contracts.math-lib-concentrated]
+path = "contracts/math/math-lib-concentrated.clar"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math-lib-concentrated"
 
 [contracts.math-math-lib-concentrated]
 path = "contracts/math/math-lib-concentrated.clar"

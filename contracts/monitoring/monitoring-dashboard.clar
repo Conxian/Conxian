@@ -5,7 +5,8 @@
 (use-trait oracle-trait .all-traits.oracle-trait)
 (use-trait monitoring-trait .all-traits.monitoring-trait)
 
-(impl-trait monitoring-trait)
+(use-trait monitoring_trait .all-traits.monitoring-trait)
+ .all-traits.monitoring-trait)
 
 ;; ===== Constants =====
 (define-constant ERR_UNAUTHORIZED (err u100))

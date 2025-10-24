@@ -1,12 +1,11 @@
 ;; cxd-token.clar
 ;; Conxian Revenue Token (SIP-010 FT) - accrues protocol revenue to holders off-contract
 ;; Enhanced with integration hooks for staking, revenue distribution, and system monitoring
-
 ;; --- Traits ---
-
-;; --- Errors ---
 (use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
-(impl-trait sip-010-ft-trait)
+(use-trait sip_010_ft_trait .all-traits.sip-010-ft-trait)
+ .all-traits.sip-010-ft-trait)
+;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED u100)
 (define-constant ERR_NOT_ENOUGH_BALANCE u101)
 (define-constant ERR_SYSTEM_PAUSED u102)
@@ -14,79 +13,56 @@
 (define-constant ERR_TRANSFER_HOOK_FAILED u104)
 (define-constant ERR_OVERFLOW u105)
 (define-constant ERR_SUB_UNDERFLOW u106)
-
-;; --- Storage ---
+;; --- Data Maps & Variables ---
+(define-map balances principal uint)
+(define-map minters principal bool)
 (define-data-var contract-owner principal tx-sender)
 (define-data-var decimals uint u6)
 (define-data-var name (string-ascii 32) "Conxian Revenue Token")
 (define-data-var symbol (string-ascii 10) "CXD")
 (define-data-var total-supply uint u0)
 (define-data-var token-uri (optional (string-utf8 256)) none)
-
-;; Integration contracts
 (define-data-var token-coordinator (optional principal) none)
 (define-data-var protocol-monitor (optional principal) none)
 (define-data-var emission-controller (optional principal) none)
 (define-data-var revenue-distributor (optional principal) none)
 (define-data-var staking-contract-ref (optional principal) none)
-
-;; Enhanced storage
-(define-map balances principal uint)
-(define-map minters { who: principal } { enabled: bool })
 (define-data-var transfer-hooks-enabled bool true)
 (define-data-var system-integration-enabled bool true)
 (define-data-var initialization-complete bool false)
-
 ;; --- Helpers ---
 (define-private (is-owner (who principal))
   (is-eq who (var-get contract-owner)))
-
 (define-read-only (is-minter (who principal))
-  (default-to false (get enabled (map-get? minters { who: who }))))
-
+  (default-to false (map-get? minters who)))
 ;; --- Safe Math ---
 (define-private (safe-add (a uint) (b uint))
   (let ((result (+ a b)))
-    (if (>= result a)
-      (ok result)
-      (err ERR_OVERFLOW))))
-
+    (if (>= result a) (ok result) (err ERR_OVERFLOW))))
 (define-private (safe-sub (a uint) (b uint))
-  (if (>= a b)
-    (ok (- a b))
-    (err ERR_SUB_UNDERFLOW)))
-
-;; --- System Integration Helpers ---
-;; Import the protocol monitor trait
-
+  (if (>= a b) (ok (- a b)) (err ERR_SUB_UNDERFLOW)))
+;; --- System Integration ---
 (define-private (check-system-pause)
-  (if (var-get system-integration-enabled)
-    (match (var-get protocol-monitor)
-      monitor (default-to false (contract-call? monitor is-paused))
-      false)
-    false))
-
+  (and (var-get system-integration-enabled)
+       (match (var-get protocol-monitor)
+         monitor (unwrap! (contract-call? monitor is-paused) false)
+         false)))
 (define-private (check-emission-allowed (amount uint))
-  (if (var-get system-integration-enabled)
-    (match (var-get emission-controller)
-      controller (default-to true (contract-call? controller can-emit amount))
-      true)
-    true))
-
+  (or (not (var-get system-integration-enabled))
+      (match (var-get emission-controller)
+        controller (unwrap! (contract-call? controller can-emit amount) true)
+        true)))
 (define-private (notify-transfer (amount uint) (sender principal) (recipient principal))
-  (if (and (var-get system-integration-enabled) (var-get transfer-hooks-enabled))
-    (match (var-get token-coordinator)
-      coordinator (default-to true (contract-call? coordinator on-transfer amount sender recipient))
-      true)
-    true))
-
+  (and (var-get system-integration-enabled)
+       (var-get transfer-hooks-enabled)
+       (match (var-get token-coordinator)
+         coordinator (unwrap! (contract-call? coordinator on-transfer amount sender recipient) false)
+         true)))
 (define-private (notify-mint (amount uint) (recipient principal))
-  (if (var-get system-integration-enabled)
-    (match (var-get token-coordinator)
-      coordinator (default-to true (contract-call? coordinator on-mint amount recipient))
-      true)
-    true))
-
+  (and (var-get system-integration-enabled)
+       (match (var-get token-coordinator)
+         coordinator (default-to true (contract-call? coordinator on-mint amount recipient))
+         true)))
 (define-private (notify-burn (amount uint) (sender principal))
   (if (var-get system-integration-enabled)
     (match (var-get token-coordinator)

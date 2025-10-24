@@ -6,7 +6,8 @@
 (use-trait oracle-trait .all-traits.oracle-trait)
 (use-trait token-trait .all-traits.sip-010-ft-trait)
 
-(impl-trait position-trait)
+(use-trait position_trait .all-traits.position-trait)
+ .all-traits.position-trait)
 
 ;; ===== Type Definitions =====
 (define-types
@@ -100,7 +101,7 @@
         is-hedged: false,
         tags: [],
         version: u1,
-        metadata: none
+        metadata: (some none)
       })
     )
       ;; Validate position with risk manager
@@ -152,7 +153,7 @@
     (pnl (calculate-pnl position price))
     (total-amount (+ position.collateral pnl))
   )
-    (asserts! (is-eq position.status (position-status ACTIVE)) (err u4003))
+    (asserts! (is-eq (get status position) (position-status ACTIVE)) (err u4003))
 
     ;; Transfer funds back to user
     (try! (contract-call? position.token transfer total-amount (as-contract tx-sender) owner))
@@ -220,3 +221,4 @@
     )
   )
 )
+

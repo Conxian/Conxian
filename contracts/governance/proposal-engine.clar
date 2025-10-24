@@ -5,7 +5,8 @@
 (use-trait proposal-engine-trait .all-traits.proposal-engine-trait)
 (use-trait governance-token-trait .all-traits.governance-token-trait)
 
-(impl-trait proposal-engine-trait)
+(use-trait proposal_engine_trait .all-traits.proposal-engine-trait)
+ .all-traits.proposal-engine-trait)
 
 ;; Constants
 (define-constant ERR_UNAUTHORIZED (err u100))

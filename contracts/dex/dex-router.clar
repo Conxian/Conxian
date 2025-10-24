@@ -6,7 +6,8 @@
 (use-trait router-trait .all-traits.router-trait)
 (use-trait factory-trait .all-traits.factory-trait)
 (use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
-(impl-trait router-trait)
+(use-trait router_trait .all-traits.router-trait)
+ .all-traits.router-trait)
 
 ;; --- Dimensional Integration ---
 (define-data-var dimensional-router principal tx-sender) ;; Will be set to advanced-router-dijkstra.clar
@@ -360,7 +361,3 @@
     (ok true)
   )
 )
-
-
-
->>>>>>> Stashed changes

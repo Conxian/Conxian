@@ -2,7 +2,8 @@
 (use-trait cache-manager-trait .all-traits.cache-manager-trait)
 
 ;; ===== Traits =====
-(impl-trait cache-manager-trait)
+(use-trait cache_manager_trait .all-traits.cache-manager-trait)
+ .all-traits.cache-manager-trait)
 
 ;; Distributed Cache Manager - Reduces latency by 60-80%
 ;; Implements multi-level caching with TTL and invalidation strategies
