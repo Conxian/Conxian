@@ -71,6 +71,21 @@ The protocol uses a dedicated system account for privileged operations. The curr
 - **DEX Components**: Basic pool and router implementations
 - **Capital Management**: Framework for efficient capital allocation
 - **Security Controls**: Circuit breakers and emergency mechanisms
+- **Liquidity Provider**: Unified liquidity provisioning for DEX integration.
+- **Price Impact Calculator**: Calculates price impact for token swaps.
+
+### 🏭 Position Management
+
+- **Position Factory**: Manages the creation and tracking of user positions.
+
+### 🛡️ Risk Framework
+
+- **Insurance Fund**: Manages the protocol's insurance fund for risk mitigation.
+
+### 🔗 Integration Points
+
+- **Chainlink Adapter**: Adapts Chainlink oracle data for Clarity.
+- **TWAP Oracle**: Provides Time-Weighted Average Price (TWAP) data.
 
 ### 🏦 Financial System Components
 
