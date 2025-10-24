@@ -4,7 +4,6 @@
 
 ;; Traits
 (use-trait proposal-engine-trait .all-traits.proposal-engine-trait)
-(impl-trait proposal-engine-trait)
 
 ;; Constants
 (define-constant ERR_UNAUTHORIZED (err u100))
@@ -163,7 +162,8 @@
         (map-set proposals { proposal-id: proposal-id } (merge (unwrap-panic proposal) { executed: true }))
         (ok true)
       )
-    )  ))
+    )
+  )
 
 ;; Read-only Functions(define-read-only (get-proposal (proposal-id uint))  (ok (map-get? proposals { proposal-id: proposal-id })))
 (define-read-only (get-vote (proposal-id uint) (voter principal))  (ok (map-get? votes { proposal-id: proposal-id, voter: voter })))

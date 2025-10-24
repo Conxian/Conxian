@@ -57,9 +57,29 @@
 (define-public (configure-prediction-settings (enabled bool) (confidence-thresh uint) (sensitivity uint))  (begin    (try! (only-owner-guard))    (asserts! (and (<= confidence-thresh CONFIDENCE_HIGH) (> sensitivity u100)) ERR_INVALID_PARAMS)    (var-set prediction-enabled enabled)    (ok true)))
 
 ;; === DATA COLLECTION ===(define-public (record-transaction-pattern (time-window uint) (pattern-id uint) (tps uint) (peak-tps uint) (tx-count uint) (gas-usage uint) (error-rate uint))  (let (    (current-time (get-block-info? time (- block-height u1)))  )    (if (var-get prediction-enabled)      (begin        (map-set transaction-patterns          { time-window: time-window, pattern-id: pattern-id }          {            avg-tps: tps,            peak-tps: peak-tps,            transaction-count: tx-count,            avg-gas-usage: gas-usage,            error-rate: error-rate,            timestamp: current-time          }        )        (ok true)      )      (ok false)    )  ))
-(define-public (update-resource-metrics (resource-type (string-ascii 32)) (current-usage uint) (predicted-usage uint) (capacity-limit uint))  (let (    (current-time (unwrap-panic (get-block-info? time (- block-height u1))))    (time-window (/ current-time u300)) 
-
-;; 5-minute windows    (utilization (if (> capacity-limit u0)                    (/ (* current-usage u100) capacity-limit)                    u0))    (trend (if (> predicted-usage current-usage) SCALE_UP             (if (< predicted-usage current-usage) SCALE_DOWN SCALE_MAINTAIN)))  )    (map-set resource-metrics      { resource-type: resource-type, time-window: time-window }      {        current-usage: current-usage,        predicted-usage: predicted-usage,        capacity-limit: capacity-limit,        utilization-percentage: utilization,        trend-direction: trend      }    )    (ok true)  ))
+(define-public (update-resource-metrics (resource-type (string-ascii 32)) (current-usage uint) (predicted-usage uint) (capacity-limit uint))
+  (let (
+    (current-time (unwrap-panic (get-block-info? time (- block-height u1))))
+    (time-window (/ current-time u300)) ;; 5-minute windows
+    (utilization (if (> capacity-limit u0)
+                    (/ (* current-usage u100) capacity-limit)
+                    u0))
+    (trend (if (> predicted-usage current-usage) SCALE_UP
+             (if (< predicted-usage current-usage) SCALE_DOWN SCALE_MAINTAIN)))
+  )
+    (map-set resource-metrics
+      { resource-type: resource-type, time-window: time-window }
+      {
+        current-usage: current-usage,
+        predicted-usage: predicted-usage,
+        capacity-limit: capacity-limit,
+        utilization-percentage: utilization,
+        trend-direction: trend
+      }
+    )
+    (ok true)
+  )
+)
 
 ;; === PREDICTION ENGINE ===
 

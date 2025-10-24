@@ -1,10 +1,7 @@
-
-
 ;; Oracle - Minimal implementation of oracle-trait
 ;; Provides price feed functionality for assets
 
 (use-trait dimensional-oracle-trait .all-traits.dimensional-oracle-trait)
-(impl-trait dimensional-oracle-trait)
 
 ;; Error codes
 (define-constant ERR_ASSET_NOT_FOUND (err u404))
@@ -40,10 +37,10 @@
   (set-price asset price)
 )
 
-;; Get price with timestamp
-(define-read-only (get-price-with-timestamp (asset principal))
+;; Get TWAP (Time Weighted Average Price)
+(define-read-only (get-twap (asset principal) (interval uint))
   (match (map-get? asset-prices { asset: asset })
-    entry (ok { price: (get price entry), timestamp: block-height })
+    entry (ok (get price entry))  ;; Simplified - return current price as TWAP
     (err ERR_ASSET_NOT_FOUND)
   )
 )

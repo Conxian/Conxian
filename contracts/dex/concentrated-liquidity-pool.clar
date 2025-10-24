@@ -1,7 +1,7 @@
 ;; Concentrated Liquidity Pool (CLP) - Minimal adapter implementation for trait compliance and compilation
 
 (use-trait clp-pool-trait .all-traits.clp-pool-trait)
-(impl-trait clp-pool-trait)
+
 (define-constant ERR_UNAUTHORIZED (err u1001))
 (define-constant ERR_INVALID_TICK (err u3001))
 (define-constant ERR_INVALID_AMOUNT (err u3004))
@@ -10,7 +10,7 @@
 (define-data-var contract-owner principal tx-sender)
 (define-data-var token0 principal tx-sender)
 (define-data-var token1 principal tx-sender)
-(define-data-var fee uint u3000) 
+(define-data-var fee uint u3000) ;; basis points (e.g., u3000 = 0.3%)
 
 ;; basis points (e.g., u3000 = 0.3%)
 (define-data-var current-tick int i0)

@@ -170,7 +170,7 @@
   (let ((intermediaries (list
     (as-contract tx-sender) ;; CXD
     'SP2H8PY27SEZ03MWRKS5XABZYQN17ETGQS3527SA5 ;; STX
-    'SP2H8PY27SEZ03MWRKS5XABZYQN17ETGQS3527SA6 ;; USDA (placeholder)
+    'ST1PQHQKV0RJXZFY1DGX8MNSYSYV1PBPZ7PY1ABEG.mock-usda-token ;; USDA (placeholder)
   )))
 
     (find-best-intermediary intermediaries token-in token-out amount-in)

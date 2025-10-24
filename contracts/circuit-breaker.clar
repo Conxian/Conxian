@@ -4,7 +4,8 @@
 
 ;; Implements the enhanced circuit breaker pattern
 
-;; ===== Constants =====(define-constant ERR_UNAUTHORIZED (err u1001))
+;; ===== Constants =====
+(define-constant ERR_UNAUTHORIZED (err u1001))
 (define-constant ERR_CIRCUIT_OPEN (err u1002))
 (define-constant ERR_INVALID_OPERATION (err u1003))
 (define-constant ERR_INVALID_THRESHOLD (err u1004))

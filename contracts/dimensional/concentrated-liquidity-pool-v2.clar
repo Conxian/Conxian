@@ -1,13 +1,15 @@
-
-
 ;; Concentrated Liquidity Pool v2 - Minimal trait-compliant adapter for compilation
 
 (use-trait clp-pool-trait .all-traits.clp-pool-trait)
-(impl-trait clp-pool-trait)
+(use-trait sip-010-ft-trait .all-traits.sip-010-trait)
+(use-trait clp_pool_trait .all-traits.clp-pool-trait)
+(use-trait clp-pool-trait .all-traits.clp-pool-trait)
+
 (define-constant ERR_UNAUTHORIZED (err u1101))
 (define-constant ERR_INVALID_TICK (err u1102))
 (define-constant ERR_INVALID_AMOUNT (err u1103))
 (define-constant ERR_POSITION_NOT_FOUND (err u1104))
+(define-constant ERR_INVALID_FEE (err u1105))
 
 (define-data-var contract-owner principal tx-sender)
 (define-data-var fee uint u3000)
@@ -37,13 +39,15 @@
     (asserts! (< lower-tick upper-tick) ERR_INVALID_TICK)
     (match (map-get? positions { position-id: position-id })
       pos
-      (let ((p pos) (new-shares (+ (get shares p) amount)))
-        (map-set positions { position-id: position-id } { lower: (get lower p), upper: (get upper p), shares: new-shares })
-        (ok (tuple (shares new-shares)))
+      (let ((new-shares (+ (get shares pos) amount)))
+        (map-set positions { position-id: position-id } 
+          { lower: (get lower pos), upper: (get upper pos), shares: new-shares })
+        (ok { shares: new-shares })
       )
-      (let ((new-shares amount))
-        (map-set positions { position-id: position-id } { lower: lower-tick, upper: upper-tick, shares: new-shares })
-        (ok (tuple (shares new-shares)))
+      (begin
+        (map-set positions { position-id: position-id } 
+          { lower: lower-tick, upper: upper-tick, shares: amount })
+        (ok { shares: amount })
       )
     )
   )
@@ -54,32 +58,45 @@
     (asserts! (> amount u0) ERR_INVALID_AMOUNT)
     (match (map-get? positions { position-id: position-id })
       pos
-      (let ((p pos) (shares (get shares p)))
+      (let ((shares (get shares pos)))
         (asserts! (>= shares amount) ERR_INVALID_AMOUNT)
-        (map-set positions { position-id: position-id } { lower: (get lower p), upper: (get upper p), shares: (- shares amount) })
-        (ok (tuple (amount-out amount)))
+        (map-set positions { position-id: position-id } 
+          { lower: (get lower pos), upper: (get upper pos), shares: (- shares amount) })
+        (ok { amount-out: amount })
       )
-      (err ERR_POSITION_NOT_FOUND)
+      ERR_POSITION_NOT_FOUND
     )
   )
 )
 
-(define-public (swap (token-in (contract-of sip-010-ft-trait)) (token-out (contract-of sip-010-ft-trait)) (amount-in uint))
+(define-public (swap (token-in <sip-010-ft-trait>) (token-out <sip-010-ft-trait>) (amount-in uint))
   (begin
     (asserts! (> amount-in u0) ERR_INVALID_AMOUNT)
     (let ((fee-amount (/ (* amount-in (var-get fee)) u10000))
           (amount-out (- amount-in fee-amount)))
-      (ok (tuple (amount-out amount-out)))
+      (ok { amount-out: amount-out })
     )
   )
 )
 
 (define-read-only (get-position (position-id (buff 32)))
   (match (map-get? positions { position-id: position-id })
-    pos (ok (tuple (lower (get lower pos)) (upper (get upper pos)) (shares (get shares pos))))
-    (err ERR_POSITION_NOT_FOUND)
+    pos (ok { lower: (get lower pos), upper: (get upper pos), shares: (get shares pos) })
+    ERR_POSITION_NOT_FOUND
   )
 )
 
-(define-read-only (get-current-tick) (ok (var-get current-tick)))
-(define-read-only (get-fee-rate) (ok (var-get fee)))
+(define-read-only (get-current-tick) 
+  (ok (var-get current-tick))
+)
+
+(define-read-only (get-fee-rate) 
+  (ok (var-get fee))
+)
+
+(define-private (get-fee-from-params (params (buff 256)))
+  (if (>= (len params) u4)
+    (ok (buff-to-uint-be (unwrap-panic (as-max-len? (unwrap-panic (slice? params u0 u4)) u4))))
+    ERR_INVALID_FEE
+  )
+)

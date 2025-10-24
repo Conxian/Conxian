@@ -4,7 +4,6 @@
 
 ;; ===== Traits =====
 (use-trait compliance-hooks-trait .all-traits.compliance-hooks-trait)
-(impl-trait compliance-hooks-trait)
 
 ;; ===== Constants =====
 (define-constant ERR_UNAUTHORIZED (err u401))

@@ -34,7 +34,7 @@ function parseImplTrait(content: string): string[] {
   return out;
 }
 
-// Enforce: implementations reference centralized traits via alias imported from `.all-traits.*`
+// Enforce: implementations reference centralized traits via alias imported from `.all-traits.*` 
 // - Contracts in `contracts/traits/` are skipped
 // - For each (impl-trait X): X must be an alias defined by (use-trait X ...)
 // - The corresponding (use-trait X ...) path must include `.all-traits.` (centralized traits)
@@ -43,7 +43,6 @@ function parseImplTrait(content: string): string[] {
 describe('Trait implementation policy (centralized all-traits)', () => {
   const contractsDir = path.join(__dirname, '..', '..', 'contracts');
   const files = readAllClarFiles(contractsDir).filter(p => !p.includes(`${path.sep}traits${path.sep}`));
-
   it('all impl-trait statements should use alias from use-trait and point to .all-traits.*', () => {
     const failures: { file: string; message: string }[] = [];
 
@@ -58,6 +57,7 @@ describe('Trait implementation policy (centralized all-traits)', () => {
           failures.push({ file, message: `(impl-trait ${sym}) should use an alias imported via (use-trait ...)` });
           continue;
         }
+        
         const ref = uses[sym];
         if (!ref) {
           failures.push({ file, message: `(impl-trait ${sym}) has no matching (use-trait ${sym} <path>)` });

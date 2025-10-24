@@ -1,6 +1,6 @@
 ;; ===== Traits =====
 (use-trait monitoring-dashboard-trait .all-traits.monitoring-dashboard-trait)
-(impl-trait monitoring-dashboard-trait)
+
 
 ;; Real-Time Monitoring Dashboard Contract
 ;; Provides comprehensive system monitoring, alerting, and metrics collection

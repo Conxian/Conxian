@@ -230,7 +230,7 @@
       (if (>= usage-percentage (var-get gc-threshold))
         (match (trigger-gc-internal pool-name)
           okv okv
-          _ true
+          (ok true)
         )
         true
       )
@@ -328,4 +328,6 @@
     (only-owner!)
     ;; Placeholder: compacting would reorganize allocations to reduce fragmentation
     (ok true)
+  )
+)
  

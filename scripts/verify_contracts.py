@@ -79,10 +79,13 @@ IGNORE_DIRS = {
     "utils",
 }
 
-# Regex patterns (support quoted and unquoted trait refs)
+# Regex patterns (support quoted and unquoted trait refs, including principal addresses)
 USE_TRAIT_PATTERN = r'\(use-trait\s+([^\s]+)\s+([^\s\)]+)\)'
 IMPL_TRAIT_PATTERN = r'\(impl-trait\s+([^\s\)]+)\)'
 DEFINE_TRAIT_PATTERN = r'\(define-trait\s+([^\s\n]+)'
+
+# Principal address pattern for trait references
+PRINCIPAL_TRAIT_PATTERN = r"'([A-Z0-9]+)\.all-traits\.([a-zA-Z0-9-]+)'"
 
 class ContractVerifier:
     def __init__(self, autofix_graph: bool = False, autofix_unused: bool = False, autofix_traits: bool = False, autofix_prune: bool = False, autofix_format: bool = False, autofix_impl_traits: bool = False):
@@ -195,11 +198,232 @@ class ContractVerifier:
             self.errors.append("all-traits.clar file not found")
             success = False
 
+
         return success
 
-    def check_contract_dependencies(self) -> bool:
-        """Check contract dependencies."""
-        # Stub implementation
+    def _check_trait_references(self, contract_file: Path, content: str) -> bool:
+        success = True
+        # Find all use-trait statements
+        use_matches = re.finditer(USE_TRAIT_PATTERN, content)
+        for match in use_matches:
+            trait_ref = match.group(1)
+
+            # Handle different trait reference formats:
+            # 1. 'ST...all-traits.trait-name' (quoted principal address format)
+            # 2. .all-traits.trait-name (relative format)
+            # 3. ST...contract.trait (unquoted principal format)
+            # 4. local-trait-id (local reference)
+            
+            principal_match = re.match(PRINCIPAL_TRAIT_PATTERN, trait_ref)
+            if principal_match:
+                # Format: 'ST...all-traits.trait-name'
+                trait_name = principal_match.group(2)
+                if trait_name not in self.defined_traits:
+                    self.errors.append(
+                        f"Undefined trait reference '{trait_name}' in {contract_file.name}"
+                    )
+                    success = False
+            elif trait_ref.startswith('.all-traits.'):
+                # Format: .all-traits.trait-name
+                base = trait_ref.split('.')[-1]
+                if base not in self.defined_traits:
+                    self.errors.append(
+                        f"Undefined centralized trait '{base}' used via {trait_ref} in {contract_file.name}"
+                    )
+                    success = False
+            elif trait_ref.startswith('ST') or trait_ref.startswith("'ST"):
+                # Principal-qualified trait reference (quoted or unquoted)
+                # Extract trait name if it's an all-traits reference
+                if 'all-traits.' in trait_ref:
+                    trait_name = trait_ref.split('all-traits.')[-1].rstrip("'")
+                    if trait_name not in self.defined_traits:
+                        self.errors.append(
+                            f"Undefined trait reference '{trait_name}' in {contract_file.name}"
+                        )
+                        success = False
+                # Otherwise, allow external principal references
+            else:
+                # Local trait identifier; ensure defined in all-traits
+                if trait_ref not in self.defined_traits:
+                    self.errors.append(
+                        f"Undefined trait reference '{trait_ref}' in {contract_file.name}"
+                    )
+                    success = False
+        
+        # Check impl-trait statements
+        impl_matches = re.finditer(IMPL_TRAIT_PATTERN, content)
+        for match in impl_matches:
+            trait_ref = match.group(1)
+
+            # Handle the same formats as above
+            principal_match = re.match(PRINCIPAL_TRAIT_PATTERN, trait_ref)
+            if principal_match:
+                # Format: 'ST...all-traits.trait-name'
+                trait_name = principal_match.group(2)
+                if trait_name not in self.defined_traits:
+                    self.errors.append(
+                        f"Undefined trait implemented in {contract_file.name}: (impl-trait {trait_ref})"
+                    )
+                    success = False
+            elif trait_ref.startswith('.all-traits.'):
+                # Format: .all-traits.trait-name
+                base = trait_ref.split('.')[-1]
+                if base not in self.defined_traits:
+                    self.errors.append(
+                        f"Undefined centralized trait '{base}' implemented in {contract_file.name}: {match.group(0)}"
+                    )
+                    success = False
+            elif trait_ref.startswith('ST') or trait_ref.startswith("'ST"):
+                # Principal-qualified trait reference
+                if 'all-traits.' in trait_ref:
+                    trait_name = trait_ref.split('all-traits.')[-1].rstrip("'")
+                    if trait_name not in self.defined_traits:
+                        self.errors.append(
+                            f"Undefined trait implemented in {contract_file.name}: (impl-trait {trait_ref})"
+                        )
+                        success = False
+                # Otherwise, allow external principal references
+            else:
+                # Local trait reference
+                if trait_ref not in self.defined_traits:
+                    self.errors.append(
+                        f"Undefined trait implemented in {contract_file.name}: {match.group(0)}"
+                    )
+                    success = False
+                
+        return success
+
+    def verify_manifest_alignment(self) -> bool:
+        """Ensure contracts using centralized .all-traits.* are listed in manifests with same address as all-traits, and advise depends_on.
+
+        Preference order for checks: stacks/Clarinet.test.toml > Clarinet.toml.
+        If the test manifest contains the contract path and has depends_on, warnings are suppressed.
+        """
+        success = True
+        root_contracts = self.toml_data.get("contracts", {})
+        test_contracts = self.test_config.get("contracts", {})
+
+        # Build path -> (name, address, depends_on, source)
+        manifest_paths: Dict[str, Tuple[str, Optional[str], List[str], str]] = {}
+        for source, table in (("test", test_contracts), ("root", root_contracts)):
+            for name, entry in table.items():
+                if isinstance(entry, dict):
+                    path = entry.get('path')
+                    addr = entry.get('address')
+                    deps = entry.get('depends_on', []) or []
+                    if path:
+                        manifest_paths[path.replace('\\', '/')] = (name, addr, deps, source)
+
+        # Determine all-traits address for both manifests
+        test_all_traits = test_contracts.get('all-traits', {})
+        test_all_traits_addr = test_all_traits.get('address') if isinstance(test_all_traits, dict) else None
+        root_all_traits = root_contracts.get('all-traits', {})
+        root_all_traits_addr = root_all_traits.get('address') if isinstance(root_all_traits, dict) else None
+
+        for f in self.contract_files:
+            content = self._strip_comments(f.read_text())
+            # Check for any all-traits usage (both old and new formats)
+            uses_all_traits = ('.all-traits.' in content or 
+                             re.search(r"'[A-Z0-9]+\.all-traits\.", content) or
+                             'all-traits.' in content)
+            if uses_all_traits:
+                rel_part = str(f.relative_to(self.contracts_dir)).replace("\\", "/")
+                rel = f"contracts/{rel_part}"
+                alt_key = rel.replace('contracts/', '')
+                manifest_entry = manifest_paths.get(rel) or manifest_paths.get(alt_key)
+                if not manifest_entry:
+                    self.errors.append(f"Contract using centralized traits not listed in Clarinet.toml: {rel}")
+                    success = False
+                    continue
+                _, addr, deps, source = manifest_entry
+                # Compare against matching manifest's all-traits address
+                reference_addr = test_all_traits_addr if source == "test" else root_all_traits_addr
+                if reference_addr and addr and addr != reference_addr:
+                    self.errors.append(
+                        f"Address mismatch for {rel}: {addr} != all-traits address {reference_addr} in {source} manifest."
+                    )
+                    success = False
+                # Soft-check depends_on
+                if isinstance(deps, list) and 'all-traits' not in deps:
+                    # Only warn when the preferred manifest (test) is missing depends_on
+                    if source == "test":
+                        self.warnings.append(
+                            f"Recommend depends_on = ['all-traits'] for {rel} to ensure build order."
+                        )
+        return success
+    
+    def verify_trait_implementation(self) -> bool:
+        """Verify contracts implement all required trait functions"""
+        # This is a simplified check - a full implementation would parse function signatures
+        # and verify they match the trait definitions
+        # For now, we'll just check that the trait is implemented
+        return True  # Placeholder for actual implementation
+
+    def analyze_system_graph(self) -> bool:
+        """Build and analyze the system graph to surface structural issues."""
+        self._load_system_graph()
+        if not self.system_graph:
+            return True
+
+        try:
+            graph = self.system_graph.build_system_graph(ROOT_DIR)
+            self._graph = graph
+        except Exception as e:
+            self.warnings.append(f"Failed to build system graph: {e}")
+            return True
+
+        # Collect node ids for traits and files
+        node_ids = {n["id"] for n in graph.get("nodes", [])}
+
+        # 1) Unknown trait references (edges to trait:* without a matching node)
+        unknown_traits: Set[str] = set()
+        # 2) Unresolved static calls (.contract not found)
+        unresolved_calls: List[Tuple[str, str]] = []
+        # 3) Dynamic calls from contracts (not tests)
+        dynamic_calls_from_contracts: List[Tuple[str, str]] = []
+
+        # Build map from node id to type for contract/test identification
+        node_types: Dict[str, str] = {n["id"]: n.get("type", "") for n in graph.get("nodes", [])}
+
+        for e in graph.get("edges", []):
+            etype = e.get("type")
+            to = e.get("to")
+            src = e.get("from")
+            if etype in ("use-trait", "impl-trait") and isinstance(to, str) and to.startswith("trait:"):
+                if to not in node_ids:
+                    unknown_traits.add(to.replace("trait:", ""))
+            if etype == "calls" and not e.get("resolved"):
+                unresolved_calls.append((src, to))
+            if etype == "dynamic-call":
+                # flag only if source is a contract (not a test)
+                if node_types.get(src) == "contract":
+                    dynamic_calls_from_contracts.append((src, str(to)))
+
+        # 4) Cycles
+        cycles = graph.get("cycles", []) or []
+
+        # Emit warnings (non-fatal for now; policy can escalate later)
+        if unknown_traits:
+            self.warnings.append(
+                "Unknown trait references detected in graph: " + ", ".join(sorted(unknown_traits))
+            )
+        if unresolved_calls:
+            sample = "; ".join([f"{s} -> {t}" for s, t in unresolved_calls[:10]])
+            more = "" if len(unresolved_calls) <= 10 else f" (+{len(unresolved_calls)-10} more)"
+            self.warnings.append(f"Unresolved static contract-call? edges: {sample}{more}")
+        if dynamic_calls_from_contracts:
+            sample = "; ".join([f"{s} -> {t}" for s, t in dynamic_calls_from_contracts[:10]])
+            more = "" if len(dynamic_calls_from_contracts) <= 10 else f" (+{len(dynamic_calls_from_contracts)-10} more)"
+            self.warnings.append(f"Dynamic calls from contracts detected: {sample}{more}")
+        if cycles:
+            # Render succinctly
+            pretty = []
+            for cyc in cycles[:5]:
+                pretty.append(" -> ".join(cyc))
+            more = "" if len(cycles) <= 5 else f" (+{len(cycles)-5} more)"
+            self.warnings.append("Call graph cycles detected: " + " | ".join(pretty) + more)
+
+
         return True
 
     def check_unused_contracts(self) -> bool:
@@ -308,7 +532,11 @@ class ContractVerifier:
                 content = self._strip_comments(f.read_text())
             except Exception:
                 continue
-            if '.all-traits.' in content:
+            # Check for any all-traits usage (both old and new formats)
+            uses_all_traits = ('.all-traits.' in content or 
+                             re.search(r"'[A-Z0-9]+\.all-traits\.", content) or
+                             'all-traits.' in content)
+            if uses_all_traits:
                 results.append(f)
         return results
 

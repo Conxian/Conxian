@@ -3,8 +3,7 @@
 ;; Enhanced with staking, yield distribution, and system integration hooks
 
 ;; --- Traits ---
-(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
-(impl-trait sip-010-ft-trait)
+
 
 ;; --- Errors ---
 (define-constant ERR_UNAUTHORIZED u100)
@@ -171,6 +170,9 @@
   ))
 
 ;; --- Owner/Admin ---
+;; @desc Sets the contract owner. Only the current owner can call this.
+;; @param new-owner The principal of the new contract owner.
+;; @returns A response containing a boolean indicating success or an error code.
 (define-public (set-contract-owner (new-owner principal))
   (begin
     (asserts! (is-owner tx-sender) (err ERR_UNAUTHORIZED))
@@ -178,6 +180,10 @@
     (ok true)
   ))
 
+;; @desc Sets or unsets a principal as a minter. Only the contract owner can call this.
+;; @param who The principal to set or unset as a minter.
+;; @param enabled A boolean indicating whether the principal should be enabled (true) or disabled (false) as a minter.
+;; @returns A response containing a boolean indicating success or an error code.
 (define-public (set-minter (who principal) (enabled bool))
   (begin
     (asserts! (is-owner tx-sender) (err ERR_UNAUTHORIZED))
@@ -185,6 +191,9 @@
     (ok true)
   ))
 
+;; @desc Sets the protocol monitor contract. Only the contract owner can call this.
+;; @param contract-address The principal of the protocol monitor contract.
+;; @returns A response containing a boolean indicating success or an error code.
 (define-public (set-protocol-monitor (contract-address principal))
   (begin
     (asserts! (is-owner tx-sender) (err ERR_UNAUTHORIZED))
@@ -192,6 +201,9 @@
     (ok true)
   ))
 
+;; @desc Sets the migration queue contract. Only the contract owner can call this.
+;; @param queue The principal of the migration queue contract.
+;; @returns A response containing a boolean indicating success or an error code.
 (define-public (set-migration-queue-contract (queue principal))
   (begin
     (asserts! (is-owner tx-sender) (err ERR_UNAUTHORIZED))
@@ -199,6 +211,11 @@
     (ok true)
   ))
 
+;; @desc Configures the migration parameters for CXLP to CXD. Only the contract owner can call this.
+;; @param cxd The principal of the CXD token contract.
+;; @param start-height The block height at which the migration starts.
+;; @param epoch-len The length of each epoch in blocks.
+;; @returns A response containing a boolean indicating success or an error code.
 (define-public (configure-migration (cxd principal) (start-height uint) (epoch-len uint))
   (begin
     (asserts! (is-owner tx-sender) (err ERR_UNAUTHORIZED))
@@ -209,6 +226,14 @@
     (ok true)
   ))
 
+;; @desc Sets various liquidity parameters for the CXLP token. Only the contract owner can call this.
+;; @param epoch-cap The maximum amount of CXD that can be minted in an epoch.
+;; @param user-base The base user capacity for CXD minting.
+;; @param user-factor The duration factor for user capacity calculation.
+;; @param user-max The maximum user capacity for CXD minting.
+;; @param midyear The number of blocks after which a mid-year adjustment can occur.
+;; @param adjust-bps The basis points for mid-year adjustment.
+;; @returns A response containing a boolean indicating success or an error code.
 (define-public (set-liquidity-params (epoch-cap uint) (user-base uint) (user-factor uint) (user-max uint) (midyear uint) (adjust-bps uint))
   (begin
     (asserts! (is-owner tx-sender) (err ERR_UNAUTHORIZED))
@@ -221,6 +246,9 @@
     (ok true)
   ))
 
+;; @desc Sets the epoch override value. Only the contract owner can call this.
+;; @param value A boolean indicating whether epoch override is enabled (true) or disabled (false).
+;; @returns A response containing a boolean indicating success or an error code.
 (define-public (set-epoch-override (value bool))
   (begin
     (asserts! (is-owner tx-sender) (err ERR_UNAUTHORIZED))
@@ -337,4 +365,11 @@
       ;; Compute band and multiplier
       (let (
           (band (unwrap! (current-band) (err u999)))
-          (mult (unwrap! (band-multiplier band) (err u
+          (mult (unwrap! (band-multiplier band) (err ERR_OVERFLOW)))
+          (cxd-to-mint (/ (* amount mult) u10000))
+        )
+        (ok true)
+      )
+    )
+  )
+)

@@ -111,7 +111,15 @@
 
 ;; placeholder
 
-;; ---------------------------------------------------------------------------
+;; @desc Retrieves the total liquidity supply for a given pool.
+;; @param pool-id The ID of the pool.
+;; @returns An `(ok uint)` result containing the total liquidity, or an error.
+(define-public (get-total-supply (pool-id uint))
+  (match (map-get? pools {pool-id: pool-id})
+    pool (ok (get liquidity pool))
+    (err u404) ;; Using u404 as a placeholder for ERR_POOL_NOT_FOUND
+  )
+)
 
 ;; Swap
 

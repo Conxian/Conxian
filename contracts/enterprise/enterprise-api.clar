@@ -4,7 +4,8 @@
 (use-trait governance-trait .all-traits.governance-token-trait)
 (use-trait access-control-trait .all-traits.access-control-trait)
 
-(impl-trait access-control-trait)
+(use-trait access_control_trait .all-traits.access-control-trait)
+(use-trait enterprise-api-trait .all-traits.enterprise-api-trait)
 
 ;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED (err u401))

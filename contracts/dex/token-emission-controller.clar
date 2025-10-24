@@ -1,8 +1,7 @@
 ;; token-emission-controller.clar
 ;; Hard-coded emission rails with governance guards to prevent inflation abuse
 
-;; --- Trait Imports ---
-(use-trait ft-mintable-trait .all-traits.ft-mintable-trait)
+(use-trait sip-010-ft-mintable-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-mintable-trait)
 
 ;; --- Constants ---
 (define-constant CONTRACT_OWNER tx-sender)
@@ -186,8 +185,7 @@
         u0))
     u0))
 
-;; Authorized mint with emission controls
-(define-public (controlled-mint (token-contract <ft-mintable-trait>) (recipient principal) (amount uint))
+(define-public (controlled-mint (token-contract <sip-010-ft-mintable-trait>) (recipient principal) (amount uint)))
   (let ((token-principal (contract-of token-contract))
         (current-epoch-num (var-get current-epoch)))
     (begin

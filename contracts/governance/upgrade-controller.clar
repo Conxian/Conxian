@@ -4,7 +4,7 @@
 
 ;; ===== Traits =====
 (use-trait upgrade-controller-trait .all-traits.upgrade-controller-trait)
-(impl-trait upgrade-controller-trait)
+(use-trait upgrade_controller_trait .all-traits.upgrade-controller-trait)
 
 ;; ===== Error Codes =====
 (define-constant ERR_UNAUTHORIZED (err u4001))

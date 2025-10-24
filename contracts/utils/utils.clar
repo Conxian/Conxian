@@ -1,16 +1,13 @@
-(use-trait sip-010-trait 'SP3FBR2AGK5H9QBDH3EEN6DF8EK8JY7RX8QJ5SVTE.sip-010-trait-ft-standard.sip-010-trait)
 
-(define-constant contract-owner tx-sender)
-(define-constant err-owner-only (err u100))
-(define-constant err-not-token-owner (err u101))
+;; Conxian Protocol - Utils Contract
+;; Purpose: Provide utils-trait implementation using standard Clarity functions
 
-(define-data-var contract-enabled bool false)
+(use-trait utils-trait .all-traits.utils-trait)
 
-(define-public (enable-contract)
-  (begin
-    (asserts! (is-eq tx-sender contract-owner) err-owner-only)
-    (var-set contract-enabled true)
-    (ok true)))
-
-(define-read-only (is-enabled)
-  (var-get contract-enabled))
+(define-public (principal-to-buff (p principal))
+  ;; Convert principal to buffer using standard Clarity functions
+  ;; Principals can be converted to string and then to buffer
+  (let ((principal-str (unwrap! (as-max-len? (to-string p) u42) (err u999))))
+    (ok (unwrap! (string-to-utf8 principal-str) (err u999)))
+  )
+)

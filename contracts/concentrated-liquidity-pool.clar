@@ -36,6 +36,7 @@
 
 ;; --- Traits ---
 (use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
+(impl-trait sip-010-ft-trait)
 
 ;; --- Public Functions (Pool Creation Trait Implementation) ---
 (define-public (create-pool (token-a <sip-010-ft-trait>) (token-b <sip-010-ft-trait>) (fee-bps uint))
