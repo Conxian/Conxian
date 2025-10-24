@@ -6,7 +6,7 @@
 (use-trait position-nft-trait .all-traits.position-nft-trait)
 
 (use-trait position_nft_trait .all-traits.position-nft-trait)
- sip-009-nft-trait)
+sip-009-nft-trait)
 (impl-trait position_nft_trait)
 
 ;; ===== Constants =====

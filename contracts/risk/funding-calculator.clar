@@ -6,7 +6,7 @@
 (use-trait dimensional-trait .all-traits.dimensional-trait)
 
 (use-trait funding_trait .all-traits.funding-trait)
- .all-traits.funding-trait)
+.all-traits.funding-calculator-trait)
 
 ;; ===== Constants =====
 (define-constant ERR_UNAUTHORIZED (err u5000))

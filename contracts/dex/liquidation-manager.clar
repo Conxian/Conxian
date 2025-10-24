@@ -1,7 +1,6 @@
-(use-trait liquidation-trait .all-traits.liquidation-trait)
-
 ;; Liquidation Manager Contract
-(impl-trait liquidation-trait)
+(use-trait liquidation-trait .all-traits.liquidation-trait)
+(impl-trait liquidation-trait liquidation-trait)
 
 ;; Constants
 (define-constant CONTRACT_OWNER tx-sender)

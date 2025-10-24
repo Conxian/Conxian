@@ -4,7 +4,7 @@
 (use-trait risk-oracle .all-traits.risk-oracle-trait)
 (use-trait oracle .all-traits.oracle-trait)
 (use-trait risk_oracle_trait .all-traits.risk-oracle-trait)
- .all-traits.risk-oracle-trait)
+.all-traits.risk-oracle-trait)
 
 ;; ===== Constants =====
 (define-constant ERR_UNAUTHORIZED (err u8000))

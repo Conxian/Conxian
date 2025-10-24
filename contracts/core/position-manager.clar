@@ -7,7 +7,7 @@
 (use-trait token-trait .all-traits.sip-010-ft-trait)
 
 (use-trait position_trait .all-traits.position-trait)
- .all-traits.position-trait)
+
 
 ;; ===== Type Definitions =====
 (define-types

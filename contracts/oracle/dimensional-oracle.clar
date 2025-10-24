@@ -6,9 +6,9 @@
 ;; Implements a robust price oracle with multiple data sources and deviation checks
 
 (use-trait oracle_trait .all-traits.oracle-trait)
- .all-traits.dimensional-oracle-trait)
+.all-traits.dimensional-oracle-trait)
 (use-trait dimensional_oracle_trait .all-traits.dimensional-oracle-trait)
- oracle_trait)
+oracle_trait)
 
 
 (define-constant ERR_NOT_AUTHORIZED (err u100))

@@ -12,7 +12,6 @@
 ;; USAGE:
 ;;   (use-trait <trait-name> .all-traits.<trait-name>)
 ;;   (use-trait flash_loan_receiver_trait .all-traits.flash-loan-receiver-trait)
- .all-traits.<trait-name>)
 ;;
 ;; ERROR CODES: See errors.clar for standardized error codes
 ;; ===========================================
@@ -30,11 +29,7 @@
 ;;
 ;; Example usage:
 ;;   (use-trait ft .all-traits.sip-010-ft-trait)
-;;   (use-trait ownable_trait .all-traits.ownable-trait)
--public (transfer (amount uint) (sender principal) (recipient principal) (memo (optional (buff 34))))
-;;     (contract-call? .token-contract transfer amount sender recipient memo))
-(use-trait pausable_trait .all-traits.pausable-trait)
--trait sip-010-ft-trait
+(define-trait sip-010-ft-trait
   (
     ;; Transfer tokens between principals
     ;; @param amount: number of tokens to transfer
@@ -70,6 +65,7 @@
     (get-token-uri () (response (optional (string-utf8 256)) uint))
   )
 )
+
 ;; ===========================================
 ;; SIP-009 NON-FUNGIBLE TOKEN TRAIT (NFT)
 ;; ===========================================
@@ -79,9 +75,6 @@
 ;;
 ;; Example usage:
 ;;   (use-trait nft .all-traits.sip-009-nft-trait)
-;;   (use-trait pool_trait .all-traits.pool-trait)
--public (transfer (token-id uint) (sender principal) (recipient principal))
-;;     (contract-call? .nft-contract transfer token-id sender recipient))
 (define-trait sip-009-nft-trait
   (
     ;; Transfer an NFT between principals
@@ -106,6 +99,7 @@
     (get-owner (uint) (response (optional principal) uint))
   )
 )
+
 ;; ===========================================
 ;; FUNGIBLE TOKEN MINTABLE TRAIT
 ;; ===========================================
@@ -116,8 +110,6 @@
 ;;
 ;; Example usage:
 ;;   (use-trait mintable .all-traits.ft-mintable-trait)
-;;   (define-public (mint-tokens (recipient principal) (amount uint))
-;;     (contract-call? .token-contract mint recipient amount))
 (define-trait ft-mintable-trait
   (
     ;; Mint new tokens and assign them to a principal
@@ -133,6 +125,7 @@
     (burn (principal uint) (response bool uint))
   )
 )
+
 ;; ===========================================
 ;; PROTOCOL MONITOR TRAIT
 ;; ===========================================
@@ -143,8 +136,6 @@
 ;;
 ;; Example usage:
 ;;   (use-trait monitor .all-traits.protocol-monitor-trait)
-;;   (define-public (check-protocol-health (monitor-contract principal))
-;;     (contract-call? monitor-contract check-invariants))
 (define-trait protocol-monitor-trait
   (
     ;; Check if the protocol is currently paused
@@ -176,8 +167,6 @@
 ;;
 ;; Example usage:
 ;;   (use-trait staking .all-traits.staking-trait)
-;;   (define-public (stake-tokens (staking-contract principal) (amount uint))
-;;     (contract-call? staking-contract stake amount))
 (define-trait staking-trait
   (
     ;; Stake tokens into the contract
@@ -215,8 +204,48 @@
 ;;
 ;; Example usage:
 ;;   (use-trait access-control .all-traits.access-control-trait)
-;;   (define-public (grant-admin (ac-contract principal) (new-admin principal))
-;;     (contract-call? ac-contract grant-role "admin" new-admin))
+(define-trait access-control-trait
+  (
+    ;; Check if an account has a specific role
+    ;; @param role: role identifier
+    ;; @param account: principal to check
+    ;; @return (response bool uint): true if account has role, false otherwise, and error code
+    (has-role (role (string-ascii 32)) (account principal) (response bool uint))
+    
+    ;; Grant a role to an account
+    ;; @param role: role identifier
+    ;; @param account: principal to grant role to
+    ;; @return (response bool uint): success flag and error code
+    (grant-role (role (string-ascii 32)) (account principal) (response bool uint))
+    
+    ;; Revoke a role from an account
+    ;; @param role: role identifier
+    ;; @param account: principal to revoke role from
+    ;; @return (response bool uint): success flag and error code
+    (revoke-role (role (string-ascii 32)) (account principal) (response bool uint))
+  )
+)
+(define-trait access-control-trait
+  (
+    ;; Check if an account has a specific role
+    ;; @param role: role identifier
+    ;; @param account: principal to check
+    ;; @return (response bool uint): true if account has role, false otherwise, and error code
+    (has-role (role (string-ascii 32)) (account principal) (response bool uint))
+    
+    ;; Grant a role to an account
+    ;; @param role: role identifier
+    ;; @param account: principal to grant role to
+    ;; @return (response bool uint): success flag and error code
+    (grant-role (role (string-ascii 32)) (account principal) (response bool uint))
+    
+    ;; Revoke a role from an account
+    ;; @param role: role identifier
+    ;; @param account: principal to revoke role from
+    ;; @return (response bool uint): success flag and error code
+    (revoke-role (role (string-ascii 32)) (account principal) (response bool uint))
+  )
+)
 (define-trait access-control-trait
   (
     ;; Check if an account has a specific role

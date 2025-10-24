@@ -7,7 +7,7 @@
 (use-trait dimensional-router-trait .all-traits.dimensional-router-trait)
 
 (use-trait dimensional_router_trait .all-traits.dimensional-router-trait)
- .all-traits.dimensional-router-trait)
+.all-traits.dimensional-router-trait)
 
 (define-constant ERR_UNAUTHORIZED (err u6005))
 (define-constant ERR_DEADLINE_PASSED (err u6006))

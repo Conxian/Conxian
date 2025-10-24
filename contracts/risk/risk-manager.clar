@@ -5,18 +5,12 @@
 (use-trait oracle-trait .all-traits.oracle-trait)
 (use-trait dimensional-trait .all-traits.dimensional-trait)
 
-(use-trait risk_trait .all-traits.risk-trait)
- .all-traits.risk-trait)
 
 ;; ===== Type Definitions =====
-(define-types
-  (risk-level (enum
-    (LOW)
-    (MEDIUM)
-    (HIGH)
-    (EXTREME)
-  ))
-)
+(define-constant LOW u0)
+(define-constant MEDIUM u1)
+(define-constant HIGH u2)
+(define-constant EXTREME u3)
 
 ;; ===== Data Variables =====
 (define-data-var owner principal tx-sender)

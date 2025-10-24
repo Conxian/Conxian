@@ -15,11 +15,11 @@
 
 ;; Implement required traits
 (use-trait pausable_trait .all-traits.pausable-trait)
- .all-traits.pool-trait)
+.all-traits.pool-trait)
 (use-trait ownable_trait .all-traits.ownable-trait)
- .all-traits.ownable-trait)
+.all-traits.ownable-trait)
 (use-trait pool_trait .all-traits.pool-trait)
- pausable_trait)
+pausable_trait)
 
 ;; ===========================================
 ;; CONSTANTS
