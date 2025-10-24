@@ -1,8 +1,16 @@
+<<<<<<< Updated upstream
 (use-trait btc-adapter-trait .all-traits.btc-adapter-trait)
 ;; btc-adapter.clar
 ;; Facilitates Bitcoin Layer Integration
 
 (impl-trait btc-adapter-trait)
+=======
+(use-trait btc-adapter-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.btc-adapter-trait)
+;; btc-adapter.clar
+;; Facilitates Bitcoin Layer Integration
+
+(impl-trait btc-adapter-trait)
+>>>>>>> Stashed changes
 
 ;; ===== Constants =====
 (define-constant ERR_UNAUTHORIZED (err u100))

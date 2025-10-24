@@ -4,11 +4,11 @@
 
 ;; Implements a concentrated liquidity pool for the Conxian DEX.
 
-(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
-(use-trait pool-trait .all-traits.pool-trait)
-(use-trait math-trait .all-traits.math-trait)
-(use-trait error-codes-trait .all-traits.error-codes-trait)
-(use-trait sip-009-nft-trait .all-traits.sip-009-nft-trait)
+(use-trait sip-010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
+(use-trait pool-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.pool-trait)
+(use-trait math-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.math-trait)
+(use-trait error-codes-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.error-codes-trait)
+(use-trait sip-009-nft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-009-nft-trait)
 
 ;; Constants
 (define-constant Q128 u340282366920938463463374607431768211455)
@@ -111,7 +111,22 @@
 
 ;; placeholder
 
+<<<<<<< Updated upstream
 ;; ---------------------------------------------------------------------------
+=======
+  ;; @desc Retrieves the total liquidity supply for a given pool.
+;; @param pool-id The ID of the pool.
+;; @returns An `(ok uint)` result containing the total liquidity, or an error.
+(define-public (get-total-supply (pool-id uint))
+  ;; Retrieves the total liquidity currently managed by a specific concentrated liquidity pool.
+  ;; @param pool-id The ID of the pool to query.
+  ;; @returns An `(ok uint)` result containing the total liquidity, or an error if the pool does not exist.
+  (match (map-get? pools {pool-id: pool-id})
+    pool (ok (get liquidity pool))
+    (err ERR_POOL_NOT_FOUND)
+  )
+)
+>>>>>>> Stashed changes
 
 ;; Swap
 
@@ -176,12 +191,32 @@
                    token-b-withdrawn: (get amount-y ok-val) })
       err-val (err err-val))))
 
+<<<<<<< Updated upstream
 (define-public (swap-trait-adapter (token-in <sip-010-ft-trait>) (token-out <sip-010-ft-trait>)
                                    (amount-in uint) (min-amount-out uint) (recipient principal))
   (let ((pool-id (var-get next-pool-id))
         (pool (unwrap! (map-get? pools { pool-id: pool-id }) (err u404)))
         (zero-for-one (is-eq (contract-of token-in) (get token-x pool))))
     (swap pool-id token-in token-out zero-for-one amount-in u0)))
+=======
+(define-public (swap-trait-adapter (token-in <sip-010-ft-trait>)
+                                   (token-out <sip-010-ft-trait>)
+                                   (amount-in uint)
+                                   (min-amount-out uint)
+                                   (recipient principal))
+  (let (
+    (pool-id (var-get next-pool-id))
+    (pool (unwrap! (map-get? pools {pool-id: pool-id}) (err ERR_POOL_NOT_FOUND)))
+    (zero-for-one (is-eq (contract-of token-in) (get token-x pool)))
+    (result (swap pool-id token-in token-out zero-for-one amount-in u0))
+  )
+  (match result
+    (ok (tuple (amount-in uint) (amount-out uint) (next-sqrt-price uint)) (ok (tuple (amount-in amount-in) (amount-out amount-out))))
+    (err e (err e))
+  )
+  )
+)
+>>>>>>> Stashed changes
 
 (define-public (get-reserves-trait-adapter (token-a <sip-010-ft-trait>) (token-b <sip-010-ft-trait>))
   (let ((pool-id (var-get next-pool-id))

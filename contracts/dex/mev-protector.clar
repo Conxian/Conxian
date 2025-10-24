@@ -49,6 +49,33 @@
 ;; Get index for principal (defaults to 0 if not set)
 (define-private (principal->index (p principal))
   (default-to u0 (map-get? principal-index p))
+<<<<<<< Updated upstream
+=======
+)
+
+;; Helper: convert path of principals into a list of indices
+(define-private (path->index-list (path (list 20 principal)))
+  (map (lambda (p) (principal->index p)) path)
+)
+
+  (define-private (get-commitment-hash (path (list 20 principal)) (amount-in uint) (min-amount-out (optional uint)) (recipient principal) (salt (buff 32)))
+    (let (
+      (payload {
+        path: (path->index-list path),
+        amount: amount-in,
+        min: min-amount-out,
+        rcpt: (principal->index recipient),
+        salt: salt
+      })
+    )
+      (sha256 (to-consensus-buff payload))
+    )
+  )
+
+(define-private (accumulate-path (p principal) (acc (buff 800)))
+  ;; Simplified - in production this would properly serialize the principal
+  acc
+>>>>>>> Stashed changes
 )
 
 ;; Convert path of principals into a list of indices

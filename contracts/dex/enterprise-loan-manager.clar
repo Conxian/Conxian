@@ -2,9 +2,17 @@
 
 ;; enterprise-loan-manager.clar
 
+<<<<<<< Updated upstream
 ;; ===== Traits =====
 (use-trait enterprise-loan-manager-trait .all-traits.enterprise-loan-manager-trait)
 (impl-trait enterprise-loan-manager-trait)
+=======
+(use-trait sip-010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
+(use-trait lending-system-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.lending-system-trait)
+
+;; Import mathematical libraries for enterprise calculations (removed unresolved trait import)
+;; (use-trait math-precision .precision-calculator)
+>>>>>>> Stashed changes
 
 ;; Constants
 (define-constant ERR_UNAUTHORIZED (err u7001))

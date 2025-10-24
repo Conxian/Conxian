@@ -15,10 +15,9 @@ bitcoin_node_rpc_address = "https://mempool.space/testnet/api"
 stacks_node_rpc_address = "https://api.hiro.so"
 bitcoin_node_rpc_address = "https://blockstream.info/api"
 
-[accounts.deployer]
-mnemonic = "twice kind fence tip hidden tilt action fragile skin nothing glory cousin green tomorrow spring wrist shed math olympic multiply hip blue scout claw"
-balance = 100000000000000
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+[contracts.all-traits]
+path = "contracts/traits/all-traits.clar"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits"
 
 [accounts.wallet_1]
 address = "ST1SJ3DTE5DN7X54YDH5D64R3BCB6A2AG2ZQ8YPD5"
@@ -39,15 +38,12 @@ dex-factory = ".dex-factory"
 dex-pool = ".dex-pool"
 pool-template = ".pool-template"
 dex-router = ".dex-router"
-oracle = ".oracle"
-automated-circuit-breaker = ".automated-circuit-breaker"
-bond-issuance-system = ".bond-issuance-system"
-comprehensive-lending-system = ".comprehensive-lending-system"
-cxlp-migration-queue = ".cxlp-migration-queue"
-cxvg-utility = ".cxvg-utility"
-distributed-cache-manager = ".distributed-cache-manager"
-enhanced-flash-loan-vault = ".enhanced-flash-loan-vault"
-enhanced-yield-strategy = ".enhanced-yield-strategy"
+oracle-adapter = ".core-oracle-oracle-adapter"
+dimensional-engine = ".core-dimensional-engine"
+position-manager = ".core-position-manager"
+risk-manager = ".risk-risk-manager"
+liquidation-engine = ".risk-liquidation-engine"
+funding-calculator = ".risk-funding-calculator"
 enterprise-loan-manager = ".enterprise-loan-manager"
 interest-rate-model = ".interest-rate-model"
 liquidation-manager = ".liquidation-manager"
@@ -406,10 +402,6 @@ address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.governance-emergency-govern
 path = "contracts/governance/governance-signature-verifier.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.governance-governance-signature-verifier"
 
-[contracts.governance-governance-token]
-path = "contracts/governance/governance-token.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.governance-governance-token"
-
 [contracts.governance-lending-protocol-governance]
 path = "contracts/governance/lending-protocol-governance.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.governance-lending-protocol-governance"
@@ -606,9 +598,35 @@ address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.tokens-cxvg-token"
 path = "contracts/tokens/token-system-coordinator.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.tokens-token-system-coordinator"
 
-[contracts.traits-all-traits]
-path = "contracts/traits/all-traits.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.traits-all-traits"
+[contracts.core-dimensional-engine]
+path = "contracts/core/dimensional-engine.clar"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.core-dimensional-engine"
+depends_on = ["traits-all-traits", "utils-encoding"]
+
+[contracts.core-position-manager]
+path = "contracts/core/position-manager.clar"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.core-position-manager"
+depends_on = ["traits-all-traits", "utils-encoding", "core-dimensional-engine"]
+
+[contracts.core-oracle-oracle-adapter]
+path = "contracts/core/oracle/oracle-adapter.clar"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.core-oracle-oracle-adapter"
+depends_on = ["traits-all-traits", "utils-encoding"]
+
+[contracts.risk-risk-manager]
+path = "contracts/risk/risk-manager.clar"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.risk-risk-manager"
+depends_on = ["traits-all-traits", "utils-encoding"]
+
+[contracts.risk-liquidation-engine]
+path = "contracts/risk/liquidation-engine.clar"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.risk-liquidation-engine"
+depends_on = ["traits-all-traits", "utils-encoding", "core-position-manager", "core-oracle-oracle-adapter", "risk-risk-manager"]
+
+[contracts.risk-funding-calculator]
+path = "contracts/risk/funding-calculator.clar"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.risk-funding-calculator"
+depends_on = ["traits-all-traits", "utils-encoding", "core-position-manager", "core-oracle-oracle-adapter"]
 
 [contracts.traits-errors]
 path = "contracts/traits/errors.clar"

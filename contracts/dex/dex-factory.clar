@@ -1,13 +1,16 @@
-(use-trait factory .all-traits.factory-trait)
-;; Conxian DEX Factory V2 - Pool creation and registry
-  ;; This contract is responsible for creating and registering new DEX pools.
+;; Conxian DEX Factory V2 - DIMENSIONAL INTEGRATION
+;; Pool creation and registration through dimensional registry
+;; All pools registered as dimensional nodes for unified routing
 
-  ;; --- Traits ---
-  (use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
-  (use-trait access-control-trait .all-traits.access-control-trait)
-  (use-trait pool-creation-trait .all-traits.pool-creation-trait)
-  (use-trait circuit-breaker-trait .all-traits.circuit-breaker-trait)
-(impl-trait factory)
+(use-trait factory-trait .all-traits.factory-trait)
+(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
+(use-trait access-control-trait .all-traits.access-control-trait)
+(use-trait circuit-breaker-trait .all-traits.circuit-breaker-trait)
+(use-trait dim-registry-trait .all-traits.dim-registry-trait)
+(impl-trait factory-trait)
+
+;; --- Dimensional Integration ---
+(define-data-var dimensional-registry principal tx-sender) ;; Will be set to dim-registry.clar
 
 ;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED (err u1003))
@@ -103,7 +106,10 @@
       (asserts! (is-none (map-get? pools normalized-pair)) ERR_POOL_EXISTS)
 
       (let ((pool-principal (unwrap! (contract-call? pool-impl create-pool (get token-a normalized-pair) (get token-b normalized-pair) fee-bps) (err ERR_SWAP_FAILED))))
-        
+
+        ;; Register pool with dimensional registry
+        (try! (contract-call? .dim-registry register-dimension pool-principal u100))  ;; Register pool as dimension with weight 100
+
         (map-set pools normalized-pair pool-principal)
         (map-set pool-info pool-principal
           {
@@ -114,9 +120,9 @@
           }
         )
         (map-set pool-types pool-principal pool-type)
-        
+
         (var-set pool-count (+ (var-get pool-count) u1))
-        
+
         (print {
           event: "pool-created",
           pool-address: pool-principal,
@@ -124,7 +130,7 @@
           token-b: (get token-b normalized-pair),
           pool-type: pool-type
         })
-        
+
         (ok pool-principal)
       )
     )

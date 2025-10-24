@@ -30,6 +30,7 @@
   (rcpt-index uint)
   (salt (buff 32)))
   (let (
+<<<<<<< Updated upstream
     ;; Hash each numeric component for deterministic encoding
     (amount-hash (sha512/256 amount))
     (rcpt-hash (sha512/256 rcpt-index))
@@ -40,3 +41,16 @@
     (combined (concat (concat (concat amount-hash rcpt-hash) min-hash) salt)))
     (ok (sha256 combined)))
 )
+=======
+    (payload {
+      path: path,
+      amount: amount,
+      min: min,
+      rcpt: rcpt-index,
+      salt: salt
+    })
+  )
+    (ok (sha256 (to-consensus-buff payload)))
+  )
+)
+>>>>>>> Stashed changes

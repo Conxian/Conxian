@@ -1,10 +1,10 @@
 (use-trait cxlp-migration-queue-trait .all-traits.cxlp-migration-queue-trait)
-;; Traits
+(use-trait sip-010-ft-mintable-trait .all-traits.sip-010-ft-mintable-trait)
+
 ;; cxlp-migration-queue.clar
 ;; Intent queue system for CXLP to CXD migration with pro-rata settlement
 ;; Prevents FCFS races and enables fair distribution based on duration-weighted requests
 
-(use-trait ft-mintable .all-traits.sip-010-ft-mintable-trait)
 (impl-trait cxlp-migration-queue-trait)
 
 ;; --- Constants ---
@@ -33,6 +33,7 @@
 (define-data-var contract-owner principal CONTRACT_OWNER)
 (define-data-var cxlp-contract principal .cxlp-token)
 (define-data-var cxd-contract principal .cxd-token)
+(define-data-var migration-enabled bool false)
 
 ;; Migration configuration
 (define-data-var migration-start-height uint u0)
@@ -95,6 +96,19 @@
     (var-set intent-window window)
     (ok true)))
 
+(define-public (enable-migration)
+  (begin
+    (asserts! (is-eq tx-sender (var-get contract-owner)) (err ERR_UNAUTHORIZED))
+    (asserts! (> (var-get migration-start-height) u0) (err ERR_MIGRATION_NOT_SET))
+    (var-set migration-enabled true)
+    (ok true)))
+
+(define-public (disable-migration)
+  (begin
+    (asserts! (is-eq tx-sender (var-get contract-owner)) (err ERR_UNAUTHORIZED))
+    (var-set migration-enabled false)
+    (ok true)))
+
 ;; --- Core Logic ---
 
 ;; Calculate current epoch based on block height
@@ -136,6 +150,7 @@
   (let ((current-epoch-num (unwrap! (get-current-epoch) (err ERR_MIGRATION_NOT_STARTED)))
         (user-duration (get-user-duration tx-sender)))
     (begin
+      (asserts! (var-get migration-enabled) (err ERR_MIGRATION_NOT_STARTED))
       (asserts! (> cxlp-amount u0) (err ERR_INVALID_AMOUNT))
       (asserts! (>= current-epoch-num u1) (err ERR_MIGRATION_NOT_STARTED))
       
@@ -184,6 +199,7 @@
 (define-public (settle-epoch (epoch uint))
   (begin
     (asserts! (is-eq tx-sender (var-get contract-owner)) (err ERR_UNAUTHORIZED))
+    (asserts! (var-get migration-enabled) (err ERR_MIGRATION_NOT_STARTED))
     
     (match (map-get? epoch-info { epoch: epoch })
       epoch-data
@@ -205,40 +221,42 @@
       (err ERR_INVALID_EPOCH))))
 
 ;; Claim CXD allocation for settled epoch
-(define-public (claim-allocation (epoch uint) (cxd-token <ft-mintable>))
-  (match (map-get? user-intents { epoch: epoch, user: tx-sender })
-    user-intent
-    (begin
-      (asserts! (not (get claimed user-intent)) (err ERR_NO_INTENT_FOUND))
-      
-      (match (map-get? epoch-info { epoch: epoch })
-        epoch-data
-        (begin
-          (asserts! (get settled epoch-data) (err ERR_EPOCH_NOT_ACTIVE))
-          (asserts! (is-eq (contract-of cxd-token) (var-get cxd-contract)) (err ERR_CONTRACT_MISMATCH))
-          
-          ;; Calculate pro-rata allocation
-          (let ((user-weight (get weight user-intent))
-                (total-weight (get total-weight epoch-data))
-                (total-cxd (get actual-cxd-minted epoch-data))
-                (user-cxlp (get cxlp-amount user-intent))
-                (pro-rata-cxd (/ (* user-weight total-cxd) total-weight)))
+(define-public (claim-allocation (epoch uint) (cxd-token <sip-010-ft-mintable-trait>))
+  (begin
+    (asserts! (var-get migration-enabled) (err ERR_MIGRATION_NOT_STARTED))
+    (match (map-get? user-intents { epoch: epoch, user: tx-sender })
+      user-intent
+      (begin
+        (asserts! (not (get claimed user-intent)) (err ERR_NO_INTENT_FOUND))
+        
+        (match (map-get? epoch-info { epoch: epoch })
+          epoch-data
+          (begin
+            (asserts! (get settled epoch-data) (err ERR_EPOCH_NOT_ACTIVE))
+            (asserts! (is-eq (contract-of cxd-token) (var-get cxd-contract)) (err ERR_CONTRACT_MISMATCH))
             
-            ;; Burn CXLP from user
-            (try! (contract-call? (var-get cxlp-contract) transfer user-cxlp tx-sender (as-contract tx-sender) none))
-            (try! (as-contract (contract-call? (var-get cxlp-contract) burn user-cxlp)))
-            
-            ;; Mint CXD to user
-            (try! (as-contract (contract-call? cxd-token mint pro-rata-cxd tx-sender)))
-            
-            ;; Mark as claimed
-            (map-set user-intents
-              { epoch: epoch, user: tx-sender }
-              (merge user-intent { cxd-allocation: pro-rata-cxd, claimed: true }))
-            
-            (ok { cxlp-burned: user-cxlp, cxd-received: pro-rata-cxd, weight: user-weight })))
-        (err ERR_INVALID_EPOCH)))
-    (err ERR_NO_INTENT_FOUND)))
+            ;; Calculate pro-rata allocation
+            (let ((user-weight (get weight user-intent))
+                  (total-weight (get total-weight epoch-data))
+                  (total-cxd (get actual-cxd-minted epoch-data))
+                  (user-cxlp (get cxlp-amount user-intent))
+                  (pro-rata-cxd (/ (* user-weight total-cxd) total-weight)))
+              
+              ;; Burn CXLP from user
+              (try! (contract-call? (var-get cxlp-contract) transfer user-cxlp tx-sender (as-contract tx-sender) none))
+              (try! (as-contract (contract-call? (var-get cxlp-contract) burn user-cxlp)))
+              
+              ;; Mint CXD to user
+              (try! (as-contract (contract-call? cxd-token mint pro-rata-cxd tx-sender)))
+              
+              ;; Mark as claimed
+              (map-set user-intents
+                { epoch: epoch, user: tx-sender }
+                (merge user-intent { cxd-allocation: pro-rata-cxd, claimed: true }))
+              
+              (ok { cxlp-burned: user-cxlp, cxd-received: pro-rata-cxd, weight: user-weight })))
+          (err ERR_INVALID_EPOCH)))
+      (err ERR_NO_INTENT_FOUND))))
 
 ;; --- Duration Tracking Hooks ---
 
@@ -290,13 +308,9 @@
     epoch-cap: (var-get epoch-cap),
     intent-window: (var-get intent-window),
     cxlp-contract: (var-get cxlp-contract),
-    cxd-contract: (var-get cxd-contract)
+    cxd-contract: (var-get cxd-contract),
+    migration-enabled: (var-get migration-enabled)
   })
 
-
-
-
-
-
-
-8bce9a06227aa3d139e549a8bea28e27bd6665af
+(define-read-only (is-migration-enabled)
+  (var-get migration-enabled))

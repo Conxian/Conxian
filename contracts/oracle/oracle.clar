@@ -40,10 +40,10 @@
   (set-price asset price)
 )
 
-;; Get price with timestamp
-(define-read-only (get-price-with-timestamp (asset principal))
+;; Get TWAP (Time Weighted Average Price)
+(define-read-only (get-twap (asset principal) (interval uint))
   (match (map-get? asset-prices { asset: asset })
-    entry (ok { price: (get price entry), timestamp: block-height })
+    entry (ok (get price entry))  ;; Simplified - return current price as TWAP
     (err ERR_ASSET_NOT_FOUND)
   )
 )
