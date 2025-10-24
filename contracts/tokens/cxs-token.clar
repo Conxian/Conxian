@@ -37,30 +37,43 @@
     false))
 
 ;; --- Configuration ---
+;; @desc Sets the contract owner.
+;; @param new-owner The principal of the new contract owner.
+;; @returns (ok true) if successful, (err ERR_UNAUTHORIZED) if called by a non-owner.
 (define-public (set-contract-owner (new-owner principal))
   (begin
     (asserts! (is-owner tx-sender) (err ERR_UNAUTHORIZED))
     (var-set contract-owner new-owner)
     (ok true)))
 
+;; @desc Sets the principal of the staking contract.
+;; @param contract-address The principal of the staking contract.
+;; @returns (ok true) if successful, (err ERR_UNAUTHORIZED) if called by a non-owner.
 (define-public (set-staking-contract (contract-address principal))
   (begin
     (asserts! (is-owner tx-sender) (err ERR_UNAUTHORIZED))
     (var-set staking-contract (some contract-address))
     (ok true)))
 
+;; @desc Sets the principal of the protocol monitor contract.
+;; @param monitor The principal of the protocol monitor contract.
+;; @returns (ok true) if successful, (err ERR_UNAUTHORIZED) if called by a non-owner.
 (define-public (set-protocol-monitor (monitor principal))
   (begin
     (asserts! (is-owner tx-sender) (err ERR_UNAUTHORIZED))
     (var-set protocol-monitor (some monitor))
     (ok true)))
 
+;; @desc Enables token transfers.
+;; @returns (ok true) if successful, (err ERR_UNAUTHORIZED) if called by a non-owner.
 (define-public (enable-transfers)
   (begin
     (asserts! (is-owner tx-sender) (err ERR_UNAUTHORIZED))
     (var-set transfers-enabled true)
     (ok true)))
 
+;; @desc Disables token transfers.
+;; @returns (ok true) if successful, (err ERR_UNAUTHORIZED) if called by a non-owner.
 (define-public (disable-transfers)
   (begin
     (asserts! (is-owner tx-sender) (err ERR_UNAUTHORIZED))
@@ -68,6 +81,10 @@
     (ok true)))
 
 ;; --- Mint / Burn ---
+;; @desc Mints a new NFT and assigns it to a recipient.
+;; @param recipient The principal to receive the new NFT.
+;; @param uri An optional URI for the token metadata.
+;; @returns (ok id) if successful, (err ERR_UNAUTHORIZED) if called by a non-owner, (err ERR_SYSTEM_PAUSED) if the system is paused.
 (define-public (mint (recipient principal) (uri (optional (string-utf8 256))))
   (begin
     (asserts! (is-owner tx-sender) (err ERR_UNAUTHORIZED))
@@ -108,4 +125,4 @@
   (ok (map-get? token-uris id)))
 
 (define-read-only (get-transfers-enabled)
-  (ok (var-get transfers-enabled)))
+  (ok (var-get transfers-enabled))))

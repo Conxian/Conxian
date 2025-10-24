@@ -5,9 +5,6 @@
 (use-trait oracle-trait .all-traits.oracle-trait)
 (use-trait monitoring-trait .all-traits.monitoring-trait)
 
-(use-trait monitoring_trait .all-traits.monitoring-trait)
-(use-trait monitoring-trait .all-traits.monitoring-trait)
-
 ;; ===== Constants =====
 (define-constant ERR_UNAUTHORIZED (err u100))
 (define-constant ERR_INVALID_MODULE (err u101))

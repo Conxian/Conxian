@@ -1,7 +1,5 @@
 (use-trait performance-optimizer-trait .all-traits.performance-optimizer-trait)
 (use-trait sip-010-trait .all-traits.sip-010-trait)
-(use-trait performance_optimizer_trait .all-traits.performance-optimizer-trait)
-(use-trait performance-optimizer-trait .all-traits.performance-optimizer-trait)
 
 ;; performance-optimizer.clar
 ;; Optimizes transaction performance and gas usage

@@ -9,6 +9,9 @@
 (define-constant ERR_UNAUTHORIZED (err u1000))
 (define-constant ERR_INVALID_INTERVAL (err u1001))
 (define-constant ERR_NOT_READY (err u1002))
+(define-constant ERR_ALREADY_INITIALIZED (err u1003))
+(define-constant ERR_NOT_INITIALIZED (err u1004))
+(define-constant ERR_INVALID_PRINCIPAL (err u1005))
 
 ;; Configuration
 (define-constant PRICE_DEVIATION_THRESHOLD u50000)  ;; 5%
@@ -25,26 +28,33 @@
 (define-data-var volatility-history (list 20 uint) (list))
 
 ;; Events
-(define-event PriceDeviation (current: uint, average: uint, deviation: uint, block: uint))
-(define-event ParameterAdjustment (parameter: (string-ascii 32), old-value: uint, new-value: uint, reason: (string-ascii 128)))
+
 
 ;; ===== Initialization =====
 
+;; @desc Initializes the price stability monitor contract.
+;; @param price-initializer-principal The principal of the price initializer contract.
+;; @param amm-principal The principal of the AMM contract.
+;; @returns A response tuple with `(ok true)` if successful, `(err ERR_UNAUTHORIZED)` or `(err ERR_ALREADY_INITIALIZED)` otherwise.
 (define-public (initialize (price-initializer-principal principal) (amm-principal principal))
     (let ((caller tx-sender))
         (asserts! (is-eq caller (contract-call? .all-traits.ownable-trait get-owner)) ERR_UNAUTHORIZED)
         (asserts! (not (var-get is-initialized)) ERR_ALREADY_INITIALIZED)
+        (asserts! (is-contract price-initializer-principal) ERR_INVALID_PRINCIPAL)
+        (asserts! (is-contract amm-principal) ERR_INVALID_PRINCIPAL)
         
         (var-set price-initializer (some price-initializer-principal))
         (var-set amm-contract (some amm-principal))
         (var-set is-initialized true)
-        
+        (print {event: "initialized", sender: tx-sender, price-initializer: price-initializer-principal, amm-contract: amm-principal, block-height: block-height})
         (ok true)
     )
 )
 
 ;; ===== Core Monitoring =====
 
+;; @desc Checks the price stability of the monitored asset and triggers adjustments if necessary.
+;; @returns A response tuple with price statistics if successful, or an error otherwise.
 (define-public (check-price-stability)
     (let (
         (caller tx-sender)
@@ -57,9 +67,9 @@
         ;; Get current price data
         (let* (
             (price-data (unwrap-panic (contract-call? price-init get-price-with-minimum)))
-            (current-price (get price-data 'price))
-            (min-price (get price-data 'min-price))
-            (last-block (get price-data 'last-updated))
+            (current-price (get price price-data))
+            (min-price (get min-price price-data))
+            (last-block (get last-updated price-data))
             
             ;; Calculate price statistics
             (history (var-get price-history))
@@ -73,12 +83,7 @@
             
             ;; Check for significant deviation
             (when (> deviation-bps PRICE_DEVIATION_THRESHOLD)
-                (print (PriceDeviation {
-                    current: current-price,
-                    average: average-price,
-                    deviation: deviation-bps,
-                    block: block-height
-                }))
+                (print {event: "price-deviation", sender: tx-sender, current: current-price, average: average-price, deviation: deviation-bps, block-height: block-height})
                 
                 ;; Suggest parameter adjustment if needed
                 (try! (suggest-parameter-adjustment current-price average-price min-price))
@@ -112,6 +117,11 @@
 
 ;; ===== Parameter Adjustment Logic =====
 
+;; @desc Suggests parameter adjustments based on price deviation.
+;; @param current The current price.
+;; @param average The average price.
+;; @param min-price The current minimum price.
+;; @returns A response tuple with `(ok true)` if an adjustment is suggested, `(ok false)` otherwise.
 (define-private (suggest-parameter-adjustment (current uint) (average uint) (min-price uint))
     (let (
         (amm (unwrap-panic (var-get amm-contract)))
@@ -126,12 +136,7 @@
                 (let (
                     (new-min-price (+ min-price (/ (* min-price 500) 10000)))  ;; +5%
                 )
-                    (print (ParameterAdjustment {
-                        parameter: "min-price",
-                        old-value: min-price,
-                        new-value: new-min-price,
-                        reason: "Price above average, increasing price floor"
-                    }))
+                    (print {event: "parameter-adjustment", sender: tx-sender, parameter: "min-price", old-value: min-price, new-value: new-min-price, reason: "Price above average, increasing price floor", block-height: block-height})
                     
                     ;; In a real implementation, this would be a governance proposal
                     (contract-call? price-init propose-min-price-update new-min-price)
@@ -142,12 +147,7 @@
                     (new-fee (max u1000 (- current-fee 500)))  ;; -0.5% fee, min 0.1%
                 )
                     (when (< new-fee current-fee)
-                        (print (ParameterAdjustment {
-                            parameter: "fee-rate",
-                            old-value: current-fee,
-                            new-value: new-fee,
-                            reason: "Price below average, reducing fees to encourage trading"
-                        }))
+                        (print {event: "parameter-adjustment", sender: tx-sender, parameter: "fee-rate", old-value: current-fee, new-value: new-fee, reason: "Price below average, reducing fees to encourage trading", block-height: block-height})
                         
                         ;; In a real implementation, this would be a governance proposal
                         (contract-call? amm propose-fee-update new-fee)
@@ -164,8 +164,17 @@
 
 ;; ===== Utility Functions =====
 
+;; @desc Helper function to sum two unsigned integers.
+;; @param a The first unsigned integer.
+;; @param b The second unsigned integer.
+;; @returns The sum of the two unsigned integers.
 (define-private (sum-uint (a uint) (b uint)) (+ a b))
 
+;; @desc Appends an element to a list, capping its size.
+;; @param xs The input list.
+;; @param x The element to append.
+;; @param cap The maximum capacity of the list.
+;; @returns The capped list with the new element appended.
 (define-private (append-capped (xs (list 100 uint)) (x uint) (cap uint))
     (let ((n (len xs)))
         (if (< n cap)
@@ -179,6 +188,8 @@
 
 ;; ===== View Functions =====
 
+;; @desc Retrieves various price statistics.
+;; @returns A response tuple with a map containing current-price, average-price, min-24h, max-24h, volatility, and last-updated, or an error otherwise.
 (define-read-only (get-price-statistics)
     (let (
         (history (var-get price-history))
@@ -198,5 +209,13 @@
     )
 )
 
+;; @desc Returns the minimum of two unsigned integers.
+;; @param a The first unsigned integer.
+;; @param b The second unsigned integer.
+;; @returns The smaller of the two unsigned integers.
 (define-read-only (get-min-uint (a uint) (b uint)) (if (< a b) a b))
+;; @desc Returns the maximum of two unsigned integers.
+;; @param a The first unsigned integer.
+;; @param b The second unsigned integer.
+;; @returns The larger of the two unsigned integers.
 (define-read-only (get-max-uint (a uint) (b uint)) (if (> a b) a b))
