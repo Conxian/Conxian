@@ -204,48 +204,7 @@
 ;;
 ;; Example usage:
 ;;   (use-trait access-control .all-traits.access-control-trait)
-(define-trait access-control-trait
-  (
-    ;; Check if an account has a specific role
-    ;; @param role: role identifier
-    ;; @param account: principal to check
-    ;; @return (response bool uint): true if account has role, false otherwise, and error code
-    (has-role (role (string-ascii 32)) (account principal) (response bool uint))
-    
-    ;; Grant a role to an account
-    ;; @param role: role identifier
-    ;; @param account: principal to grant role to
-    ;; @return (response bool uint): success flag and error code
-    (grant-role (role (string-ascii 32)) (account principal) (response bool uint))
-    
-    ;; Revoke a role from an account
-    ;; @param role: role identifier
-    ;; @param account: principal to revoke role from
-    ;; @return (response bool uint): success flag and error code
-    (revoke-role (role (string-ascii 32)) (account principal) (response bool uint))
-  )
-)
-(define-trait access-control-trait
-  (
-    ;; Check if an account has a specific role
-    ;; @param role: role identifier
-    ;; @param account: principal to check
-    ;; @return (response bool uint): true if account has role, false otherwise, and error code
-    (has-role (role (string-ascii 32)) (account principal) (response bool uint))
-    
-    ;; Grant a role to an account
-    ;; @param role: role identifier
-    ;; @param account: principal to grant role to
-    ;; @return (response bool uint): success flag and error code
-    (grant-role (role (string-ascii 32)) (account principal) (response bool uint))
-    
-    ;; Revoke a role from an account
-    ;; @param role: role identifier
-    ;; @param account: principal to revoke role from
-    ;; @return (response bool uint): success flag and error code
-    (revoke-role (role (string-ascii 32)) (account principal) (response bool uint))
-  )
-)
+
 (define-trait access-control-trait
   (
     ;; Check if an account has a specific role
@@ -1426,46 +1385,6 @@
 ;; and registering system components under the dimensional architecture.
 ;;
 ;; Example usage:
-;;   (use-trait dim-registry .all-traits.dim-registry-trait)
-(define-trait dim-registry-trait
-  (
-    ;; Register a new dimension
-    ;; @param id: dimension ID
-    ;; @param weight: initial weight for the dimension
-    ;; @return (response uint uint): dimension ID and error code
-    (register-dimension (id uint) (weight uint) (response uint uint))
-
-    ;; Update dimension weight
-    ;; @param dim-id: dimension ID to update
-    ;; @param new-weight: new weight value
-    ;; @return (response uint uint): success flag and error code
-    (update-dimension-weight (dim-id uint) (new-weight uint) (response bool uint))
-
-    ;; Get dimension weight
-    ;; @param id: dimension ID
-    ;; @return (response uint uint): weight value and error code
-    (get-dimension-weight (id uint) (response uint uint))
-
-    ;; Register oracle contract
-    ;; @param oracle: oracle contract principal
-    ;; @return (response bool uint): success flag and error code
-    (register-oracle (oracle principal) (response bool uint))
-
-    ;; Unregister oracle contract
-    ;; @param oracle: oracle contract principal
-    ;; @return (response bool uint): success flag and error code
-    (unregister-oracle (oracle principal) (response bool uint))
-
-    ;; Check if oracle is registered
-    ;; @param oracle: oracle contract principal
-    ;; @return (response bool uint): registration status and error code
-    (is-oracle-registered (oracle principal) (response bool uint))
-
-    ;; Get all registered dimensions
-    ;; @return (response (list 50 (tuple (id uint) (weight uint))) uint): dimensions list and error code
-    (get-all-dimensions () (response (list 50 (tuple (id uint) (weight uint))) uint))
-  )
-)
 
 ;; ===========================================
 ;; ADVANCED ROUTER DIJKSTRA TRAIT

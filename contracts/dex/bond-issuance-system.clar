@@ -1,12 +1,4 @@
 ;; ===== Imports =====
-(use-trait bond-issuance-trait .all-traits.bond-issuance-trait)
-(use-trait ft-trait .all-traits.sip-010-ft-trait)
-
-;; ===== Traits =====
-(use-trait sip_010_ft_trait .all-traits.sip-010-ft-trait)
-
-(use-trait bond_issuance_trait .all-traits.bond-issuance-trait)
-
 
 ;; bond-issuance-system.clar
 ;; Tokenized bond system for backing large enterprise loans

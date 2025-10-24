@@ -1,6 +1,8 @@
 ;; mock-strategy-a.clar
 ;; A simple mock strategy contract for testing the yield optimizer.
 
+(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
+
 ;; ===== Constants =====
 (define-constant ERR_UNAUTHORIZED (err u1000))
 (define-constant ERR_INVALID_AMOUNT (err u1001))

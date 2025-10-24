@@ -3,7 +3,6 @@
 ;; Enhanced with integration hooks for staking, revenue distribution, and system monitoring
 ;; --- Traits ---
 (use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
-(use-trait sip_010_ft_trait .all-traits.sip-010-ft-trait)
 .all-traits.cxd-token-trait)
 ;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED u100)
@@ -31,14 +30,28 @@
 (define-data-var system-integration-enabled bool true)
 (define-data-var initialization-complete bool false)
 ;; --- Helpers ---
+;; @desc Checks if the given principal is the contract owner.
+;; @param who (principal) The principal to check.
+;; @returns (bool) True if the principal is the owner, false otherwise.
 (define-private (is-owner (who principal))
   (is-eq who (var-get contract-owner)))
+;; @desc Checks if the given principal is a minter.
+;; @param who (principal) The principal to check.
+;; @returns (bool) True if the principal is a minter, false otherwise.
 (define-read-only (is-minter (who principal))
   (default-to false (map-get? minters who)))
 ;; --- Safe Math ---
+;; @desc Safely adds two unsigned integers, returning an error on overflow.
+;; @param a (uint) The first unsigned integer.
+;; @param b (uint) The second unsigned integer.
+;; @returns (response uint uint) An `ok` response with the sum, or an `err` with `ERR_OVERFLOW`.
 (define-private (safe-add (a uint) (b uint))
   (let ((result (+ a b)))
     (if (>= result a) (ok result) (err ERR_OVERFLOW))))
+;; @desc Safely subtracts two unsigned integers, returning an error on underflow.
+;; @param a (uint) The first unsigned integer.
+;; @param b (uint) The second unsigned integer.
+;; @returns (response uint uint) An `ok` response with the difference, or an `err` with `ERR_SUB_UNDERFLOW`.
 (define-private (safe-sub (a uint) (b uint))
   (if (>= a b) (ok (- a b)) (err ERR_SUB_UNDERFLOW)))
 ;; --- System Integration ---

@@ -31,84 +31,101 @@
   {
     issuer: principal,         ;; Bond issuer
     principal-amount: uint,     ;; Bond principal in satoshis
-    coupon-rate: uint,         ;;
-
-;; Annual coupon rate    maturity-block: uint,      
-
-;; Maturity block height    issue-block: uint,         
-
-;; Issue block height    collateral-amount: uint,   
-
-;; sBTC collateral amount    collateral-ratio: uint,    
-
-;; Current collateralization ratio    is-callable: bool,         
-
-;; Can be called early    call-premium: uint,        
-
-;; Early call premium    status: uint               
-
-;; 0=active, 1=matured, 2=called, 3=defaulted  })
-(define-map bond-holders  { bond-id: uint, holder: principal }  {    amount-held: uint,         
-
-;; Amount of bond held    purchase-block: uint,      
-
-;; When bond was purchased    purchase-price: uint,      
-
-;; Purchase price per unit    accrued-interest: uint,    
-
-;; Accrued interest    last-interest-claim: uint  
-
-;; Last interest claim block  })
-(define-map yield-distribution-pools  { pool-id: uint }  {    total-sbtc-deposited: uint, 
-
-;; Total sBTC in yield pool    total-bonds-backed: uint,   
-
-;; Total bonds backed by pool    current-yield-rate: uint,   
-
-;; Current annualized yield rate    last-yield-calculation: uint, 
-
-;; Last yield calculation block    pool-manager: principal,    
-
-;; Pool manager    is-active: bool            
-
-;; Pool status  })
-(define-map bond-yield-allocations  { bond-id: uint, pool-id: uint }  {    allocated-amount: uint,    
-
-;; Amount allocated from pool    yield-share: uint,         
-
-;; Share of pool yields    allocation-block: uint     
-
-;; When allocation was made  })
-(define-map enterprise-loan-bonds  { loan-id: uint }  {    bond-ids: (list 10 uint),  
-
-;; Associated bond IDs    total-bond-value: uint,    
-
-;; Total value of bonds    loan-to-bond-ratio: uint,  
-
-;; Loan to bond value ratio    risk-tier: uint            
-
-;; Risk tier (1-5, 5 being highest risk)  })
+    coupon-rate: uint,         ;; Annual coupon rate
+    maturity-block: uint,      ;; Maturity block height
+    issue-block: uint,         ;; Issue block height
+    collateral-amount: uint,   ;; sBTC collateral amount
+    collateral-ratio: uint,    ;; Current collateralization ratio
+    is-callable: bool,         ;; Can be called early
+    call-premium: uint,        ;; Early call premium
+    status: uint               ;; 0=active, 1=matured, 2=called, 3=defaulted
+  })
+(define-map bond-holders  { bond-id: uint, holder: principal }  {    amount-held: uint,         ;; Amount of bond held
+    purchase-block: uint,      ;; When bond was purchased
+    purchase-price: uint,      ;; Purchase price per unit
+    accrued-interest: uint,    ;; Accrued interest
+    last-interest-claim: uint  ;; Last interest claim block
+  })
+(define-map yield-distribution-pools  { pool-id: uint }  {    total-sbtc-deposited: uint, ;; Total sBTC in yield pool
+    total-bonds-backed: uint,   ;; Total bonds backed by pool
+    current-yield-rate: uint,   ;; Current annualized yield rate
+    last-yield-calculation: uint, ;; Last yield calculation block
+    pool-manager: principal,    ;; Pool manager
+    is-active: bool            ;; Pool status
+  })
+(define-map bond-yield-allocations  { bond-id: uint, pool-id: uint }  {    allocated-amount: uint,    ;; Amount allocated from pool
+    yield-share: uint,         ;; Share of pool yields
+    allocation-block: uint     ;; When allocation was made
+  })
+(define-map enterprise-loan-bonds  { loan-id: uint }  {    bond-ids: (list 10 uint),  ;; Associated bond IDs
+    total-bond-value: uint,    ;; Total value of bonds
+    loan-to-bond-ratio: uint,  ;; Loan to bond value ratio
+    risk-tier: uint            ;; Risk tier (1-5, 5 being highest risk)
+  })
 
 ;; Global state(define-data-var next-bond-id uint u1)
 (define-data-var next-pool-id uint u1)
 (define-data-var total-sbtc-bonds uint u0)
 (define-data-var total-yield-distributed uint u0)
 
-;; 
+  (define-public (issue-sbtc-backed-bond
+    (principal-amount uint)
+    (coupon-rate uint)
+    (maturity-blocks uint)
+    (collateral-amount uint)
+    (is-callable bool)
+    (call-premium uint))
+  "Issue new sBTC-backed bond"
+  (let ((bond-id (var-get next-bond-id)))
+    (begin
+      ;; Validate bond terms
+      (asserts! (>= principal-amount MIN_BOND_AMOUNT) ERR_INVALID_BOND_TERMS)
+      (asserts! (<= principal-amount MAX_BOND_AMOUNT) ERR_INVALID_BOND_TERMS)
+      (asserts! (>= maturity-blocks MIN_MATURITY_BLOCKS) ERR_INVALID_BOND_TERMS)
+      (asserts! (<= maturity-blocks MAX_MATURITY_BLOCKS) ERR_INVALID_BOND_TERMS)
+      (asserts! (<= coupon-rate MAX_YIELD_RATE) ERR_INVALID_BOND_TERMS)
 
-;; BOND ISSUANCE
+      ;; Validate collateral ratio
+      (match (contract-call? .sbtc-integration get-sbtc-price)
+        sbtc-price (let ((collateral-value (* collateral-amount sbtc-price))
+                         (required-collateral (/ (* principal-amount COLLATERAL_RATIO) u1000000)))
+          (asserts! (>= collateral-value required-collateral) ERR_INSUFFICIENT_COLLATERAL)
 
-;; (define-public (issue-sbtc-backed-bond   (principal-amount uint)  (coupon-rate uint)  (maturity-blocks uint)  (collateral-amount uint)  (is-callable bool)  (call-premium uint))  "Issue new sBTC-backed bond"  (let ((bond-id (var-get next-bond-id)))    (begin      
+          ;; Transfer collateral to contract
+          (try! (contract-call? .sbtc-token transfer collateral-amount tx-sender (as-contract tx-sender) none))
 
-;; Validate bond terms      (asserts! (>= principal-amount MIN_BOND_AMOUNT) ERR_INVALID_BOND_TERMS)      (asserts! (<= principal-amount MAX_BOND_AMOUNT) ERR_INVALID_BOND_TERMS)      (asserts! (>= maturity-blocks MIN_MATURITY_BLOCKS) ERR_INVALID_BOND_TERMS)      (asserts! (<= maturity-blocks MAX_MATURITY_BLOCKS) ERR_INVALID_BOND_TERMS)      (asserts! (<= coupon-rate MAX_YIELD_RATE) ERR_INVALID_BOND_TERMS)            
+          ;; Create bond
+          (map-set sbtc-bonds
+            { bond-id: bond-id }
+            {              issuer: tx-sender,
+              principal-amount: principal-amount,
+              coupon-rate: coupon-rate,
+              maturity-block: (+ block-height maturity-blocks),
+              issue-block: block-height,
+              collateral-amount: collateral-amount,
+              collateral-ratio: (/ (* collateral-value u1000000) principal-amount),
+              is-callable: is-callable,
+              call-premium: call-premium,
+              status: u0
+            }
+          )
 
-;; Validate collateral ratio      (match (contract-call? .sbtc-integration get-sbtc-price)        sbtc-price (let ((collateral-value (* collateral-amount sbtc-price))                         (required-collateral (/ (* principal-amount COLLATERAL_RATIO) u1000000)))          (asserts! (>= collateral-value required-collateral) ERR_INSUFFICIENT_COLLATERAL)                    
+          ;; Update global state
+          (var-set next-bond-id (+ bond-id u1))
+          (var-set total-sbtc-bonds (+ (var-get total-sbtc-bonds) principal-amount))
 
-;; Transfer collateral to contract          (try! (contract-call? .sbtc-token transfer collateral-amount tx-sender (as-contract tx-sender) none))                    
-
-;; Create bond          (map-set sbtc-bonds             { bond-id: bond-id }            {              issuer: tx-sender,              principal-amount: principal-amount,              coupon-rate: coupon-rate,              maturity-block: (+ block-height maturity-blocks),              issue-block: block-height,              collateral-amount: collateral-amount,              collateral-ratio: (/ (* collateral-value u1000000) principal-amount),              is-callable: is-callable,              call-premium: call-premium,              status: u0            }          )                    
-
-;; Update global state          (var-set next-bond-id (+ bond-id u1))          (var-set total-sbtc-bonds (+ (var-get total-sbtc-bonds) principal-amount))                    (print {             event: "sbtc-bond-issued",             bond-id: bond-id,             issuer: tx-sender,            principal: principal-amount,            collateral: collateral-amount          })          (ok bond-id)        )        ERR_INSUFFICIENT_COLLATERAL      )    )  ))
+          (print {             event: "sbtc-bond-issued",
+            bond-id: bond-id,
+            issuer: tx-sender,
+            principal: principal-amount,
+            collateral: collateral-amount
+          })
+          (ok bond-id)
+        )
+        ERR_INSUFFICIENT_COLLATERAL
+      )
+    )
+  ))
 (define-public (purchase-bond (bond-id uint) (amount uint))  "Purchase bond units"  (match (map-get? sbtc-bonds { bond-id: bond-id })    bond (begin      (asserts! (is-eq (get status bond) u0) ERR_BOND_ALREADY_MATURED)      (asserts! (> amount u0) ERR_INVALID_BOND_TERMS)      (asserts! (<= amount (get principal-amount bond)) ERR_INVALID_BOND_TERMS)            
 
 ;; Calculate purchase price (simplified - could include market pricing)      (let ((purchase-price amount))                
@@ -117,15 +134,33 @@
 
 ;; Record bond holding        (let ((existing-holding (default-to                                  { amount-held: u0, purchase-block: u0, purchase-price: u0, accrued-interest: u0, last-interest-claim: u0 }                                 (map-get? bond-holders { bond-id: bond-id, holder: tx-sender }))))          (map-set bond-holders             { bond-id: bond-id, holder: tx-sender }            {              amount-held: (+ (get amount-held existing-holding) amount),              purchase-block: block-height,              purchase-price: (+ (get purchase-price existing-holding) purchase-price),              accrued-interest: (get accrued-interest existing-holding),              last-interest-claim: (max (get last-interest-claim existing-holding) block-height)            }          )        )                (print { event: "bond-purchased", bond-id: bond-id, buyer: tx-sender, amount: amount })        (ok true)      )    )    ERR_BOND_NOT_FOUND  ))
 
-;; 
+  (define-public (create-yield-pool (initial-sbtc-amount uint))
+  "Create new yield distribution pool"
+  (let ((pool-id (var-get next-pool-id)))
+    (begin
+      (asserts! (> initial-sbtc-amount u0) ERR_INVALID_YIELD_DISTRIBUTION)
 
-;; YIELD DISTRIBUTION POOLS
+      ;; Transfer sBTC to contract for yield generation
+      (try! (contract-call? .sbtc-token transfer initial-sbtc-amount tx-sender (as-contract tx-sender) none))
 
-;; (define-public (create-yield-pool (initial-sbtc-amount uint))  "Create new yield distribution pool"  (let ((pool-id (var-get next-pool-id)))    (begin      (asserts! (> initial-sbtc-amount u0) ERR_INVALID_YIELD_DISTRIBUTION)            
+      ;; Create yield pool
+      (map-set yield-distribution-pools
+        { pool-id: pool-id }
+        {          total-sbtc-deposited: initial-sbtc-amount,
+          total-bonds-backed: u0,
+          current-yield-rate: BASE_YIELD_RATE,
+          last-yield-calculation: block-height,
+          pool-manager: tx-sender,
+          is-active: true
+        }
+      )
 
-;; Transfer sBTC to contract for yield generation      (try! (contract-call? .sbtc-token transfer initial-sbtc-amount tx-sender (as-contract tx-sender) none))            
+      (var-set next-pool-id (+ pool-id u1))
 
-;; Create yield pool      (map-set yield-distribution-pools         { pool-id: pool-id }        {          total-sbtc-deposited: initial-sbtc-amount,          total-bonds-backed: u0,          current-yield-rate: BASE_YIELD_RATE,          last-yield-calculation: block-height,          pool-manager: tx-sender,          is-active: true        }      )            (var-set next-pool-id (+ pool-id u1))            (print { event: "yield-pool-created", pool-id: pool-id, manager: tx-sender, initial-amount: initial-sbtc-amount })      (ok pool-id)    )  ))
+      (print { event: "yield-pool-created", pool-id: pool-id, manager: tx-sender, initial-amount: initial-sbtc-amount })
+      (ok pool-id)
+    )
+  ))
 (define-public (allocate-yield-to-bond (bond-id uint) (pool-id uint) (allocation-percentage uint))  "Allocate yield from pool to specific bond"  (begin    
 
 ;; Validate allocation percentage    (asserts! (<= allocation-percentage u1000000) ERR_INVALID_YIELD_DISTRIBUTION)        (match (map-get? sbtc-bonds { bond-id: bond-id })      bond (match (map-get? yield-distribution-pools { pool-id: pool-id })        pool (begin          
@@ -137,34 +172,85 @@
 ;; Record allocation            (map-set bond-yield-allocations               { bond-id: bond-id, pool-id: pool-id }              {                allocated-amount: allocated-amount,                yield-share: allocation-percentage,                allocation-block: block-height              }            )                        
 
 ;; Update pool            (map-set yield-distribution-pools               { pool-id: pool-id }              (merge pool {                total-bonds-backed: (+ (get total-bonds-backed pool) (get principal-amount bond))              })            )                        (print { event: "yield-allocated", bond-id: bond-id, pool-id: pool-id, amount: allocated-amount })            (ok true)          )        )        ERR_BOND_NOT_FOUND      )      ERR_BOND_NOT_FOUND    )  ))
-(define-public (calculate-and-distribute-yield (pool-id uint))  "Calculate and distribute yield for pool"  (match (map-get? yield-distribution-pools { pool-id: pool-id })    pool (begin      (asserts! (is-eq tx-sender (get pool-manager pool)) ERR_NOT_AUTHORIZED)            
+(define-public (calculate-and-distribute-yield (pool-id uint))
+  "Calculate and distribute yield for pool"
+  (match (map-get? yield-distribution-pools { pool-id: pool-id })
+    pool (begin
+      (asserts! (is-eq tx-sender (get pool-manager pool)) ERR_NOT_AUTHORIZED)
 
-;; Calculate blocks since last yield calculation      (let ((blocks-elapsed (- block-height (get last-yield-calculation pool)))            (annual-blocks u52560)) 
+      ;; Calculate blocks since last yield calculation
+      (let ((blocks-elapsed (- block-height (get last-yield-calculation pool)))
+            (annual-blocks u52560)) ;; Approximate blocks in a year
 
-;; Approximate blocks in a year                
+        ;; Calculate yield based on sBTC staking/lending returns
+        (match (contract-call? .enhanced-yield-strategy get-current-apy)
+          current-apy (let ((yield-amount (/ (* (get total-sbtc-deposited pool) current-apy blocks-elapsed) (* annual-blocks u1000000))))
 
-;; Calculate yield based on sBTC staking/lending returns        (match (contract-call? .enhanced-yield-strategy get-current-apy)          current-apy (let ((yield-amount (/ (* (get total-sbtc-deposited pool) current-apy blocks-elapsed) (* annual-blocks u1000000))))                        
+            ;; Distribute yield proportionally to bond allocations
+            (try! (distribute-pool-yield pool-id yield-amount))
 
-;; Distribute yield proportionally to bond allocations            (try! (distribute-pool-yield pool-id yield-amount))                        
+            ;; Update pool state
+            (map-set yield-distribution-pools
+              { pool-id: pool-id }
+              (merge pool {
+                current-yield-rate: current-apy,
+                last-yield-calculation: block-height
+              })
+            )
 
-;; Update pool state            (map-set yield-distribution-pools               { pool-id: pool-id }              (merge pool {                current-yield-rate: current-apy,                last-yield-calculation: block-height              })            )                        (var-set total-yield-distributed (+ (var-get total-yield-distributed) yield-amount))                        (print { event: "yield-distributed", pool-id: pool-id, amount: yield-amount })            (ok yield-amount)          )          (err ERR_INSUFFICIENT_YIELD)        )      )    )    ERR_BOND_NOT_FOUND  ))
-(define-private (distribute-pool-yield (pool-id uint) (total-yield uint))  "Distribute yield to bond holders proportionally"  
+            (var-set total-yield-distributed (+ (var-get total-yield-distributed) yield-amount))
 
-;; In a full implementation, this would iterate through all bonds with allocations  
+            (print { event: "yield-distributed", pool-id: pool-id, amount: yield-amount })
+            (ok yield-amount)
+          )
+          (err ERR_INSUFFICIENT_YIELD)
+        )
+      )
+    )
+    ERR_BOND_NOT_FOUND
+  ))
+(define-private (distribute-pool-yield (pool-id uint) (total-yield uint))
+  "Distribute yield to bond holders proportionally"
 
-;; For now, well mark the yield as available for claiming  (begin    (print { event: "yield-available-for-claim", pool-id: pool-id, amount: total-yield })    (ok true)  ))
+  ;; In a full implementation, this would iterate through all bonds with allocations
+  ;; For now, well mark the yield as available for claiming
+  (begin
+    (print { event: "yield-available-for-claim", pool-id: pool-id, amount: total-yield })
+    (ok true)
+  ))
 
-;; 
+  (define-public (redeem-matured-bond (bond-id uint))
+  "Redeem bond at maturity"
+  (match (map-get? sbtc-bonds { bond-id: bond-id })
+    bond (match (map-get? bond-holders { bond-id: bond-id, holder: tx-sender })
+      holding (begin
+        (asserts! (>= block-height (get maturity-block bond)) ERR_EARLY_REDEMPTION_NOT_ALLOWED)
+        (asserts! (is-eq (get status bond) u0) ERR_BOND_ALREADY_MATURED)
 
-;; BOND SERVICING AND REDEMPTION
+        ;; Calculate redemption amount (principal + final interest)
+        (let ((redemption-amount (get amount-held holding)))
 
+          ;; Transfer redemption amount to holder
+          (try! (as-contract (contract-call? .sbtc-token transfer redemption-amount tx-sender tx-sender none)))
 
-(define-public (redeem-matured-bond (bond-id uint))  "Redeem bond at maturity"  (match (map-get? sbtc-bonds { bond-id: bond-id })    bond (match (map-get? bond-holders { bond-id: bond-id, holder: tx-sender })      holding (begin        (asserts! (>= block-height (get maturity-block bond)) ERR_EARLY_REDEMPTION_NOT_ALLOWED)        (asserts! (is-eq (get status bond) u0) ERR_BOND_ALREADY_MATURED)                
-;; Calculate redemption amount (principal + final interest)        (let ((redemption-amount (get amount-held holding)))                    
-;; Transfer redemption amount to holder          (try! (as-contract (contract-call? .sbtc-token transfer redemption-amount tx-sender tx-sender none)))                    
-;; Mark bond portion as redeemed          (map-delete bond-holders { bond-id: bond-id, holder: tx-sender })                    
-;; Check if all bond units have been redeemed and update status          
-;; (Simplified - in full implementation would check all holders)          (map-set sbtc-bonds             { bond-id: bond-id }            (merge bond { status: u1 })          )                    (print { event: "bond-redeemed", bond-id: bond-id, holder: tx-sender, amount: redemption-amount })          (ok redemption-amount)        )      )      ERR_BOND_NOT_FOUND    )    ERR_BOND_NOT_FOUND  ))
+          ;; Mark bond portion as redeemed
+          (map-delete bond-holders { bond-id: bond-id, holder: tx-sender })
+
+          ;; Check if all bond units have been redeemed and update status
+          ;; (Simplified - in full implementation would check all holders)
+          (map-set sbtc-bonds
+            { bond-id: bond-id }
+            (merge bond { status: u1 })
+          )
+
+          (print { event: "bond-redeemed", bond-id: bond-id, holder: tx-sender, amount: redemption-amount })
+          (ok redemption-amount)
+        )
+      )
+      ERR_BOND_NOT_FOUND
+    )
+    ERR_BOND_NOT_FOUND
+  ))
 (define-public (early-call-bond (bond-id uint))  "Call bond early (issuer only)"  (match (map-get? sbtc-bonds { bond-id: bond-id })    bond (begin      (asserts! (is-eq tx-sender (get issuer bond)) ERR_NOT_AUTHORIZED)      (asserts! (get is-callable bond) ERR_EARLY_REDEMPTION_NOT_ALLOWED)      (asserts! (is-eq (get status bond) u0) ERR_BOND_ALREADY_MATURED)            
       (let ((call-price (+ (get principal-amount bond) (get call-premium bond))))
         ;; Mark bond as called
@@ -179,13 +265,32 @@
         (ok call-price)
       ))
 
-;; RISK MANAGEMENT
+  (define-public (check-bond-collateralization (bond-id uint))
+  "Check and update bond collateralization ratio"
+  (match (map-get? sbtc-bonds { bond-id: bond-id })
+    bond (match (contract-call? .sbtc-integration get-sbtc-price)
+      sbtc-price (let ((current-collateral-value (* (get collateral-amount bond) sbtc-price))
+                       (current-ratio (/ (* current-collateral-value u1000000) (get principal-amount bond))))
 
-;; (define-public (check-bond-collateralization (bond-id uint))  "Check and update bond collateralization ratio"  (match (map-get? sbtc-bonds { bond-id: bond-id })    bond (match (contract-call? .sbtc-integration get-sbtc-price)      sbtc-price (let ((current-collateral-value (* (get collateral-amount bond) sbtc-price))                       (current-ratio (/ (* current-collateral-value u1000000) (get principal-amount bond))))                
+        ;; Update collateral ratio
+        (map-set sbtc-bonds
+          { bond-id: bond-id }
+          (merge bond { collateral-ratio: current-ratio })
+        )
 
-;; Update collateral ratio        (map-set sbtc-bonds           { bond-id: bond-id }          (merge bond { collateral-ratio: current-ratio })        )                
-
-;; Check if liquidation threshold is breached        (if (< current-ratio LIQUIDATION_THRESHOLD)          (begin            (print { event: "bond-undercollateralized", bond-id: bond-id, ratio: current-ratio })            (err ERR_LIQUIDATION_THRESHOLD_BREACHED)          )          (ok current-ratio)        )      )      (err ERR_INSUFFICIENT_COLLATERAL)    )    ERR_BOND_NOT_FOUND  ))
+        ;; Check if liquidation threshold is breached
+        (if (< current-ratio LIQUIDATION_THRESHOLD)
+          (begin
+            (print { event: "bond-undercollateralized", bond-id: bond-id, ratio: current-ratio })
+            (err ERR_LIQUIDATION_THRESHOLD_BREACHED)
+          )
+          (ok current-ratio)
+        )
+      )
+      (err ERR_INSUFFICIENT_COLLATERAL)
+    )
+    ERR_BOND_NOT_FOUND
+  ))
 (define-public (liquidate-undercollateralized-bond (bond-id uint))
   "Liquidate bond with insufficient collateral"
   (match (check-bond-collateralization bond-id)
@@ -209,31 +314,45 @@
     )
   ))
 
-;; 
-
-;; ENTERPRISE LOAN INTEGRATION
-
-(define-private (create-loan-bonds (bond-structure (list 10 { amount: uint, coupon: uint, maturity: uint })))  "Create bonds for loan structure"  (list (var-get next-bond-id)))
+  (define-private (create-loan-bonds (bond-structure (list 10 { amount: uint, coupon: uint, maturity: uint })))
+  "Create bonds for loan structure"
+  (list (var-get next-bond-id)))
 
 ;; Simplified implementation - would iterate and create each bond  (list (var-get next-bond-id)))
-(define-private (sum-bond-amounts (bond-spec { amount: uint, coupon: uint, maturity: uint }) (acc uint))  "Sum bond amounts"  (+ acc (get amount bond-spec)))
+(define-private (sum-bond-amounts (bond-spec { amount: uint, coupon: uint, maturity: uint }) (acc uint))
+  "Sum bond amounts"
+  (+ acc (get amount bond-spec)))
 
-;; 
-
-;; READ-ONLY FUNCTIONS
-
-;; (define-read-only (get-bond-details (bond-id uint))  "Get comprehensive bond details"  (match (map-get? sbtc-bonds { bond-id: bond-id })    bond (ok bond)    (err ERR_BOND_NOT_FOUND)  ))
-(define-read-only (get-bond-holding (bond-id uint) (holder principal))  "Get bond holding details"  (map-get? bond-holders { bond-id: bond-id, holder: holder }))
-(define-read-only (get-yield-pool-info (pool-id uint))  "Get yield pool information"  (map-get? yield-distribution-pools { pool-id: pool-id }))
-(define-read-only (get-bond-yield-allocation (bond-id uint) (pool-id uint))  "Get bond yield allocation details"  (map-get? bond-yield-allocations { bond-id: bond-id, pool-id: pool-id }))
-(define-read-only (calculate-bond-value (bond-id uint))  "Calculate current bond market value"  (match (map-get? sbtc-bonds { bond-id: bond-id })
-    bond (let ((remaining-blocks (if (> (get maturity-block bond) block-height)
-                                   (- (get maturity-block bond) block-height)
-                                   u0)))
-      
-      ;; Simplified present value calculation
-      (ok (/ (* (get principal-amount bond) u950000) u1000000)) ;; 5% discount
-    )
+  (define-read-only (get-bond-details (bond-id uint))
+  "Get comprehensive bond details"
+  (match (map-get? sbtc-bonds { bond-id: bond-id })
+    bond (ok bond)
     (err ERR_BOND_NOT_FOUND)
   ))
-(define-read-only (get-global-bond-stats)  "Get global bond statistics"  {    total-bonds-issued: (- (var-get next-bond-id) u1),    total-bond-value: (var-get total-sbtc-bonds),    total-yield-distributed: (var-get total-yield-distributed),    active-yield-pools: (- (var-get next-pool-id) u1)  })
+(define-read-only (get-bond-holding (bond-id uint) (holder principal))
+  "Get bond holding details"
+  (map-get? bond-holders { bond-id: bond-id, holder: holder }))
+(define-read-only (get-yield-pool-info (pool-id uint))
+  "Get yield pool information"
+  (map-get? yield-distribution-pools { pool-id: pool-id }))
+(define-read-only (get-bond-yield-allocation (bond-id uint) (pool-id uint))
+  "Get bond yield allocation details"
+  (map-get? bond-yield-allocations { bond-id: bond-id, pool-id: pool-id }))
+  (define-read-only (calculate-bond-value (bond-id uint))
+  "Calculate current bond market value"
+  (match (map-get? sbtc-bonds { bond-id: bond-id })
+    bond (let ((remaining-blocks (if (> (get maturity-block bond) block-height)
+                                    (- (get maturity-block bond) block-height)
+                                    u0)))
+           ;; Simplified valuation: principal + accrued coupon
+           (ok (+ (get principal-amount bond) (/ (* (get coupon-rate bond) (get principal-amount bond) remaining-blocks) (* u1000000 (get coupon-interval-blocks bond))))))
+    (err ERR_BOND_NOT_FOUND)
+  ))
+(define-read-only (get-global-bond-stats)
+  "Get global bond statistics"
+  {
+    total-bonds-issued: (- (var-get next-bond-id) u1),
+    total-bond-value: (var-get total-sbtc-bonds),
+    total-yield-distributed: (var-get total-yield-distributed),
+    active-yield-pools: (- (var-get next-pool-id) u1)
+  })

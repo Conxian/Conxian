@@ -1,10 +1,7 @@
-(use-trait oracle-aggregator-trait .all-traits.oracle-aggregator-trait)
-
 ;; oracle-aggregator.clar
 ;; Aggregates price feeds from multiple oracles and provides TWAP calculations
 
-(use-trait oracle_aggregator_trait .all-traits.oracle-aggregator-trait)
-.all-traits.oracle-aggregator-trait)
+(use-trait oracle-aggregator-trait .all-traits.oracle-aggregator-trait)
 
 ;; Constants
 (define-constant ERR_UNAUTHORIZED (err u100))

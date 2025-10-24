@@ -1,16 +1,9 @@
-;; dex-router.clar
-;; DEX Router - DIMENSIONAL INTEGRATION LAYER
-;; Routes ALL DEX operations through dimensional graph system
-;; Delegates optimal routing to advanced-router-dijkstra.clar
-
 (use-trait router-trait .all-traits.router-trait)
 (use-trait factory-trait .all-traits.factory-trait)
 (use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
 
-;; --- Dimensional Integration ---
-(define-data-var dimensional-router principal tx-sender) ;; Will be set to advanced-router-dijkstra.clar
-
 ;; --- Constants ---
+
 (define-constant ERR_UNAUTHORIZED (err u4000))
 (define-constant ERR_INVALID_PATH (err u4002))
 (define-constant ERR_INSUFFICIENT_OUTPUT (err u4003))

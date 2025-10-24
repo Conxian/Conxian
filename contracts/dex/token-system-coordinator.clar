@@ -6,6 +6,8 @@
 
 ;; Provides unified interface and orchestrates interactions between all token subsystems
 
+(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
+
 ;; --- Constants ---
 (define-constant CONTRACT_OWNER tx-sender)
 (define-constant PRECISION u100000000)

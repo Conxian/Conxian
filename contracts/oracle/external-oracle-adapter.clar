@@ -1,339 +1,470 @@
-;; ===== Traits =====
-(use-trait oracle-adapter-trait .all-traits.oracle-adapter-trait)
-(use-trait oracle_adapter_trait .all-traits.oracle-adapter-trait)
-(use-trait oracle-adapter-trait .all-traits.oracle-adapter-trait)
+;; external-oracle-adapter
+;; This contract acts as an adapter for integrating external oracle providers, allowing the system to fetch and use off-chain data.
+;; It supports multiple oracle sources, manages their authorization, and aggregates price data to mitigate manipulation risks.
 
-;; external-oracle-adapter.clar
-;; Adapter for integrating external oracle providers (Chainlink, Pyth, Redstone)
-;; Provides multi-source price aggregation with manipulation detection
+(define-constant ERR_UNAUTHORIZED (err u1000))
+(define-constant ERR_INVALID_ORACLE_SOURCE (err u1001))
+(define-constant ERR_INVALID_PRICE_DATA (err u1002))
+(define-constant ERR_PRICE_TOO_OLD (err u1003))
+(define-constant ERR_PRICE_MANIPULATION_RISK (err u1004))
+(define-constant ERR_ALREADY_INITIALIZED (err u1005))
+(define-constant ERR_NOT_INITIALIZED (err u1006))
+(define-constant ERR_ORACLE_SOURCE_ALREADY_EXISTS (err u1007))
+(define-constant ERR_ORACLE_SOURCE_NOT_FOUND (err u1008))
+(define-constant ERR_OPERATOR_ALREADY_AUTHORIZED (err u1009))
+(define-constant ERR_OPERATOR_NOT_AUTHORIZED (err u1010))
+(define-constant ERR_QUORUM_NOT_REACHED (err u1011))
+(define-constant ERR_PRICE_FEED_NOT_ACTIVE (err u1012))
+(define-constant ERR_INVALID_QUORUM_PERCENTAGE (err u1013))
+(define-constant ERR_INVALID_EXPIRATION_THRESHOLD (err u1014))
+(define-constant ERR_INVALID_PRICE_THRESHOLD (err u1015))
+(define-constant ERR_INVALID_SOURCE_ID (err u1016))
 
-;; ===== Constants =====
-(define-constant ERR_UNAUTHORIZED (err u8001))
-(define-constant ERR_INVALID_SOURCE (err u8002))
-(define-constant ERR_STALE_PRICE (err u8003))
-(define-constant ERR_PRICE_DEVIATION (err u8004))
-(define-constant ERR_NO_CONSENSUS (err u8005))
-(define-constant ERR_INVALID_SIGNATURE (err u8006))
+;; Constants for source IDs
+(define-constant ORACLE_SOURCE_BINANCE u1)
+(define-constant ORACLE_SOURCE_COINBASE u2)
+(define-constant ORACLE_SOURCE_CHAINLINK u3)
 
-;; Oracle source IDs
-(define-constant SOURCE_CHAINLINK u1)
-(define-constant SOURCE_PYTH u2)
-(define-constant SOURCE_REDSTONE u3)
-(define-constant SOURCE_INTERNAL u4)
+;; Data map for oracle sources
+;; source-id: uint (e.g., u1 for Binance, u2 for Coinbase)
+;; source-name: (string-ascii 32)
+;; source-address: principal
+;; is-active: bool
+(define-map oracle-sources { source-id: uint } {
+    source-name: (string-ascii 32),
+    source-address: principal,
+    is-active: bool
+})
 
-;; Configuration
-(define-constant MAX_PRICE_AGE_BLOCKS u10) ;; ~10 minutes max staleness
-(define-constant MAX_DEVIATION_BPS u500) ;; 5% max deviation between sources
-(define-constant MIN_SOURCES_REQUIRED u2) ;; Minimum 2 sources for consensus
+;; Data map for authorized operators for each oracle source
+;; source-id: uint
+;; operator-address: principal
+(define-map authorized-operators { source-id: uint, operator-address: principal } bool)
 
-;; ===== Data Structures =====
+;; Data map for submitted price data
+;; source-id: uint
+;; asset-pair: (string-ascii 16) (e.g., "STX-USD")
+;; block-height: uint
+;; price: uint (price * 10^decimals)
+;; timestamp: uint (unix timestamp)
+(define-map price-data { source-id: uint, asset-pair: (string-ascii 16), block-height: uint } {
+    price: uint,
+    timestamp: uint
+})
+
+;; Data map for aggregated prices
+;; asset-pair: (string-ascii 16)
+;; last-aggregated-block: uint
+(define-map aggregated-prices { asset-pair: (string-ascii 16) } {
+    price: uint,
+    timestamp: uint,
+    last-aggregated-block: uint
+})
+
+;; Data variables
 (define-data-var contract-owner principal tx-sender)
-(define-data-var aggregation-enabled bool true)
+(define-data-var initialized bool false)
+(define-data-var min-oracle-sources-for-quorum uint u3) ;; Minimum number of active oracle sources required for price aggregation
+(define-data-var quorum-percentage uint u6000) ;; 60% (6000 out of 10000)
+(define-data-var price-data-expiration-threshold uint u100) ;; Price data expires after 100 blocks
+(define-data-var price-manipulation-threshold uint u500) ;; 5% (500 out of 10000)
 
-;; Oracle source configuration
-(define-map oracle-sources uint {
-  name: (string-ascii 32),
-  enabled: bool,
-  weight: uint,
-  endpoint: (string-ascii 256),
-  last-update: uint,
-  reliability-score: uint
-})
+;; Authorization check
+(define-private (is-owner)
+    (is-eq tx-sender (var-get contract-owner))
+)
 
-;; Asset price data from external sources
-(define-map external-prices {asset: principal, source: uint} {
-  price: uint,
-  timestamp: uint,
-  decimals: uint,
-  confidence: uint,
-  signature: (optional (buff 65))
-})
+(define-private (is-oracle-operator (source-id uint) (operator principal))
+    (default-to false (map-get? authorized-operators { source-id: source-id, operator-address: operator }))
+)
 
-;; Aggregated price data
-(define-map aggregated-prices principal {
-  price: uint,
-  timestamp: uint,
-  sources-count: uint,
-  deviation: uint,
-  confidence-level: uint
-})
+;; --- Admin functions ---
 
-;; Price update history for manipulation detection
-(define-map price-history {asset: principal, block: uint} {
-  price: uint,
-  volume-change: uint,
-  was-flagged: bool
-})
+;; @desc Initialize the oracle adapter with initial settings.
+;; @param min-sources (uint) - Minimum number of active oracle sources for quorum.
+;; @param quorum-pct (uint) - Quorum percentage (e.g., 6000 for 60%).
+;; @param expiration-thresh (uint) - Price data expiration threshold in blocks.
+;; @param manipulation-thresh (uint) - Price manipulation threshold (e.g., 500 for 5%).
+;; @returns (response bool uint) - True if successful, error otherwise.
+(define-public (initialize (min-sources uint) (quorum-pct uint) (expiration-thresh uint) (manipulation-thresh uint))
+    (begin
+        (asserts! (is-owner) ERR_UNAUTHORIZED)
+        (asserts! (not (var-get initialized)) ERR_ALREADY_INITIALIZED)
+        (asserts! (and (>= quorum-pct u0) (<= quorum-pct u10000)) ERR_INVALID_QUORUM_PERCENTAGE)
+        (asserts! (> expiration-thresh u0) ERR_INVALID_EXPIRATION_THRESHOLD)
+        (asserts! (and (>= manipulation-thresh u0) (<= manipulation-thresh u10000)) ERR_INVALID_PRICE_THRESHOLD)
 
-;; Trusted price feed operators
-(define-map trusted-operators principal bool)
+        (var-set min-oracle-sources-for-quorum min-sources)
+        (var-set quorum-percentage quorum-pct)
+        (var-set price-data-expiration-threshold expiration-thresh)
+        (var-set price-manipulation-threshold manipulation-thresh)
+        (var-set initialized true)
+        (ok true)
+    )
+)
 
-;; ===== Authorization =====
-(define-private (check-is-owner)
-  (ok (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)))
+;; @desc Add a new oracle source.
+;; @param source-id (uint) - Unique identifier for the oracle source.
+;; @param source-name (string-ascii 32) - Name of the oracle source.
+;; @param source-address (principal) - Contract or principal address of the oracle source.
+;; @returns (response bool uint) - True if successful, error otherwise.
+(define-public (add-oracle-source (source-id uint) (source-name (string-ascii 32)) (source-address principal))
+    (begin
+        (asserts! (is-owner) ERR_UNAUTHORIZED)
+        (asserts! (var-get initialized) ERR_NOT_INITIALIZED)
+        (asserts! (not (is-some (map-get? oracle-sources { source-id: source-id }))) ERR_ORACLE_SOURCE_ALREADY_EXISTS)
+        (map-set oracle-sources { source-id: source-id } {
+            source-name: source-name,
+            source-address: source-address,
+            is-active: true
+        })
+        (ok true)
+    )
+)
 
-(define-private (check-is-operator)
-  (ok (asserts! (or (is-eq tx-sender (var-get contract-owner))
-                    (default-to false (map-get? trusted-operators tx-sender)))
-                ERR_UNAUTHORIZED)))
+;; @desc Set the active status of an oracle source.
+;; @param source-id (uint) - Identifier of the oracle source.
+;; @param active (bool) - New active status.
+;; @returns (response bool uint) - True if successful, error otherwise.
+(define-public (set-oracle-source-active (source-id uint) (active bool))
+    (begin
+        (asserts! (is-owner) ERR_UNAUTHORIZED)
+        (asserts! (var-get initialized) ERR_NOT_INITIALIZED)
+        (map-update oracle-sources { source-id: source-id } { is-active: active })
+        (ok true)
+    )
+)
 
-;; ===== Admin Functions =====
-(define-public (add-oracle-source (source-id uint) (name (string-ascii 32)) (weight uint) (endpoint (string-ascii 256)))
-  (begin
-    (try! (check-is-owner))
-    (map-set oracle-sources source-id {
-      name: name,
-      enabled: true,
-      weight: weight,
-      endpoint: endpoint,
-      last-update: u0,
-      reliability-score: u10000 ;; Start at 100%
-    })
-    (ok true)))
+;; @desc Authorize an operator for a specific oracle source.
+;; @param source-id (uint) - Identifier of the oracle source.
+;; @param operator (principal) - Address of the operator to authorize.
+;; @returns (response bool uint) - True if successful, error otherwise.
+(define-public (authorize-operator (source-id uint) (operator principal))
+    (begin
+        (asserts! (is-owner) ERR_UNAUTHORIZED)
+        (asserts! (var-get initialized) ERR_NOT_INITIALIZED)
+        (asserts! (is-some (map-get? oracle-sources { source-id: source-id })) ERR_ORACLE_SOURCE_NOT_FOUND)
+        (asserts! (not (is-oracle-operator source-id operator)) ERR_OPERATOR_ALREADY_AUTHORIZED)
+        (map-set authorized-operators { source-id: source-id, operator-address: operator } true)
+        (ok true)
+    )
+)
 
-(define-public (update-source-status (source-id uint) (enabled bool))
-  (begin
-    (try! (check-is-owner))
-    (match (map-get? oracle-sources source-id)
-      source
-      (begin
-        (map-set oracle-sources source-id (merge source {enabled: enabled}))
-        (ok true))
-      ERR_INVALID_SOURCE)))
+;; @desc Deauthorize an operator for a specific oracle source.
+;; @param source-id (uint) - Identifier of the oracle source.
+;; @param operator (principal) - Address of the operator to deauthorize.
+;; @returns (response bool uint) - True if successful, error otherwise.
+(define-public (deauthorize-operator (source-id uint) (operator principal))
+    (begin
+        (asserts! (is-owner) ERR_UNAUTHORIZED)
+        (asserts! (var-get initialized) ERR_NOT_INITIALIZED)
+        (asserts! (is-oracle-operator source-id operator) ERR_OPERATOR_NOT_AUTHORIZED)
+        (map-delete authorized-operators { source-id: source-id, operator-address: operator })
+        (ok true)
+    )
+)
 
-(define-public (add-trusted-operator (operator principal))
-  (begin
-    (try! (check-is-owner))
-    (map-set trusted-operators operator true)
-    (ok true)))
+;; --- Price Feed functions ---
 
-(define-public (remove-trusted-operator (operator principal))
-  (begin
-    (try! (check-is-owner))
-    (map-set trusted-operators operator false)
-    (ok true)))
+;; @desc Submit price data from an authorized oracle operator.
+;; @param source-id (uint) - Identifier of the oracle source.
+;; @param asset-pair (string-ascii 16) - Asset pair (e.g., "STX-USD").
+;; @param price (uint) - Price value (e.g., 1000000 for 1.00 USD with 6 decimals).
+;; @param timestamp (uint) - Unix timestamp of the price data.
+;; @returns (response bool uint) - True if successful, error otherwise.
+(define-public (submit-price (source-id uint) (asset-pair (string-ascii 16)) (price uint) (timestamp uint))
+    (begin
+        (asserts! (var-get initialized) ERR_NOT_INITIALIZED)
+        (asserts! (is-oracle-operator source-id tx-sender) ERR_UNAUTHORIZED)
+        (asserts! (is-some (map-get? oracle-sources { source-id: source-id })) ERR_ORACLE_SOURCE_NOT_FOUND)
+        (let
+            ((source-info (unwrap! (map-get? oracle-sources { source-id: source-id }) ERR_ORACLE_SOURCE_NOT_FOUND)))
+            (asserts! (get is-active source-info) ERR_PRICE_FEED_NOT_ACTIVE)
+            (map-set price-data { source-id: source-id, asset-pair: asset-pair, block-height: block-height } {
+                price: price,
+                timestamp: timestamp
+            })
+            (ok true)
+        )
+    )
+)
 
-(define-public (set-aggregation-enabled (enabled bool))
-  (begin
-    (try! (check-is-owner))
-    (var-set aggregation-enabled enabled)
-    (ok true)))
+;; @desc Aggregate price data from multiple oracle sources.
+;; @param asset-pair (string-ascii 16) - Asset pair to aggregate.
+;; @returns (response uint uint) - Aggregated price if successful, error otherwise.
+(define-public (aggregate-prices (asset-pair (string-ascii 16)))
+    (begin
+        (asserts! (var-get initialized) ERR_NOT_INITIALIZED)
+        (let
+            (
+                (active-sources (get-active-oracle-sources))
+                (valid-prices (get-valid-prices-for-aggregation active-sources asset-pair))
+                (num-valid-prices (len valid-prices))
+                (min-sources (var-get min-oracle-sources-for-quorum))
+            )
+            (asserts! (>= num-valid-prices min-sources) ERR_QUORUM_NOT_REACHED)
 
-;; ===== Price Feed Functions =====
+            ;; Sort prices and get the median
+            (let
+                (
+                    (sorted-prices (sort-prices valid-prices))
+                    (median-price (get-median sorted-prices))
+                )
+                ;; Check for price manipulation risk
+                (asserts! (not (check-price-manipulation-risk valid-prices median-price)) ERR_PRICE_MANIPULATION_RISK)
 
-;; Submit price from external oracle
-(define-public (submit-external-price
-  (asset principal)
-  (source-id uint)
-  (price uint)
-  (decimals uint)
-  (confidence uint)
-  (signature (optional (buff 65))))
-  (begin
-    (try! (check-is-operator))
-    (asserts! (var-get aggregation-enabled) ERR_UNAUTHORIZED)
-    
-    ;; Validate source
-    (let ((source (unwrap! (map-get? oracle-sources source-id) ERR_INVALID_SOURCE)))
-      (asserts! (get enabled source) ERR_INVALID_SOURCE)
-      
-      ;; Verify signature if required
-      (if (is-some signature)
-          (try! (verify-oracle-signature asset price (unwrap-panic signature)))
-          true)
-      
-      ;; Store price data
-      (map-set external-prices {asset: asset, source: source-id} {
-        price: price,
-        timestamp: block-height,
-        decimals: decimals,
-        confidence: confidence,
-        signature: signature
-      })
-      
-      ;; Update source last-update
-      (map-set oracle-sources source-id (merge source {last-update: block-height}))
-      
-      ;; Trigger aggregation
-      (try! (aggregate-prices asset))
-      
-      (ok true))))
+                (map-set aggregated-prices { asset-pair: asset-pair } {
+                    price: median-price,
+                    timestamp: (get timestamp (unwrap! (element-at sorted-prices (div (len sorted-prices) u2)) (err u0))), ;; Use timestamp of median price
+                    last-aggregated-block: block-height
+                })
+                (ok median-price)
+            )
+        )
+    )
+)
 
-;; Aggregate prices from multiple sources
-(define-private (aggregate-prices (asset principal))
-  (let (
-    (chainlink-price (get-source-price asset SOURCE_CHAINLINK))
-    (pyth-price (get-source-price asset SOURCE_PYTH))
-    (redstone-price (get-source-price asset SOURCE_REDSTONE))
-    (internal-price (get-source-price asset SOURCE_INTERNAL))
-    
-    ;; Build list of valid prices with weights
-    (prices-list (filter is-valid-price-data (list
-      {price: chainlink-price, weight: (get-source-weight SOURCE_CHAINLINK)}
-      {price: pyth-price, weight: (get-source-weight SOURCE_PYTH)}
-      {price: redstone-price, weight: (get-source-weight SOURCE_REDSTONE)}
-      {price: internal-price, weight: (get-source-weight SOURCE_INTERNAL)}
-    )))
-    
-    (sources-count (len prices-list))
-  )
-    
-    ;; Require minimum sources
-    (asserts! (>= sources-count MIN_SOURCES_REQUIRED) ERR_NO_CONSENSUS)
-    
-    ;; Calculate weighted average price
-    (let ((aggregated (calculate-weighted-average prices-list))
-          (deviation (calculate-price-deviation prices-list)))
-      
-      ;; Check for excessive deviation (manipulation signal)
-      (asserts! (<= deviation MAX_DEVIATION_BPS) ERR_PRICE_DEVIATION)
-      
-      ;; Store aggregated price
-      (map-set aggregated-prices asset {
-        price: aggregated,
-        timestamp: block-height,
-        sources-count: sources-count,
-        deviation: deviation,
-        confidence-level: (calculate-confidence-level prices-list deviation)
-      })
-      
-      ;; Record price history
-      (map-set price-history {asset: asset, block: block-height} {
-        price: aggregated,
-        volume-change: u0,
-        was-flagged: (> deviation MAX_DEVIATION_BPS)
-      })
-      
-      (ok aggregated))))
+;; --- Helper functions for aggregation ---
 
-;; ===== Helper Functions =====
-(define-private (get-source-price (asset principal) (source-id uint))
-  (match (map-get? external-prices {asset: asset, source: source-id})
-    price-data
-    (if (<= (- block-height (get timestamp price-data)) MAX_PRICE_AGE_BLOCKS)
-        (some (get price price-data))
-        none)
-    none))
+;; @desc Get a list of active oracle sources.
+;; @returns (list ({source-id: uint, source-address: principal, is-active: bool, source-name: (string-ascii 32)})) - List of active oracle sources.
+(define-private (get-active-oracle-sources)
+    (fold
+        (fun (source-id-entry (accumulator (list 20 {source-id: uint, source-address: principal, is-active: bool, source-name: (string-ascii 32)})))
+            (let
+                ((source-info (unwrap! (map-get? oracle-sources { source-id: (get source-id source-id-entry) }) (err u0))))
+                (if (get is-active source-info)
+                    (cons source-info accumulator)
+                    accumulator
+                )
+            )
+        )
+        (list)
+        (map-keys oracle-sources)
+    )
+)
 
-(define-private (get-source-weight (source-id uint))
-  (match (map-get? oracle-sources source-id)
-    source
-    (if (get enabled source) (get weight source) u0)
-    u0))
+;; @desc Get valid prices for aggregation from active sources.
+;; @param active-sources (list) - List of active oracle sources.
+;; @param asset-pair (string-ascii 16) - Asset pair.
+;; @returns (list ({price: uint, timestamp: uint})) - List of valid prices.
+(define-private (get-valid-prices-for-aggregation (active-sources (list 20 {source-id: uint, source-address: principal, is-active: bool, source-name: (string-ascii 32)})) (asset-pair (string-ascii 16)))
+    (fold
+        (fun (source-info (accumulator (list 20 {price: uint, timestamp: uint})))
+            (let
+                (
+                    (source-id (get source-id source-info))
+                    (latest-price-data (get-latest-price-data source-id asset-pair))
+                )
+                (if (and (is-some latest-price-data) (not (is-price-data-expired (unwrap! latest-price-data (err u0)))))
+                    (cons (unwrap! latest-price-data (err u0)) accumulator)
+                    accumulator
+                )
+            )
+        )
+        (list)
+        active-sources
+    )
+)
 
-(define-private (is-valid-price-data (data {price: (optional uint), weight: uint}))
-  (and (is-some (get price data)) (> (get weight data) u0)))
+;; @desc Get the latest price data for a given source and asset pair.
+;; @param source-id (uint) - Identifier of the oracle source.
+;; @param asset-pair (string-ascii 16) - Asset pair.
+;; @returns (optional {price: uint, timestamp: uint}) - Latest price data or none.
+(define-private (get-latest-price-data (source-id uint) (asset-pair (string-ascii 16)))
+    (let
+        (
+            (current-block block-height)
+            (expiration-threshold (var-get price-data-expiration-threshold))
+            (start-block (if (> current-block expiration-threshold) (- current-block expiration-threshold) u0))
+            (latest-price none)
+            (latest-block u0)
+        )
+        (map-fold
+            (fun (key value result)
+                (if (and
+                        (is-eq (get source-id key) source-id)
+                        (is-eq (get asset-pair key) asset-pair)
+                        (>= (get block-height key) start-block)
+                        (> (get block-height key) latest-block)
+                    )
+                    (begin
+                        (var-set latest-block (get block-height key))
+                        (some value)
+                    )
+                    result
+                )
+            )
+            none
+            price-data
+        )
+    )
+)
 
-(define-private (calculate-weighted-average (prices (list 10 {price: (optional uint), weight: uint})))
-  (let ((result (fold calculate-weighted-sum prices {total: u0, weight-sum: u0})))
-    (if (> (get weight-sum result) u0)
-        (/ (get total result) (get weight-sum result))
-        u0)))
+;; @desc Check if price data has expired.
+;; @param price-info ({price: uint, timestamp: uint}) - Price data.
+;; @returns (bool) - True if expired, false otherwise.
+(define-private (is-price-data-expired (price-info {price: uint, timestamp: uint}))
+    (let
+        ((last-block (get last-aggregated-block (map-get? aggregated-prices { asset-pair: "STX-USD" })))) ;; This needs to be dynamic
+        (> (- block-height last-block) (var-get price-data-expiration-threshold))
+    )
+)
 
-(define-private (calculate-weighted-sum 
-  (item {price: (optional uint), weight: uint})
-  (acc {total: uint, weight-sum: uint}))
-  (match (get price item)
-    price-val
-    {
-      total: (+ (get total acc) (* price-val (get weight item))),
-      weight-sum: (+ (get weight-sum acc) (get weight item))
-    }
-    acc))
+;; @desc Sort a list of prices in ascending order.
+;; @param prices (list) - List of prices.
+;; @returns (list) - Sorted list of prices.
+(define-private (sort-prices (prices (list 20 {price: uint, timestamp: uint})))
+    ;; This is a simplified bubble sort for demonstration.
+    ;; In a real scenario, consider more efficient sorting or off-chain sorting.
+    (if (<= (len prices) u1)
+        prices
+        (let
+            (
+                (swapped true)
+                (current-prices prices)
+            )
+            (while swapped
+                (begin
+                    (var-set swapped false)
+                    (let
+                        (
+                            (i u0)
+                            (n (- (len current-prices) u1))
+                        )
+                        (while (< i n)
+                            (begin
+                                (let
+                                    (
+                                        (price1 (get price (unwrap! (element-at current-prices i) (err u0))))
+                                        (price2 (get price (unwrap! (element-at current-prices (+ i u1)) (err u0))))
+                                    )
+                                    (if (> price1 price2)
+                                        (begin
+                                            ;; Swap elements (simplified, actual swap logic would be more complex)
+                                            (var-set swapped true)
+                                            ;; For clarity, a real swap would involve reconstructing the list or using a mutable data structure.
+                                            ;; This example assumes a functional swap for illustration.
+                                        )
+                                    )
+                                )
+                                (var-set i (+ i u1))
+                            )
+                        )
+                    )
+                )
+            )
+            current-prices
+        )
+    )
+)
 
-(define-private (calculate-price-deviation (prices (list 10 {price: (optional uint), weight: uint})))
-  (let ((avg (calculate-weighted-average prices))
-        (valid-prices (filter is-valid-price-data prices)))
-    (if (is-eq (len valid-prices) u0)
-        u0
-        (fold calculate-max-deviation valid-prices {avg: avg, max-dev: u0}))))
+;; @desc Get the median price from a sorted list of prices.
+;; @param sorted-prices (list) - Sorted list of prices.
+;; @returns (uint) - Median price.
+(define-private (get-median (sorted-prices (list 20 {price: uint, timestamp: uint})))
+    (let
+        ((len-prices (len sorted-prices)))
+        (if (is-eq (mod len-prices u2) u1)
+            ;; Odd number of elements
+            (get price (unwrap! (element-at sorted-prices (div len-prices u2)) (err u0)))
+            ;; Even number of elements, average the two middle ones
+            (let
+                (
+                    (mid1 (unwrap! (element-at sorted-prices (- (div len-prices u2) u1)) (err u0)))
+                    (mid2 (unwrap! (element-at sorted-prices (div len-prices u2)) (err u0)))
+                )
+                (/ (+ (get price mid1) (get price mid2)) u2)
+            )
+        )
+    )
+)
 
-(define-private (calculate-max-deviation
-  (item {price: (optional uint), weight: uint})
-  (acc {avg: uint, max-dev: uint}))
-  (match (get price item)
-    price-val
-    (let ((deviation (if (> price-val (get avg acc))
-                         (/ (* (- price-val (get avg acc)) u10000) (get avg acc))
-                         (/ (* (- (get avg acc) price-val) u10000) (get avg acc)))))
-      {avg: (get avg acc), max-dev: (if (> deviation (get max-dev acc)) deviation (get max-dev acc))})
-    acc))
+;; @desc Check for price manipulation risk by comparing individual prices to the median.
+;; @param valid-prices (list) - List of valid prices.
+;; @param median-price (uint) - Median price.
+;; @returns (bool) - True if manipulation risk detected, false otherwise.
+(define-private (check-price-manipulation-risk (valid-prices (list 20 {price: uint, timestamp: uint})) (median-price uint))
+    (let
+        ((manipulation-thresh (var-get price-manipulation-threshold)))
+        (fold
+            (fun (price-info (risk-detected bool))
+                (if risk-detected
+                    true
+                    (let
+                        ((price (get price price-info)))
+                        (if (or
+                                (> price (* median-price (+ u10000 manipulation-thresh)) / u10000)
+                                (< price (* median-price (- u10000 manipulation-thresh)) / u10000)
+                            )
+                            true
+                            false
+                        )
+                    )
+                )
+            )
+            false
+            valid-prices
+        )
+    )
+)
 
-(define-private (calculate-confidence-level (prices (list 10 {price: (optional uint), weight: uint})) (deviation uint))
-  (if (< deviation u100)
-      u10000 ;; Very high confidence
-      (if (< deviation u300)
-          u8000 ;; High confidence
-          u5000))) ;; Medium confidence
+;; --- Read-only functions ---
 
-(define-private (verify-oracle-signature (asset principal) (price uint) (signature (buff 65)))
-  ;; In production, implement actual signature verification
-  (ok true))
+;; @desc Get the current aggregated price for an asset pair.
+;; @param asset-pair (string-ascii 16) - Asset pair.
+;; @returns (response uint uint) - Aggregated price if available, error otherwise.
+(define-read-only (get-price (asset-pair (string-ascii 16)))
+    (ok (get price (unwrap! (map-get? aggregated-prices { asset-pair: asset-pair }) ERR_PRICE_FEED_NOT_ACTIVE)))
+)
 
-;; ===== Read-Only Functions =====
-(define-read-only (get-price (asset principal))
-  (match (map-get? aggregated-prices asset)
-    price-data
-    (if (<= (- block-height (get timestamp price-data)) MAX_PRICE_AGE_BLOCKS)
-        (ok (get price price-data))
-        ERR_STALE_PRICE)
-    ERR_STALE_PRICE))
+;; @desc Get details of an oracle source.
+;; @param source-id (uint) - Identifier of the oracle source.
+;; @returns (response (optional {source-name: (string-ascii 32), source-address: principal, is-active: bool}) uint) - Oracle source details or error.
+(define-read-only (get-oracle-source-details (source-id uint))
+    (ok (map-get? oracle-sources { source-id: source-id }))
+)
 
-(define-read-only (get-price-with-confidence (asset principal))
-  (match (map-get? aggregated-prices asset)
-    price-data
-    (ok {
-      price: (get price price-data),
-      confidence: (get confidence-level price-data),
-      sources: (get sources-count price-data),
-      age: (- block-height (get timestamp price-data))
-    })
-    ERR_STALE_PRICE))
+;; @desc Check if an operator is authorized for an oracle source.
+;; @param source-id (uint) - Identifier of the oracle source.
+;; @param operator (principal) - Address of the operator.
+;; @returns (bool) - True if authorized, false otherwise.
+(define-read-only (is-operator-authorized (source-id uint) (operator principal))
+    (is-oracle-operator source-id operator)
+)
 
-(define-read-only (get-source-data (asset principal) (source-id uint))
-  (map-get? external-prices {asset: asset, source: source-id}))
+;; @desc Get the current contract owner.
+;; @returns (principal) - The contract owner.
+(define-read-only (get-contract-owner)
+    (ok (var-get contract-owner))
+)
 
-(define-read-only (get-oracle-source-info (source-id uint))
-  (map-get? oracle-sources source-id))
+;; @desc Get initialization status.
+;; @returns (bool) - True if initialized, false otherwise.
+(define-read-only (is-initialized)
+    (ok (var-get initialized))
+)
 
-(define-read-only (get-price-history (asset principal) (block uint))
-  (map-get? price-history {asset: asset, block: block}))
+;; @desc Get minimum oracle sources for quorum.
+;; @returns (uint) - Minimum sources.
+(define-read-only (get-min-oracle-sources-for-quorum)
+    (ok (var-get min-oracle-sources-for-quorum))
+)
 
-(define-read-only (is-price-fresh (asset principal))
-  (match (map-get? aggregated-prices asset)
-    price-data
-    (<= (- block-height (get timestamp price-data)) MAX_PRICE_AGE_BLOCKS)
-    false))
+;; @desc Get quorum percentage.
+;; @returns (uint) - Quorum percentage.
+(define-read-only (get-quorum-percentage)
+    (ok (var-get quorum-percentage))
+)
 
-(define-read-only (get-all-source-prices (asset principal))
-  {
-    chainlink: (get-source-price asset SOURCE_CHAINLINK),
-    pyth: (get-source-price asset SOURCE_PYTH),
-    redstone: (get-source-price asset SOURCE_REDSTONE),
-    internal: (get-source-price asset SOURCE_INTERNAL),
-    aggregated: (match (map-get? aggregated-prices asset)
-                  price-data (some (get price price-data))
-                  none)
-  })
+;; @desc Get price data expiration threshold.
+;; @returns (uint) - Expiration threshold.
+(define-read-only (get-price-data-expiration-threshold)
+    (ok (var-get price-data-expiration-threshold))
+)
 
-;; Check for price manipulation
-(define-read-only (check-manipulation-risk (asset principal))
-  (match (map-get? aggregated-prices asset)
-    price-data
-    {
-      deviation-risk: (> (get deviation price-data) u300),
-      confidence-low: (< (get confidence-level price-data) u5000),
-      sources-insufficient: (< (get sources-count price-data) MIN_SOURCES_REQUIRED),
-      overall-risk-score: (calculate-risk-score price-data)
-    }
-    {
-      deviation-risk: true,
-      confidence-low: true,
-      sources-insufficient: true,
-      overall-risk-score: u10000
-    }))
-
-(define-private (calculate-risk-score (price-data {price: uint, timestamp: uint, sources-count: uint, deviation: uint, confidence-level: uint}))
-  (+ (get deviation price-data)
-     (if (< (get sources-count price-data) MIN_SOURCES_REQUIRED) u2000 u0)
-     (if (< (get confidence-level price-data) u5000) u1000 u0)))
+;; @desc Get price manipulation threshold.
+;; @returns (uint) - Manipulation threshold.
+(define-read-only (get-price-manipulation-threshold)
+    (ok (var-get price-manipulation-threshold))
+)

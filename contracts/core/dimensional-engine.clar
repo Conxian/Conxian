@@ -5,9 +5,6 @@
 (use-trait oracle-trait .all-traits.oracle-trait)
 (use-trait token-trait .all-traits.sip-010-ft-trait)
 
-(use-trait dimensional_trait .all-traits.dimensional-trait)
-(use-trait dimensional-trait .all-traits.dimensional-trait)
-
 ;; ===== Type Definitions =====
 (define-types
   (position-type (enum

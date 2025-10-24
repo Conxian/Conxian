@@ -4,8 +4,8 @@
 
 ;; This contract manages the migration of data from older protocol versions.
 
-(use-trait migration-manager-trait .all-traits.migration-manager-trait)
-(impl-trait migration-manager-trait)
+(use-trait migration_manager_trait .all-traits.migration-manager-trait)
+(impl-trait migration_manager_trait)
 
 (define-constant ERR_UNAUTHORIZED (err u9300))
 (define-constant ERR_MIGRATION_ALREADY_PERFORMED (err u9301))

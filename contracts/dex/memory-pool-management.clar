@@ -328,4 +328,6 @@
     (only-owner!)
     ;; Placeholder: compacting would reorganize allocations to reduce fragmentation
     (ok true)
+  )
+)
  

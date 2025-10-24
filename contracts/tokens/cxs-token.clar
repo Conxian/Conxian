@@ -12,6 +12,9 @@
 (define-constant ERR_TRANSFER_DISABLED u102)
 (define-constant ERR_NO_SUCH_TOKEN u103)
 (define-constant ERR_SYSTEM_PAUSED u104)
+(define-constant ERR_INVALID_CONTRACT_PRINCIPAL u105)
+(define-constant ERR_INVALID_RECIPIENT u106)
+(define-constant ERR_INVALID_URI u107)
 
 ;; --- Storage ---
 (define-data-var contract-owner principal tx-sender)
@@ -43,7 +46,9 @@
 (define-public (set-contract-owner (new-owner principal))
   (begin
     (asserts! (is-owner tx-sender) (err ERR_UNAUTHORIZED))
+    (asserts! (not (is-eq new-owner (as-contract tx-sender))) (err ERR_INVALID_RECIPIENT))
     (var-set contract-owner new-owner)
+    (print {event: "contract-owner-set", sender: tx-sender, new-owner: new-owner, block-height: (get block-height (get-block-info?))})
     (ok true)))
 
 ;; @desc Sets the principal of the staking contract.
@@ -52,7 +57,9 @@
 (define-public (set-staking-contract (contract-address principal))
   (begin
     (asserts! (is-owner tx-sender) (err ERR_UNAUTHORIZED))
+    (asserts! (is-some (contract-of contract-address)) (err ERR_INVALID_CONTRACT_PRINCIPAL))
     (var-set staking-contract (some contract-address))
+    (print {event: "staking-contract-set", sender: tx-sender, contract-address: contract-address, block-height: (get block-height (get-block-info?))})
     (ok true)))
 
 ;; @desc Sets the principal of the protocol monitor contract.
@@ -61,7 +68,9 @@
 (define-public (set-protocol-monitor (monitor principal))
   (begin
     (asserts! (is-owner tx-sender) (err ERR_UNAUTHORIZED))
+    (asserts! (is-some (contract-of monitor)) (err ERR_INVALID_CONTRACT_PRINCIPAL))
     (var-set protocol-monitor (some monitor))
+    (print {event: "protocol-monitor-set", sender: tx-sender, monitor: monitor, block-height: (get block-height (get-block-info?))})
     (ok true)))
 
 ;; @desc Enables token transfers.
@@ -70,6 +79,7 @@
   (begin
     (asserts! (is-owner tx-sender) (err ERR_UNAUTHORIZED))
     (var-set transfers-enabled true)
+    (print {event: "transfers-enabled", sender: tx-sender, enabled: true, block-height: (get block-height (get-block-info?))})
     (ok true)))
 
 ;; @desc Disables token transfers.
@@ -78,6 +88,7 @@
   (begin
     (asserts! (is-owner tx-sender) (err ERR_UNAUTHORIZED))
     (var-set transfers-enabled false)
+    (print {event: "transfers-disabled", sender: tx-sender, enabled: false, block-height: (get block-height (get-block-info?))})
     (ok true)))
 
 ;; --- Mint / Burn ---
@@ -86,15 +97,25 @@
 ;; @param uri An optional URI for the token metadata.
 ;; @returns (ok id) if successful, (err ERR_UNAUTHORIZED) if called by a non-owner, (err ERR_SYSTEM_PAUSED) if the system is paused.
 (define-public (mint (recipient principal) (uri (optional (string-utf8 256))))
-  (begin
-    (asserts! (is-owner tx-sender) (err ERR_UNAUTHORIZED))
-    (asserts! (not (check-system-pause)) (err ERR_SYSTEM_PAUSED))
-    (var-set last-token-id (+ (var-get last-token-id) u1))
-    (let ((id (var-get last-token-id)))
-      (map-set owners id recipient)
-      (map-set token-uris id uri)
-      (ok id))))
+  (let ((id (var-get last-token-id)))
+    (begin
+      (asserts! (is-owner tx-sender) (err ERR_UNAUTHORIZED))
+      (asserts! (not (is-eq recipient (as-contract tx-sender))) (err ERR_INVALID_RECIPIENT))
+      (asserts! (not (check-system-pause)) (err ERR_SYSTEM_PAUSED))
+      (var-set last-token-id (+ id u1))
+      (map-set owners (+ id u1) recipient)
+      (match uri
+        some-uri-val
+          (map-set token-uris (+ id u1) (some some-uri-val))
+        none
+          (map-set token-uris (+ id u1) none)
+      )
+      (print {event: "token-minted", sender: tx-sender, recipient: recipient, token-id: (+ id u1), uri: uri, block-height: (get block-height (get-block-info?))})
+      (ok (+ id u1)))))
 
+;; @desc Burns an NFT, removing it from circulation.
+;; @param id The ID of the token to burn.
+;; @returns (ok true) if successful, (err ERR_NO_SUCH_TOKEN) if the token does not exist, (err ERR_NOT_OWNER) if called by a non-owner, (err ERR_SYSTEM_PAUSED) if the system is paused.
 (define-public (burn (id uint))
   (let ((owner (unwrap! (map-get? owners id) (err ERR_NO_SUCH_TOKEN))))
     (begin
@@ -102,27 +123,45 @@
       (asserts! (not (check-system-pause)) (err ERR_SYSTEM_PAUSED))
       (map-delete owners id)
       (map-delete token-uris id)
+      (print {event: "token-burned", sender: tx-sender, token-id: id, owner: owner, block-height: (get block-height (get-block-info?))})
       (ok true))))
 
 ;; --- SIP-009 Interface ---
+;; @desc Transfers an NFT from one principal to another.
+;; @param id The ID of the token to transfer.
+;; @param sender The principal of the current owner.
+;; @param recipient The principal of the new owner.
+;; @returns (ok true) if successful, (err ERR_UNAUTHORIZED) if tx-sender is not the sender, (err ERR_NOT_OWNER) if sender is not the owner, (err ERR_TRANSFER_DISABLED) if transfers are disabled, (err ERR_SYSTEM_PAUSED) if the system is paused.
 (define-public (transfer (id uint) (sender principal) (recipient principal))
   (let ((owner (unwrap! (map-get? owners id) (err ERR_NO_SUCH_TOKEN))))
     (begin
       (asserts! (is-eq tx-sender sender) (err ERR_UNAUTHORIZED))
       (asserts! (is-eq sender owner) (err ERR_NOT_OWNER))
       (asserts! (var-get transfers-enabled) (err ERR_TRANSFER_DISABLED))
+      (asserts! (not (is-eq recipient (as-contract tx-sender))) (err ERR_INVALID_RECIPIENT))
       (asserts! (not (check-system-pause)) (err ERR_SYSTEM_PAUSED))
       (map-set owners id recipient)
+      (print {event: "token-transferred", sender: sender, recipient: recipient, token-id: id, block-height: (get block-height (get-block-info?))})
       (ok true))))
 
+;; @desc Gets the owner of a given token ID.
+;; @param id The ID of the token.
+;; @returns (ok (optional principal)) The principal of the owner, or none if the token does not exist.
 (define-read-only (get-owner (id uint))
   (ok (map-get? owners id)))
 
+;; @desc Returns the ID of the last minted token.
+;; @returns (ok uint) The ID of the last minted token.
 (define-read-only (get-last-token-id)
   (ok (var-get last-token-id)))
 
+;; @desc Returns the URI of a given token ID.
+;; @param id The ID of the token.
+;; @returns (ok (optional (string-utf8 256))) The URI of the token, or none if not set.
 (define-read-only (get-token-uri (id uint))
   (ok (map-get? token-uris id)))
 
+;; @desc Returns whether token transfers are enabled.
+;; @returns (ok bool) True if transfers are enabled, false otherwise.
 (define-read-only (get-transfers-enabled)
-  (ok (var-get transfers-enabled))))
+  (ok (var-get transfers-enabled)))
