@@ -1583,3 +1583,114 @@
     (get-route-stats (token-in principal) (token-out principal) (response (tuple (hops uint) (estimated-output uint) (price-impact uint) (dimensional-multiplier uint)) uint))
   )
 )
+
+;; ===========================================
+;; POSITION TRAIT
+;; ===========================================
+;; Interface for position management functionality
+;;
+;; This trait provides functions for creating, managing, and closing
+;; trading positions within the dimensional system.
+;;
+;; Example usage:
+;;   (use-trait position .all-traits.position-trait)
+(define-trait position-trait
+  (
+    ;; Create a new trading position
+    ;; @param owner: position owner
+    ;; @param collateral-amount: initial collateral
+    ;; @param leverage: leverage multiplier
+    ;; @param position-type: type of position
+    ;; @param token: asset token
+    ;; @param slippage-tolerance: maximum allowed slippage
+    ;; @param funding-interval: funding rate interval
+    ;; @return (response uint uint): position ID and error code
+    (create-position (owner principal) (collateral-amount uint) (leverage uint) (position-type (string-ascii 20)) (token principal) (slippage-tolerance uint) (funding-interval (string-ascii 20)) (response uint uint))
+
+    ;; Close an existing position
+    ;; @param owner: position owner
+    ;; @param position-id: position identifier
+    ;; @param slippage-tolerance: maximum allowed slippage
+    ;; @return (response bool uint): success flag and error code
+    (close-position (owner principal) (position-id uint) (slippage-tolerance uint) (response bool uint))
+
+    ;; Get position details
+    ;; @param owner: position owner
+    ;; @param position-id: position identifier
+    ;; @return (response (tuple ...) uint): position data and error code
+    (get-position (owner principal) (position-id uint) (response (tuple (owner principal) (id uint) (collateral uint) (size int) (entry-price uint) (status (string-ascii 20))) uint))
+
+    ;; Get position events
+    ;; @param owner: position owner
+    ;; @param position-id: position identifier
+    ;; @param limit: maximum number of events to return
+    ;; @return (response (list ...) uint): position events and error code
+    (get-position-events (owner principal) (position-id uint) (limit uint) (response (list 50 (tuple (action (string-ascii 20)) (timestamp uint) (data (string-utf8 256)))) uint))
+  )
+)
+
+;; ===========================================
+;; ORACLE TRAIT
+;; ===========================================
+;; Interface for oracle functionality (alias for dimensional-oracle-trait)
+;;
+;; This trait provides a simplified interface for basic oracle operations.
+;; It serves as an alias to dimensional-oracle-trait for backward compatibility.
+;;
+;; Example usage:
+;;   (use-trait oracle .all-traits.oracle-trait)
+(define-trait oracle-trait
+  (
+    ;; Get the current price of an asset
+    ;; @param asset: token address to get price for
+    ;; @return (response uint uint): price and error code
+    (get-price (asset principal) (response uint uint))
+
+    ;; Update the price of an asset (admin only)
+    ;; @param asset: token address to update price for
+    ;; @param price: new price value
+    ;; @return (response bool uint): success flag and error code
+    (update-price (asset principal) (price uint) (response bool uint))
+
+    ;; Get price with timestamp information
+    ;; @param asset: token address to get price for
+    ;; @return (response (tuple (price uint) (timestamp uint)) uint): price data and error code
+    (get-price-with-timestamp (asset principal) (response (tuple (price uint) (timestamp uint)) uint))
+  )
+)
+
+;; ===========================================
+;; TYPE DEFINITIONS
+;; ===========================================
+;; Common type definitions used across the Conxian protocol
+
+;; Position type enumeration
+(define-type position-type (enum
+  (LONG)
+  (SHORT)
+  (HEDGED)
+))
+
+;; Position status enumeration
+(define-type position-status (enum
+  (ACTIVE)
+  (CLOSED)
+  (LIQUIDATED)
+  (EXPIRED)
+))
+
+;; Funding interval enumeration
+(define-type funding-interval (enum
+  (HOURLY)
+  (DAILY)
+  (WEEKLY)
+  (MONTHLY)
+))
+
+;; Position action enumeration
+(define-type position-action (enum
+  (OPEN)
+  (CLOSE)
+  (MODIFY)
+  (LIQUIDATE)
+))
