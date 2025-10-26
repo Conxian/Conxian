@@ -3,6 +3,7 @@
 ;; Enhanced with staking, yield distribution, and system integration hooks
 
 ;; --- Traits ---
+(use-trait monitor-trait .all-traits.monitor-trait)
 
 
 ;; --- Errors ---
@@ -85,7 +86,7 @@
 (define-private (check-system-pause)
   (if (var-get system-integration-enabled)
     (match (var-get protocol-monitor)
-      monitor (default-to false (contract-call? monitor is-paused))
+      monitor-contract (is-ok (contract-call? monitor-contract is-paused))
       false)
     false))
 

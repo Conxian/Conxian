@@ -239,7 +239,6 @@
       (merge operation { status: status }))
     false
   )
-  (ok true)
 )
 
 ;; --- Unified Token Operations ---
@@ -382,5 +381,20 @@
       (list COMPONENT_REVENUE_DISTRIBUTOR COMPONENT_CXD_STAKING)))
   )
     (asserts! (not (var-get system-paused)) (err ERR_SYSTEM_PAUSED))
-    
-    (match (if (is-component-available (
+
+    (match (if (is-component-available (var-get revenue-distributor-contract))
+             (if (is-component-available (var-get cxd-staking-contract))
+               (ok { distribution-triggered: true, components: (list COMPONENT_REVENUE_DISTRIBUTOR COMPONENT_CXD_STAKING) })
+               (err ERR_COMPONENT_UNAVAILABLE))
+             (err ERR_COMPONENT_UNAVAILABLE))
+      success (begin
+        (unwrap-panic (update-operation-status operation-id OP_STATUS_SUCCESS))
+        (ok success)
+      )
+      error (begin
+        (unwrap-panic (update-operation-status operation-id OP_STATUS_FAILED))
+        (err error)
+      )
+    )
+  )
+)

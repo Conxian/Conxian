@@ -1,7 +1,7 @@
 ;; sbtc-bond-integration.clar
 ;; sBTC Bond Integration - Advanced bond issuance with sBTC collateral and yields
 
-(use-trait sip-010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait)
+(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
 
 ;; CONSTANTS AND ERROR CODES
 (define-constant CONTRACT_OWNER tx-sender)
@@ -314,4 +314,19 @@
 (define-public (check-bond-collateralization (bond-id uint))
   (match (map-get? sbtc-bonds { bond-id: bond-id })
     bond (match (contract-call? .sbtc-integration get-sbtc-price)
-      sbtc-price (
+      sbtc-price (let (
+          (collateral-value (calculate-collateral-value (get collateral-amount bond) sbtc-price))
+          (required-collateral (calculate-required-collateral (get principal-amount bond)))
+          (current-ratio (calculate-collateral-ratio collateral-value (get principal-amount bond)))
+          (is-liquidatable (< current-ratio LIQUIDATION_THRESHOLD)))
+        (ok {
+          bond-id: bond-id,
+          collateral-amount: (get collateral-amount bond),
+          collateral-value: collateral-value,
+          required-collateral: required-collateral,
+          current-ratio: current-ratio,
+          is-liquidatable: is-liquidatable,
+          status: (get status bond)
+        }))
+      ERR_INSUFFICIENT_COLLATERAL)
+    ERR_BOND_NOT_FOUND))

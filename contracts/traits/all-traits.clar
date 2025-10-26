@@ -1630,16 +1630,16 @@
 )
 
 ;; ===========================================
-;; ORACLE TRAIT
+;; DIMENSIONAL ORACLE TRAIT
 ;; ===========================================
-;; Interface for oracle functionality (alias for dimensional-oracle-trait)
+;; Interface for dimensional oracle functionality
 ;;
-;; This trait provides a simplified interface for basic oracle operations.
-;; It serves as an alias to dimensional-oracle-trait for backward compatibility.
+;; This trait provides enhanced oracle functions for the dimensional system
+;; with multi-feed aggregation, deviation checks, and price feed management.
 ;;
 ;; Example usage:
-;;   (use-trait oracle .all-traits.oracle-trait)
-(define-trait oracle-trait
+;;   (use-trait dimensional-oracle .all-traits.dimensional-oracle-trait)
+(define-trait dimensional-oracle-trait
   (
     ;; Get the current price of an asset
     ;; @param asset: token address to get price for
@@ -1656,15 +1656,82 @@
     ;; @param asset: token address to get price for
     ;; @return (response (tuple (price uint) (timestamp uint)) uint): price data and error code
     (get-price-with-timestamp (asset principal) (response (tuple (price uint) (timestamp uint)) uint))
+
+    ;; Get TWAP (Time-Weighted Average Price)
+    ;; @param asset: token address to get TWAP for
+    ;; @param interval: time interval in blocks
+    ;; @return (response uint uint): TWAP and error code
+    (get-twap (asset principal) (interval uint) (response uint uint))
+
+    ;; Add a price feed for an asset (admin only)
+    ;; @param asset: token address
+    ;; @param feed: oracle feed address
+    ;; @return (response bool uint): success flag and error code
+    (add-price-feed (asset principal) (feed principal) (response bool uint))
+
+    ;; Remove a price feed for an asset (admin only)
+    ;; @param asset: token address
+    ;; @param feed: oracle feed address
+    ;; @return (response bool uint): success flag and error code
+    (remove-price-feed (asset principal) (feed principal) (response bool uint))
+
+    ;; Set heartbeat interval for price updates (admin only)
+    ;; @param interval: heartbeat interval in blocks
+    ;; @return (response bool uint): success flag and error code
+    (set-heartbeat-interval (interval uint) (response bool uint))
+
+    ;; Set maximum price deviation threshold (admin only)
+    ;; @param deviation: maximum deviation in basis points
+    ;; @return (response bool uint): success flag and error code
+    (set-max-deviation (deviation uint) (response bool uint))
   )
 )
 
 ;; ===========================================
-;; TYPE DEFINITIONS
+;; MONITOR TRAIT
 ;; ===========================================
-;; Common type definitions used across the Conxian protocol
+;; Interface for system monitoring and alerting functionality
+;;
+;; This trait provides functions for monitoring system health,
+;; logging events, and managing component status across the protocol.
+;;
+;; Example usage:
+;;   (use-trait monitor .all-traits.monitor-trait)
+(define-trait monitor-trait
+  (
+    ;; Log an event in the monitoring system
+    ;; @param component: component name
+    ;; @param event-type: type of event
+    ;; @param severity: severity level (0-4)
+    ;; @param message: event message
+    ;; @param data: optional additional data
+    ;; @return (response uint uint): event ID and error code
+    (log-event (component (string-ascii 32)) (event-type (string-ascii 32)) (severity uint) (message (string-ascii 256)) (data (optional (string-utf8 256))) (response uint uint))
 
-;; Position type enumeration
+    ;; Check if the system/component is paused
+    ;; @return (response bool uint): pause status and error code
+    (is-paused () (response bool uint))
+
+    ;; Get health status of a component
+    ;; @param component: component name
+    ;; @return (response (tuple ...) uint): health data and error code
+    (get-health-status (component (string-ascii 32)) (response (tuple (status uint) (last-updated uint) (uptime uint) (error-count uint) (warning-count uint)) uint))
+
+    ;; Get recent events for a component
+    ;; @param component: component name
+    ;; @param limit: maximum number of events
+    ;; @param offset: offset for pagination
+    ;; @return (response (list ...) uint): events and error code
+    (get-events (component (string-ascii 32)) (limit uint) (offset uint) (response (list 100 (tuple (id uint) (component (string-ascii 32)) (event-type (string-ascii 32)) (severity uint) (message (string-ascii 256)) (block-height uint) (data (optional (string-utf8 256))))) uint))
+
+    ;; Set alert threshold for a component
+    ;; @param component: component name
+    ;; @param alert-type: type of alert
+    ;; @param threshold: threshold value
+    ;; @return (response bool uint): success flag and error code
+    (set-alert-threshold (component (string-ascii 32)) (alert-type (string-ascii 32)) (threshold uint) (response bool uint))
+  )
+)
 (define-type position-type (enum
   (LONG)
   (SHORT)
