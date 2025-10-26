@@ -2,7 +2,7 @@
 ;; Implements vault-trait and vault-admin-trait with full system integration
 
 ;; Traits
-(use-trait vault-trait .all-traits.vault-trait)
+(use-trait vault-trait)
 (use-trait ft-trait .all-traits.sip-010-ft-trait)
 
 ;; Error Constants
