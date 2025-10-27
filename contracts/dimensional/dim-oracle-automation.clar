@@ -1,16 +1,7 @@
 (use-trait dimensional-oracle-trait .all-traits.dimensional-oracle-trait)
 
-;; dim-oracle-automation.clar
-;; Dimensional Oracle Automation
-;; Responsibilities:
-;; - Fetch oracle data from off-chain sources
-;; - Adjust dimension weights on-chain by calling the dim-registry contract
-;;
-;; This contract implements the dimensional-oracle-trait and is designed
-;; to be called by a whitelisted keeper principal.
-
-(use-trait dimensional_oracle_trait .all-traits.dimensional-oracle-trait)
-(use-trait dimensional-oracle-trait .all-traits.dimensional-oracle-trait)
+;; Implement required traits
+(impl-trait dimensional-oracle-trait)
 
 (define-constant ERR_UNAUTHORIZED u101)
 

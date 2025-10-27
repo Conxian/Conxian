@@ -2,8 +2,8 @@
 ;; Pool creation and registration through dimensional registry
 ;; All pools registered as dimensional nodes for unified routing
 
-(use-trait factory-trait .all-traits.factory-trait)
 (use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
+(use-trait factory-trait .all-traits.factory-trait)
 (use-trait access-control-trait .all-traits.access-control-trait)
 (use-trait circuit-breaker-trait .all-traits.circuit-breaker-trait)
 (use-trait dim-registry-trait .all-traits.dim-registry-trait)
@@ -48,18 +48,18 @@
 (define-constant POOL_TYPE_CONCENTRATED_LIQUIDITY "concentrated-liquidity")
 (define-constant POOL_TYPE_LIQUIDITY_BOOTSTRAP "liquidity-bootstrap")
 
-  (define-private (normalize-token-pair (token-a principal) (token-b principal))
-    (if (is-eq token-a token-b)
-      (err ERR_INVALID_TOKENS)
-      (let ((order-a (default-to u0 (map-get? token-order token-a)))
-            (order-b (default-to u0 (map-get? token-order token-b))))
-        (if (< order-a order-b)
-          (ok { token-a: token-a, token-b: token-b })
-          (ok { token-a: token-b, token-b: token-a })
-        )
+(define-private (normalize-token-pair (token-a principal) (token-b principal))
+  (if (is-eq token-a token-b)
+    (err ERR_INVALID_TOKENS)
+    (let ((order-a (default-to u0 (map-get? token-order token-a)))
+          (order-b (default-to u0 (map-get? token-order token-b))))
+      (if (< order-a order-b)
+        (ok { token-a: token-a, token-b: token-b })
+        (ok { token-a: token-b, token-b: token-a })
       )
     )
   )
+)
 
 
 (define-private (check-is-owner)
@@ -106,8 +106,8 @@
 
       (let ((pool-principal (unwrap! (contract-call? pool-impl create-pool (get token-a normalized-pair) (get token-b normalized-pair) fee-bps) (err ERR_SWAP_FAILED))))
 
-        ;; Register pool with dimensional registry
-        (try! (contract-call? .dim-registry register-dimension pool-principal u100))  ;; Register pool as dimension with weight 100
+        ;; TODO: Register pool with dimensional registry when available
+        ;; (try! (contract-call? .dim-registry register-dimension pool-principal u100))
 
         (map-set pools normalized-pair pool-principal)
         (map-set pool-info pool-principal
