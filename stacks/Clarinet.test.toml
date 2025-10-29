@@ -657,10 +657,6 @@ depends_on = [ "all-traits",]
 path = "contracts/dimensional/tokenized-bond.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
-[contracts.math-lib-advanced]
-path = "contracts/lib/math-lib-advanced.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
-
 [contracts.auto-compounder]
 path = "contracts/dex/auto-compounder.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"

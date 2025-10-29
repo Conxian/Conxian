@@ -1,7 +1,7 @@
 ;; oracle-adapter.clar
 ;; Oracle adapter for the dimensional engine
 
-;; Consolidated trait imports – one canonical oracle-trait is enough
+;; Consolidated trait imports - one canonical oracle-trait is enough
 (use-trait oracle-trait .all-traits.oracle-trait)
 (use-trait dimensional-trait .all-traits.dimensional-trait)
 
@@ -58,7 +58,7 @@
     (let (
       (price-data (default-to
         {price: u0, last-updated: u0, twap: u0, twap-interval: u0, price-history: (list )}
-        (map-get? asset-prices {asset: asset})
+        (map-get? asset-prices {asset: asset})))
       (price-diff (abs (- price (get price-data price))))
       (price-diff-percent (if (> (get price-data price) u0)
         (/ (* price-diff u10000) (get price-data price))
@@ -105,8 +105,8 @@
 
 ;; ===== Oracle Management =====
 (define-public (add-oracle
-    (oracle: principal)
-    (weight: uint)
+    (oracle principal)
+    (weight uint)
   )
   (begin
     (asserts! (is-eq tx-sender (var-get owner)) ERR_UNAUTHORIZED)

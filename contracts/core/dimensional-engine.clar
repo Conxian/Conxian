@@ -4,9 +4,6 @@
 (use-trait dimensional-trait .all-traits.dimensional-trait)
 (use-trait oracle-trait .all-traits.oracle-trait)
 (use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
-(use-trait dimensional-engine-trait .all-traits.dimensional-engine-trait)
-
-(impl-trait dimensional-engine-trait)
 
 ;; =============================================================================
 ;; CONSTANTS AND ERROR CODES
