@@ -14,6 +14,11 @@ The oracle system provides secure and reliable price feeds for assets in the Con
 - **Admin Controls**: Secure admin functions for managing the oracle
 - **Price Freezing**: Ability to freeze specific asset prices in case of emergencies
 - **Decentralized Updates**: Support for multiple price feed providers
+- **Multiple Price Feeds**: Supports multiple price feeds per token for redundancy
+- **Deviation Checks**: Ensures prices don't deviate beyond configured thresholds
+- **Staleness Protection**: Identifies and handles stale price data
+- **Emergency Override**: Admin can manually override prices in emergencies
+- **Feed Management**: Add/remove price feeds dynamically
 
 ### Contract Interface
 
@@ -44,6 +49,12 @@ The oracle system provides secure and reliable price feeds for assets in the Con
   )
 )
 ```
+
+### Contracts
+
+- **`oracle-trait.clar`**: Defines the standard interface for oracles
+- **`dimensional-oracle.clar`**: Main implementation of the oracle system
+- **`mock-oracle.clar`**: Mock implementation for testing
 
 ## Integration with Lending System
 
@@ -80,6 +91,38 @@ Health factors are calculated using oracle prices to determine the safety of use
   )
 )
 ```
+
+## Circuit Breaker
+
+The Circuit Breaker pattern protects the system from cascading failures.
+
+### Key Features
+
+- **Automatic Tripping**: Automatically opens the circuit when failure threshold is exceeded
+- **Half-Open State**: Tests if the underlying issue is resolved before closing the circuit
+- **Configurable Thresholds**: Adjustable failure rates and reset timeouts
+- **Operation-Specific**: Can monitor different operations independently
+
+### Contracts
+
+- **`circuit-breaker-trait.clar`**: Defines the circuit breaker interface
+- **`circuit-breaker.clar`**: Implementation of the circuit breaker pattern
+
+## Monitoring System
+
+The Monitoring system tracks system health and events.
+
+### Key Features
+
+- **Event Logging**: Capture and query system events with different severity levels
+- **Health Status**: Track component health status and uptime
+- **Alerting**: Configure alert thresholds for different components
+- **Historical Data**: Query historical events for analysis
+
+### Contracts
+
+- **`monitoring-trait.clar`**: Defines the monitoring interface
+- **`system-monitor.clar`**: Implementation of the monitoring system
 
 ## Security Considerations
 

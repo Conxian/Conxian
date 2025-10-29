@@ -1,4 +1,0 @@
-# fee Trait
-
-## Functions
-

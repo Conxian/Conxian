@@ -1,4 +1,0 @@
-# performance Trait
-
-## Functions
-

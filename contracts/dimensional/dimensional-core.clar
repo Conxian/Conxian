@@ -5,8 +5,7 @@
 (use-trait oracle-trait .all-traits.oracle-trait)
 (use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
 
-(use-trait dimensional_trait .all-traits.dimensional-trait)
-.all-traits.dimensional-trait)
+(impl-trait dimensional-trait)
 
 ;; ===== Type Definitions =====
 (define-types
@@ -374,41 +373,6 @@
       )
     )
   )
-)
-
-(define-public (initialize-risk-params)
-  (begin
-    (asserts! (is-eq tx-sender (var-get owner)) (err ERR_UNAUTHORIZED))
-
-    ;; Initialize risk parameters for different position types
-    (map-set risk-params {position-type: "LONG"} {
-      max-leverage: u2000,        ;; 20x
-      liquidation-threshold: u8000,  ;; 80%
-      funding-rate: u10,          ;; 0.1%
-      maintenance-margin: u500,   ;; 5%
-      max-position-size: u1000000000000,  ;; 1M with 6 decimals
-      min-position-size: u10000,  ;; 10 with 6 decimals
-      max-position-value: u10000000000000,  ;; 10M with 6 decimals
-      funding-interval: "DAILY",
-      is-active: true
-    })
-
-    (map-set risk-params {position-type: "SHORT"} {
-      max-leverage: u1500,        ;; 15x
-      liquidation-threshold: u8500,  ;; 85%
-      funding-rate: u15,          ;; 0.15%
-      maintenance-margin: u600,   ;; 6%
-      max-position-size: u500000000000,   ;; 500K with 6 decimals
-      min-position-size: u10000,  ;; 10 with 6 decimals
-      max-position-value: u5000000000000,  ;; 5M with 6 decimals
-      funding-interval: "DAILY",
-      is-active: true
-    })
-
-    (ok true)
-  )
-)
-
 ;; ===== Internal Helper Functions =====
 
 (define-private (count-active-positions)
@@ -427,8 +391,8 @@
 
 (define-private (get-position-asset (position {collateral: uint, size: int}))
   ;; In a real implementation, this would return the asset for the position
-  ;; For now, we'll use a placeholder
-  'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.conx-token
+  ;; For now, we'll use the dimensional token
+  'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dimensional-token
 )
 
 (define-private (calculate-pnl

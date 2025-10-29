@@ -1583,3 +1583,554 @@
     (get-route-stats (token-in principal) (token-out principal) (response (tuple (hops uint) (estimated-output uint) (price-impact uint) (dimensional-multiplier uint)) uint))
   )
 )
+
+;; ===========================================
+;; POSITION TRAIT
+;; ===========================================
+;; Interface for position management functionality
+;;
+;; This trait provides functions for creating, managing, and closing
+;; trading positions within the dimensional system.
+;;
+;; Example usage:
+;;   (use-trait position .all-traits.position-trait)
+(define-trait position-trait
+  (
+    ;; Create a new trading position
+    ;; @param owner: position owner
+    ;; @param collateral-amount: initial collateral
+    ;; @param leverage: leverage multiplier
+    ;; @param position-type: type of position
+    ;; @param token: asset token
+    ;; @param slippage-tolerance: maximum allowed slippage
+    ;; @param funding-interval: funding rate interval
+    ;; @return (response uint uint): position ID and error code
+    (create-position (owner principal) (collateral-amount uint) (leverage uint) (position-type (string-ascii 20)) (token principal) (slippage-tolerance uint) (funding-interval (string-ascii 20)) (response uint uint))
+
+    ;; Close an existing position
+    ;; @param owner: position owner
+    ;; @param position-id: position identifier
+    ;; @param slippage-tolerance: maximum allowed slippage
+    ;; @return (response bool uint): success flag and error code
+    (close-position (owner principal) (position-id uint) (slippage-tolerance uint) (response bool uint))
+
+    ;; Get position details
+    ;; @param owner: position owner
+    ;; @param position-id: position identifier
+    ;; @return (response (tuple ...) uint): position data and error code
+    (get-position (owner principal) (position-id uint) (response (tuple (owner principal) (id uint) (collateral uint) (size int) (entry-price uint) (status (string-ascii 20))) uint))
+
+    ;; Get position events
+    ;; @param owner: position owner
+    ;; @param position-id: position identifier
+    ;; @param limit: maximum number of events to return
+    ;; @return (response (list ...) uint): position events and error code
+    (get-position-events (owner principal) (position-id uint) (limit uint) (response (list 50 (tuple (action (string-ascii 20)) (timestamp uint) (data (string-utf8 256)))) uint))
+  )
+)
+
+;; ===========================================
+;; DIMENSIONAL ORACLE TRAIT
+;; ===========================================
+;; Interface for dimensional oracle functionality
+;;
+;; This trait provides enhanced oracle functions for the dimensional system
+;; with multi-feed aggregation, deviation checks, and price feed management.
+;;
+;; Example usage:
+;;   (use-trait dimensional-oracle .all-traits.dimensional-oracle-trait)
+(define-trait dimensional-oracle-trait
+  (
+    ;; Get the current price of an asset
+    ;; @param asset: token address to get price for
+    ;; @return (response uint uint): price and error code
+    (get-price (asset principal) (response uint uint))
+
+    ;; Update the price of an asset (admin only)
+    ;; @param asset: token address to update price for
+    ;; @param price: new price value
+    ;; @return (response bool uint): success flag and error code
+    (update-price (asset principal) (price uint) (response bool uint))
+
+    ;; Get price with timestamp information
+    ;; @param asset: token address to get price for
+    ;; @return (response (tuple (price uint) (timestamp uint)) uint): price data and error code
+    (get-price-with-timestamp (asset principal) (response (tuple (price uint) (timestamp uint)) uint))
+
+    ;; Get TWAP (Time-Weighted Average Price)
+    ;; @param asset: token address to get TWAP for
+    ;; @param interval: time interval in blocks
+    ;; @return (response uint uint): TWAP and error code
+    (get-twap (asset principal) (interval uint) (response uint uint))
+
+    ;; Add a price feed for an asset (admin only)
+    ;; @param asset: token address
+    ;; @param feed: oracle feed address
+    ;; @return (response bool uint): success flag and error code
+    (add-price-feed (asset principal) (feed principal) (response bool uint))
+
+    ;; Remove a price feed for an asset (admin only)
+    ;; @param asset: token address
+    ;; @param feed: oracle feed address
+    ;; @return (response bool uint): success flag and error code
+    (remove-price-feed (asset principal) (feed principal) (response bool uint))
+
+    ;; Set heartbeat interval for price updates (admin only)
+    ;; @param interval: heartbeat interval in blocks
+    ;; @return (response bool uint): success flag and error code
+    (set-heartbeat-interval (interval uint) (response bool uint))
+
+    ;; Set maximum price deviation threshold (admin only)
+    ;; @param deviation: maximum deviation in basis points
+    ;; @return (response bool uint): success flag and error code
+    (set-max-deviation (deviation uint) (response bool uint))
+  )
+)
+
+;; ===========================================
+;; MONITOR TRAIT
+;; ===========================================
+;; Interface for system monitoring and alerting functionality
+;;
+;; This trait provides functions for monitoring system health,
+;; logging events, and managing component status across the protocol.
+;;
+;; Example usage:
+;;   (use-trait monitor .all-traits.monitor-trait)
+(define-trait monitor-trait
+  (
+    ;; Log an event in the monitoring system
+    ;; @param component: component name
+    ;; @param event-type: type of event
+    ;; @param severity: severity level (0-4)
+    ;; @param message: event message
+    ;; @param data: optional additional data
+    ;; @return (response uint uint): event ID and error code
+    (log-event (component (string-ascii 32)) (event-type (string-ascii 32)) (severity uint) (message (string-ascii 256)) (data (optional (string-utf8 256))) (response uint uint))
+
+    ;; Check if the system/component is paused
+    ;; @return (response bool uint): pause status and error code
+    (is-paused () (response bool uint))
+
+    ;; Get health status of a component
+    ;; @param component: component name
+    ;; @return (response (tuple ...) uint): health data and error code
+    (get-health-status (component (string-ascii 32)) (response (tuple (status uint) (last-updated uint) (uptime uint) (error-count uint) (warning-count uint)) uint))
+
+    ;; Get recent events for a component
+    ;; @param component: component name
+    ;; @param limit: maximum number of events
+    ;; @param offset: offset for pagination
+    ;; @return (response (list ...) uint): events and error code
+    (get-events (component (string-ascii 32)) (limit uint) (offset uint) (response (list 100 (tuple (id uint) (component (string-ascii 32)) (event-type (string-ascii 32)) (severity uint) (message (string-ascii 256)) (block-height uint) (data (optional (string-utf8 256))))) uint))
+
+    ;; Set alert threshold for a component
+    ;; @param component: component name
+    ;; @param alert-type: type of alert
+    ;; @param threshold: threshold value
+    ;; @return (response bool uint): success flag and error code
+    (set-alert-threshold (component (string-ascii 32)) (alert-type (string-ascii 32)) (threshold uint) (response bool uint))
+  )
+)
+(define-type position-type (enum
+  (LONG)
+  (SHORT)
+  (HEDGED)
+))
+
+;; Position status enumeration
+(define-type position-status (enum
+  (ACTIVE)
+  (CLOSED)
+  (LIQUIDATED)
+  (EXPIRED)
+))
+
+;; Funding interval enumeration
+(define-type funding-interval (enum
+  (HOURLY)
+  (DAILY)
+  (WEEKLY)
+  (MONTHLY)
+))
+
+;; ===========================================
+;; GOVERNANCE TOKEN TRAIT
+;; ===========================================
+;; Interface for governance token functionality
+;;
+;; This trait provides functions for governance voting power and token management.
+;;
+;; Example usage:
+;;   (use-trait governance-token .all-traits.governance-token-trait)
+(define-trait governance-token-trait
+  (
+    ;; Get the voting power of an account
+    ;; @param account: principal to check voting power for
+    ;; @return (response uint uint): voting power and error code
+    (get-voting-power (account principal) (response uint uint))
+
+    ;; Check if an account has voting power
+    ;; @param account: principal to check
+    ;; @return (response bool uint): true if has voting power, false otherwise, and error code
+    (has-voting-power (account principal) (response bool uint))
+
+    ;; Get the total voting power in the system
+    ;; @return (response uint uint): total voting power and error code
+    (get-total-voting-power () (response uint uint))
+
+    ;; Delegate voting power to another account
+    ;; @param delegate: account to delegate to
+    ;; @param amount: amount of voting power to delegate
+    ;; @return (response bool uint): success flag and error code
+    (delegate-voting-power (delegate principal) (amount uint) (response bool uint))
+
+    ;; Undelegate voting power
+    ;; @param amount: amount of voting power to undelegate
+    ;; @return (response bool uint): success flag and error code
+    (undelegate-voting-power (amount uint) (response bool uint))
+  )
+)
+
+;; ===========================================
+;; PROPOSAL ENGINE TRAIT
+;; ===========================================
+;; Interface for DAO proposal and voting system
+;;
+;; This trait provides functions to create, vote on, and execute proposals.
+;;
+;; Example usage:
+;;   (use-trait proposal-engine .all-traits.proposal-engine-trait)
+(define-trait proposal-engine-trait
+  (
+    ;; Create a new proposal
+    ;; @param description: proposal description
+    ;; @param targets: list of contract addresses to call
+    ;; @param values: list of STX amounts to send
+    ;; @param signatures: list of function signatures
+    ;; @param calldatas: list of function call data
+    ;; @param start-block: block when voting starts
+    ;; @param end-block: block when voting ends
+    ;; @return (response uint uint): proposal ID and error code
+    (propose (description (string-ascii 256)) (targets (list 10 principal)) (values (list 10 uint)) (signatures (list 10 (string-ascii 64))) (calldatas (list 10 (buff 1024))) (start-block uint) (end-block uint) (response uint uint))
+
+    ;; Cast a vote on a proposal
+    ;; @param proposal-id: ID of the proposal
+    ;; @param support: true for yes, false for no
+    ;; @param votes: number of votes to cast
+    ;; @return (response bool uint): success flag and error code
+    (vote (proposal-id uint) (support bool) (votes uint) (response bool uint))
+
+    ;; Execute a proposal
+    ;; @param proposal-id: ID of the proposal to execute
+    ;; @return (response bool uint): success flag and error code
+    (execute (proposal-id uint) (response bool uint))
+
+    ;; Get proposal details
+    ;; @param proposal-id: ID of the proposal
+    ;; @return (response (tuple ...) uint): proposal details and error code
+    (get-proposal (proposal-id uint) (response (tuple (id uint) (proposer principal) (start-block uint) (end-block uint) (for-votes uint) (against-votes uint) (executed bool) (canceled bool)) uint))
+
+    ;; Get vote information
+    ;; @param proposal-id: ID of the proposal
+    ;; @param voter: voter principal
+    ;; @return (response (tuple (support bool) (votes uint)) uint): vote details and error code
+    (get-vote (proposal-id uint) (voter principal) (response (tuple (support bool) (votes uint)) uint))
+
+    ;; Cancel a proposal
+    ;; @param proposal-id: ID of the proposal to cancel
+    ;; @return (response bool uint): success flag and error code
+    (cancel (proposal-id uint) (response bool uint))
+  )
+)
+
+;; ===========================================
+;; CONCENTRATED LIQUIDITY POOL TRAIT
+;; ===========================================
+;; Interface for concentrated liquidity pools
+;;
+;; This trait provides functions for concentrated liquidity management,
+;; position NFTs, and tick-based price calculations.
+;;
+;; Example usage:
+;;   (use-trait concentrated-pool .all-traits.concentrated-liquidity-pool-trait)
+(define-trait concentrated-liquidity-pool-trait
+  (
+    ;; Mint a new liquidity position
+    ;; @param recipient: recipient of the position NFT
+    ;; @param tick-lower: lower tick of the position
+    ;; @param tick-upper: upper tick of the position
+    ;; @param amount0: amount of token0 to add
+    ;; @param amount1: amount of token1 to add
+    ;; @return (response (tuple (token-id uint) (liquidity uint) (amount0 uint) (amount1 uint)) uint): position details and error code
+    (mint (recipient principal) (tick-lower int) (tick-upper int) (amount0 uint) (amount1 uint) (response (tuple (token-id uint) (liquidity uint) (amount0 uint) (amount1 uint)) uint))
+
+    ;; Burn a liquidity position
+    ;; @param token-id: ID of the position NFT to burn
+    ;; @return (response (tuple (amount0 uint) (amount1 uint)) uint): amounts returned and error code
+    (burn (token-id uint) (response (tuple (amount0 uint) (amount1 uint)) uint))
+
+    ;; Collect fees from a position
+    ;; @param recipient: recipient of the fees
+    ;; @param token-id: ID of the position NFT
+    ;; @param amount0-max: maximum amount0 to collect
+    ;; @param amount1-max: maximum amount1 to collect
+    ;; @return (response (tuple (amount0 uint) (amount1 uint)) uint): collected amounts and error code
+    (collect (recipient principal) (token-id uint) (amount0-max uint) (amount1-max uint) (response (tuple (amount0 uint) (amount1 uint)) uint))
+
+    ;; Swap tokens in the pool
+    ;; @param recipient: recipient of output tokens
+    ;; @param zero-for-one: direction of swap
+    ;; @param amount-specified: amount of input tokens
+    ;; @param sqrt-price-limit: price limit for the swap
+    ;; @return (response (tuple (amount0 int) (amount1 int) (sqrt-price uint) (liquidity uint) (tick int)) uint): swap results and error code
+    (swap (recipient principal) (zero-for-one bool) (amount-specified uint) (sqrt-price-limit uint) (response (tuple (amount0 int) (amount1 int) (sqrt-price uint) (liquidity uint) (tick int)) uint))
+
+    ;; Get pool state
+    ;; @return (response (tuple (sqrt-price uint) (tick int) (liquidity uint)) uint): current pool state and error code
+    (get-pool-state () (response (tuple (sqrt-price uint) (tick int) (liquidity uint)) uint))
+
+    ;; Get position information
+    ;; @param token-id: ID of the position NFT
+    ;; @return (response (tuple (owner principal) (tick-lower int) (tick-upper int) (liquidity uint)) uint): position details and error code
+    (get-position (token-id uint) (response (tuple (owner principal) (tick-lower int) (tick-upper int) (liquidity uint)) uint))
+  )
+)
+
+;; ===========================================
+;; POOL TRAIT
+;; ===========================================
+;; Interface for liquidity pools
+;;
+;; This trait provides standard functions for all types of liquidity pools.
+;;
+;; Example usage:
+;;   (use-trait pool .all-traits.pool-trait)
+(define-trait pool-trait
+  (
+    ;; Add liquidity to the pool
+    ;; @param provider: liquidity provider
+    ;; @param token-amount: amount of first token
+    ;; @param stx-amount: amount of second token (usually STX)
+    ;; @return (response uint uint): liquidity tokens minted and error code
+    (add-liquidity (provider principal) (token-amount uint) (stx-amount uint) (response uint uint))
+
+    ;; Remove liquidity from the pool
+    ;; @param provider: liquidity provider
+    ;; @param liquidity-amount: amount of liquidity tokens to burn
+    ;; @return (response (tuple (token-amount uint) (stx-amount uint)) uint): amounts returned and error code
+    (remove-liquidity (provider principal) (liquidity-amount uint) (response (tuple (token-amount uint) (stx-amount uint)) uint))
+
+    ;; Swap tokens
+    ;; @param sender: transaction sender
+    ;; @param token-in: input token
+    ;; @param token-out: output token
+    ;; @param amount-in: input amount
+    ;; @param min-out: minimum output amount
+    ;; @return (response uint uint): output amount and error code
+    (swap (sender principal) (token-in principal) (token-out principal) (amount-in uint) (min-out uint) (response uint uint))
+
+    ;; Get pool reserves
+    ;; @return (response (tuple (token-reserve uint) (stx-reserve uint)) uint): reserve amounts and error code
+    (get-reserves () (response (tuple (token-reserve uint) (stx-reserve uint)) uint))
+
+    ;; Get pool information
+    ;; @return (response (tuple (total-liquidity uint) (fee-rate uint)) uint): pool info and error code
+    (get-pool-info () (response (tuple (total-liquidity uint) (fee-rate uint)) uint))
+  )
+)
+
+;; ===========================================
+;; SELF-LAUNCH COORDINATOR TRAIT
+;; ===========================================
+;; Interface for self-launch coordination
+;;
+;; This trait provides functions for community-driven contract deployment
+;; and progressive system bootstrapping.
+;;
+;; Example usage:
+;;   (use-trait self-launch .all-traits.self-launch-coordinator-trait)
+(define-trait self-launch-coordinator-trait
+  (
+    ;; Contribute funding to the launch
+    ;; @param amount: STX amount to contribute
+    ;; @return (response uint uint): tokens minted and error code
+    (contribute-funding (amount uint) (response uint uint))
+
+    ;; Get current launch status
+    ;; @return (response (tuple ...) uint): launch status and error code
+    (get-launch-status () (response (tuple (phase uint) (funding-received uint) (funding-target uint) (progress-percentage uint) (contracts-deployed uint)) uint))
+
+    ;; Check if phase advancement criteria are met
+    ;; @param phase: phase to check
+    ;; @return (response bool uint): true if ready to advance, false otherwise, and error code
+    (check-phase-advancement (phase uint) (response bool uint))
+
+    ;; Advance to next launch phase
+    ;; @return (response bool uint): success flag and error code
+    (advance-phase () (response bool uint))
+
+    ;; Get community contribution statistics
+    ;; @return (response (tuple ...) uint): community stats and error code
+    (get-community-stats () (response (tuple (total-contributors uint) (total-funding uint) (average-contribution uint)) uint))
+  )
+)
+
+;; ===========================================
+;; FACTORY TRAIT
+;; ===========================================
+;; Interface for factory contracts that create other contracts
+;;
+;; This trait provides functions for creating and managing contract instances.
+;;
+;; Example usage:
+;;   (use-trait factory .all-traits.factory-trait)
+(define-trait factory-trait
+  (
+    ;; Create a new contract instance
+    ;; @param token-a: first token for the pair
+    ;; @param token-b: second token for the pair
+    ;; @param fee-bps: fee in basis points
+    ;; @return (response principal uint): contract address and error code
+    (create-pool (token-a principal) (token-b principal) (fee-bps uint) (response principal uint))
+
+    ;; Get the total number of contracts created
+    ;; @return (response uint uint): total count and error code
+    (get-contract-count () (response uint uint))
+
+    ;; Get contract address by index
+    ;; @param index: contract index
+    ;; @return (response principal uint): contract address and error code
+    (get-contract-by-index (index uint) (response principal uint))
+  )
+)
+
+;; ===========================================
+;; CIRCUIT BREAKER TRAIT
+;; ===========================================
+;; Interface for circuit breaker functionality
+;;
+;; This trait provides functions to pause and resume protocol operations
+;; in emergency situations.
+;;
+;; Example usage:
+;;   (use-trait circuit-breaker .all-traits.circuit-breaker-trait)
+(define-trait circuit-breaker-trait
+  (
+    ;; Check if the circuit breaker is currently open (paused)
+    ;; @return (response bool uint): true if open, false if closed, and error code
+    (is-circuit-open () (response bool uint))
+
+    ;; Open the circuit breaker (pause operations)
+    ;; @return (response bool uint): success flag and error code
+    (open-circuit () (response bool uint))
+
+    ;; Close the circuit breaker (resume operations)
+    ;; @return (response bool uint): success flag and error code
+    (close-circuit () (response bool uint))
+
+    ;; Get circuit breaker status information
+    ;; @return (response (tuple ...) uint): status details and error code
+    (get-circuit-status () (response (tuple (is-open bool) (opened-at uint) (opened-by principal) (reason (optional (string-ascii 256)))) uint))
+  )
+)
+
+;; ===========================================
+;; STRATEGY TRAIT
+;; ===========================================
+;; Interface for yield strategy contracts
+;;
+;; This trait provides functions for DeFi yield strategies, including
+;; deposit, withdrawal, harvesting, and emergency functions.
+;;
+;; Example usage:
+;;   (use-trait strategy .all-traits.strategy-trait)
+(define-trait strategy-trait
+  (
+    ;; Deposit tokens into the strategy
+    ;; @param token-contract: the token contract to deposit
+    ;; @param amount: amount of tokens to deposit
+    ;; @return (response uint uint): deposited amount and error code
+    (deposit (token-contract principal) (amount uint) (response uint uint))
+
+    ;; Withdraw tokens from the strategy
+    ;; @param token-contract: the token contract to withdraw from
+    ;; @param amount: amount of tokens to withdraw
+    ;; @return (response uint uint): withdrawn amount and error code
+    (withdraw (token-contract principal) (amount uint) (response uint uint))
+
+    ;; Harvest rewards from the strategy
+    ;; @return (response bool uint): success flag and error code
+    (harvest () (response bool uint))
+
+    ;; Get the total value locked in the strategy
+    ;; @return (response uint uint): TVL and error code
+    (get-tvl () (response uint uint))
+
+    ;; Get the annual percentage yield
+    ;; @return (response uint uint): APY in basis points and error code
+    (get-apy () (response uint uint))
+
+    ;; Emergency exit - withdraw all funds immediately
+    ;; @return (response uint uint): withdrawn amount and error code
+    (emergency-exit () (response uint uint))
+
+    ;; Get strategy information
+    ;; @return (response (tuple ...) uint): strategy details and error code
+    (get-strategy-info () (response (tuple (deployed uint) (current-value uint) (expected-apy uint) (risk-level uint)) uint))
+  )
+)
+
+;; ===========================================
+;; PAUSABLE TRAIT
+;; ===========================================
+;; Interface for pausable contracts
+;;
+;; This trait provides functions to pause and unpause contract operations,
+;; typically used for emergency situations or maintenance.
+;;
+;; Example usage:
+;;   (use-trait pausable .all-traits.pausable-trait)
+(define-trait pausable-trait
+  (
+    ;; Check if the contract is paused
+    ;; @return (response bool uint): true if paused, false otherwise, and error code
+    (is-paused () (response bool uint))
+
+    ;; Pause the contract
+    ;; @return (response bool uint): success flag and error code
+    (pause () (response bool uint))
+
+    ;; Unpause the contract
+    ;; @return (response bool uint): success flag and error code
+    (unpause () (response bool uint))
+  )
+)
+
+;; ===========================================
+;; OWNABLE TRAIT
+;; ===========================================
+;; Interface for ownable contracts
+;;
+;; This trait provides functions for ownership management,
+;; allowing transfer of ownership and ownership verification.
+;;
+;; Example usage:
+;;   (use-trait ownable .all-traits.ownable-trait)
+(define-trait ownable-trait
+  (
+    ;; Get the current owner
+    ;; @return (response principal uint): owner address and error code
+    (get-owner () (response principal uint))
+
+    ;; Check if an address is the owner
+    ;; @param account: address to check
+    ;; @return (response bool uint): true if owner, false otherwise, and error code
+    (is-owner (account principal) (response bool uint))
+
+    ;; Transfer ownership to a new address
+    ;; @param new-owner: new owner address
+    ;; @return (response bool uint): success flag and error code
+    (transfer-ownership (new-owner principal) (response bool uint))
+  )
+)

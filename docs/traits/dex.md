@@ -1,4 +1,0 @@
-# dex Trait
-
-## Functions
-

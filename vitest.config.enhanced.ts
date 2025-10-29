@@ -16,6 +16,7 @@ export default defineConfig({
     // Test directories for comprehensive coverage
     include: [
       'stacks/tests/**/*.test.ts',
+      'stacks/tests/**/*.spec.ts',
       'stacks/sdk-tests/**/*.spec.ts',
       'tests/load-testing/**/*.test.ts',
       'tests/**/*.test.ts',

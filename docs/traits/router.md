@@ -1,4 +1,0 @@
-# router Trait
-
-## Functions
-

@@ -1,4 +1,0 @@
-# ownable Trait
-
-## Functions
-

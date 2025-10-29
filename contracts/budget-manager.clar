@@ -5,11 +5,6 @@
 (use-trait budget-manager-trait .all-traits.budget-manager-trait)
 (use-trait proposal-trait .all-traits.proposal-trait)
 
-(use-trait budget_manager_trait .all-traits.budget-manager-trait)
-(use-trait budget-manager-trait .all-traits.budget-manager-trait)
-(use-trait proposal_trait .all-traits.proposal-trait)
-(use-trait proposal-trait .all-traits.proposal-trait)
-
 ;; Constants
 (define-constant ERR_UNAUTHORIZED (err u100))
 (define-constant ERR_PROPOSAL_NOT_FOUND (err u101))

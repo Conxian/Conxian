@@ -1,4 +1,0 @@
-# CXLP Trait
-
-## Functions
-

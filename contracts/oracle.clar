@@ -4,7 +4,6 @@
 
 ;; Traits
 (use-trait oracle-trait .all-traits.oracle-trait)
-(use-trait oracle_trait .all-traits.oracle-trait)
 
 ;; Constants
 (define-constant ERR_UNAUTHORIZED (err u100))

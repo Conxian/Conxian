@@ -1,4 +1,0 @@
-# dao Trait
-
-## Functions
-

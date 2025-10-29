@@ -25,6 +25,18 @@ This document outlines the GitHub Secrets configured for the Conxian project.
 
 - `VAULT_CONTRACT_ADDRESS`: Address of the vault contract
 
+## Setup Instructions
+
+### 1. Navigate to Repository Settings
+
+1. Go to your GitHub repository: `https://github.com/your-org/Conxian`
+2. Click on **Settings** tab
+3. In the left sidebar, navigate to **Security** → **Secrets and variables** → **Actions**
+
+### 2. Add Repository Secrets
+
+Click **New repository secret** and add each of the required secrets.
+
 ## Usage in Workflows
 
 ### Testnet Deployment
@@ -61,8 +73,16 @@ env:
 
 These aliases allow workflows to remain unchanged while the GUI auto-detects and populates required fields when secrets are present.
 
-## Security Notes
+## Security Best Practices
 
+- **Never commit private keys to code**
+- **Use testnet keys for development/staging**
+- **Rotate keys regularly**
+- **Use dedicated keys with minimal balances**
+- **Enable 2FA on GitHub account**
+- **Regenerate API keys periodically**
+- **Use minimum required permissions**
+- **Monitor API usage for anomalies**
 - All secrets are stored in GitHub's encrypted secrets store
 - Access is restricted to repository administrators
 - Rotate secrets regularly, especially after team member changes

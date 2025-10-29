@@ -474,10 +474,6 @@ address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.libraries-concentrated-math
 path = "contracts/math/math-lib-concentrated.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math-lib-concentrated"
 
-[contracts.math-math-lib-concentrated]
-path = "contracts/math/math-lib-concentrated.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math-math-lib-concentrated"
-
 [contracts.mev-protector]
 path = "contracts/mev-protector.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.mev-protector"

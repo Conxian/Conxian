@@ -3,8 +3,6 @@
 ;; DEX Factory v2 - Minimal trait-compliant implementation
 
 (use-trait dex-factory-v2-trait .all-traits.dex-factory-v2-trait)
-(use-trait dex_factory_v2_trait .all-traits.dex-factory-v2-trait)
-(use-trait dex-factory-v2-trait .all-traits.dex-factory-v2-trait)
 (define-constant ERR_UNAUTHORIZED (err u2001))
 (define-constant ERR_TYPE_NOT_FOUND (err u2002))
 
