@@ -2,8 +2,8 @@
 ;; Refactored for clarity, security, and correctness.
 
 ;; --- Traits ---
+(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
 (use-trait lending-system-trait .all-traits.lending-system-trait)
-(use-trait lending_system_trait .all-traits.lending-system-trait)
 
 ;; --- Constants ---
 (define-constant LENDING_SERVICE "lending-service")
@@ -138,12 +138,12 @@
     (ok true)))
 
 ;; --- Core Functions ---
-(define-public (supply (asset <ft-trait>) (amount uint))
+(define-public (supply (asset <sip-010-ft-trait>) (amount uint))
   (match (supply-internal asset amount)
     success (begin (try! (call-circuit-breaker-success)) (ok success))
     error (begin (try! (call-circuit-breaker-failure)) (err error))))
 
-(define-private (supply-internal (asset <ft-trait>) (amount uint))
+(define-private (supply-internal (asset <sip-010-ft-trait>) (amount uint))
   (begin
     (try! (check-not-paused))
     (try! (check-circuit-breaker))
@@ -157,12 +157,12 @@
         (map-set user-collateral-assets { user: tx-sender, asset: asset-principal } true)
         (ok true)))))
 
-(define-public (withdraw (asset <ft-trait>) (amount uint))
+(define-public (withdraw (asset <sip-010-ft-trait>) (amount uint))
   (match (withdraw-internal asset amount)
     success (begin (try! (call-circuit-breaker-success)) (ok success))
     error (begin (try! (call-circuit-breaker-failure)) (err error))))
 
-(define-private (withdraw-internal (asset <ft-trait>) (amount uint))
+(define-private (withdraw-internal (asset <sip-010-ft-trait>) (amount uint))
   (begin
     (try! (check-not-paused))
     (try! (check-circuit-breaker))
@@ -177,12 +177,12 @@
           (try! (as-contract (contract-call? asset transfer amount (as-contract tx-sender) tx-sender none)))
           (ok true))))))
 
-(define-public (borrow (asset <ft-trait>) (amount uint))
+(define-public (borrow (asset <sip-010-ft-trait>) (amount uint))
   (match (borrow-internal asset amount)
     success (begin (try! (call-circuit-breaker-success)) (ok success))
     error (begin (try! (call-circuit-breaker-failure)) (err error))))
 
-(define-private (borrow-internal (asset <ft-trait>) (amount uint))
+(define-private (borrow-internal (asset <sip-010-ft-trait>) (amount uint))
   (begin
     (try! (check-not-paused))
     (try! (check-circuit-breaker))
@@ -200,12 +200,12 @@
           (try! (as-contract (contract-call? asset transfer amount (as-contract tx-sender) tx-sender none)))
           (ok true))))))
 
-(define-public (repay (asset <ft-trait>) (amount uint))
+(define-public (repay (asset <sip-010-ft-trait>) (amount uint))
   (match (repay-internal asset amount)
     success (begin (try! (call-circuit-breaker-success)) (ok success))
     error (begin (try! (call-circuit-breaker-failure)) (err error))))
 
-(define-private (repay-internal (asset <ft-trait>) (amount uint))
+(define-private (repay-internal (asset <sip-010-ft-trait>) (amount uint))
   (begin
     (try! (check-not-paused))
     (try! (check-circuit-breaker))
@@ -222,8 +222,8 @@
 (define-public (liquidate 
   (liquidator principal) 
   (borrower principal) 
-  (repay-asset <ft-trait>) 
-  (collateral-asset <ft-trait>) 
+  (repay-asset <sip-010-ft-trait>) 
+  (collateral-asset <sip-010-ft-trait>) 
   (repay-amount uint))
   (begin
     (asserts! (is-eq tx-sender (var-get loan-liquidation-manager-contract)) ERR_UNAUTHORIZED)
@@ -250,9 +250,8 @@
               (borrower-collateral (default-to u0 (get balance (map-get? user-supply-balances { user: borrower, asset: collateral-asset-principal }))))
             )
           )
-        )
+        (ok true)
       )
     )
   )
 )
-            ) ;; Closing parenthesis for the let expression

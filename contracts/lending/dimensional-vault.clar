@@ -30,7 +30,7 @@
   total-borrows: u0,
   total-reserves: u0,
   last-updated: u0,
-  borrow-index: u1e18
+  borrow-index: u1000000000000000000
 })
 
 ;; User balances
@@ -133,7 +133,7 @@
         ;; Update borrow index
         (borrow-index-increase 
           (if (> (get state 'total-supply) 0)
-            (/ (* interest-accumulated u1e18) (get state 'total-supply))
+            (/ (* interest-accumulated u1000000000000000000) (get state 'total-supply))
             u0
           )
         )

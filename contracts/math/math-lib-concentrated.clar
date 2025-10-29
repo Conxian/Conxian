@@ -74,7 +74,7 @@
   (if (<= n 1)
     n
     (let (
-      (initial (let ((candidate (>> n 1))) (if (> candidate u0) candidate u1)))
+      (initial (let ((candidate (/ n u2))) (if (> candidate u0) candidate u1)))
       (approx (fold SQRT-ITERATIONS initial
         (lambda (iteration guess)
           (let ((next (/ (+ guess (/ n guess)) u2)))
