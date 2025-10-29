@@ -78,7 +78,7 @@ const hasRole = await simnet.callReadOnlyFn(
 ```text
 Conxian/
 ├── contracts/                  # Smart contract source files
-├── stacks/sdk-tests/           # TypeScript test files
+├── tests/                      # TypeScript test files
 ├── documentation/              # Project documentation
 ├── settings/                   # Network configs (Testnet.toml)
 ├── .github/workflows/          # CI/CD workflows
@@ -96,7 +96,7 @@ When developing new contracts, follow these patterns for access control:
 
 1. **Import Access Control**
    ```clarity
-   (use-trait access-control-trait .access-control.access-control-trait)
+   (use-trait access-control-trait .all-traits.access-control-trait)
    ```
 
 2. **Define Required Roles**
@@ -167,7 +167,7 @@ vim ../Clarinet.toml
 #### Test Structure
 
 ```typescript
-// sdk-tests/my-contract.spec.ts
+// tests/my-contract.spec.ts
 import { describe, expect, it, beforeEach } from 'vitest';
 import { Simnet } from '@hirosystems/clarinet-sdk';
 
@@ -198,16 +198,16 @@ describe('My Contract Tests', () => {
 
 ```bash
 # Run all tests
-npm test
+npx vitest run
 
 # Run specific test file
-npm test -- my-contract.spec.ts
+npx vitest run -- my-contract.spec.ts
 
 # Run tests with coverage
-npm run test:coverage
+npx vitest run --coverage
 
 # Run tests in watch mode
-npm run test:watch
+npx vitest watch
 ```
 
 #### Test Categories
@@ -471,10 +471,10 @@ npx clarinet check --verbose
 
 ```bash
 # Run tests with detailed output
-npm test -- --reporter=verbose
+npx vitest run -- --reporter=verbose
 
 # Debug specific test
-npm test -- --grep "failing test name"
+npx vitest run -- --grep "failing test name"
 
 # Check simnet state
 console.log(simnet.getBlockHeight());
@@ -589,7 +589,7 @@ git push origin feature/my-feature
 
 - **Documentation**: Check `/documentation/` directory
 - **GitHub Issues**: [Report bugs or request features](https://github.com/Anya-org/Conxian/issues)
-- **Code Examples**: See `sdk-tests/` for comprehensive examples
+- **Code Examples**: See `tests/` for comprehensive examples
 - **Community**: Join development discussions
 
 ### Common Resources

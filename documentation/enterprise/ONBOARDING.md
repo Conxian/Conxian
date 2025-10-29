@@ -42,24 +42,11 @@ The enterprise system can be connected to a compliance contract.
 
 *   The contract owner sets the address of the compliance contract using `set-compliance-hook`.
 *   Once set, all trading functions in the `enterprise-api` will call the `is-verified` function in the compliance contract to ensure the user is authorized to trade.
-*   A reference implementation of a compliance contract is available in `compliance-hooks.clar`.
-
-## The Dimensional DeFi System: An Architectural Overview
-
-A key innovation in the Conxian protocol is its "dimensional" architecture. This refers to a graph-based representation of the entire DeFi ecosystem, where:
-
-*   **Nodes** are tokens.
-*   **Edges** are liquidity pools or other connections between tokens.
-*   **Edge Weights** are calculated based on liquidity, fees, and other factors.
-
-This allows for highly efficient trade routing. The `advanced-router-dijkstra.clar` contract uses Dijkstra's algorithm to find the optimal path for any given swap, minimizing slippage and fees.
-
-### Integrating with the Dimensional Router
-
-While retail users will interact with this router through the standard `dex-router.clar`, institutions can integrate directly with the `advanced-router-dijkstra.clar` contract to:
-
-*   **Query for optimal paths:** Use `find-optimal-path` to determine the best route for a trade before execution.
-*   **Execute complex swaps:** The `swap-optimal-path` function allows for the execution of a swap along the most efficient route.
+*   A reference implementation of a compliance contract is available in `compliance-hooks.clar`. This contract includes the following functions:
+    *   `set-kyc-tier`: Sets the KYC tier for a given account.
+    *   `verify-account`: Verifies an account by setting its KYC tier to a basic level.
+    *   `unverify-account`: Removes the verification for an account.
+    *   `is-verified`: Checks if an account is currently verified.
 
 ## Technical API Reference
 
