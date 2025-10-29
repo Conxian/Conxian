@@ -65,28 +65,30 @@
   (if (> a b) a b))
 
 ;; ===========================================
-;; SQUARE ROOT FUNCTIONS (NON-CIRCULAR)
+;; SQUARE ROOT FUNCTIONS (ITERATIVE)
 ;; ===========================================
 
-;; Babylonian method for square root - fixed iteration implementation (no recursion)
-(define-read-only (sqrt-babylonian (x uint))
-  (if (is-eq x u0)
-    (ok u0)
-    (if (is-eq x u1)
-      (ok u1)
-      (let ((guess (/ (+ x u1) u2)))
-        ;; Fixed number of iterations (10) for convergence
-        (let ((result1 (/ (+ guess (/ x guess)) u2)))
-          (let ((result2 (/ (+ result1 (/ x result1)) u2)))
-            (let ((result3 (/ (+ result2 (/ x result2)) u2)))
-              (let ((result4 (/ (+ result3 (/ x result3)) u2)))
-                (let ((result5 (/ (+ result4 (/ x result4)) u2)))
-                  (let ((result6 (/ (+ result5 (/ x result5)) u2)))
-                    (let ((result7 (/ (+ result6 (/ x result6)) u2)))
-                      (let ((result8 (/ (+ result7 (/ x result7)) u2)))
-                        (let ((result9 (/ (+ result8 (/ x result8)) u2)))
-                          (let ((result10 (/ (+ result9 (/ x result9)) u2)))
-                            (ok result10)))))))))))))
+(define-constant SQRT-ITERATIONS (list u0 u1 u2 u3 u4 u5 u6 u7 u8 u9 u10 u11 u12 u13 u14 u15))
+
+(define-private (sqrt (n uint))
+  (if (<= n 1)
+    n
+    (let (
+      (initial (let ((candidate (>> n 1))) (if (> candidate u0) candidate u1)))
+      (approx (fold SQRT-ITERATIONS initial
+        (lambda (iteration guess)
+          (let ((next (/ (+ guess (/ n guess)) u2)))
+            (if (>= guess next)
+              next
+              guess)
+          )
+        )
+      ))
+    )
+      approx
+    )
+  )
+)
 
 ;; Helper for absolute difference
 (define-private (abs-diff (a uint) (b uint))
@@ -129,7 +131,7 @@
 
 ;; Convert price to nearest tick
 (define-read-only (price-to-tick (price uint))
-  (let ((sqrt-price-result (sqrt-babylonian (* price Q128))))
+  (let ((sqrt-price-result (sqrt (* price Q128))))
     (match sqrt-price-result
       sqrt-price (get-tick-at-sqrt-ratio sqrt-price)
       error error)))

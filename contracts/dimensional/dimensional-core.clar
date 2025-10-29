@@ -300,13 +300,13 @@
       (asserts! (>= total-amount min-amount-out) (err ERR_SLIPPAGE))
 
       ;; Mark position as closed
-      (map-set positions (merge position-key {
+      (map-set positions position-key (merge position {
         status: "CLOSED",
         last-updated: block-height
       }))
 
       ;; Transfer funds back to user
-      (try! (as-contract (contract-call? (get-position-asset position) transfer total-amount (as-contract tx-sender) tx-sender none)))
+      (try! (contract-call? (get-position-asset position) transfer total-amount (as-contract tx-sender) tx-sender none))
 
       (ok total-amount)
     )
@@ -361,13 +361,13 @@
         (total-amount (+ (get position collateral) pnl))
       )
         ;; Mark position as closed
-        (map-set positions (merge position-key {
+        (map-set positions position-key (merge position {
           status: "SETTLED",
           last-updated: block-height
         }))
 
         ;; Transfer funds back to user
-        (try! (as-contract (contract-call? (get-position-asset position) transfer total-amount (as-contract tx-sender) owner none)))
+        (try! (contract-call? (get-position-asset position) transfer total-amount (as-contract tx-sender) owner none))
 
         (ok true)
       )

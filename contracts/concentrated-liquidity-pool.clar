@@ -1,5 +1,3 @@
-
-
 ;; concentrated-liquidity-pool.clar
 
 ;; This contract implements a concentrated liquidity pool.
@@ -32,17 +30,41 @@
 
 ;; --- Private Functions ---
 
-;; Helper function to normalize token order(define-private (normalize-token-pair (token-a principal) (token-b principal))  (if (is-eq token-a token-b)    (err ERR_INVALID_TOKENS)    (let ((order-a (default-to u0 (map-get? token-order token-a)))          (order-b (default-to u0 (map-get? token-order token-b))))      (if (< order-a order-b)        (ok { token-a: token-a, token-b: token-b })        (ok { token-a: token-b, token-b: token-a })      )    )  ))
+;; Helper function to normalize token order
+(define-private (normalize-token-pair (token-a principal) (token-b principal))  
+  (if (is-eq token-a token-b)    
+    (err ERR_INVALID_TOKENS)    
+    (let ((order-a (default-to u0 (map-get? token-order token-a)))          
+          (order-b (default-to u0 (map-get? token-order token-b))))      
+      (if (< order-a order-b)        
+        (ok { token-a: token-a, token-b: token-b })        
+        (ok { token-a: token-b, token-b: token-a })      
+      )    
+    )  
+  )
 
 ;; --- Traits ---
 (use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
-(impl-trait sip-010-ft-trait)
+(use-trait clp-pool-trait .all-traits.clp-pool-trait)
+(impl-trait clp-pool-trait)
 
 ;; --- Public Functions (Pool Creation Trait Implementation) ---
 (define-public (create-pool (token-a <sip-010-ft-trait>) (token-b <sip-010-ft-trait>) (fee-bps uint))
   (begin
     (asserts! (is-ok (contract-call? token-a get-symbol)) (err ERR_INVALID_TOKENS))
-    (asserts! (is-ok (contract-call? token-b get-symbol)) (err ERR_INVALID_TOKENS))    (asserts! (not (is-eq (contract-of token-a) (contract-of token-b))) (err ERR_INVALID_TOKENS))    (let ((normalized-pair (unwrap! (normalize-token-pair (contract-of token-a) (contract-of token-b)) (err ERR_INVALID_TOKENS))))      (asserts! (is-none (map-get? pools normalized-pair)) ERR_POOL_ALREADY_EXISTS)      (map-set pools normalized-pair {        fee-bps: fee-bps,        token-a-addr: (contract-of token-a),        token-b-addr: (contract-of token-b)      })      (ok (as-contract tx-sender))    )  ))
+    (asserts! (is-ok (contract-call? token-b get-symbol)) (err ERR_INVALID_TOKENS))    
+    (asserts! (not (is-eq (contract-of token-a) (contract-of token-b))) (err ERR_INVALID_TOKENS))    
+    (let ((normalized-pair (unwrap! (normalize-token-pair (contract-of token-a) (contract-of token-b)) (err ERR_INVALID_TOKENS))))      
+      (asserts! (is-none (map-get? pools normalized-pair)) ERR_POOL_ALREADY_EXISTS)      
+      (map-set pools normalized-pair {        
+        fee-bps: fee-bps,        
+        token-a-addr: (contract-of token-a),        
+        token-b-addr: (contract-of token-b)      
+      })      
+      (ok (as-contract tx-sender))    
+    )  
+  )
+)
 (define-public (get-pool (token-a <sip-010-ft-trait>) (token-b <sip-010-ft-trait>))
   (let ((normalized-pair (unwrap! (normalize-token-pair (contract-of token-a) (contract-of token-b)) (err ERR_INVALID_TOKENS))))
     (ok (map-get? pools normalized-pair))
@@ -75,9 +97,7 @@
 
       ;; TODO: Calculate liquidity based on amounts and current price
       (let ((liquidity u1000)
-
-        ;; Placeholder for actual liquidity calculation
-        (position-id (var-get next-position-id)))
+            (position-id (var-get next-position-id)))
 
         ;; Transfer tokens to the pool
         (try! (contract-call? token-a transfer amount-a tx-sender (as-contract tx-sender) none))
@@ -115,9 +135,7 @@
 
       ;; TODO: Calculate token amounts to return based on liquidity and current price
       (let ((amount-a u500)
-
-        ;; Placeholder
-        (amount-b u500))
+            (amount-b u500))
 
         ;; Placeholder
         (try! (contract-call? (unwrap-panic (contract-call? .all-traits get-contract-by-address (get token-a position))) transfer amount-a (as-contract tx-sender) tx-sender none))
@@ -139,9 +157,7 @@
 
       ;; TODO: Implement actual swap logic, tick traversal, and fee calculation
       (let ((amount-out u900)
-
-        ;; Placeholder
-        (fee-amount u100))
+            (fee-amount u100))
 
         ;; Placeholder
         (asserts! (>= amount-out min-amount-out) (err ERR_INSUFFICIENT_LIQUIDITY))
@@ -164,9 +180,7 @@
       (asserts! (is-some (map-get? pools normalized-pair)) (err ERR_POOL_NOT_FOUND))
 
       ;; TODO: Implement actual price calculation based on current tick
-      (ok u100000000)
-
-      ;; Placeholder for price
+      (ok u100000000)  ;; Placeholder for price
     )
   )
 )

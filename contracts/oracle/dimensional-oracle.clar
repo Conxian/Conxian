@@ -192,25 +192,43 @@
 )
 
 (define-private (update-aggregate-price (asset principal))
-  (let ((feeds (default-to (list) (map-get? price-feeds {token: asset})))
-        (current-block block-height)
-        (heartbeat (var-get heartbeat-interval)))
-    (let ((valid-prices (fold (lambda ((feed principal) (acc (list 10 uint)))
-                                (let ((fd (map-get? feed-prices {feed: feed, token: asset})))
-                                  (if (and fd (>= current-block (- (get last-updated (unwrap-panic fd)) heartbeat)))
-                                      (append acc (list (get price (unwrap-panic fd))))
-                                      acc)))
-                              feeds
-                              (list))))
+  (let (
+      (feeds (default-to (list) (map-get? price-feeds {token: asset})))
+      (current-block block-height)
+      (heartbeat (var-get heartbeat-interval))
+    )
+    (let (
+        (valid-prices
+          (fold feeds (list)
+            (lambda (feed acc)
+              (let ((feed-data (map-get? feed-prices {feed: feed, token: asset})))
+                (if (and (is-some feed-data)
+                         (>= current-block (- (get last-updated (unwrap-panic feed-data)) heartbeat)))
+                    (append acc (list (get price (unwrap-panic feed-data))))
+                    acc
+                )
+              )
+            )
+          )
+        )
+      )
       (asserts! (> (len valid-prices) u0) ERR_STALE_PRICE)
       (let ((median-price (get-median valid-prices)))
-        (match (map-get? price-data {token: asset})
-          existing-data (let ((current-price (get price existing-data)))
-                          (asserts! (is-price-deviation-valid? current-price median-price) ERR_DEVIATION_TOO_HIGH)
-                          (ok true))
-          (ok true))
-        (map-set price-data {token: asset}
-          { price: median-price, last-updated: current-block, deviation-threshold: (var-get max-deviation) })
+        (let ((existing-data (map-get? price-data {token: asset})))
+          (if (is-some existing-data)
+              (asserts!
+                (is-price-deviation-valid?
+                  (get price (unwrap-panic existing-data))
+                  median-price)
+                ERR_DEVIATION_TOO_HIGH)
+              (ok true)
+          )
+        )
+        (map-set price-data {token: asset} {
+          price: median-price,
+          last-updated: current-block,
+          deviation-threshold: (var-get max-deviation)
+        })
         (ok true)
       )
     )

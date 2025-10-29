@@ -4,7 +4,6 @@
 (use-trait risk-oracle .all-traits.risk-oracle-trait)
 (use-trait oracle .all-traits.oracle-trait)
 (use-trait risk_oracle_trait .all-traits.risk-oracle-trait)
-.all-traits.risk-oracle-trait)
 
 ;; ===== Constants =====
 (define-constant ERR_UNAUTHORIZED (err u8000))
@@ -17,27 +16,27 @@
 
 ;; Asset-specific risk parameters
 (define-map asset-params {asset: principal} {
-  volatility: uint,       \; 30-day annualized volatility (in bps)
-  correlation: uint,      \; Correlation with base asset (in bps)
-  max-leverage: uint,     \; Maximum allowed leverage (in bps, e.g., 2000 for 20x)
-  liquidation-threshold: uint  \; Liquidation threshold (in bps, e.g., 8000 for 80%)
+  volatility: uint,       ;; 30-day annualized volatility (in bps)
+  correlation: uint,      ;; Correlation with base asset (in bps)
+  max-leverage: uint,     ;; Maximum allowed leverage (in bps, e.g., 2000 for 20x)
+  liquidation-threshold: uint  ;; Liquidation threshold (in bps, e.g., 8000 for 80%)
 })
 
 ;; Global risk parameters
 (define-data-var global-params {
-  base-maintenance-margin: uint,  \; Base maintenance margin (in bps)
-  min-margin: uint,              \; Minimum margin requirement (in bps)
-  max-leverage: uint,            \; System-wide max leverage (in bps)
-  liquidation-penalty: uint,     \; Penalty for liquidation (in bps)
-  insurance-fund-fee: uint,      \; Insurance fund contribution (in bps)
-  oracle-freshness: uint         \; Maximum allowed oracle staleness (in blocks)
+  base-maintenance-margin: uint,  ;; Base maintenance margin (in bps)
+  min-margin: uint,              ;; Minimum margin requirement (in bps)
+  max-leverage: uint,            ;; System-wide max leverage (in bps)
+  liquidation-penalty: uint,     ;; Penalty for liquidation (in bps)
+  insurance-fund-fee: uint,      ;; Insurance fund contribution (in bps)
+  oracle-freshness: uint         ;; Maximum allowed oracle staleness (in blocks)
 }) {
-  base-maintenance-margin: u500,   \; 5%
-  min-margin: u1000,              \; 10%
-  max-leverage: u2000,            \; 20x
-  liquidation-penalty: u500,      \; 5%
-  insurance-fund-fee: u10,        \; 0.1%
-  oracle-freshness: u25           \; ~5 minutes
+  base-maintenance-margin: u500,   ;; 5%
+  min-margin: u1000,              ;; 10%
+  max-leverage: u2000,            ;; 20x
+  liquidation-penalty: u500,      ;; 5%
+  insurance-fund-fee: u10,        ;; 0.1%
+  oracle-freshness: u25           ;; ~5 minutes
 }
 
 ;; ===== Core Functions =====
@@ -62,9 +61,9 @@
     (asserts! (and 
       (> (get params 'base-maintenance-margin) u0)
       (> (get params 'min-margin) (get params 'base-maintenance-margin))
-      (> (get params 'max-leverage) u1000)  \; At least 10x
-      (< (get params 'liquidation-penalty) u1000)  \; Max 10%
-      (< (get params 'insurance-fund-fee) u50)     \; Max 0.5%
+      (> (get params 'max-leverage) u1000)  ;; At least 10x
+      (< (get params 'liquidation-penalty) u1000)  ;; Max 10%
+      (< (get params 'insurance-fund-fee) u50)     ;; Max 0.5%
     ) ERR_INVALID_PARAM)
     
     (var-set global-params params)
@@ -84,10 +83,10 @@
   (begin
     (asserts! (is-eq tx-sender (var-get owner)) ERR_UNAUTHORIZED)
     (asserts! (and 
-      (<= (get params 'volatility) u10000)  \; Max 100%
-      (<= (get params 'correlation) u10000) \; Max 100%
+      (<= (get params 'volatility) u10000)  ;; Max 100%
+      (<= (get params 'correlation) u10000) ;; Max 100%
       (<= (get params 'max-leverage) (get (var-get global-params) 'max-leverage))
-      (> (get params 'liquidation-threshold) u5000)  \; At least 50%
+      (> (get params 'liquidation-threshold) u5000)  ;; At least 50%
     ) ERR_INVALID_PARAM)
     
     (map-set asset-params {asset: asset} params)
@@ -107,14 +106,14 @@
     (base-margin (/ u10000 leverage))
     
     ;; Adjust margin based on volatility and correlation
-    (volatility-factor (/ (get params 'volatility) u100))  \; Convert bps to %
-    (correlation-factor (/ (get params 'correlation) u10000))  \; 0-1.0
+    (volatility-factor (/ (get params 'volatility) u100))  ;; Convert bps to %
+    (correlation-factor (/ (get params 'correlation) u10000))  ;; 0-1.0
     
     (risk-adjusted-margin 
       (/ 
         (* base-margin 
-           (+ u10000 volatility-factor)  \; Increase margin for volatile assets
-           (+ u10000 (* u5000 (- u10000 correlation-factor)))) \; Increase margin for low correlation
+           (+ u10000 volatility-factor)  ;; Increase margin for volatile assets
+           (+ u10000 (* u5000 (- u10000 correlation-factor)))) ;; Increase margin for low correlation
         u10000
       )
     )
@@ -162,7 +161,7 @@
           (denominator size-abs)
         )
           (if (<= numerator 0) 
-            u0  \; Already liquidatable at any price
+            u0  ;; Already liquidatable at any price
             (/ numerator denominator)
           )
         )
@@ -204,7 +203,7 @@
     
     ;; Calculate PnL
     (unrealized-pnl 
-      (if (> (get position 'size) 0)  \; Long position
+      (if (> (get position 'size) 0)  ;; Long position
         (/ (* (abs (get position 'size)) (- current-price (get position 'entry-price))) 
            (get position 'entry-price))
         (/ (* (abs (get position 'size)) (- (get position 'entry-price) current-price))

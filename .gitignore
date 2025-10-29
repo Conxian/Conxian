@@ -138,7 +138,7 @@ yarn-error.log*
 lerna-debug.log*
 
 # Prompt files (sensitive AI instructions)
-
+.github/chatmodes/*
 
 # Backup files (automatically generated)
 *.backup

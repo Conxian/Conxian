@@ -1,8 +1,8 @@
 ;; bond-factory.clar
 ;; Factory contract for creating and managing bond tokens
-(use-trait bond-factory-trait)
-(use-trait bond_factory_trait)
-(use-trait bond-factory-trait)
+(use-trait bond-factory-trait .all-traits.bond-factory-trait)
+
+(impl-trait bond-factory-trait)
 (define-constant ERR_UNAUTHORIZED (err u5000))
 (define-constant ERR_INVALID_TERMS (err u5001))
 (define-constant ERR_INSUFFICIENT_COLLATERAL (err u5002))
@@ -44,7 +44,7 @@
 ;; @returns (response uint uint) The product or an error code.
 (define-private (safe-mul (a uint) (b uint))
   (let ((c (* a b)))
-    (if (is-eq a u0) (is-eq c (/ c a)))
+    (if (or (is-eq a u0) (<= (/ c a) b))
       (ok c)
       (err ERR_OVERFLOW)
     )
@@ -253,72 +253,74 @@
     (asserts! (>= coupon-rate u0) (err ERR_INVALID_TERMS))
     (asserts! (<= coupon-rate u5000) (err ERR_INVALID_TERMS))  ;; Max 50%
     (asserts! (not (is-eq collateral-amount u0)) (err ERR_INSUFFICIENT_COLLATERAL))
-    
+
     ;; Calculate total payout to ensure no overflow
-    (let ((total-payout (unwrap! (safe-add principal-amount (unwrap! (safe-mul principal-amount coupon-rate) (err ERR_OVERFLOW))) (err ERR_OVERFLOW))))
+    (let ((total-payout (unwrap!
+                          (safe-add principal-amount
+                            (unwrap! (safe-mul principal-amount coupon-rate) (err ERR_OVERFLOW)))
+                          (err ERR_OVERFLOW))))
       (asserts! (>= collateral-amount total-payout) (err ERR_INSUFFICIENT_COLLATERAL))
-      
+
       ;; Transfer collateral from issuer
       (try! (contract-call? collateral-token transfer collateral-amount issuer (as-contract tx-sender) none))
-      
+
       ;; Increment bond ID safely
       (var-set next-bond-id (unwrap! (safe-add bond-id u1) (err ERR_OVERFLOW)))
-      
+
       ;; Deploy new bond token contract (simplified)
       (let ((bond-contract (try! (contract-call? .token-soft-launch deploy-contract))))
-      
-      ;; Save bond details
-      (map-set bonds bond-id (tuple
-        (issuer issuer)
-        (principal-amount principal-amount)
-        (coupon-rate coupon-rate)
-        (issue-block issue-block)
-        (maturity-block maturity-block)
-        (collateral-amount collateral-amount)
-        (collateral-token collateral-token)
-        (status bond-status)
-        (is-callable is-callable)
-        (call-premium call-premium)
-        (bond-contract bond-contract)
-        (name name)
-        (symbol symbol)
-        (decimals decimals)
-        (face-value face-value)
-      ))
-      (map-set bonds-by-contract bond-contract (tuple
-        (issuer issuer)
-        (principal-amount principal-amount)
-        (coupon-rate coupon-rate)
-        (issue-block issue-block)
-        (maturity-block maturity-block)
-        (collateral-amount collateral-amount)
-        (collateral-token collateral-token)
-        (status bond-status)
-        (is-callable is-callable)
-        (call-premium call-premium)
-        (bond-contract bond-contract)
-        (name name)
-        (symbol symbol)
-        (decimals decimals)
-        (face-value face-value)
-      ))
-      
-      ;; Increment bond ID for next issue
-      (var-set next-bond-id (+ bond-id u1))
-      
-      ;; Emit event
-      (emit-event "bond_created" (tuple
-        (issuer issuer)
-        (bond-id bond-id)
-        (amount principal-amount)
-        (timestamp block-height)
-      ))
-      
-      (ok (tuple
-        (bond-id bond-id)
-        (bond-contract bond-contract)
-        (maturity-block maturity-block)
-      )))
+
+        ;; Save bond details
+        (map-set bonds bond-id (tuple
+          (issuer issuer)
+          (principal-amount principal-amount)
+          (coupon-rate coupon-rate)
+          (issue-block issue-block)
+          (maturity-block maturity-block)
+          (collateral-amount collateral-amount)
+          (collateral-token collateral-token)
+          (status bond-status)
+          (is-callable is-callable)
+          (call-premium call-premium)
+          (bond-contract bond-contract)
+          (name name)
+          (symbol symbol)
+          (decimals decimals)
+          (face-value face-value)
+        ))
+
+        (map-set bonds-by-contract bond-contract (tuple
+          (issuer issuer)
+          (principal-amount principal-amount)
+          (coupon-rate coupon-rate)
+          (issue-block issue-block)
+          (maturity-block maturity-block)
+          (collateral-amount collateral-amount)
+          (collateral-token collateral-token)
+          (status bond-status)
+          (is-callable is-callable)
+          (call-premium call-premium)
+          (bond-contract bond-contract)
+          (name name)
+          (symbol symbol)
+          (decimals decimals)
+          (face-value face-value)
+        ))
+
+        ;; Emit event
+        (emit-event "bond_created" (tuple
+          (issuer issuer)
+          (bond-id bond-id)
+          (amount principal-amount)
+          (timestamp block-height)
+        ))
+
+        (ok (tuple
+          (bond-id bond-id)
+          (bond-contract bond-contract)
+          (maturity-block maturity-block)
+        ))
+      )
     )
   )
 )

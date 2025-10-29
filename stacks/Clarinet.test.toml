@@ -661,10 +661,6 @@ address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 path = "contracts/lib/math-lib-advanced.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
-[contracts.circuit-breaker]
-path = "contracts/security/circuit-breaker.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
-
 [contracts.auto-compounder]
 path = "contracts/dex/auto-compounder.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
@@ -932,10 +928,6 @@ address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 path = "contracts/governance/upgrade-controller.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
-[contracts.math-lib-concentrated]
-path = "contracts/math/math-lib-concentrated.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
-
 [contracts.cxd-token]
 path = "contracts/tokens/cxd-token.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
@@ -1068,10 +1060,6 @@ depends_on = [ "all-traits",]
 
 [contracts.dex-pool]
 path = "contracts/dex/dex-pool.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
-
-[contracts.fee-manager]
-path = "contracts/dex/fee-manager.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.legacy-adapter]

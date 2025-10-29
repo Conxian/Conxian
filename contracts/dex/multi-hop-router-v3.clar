@@ -1,4 +1,3 @@
-
 ;; ===========================================
 ;; MULTI-HOP ROUTER V3
 ;; ===========================================
@@ -135,114 +134,107 @@
 ;; ===========================================
 
 (define-private (find-best-route (token-in principal) (token-out principal) (amount-in uint))
-  (let ((direct-route (try-direct-route token-in token-out amount-in)))
-    (if (is-some direct-route)
-      direct-route
-      (try-two-hop-route token-in token-out amount-in)
-    )
+  (let ((direct-route (try-direct-route token-in token-out amount-in))
+        (two-hop-route (try-two-hop-route token-in token-out amount-in)))
+    (select-better-route direct-route two-hop-route)
   )
 )
 
 (define-private (try-direct-route (token-in principal) (token-out principal) (amount-in uint))
-  ;; Try to find a direct pool between token-in and token-out
   (let ((pools (get-pools-for-pair token-in token-out)))
-    (if (> (len pools) u0)
-      (let ((best-pool (get-best-pool pools token-in token-out amount-in)))
-        (if (is-some best-pool)
-          (let ((pool (unwrap-panic best-pool)))
-            (let ((amount-out (unwrap! (contract-call? pool get-amount-out token-in token-out amount-in) (err u0))))
-              (some {
-                hops: (list {pool: pool, token-in: token-in, token-out: token-out}),
-                min-amount-out: amount-out
-              })
-            )
-          )
-          none
-        )
-      )
+    (match (get-best-pool pools token-in token-out amount-in)
+      best
+      (some {
+        hops: (list { pool: (get pool best), token-in: token-in, token-out: token-out }),
+        min-amount-out: (get amount-out best)
+      })
       none
     )
   )
 )
 
 (define-private (try-two-hop-route (token-in principal) (token-out principal) (amount-in uint))
-  ;; Try routing through common intermediary tokens (like CXD, STX, USDA)
   (let ((intermediaries (list
-    (as-contract tx-sender) ;; CXD
-    'SP2H8PY27SEZ03MWRKS5XABZYQN17ETGQS3527SA5 ;; STX
-    'ST1PQHQKV0RJXZFY1DGX8MNSYSYV1PBPZ7PY1ABEG.mock-usda-token ;; USDA (placeholder)
-  )))
-
+          (as-contract tx-sender)
+          'SP2H8PY27SEZ03MWRKS5XABZYQN17ETGQS3527SA5
+          .contracts.mock-usda-token
+        )))
     (find-best-intermediary intermediaries token-in token-out amount-in)
   )
 )
 
 (define-private (find-best-intermediary (intermediaries (list 10 principal)) (token-in principal) (token-out principal) (amount-in uint))
-  (match intermediaries
-    intermediary
-    (let ((first-hop (try-direct-route token-in intermediary amount-in))
-          (second-hop (if (is-some first-hop)
-                         (let ((first-amount (unwrap-panic (contract-call? (get pool (unwrap-panic first-hop)) get-amount-out token-in intermediary amount-in))))
-                           (try-direct-route intermediary token-out first-amount))
-                         none)))
-
-      (if (and (is-some first-hop) (is-some second-hop))
-        (let ((first-route (unwrap-panic first-hop))
-              (second-route (unwrap-panic second-hop)))
-          (let ((total-min-out (get min-amount-out second-route)))
-            (some {
-              hops: (append (get hops first-route) (get hops second-route)),
-              min-amount-out: total-min-out
-            })
+  (fold intermediaries none
+    (lambda (intermediary best-route)
+      (let ((first-route (try-direct-route token-in intermediary amount-in)))
+        (if (is-some first-route)
+          (let ((first (unwrap-panic first-route))
+                (first-output (get min-amount-out (unwrap-panic first-route)))
+                (second-route (try-direct-route intermediary token-out first-output)))
+            (if (is-some second-route)
+              (let ((second (unwrap-panic second-route))
+                    (combined-hops (append (get hops first) (get hops second))))
+                (let ((candidate (some {
+                                  hops: combined-hops,
+                                  min-amount-out: (get min-amount-out second)
+                                })))
+                  (if (is-some best-route)
+                    (if (> (get min-amount-out (unwrap-panic candidate)) (get min-amount-out (unwrap-panic best-route)))
+                      candidate
+                      best-route)
+                    candidate)
+                )
+              )
+              best-route)
           )
-        )
-        (find-best-intermediary (as-max-len? (rest intermediaries) u9) token-in token-out amount-in)
+          best-route)
       )
     )
-    none
-  )
 )
 
 (define-private (execute-multi-hop-swap (hops (list 10 {pool: principal, token-in: principal, token-out: principal})) (amount-in uint) (recipient principal))
-  (match hops
-    hop
-    (let ((remaining-hops (as-max-len? (rest hops) u9)))
-      (if (> (len remaining-hops) u0)
-        ;; Multi-hop: swap through intermediate token
-        (let ((intermediate-result (unwrap! (contract-call? (get pool hop) swap (get token-in hop) (get token-out hop) amount-in amount-in recipient) (err u0))))
-          (execute-multi-hop-swap remaining-hops intermediate-result recipient)
-        )
-        ;; Final hop: swap to final token
-        (contract-call? (get pool hop) swap (get token-in hop) (get token-out hop) amount-in u0 recipient)
+  (fold hops (ok amount-in)
+    (lambda (hop result)
+      (match result
+        (ok current-amount)
+        (contract-call? (get pool hop) swap (get token-in hop) (get token-out hop) current-amount u0 recipient)
+        err-result
+        err-result
       )
     )
-    (err ERR_INVALID_ROUTE)
   )
-)
-
-(define-private (get-pools-for-pair (token-a principal) (token-b principal))
-  ;; In production, this would query the factory for all pools with this pair
-  ;; For now, return empty list - would need integration with dex-factory
-  (list)
 )
 
 (define-private (get-best-pool (pools (list 10 principal)) (token-in principal) (token-out principal) (amount-in uint))
-  ;; Find the pool with best output for the given amount
-  (match pools
-    pool
-    (let ((amount-out (unwrap! (contract-call? pool get-amount-out token-in token-out amount-in) (err u0))))
-      (let ((remaining-pools (as-max-len? (rest pools) u9)))
-        (let ((best-remaining (get-best-pool remaining-pools token-in token-out amount-in)))
-          (if (or (is-none best-remaining)
-                  (> amount-out (unwrap! (contract-call? (unwrap-panic best-remaining) get-amount-out token-in token-out amount-in) (err u0))))
-            (some pool)
-            best-remaining
-          )
+  (fold pools none
+    (lambda (pool current-best)
+      (let ((maybe-amount (contract-call? pool get-amount-out token-in token-out amount-in)))
+        (match maybe-amount
+          (ok amount-out)
+          (if (or (is-none current-best) (> amount-out (get amount-out (unwrap-panic current-best))))
+            (some {
+              pool: pool,
+              amount-out: amount-out
+            })
+            current-best)
+          (err _)
+          current-best
         )
       )
     )
-    none
   )
+)
+
+(define-private (select-better-route (current (optional (tuple (hops (list 10 {pool: principal, token-in: principal, token-out: principal})) (min-amount-out uint)))) (candidate (optional (tuple (hops (list 10 {pool: principal, token-in: principal, token-out: principal})) (min-amount-out uint)))))
+  (if (is-none candidate)
+      current
+      (if (is-none current)
+          candidate
+          (if (>
+                (get min-amount-out (unwrap-panic candidate))
+                (get min-amount-out (unwrap-panic current)))
+              candidate
+              current)))
 )
 
 (define-private (generate-route-id (token-in principal) (token-out principal) (amount-in uint))
