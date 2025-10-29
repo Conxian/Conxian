@@ -1,4 +1,0 @@
-# sip Trait
-
-## Functions
-

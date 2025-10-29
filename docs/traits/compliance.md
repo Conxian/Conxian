@@ -1,4 +1,0 @@
-# compliance Trait
-
-## Functions
-

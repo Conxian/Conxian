@@ -1,4 +1,0 @@
-# budget Trait
-
-## Functions
-

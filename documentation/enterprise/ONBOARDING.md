@@ -44,26 +44,42 @@ The enterprise system can be connected to a compliance contract.
 *   Once set, all trading functions in the `enterprise-api` will call the `is-verified` function in the compliance contract to ensure the user is authorized to trade.
 *   A reference implementation of a compliance contract is available in `compliance-hooks.clar`.
 
-## The Dimensional DeFi System: An Architectural Overview
+## API Reference
 
-A key innovation in the Conxian protocol is its "dimensional" architecture. This refers to a graph-based representation of the entire DeFi ecosystem, where:
+### `enterprise-api.clar`
 
-*   **Nodes** are tokens.
-*   **Edges** are liquidity pools or other connections between tokens.
-*   **Edge Weights** are calculated based on liquidity, fees, and other factors.
+#### Public Functions
 
-This allows for highly efficient trade routing. The `advanced-router-dijkstra.clar` contract uses Dijkstra's algorithm to find the optimal path for any given swap, minimizing slippage and fees.
+##### `create-institutional-account`
+*   **Description:** Creates a new institutional account.
+*   **Parameters:**
+    *   `owner` (principal): The owner of the new account.
+    *   `tier-id` (uint): The tier level for the new account.
+*   **Returns:** `(response uint)` - The ID of the newly created account.
 
-### Integrating with the Dimensional Router
+##### `set-kyc-expiry`
+*   **Description:** Sets the KYC expiry for an institutional account.
+*   **Parameters:**
+    *   `account-id` (uint): The ID of the account to update.
+    *   `expiry` (optional uint): The block height when KYC expires.
+*   **Returns:** `(response bool)`
 
-While retail users will interact with this router through the standard `dex-router.clar`, institutions can integrate directly with the `advanced-router-dijkstra.clar` contract to:
+### `compliance-hooks.clar`
 
-*   **Query for optimal paths:** Use `find-optimal-path` to determine the best route for a trade before execution.
-*   **Execute complex swaps:** The `swap-optimal-path` function allows for the execution of a swap along the most efficient route.
+#### Public Functions
 
-## Technical API Reference
+##### `set-kyc-tier`
+*   **Description:** Sets the KYC tier for a given account.
+*   **Parameters:**
+    *   `account` (principal): The account to modify.
+    *   `kyc-tier` (uint): The new KYC tier.
+*   **Returns:** `(response bool)`
 
-A full API reference for the enterprise contracts will be provided in `documentation/enterprise/API_REFERENCE.md`. This will include detailed specifications for all public functions, data maps, and error codes.
+##### `is-verified`
+*   **Description:** Checks if an account is currently verified.
+*   **Parameters:**
+    *   `account` (principal): The account to check.
+*   **Returns:** `(bool)`
 
 ## Security and Best Practices
 

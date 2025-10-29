@@ -1,4 +1,0 @@
-# liquidity Trait
-
-## Functions
-

@@ -1,4 +1,0 @@
-# math Trait
-
-## Functions
-

@@ -1,4 +1,0 @@
-# keeper Trait
-
-## Functions
-
