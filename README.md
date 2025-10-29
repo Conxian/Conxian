@@ -1,5 +1,3 @@
-# Conxian Protocol
-
 [![Tests](https://img.shields.io/badge/Tests-Comprehensive-green)](https://github.com/Anya-org/Conxian)
 [![Contracts](https://img.shields.io/badge/Contracts-65%2B-blue)](https://github.com/Anya-org/Conxian)
 [![Status](https://img.shields.io/badge/Status-Core%20System%20Implemented-blue)](https://github.com/Anya-org/Conxian)

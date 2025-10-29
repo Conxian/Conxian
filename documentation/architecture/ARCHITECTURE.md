@@ -25,8 +25,6 @@ For detailed product-level requirements, see `documentation/prd/` (e.g., `VAULT.
 - `interest-rate-model.clar` – Dynamic interest rate calculation framework based on utilization curves
 - `loan-liquidation-manager.clar` – Basic liquidation framework with keeper incentive structure
 - `lending-protocol-governance.clar` – Community governance framework for protocol parameters
-- `flash-loan-receiver-trait.clar` – Interface for flash loan callback implementations
-- `lending-system-trait.clar` – Comprehensive lending protocol interface definitions
 
 ### Token System
 - `cxd-staking.clar` – Staking contract for CXD tokens
@@ -44,9 +42,8 @@ For detailed product-level requirements, see `documentation/prd/` (e.g., `VAULT.
 - `dex-router.clar` – Router for the DEX with multi-hop capabilities
 
 ### Monitoring & Security
-- `automated-circuit-breaker.clar` – Automated circuit breaker for the system
+- `circuit-breaker.clar` – Automated circuit breaker for the system
 - `protocol-invariant-monitor.clar` – Monitors the protocol for invariants
-- `revenue-distributor.clar` – Distributes revenue to stakeholders
 - `token-emission-controller.clar` – Controls the emission of new tokens
 - `token-system-coordinator.clar` – Coordinates the token system
 
@@ -57,7 +54,7 @@ For detailed product-level requirements, see `documentation/prd/` (e.g., `VAULT.
 - `real-time-monitoring-dashboard.clar` – Monitoring framework structure
 - `transaction-batch-processor.clar` – Transaction batch processing framework
   
-Traits & Interfaces: `vault-trait`, `vault-admin-trait`, `pool-trait`, `sip-010-trait`.
+Traits & Interfaces are defined in `stacks/contracts/traits/all-traits.clar`.
 
 ## Differentiation via Bitcoin Layers (Planned / Partially Enabled)
 
@@ -113,7 +110,7 @@ Upcoming:
 
 ## DEX Subsystem (Enhanced with Advanced Mathematics)
 
-**Core Implementation**: `dex-factory`, `dex-pool`, `dex-router`, `math-lib-advanced`, `fixed-point-math`, `pool-trait`
+**Core Implementation**: `dex-factory`, `dex-pool`, `dex-router`, `math-lib-advanced`, `fixed-point-math`
 
 **Mathematical Capabilities**: 
 - Newton-Raphson square root for liquidity calculations
@@ -138,5 +135,22 @@ Upcoming:
 - Implement cross-protocol yield optimization strategies
 
 **Framework Status**: Mathematical library framework implemented, precision validation framework, invariant calculation framework ready
+
+## The Dimensional DeFi System: An Architectural Overview
+
+A key innovation in the Conxian protocol is its "dimensional" architecture. This refers to a graph-based representation of the entire DeFi ecosystem, where:
+
+*   **Nodes** are tokens.
+*   **Edges** are liquidity pools or other connections between tokens.
+*   **Edge Weights** are calculated based on liquidity, fees, and other factors.
+
+This allows for highly efficient trade routing. The `advanced-router-dijkstra.clar` contract uses Dijkstra's algorithm to find the optimal path for any given swap, minimizing slippage and fees.
+
+### Integrating with the Dimensional Router
+
+While retail users will interact with this router through the standard `dex-router.clar`, institutions can integrate directly with the `advanced-router-dijkstra.clar` contract to:
+
+*   **Query for optimal paths:** Use `find-optimal-path` to determine the best route for a trade before execution.
+*   **Execute complex swaps:** The `swap-optimal-path` function allows for the execution of a swap along the most efficient route.
 
 Updated: Sep 09, 2025
