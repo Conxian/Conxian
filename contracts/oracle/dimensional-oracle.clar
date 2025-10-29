@@ -2,13 +2,12 @@
 (use-trait oracle-trait .all-traits.oracle-trait)
 (use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
 
+;; Implement required traits
+(impl-trait dimensional-oracle-trait)
+(impl-trait oracle-trait)
+
 ;; Dimensional Oracle
 ;; Implements a robust price oracle with multiple data sources and deviation checks
-
-(use-trait oracle_trait .all-traits.oracle-trait)
-.all-traits.dimensional-oracle-trait)
-(use-trait dimensional_oracle_trait .all-traits.dimensional-oracle-trait)
-oracle_trait)
 
 
 (define-constant ERR_NOT_AUTHORIZED (err u100))
@@ -111,7 +110,7 @@ oracle_trait)
   )
 )
 
-(define-public (set-heartbeat (token principal) (interval uint))
+(define-public (set-heartbeat-interval (interval uint))
   (begin
     (asserts! (is-eq tx-sender (var-get admin)) ERR_NOT_AUTHORIZED)
     (var-set heartbeat-interval interval)
@@ -130,9 +129,9 @@ oracle_trait)
 
 ;; ========== Price Feed Management ==========
 
-(define-public (add-price-feed (token principal) (feed principal))
+(define-public (add-price-feed (asset principal) (feed principal))
   (let (
-      (current-feeds (default-to (list) (map-get? price-feeds {token: token})))
+      (current-feeds (default-to (list) (map-get? price-feeds {token: asset})))
     )
     (try! (only-admin))
     (asserts! (< (len current-feeds) MAX_FEEDS) (err u108))  ;; Max feeds reached
@@ -140,7 +139,7 @@ oracle_trait)
     ;; Check if feed already exists
     (asserts! (not (any (lambda ((f principal)) (is-eq f feed)) current-feeds)) ERR_FEED_EXISTS)
       
-    (map-set price-feeds {token: token} (append current-feeds (list feed)))
+    (map-set price-feeds {token: asset} (append current-feeds (list feed)))
     
     ;; Log the feed addition
     ;; (try! (contract-call? .system-monitor 
@@ -155,14 +154,14 @@ oracle_trait)
   )
 )
 
-(define-public (remove-price-feed (token principal) (feed principal))
+(define-public (remove-price-feed (asset principal) (feed principal))
   (let (
-      (current-feeds (default-to (list) (map-get? price-feeds {token: token})))
+      (current-feeds (default-to (list) (map-get? price-feeds {token: asset})))
     )
     (try! (only-admin))
     (let ((new-feeds (filter (lambda ((f principal)) (not (is-eq f feed))) current-feeds)))
       (asserts! (> (len new-feeds) u0) (err u109))  ;; At least one feed required
-      (map-set price-feeds {token: token} new-feeds)
+      (map-set price-feeds {token: asset} new-feeds)
       ;; Log the feed removal
       ;; (try! (contract-call? .system-monitor
       ;;   log-event
@@ -170,7 +169,7 @@ oracle_trait)
       ;;   "feed-removed"
       ;;   u2
       ;;   "Oracle feed removed"
-      ;;   (some { feed: feed, token: token })))
+      ;;   (some { feed: feed, token: asset })))
       (ok true)
     )
   )
@@ -178,25 +177,26 @@ oracle_trait)
 
 ;; ========== Price Updates ==========
 
-(define-public (update-price (token principal) (price uint))
+(define-public (update-price (asset principal) (price uint))
   (begin
     (try! (when-not-paused))
     (try! (only-oracle-updater))
     (let ((current-block block-height)
-          (feeds (default-to (list) (map-get? price-feeds {token: token}))))
+          (feeds (default-to (list) (map-get? price-feeds {token: asset}))))
       (asserts! (any (lambda ((f principal)) (is-eq tx-sender f)) feeds) ERR_NOT_AUTHORIZED)
-      (map-set feed-prices {feed: tx-sender, token: token} { price: price, last-updated: current-block })
-      (try! (update-aggregate-price token))
+      (map-set feed-prices {feed: tx-sender, token: asset} { price: price, last-updated: current-block })
+      (try! (update-aggregate-price asset))
       (ok true)
     )
   )
 )
-(define-private (update-aggregate-price (token principal))
-  (let ((feeds (default-to (list) (map-get? price-feeds {token: token})))
+
+(define-private (update-aggregate-price (asset principal))
+  (let ((feeds (default-to (list) (map-get? price-feeds {token: asset})))
         (current-block block-height)
         (heartbeat (var-get heartbeat-interval)))
     (let ((valid-prices (fold (lambda ((feed principal) (acc (list 10 uint)))
-                                (let ((fd (map-get? feed-prices {feed: feed, token: token})))
+                                (let ((fd (map-get? feed-prices {feed: feed, token: asset})))
                                   (if (and fd (>= current-block (- (get last-updated (unwrap-panic fd)) heartbeat)))
                                       (append acc (list (get price (unwrap-panic fd))))
                                       acc)))
@@ -204,12 +204,12 @@ oracle_trait)
                               (list))))
       (asserts! (> (len valid-prices) u0) ERR_STALE_PRICE)
       (let ((median-price (get-median valid-prices)))
-        (match (map-get? price-data {token: token})
+        (match (map-get? price-data {token: asset})
           existing-data (let ((current-price (get price existing-data)))
                           (asserts! (is-price-deviation-valid? current-price median-price) ERR_DEVIATION_TOO_HIGH)
                           (ok true))
           (ok true))
-        (map-set price-data {token: token}
+        (map-set price-data {token: asset}
           { price: median-price, last-updated: current-block, deviation-threshold: (var-get max-deviation) })
         (ok true)
       )
@@ -242,86 +242,28 @@ oracle_trait)
 
 ;; ========== Public Getters ==========
 
-(define-read-only (get-price (token principal))
-  (match (map-get? price-data {token: token})
+(define-read-only (get-price (asset principal))
+  (match (map-get? price-data {token: asset})
     data (ok (get price data))
     (err ERR_INVALID_PRICE)
   )
 )
 
-(define-read-only (get-last-updated (token principal))
-  (match (map-get? price-data {token: token})
-    data (ok (get last-updated data))
-    (err ERR_INVALID_PRICE)
+(define-read-only (get-twap (asset principal) (interval uint))
+  (begin
+    ;; Simplified TWAP implementation
+    ;; In production, would calculate actual time-weighted average price
+    (get-price asset)
   )
 )
 
-(define-read-only (get-deviation-threshold (token principal))
-  (match (map-get? price-data {token: token})
-    data (ok (get deviation-threshold data))
-    (ok (var-get max-deviation))
-  )
-)
-
-(define-read-only (is-price-stale (token principal))
-  (match (map-get? price-data {token: token})
-    data
-    (begin
-      (let ((last-updated (get last-updated data))
-            (current-block block-height))
-        (ok (> (- current-block last-updated) (var-get heartbeat-interval)))
-      )
-    )
-    (ok true)  ;; If no price data, consider it stale
-  )
-)
-
-(define-read-only (get-feed-count (token principal))
-  (ok (len (default-to (list) (map-get? price-feeds {token: token}))))
-)
-
-(define-read-only (get-admin)
-  (ok (var-get admin))
-)
-
-;; ========== Trait Implementation Functions ==========
-
-(define-read-only (get-price-with-timestamp (token principal))
-  (match (map-get? price-data {token: token})
+(define-read-only (get-price-with-timestamp (asset principal))
+  (match (map-get? price-data {token: asset})
     data (ok {
       price: (get price data),
       timestamp: (get last-updated data)
     })
     (err ERR_INVALID_PRICE)
-  )
-)
-
-(define-read-only (get-twap (token principal) (interval uint))
-  (begin
-    ;; Simplified TWAP implementation
-    ;; In production, would calculate actual time-weighted average price
-    (get-price token)
-  )
-)
-
-(define-public (update-price (token principal) (price uint))
-  (begin
-    (try! (only-oracle-updater))
-    (try! (when-not-paused))
-
-    (let ((current-block block-height))
-      ;; Update the price directly
-      (map-set price-data
-        {token: token}
-        {
-          price: price,
-          last-updated: current-block,
-          deviation-threshold: (var-get max-deviation)
-        }
-      )
-
-      (ok true)
-    )
   )
 )
 

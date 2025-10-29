@@ -1,4 +1,0 @@
-# liquidation Trait
-
-## Functions
-

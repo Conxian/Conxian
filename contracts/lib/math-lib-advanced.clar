@@ -93,26 +93,15 @@
       (let ((result PRECISION)
             (current-base base)
             (current-exp exp))
-        (begin
-          ;; Use binary exponentiation algorithm
-          (fold pow-step (list u0 u1 u2 u3 u4 u5 u6 u7 u8 u9 u10 u11 u12 u13 u14 u15 u16 u17 u18 u19 u20 u21 u22 u23 u24 u25 u26 u27 u28 u29 u30 u31)
-                {result: result, base: current-base, exp: current-exp})
-          (ok result))))))
+        (pow-step result current-base current-exp u0)))))
 
 ;; Helper function for binary exponentiation
-(define-private (pow-step (i uint) (state {result: uint, base: uint, exp: uint}))
-  (let ((result (get result state))
-        (base (get base state))
-        (exp (get exp state)))
-    (if (is-eq exp u0)
-      state
-      (if (is-eq (mod exp u2) u1)
-        {result: (unwrap-panic (mul-down result base)),
-         base: (unwrap-panic (mul-down base base)),
-         exp: (/ exp u2)}
-        {result: result,
-         base: (unwrap-panic (mul-down base base)),
-         exp: (/ exp u2)}))))
+(define-private (pow-step (result uint) (base uint) (exp uint) (bit-index uint))
+  (if (> bit-index u31)
+    (ok result)
+    (if (is-eq (mod exp (pow u2 bit-index)) u0)
+      (pow-step result (unwrap-panic (mul-down base base)) (/ exp (pow u2 bit-index)) (+ bit-index u1))
+      (pow-step (unwrap-panic (mul-down result base)) (unwrap-panic (mul-down base base)) (/ exp (pow u2 bit-index)) (+ bit-index u1)))))
 
 ;; Power function (alias for pow-fixed)
 (define-read-only (pow (base uint) (exp uint))
@@ -128,18 +117,16 @@
     (ok u0)
     (if (is-eq n PRECISION)
       (ok PRECISION) ;; sqrt(1) = 1
-      (let ((x n)
-            (iterations u0))
-        (sqrt-iter x n iterations)))))
+      (sqrt-iter (/ (+ n PRECISION) u2) n))))
 
 ;; Iterative square root calculation
-(define-private (sqrt-iter (x uint) (n uint) (iterations uint))
-  (if (> iterations u20) ;; Max 20 iterations for safety
-    (ok x)
+(define-private (sqrt-iter (x uint) (n uint))
+  (if (is-eq x u0)
+    (ok u0)
     (let ((new-x (/ (+ x (/ n x)) u2)))
       (if (or (is-eq new-x x) (< (abs-diff new-x x) u1))
         (ok new-x)
-        (sqrt-iter new-x n (+ iterations u1))))))
+        (sqrt-iter new-x n)))))
 
 ;; Helper function for absolute difference
 (define-private (abs-diff (a uint) (b uint))

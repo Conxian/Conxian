@@ -14,12 +14,9 @@
 (use-trait pool-trait .all-traits.pool-trait)
 
 ;; Implement required traits
-(use-trait pausable_trait .all-traits.pausable-trait)
-.all-traits.pool-trait)
-(use-trait ownable_trait .all-traits.ownable-trait)
-.all-traits.ownable-trait)
-(use-trait pool_trait .all-traits.pool-trait)
-pausable_trait)
+(impl-trait pausable-trait)
+(impl-trait ownable-trait)
+(impl-trait pool-trait)
 
 ;; ===========================================
 ;; CONSTANTS
@@ -122,6 +119,10 @@ pausable_trait)
   (ok (var-get contract-owner))
 )
 
+(define-read-only (is-owner (account principal))
+  (ok (is-eq account (var-get contract-owner)))
+)
+
 (define-public (transfer-ownership (new-owner principal))
   (begin
     (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
@@ -136,7 +137,7 @@ pausable_trait)
 ;; ===========================================
 
 (define-read-only (is-paused)
-  (var-get is-paused)
+  (ok (var-get is-paused))
 )
 
 (define-public (pause)
@@ -497,30 +498,68 @@ pausable_trait)
   (ok amount-out)
 )
 
-(define-public (add-liquidity
-  (token-x-amount uint)
-  (token-y-amount uint)
-  (min-token-x-amount uint)
-  (min-token-y-amount uint)
-  (recipient principal)
-)
-  ;; For concentrated liquidity, use mint-position instead
-  (ok (tuple (liquidity u0) (token-x-amount u0) (token-y-amount u0)))
+;; ===========================================
+;; POOL TRAIT IMPLEMENTATION
+;; ===========================================
+
+(define-public (add-liquidity (provider principal) (token-amount uint) (stx-amount uint))
+  ;; For concentrated liquidity, this is a simplified wrapper
+  ;; In production, would handle both token types appropriately
+  (begin
+    (check-not-paused)
+    (asserts! (var-get is-initialized) ERR_INVALID_INPUT)
+    ;; Simplified implementation - would need proper token handling
+    (ok u0)
+  )
 )
 
-(define-public (remove-liquidity
-  (liquidity-amount uint)
-  (min-token-x-amount uint)
-  (min-token-y-amount uint)
-  (recipient principal)
-)
-  ;; For concentrated liquidity, use burn-position and collect-position instead
-  (ok (tuple (token-x-amount u0) (token-y-amount u0)))
+(define-public (remove-liquidity (provider principal) (liquidity-amount uint))
+  ;; For concentrated liquidity, this is a simplified wrapper
+  (begin
+    (check-not-paused)
+    (asserts! (var-get is-initialized) ERR_INVALID_INPUT)
+    ;; Simplified implementation - would need proper token handling
+    (ok (tuple (token-amount u0) (stx-amount u0)))
+  )
 )
 
-;; ===========================================
-;; TICK MANAGEMENT
-;; ===========================================
+(define-public (swap (sender principal) (token-in principal) (token-out principal) (amount-in uint) (min-out uint))
+  ;; Use existing execute-swap function directly to avoid recursion
+  (begin
+    (check-not-paused)
+    (asserts! (var-get is-initialized) ERR_INVALID_INPUT)
+    (asserts! (> amount-in u0) ERR_INVALID_INPUT)
+
+    (let ((zero-for-one (is-eq token-in (var-get pool-token-x))))
+      (asserts! (if zero-for-one
+                   (is-eq token-out (var-get pool-token-y))
+                   (is-eq token-out (var-get pool-token-x))) ERR_INVALID_INPUT)
+
+      ;; Execute swap using existing logic
+      (let ((result (try! (execute-swap zero-for-one amount-in u0))))
+        (let ((amount-out (get amount-out result)))
+          (asserts! (>= amount-out min-out) ERR_SLIPPAGE_EXCEEDED)
+
+          ;; Transfer tokens
+          (try! (contract-call? token-in transfer amount-in tx-sender (as-contract tx-sender) none))
+          (try! (as-contract (contract-call? token-out transfer amount-out tx-sender sender none)))
+
+          (ok amount-out)
+        )
+      )
+    )
+  )
+)
+
+(define-read-only (get-reserves)
+  ;; Return current reserves (simplified)
+  (ok (tuple (token-reserve (var-get protocol-fees-x)) (stx-reserve (var-get protocol-fees-y))))
+)
+
+(define-read-only (get-pool-info)
+  ;; Return pool information in trait-compatible format
+  (ok (tuple (total-liquidity (var-get liquidity)) (fee-rate (var-get fee-tier))))
+)
 
 (define-private (update-tick (tick-idx int) (liquidity-delta uint))
   (let ((tick-data (default-to

@@ -1,4 +1,0 @@
-# lending Trait
-
-## Functions
-

@@ -3,6 +3,7 @@
 ;; Enhanced with staking, yield distribution, and system integration hooks
 
 ;; --- Traits ---
+(use-trait monitor-trait .all-traits.monitor-trait)
 
 
 ;; --- Errors ---
@@ -85,7 +86,7 @@
 (define-private (check-system-pause)
   (if (var-get system-integration-enabled)
     (match (var-get protocol-monitor)
-      monitor (default-to false (contract-call? monitor is-paused))
+      monitor-contract (is-ok (contract-call? monitor-contract is-paused))
       false)
     false))
 
@@ -343,7 +344,7 @@
   ))
 
 ;; --- Migration: CXLP -> CXD ---
-(define-public (migrate-to-cxd (amount uint) (recipient principal) (cxd <sip-010-ft-trait>))
+(define-public (migrate-to-cxd (amount uint) (recipient principal) (cxd-contract principal))
   (let (
       (start (unwrap! (var-get migration-start-height) (err ERR_MIGRATION_NOT_SET)))
       (len (var-get epoch-length))
@@ -355,7 +356,7 @@
       (maybe-auto-adjust)
       (asserts! (> len u0) (err ERR_MIGRATION_NOT_SET))
       (asserts! (>= block-height start) (err ERR_MIGRATION_NOT_STARTED))
-      (asserts! (is-eq cxd-stored (contract-of cxd)) (err ERR_CXD_MISMATCH))
+      (asserts! (is-eq cxd-stored cxd-contract) (err ERR_CXD_MISMATCH))
       (asserts! (>= sender-bal amount) (err ERR_NOT_ENOUGH_BALANCE))
       
       ;; Burn CXLP from sender
@@ -368,7 +369,9 @@
           (mult (unwrap! (band-multiplier band) (err ERR_OVERFLOW)))
           (cxd-to-mint (/ (* amount mult) u10000))
         )
-        (ok true)
+        ;; Mint CXD tokens to recipient
+        (try! (contract-call? cxd-contract mint cxd-to-mint recipient))
+        (ok cxd-to-mint)
       )
     )
   )

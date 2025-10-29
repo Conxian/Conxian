@@ -1,4 +1,0 @@
-# pausable Trait
-
-## Functions
-

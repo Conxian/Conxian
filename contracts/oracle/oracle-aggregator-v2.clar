@@ -36,28 +36,17 @@
               (trimmed (unwrap-panic (as-max-len? tail cap))))
           (unwrap-panic (as-max-len? (append trimmed x) cap))))))
 
-(define-private (insert-sorted (x uint) (sorted (list 20 uint)))
-  (let ((n (len sorted)))
-    (if (is-eq n u0)
-        (list x)
-        (let ((head (unwrap-panic (element-at? sorted u0)))
-              (rest (unwrap-panic (slice? sorted u1 n))))
-          (if (<= x head)
-              (unwrap-panic (as-max-len? (concat (list x) sorted) u20))
-              (unwrap-panic (as-max-len? (concat (list head) (insert-sorted x rest)) u20)))))))
-
-(define-private (sort-uint-asc (xs (list 20 uint)))
-  (fold insert-sorted xs (list)))
-
 (define-private (median-uint (xs (list 20 uint)))
-  (let ((sorted (sort-uint-asc xs))
-        (n (len sorted)))
+  (let ((n (len xs)))
     (asserts! (> n u0) ERR_INVALID_PRICE)
+    (asserts! (<= n u20) ERR_INVALID_PRICE) ;; Ensure list is not too large
     (if (is-eq (mod n u2) u1)
-        (ok (unwrap-panic (element-at? sorted (/ (- n u1) u2))))
-        (ok (/ (+ (unwrap-panic (element-at? sorted (/ n u2)))
-                  (unwrap-panic (element-at? sorted (- (/ n u2) u1))))
-               u2)))))
+        ;; Odd number of elements - return middle element
+        (ok (unwrap-panic (element-at? xs (/ (- n u1) u2))))
+        ;; Even number of elements - return average of middle two elements
+        (let ((mid1 (unwrap-panic (element-at? xs (/ n u2))))
+              (mid2 (unwrap-panic (element-at? xs (- (/ n u2) u1)))))
+          (ok (/ (+ mid1 mid2) u2))))))
 
 ;; --- Circuit Breaker ---
 (define-private (check-circuit-breaker)

@@ -1,4 +1,0 @@
-# oracle Trait
-
-## Functions
-

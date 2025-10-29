@@ -1,4 +1,0 @@
-# dimensional Trait
-
-## Functions
-
