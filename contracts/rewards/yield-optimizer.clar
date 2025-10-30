@@ -100,9 +100,9 @@
   )
 )
 
-;; @desc Finds the best active strategy based on APY.
+;; @desc Finds the best active strategy based on APY (internal version).
 ;; @return (response { contract: principal, apy: uint }) A response containing the contract principal of the best strategy and its APY.
-(define-private (find-best-strategy)
+(define-private (find-best-strategy-internal)
   (find-best-strategy-iter u0 (tuple (contract (as-contract tx-sender)) (apy u0) (yield-efficiency u0) (vault-performance u0)))
 )
 
@@ -113,7 +113,7 @@
 (define-public (optimize-and-rebalance (asset (contract-of sip-010-ft-trait)))
   (let ((current-allocation (default-to (tuple (strategy (as-contract tx-sender)) (amount u0)) (map-get? asset-allocation (contract-of asset))))
         (current-strategy (get strategy current-allocation))
-        (best-strategy-info (try! (find-best-strategy))))
+        (best-strategy-info (try! (find-best-strategy-internal))))
 
     (if (not (is-eq current-strategy (get contract best-strategy-info)))
       (begin

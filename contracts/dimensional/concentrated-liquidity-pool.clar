@@ -246,7 +246,7 @@
     (let ((position-id (unwrap! (contract-call? (var-get position-nft-contract) mint recipient) ERR_UNAUTHORIZED)))
       ;; Calculate liquidity
       (let ((sqrt-price-lower (unwrap! (contract-call? .math-lib-concentrated tick-to-sqrt-price-x96 tick-lower) ERR_INVALID_INPUT))
-(sqrt-price-upper (unwrap! (contract-call? .math-lib-concentrated tick-to-sqrt-price-x96 tick-upper) ERR_INVALID_INPUT)))
+            (sqrt-price-upper (unwrap! (contract-call? .math-lib-concentrated tick-to-sqrt-price-x96 tick-upper) ERR_INVALID_INPUT))))
         (let ((liquidity-amount (unwrap! (contract-call? .math-lib-concentrated get-liquidity-for-amounts
                                                           (var-get sqrt-price-x96)
                                                           sqrt-price-lower

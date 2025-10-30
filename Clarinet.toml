@@ -37,7 +37,7 @@ cxs-token = ".cxs-token"
 dex-factory = ".dex-factory"
 dex-pool = ".dex-pool"
 pool-template = ".pool-template"
-dex-router = ".dex-router"
+dex-router = ".dimensional-advanced-router-dijkstra"
 oracle-adapter = ".core-oracle-oracle-adapter"
 dimensional-engine = ".core-dimensional-engine"
 position-manager = ".core-position-manager"
@@ -78,9 +78,9 @@ governance-signature-verifier = ".governance-signature-verifier"
 signed-data-base = ".signed-data-base"
 dim-registry = ".dim-registry"
 dim-metrics = ".dim-metrics"
-concentrated-liquidity-pool = ".concentrated-liquidity-pool"
+concentrated-liquidity-pool = ".dimensional-concentrated-liquidity-pool"
 tokenized-bond-adapter = ".tokenized-bond-adapter"
-position-nft = ".position-nft"
+position-nft = ".dimensional-position-nft"
 dim-graph = ".dim-graph"
 dim-oracle-automation = ".dim-oracle-automation"
 dim-revenue-adapter = ".dim-revenue-adapter"
@@ -90,8 +90,8 @@ access-control-interface = ".access-control-interface"
 audit-registry-interface = ".audit-registry-interface"
 concentrated-math = ".concentrated-math"
 math-lib-advanced = ".math-lib-advanced"
-fixed-point-math = ".fixed-point-math"
-precision-calculator = ".precision-calculator"
+fixed-point-math = ".math-lib-advanced"
+precision-calculator = ".math-lib-advanced"
 audit-registry = ".audit-registry"
 
 [contracts.audit-registry-audit-badge-nft]
@@ -123,12 +123,8 @@ path = "contracts/budget-manager.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits"
 
 [contracts.circuit-breaker]
-path = "contracts/circuit-breaker.clar"
+path = "contracts/security/circuit-breaker.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.circuit-breaker"
-
-[contracts.concentrated-liquidity-pool]
-path = "contracts/concentrated-liquidity-pool.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits"
 
 [contracts.dex-auto-compounder]
 path = "contracts/dex/auto-compounder.clar"
@@ -178,10 +174,6 @@ address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dex-dex-factory"
 path = "contracts/dex/dex-pool.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dex-dex-pool"
 
-[contracts.dex-dex-router]
-path = "contracts/dex/dex-router.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dex-dex-router"
-
 [contracts.dex-distributed-cache-manager]
 path = "contracts/dex/distributed-cache-manager.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dex-distributed-cache-manager"
@@ -197,14 +189,6 @@ address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dex-enterprise-loan-manager
 [contracts.dex-fee-manager]
 path = "contracts/dex/fee-manager.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dex-fee-manager"
-
-[contracts.position-nft]
-path = "contracts/position-nft.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.position-nft"
-
-[contracts.dex-dimensional-router]
-path = "contracts/dex/dimensional-router.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dex-dimensional-router"
 
 [contracts.dimensional-dimensional-core]
 path = "contracts/dimensional/dimensional-core.clar"
@@ -265,10 +249,6 @@ address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dex-migration-manager"
 [contracts.dex-monitoring-dashboard]
 path = "contracts/dex/monitoring-dashboard.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dex-monitoring-dashboard"
-
-[contracts.dex-multi-hop-router-v3]
-path = "contracts/dex/multi-hop-router-v3.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dex-multi-hop-router-v3"
 
 [contracts.dex-nakamoto-compatibility]
 path = "contracts/dex/nakamoto-compatibility.clar"
@@ -394,10 +374,6 @@ address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dimensional-dim-revenue-ada
 path = "contracts/dimensional/dim-yield-stake.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dimensional-dim-yield-stake"
 
-[contracts.dimensional-multi-hop-router-v3]
-path = "contracts/dimensional/multi-hop-router-v3.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dimensional-multi-hop-router-v3"
-
 [contracts.dimensional-position-nft]
 path = "contracts/dimensional/position-nft.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dimensional-position-nft"
@@ -470,16 +446,9 @@ address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.lib-precision-calculator"
 path = "contracts/libraries/concentrated-math.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.libraries-concentrated-math"
 
-[contracts.math-helpers]
-path = "contracts/math/math-helpers.clar"
-
 [contracts.optimization-helpers]
 path = "contracts/helpers/optimization-helpers.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.optimization-helpers"
-
-[contracts.math-lib-concentrated]
-path = "contracts/math/math-lib-concentrated.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.math-lib-concentrated"
 
 [contracts.mev-protector]
 path = "contracts/mev-protector.clar"
@@ -529,10 +498,6 @@ address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.monitoring-price-stability-
 path = "contracts/monitoring/system-monitor.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.monitoring-system-monitor"
 
-[contracts.oracle]
-path = "contracts/oracle.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits"
-
 [contracts.oracle-dimensional-oracle]
 path = "contracts/oracle/dimensional-oracle.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.oracle-dimensional-oracle"
@@ -540,18 +505,6 @@ address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.oracle-dimensional-oracle"
 [contracts.oracle-external-oracle-adapter]
 path = "contracts/oracle/external-oracle-adapter.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.oracle-external-oracle-adapter"
-
-[contracts.oracle-oracle-aggregator-v2]
-path = "contracts/oracle/oracle-aggregator-v2.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.oracle-oracle-aggregator-v2"
-
-[contracts.oracle-oracle-aggregator]
-path = "contracts/oracle/oracle-aggregator.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.oracle-oracle-aggregator"
-
-[contracts.oracle-oracle]
-path = "contracts/oracle/oracle.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.oracle-oracle"
 
 [contracts.pools-concentrated-liquidity-pool]
 path = "contracts/pools/concentrated-liquidity-pool.clar"

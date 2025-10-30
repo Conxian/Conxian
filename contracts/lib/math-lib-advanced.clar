@@ -103,8 +103,8 @@
       (pow-step result (unwrap-panic (mul-down base base)) (/ exp (pow u2 bit-index)) (+ bit-index u1))
       (pow-step (unwrap-panic (mul-down result base)) (unwrap-panic (mul-down base base)) (/ exp (pow u2 bit-index)) (+ bit-index u1)))))
 
-;; Power function (alias for pow-fixed)
-(define-read-only (pow (base uint) (exp uint))
+;; Power function (internal implementation - renamed to avoid cycle with pow-step)
+(define-private (pow-internal (base uint) (exp uint))
   (pow-fixed base exp))
 
 ;; ===========================================
@@ -117,16 +117,16 @@
     (ok u0)
     (if (is-eq n PRECISION)
       (ok PRECISION) ;; sqrt(1) = 1
-      (sqrt-iter (/ (+ n PRECISION) u2) n))))
+      (sqrt-iter-internal (/ (+ n PRECISION) u2) n))))
 
-;; Iterative square root calculation
-(define-private (sqrt-iter (x uint) (n uint))
+;; Iterative square root calculation (internal function)
+(define-private (sqrt-iter-internal (x uint) (n uint))
   (if (is-eq x u0)
     (ok u0)
     (let ((new-x (/ (+ x (/ n x)) u2)))
       (if (or (is-eq new-x x) (< (abs-diff new-x x) u1))
         (ok new-x)
-        (sqrt-iter new-x n)))))
+        (sqrt-iter-internal new-x n)))))
 
 ;; Helper function for absolute difference
 (define-private (abs-diff (a uint) (b uint))
@@ -142,10 +142,10 @@
     ERR_DIVISION_BY_ZERO
     (if (is-eq x PRECISION)
       (ok u0) ;; ln(1) = 0
-      (ln-taylor x u0 PRECISION u1))))
+      (ln-taylor-internal x u0 PRECISION u1))))
 
-;; Taylor series for ln(1+x) where x is small
-(define-private (ln-taylor (x uint) (result uint) (term uint) (n uint))
+;; Taylor series for ln(1+x) where x is small (internal function)
+(define-private (ln-taylor-internal (x uint) (result uint) (term uint) (n uint))
   (if (> n u10) ;; Limit iterations
     (ok result)
     (let ((new-term (/ (* term x) n))
@@ -154,7 +154,7 @@
                        (- result new-term))))
       (if (< new-term u1000) ;; Convergence check
         (ok new-result)
-        (ln-taylor x new-result new-term (+ n u1))))))
+        (ln-taylor-internal x new-result new-term (+ n u1))))))
 
 ;; Base-2 logarithm
 (define-read-only (log2 (n uint))
@@ -174,17 +174,17 @@
 (define-read-only (exp (x uint))
   (if (is-eq x u0)
     (ok PRECISION) ;; e^0 = 1
-    (exp-taylor x PRECISION PRECISION u1)))
+    (exp-taylor-internal x PRECISION PRECISION u1)))
 
-;; Taylor series for e^x
-(define-private (exp-taylor (x uint) (result uint) (term uint) (n uint))
+;; Taylor series for e^x (internal function)
+(define-private (exp-taylor-internal (x uint) (result uint) (term uint) (n uint))
   (if (> n u20) ;; Limit iterations
     (ok result)
     (let ((new-term (/ (* term x) n))
           (new-result (+ result new-term)))
       (if (< new-term u1000) ;; Convergence check
         (ok new-result)
-        (exp-taylor x new-result new-term (+ n u1))))))
+        (exp-taylor-internal x new-result new-term (+ n u1))))))
 
 ;; ===========================================
 ;; SWAP CALCULATION FUNCTIONS
