@@ -18,9 +18,7 @@ export default defineConfig({
       'stacks/tests/**/*.test.ts',
       'stacks/tests/**/*.spec.ts',
       'stacks/sdk-tests/**/*.spec.ts',
-      'tests/load-testing/**/*.test.ts',
-      'tests/**/*.test.ts',
-      'tests/**/*.spec.ts'
+      'tests/load-testing/**/*.test.ts'
     ],
     exclude: [
       'stacks/tests/helpers/**',
@@ -59,7 +57,7 @@ export default defineConfig({
       reportsDirectory: './coverage',
       include: [
         'stacks/tests/**/*.ts',
-        'tests/**/*.ts',
+        'tests/load-testing/**/*.ts',
         'contracts/**/*.clar'
       ],
       exclude: [

@@ -26,8 +26,6 @@
 
 (define-map reserves { token: principal } { amount: uint })
 
-(define-event swap-event (sender: principal, token-in: principal, amount-in: uint, token-out: principal, amount-out: uint, fee: uint))
-(define-event liquidity-event (provider: principal, token: principal, amount: uint, shares: uint))
 
 (define-private (ensure-owner (caller principal))
   (asserts! (is-eq caller (var-get contract-owner)) ERR_UNAUTHORIZED))
@@ -123,14 +121,13 @@
           (try! (as-contract (contract-call? token-out transfer amount-out tx-sender tx-sender none)))
           (set-reserve token-in (+ reserve-in amount-in))
           (set-reserve token-out (if (> reserve-out amount-out) (- reserve-out amount-out) u0))
-          (print (swap-event {
-            sender: tx-sender,
-            token-in: token-in,
-            amount-in: amount-in,
-            token-out: token-out,
-            amount-out: amount-out,
+          (print {
+            token_in: token-in,
+            amount_in: amount-in,
+            token_out: token-out,
+            amount_out: amount-out,
             fee: u0
-          }))
+          })
           (ok amount-out))))))
 
 (define-public (add-liquidity (token principal) (amount uint))
@@ -140,12 +137,13 @@
     (asserts! (> amount u0) ERR_INVALID_INPUT)
     (try! (contract-call? token transfer amount tx-sender (as-contract tx-sender) none))
     (set-reserve token (+ (get-reserve token) amount))
-    (print (liquidity-event {
+    (print {
+      event: "liquidity",
       provider: tx-sender,
       token: token,
       amount: amount,
       shares: amount
-    }))
+    })
     (ok amount)))
 
 (define-public (set-fee-rate (new-fee uint))

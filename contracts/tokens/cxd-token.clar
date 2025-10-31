@@ -3,7 +3,6 @@
 ;; Enhanced with integration hooks for staking, revenue distribution, and system monitoring
 ;; --- Traits ---
 (use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
-.all-traits.cxd-token-trait)
 ;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED u100)
 (define-constant ERR_NOT_ENOUGH_BALANCE u101)

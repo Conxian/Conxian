@@ -130,7 +130,7 @@ address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.circuit-breaker"
 path = "contracts/dex/auto-compounder.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dex-auto-compounder"
 
-[contracts.dex-batch-auction]
+[disabled.dex-batch-auction]
 path = "contracts/dex/batch-auction.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dex-batch-auction"
 
@@ -186,7 +186,7 @@ address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dex-enhanced-yield-strategy
 path = "contracts/dex/enterprise-loan-manager.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dex-enterprise-loan-manager"
 
-[contracts.dex-fee-manager]
+[disabled.dex-fee-manager]
 path = "contracts/dex/fee-manager.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dex-fee-manager"
 
@@ -422,7 +422,7 @@ address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.governance-signed-data-base
 path = "contracts/governance/upgrade-controller.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.governance-upgrade-controller"
 
-[contracts.interfaces-btc-adapter]
+[disabled.interfaces-btc-adapter]
 path = "contracts/interfaces/btc-adapter.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.interfaces-btc-adapter"
 
@@ -494,7 +494,7 @@ address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.monitoring-performance-opti
 path = "contracts/monitoring/price-stability-monitor.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.monitoring-price-stability-monitor"
 
-[contracts.monitoring-system-monitor]
+[disabled.monitoring-system-monitor]
 path = "contracts/monitoring/system-monitor.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.monitoring-system-monitor"
 
@@ -636,6 +636,33 @@ address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.vaults-sbtc-vault"
 path = "contracts/staking/dual-stacking-orchestrator.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.staking-dual-stacking-orchestrator"
 depends_on = ["all-traits"]
+
+[disabled.position-factory]
+path = "contracts/position-factory.clar"
+
+[disabled.self-launch-coordinator]
+path = "contracts/self-launch-coordinator.clar"
+
+[disabled.dex-liquidity-provider]
+path = "contracts/dex/liquidity-provider.clar"
+
+[disabled.dex-price-impact-calculator]
+path = "contracts/dex/price-impact-calculator.clar"
+
+[disabled.oracle-legacy-oracle]
+path = "contracts/oracle/oracle.clar"
+
+[disabled.risk-insurance-fund]
+path = "contracts/risk/insurance-fund.clar"
+
+[disabled.integrations-chainlink-adapter]
+path = "contracts/integrations/chainlink-adapter.clar"
+
+[disabled.integrations-twap-oracle]
+path = "contracts/integrations/twap-oracle.clar"
+
+[disabled.mocks-mock-token]
+path = "contracts/mocks/mock-token.clar"
 
 [accounts.wallet_3.system]
 mnemonic = "theme apart absurd gasp river used vessel screen fiction slice slab ice jar hurt slam puppy snake life radar sign ship list excuse trick"

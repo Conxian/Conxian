@@ -217,7 +217,7 @@
               amount-out: amount-out
             })
             current-best)
-          (err _)
+          (err e)
           current-best
         )
       )

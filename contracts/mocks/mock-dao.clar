@@ -1,7 +1,6 @@
 ;; mock-dao.clar
 ;; Mock DAO implementation for testing the audit registry
 
-
 ;; ===== Constants =====
 (define-constant CONTRACT_OWNER tx-sender)
 (define-constant ERR_UNAUTHORIZED (err u1001))

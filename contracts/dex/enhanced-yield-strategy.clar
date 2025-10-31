@@ -166,7 +166,8 @@
       (var-set total-deployed (- current-deployed amount))
       
       (print {event: "withdraw", amount: amount, remaining-deployed: (var-get total-deployed)})
-      (ok amount))))
+      (ok amount)))))
+
 (define-public (harvest)
   (begin
     (asserts! (not (var-get paused)) ERR_PAUSED)
@@ -235,7 +236,7 @@
     
     ;; In a real implementation, this would rebalance the strategy's positions
     (print {event: "rebalanced", timestamp: block-height})
-    (ok true))))
+    (ok true)))
 
 (define-read-only (get-apy)
   (ok (var-get expected-apy)))

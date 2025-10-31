@@ -28,7 +28,7 @@ address = "ST2NEB84ASENDXKYGJPQW86YXQCEFEX2ZQPG87ND"
 
 [accounts.wallet_3]
 address = "ST2REHHS5J3CERCRBEPMGH7921Q6PYKAADT7JP2VB"
-[contracts.math-lib-concentrated]
+[disabled.math-lib-concentrated]
 path = "../contracts/math/math-lib-concentrated.clar"
 clarity_version = 3
 epoch = "3.0"
@@ -49,7 +49,7 @@ epoch = "3.0"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 depends_on = [ "all-traits",]
 
-[contracts.fee-manager]
+[disabled.fee-manager]
 path = "../contracts/dex/fee-manager.clar"
 clarity_version = 3
 epoch = "3.0"
@@ -70,7 +70,7 @@ epoch = "3.0"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 depends_on = [ "all-traits",]
 
-[contracts.system-monitor]
+[disabled.system-monitor]
 path = "../contracts/monitoring/system-monitor.clar"
 clarity_version = 3
 epoch = "3.0"
@@ -224,21 +224,21 @@ epoch = "3.0"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 depends_on = [ "all-traits",]
 
-[contracts.fee-manager-trait]
+[disabled.fee-manager-trait]
 path = "../contracts/traits/defi/fee-manager-trait.clar"
 clarity_version = 3
 epoch = "3.0"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 depends_on = [ "all-traits",]
 
-[contracts.strategy-trait]
+[disabled.strategy-trait]
 path = "../contracts/traits/defi/strategy-trait.clar"
 clarity_version = 3
 epoch = "3.0"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 depends_on = [ "all-traits",]
 
-[contracts.performance-optimizer-trait]
+[disabled.performance-optimizer-trait]
 path = "../contracts/traits/defi/performance-optimizer-trait.clar"
 clarity_version = 3
 epoch = "3.0"
@@ -254,70 +254,70 @@ depends_on = [ "all-traits",]
 
  
 
-[contracts.pool-creation-trait]
+[disabled.pool-creation-trait]
 path = "../contracts/traits/defi/pool-creation-trait.clar"
 clarity_version = 3
 epoch = "3.0"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 depends_on = [ "all-traits",]
 
-[contracts.dao-trait]
+[disabled.dao-trait]
 path = "../contracts/traits/governance/dao-trait.clar"
 clarity_version = 3
 epoch = "3.0"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 depends_on = [ "all-traits",]
 
-[contracts.governance-token-trait]
+[disabled.governance-token-trait]
 path = "../contracts/traits/governance/governance-token-trait.clar"
 clarity_version = 3
 epoch = "3.0"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 depends_on = [ "all-traits",]
 
-[contracts.standard-constants-trait]
+[disabled.standard-constants-trait]
 path = "../contracts/traits/core/standard-constants-trait.clar"
 clarity_version = 3
 epoch = "3.0"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 depends_on = [ "all-traits",]
 
-[contracts.utils-trait]
+[disabled.utils-trait]
 path = "../contracts/traits/core/utils-trait.clar"
 clarity_version = 3
 epoch = "3.0"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 depends_on = [ "all-traits",]
 
-[contracts.metrics-trait]
+[disabled.metrics-trait]
 path = "../contracts/traits/core/metrics-trait.clar"
 clarity_version = 3
 epoch = "3.0"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 depends_on = [ "all-traits",]
 
-[contracts.ownable-trait]
+[disabled.ownable-trait]
 path = "../contracts/traits/core/ownable-trait.clar"
 clarity_version = 3
 epoch = "3.0"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 depends_on = [ "all-traits",]
 
-[contracts.error-codes-trait]
+[disabled.error-codes-trait]
 path = "../contracts/traits/core/error-codes-trait.clar"
 clarity_version = 3
 epoch = "3.0"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 depends_on = [ "all-traits",]
 
-[contracts.migration-manager-trait]
+[disabled.migration-manager-trait]
 path = "../contracts/traits/core/migration-manager-trait.clar"
 clarity_version = 3
 epoch = "3.0"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 depends_on = [ "all-traits",]
 
-[contracts.fixed-point-math-trait]
+[disabled.fixed-point-math-trait]
 path = "../contracts/traits/math/fixed-point-math-trait.clar"
 clarity_version = 3
 epoch = "3.0"
@@ -387,14 +387,14 @@ epoch = "3.0"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 depends_on = [ "all-traits",]
 
-[contracts.legacy-adapter-trait]
+[disabled.legacy-adapter-trait]
 path = "../contracts/traits/protocol/legacy-adapter-trait.clar"
 clarity_version = 3
 epoch = "3.0"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 depends_on = [ "all-traits",]
 
-[contracts.cross-protocol-trait]
+[disabled.cross-protocol-trait]
 path = "../contracts/traits/protocol/cross-protocol-trait.clar"
 clarity_version = 3
 epoch = "3.0"
@@ -464,7 +464,7 @@ epoch = "3.0"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 depends_on = [ "all-traits",]
 
-[contracts.cxd-staking]
+[disabled.cxd-staking]
 path = "../contracts/dex/cxd-staking.clar"
 clarity_version = 3
 epoch = "3.0"
@@ -492,14 +492,14 @@ epoch = "3.0"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 depends_on = [ "all-traits",]
 
-[contracts.flash-loan-vault]
+[disabled.flash-loan-vault]
 path = "../contracts/dex/flash-loan-vault.clar"
 clarity_version = 3
 epoch = "3.0"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 depends_on = [ "all-traits",]
 
-[contracts.revenue-distributor]
+[disabled.revenue-distributor]
 path = "../contracts/dex/revenue-distributor.clar"
 clarity_version = 3
 epoch = "3.0"
@@ -548,14 +548,14 @@ epoch = "3.0"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 depends_on = [ "all-traits",]
 
-[contracts.ft-mintable-trait]
+[disabled.ft-mintable-trait]
 path = "../contracts/traits/sips/sip-010-ft-mintable-trait.clar"
 clarity_version = 3
 epoch = "3.0"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 depends_on = [ "all-traits",]
 
-[contracts.ft-trait]
+[disabled.ft-trait]
 path = "../contracts/traits/sips/sip-010-ft-trait.clar"
 clarity_version = 3
 epoch = "3.0"
@@ -684,21 +684,21 @@ epoch = "3.0"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 depends_on = [ "all-traits",]
 
-[contracts.btc-adapter]
+[disabled.btc-adapter]
 path = "../contracts/interfaces/btc-adapter.clar"
 clarity_version = 3
 epoch = "3.0"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 depends_on = [ "all-traits",]
 
-[contracts.governance-token]
+[disabled.governance-token]
 path = "../contracts/governance/governance-token.clar"
 clarity_version = 3
 epoch = "3.0"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 depends_on = [ "all-traits",]
 
-[contracts.batch-auction]
+[disabled.batch-auction]
 path = "../contracts/dex/batch-auction.clar"
 clarity_version = 3
 epoch = "3.0"
@@ -712,21 +712,21 @@ epoch = "3.0"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 depends_on = [ "all-traits",]
 
-[contracts.multi-hop-router-v3]
+[disabled.multi-hop-router-v3]
 path = "../contracts/dex/multi-hop-router-v3.clar"
 clarity_version = 3
 epoch = "3.0"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 depends_on = [ "all-traits",]
 
-[contracts.signed-data-base]
+[disabled.signed-data-base]
 path = "../contracts/governance/signed-data-base.clar"
 clarity_version = 3
 epoch = "3.0"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 depends_on = [ "all-traits",]
 
-[contracts.dex-router]
+[disabled.dex-router]
 path = "../contracts/dex/dex-router.clar"
 clarity_version = 3
 epoch = "3.0"
@@ -821,7 +821,7 @@ address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 path = "contracts/oracle/dimensional-oracle.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
-[contracts.oracle-aggregator-v2]
+[disabled.oracle-aggregator-v2]
 path = "contracts/oracle/oracle-aggregator-v2.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
@@ -841,7 +841,7 @@ address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 path = "contracts/automation/batch-processor.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
-[contracts.Pausable]
+[disabled.Pausable]
 path = "contracts/security/Pausable.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 depends_on = [ "all-traits",]
@@ -882,7 +882,7 @@ address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 path = "contracts/dex/asset-vault.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
-[contracts.cross-protocol-integrator]
+[disabled.cross-protocol-integrator]
 path = "contracts/interfaces/cross-protocol-integrator.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
@@ -903,7 +903,7 @@ address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 path = "contracts/dex/manipulation-detector.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
-[contracts.mev-protector]
+[disabled.mev-protector]
 path = "contracts/security/mev-protector.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 depends_on = [ "all-traits",]
@@ -916,12 +916,12 @@ address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 path = "contracts/monitoring/monitoring-dashboard.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
-[contracts.performance-optimizer]
+[disabled.performance-optimizer]
 path = "contracts/monitoring/performance-optimizer.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 depends_on = [ "all-traits",]
 
-[contracts.finance-metrics]
+[disabled.finance-metrics]
 path = "contracts/monitoring/finance-metrics.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 depends_on = [ "all-traits",]
@@ -934,7 +934,7 @@ address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 path = "contracts/dex/sbtc-bond-integration.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
-[contracts.sbtc-flash-loan-extension]
+[disabled.sbtc-flash-loan-extension]
 path = "contracts/dex/sbtc-flash-loan-extension.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 depends_on = [ "all-traits",]
@@ -975,16 +975,16 @@ address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 path = "contracts/dex/yield-optimizer.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
-[contracts.concentrated-liquidity-pool]
+[disabled.concentrated-liquidity-pool]
 path = "contracts/pools/concentrated-liquidity-pool.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 depends_on = [ "all-traits",]
 
-[contracts.proposal-engine]
+[disabled.proposal-engine]
 path = "contracts/governance/proposal-engine.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
-[contracts.audit-registry-trait]
+[disabled.audit-registry-trait]
 path = "contracts/interfaces/audit-registry-trait.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
@@ -992,38 +992,28 @@ address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 path = "contracts/lib/error-codes.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
-[contracts.fixed-point-math]
-path = "contracts/lib/fixed-point-math.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
-depends_on = [ "all-traits",]
-
-[contracts.mock-dao]
-path = "contracts/mocks/mock-dao.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
-depends_on = [ "all-traits",]
-
-[contracts.mock-oracle]
+[disabled.mock-oracle]
 path = "contracts/mocks/mock-oracle.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 depends_on = [ "all-traits",]
 
-[contracts.oracle-aggregator]
+[disabled.oracle-aggregator]
 path = "contracts/oracle/oracle-aggregator.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 depends_on = [ "all-traits",]
 
-[contracts.stable-pool-enhanced]
+[disabled.stable-pool-enhanced]
 path = "contracts/pools/stable-pool-enhanced.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
-[contracts.tiered-pools]
+[disabled.tiered-pools]
 path = "contracts/pools/tiered-pools.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
-[contracts.weighted-pool]
+[disabled.weighted-pool]
 path = "contracts/pools/weighted-pool.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
+[disabled.advanced-router-dijkstra]
 [contracts.advanced-router-dijkstra]
 path = "contracts/dimensional/advanced-router-dijkstra.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
@@ -1041,10 +1031,9 @@ address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 path = "contracts/circuit-breaker.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
-[contracts.concentrated-liquidity-pool-root]
+[disabled.concentrated-liquidity-pool-root]
 path = "contracts/concentrated-liquidity-pool.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
-
 [contracts.concentrated-liquidity-pool-dex]
 path = "contracts/dex/concentrated-liquidity-pool.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
@@ -1155,7 +1144,7 @@ cxs-token = ".cxs-token"
 dex-factory = ".dex-factory"
 dex-pool = ".dex-pool"
 pool-template = ".pool-template"
-dex-router = ".dex-router"
+dex-router = ".advanced-router-dijkstra"
 oracle = ".oracle"
 automated-circuit-breaker = ".automated-circuit-breaker"
 bond-issuance-system = ".bond-issuance-system"

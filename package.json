@@ -19,7 +19,7 @@
     "test:all": "npm run test:contracts && npm run test:integration && npm run test:enterprise && npm run test:load && npm run test:tokens",
     "test:production": "npm run test:enterprise && npm run test:flash-loans && npm run test:integration && npm run test:tokens",
     "test:system": "vitest run tests/system-tests/ --config vitest.config.enhanced.ts",
-    "test:performance": "vitest run tests/performance/ --config vitest.config.enhanced.ts",
+    "test:performance": "vitest run tests/load-testing/ --config vitest.config.enhanced.ts",
     "clarinet:test": "clarinet test",
     "clarinet:check": "clarinet check",
     "check": "clarinet check",

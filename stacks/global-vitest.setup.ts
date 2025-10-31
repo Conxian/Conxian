@@ -26,6 +26,12 @@ global.testEnvironment = 'clarinet';
 global.coverageReports = [];
 global.costsReports = [];
 
+// Allow static tests (e.g., policy linters) to skip SDK init to avoid compiling manifests
+if (process.env.SKIP_SDK === '1') {
+  // @ts-ignore ensure simnet is undefined for tests that don't use it
+  global.simnet = undefined;
+  // Early return: do not initialize Clarinet SDK
+} else {
 // Initialize a global simnet instance so Clarinet vitest helpers can manage sessions
 const sdk = await getSDK({
   trackCosts: global.options.clarinet.costs,
@@ -33,3 +39,4 @@ const sdk = await getSDK({
 });
 // @ts-ignore assign to declared global from SDK helpers
 global.simnet = sdk;
+}
