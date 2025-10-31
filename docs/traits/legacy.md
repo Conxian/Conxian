@@ -1,4 +1,0 @@
-# legacy Trait
-
-## Functions
-

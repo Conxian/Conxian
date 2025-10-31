@@ -1,4 +1,0 @@
-# proposal Trait
-
-## Functions
-

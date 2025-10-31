@@ -1,4 +1,0 @@
-# batch Trait
-
-## Functions
-

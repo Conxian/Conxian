@@ -1,7 +1,6 @@
 # Conxian Stacks DeFi — Design
 
 This document outlines the Conxian on-chain DeFi framework architecture (current framework implementation + development roadmap) on Stacks, leveraging Bitcoin anchoring and future BTC bridges (e.g., sBTC) for differentiation.  
-For detailed product-level requirements, see `documentation/prd/` (e.g., `VAULT.md`, `DAO_GOVERNANCE.md`, `DEX.md`).
 
 ## Principles
 
@@ -126,15 +125,11 @@ Upcoming:
 
 **Prototypes / Experimental**: `stable-pool`, `weighted-pool`, `multi-hop-router`, `mock-dex`
 
-**Design References**: `DEX_DESIGN.md`, `DEX_IMPLEMENTATION_ROADMAP.md`, `DEX_ECOSYSTEM_BENCHMARK.md`
+## The Dimensional DeFi System: An Architectural Overview
 
-**Next Steps**:
-- Deploy concentrated liquidity pools using implemented mathematical functions
-- Integrate flash loan arbitrage with DEX operations
-- Add MEV protection using circuit-breaker hooks
-- Implement cross-protocol yield optimization strategies
+### Introduction
 
-**Framework Status**: Mathematical library framework implemented, precision validation framework, invariant calculation framework ready
+The "Dimensional DeFi System" is the core architectural innovation of the Conxian protocol. It is a graph-based model of the entire DeFi ecosystem, designed to facilitate highly efficient trade routing and provide a framework for analyzing risk and liquidity. This document provides a detailed overview of this system.
 
 ## The Dimensional DeFi System: An Architectural Overview
 

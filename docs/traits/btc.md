@@ -1,4 +1,0 @@
-# btc Trait
-
-## Functions
-

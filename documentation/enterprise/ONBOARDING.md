@@ -48,9 +48,18 @@ The enterprise system can be connected to a compliance contract.
     *   `unverify-account`: Removes the verification for an account.
     *   `is-verified`: Checks if an account is currently verified.
 
-## Technical API Reference
+##### `set-kyc-tier`
+*   **Description:** Sets the KYC tier for a given account.
+*   **Parameters:**
+    *   `account` (principal): The account to modify.
+    *   `kyc-tier` (uint): The new KYC tier.
+*   **Returns:** `(response bool)`
 
-A full API reference for the enterprise contracts will be provided in `documentation/enterprise/API_REFERENCE.md`. This will include detailed specifications for all public functions, data maps, and error codes.
+##### `is-verified`
+*   **Description:** Checks if an account is currently verified.
+*   **Parameters:**
+    *   `account` (principal): The account to check.
+*   **Returns:** `(bool)`
 
 ## Security and Best Practices
 

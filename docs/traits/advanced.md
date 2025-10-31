@@ -1,4 +1,0 @@
-# advanced Trait
-
-## Functions
-
