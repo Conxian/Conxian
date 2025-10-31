@@ -312,7 +312,25 @@
     ;; Check if an oracle is registered
     ;; @param oracle: principal to check
     ;; @return (response bool uint): true if registered, false otherwise, and error code
-    (is-registered (oracle principal) (response bool uint))
+    (is-oracle-registered (oracle principal) (response bool uint))
+    
+    ;; Register a new dimension id with a weight
+    ;; @param id: dimension identifier
+    ;; @param weight: dimension weight (> 0)
+    ;; @return (response uint uint): registered dimension id and error code
+    (register-dimension (id uint) (weight uint) (response uint uint))
+    
+    ;; Update an existing dimension's weight
+    ;; @param dim-id: dimension identifier
+    ;; @param new-weight: new weight (> 0)
+    ;; @return (response bool uint): success flag and error code
+    (update-dimension-weight (dim-id uint) (new-weight uint) (response bool uint))
+    
+    ;; Register a component (contract principal) as a new dimension
+    ;; @param component: component contract principal
+    ;; @param weight: initial weight (> 0)
+    ;; @return (response uint uint): assigned dimension id and error code
+    (register-component (component principal) (weight uint) (response uint uint))
   )
 )
 
@@ -1348,6 +1366,23 @@
     ;; Get strategy information
     ;; @return (response (tuple ...) uint): strategy details and error code
     (get-strategy-info () (response (tuple (deployed uint) (current-value uint) (expected-apy uint) (risk-level uint)) uint))
+  )
+)
+
+;; ===========================================
+;; DUAL STACKING TRAIT
+;; ===========================================
+(define-trait dual-stacking-trait
+  (
+    (initialize (sbtc <sip-010-ft-trait>) (operator principal) (fee-bps uint) (response bool uint))
+    (record-delegations (cycle-id uint) (entries (list 200 (tuple (user principal) (amount uint)))) (response bool uint))
+    (deposit-reward (cycle-id uint) (token <sip-010-ft-trait>) (amount uint) (response bool uint))
+    (claim (token <sip-010-ft-trait>) (response uint uint))
+    (get-user-claimable (user principal) (response uint uint))
+    (get-cycle-stats (cycle-id uint) (response (tuple (total-delegated uint) (reward uint)) uint))
+    (set-operator (new-operator principal) (response bool uint))
+    (set-fee (new-fee-bps uint) (response bool uint))
+    (set-fee-recipient (recipient principal) (response bool uint))
   )
 )
 

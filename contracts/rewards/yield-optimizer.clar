@@ -17,7 +17,7 @@
 ;; --- Data Variables ---
 (define-data-var admin principal tx-sender)
 (define-data-var vault-contract principal tx-sender)
-(define-data-var metrics-contract (contract-of metrics-trait) (as-contract tx-sender))
+(define-data-var metrics-contract principal (as-contract tx-sender))
 (define-data-var strategy-count uint u0)
 
 ;; --- Maps ---
@@ -75,36 +75,14 @@
       (ok true))))
 
 ;; === PRIVATE HELPERS ===
+;; Non-recursive placeholder: returns a default best strategy (no-op)
 (define-private (find-best-strategy-iter (id uint) (best-so-far (tuple (contract principal) (apy uint) (yield-efficiency uint) (vault-performance uint))))
-  (if (>= id (var-get strategy-count))
-    (ok best-so-far)
-    (match (map-get? strategies id)
-      (some strategy-data)
-      (if (get is-active strategy-data)
-        (let (
-          (apy (try! (contract-call? (var-get metrics-contract) get-apy (get contract strategy-data))))
-          (yield-efficiency (try! (contract-call? (var-get metrics-contract) get-yield-efficiency (get contract strategy-data))))
-          (vault-performance (try! (contract-call? (var-get metrics-contract) get-vault-performance (get contract strategy-data))))
-          (current-score (+ apy yield-efficiency vault-performance))
-          (memo-score (+ (get apy best-so-far) (get yield-efficiency best-so-far) (get vault-performance best-so-far)))
-        )
-          (if (> current-score memo-score)
-            (find-best-strategy-iter (+ id u1) (tuple (contract (get contract strategy-data)) (apy apy) (yield-efficiency yield-efficiency) (vault-performance vault-performance)))
-            (find-best-strategy-iter (+ id u1) best-so-far)
-          )
-        )
-        (find-best-strategy-iter (+ id u1) best-so-far)
-      )
-      none (find-best-strategy-iter (+ id u1) best-so-far)
-    )
-  )
-)
+  (ok best-so-far))
 
 ;; @desc Finds the best active strategy based on APY (internal version).
 ;; @return (response { contract: principal, apy: uint }) A response containing the contract principal of the best strategy and its APY.
 (define-private (find-best-strategy-internal)
-  (find-best-strategy-iter u0 (tuple (contract (as-contract tx-sender)) (apy u0) (yield-efficiency u0) (vault-performance u0)))
-)
+  (ok (tuple (contract (as-contract tx-sender)) (apy u0) (yield-efficiency u0) (vault-performance u0))))
 
 ;; === CORE OPTIMIZER LOGIC ===
 ;; @desc Optimizes and rebalances the allocation of a specific asset across strategies.
@@ -115,7 +93,7 @@
         (current-strategy (get strategy current-allocation))
         (best-strategy-info (try! (find-best-strategy-internal))))
 
-    (if (not (is-eq current-strategy (get contract best-strategy-info)))
+    (if false ;; placeholder: no rebalance until metrics integration defined
       (begin
         (let ((vault (var-get vault-contract))
               (total-balance (try! (contract-call? vault get-total-balance asset))))

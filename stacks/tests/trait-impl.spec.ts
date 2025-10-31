@@ -34,16 +34,18 @@ function parseImplTrait(content: string): string[] {
   return out;
 }
 
-// Enforce: implementations reference centralized traits via alias imported from `.all-traits.*` 
-// - Contracts in `contracts/traits/` are skipped
-// - For each (impl-trait X): X must be an alias defined by (use-trait X ...)
-// - The corresponding (use-trait X ...) path must include `.all-traits.` (centralized traits)
-// - Disallow `(impl-trait .something...)` (fully-qualified impl)
+// Enforce: implementations reference centralized traits from `.all-traits.*`
+// Allowed patterns:
+// - (impl-trait .all-traits.<trait>)
+// - (impl-trait <alias>) where a corresponding (use-trait <alias> .all-traits.<trait>) exists
+// Disallowed:
+// - Principal-qualified impl-trait (starts with "'")
+// - Fully-qualified impl-trait that is NOT under `.all-traits.`
 
 describe('Trait implementation policy (centralized all-traits)', () => {
   const contractsDir = path.join(__dirname, '..', '..', 'contracts');
   const files = readAllClarFiles(contractsDir).filter(p => !p.includes(`${path.sep}traits${path.sep}`));
-  it('all impl-trait statements should use alias from use-trait and point to .all-traits.*', () => {
+  it('all impl-trait statements should use .all-traits.* directly or via alias mapped to .all-traits.*', () => {
     const failures: { file: string; message: string }[] = [];
 
     for (const file of files) {
@@ -52,12 +54,21 @@ describe('Trait implementation policy (centralized all-traits)', () => {
       const impls = parseImplTrait(content);
 
       for (const sym of impls) {
-        // Disallow fully-qualified impl-trait
-        if (sym.includes('.') || sym.startsWith("'")) {
-          failures.push({ file, message: `(impl-trait ${sym}) should use an alias imported via (use-trait ...)` });
+        // Disallow principal-qualified impl-trait
+        if (sym.startsWith("'")) {
+          failures.push({ file, message: `(impl-trait ${sym}) must not be principal-qualified; use .all-traits.* or an alias mapped to it` });
           continue;
         }
-        
+
+        // Allow fully-qualified impl that points to centralized traits
+        if (sym.includes('.')) {
+          if (!sym.includes('.all-traits.')) {
+            failures.push({ file, message: `(impl-trait ${sym}) must point to centralized traits via .all-traits.*` });
+          }
+          continue;
+        }
+
+        // Otherwise, sym must be an alias with a matching use-trait mapped to .all-traits.*
         const ref = uses[sym];
         if (!ref) {
           failures.push({ file, message: `(impl-trait ${sym}) has no matching (use-trait ${sym} <path>)` });

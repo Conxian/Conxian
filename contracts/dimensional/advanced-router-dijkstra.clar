@@ -3,7 +3,7 @@
 ;; Integrates all routing functionality under dimensional architecture
 
 (use-trait advanced-router-dijkstra-trait .all-traits.advanced-router-dijkstra-trait)
-(impl-trait advanced-router-dijkstra-trait)
+(impl-trait .all-traits.advanced-router-dijkstra-trait)
 
 ;; === DIMENSIONAL INTEGRATION CONSTANTS ===
 (define-constant CONTRACT_OWNER tx-sender)

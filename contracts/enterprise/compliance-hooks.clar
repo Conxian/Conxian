@@ -3,7 +3,6 @@
 ;; compliance-hooks.clar
 
 ;; ===== Traits =====
-(use-trait compliance-hooks-trait)
 
 ;; ===== Constants =====
 (define-constant ERR_UNAUTHORIZED (err u401))

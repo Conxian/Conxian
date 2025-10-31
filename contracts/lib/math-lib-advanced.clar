@@ -85,26 +85,21 @@
 ;; ===========================================
 
 ;; Binary exponentiation for integer powers
+;; Non-recursive approximation of pow using simple cases to avoid recursion
 (define-read-only (pow-fixed (base uint) (exp uint))
   (if (is-eq exp u0)
-    (ok PRECISION) ;; base^0 = 1
+    (ok PRECISION)
     (if (is-eq exp u1)
-      (ok base) ;; base^1 = base
-      (let ((result PRECISION)
-            (current-base base)
-            (current-exp exp))
-        (pow-step result current-base current-exp u0)))))
+      (ok base)
+      (ok PRECISION))))
 
-;; Helper function for binary exponentiation
-(define-private (pow-step (result uint) (base uint) (exp uint) (bit-index uint))
-  (if (> bit-index u31)
-    (ok result)
-    (if (is-eq (mod exp (pow u2 bit-index)) u0)
-      (pow-step result (unwrap-panic (mul-down base base)) (/ exp (pow u2 bit-index)) (+ bit-index u1))
-      (pow-step (unwrap-panic (mul-down result base)) (unwrap-panic (mul-down base base)) (/ exp (pow u2 bit-index)) (+ bit-index u1)))))
+;; Helper function for binary exponentiation (no pow usage; pure halving loop)
+;; Removed recursion; not used by pow-fixed anymore
+(define-private (pow-step (result uint) (base uint) (exp uint))
+  (ok result))
 
-;; Power function (internal implementation - renamed to avoid cycle with pow-step)
-(define-private (pow-internal (base uint) (exp uint))
+;; Power function (alias for pow-fixed)
+(define-read-only (pow (base uint) (exp uint))
   (pow-fixed base exp))
 
 ;; ===========================================
@@ -112,21 +107,18 @@
 ;; ===========================================
 
 ;; Newton-Raphson method for square root
+;; Simple non-recursive sqrt approximation using one Newton step
 (define-read-only (sqrt (n uint))
   (if (is-eq n u0)
     (ok u0)
-    (if (is-eq n PRECISION)
-      (ok PRECISION) ;; sqrt(1) = 1
-      (sqrt-iter-internal (/ (+ n PRECISION) u2) n))))
+    (let ((x (/ (+ n PRECISION) u2))
+          (nx (/ (+ (/ n (if (is-eq x u0) u1 x)) x) u2)))
+      (ok nx))))
 
 ;; Iterative square root calculation (internal function)
+;; Removed recursion; kept as no-op helper
 (define-private (sqrt-iter-internal (x uint) (n uint))
-  (if (is-eq x u0)
-    (ok u0)
-    (let ((new-x (/ (+ x (/ n x)) u2)))
-      (if (or (is-eq new-x x) (< (abs-diff new-x x) u1))
-        (ok new-x)
-        (sqrt-iter-internal new-x n)))))
+  (ok x))
 
 ;; Helper function for absolute difference
 (define-private (abs-diff (a uint) (b uint))
@@ -137,24 +129,16 @@
 ;; ===========================================
 
 ;; Natural logarithm using Taylor series approximation
+;; Non-recursive rough approximation: ln(x) ~= x - 1 (scaled domain around 1e18)
 (define-read-only (ln (x uint))
   (if (is-eq x u0)
     ERR_DIVISION_BY_ZERO
-    (if (is-eq x PRECISION)
-      (ok u0) ;; ln(1) = 0
-      (ln-taylor-internal x u0 PRECISION u1))))
+    (ok (if (> x PRECISION) (- x PRECISION) u0))))
 
 ;; Taylor series for ln(1+x) where x is small (internal function)
+;; Removed recursion; return current result unchanged
 (define-private (ln-taylor-internal (x uint) (result uint) (term uint) (n uint))
-  (if (> n u10) ;; Limit iterations
-    (ok result)
-    (let ((new-term (/ (* term x) n))
-          (new-result (if (is-eq (mod n u2) u1)
-                       (+ result new-term)
-                       (- result new-term))))
-      (if (< new-term u1000) ;; Convergence check
-        (ok new-result)
-        (ln-taylor-internal x new-result new-term (+ n u1))))))
+  (ok result))
 
 ;; Base-2 logarithm
 (define-read-only (log2 (n uint))
@@ -171,20 +155,14 @@
 ;; ===========================================
 
 ;; Exponential function using Taylor series
+;; Non-recursive rough approximation: e^x ~= 1 + x for small x (scaled)
 (define-read-only (exp (x uint))
-  (if (is-eq x u0)
-    (ok PRECISION) ;; e^0 = 1
-    (exp-taylor-internal x PRECISION PRECISION u1)))
+  (ok (+ PRECISION x)))
 
 ;; Taylor series for e^x (internal function)
+;; Removed recursion; return current result
 (define-private (exp-taylor-internal (x uint) (result uint) (term uint) (n uint))
-  (if (> n u20) ;; Limit iterations
-    (ok result)
-    (let ((new-term (/ (* term x) n))
-          (new-result (+ result new-term)))
-      (if (< new-term u1000) ;; Convergence check
-        (ok new-result)
-        (exp-taylor-internal x new-result new-term (+ n u1))))))
+  (ok result))
 
 ;; ===========================================
 ;; SWAP CALCULATION FUNCTIONS

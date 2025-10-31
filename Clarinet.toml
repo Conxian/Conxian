@@ -1,7 +1,7 @@
 [project]
 name = "Conxian"
 description = "A comprehensive, standardized Clarinet configuration for the Conxian DeFi protocol."
-clarinet_version = "3.8.0"
+clarinet_version = "3.8.1"
 
 [network]
 api_endpoint = "https://api.hiro.so"
@@ -631,6 +631,11 @@ address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.utils-utils"
 [contracts.vaults-sbtc-vault]
 path = "contracts/vaults/sbtc-vault.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.vaults-sbtc-vault"
+
+[contracts.staking-dual-stacking-orchestrator]
+path = "contracts/staking/dual-stacking-orchestrator.clar"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.staking-dual-stacking-orchestrator"
+depends_on = ["all-traits"]
 
 [accounts.wallet_3.system]
 mnemonic = "theme apart absurd gasp river used vessel screen fiction slice slab ice jar hurt slam puppy snake life radar sign ship list excuse trick"

@@ -8,7 +8,7 @@
 (use-trait utils-trait .all-traits.utils-trait)
 
 ;; Implement the trait
-(impl-trait utils-trait)
+(impl-trait .all-traits.utils-trait)
 
 (define-public (principal-to-buff (p principal))
   ;; Convert principal to buffer using standard Clarity functions

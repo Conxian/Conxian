@@ -1,11 +1,9 @@
 ;; Conxian Enterprise API - Institutional features
 
-;; Traits
-(use-trait governance-trait .all-traits.governance-token-trait)
+;; Traits (centralized policy) - keep only known centralized traits
 (use-trait access-control-trait .all-traits.access-control-trait)
-
-(use-trait access_control_trait .all-traits.access-control-trait)
-(use-trait enterprise-api-trait .all-traits.enterprise-api-trait)
+;; (use-trait governance-trait .all-traits.governance-token-trait)
+;; (use-trait enterprise-api-trait .all-traits.enterprise-api-trait)
 
 ;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED (err u401))
@@ -246,26 +244,10 @@
 (define-private (check-verification (account principal))
   (ok true))
 
-;; @desc Manual bitwise AND implementation for checking privilege bits.
-;; @param a (uint) The first operand.
-;; @param b (uint) The second operand.
-;; @return (uint) The result of bitwise AND operation.
-(define-read-only (bitwise-and (a uint) (b uint))
-  (if (or (is-eq a u0) (is-eq b u0))
-    u0
-    (if (and (> a u0) (> b u0))
-      (+ (bitwise-and (/ a u2) (/ b u2)) 
-         (if (and (is-eq (mod a u2) u1) (is-eq (mod b u2) u1))
-           u1
-           u0))
-      u0)))
-
-;; @desc Checks if an account has a specific privilege.
-;; @param privileges (uint) The bitmask of privileges.
-;; @param privilege (uint) The privilege to check.
-;; @return (bool) True if the account has the privilege, false otherwise.
+;; @desc Checks if an account has a specific privilege bit (privilege is assumed power-of-two).
+;; Uses arithmetic to avoid recursion: ((privileges / privilege) % 2) == 1
 (define-private (has-privilege (privileges uint) (privilege uint))
-  (is-eq (bitwise-and privileges privilege) privilege))
+  (is-eq (mod (/ privileges privilege) u2) u1))
 
 ;; @desc Logs an audit event.
 ;; @param action (string-ascii 64) The action that was performed.

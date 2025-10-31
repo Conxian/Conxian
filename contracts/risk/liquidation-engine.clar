@@ -44,23 +44,23 @@
     (caller tx-sender)
     (current-block block-height)
     (position (unwrap! (contract-call? (var-get position-manager-contract) get-position-by-owner position-owner position-id) (err u4004)))
-    (asset (get position.asset))
+    (asset (get asset position))
     (price (unwrap! (contract-call? (var-get oracle-contract) get-price asset) (err u4005)))
     (liquidation-price (unwrap! (contract-call? (var-get risk-manager-contract) get-liquidation-price position price) (err u4006)))
   )
     ;; Verify position can be liquidated
-    (asserts! (is-eq (get position.status) ACTIVE) (err u4007))
+    (asserts! (is-eq (get status position) ACTIVE) (err u4007))
 
     ;; Check if position is underwater
     (let (
       (margin-ratio (calculate-margin-ratio position price))
-      (maintenance-margin (get position maintenance-margin))
+      (maintenance-margin (get maintenance-margin position))
     )
       (asserts! (< margin-ratio maintenance-margin) ERR_POSITION_SAFE)
 
       ;; Calculate liquidation reward (capped between min and max)
       (let* (
-        (collateral-value (get position collateral))
+        (collateral-value (get collateral position))
         (reward-amount (min
           (max
             (/ (* collateral-value (var-get min-liquidation-reward)) u10000)
@@ -128,7 +128,7 @@
   )
   (let (
     (position (unwrap! (contract-call? (var-get position-manager-contract) get-position-by-owner position-owner position-id) (err u4004)))
-    (price (unwrap! (contract-call? (var-get oracle-contract) get-price (get position.asset)) (err u4005)))
+    (price (unwrap! (contract-call? (var-get oracle-contract) get-price (get asset position)) (err u4005)))
     (margin-ratio (calculate-margin-ratio position price))
     (liquidation-price (unwrap! (contract-call? (var-get risk-manager-contract) get-liquidation-price position price) (err u4006)))
   )
@@ -136,8 +136,8 @@
       margin-ratio: margin-ratio,
       liquidation-price: liquidation-price,
       current-price: price,
-      health-factor: (/ margin-ratio (get position maintenance-margin)),
-      is-liquidatable: (< margin-ratio (get position maintenance-margin))
+      health-factor: (/ margin-ratio (get maintenance-margin position)),
+      is-liquidatable: (< margin-ratio (get maintenance-margin position))
     })
   )
 )
@@ -194,9 +194,9 @@
     (current-price uint)
   )
   (let (
-    (position-value (/ (* (abs position.size) current-price) (pow u10 u8)))
+    (position-value (/ (* (abs (get size position)) current-price) u100000000))
     (pnl (calculate-pnl position current-price))
-    (collateral (get position collateral))
+    (collateral (get collateral position))
   )
     (if (> position-value u0)
       (/ (* (+ collateral pnl) u10000) position-value)
@@ -210,14 +210,14 @@
     (current-price uint)
   )
   (let (
-    (price-diff (- current-price (get position entry-price)))
-    (position-size (abs (get position size)))
+    (price-diff (- current-price (get entry-price position)))
+    (position-size (abs (get size position)))
   )
-    (if (> (get position size) 0)
+    (if (> (get size position) 0)
       ;; Long position
-      (/ (* position-size price-diff) (get position entry-price))
+      (/ (* position-size price-diff) (get entry-price position))
       ;; Short position
-      (/ (* position-size (- (get position entry-price) current-price)) (get position entry-price))
+      (/ (* position-size (- (get entry-price position) current-price)) (get entry-price position))
     )
   )
 )

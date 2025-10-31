@@ -1,10 +1,8 @@
 (use-trait dimensional-oracle-trait .all-traits.dimensional-oracle-trait)
-(use-trait oracle-trait .all-traits.oracle-trait)
 (use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
 
 ;; Implement required traits
-(impl-trait dimensional-oracle-trait)
-(impl-trait oracle-trait)
+(impl-trait .all-traits.dimensional-oracle-trait)
 
 ;; Dimensional Oracle
 ;; Implements a robust price oracle with multiple data sources and deviation checks

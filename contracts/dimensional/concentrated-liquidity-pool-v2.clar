@@ -1,9 +1,7 @@
 ;; Concentrated Liquidity Pool v2 - Minimal trait-compliant adapter for compilation
 
 (use-trait clp-pool-trait .all-traits.clp-pool-trait)
-(use-trait sip-010-ft-trait .all-traits.sip-010-trait)
-(use-trait clp_pool_trait .all-traits.clp-pool-trait)
-(use-trait clp-pool-trait .all-traits.clp-pool-trait)
+(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
 
 (define-constant ERR_UNAUTHORIZED (err u1101))
 (define-constant ERR_INVALID_TICK (err u1102))
@@ -92,11 +90,4 @@
 
 (define-read-only (get-fee-rate) 
   (ok (var-get fee))
-)
-
-(define-private (get-fee-from-params (params (buff 256)))
-  (if (>= (len params) u4)
-    (ok (buff-to-uint-be (unwrap-panic (as-max-len? (unwrap-panic (slice? params u0 u4)) u4))))
-    ERR_INVALID_FEE
-  )
 )

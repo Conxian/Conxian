@@ -1,9 +1,9 @@
 ;; dimensional-vault.clar
 ;; Unified lending vault with risk-adjusted parameters
 
-(use-trait vault-trait .all-traits.vault-trait)
-(use-trait dimensional-core .all-traits.dimensional-core-trait)
-(use-trait risk-oracle .all-traits.risk-oracle-trait)
+;; (use-trait vault-trait .all-traits.vault-trait)
+;; (use-trait dimensional-core .all-traits.dimensional-core-trait)
+;; (use-trait risk-oracle .all-traits.risk-oracle-trait)
 ;; ===== Constants =====
 (define-constant ERR_UNAUTHORIZED (err u9000))
 (define-constant ERR_INVALID_ASSET (err u9001))
@@ -19,7 +19,7 @@
 (define-data-var risk-engine principal)
 
 ;; Vault state
-(define-map vault-state {
+(define-data-var vault-state {
   total-supply: uint,
   total-borrows: uint,
   total-reserves: uint,
@@ -68,7 +68,7 @@
         (new-supply (+ current-supply amount))
       )
         (map-set user-supply {user: supplier} new-supply)
-        (vault-update-supply amount 'add)
+        (vault-update-supply amount "add")
       )
       
       (ok true)
@@ -90,7 +90,7 @@
       
       ;; Check borrowing power
       (let (
-        (borrow-ok (contract-call? risk-oracle check-borrow-power borrower amount))
+        (borrow-ok (contract-call? (var-get risk-oracle) check-borrow-power borrower amount))
       )
         (asserts! borrow-ok ERR_POSITION_UNHEALTHY)
       )
@@ -101,7 +101,7 @@
         (new-borrow (+ current-borrow amount))
       )
         (map-set user-borrows {user: borrower} new-borrow)
-        (vault-update-borrow amount 'add)
+        (vault-update-borrow amount "add")
       )
       
       ;; Transfer tokens to user
@@ -117,33 +117,35 @@
   (let (
     (current-block block-height)
     (state (var-get vault-state))
-    (last-updated (get state 'last-updated))
+    (last-updated (get last-updated state))
   )
     (when (> current-block last-updated)
       (let (
-        (borrow-rate (contract-call? risk-oracle get-borrow-rate (get state 'utilization)))
+        (utilization (let ((ts (get total-supply state)) (tb (get total-borrows state)))
+                       (if (> ts u0) (/ (* tb u10000) ts) u0)))
+        (borrow-rate (contract-call? (var-get risk-oracle) get-borrow-rate utilization))
         (block-delta (- current-block last-updated))
         
         ;; Calculate interest
         (interest-accumulated 
-          (/ (* (get state 'total-borrows) borrow-rate block-delta) u10000)
+          (/ (* (get total-borrows state) borrow-rate block-delta) u10000)
         )
-        (new-total-borrows (+ (get state 'total-borrows) interest-accumulated))
+        (new-total-borrows (+ (get total-borrows state) interest-accumulated))
         
         ;; Update borrow index
         (borrow-index-increase 
-          (if (> (get state 'total-supply) 0)
-            (/ (* interest-accumulated u1000000000000000000) (get state 'total-supply))
+          (if (> (get total-supply state) 0)
+            (/ (* interest-accumulated u1000000000000000000) (get total-supply state))
             u0
           )
         )
-        (new-borrow-index (+ (get state 'borrow-index) borrow-index-increase))
+        (new-borrow-index (+ (get borrow-index state) borrow-index-increase))
       )
         ;; Update state
         (var-set vault-state (merge state {
-          'total-borrows: new-total-borrows,
-          'borrow-index: new-borrow-index,
-          'last-updated: current-block
+          total-borrows: new-total-borrows,
+          borrow-index: new-borrow-index,
+          last-updated: current-block
         }))
       )
     )
@@ -153,7 +155,7 @@
 (define-read-only (get-available-liquidity (asset principal))
   (let (
     (balance (contract-call? asset balance-of (as-contract tx-sender)))
-    (total-borrows (get (var-get vault-state) 'total-borrows))
+    (total-borrows (get total-borrows (var-get vault-state)))
   )
     (- balance total-borrows)
   )
@@ -164,14 +166,14 @@
     (state (var-get vault-state))
     (new-supply 
       (if (is-eq op "add") 
-        (+ (get state 'total-supply) amount)
-        (- (get state 'total-supply) amount)
+        (+ (get total-supply state) amount)
+        (- (get total-supply state) amount)
       )
     )
   )
     (var-set vault-state (merge state {
-      'total-supply: new-supply,
-      'last-updated: block-height
+      total-supply: new-supply,
+      last-updated: block-height
     }))
   )
 )
@@ -181,14 +183,14 @@
     (state (var-get vault-state))
     (new-borrows 
       (if (is-eq op "add")
-        (+ (get state 'total-borrows) amount)
-        (- (get state 'total-borrows) amount)
+        (+ (get total-borrows state) amount)
+        (- (get total-borrows state) amount)
       )
     )
   )
     (var-set vault-state (merge state {
-      'total-borrows: new-borrows,
-      'last-updated: block-height
+      total-borrows: new-borrows,
+      last-updated: block-height
     }))
   )
 )

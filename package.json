@@ -39,10 +39,10 @@
     "node-fetch": "^3.3.2"
   },
   "devDependencies": {
-    "@hirosystems/clarinet-sdk": "3.8.0",
+    "@hirosystems/clarinet-sdk": "3.8.1",
     "@types/node": "^24.5.2",
     "@vitest/coverage-v8": "3.2.4",
-    "artillery": "^2.0.0",
+    "artillery": "^2.0.26",
     "ts-node": "^10.9.2",
     "tsx": "^4.7.1",
     "typescript": "^5.4.5",

@@ -1,8 +1,6 @@
 ;; mock-dao.clar
 ;; Mock DAO implementation for testing the audit registry
 
-(use-trait dao-trait .all-traits.dao-trait)
-(impl-trait dao-trait)
 
 ;; ===== Constants =====
 (define-constant CONTRACT_OWNER tx-sender)
@@ -79,10 +77,10 @@
   (ok {
     id: proposal-id,
     proposer: CONTRACT_OWNER,
-    start-block: u0,
-    end-block: u100,
-    for-votes: u0,
-    against-votes: u0,
+    start_block: u0,
+    end_block: u100,
+    for_votes: u0,
+    against_votes: u0,
     executed: false,
     canceled: false
   })
