@@ -1,0 +1,17 @@
+[project]
+name = "Conxian"
+description = "Foundation-only manifest to bootstrap compilation and iterate upward."
+clarinet_version = "3.8.1"
+
+[accounts.deployer]
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+
+[contracts.all-traits]
+path = "../contracts/traits/all-traits.clar"
+clarity_version = 3
+epoch = "3.0"
+
+[contracts.utils-encoding]
+path = "../contracts/utils/encoding.clar"
+clarity_version = 3
+epoch = "3.0"

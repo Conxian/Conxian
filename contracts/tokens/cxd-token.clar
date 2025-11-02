@@ -3,6 +3,7 @@
 ;; Enhanced with integration hooks for staking, revenue distribution, and system monitoring
 ;; --- Traits ---
 (use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
+(use-trait protocol-monitor-trait .all-traits.protocol-monitor-trait)
 ;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED u100)
 (define-constant ERR_NOT_ENOUGH_BALANCE u101)
@@ -55,10 +56,7 @@
   (if (>= a b) (ok (- a b)) (err ERR_SUB_UNDERFLOW)))
 ;; --- System Integration ---
 (define-private (check-system-pause)
-  (and (var-get system-integration-enabled)
-       (match (var-get protocol-monitor)
-         monitor (unwrap! (contract-call? monitor is-paused) false)
-         false)))
+  false)
 (define-private (check-emission-allowed (amount uint))
   (or (not (var-get system-integration-enabled))
       (match (var-get emission-controller)

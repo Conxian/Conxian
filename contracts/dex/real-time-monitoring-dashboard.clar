@@ -1,5 +1,6 @@
 ;; ===== Traits =====
-(use-trait monitoring-dashboard-trait .all-traits.monitoring-dashboard-trait)
+;; TODO: monitoring-dashboard-trait not defined in all-traits.clar
+;; (use-trait monitoring-dashboard-trait .all-traits.monitoring-dashboard-trait)
 
 
 ;; Real-Time Monitoring Dashboard Contract

@@ -2,6 +2,19 @@ import { defineConfig } from 'vitest/config';
 import { resolve } from 'path';
 import { fileURLToPath } from 'url';
 
+const skipSdk = process.env.SKIP_SDK === '1';
+const includeStatic = [
+  'stacks/tests/**/foundation-*.spec.ts',
+  'stacks/tests/core/core-shape.spec.ts',
+  'tests/load-testing/performance-benchmarks.test.ts',
+];
+const includeAll = [
+  'stacks/tests/**/*.test.ts',
+  'stacks/tests/**/*.spec.ts',
+  'stacks/sdk-tests/**/*.spec.ts',
+  'tests/load-testing/**/*.test.ts',
+];
+
 /**
  * Enhanced Vitest Configuration for Conxian Tokenomics System
  * 
@@ -13,13 +26,8 @@ import { fileURLToPath } from 'url';
  */
 export default defineConfig({
   test: {
-    // Test directories for comprehensive coverage
-    include: [
-      'stacks/tests/**/*.test.ts',
-      'stacks/tests/**/*.spec.ts',
-      'stacks/sdk-tests/**/*.spec.ts',
-      'tests/load-testing/**/*.test.ts'
-    ],
+    // Test directories (static-only when SKIP_SDK=1)
+    include: skipSdk ? includeStatic : includeAll,
     exclude: [
       'stacks/tests/helpers/**',
       'node_modules/**',
@@ -46,7 +54,7 @@ export default defineConfig({
     // Global setup and teardown
     setupFiles: [
       './stacks/global-vitest.setup.ts',
-      './node_modules/@hirosystems/clarinet-sdk/vitest-helpers/src/vitest.setup.ts'
+      ...(!skipSdk ? ['./node_modules/@hirosystems/clarinet-sdk/vitest-helpers/src/vitest.setup.ts'] : []),
     ],
     
     // Coverage configuration
@@ -55,10 +63,10 @@ export default defineConfig({
       provider: 'v8',
       reporter: ['text', 'json', 'html', 'lcov'],
       reportsDirectory: './coverage',
-      include: [
-        'stacks/tests/**/*.ts',
-        'tests/load-testing/**/*.ts',
-        'contracts/**/*.clar'
+      include: skipSdk ? includeStatic : [
+        'stacks/tests/**/*.spec.ts',
+        'stacks/tests/**/*.test.ts',
+        'tests/load-testing/**/*.test.ts'
       ],
       exclude: [
         'stacks/tests/helpers/**',

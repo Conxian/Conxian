@@ -3,7 +3,8 @@
 
 (use-trait token-trait .all-traits.sip-010-ft-trait)
 (use-trait governance-token-trait .all-traits.governance-token-trait)
-(use-trait price-initializer-trait .all-traits.price-initializer-trait)
+;; TODO: price-initializer-trait not defined in all-traits.clar
+;; (use-trait price-initializer-trait .all-traits.price-initializer-trait)
 
 (define-constant ERR_UNAUTHORIZED (err u1000))
 (define-constant ERR_INVALID_INPUT (err u1001))

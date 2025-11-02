@@ -71,7 +71,10 @@
 
 (define-private (check-pool-manager)
   (let ((access-control (var-get access-control-contract)))
-    (ok (asserts! (unwrap! (contract-call? access-control has-role tx-sender u2) (err ERR_UNAUTHORIZED)) ERR_UNAUTHORIZED))
+    (let ((has (unwrap! (contract-call? access-control has-role "POOL_MANAGER" tx-sender) (err ERR_UNAUTHORIZED))))
+      (asserts! has ERR_UNAUTHORIZED)
+      (ok true)
+    )
   )
 )
 

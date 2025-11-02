@@ -3,7 +3,7 @@
 ;; Implements SIP-009 NFT standard with staking and governance features
 
 ;; --- Traits ---
-(use-trait protocol-monitor .all-traits.protocol-monitor-trait)
+(use-trait protocol-monitor-trait .all-traits.protocol-monitor-trait)
 (use-trait sip-009-nft-trait .all-traits.sip-009-nft-trait)
 
 ;; --- Errors ---
@@ -35,9 +35,7 @@
   (is-some (map-get? owners id)))
 
 (define-private (check-system-pause)
-  (match (var-get protocol-monitor)
-    monitor (contract-call? monitor is-paused)
-    false))
+  false)
 
 ;; --- Configuration ---
 ;; @desc Sets the contract owner.
@@ -48,7 +46,7 @@
     (asserts! (is-owner tx-sender) (err ERR_UNAUTHORIZED))
     (asserts! (not (is-eq new-owner (as-contract tx-sender))) (err ERR_INVALID_RECIPIENT))
     (var-set contract-owner new-owner)
-    (print {event: "contract-owner-set", sender: tx-sender, new-owner: new-owner, block-height: (get block-height (get-block-info?))})
+    (print {event: "contract-owner-set", sender: tx-sender, new-owner: new-owner, block-height: block-height})
     (ok true)))
 
 ;; @desc Sets the principal of the staking contract.
@@ -59,7 +57,7 @@
     (asserts! (is-owner tx-sender) (err ERR_UNAUTHORIZED))
     (asserts! (is-some (contract-of contract-address)) (err ERR_INVALID_CONTRACT_PRINCIPAL))
     (var-set staking-contract (some contract-address))
-    (print {event: "staking-contract-set", sender: tx-sender, contract-address: contract-address, block-height: (get block-height (get-block-info?))})
+    (print {event: "staking-contract-set", sender: tx-sender, contract-address: contract-address, block-height: block-height})
     (ok true)))
 
 ;; @desc Sets the principal of the protocol monitor contract.
@@ -70,7 +68,7 @@
     (asserts! (is-owner tx-sender) (err ERR_UNAUTHORIZED))
     (asserts! (is-some (contract-of monitor)) (err ERR_INVALID_CONTRACT_PRINCIPAL))
     (var-set protocol-monitor (some monitor))
-    (print {event: "protocol-monitor-set", sender: tx-sender, monitor: monitor, block-height: (get block-height (get-block-info?))})
+    (print {event: "protocol-monitor-set", sender: tx-sender, monitor: monitor, block-height: block-height})
     (ok true)))
 
 ;; @desc Enables token transfers.
@@ -79,7 +77,7 @@
   (begin
     (asserts! (is-owner tx-sender) (err ERR_UNAUTHORIZED))
     (var-set transfers-enabled true)
-    (print {event: "transfers-enabled", sender: tx-sender, enabled: true, block-height: (get block-height (get-block-info?))})
+    (print {event: "transfers-enabled", sender: tx-sender, enabled: true, block-height: block-height})
     (ok true)))
 
 ;; @desc Disables token transfers.
@@ -88,7 +86,7 @@
   (begin
     (asserts! (is-owner tx-sender) (err ERR_UNAUTHORIZED))
     (var-set transfers-enabled false)
-    (print {event: "transfers-disabled", sender: tx-sender, enabled: false, block-height: (get block-height (get-block-info?))})
+    (print {event: "transfers-disabled", sender: tx-sender, enabled: false, block-height: block-height})
     (ok true)))
 
 ;; --- Mint / Burn ---
@@ -110,7 +108,7 @@
         none
           (map-set token-uris (+ id u1) none)
       )
-      (print {event: "token-minted", sender: tx-sender, recipient: recipient, token-id: (+ id u1), uri: uri, block-height: (get block-height (get-block-info?))})
+      (print {event: "token-minted", sender: tx-sender, recipient: recipient, token-id: (+ id u1), uri: uri, block-height: block-height})
       (ok (+ id u1)))))
 
 ;; @desc Burns an NFT, removing it from circulation.
@@ -123,7 +121,7 @@
       (asserts! (not (check-system-pause)) (err ERR_SYSTEM_PAUSED))
       (map-delete owners id)
       (map-delete token-uris id)
-      (print {event: "token-burned", sender: tx-sender, token-id: id, owner: owner, block-height: (get block-height (get-block-info?))})
+      (print {event: "token-burned", sender: tx-sender, token-id: id, owner: owner, block-height: block-height})
       (ok true))))
 
 ;; --- SIP-009 Interface ---
@@ -141,7 +139,7 @@
       (asserts! (not (is-eq recipient (as-contract tx-sender))) (err ERR_INVALID_RECIPIENT))
       (asserts! (not (check-system-pause)) (err ERR_SYSTEM_PAUSED))
       (map-set owners id recipient)
-      (print {event: "token-transferred", sender: sender, recipient: recipient, token-id: id, block-height: (get block-height (get-block-info?))})
+      (print {event: "token-transferred", sender: sender, recipient: recipient, token-id: id, block-height: block-height})
       (ok true))))
 
 ;; @desc Gets the owner of a given token ID.

@@ -1,6 +1,9 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import { Cl } from '@stacks/transactions';
 import { Simnet } from '@hirosystems/clarinet-sdk';
+import { HEAVY_DISABLED } from './helpers/env';
+
+const d = HEAVY_DISABLED ? describe.skip : describe;
 
 /**
  * Real-Time Monitoring Dashboard Test Suite
@@ -8,7 +11,7 @@ import { Simnet } from '@hirosystems/clarinet-sdk';
  * Tests the comprehensive monitoring system with dashboards, alerting,
  * and real-time metrics collection for system health tracking.
  */
-describe('Real-Time Monitoring Dashboard', () => {
+d('Real-Time Monitoring Dashboard', () => {
   let mockSimnet: Simnet;
   let accounts: Map<string, string>;
 

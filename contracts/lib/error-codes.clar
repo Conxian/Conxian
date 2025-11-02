@@ -1,6 +1,6 @@
+;; Centralized error codes for Conxian system
 
-
-;; Centralized error codes for Conxian system(define-constant ERR_UNAUTHORIZED u1001)
+(define-constant ERR_UNAUTHORIZED u1001)
 (define-constant ERR_INSUFFICIENT_BALANCE u1002)
 (define-constant ERR_INVALID_PARAMETERS u1003)
 (define-constant ERR_NOT_FOUND u1004)

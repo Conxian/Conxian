@@ -1,7 +1,7 @@
 ;; DEX Oracle - Minimal implementation of oracle-trait
 
 (use-trait oracle-trait .all-traits.oracle-trait)
-(use-trait oracle_trait .all-traits.oracle-trait)
+
 
 (define-constant ERR_ASSET_NOT_FOUND (err u404))
 (define-constant ERR_UNAUTHORIZED (err u401))

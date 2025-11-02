@@ -246,6 +246,18 @@
     (print {event: "yield-claimed", participant: participant, pool-id: pool-id, amount: claimable})
     (ok claimable)))
 
+(define-private (calculate-claimable-yield (pool-id uint) (participant principal))
+  (let (
+    (pool (unwrap! (map-get? yield-pools pool-id) ERR_POOL_NOT_FOUND))
+    (stake (unwrap! (map-get? pool-participants {pool-id: pool-id, participant: participant}) ERR_UNAUTHORIZED))
+    (available (get total-yield-available pool))
+    (total (get total-deposited pool))
+    (my-stake (get stake-amount stake))
+  )
+    (if (> total u0)
+      (/ (* available my-stake) total)
+      u0)))
+
 ;; ===== Automated Distribution Schedules =====
 (define-public (create-distribution-schedule
   (pool-id uint)
@@ -328,4 +340,3 @@
     (ok true)
   )
 )
-(use-trait yield-distribution-engine-trait)

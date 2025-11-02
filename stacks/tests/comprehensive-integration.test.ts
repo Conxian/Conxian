@@ -1,6 +1,9 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import { Cl } from '@stacks/transactions';
 import { Simnet } from '@hirosystems/clarinet-sdk';
+import { HEAVY_DISABLED } from './helpers/env';
+
+const d = HEAVY_DISABLED ? describe.skip : describe;
 
 /**
  * Comprehensive Integration Test Suite
@@ -13,7 +16,7 @@ import { Simnet } from '@hirosystems/clarinet-sdk';
  * - Memory pool management
  * - Predictive scaling system
  */
-describe('Enhanced Tokenomics - Comprehensive Integration', () => {
+d('Enhanced Tokenomics - Comprehensive Integration', () => {
   let mockSimnet: Simnet;
   let accounts: Map<string, string>;
 

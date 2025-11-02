@@ -184,3 +184,35 @@
   (let ((from-idx (unwrap! (map-get? token-index token-from) ERR_INVALID_NODE))
         (to-idx (unwrap! (map-get? token-index token-to) ERR_INVALID_NODE)))
     (ok (unwrap! (map-get? graph-edges {from: from-idx, to: to-idx}) ERR_INVALID_NODE))))
+
+(define-read-only (get-token-index (token principal))
+  (ok (map-get? token-index token)))
+
+(define-read-only (get-edge-info (from-token principal) (to-token principal))
+  (let ((from-idx (map-get? token-index from-token))
+        (to-idx (map-get? token-index to-token)))
+    (if (and (is-some from-idx) (is-some to-idx))
+      (let ((edge (map-get? graph-edges {from: (unwrap-panic from-idx), to: (unwrap-panic to-idx)})))
+        (match edge
+          e (ok (some {
+               pool: (get pool e),
+               pool-type: (get pool-type e),
+               weight: (get weight e),
+               liquidity: (get liquidity e),
+               fee: (get fee e),
+               active: (get active e)
+             }))
+          (ok none)))
+      (ok none))))
+
+(define-read-only (estimate-output (token-in principal) (token-out principal) (amount-in uint))
+  (let ((route (try! (find-optimal-path token-in token-out amount-in))))
+    (ok (tuple
+      (path (get path route))
+      (distance (get distance route))
+      (hops (get hops route))
+    ))))
+
+(define-read-only (estimate-amount-out (token-in principal) (token-out principal) (amount-in uint))
+  ;; TODO: replace stub with actual multi-hop estimation
+  (ok amount-in))

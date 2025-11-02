@@ -52,7 +52,7 @@
 
 ;; ===== Circuit Breaker =====
 (define-private (check-circuit-breaker)
-  (contract-call? (var-get circuit-breaker) is-circuit-open))
+  (contract-call? .circuit-breaker is-circuit-open))
 
 ;; ===== Private Helper Functions =====
 (define-private (is-contract-owner)

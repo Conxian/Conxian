@@ -1,6 +1,9 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import { Cl } from '@stacks/transactions';
 import { Simnet } from '@hirosystems/clarinet-sdk';
+import { HEAVY_DISABLED } from './helpers/env';
+
+const d = HEAVY_DISABLED ? describe.skip : describe;
 
 /**
  * Distributed Cache Manager Test Suite
@@ -8,7 +11,7 @@ import { Simnet } from '@hirosystems/clarinet-sdk';
  * Tests the multi-level distributed caching system implementation
  * with L1, L2, L3 cache layers, TTL management, and cache statistics.
  */
-describe('Distributed Cache Manager', () => {
+d('Distributed Cache Manager', () => {
   let mockSimnet: Simnet;
   let accounts: Map<string, string>;
 

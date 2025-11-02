@@ -1,8 +1,7 @@
 
 
 (use-trait performance-optimizer-trait .all-traits.performance-optimizer-trait)
-(use-trait performance_optimizer_trait .all-traits.performance-optimizer-trait)
-.all-traits.performance-optimizer-trait)
+
 
 ;; performance-optimizer.clar
 

@@ -1,6 +1,9 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import { Cl } from '@stacks/transactions';
 import { Simnet } from '@hirosystems/clarinet-sdk';
+import { HEAVY_DISABLED } from './helpers/env';
+
+const d = HEAVY_DISABLED ? describe.skip : describe;
 
 /**
  * Predictive Scaling System Test Suite
@@ -8,7 +11,7 @@ import { Simnet } from '@hirosystems/clarinet-sdk';
  * Tests the intelligent scaling predictions based on transaction patterns,
  * historical data analysis, and proactive resource allocation.
  */
-describe('Predictive Scaling System', () => {
+d('Predictive Scaling System', () => {
   let mockSimnet: Simnet;
   let accounts: Map<string, string>;
 

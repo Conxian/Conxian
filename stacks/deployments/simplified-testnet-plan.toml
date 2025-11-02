@@ -10,7 +10,7 @@ id = 0
   [[plan.batches.transactions]]
   contract-publish = {
     contract-name = "all-traits",
-    expected-sender = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6",
+    expected-sender = "ST3N0ZC9HBPDEBEJ1H1QFGMJF3PSNGW3FYZSVN513",
     cost = 500000,
     path = "contracts/traits/all-traits.clar",
     anchor-block-only = true,
@@ -24,7 +24,7 @@ id = 1
   [[plan.batches.transactions]]
   contract-publish = {
     contract-name = "cxd-token",
-    expected-sender = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6",
+    expected-sender = "ST3N0ZC9HBPDEBEJ1H1QFGMJF3PSNGW3FYZSVN513",
     cost = 1000000,
     path = "contracts/tokens/cxd-token.clar",
     anchor-block-only = true,
@@ -38,9 +38,34 @@ id = 2
   [[plan.batches.transactions]]
   contract-publish = {
     contract-name = "governance-token",
-    expected-sender = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6",
+    expected-sender = "ST3N0ZC9HBPDEBEJ1H1QFGMJF3PSNGW3FYZSVN513",
     cost = 1000000,
     path = "contracts/governance/governance-token.clar",
+    anchor-block-only = true,
+    clarity-version = 3,
+    epoch = "3.0"
+  }
+
+[[plan.batches]]
+id = 3
+
+  [[plan.batches.transactions]]
+  contract-publish = {
+    contract-name = "role-nft",
+    expected-sender = "ST3N0ZC9HBPDEBEJ1H1QFGMJF3PSNGW3FYZSVN513",
+    cost = 500000,
+    path = "contracts/security/role-nft.clar",
+    anchor-block-only = true,
+    clarity-version = 3,
+    epoch = "3.0"
+  }
+
+  [[plan.batches.transactions]]
+  contract-publish = {
+    contract-name = "role-manager",
+    expected-sender = "ST3N0ZC9HBPDEBEJ1H1QFGMJF3PSNGW3FYZSVN513",
+    cost = 500000,
+    path = "contracts/security/role-manager.clar",
     anchor-block-only = true,
     clarity-version = 3,
     epoch = "3.0"

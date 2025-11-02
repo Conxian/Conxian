@@ -1,6 +1,4 @@
 ;; ===== Traits =====
-(use-trait sbtc-integration-trait .all-traits.sbtc-integration-trait)
-
 ;; sbtc-integration.clar
 ;; sBTC Integration Module for Conxian Protocol
 ;; Provides sBTC asset management, risk parameters, and oracle integration
@@ -22,8 +20,8 @@
 
 ;; Risk management constants
 ;; Basis points and rates are scaled by 1e6 (u1000000)
-(define-constant ONE (u1))
-(define-constant WAD (u1000000))
+(define-constant ONE u1)
+(define-constant WAD u1000000)
 
 (define-constant DEFAULT-LTV u700000)             ;; 70% in 1e6 scale
 (define-constant DEFAULT-LIQ-THRESHOLD u750000)   ;; 75%
@@ -243,6 +241,4 @@
         )
         ERR-ASSET-NOT-FOUND
       )
-    )
   )
-)

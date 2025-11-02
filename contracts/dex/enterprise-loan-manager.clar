@@ -3,7 +3,6 @@
 ;; enterprise-loan-manager.clar
 
 (use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
-(use-trait lending-system-trait .all-traits.lending-system-trait)
 
 ;; Constants
 (define-constant ERR_UNAUTHORIZED (err u7001))
@@ -277,6 +276,12 @@
       (if (<= interest-denominator interest-numerator)
         (/ interest-numerator interest-denominator)
         u0))))
+
+;; === YIELD DISTRIBUTION BRIDGE ===
+(define-private (distribute-bond-yield (bond-id uint) (amount uint))
+  (let ((issuer (unwrap! (var-get bond-issuance-system-principal) ERR_BOND_ISSUER_NOT_CONFIGURED)))
+    (contract-call? issuer distribute-yield bond-id amount))
+)
 
 ;; === LOAN REPAYMENT ===
 (define-public (repay-loan (loan-id uint) (payment-amount uint))

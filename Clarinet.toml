@@ -1,3 +1,9 @@
+# Conxian Clarinet manifest
+# Policy highlights:
+# - Centralized traits: import/implement via .all-traits.*
+# - addresses must match the [contracts.<key>] name
+# - depends_on uses contract keys, e.g., ["all-traits", ...]
+# - Avoid duplicate [contracts.*] tables; keep a single registration per contract
 [project]
 name = "Conxian"
 description = "A comprehensive, standardized Clarinet configuration for the Conxian DeFi protocol."
@@ -112,15 +118,15 @@ address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.automation-keeper-coordinat
 
 [contracts.batch-auction]
 path = "contracts/batch-auction.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.oracle"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.batch-auction"
 
 [contracts.btc-adapter]
 path = "contracts/btc-adapter.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.position-nft"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.btc-adapter"
 
 [contracts.budget-manager]
 path = "contracts/budget-manager.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.budget-manager"
 
 [contracts.circuit-breaker]
 path = "contracts/security/circuit-breaker.clar"
@@ -197,6 +203,10 @@ address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dimensional-dimensional-cor
 [contracts.dimensional-governance]
 path = "contracts/dimensional/governance.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dimensional-governance"
+
+[contracts.dimensional-position-nft]
+path = "contracts/dimensional/position-nft.clar"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dimensional-position-nft"
 
 [contracts.lending-dimensional-vault]
 path = "contracts/lending/dimensional-vault.clar"
@@ -374,10 +384,6 @@ address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dimensional-dim-revenue-ada
 path = "contracts/dimensional/dim-yield-stake.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dimensional-dim-yield-stake"
 
-[contracts.dimensional-position-nft]
-path = "contracts/dimensional/position-nft.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dimensional-position-nft"
-
 [contracts.dimensional-tokenized-bond-adapter]
 path = "contracts/dimensional/tokenized-bond-adapter.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dimensional-tokenized-bond-adapter"
@@ -454,25 +460,33 @@ address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.optimization-helpers"
 path = "contracts/mev-protector.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.mev-protector"
 
-[contracts.mocks-mock-dao]
+[disabled.mocks-mock-dao]
 path = "contracts/mocks/mock-dao.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.mocks-mock-dao"
 
-[contracts.mocks-mock-metrics]
+[disabled.mocks-mock-metrics]
 path = "contracts/mocks/mock-metrics.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.mocks-mock-metrics"
 
-[contracts.mocks-mock-oracle]
+[disabled.mocks-mock-oracle]
 path = "contracts/mocks/mock-oracle.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.mocks-mock-oracle"
 
-[contracts.mocks-mock-strategy-a]
+[disabled.mocks-mock-strategy-a]
 path = "contracts/mocks/mock-strategy-a.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.mocks-mock-strategy-a"
 
-[contracts.mocks-mock-strategy-b]
+[disabled.mocks-mock-strategy-b]
 path = "contracts/mocks/mock-strategy-b.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.mocks-mock-strategy-b"
+
+[disabled.oracle-root]
+path = "contracts/oracle.clar"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.oracle-root"
+
+[disabled.oracle-aggregator-v2]
+path = "contracts/oracle/oracle-aggregator-v2.clar"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.oracle-aggregator-v2"
 
 [contracts.monitoring-analytics-aggregator]
 path = "contracts/monitoring/analytics-aggregator.clar"
@@ -585,32 +599,32 @@ address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.tokens-token-system-coordin
 [contracts.core-dimensional-engine]
 path = "contracts/core/dimensional-engine.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.core-dimensional-engine"
-depends_on = ["traits-all-traits", "utils-encoding"]
+depends_on = ["all-traits", "utils-encoding"]
 
 [contracts.core-position-manager]
 path = "contracts/core/position-manager.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.core-position-manager"
-depends_on = ["traits-all-traits", "utils-encoding", "core-dimensional-engine"]
+depends_on = ["all-traits", "utils-encoding", "core-dimensional-engine"]
 
 [contracts.core-oracle-oracle-adapter]
 path = "contracts/core/oracle/oracle-adapter.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.core-oracle-oracle-adapter"
-depends_on = ["traits-all-traits", "utils-encoding"]
+depends_on = ["all-traits", "utils-encoding"]
 
 [contracts.risk-risk-manager]
 path = "contracts/risk/risk-manager.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.risk-risk-manager"
-depends_on = ["traits-all-traits", "utils-encoding"]
+depends_on = ["all-traits", "utils-encoding"]
 
 [contracts.risk-liquidation-engine]
 path = "contracts/risk/liquidation-engine.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.risk-liquidation-engine"
-depends_on = ["traits-all-traits", "utils-encoding", "core-position-manager", "core-oracle-oracle-adapter", "risk-risk-manager"]
+depends_on = ["all-traits", "utils-encoding", "core-position-manager", "core-oracle-oracle-adapter", "risk-risk-manager"]
 
 [contracts.risk-funding-calculator]
 path = "contracts/risk/funding-calculator.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.risk-funding-calculator"
-depends_on = ["traits-all-traits", "utils-encoding", "core-position-manager", "core-oracle-oracle-adapter"]
+depends_on = ["all-traits", "utils-encoding", "core-position-manager", "core-oracle-oracle-adapter"]
 
 [contracts.traits-errors]
 path = "contracts/traits/errors.clar"
@@ -667,3 +681,4 @@ path = "contracts/mocks/mock-token.clar"
 [accounts.wallet_3.system]
 mnemonic = "theme apart absurd gasp river used vessel screen fiction slice slab ice jar hurt slam puppy snake life radar sign ship list excuse trick"
 balance = 100000000000000
+

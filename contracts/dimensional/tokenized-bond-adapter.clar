@@ -91,7 +91,8 @@
     ;; Check system operational status
     (match (var-get protocol-monitor)
       monitor-contract
-        (asserts! (unwrap! (contract-call? monitor-contract is-system-operational) (err ERR_SYSTEM_PAUSED)) (err ERR_SYSTEM_PAUSED))
+        (let ((paused (unwrap! (contract-call? monitor-contract is-paused) (err ERR_SYSTEM_PAUSED))))
+          (asserts! (not paused) (err ERR_SYSTEM_PAUSED)))
       true)
     
     ;; Calculate token holder portion
@@ -156,7 +157,8 @@
     ;; Check system operational status
     (match (var-get protocol-monitor)
       monitor-contract
-        (asserts! (unwrap! (contract-call? monitor-contract is-system-operational) (err ERR_SYSTEM_PAUSED)) (err ERR_SYSTEM_PAUSED))
+        (let ((paused (unwrap! (contract-call? monitor-contract is-paused) (err ERR_SYSTEM_PAUSED))))
+          (asserts! (not paused) (err ERR_SYSTEM_PAUSED)))
       true)
     
     ;; Calculate token holder portion

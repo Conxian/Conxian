@@ -3,7 +3,7 @@
 ;; Implements secure flash loans with sBTC collateral and risk management
 
 ;; ===== Traits =====
-(use-trait ft-trait .all-traits.sip-010-trait)
+(use-trait ft-trait .all-traits.sip-010-ft-trait)
 (use-trait flash-loan-receiver-trait .all-traits.flash-loan-receiver-trait)
 
 ;; =============================================================================

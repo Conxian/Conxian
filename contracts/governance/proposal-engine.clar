@@ -3,7 +3,8 @@
 
 ;; Traits
 (use-trait proposal-engine-trait .all-traits.proposal-engine-trait)
-(impl-trait .all-traits.proposal-engine-trait)
+;; TODO: proposal-engine-trait not defined in all-traits.clar
+;; (impl-trait .all-traits.proposal-engine-trait)
 
 ;; Constants
 (define-constant ERR_UNAUTHORIZED (err u100))

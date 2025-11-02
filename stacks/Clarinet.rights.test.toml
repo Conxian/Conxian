@@ -1,0 +1,22 @@
+[project]
+name = "Conxian-Rights"
+description = "Minimal manifest to compile Role-Manager and Role-NFT with centralized traits"
+clarinet_version = "3.8.1"
+
+[accounts.deployer]
+balance = 100000000000000
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+
+[contracts.all-traits]
+path = "../contracts/traits/all-traits.clar"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+
+[contracts.role-nft]
+path = "../contracts/security/role-nft.clar"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits", ]
+
+[contracts.role-manager]
+path = "../contracts/security/role-manager.clar"
+address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+depends_on = [ "all-traits", ]

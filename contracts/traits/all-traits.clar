@@ -173,12 +173,12 @@
     ;; Stake tokens into the contract
     ;; @param amount: number of tokens to stake
     ;; @return (response bool uint): success flag and error code
-    (stake (amount uint) (response bool uint))
+    (stake (uint) (response bool uint))
     
     ;; Unstake tokens from the contract
     ;; @param amount: number of tokens to unstake
     ;; @return (response bool uint): success flag and error code
-    (unstake (amount uint) (response bool uint))
+    (unstake (uint) (response bool uint))
     
     ;; Claim accumulated staking rewards
     ;; @return (response uint uint): amount of rewards claimed and error code
@@ -187,12 +187,12 @@
     ;; Get the staked balance for a user
     ;; @param user: principal to check balance for
     ;; @return (response uint uint): staked amount and error code
-    (get-staked-balance (user principal) (response uint uint))
+    (get-staked-balance (principal) (response uint uint))
     
     ;; Get pending rewards for a user
     ;; @param user: principal to check rewards for
     ;; @return (response uint uint): pending reward amount and error code
-    (get-pending-rewards (user principal) (response uint uint))
+    (get-pending-rewards (principal) (response uint uint))
   )
 )
 
@@ -212,19 +212,19 @@
     ;; @param role: role identifier
     ;; @param account: principal to check
     ;; @return (response bool uint): true if account has role, false otherwise, and error code
-    (has-role (role (string-ascii 32)) (account principal) (response bool uint))
+    (has-role ((string-ascii 32) principal) (response bool uint))
     
     ;; Grant a role to an account
     ;; @param role: role identifier
     ;; @param account: principal to grant role to
     ;; @return (response bool uint): success flag and error code
-    (grant-role (role (string-ascii 32)) (account principal) (response bool uint))
+    (grant-role ((string-ascii 32) principal) (response bool uint))
     
     ;; Revoke a role from an account
     ;; @param role: role identifier
     ;; @param account: principal to revoke role from
     ;; @return (response bool uint): success flag and error code
-    (revoke-role (role (string-ascii 32)) (account principal) (response bool uint))
+    (revoke-role ((string-ascii 32) principal) (response bool uint))
   )
 )
 
@@ -247,7 +247,7 @@
     ;; @param initiator: address that initiated the flash loan
     ;; @param params: arbitrary data for custom logic
     ;; @return (response bool uint): success flag and error code
-    (execute-operation (asset principal) (amount uint) (premium uint) (initiator principal) (params (buff 256)) (response bool uint))
+    (execute-operation (principal uint uint principal (buff 256)) (response bool uint))
   )
 )
 
@@ -267,24 +267,24 @@
     ;; Get the current price of an asset
     ;; @param asset: token address to get price for
     ;; @return (response uint uint): price and error code
-    (get-price (asset principal) (response uint uint))
+    (get-price (principal) (response uint uint))
     
     ;; Update the price of an asset (admin only)
     ;; @param asset: token address to update price for
     ;; @param price: new price value
     ;; @return (response bool uint): success flag and error code
-    (update-price (asset principal) (price uint) (response bool uint))
+    (update-price (principal uint) (response bool uint))
     
     ;; Get price with timestamp information
     ;; @param asset: token address to get price for
     ;; @return (response (tuple (price uint) (timestamp uint)) uint): price data and error code
-    (get-price-with-timestamp (asset principal) (response (tuple (price uint) (timestamp uint)) uint))
+    (get-price-with-timestamp (principal) (response (tuple (price uint) (timestamp uint)) uint))
 
     ;; Get TWAP (Time Weighted Average Price)
     ;; @param asset: token address to get TWAP for
     ;; @param interval: time interval for TWAP calculation
     ;; @return (response uint uint): TWAP value and error code
-    (get-twap (asset principal) (interval uint) (response uint uint))
+    (get-twap (principal uint) (response uint uint))
   )
 )
 
@@ -302,35 +302,35 @@
     ;; Register a new oracle contract
     ;; @param oracle: principal of oracle contract to register
     ;; @return (response bool uint): success flag and error code
-    (register-oracle (oracle principal) (response bool uint))
+    (register-oracle (principal) (response bool uint))
     
     ;; Unregister an existing oracle contract
     ;; @param oracle: principal of oracle contract to unregister
     ;; @return (response bool uint): success flag and error code
-    (unregister-oracle (oracle principal) (response bool uint))
+    (unregister-oracle (principal) (response bool uint))
     
     ;; Check if an oracle is registered
     ;; @param oracle: principal to check
     ;; @return (response bool uint): true if registered, false otherwise, and error code
-    (is-oracle-registered (oracle principal) (response bool uint))
+    (is-oracle-registered (principal) (response bool uint))
     
     ;; Register a new dimension id with a weight
     ;; @param id: dimension identifier
     ;; @param weight: dimension weight (> 0)
     ;; @return (response uint uint): registered dimension id and error code
-    (register-dimension (id uint) (weight uint) (response uint uint))
+    (register-dimension (uint uint) (response uint uint))
     
     ;; Update an existing dimension's weight
     ;; @param dim-id: dimension identifier
     ;; @param new-weight: new weight (> 0)
     ;; @return (response bool uint): success flag and error code
-    (update-dimension-weight (dim-id uint) (new-weight uint) (response bool uint))
+    (update-dimension-weight (uint uint) (response bool uint))
     
     ;; Register a component (contract principal) as a new dimension
     ;; @param component: component contract principal
     ;; @param weight: initial weight (> 0)
     ;; @return (response uint uint): assigned dimension id and error code
-    (register-component (component principal) (weight uint) (response uint uint))
+    (register-component (principal uint) (response uint uint))
   )
 )
 
@@ -348,22 +348,22 @@
     ;; Convert principal to buffer
     ;; @param p: principal to convert
     ;; @return (response (buff 32) uint): buffer representation and error code
-    (principal-to-buff (p principal) (response (buff 32) uint))
+    (principal-to-buff (principal) (response (buff 32) uint))
     
     ;; Convert buffer to principal
     ;; @param b: buffer to convert
     ;; @return (response principal uint): principal and error code
-    (buff-to-principal (b (buff 128)) (response principal uint))
+    (buff-to-principal ((buff 128)) (response principal uint))
     
     ;; Convert string to unsigned integer
     ;; @param s: string to convert
     ;; @return (response uint uint): integer value and error code
-    (string-to-uint (s (string-ascii 32)) (response uint uint))
+    (string-to-uint ((string-ascii 32)) (response uint uint))
     
     ;; Convert unsigned integer to string
     ;; @param n: integer to convert
     ;; @return (response (string-ascii 32) uint): string representation and error code
-    (uint-to-string (n uint) (response (string-ascii 32) uint))
+    (uint-to-string (uint) (response (string-ascii 32) uint))
   )
 )
 
@@ -382,7 +382,7 @@
     ;; Add a token node to the routing graph
     ;; @param token: token principal to add
     ;; @return (response uint uint): token index and error code
-    (add-token (token principal) (response uint uint))
+    (add-token (principal) (response uint uint))
     
     ;; Add an edge (pool connection) between two tokens
     ;; @param token-from: source token
@@ -392,14 +392,14 @@
     ;; @param liquidity: available liquidity in the pool
     ;; @param fee: swap fee for this pool
     ;; @return (response bool uint): success flag and error code
-    (add-edge (token-from principal) (token-to principal) (pool principal) (pool-type (string-ascii 20)) (liquidity uint) (fee uint) (response bool uint))
+    (add-edge (principal principal principal (string-ascii 20) uint uint) (response bool uint))
     
     ;; Find the optimal swap path between two tokens
     ;; @param token-in: input token
     ;; @param token-out: output token
     ;; @param amount-in: amount of input token
     ;; @return (response (tuple (path (list 20 principal)) (distance uint) (hops uint)) uint): optimal path data and error code
-    (find-optimal-path (token-in principal) (token-out principal) (amount-in uint) (response (tuple (path (list 20 principal)) (distance uint) (hops uint)) uint))
+    (find-optimal-path (principal principal uint) (response (tuple (path (list 20 principal)) (distance uint) (hops uint)) uint))
     
     ;; Execute a swap along the optimal path
     ;; @param token-in: input token
@@ -407,7 +407,7 @@
     ;; @param amount-in: amount of input token
     ;; @param min-amount-out: minimum acceptable output amount
     ;; @return (response (tuple (amount-out uint) (path (list 20 principal)) (hops uint) (distance uint)) uint): swap result and error code
-    (swap-optimal-path (token-in principal) (token-out principal) (amount-in uint) (min-amount-out uint) (response (tuple (amount-out uint) (path (list 20 principal)) (hops uint) (distance uint)) uint))
+    (swap-optimal-path (principal principal uint uint) (response (tuple (amount-out uint) (path (list 20 principal)) (hops uint) (distance uint)) uint))
     
     ;; Get statistics about the routing graph
     ;; @return (response (tuple (nodes uint) (edges uint)) uint): graph statistics and error code
@@ -416,20 +416,20 @@
     ;; Get the index of a token in the graph
     ;; @param token: token principal to look up
     ;; @return (response (optional uint) uint): token index and error code
-    (get-token-index (token principal) (response (optional uint) uint))
+    (get-token-index (principal) (response (optional uint) uint))
     
     ;; Get information about an edge between two tokens
     ;; @param from-token: source token
     ;; @param to-token: destination token
     ;; @return (response (optional (tuple ...)) uint): edge information and error code
-    (get-edge-info (from-token principal) (to-token principal) (response (optional (tuple (pool principal) (pool-type (string-ascii 20)) (weight uint) (liquidity uint) (fee uint) (active bool))) uint))
+    (get-edge-info (principal principal) (response (optional (tuple (pool principal) (pool-type (string-ascii 20)) (weight uint) (liquidity uint) (fee uint) (active bool))) uint))
     
     ;; Estimate output amount for a swap
     ;; @param token-in: input token
     ;; @param token-out: output token
     ;; @param amount-in: amount of input token
     ;; @return (response (tuple (path (list 20 principal)) (distance uint) (hops uint)) uint): estimated output and error code
-    (estimate-output (token-in principal) (token-out principal) (amount-in uint) (response (tuple (path (list 20 principal)) (distance uint) (hops uint)) uint))
+    (estimate-output (principal principal uint) (response (tuple (path (list 20 principal)) (distance uint) (hops uint)) uint))
   )
 )
 
@@ -457,19 +457,27 @@
     ;; @param signature: signature to verify
     ;; @param signer: expected signer principal
     ;; @return (response bool uint): true if valid, false otherwise, and error code
-    (verify-signature (message (buff 1024)) (signature (buff 65)) (signer principal) (response bool uint))
+    (verify-signature ((buff 1024) (buff 65) principal) (response bool uint))
     
     ;; Verify a signature for structured data
     ;; @param structured-data: structured data that was signed
     ;; @param signature: signature to verify
     ;; @param signer: expected signer principal
     ;; @return (response bool uint): true if valid, false otherwise, and error code
-    (verify-structured-data (structured-data (buff 1024)) (signature (buff 65)) (signer principal) (response bool uint))
+    (verify-structured-data ((buff 1024) (buff 65) principal) (response bool uint))
     
     ;; Initialize or update the domain separator
     ;; @param new-separator: new domain separator value
     ;; @return (response bool uint): success flag and error code
-    (initialize-domain-separator (new-separator (buff 32)) (response bool uint))
+    (initialize-domain-separator ((buff 32)) (response bool uint))
+  )
+)
+
+;; Governance DAO trait
+(define-trait dao-trait
+  (
+    (get-voting-power (principal) (response uint uint))
+    (has-voting-power (principal) (response bool uint))
   )
 )
 
@@ -495,7 +503,7 @@
     ;; @param frequency-in-blocks: blocks between coupon payments
     ;; @param payment-token-address: token used for payments
     ;; @return (response bool uint): success flag and error code
-    (issue-bond (name (string-ascii 32)) (symbol (string-ascii 10)) (decimals uint) (initial-supply uint) (maturity-in-blocks uint) (coupon-rate-scaled uint) (frequency-in-blocks uint) (payment-token-address principal) (response bool uint))
+    (issue-bond ((string-ascii 32) (string-ascii 10) uint uint uint uint uint principal) (response bool uint))
     
     ;; Claim a coupon payment
     ;; @return (response uint uint): amount claimed and error code
@@ -504,11 +512,7 @@
     ;; Redeem bond at maturity
     ;; @param payment-token: token to receive payment in
     ;; @return (response uint uint): amount redeemed and error code
-    (redeem-at-maturity (payment-token principal) (response uint uint))
-    
-    ;; Get details about a bond
-    ;; @param bond-id: ID of the bond
-    ;; @return (response (tuple ...) uint): bond details and error code
+    (redeem-at-maturity (principal) (response uint uint))
   )
 )
 
@@ -533,16 +537,16 @@
     ;; @param coupon-rate: coupon rate in basis points
     ;; @param face-value: face value per bond
     ;; @return (response principal uint): bond contract address and error code
-    (create-bond (principal-amount uint) (coupon-rate uint) (maturity-blocks uint) (collateral-amount uint) (collateral-token principal) (is-callable bool) (call-premium uint) (name (string-ascii 32)) (symbol (string-ascii 10)) (decimals uint) (face-value uint) (response (tuple (bond-id uint) (bond-contract principal) (maturity-block uint)) uint))
+    (create-bond (uint uint uint uint principal bool uint (string-ascii 32) (string-ascii 10) uint uint) (response (tuple (bond-id uint) (bond-contract principal) (maturity-block uint)) uint))
     
     ;; Get bond details by address
     ;; @param bond-address: bond contract address
     ;; @return (response (tuple ...) uint): bond details and error code
-    (get-bond-details (bond-contract principal) (response (tuple (issuer principal) (principal-amount uint) (coupon-rate uint) (issue-block uint) (maturity-block uint) (collateral-amount uint) (collateral-token principal) (status (string-ascii 20)) (is-callable bool) (call-premium uint) (bond-contract principal) (name (string-ascii 32)) (symbol (string-ascii 10)) (decimals uint) (face-value uint)) uint))
+    (get-bond-details (principal) (response (tuple (issuer principal) (principal-amount uint) (coupon-rate uint) (issue-block uint) (maturity-block uint) (collateral-amount uint) (collateral-token principal) (status (string-ascii 20)) (is-callable bool) (call-premium uint) (bond-contract principal) (name (string-ascii 32)) (symbol (string-ascii 10)) (decimals uint) (face-value uint)) uint))
     
     ;; List all bonds created by this factory
     ;; @return (response (list 100 principal) uint): list of bond addresses and error code
-    (get-all-bonds () (response (list principal) uint))
+    (get-all-bonds () (response (list 100 principal) uint))
   )
 )
 
@@ -564,23 +568,23 @@
     ;; @param maturity-blocks: maturity period in blocks
     ;; @param coupon-rate: coupon rate in basis points
     ;; @return (response uint uint): bond ID and error code
-    (issue-bonds (collateral-amount uint) (bond-amount uint) (maturity-blocks uint) (coupon-rate uint) (response uint uint))
+    (issue-bonds (uint uint uint uint) (response uint uint))
     
     ;; Redeem bonds at maturity
     ;; @param bond-id: bond identifier
     ;; @param amount: amount of bonds to redeem
     ;; @return (response uint uint): collateral returned and error code
-    (redeem-bonds (bond-id uint) (amount uint) (response uint uint))
+    (redeem-bonds (uint uint) (response uint uint))
     
     ;; Claim coupon payments
     ;; @param bond-id: bond identifier
     ;; @return (response uint uint): coupon amount and error code
-    (claim-coupon (bond-id uint) (response uint uint))
+    (claim-coupon (uint) (response uint uint))
     
     ;; Get bond information
     ;; @param bond-id: bond identifier
     ;; @return (response (tuple ...) uint): bond details and error code
-    (get-bond-info (bond-id uint) (response (tuple (collateral-amount uint) (bond-amount uint) (maturity-blocks uint) (coupon-rate uint) (issued-at uint) (issuer principal)) uint))
+    (get-bond-info (uint) (response (tuple (collateral-amount uint) (bond-amount uint) (maturity-blocks uint) (coupon-rate uint) (issued-at uint) (issuer principal)) uint))
   )
 )
 
@@ -599,17 +603,17 @@
     ;; Queue a migration request
     ;; @param cxlp-amount: amount of CXLP tokens to migrate
     ;; @return (response uint uint): queue position and error code
-    (queue-migration (cxlp-amount uint) (response uint uint))
+    (queue-migration (uint) (response uint uint))
     
     ;; Cancel a queued migration request
     ;; @param queue-id: queue entry identifier
     ;; @return (response uint uint): refunded amount and error code
-    (cancel-migration (queue-id uint) (response uint uint))
+    (cancel-migration (uint) (response uint uint))
     
     ;; Process pending migration requests
     ;; @param max-process: maximum number of requests to process
     ;; @return (response uint uint): number processed and error code
-    (process-migrations (max-process uint) (response uint uint))
+    (process-migrations (uint) (response uint uint))
     
     ;; Get migration queue statistics
     ;; @return (response (tuple ...) uint): queue statistics and error code
@@ -617,7 +621,7 @@
     
     ;; Get user's queued migrations
     ;; @return (response (list 10 uint) uint): list of queue IDs and error code
-    (get-user-migrations (user principal) (response (list 10 uint) uint))
+    (get-user-migrations (principal) (response (list 10 uint) uint))
   )
 )
 
@@ -640,7 +644,7 @@
     ;; @param to: recipient address
     ;; @param deadline: transaction deadline
     ;; @return (response (list uint) uint): amounts and error code
-    (swap-exact-tokens-for-tokens (amount-in uint) (amount-out-min uint) (path (list 10 principal)) (to principal) (deadline uint) (response (list uint) uint))
+    (swap-exact-tokens-for-tokens (uint uint (list 10 principal) principal uint) (response (list 10 uint) uint))
     
     ;; Swap tokens for exact tokens
     ;; @param amount-out: desired output amount
@@ -649,19 +653,19 @@
     ;; @param to: recipient address
     ;; @param deadline: transaction deadline
     ;; @return (response (list uint) uint): amounts and error code
-    (swap-tokens-for-exact-tokens (amount-out uint) (amount-in-max uint) (path (list 10 principal)) (to principal) (deadline uint) (response (list uint) uint))
+    (swap-tokens-for-exact-tokens (uint uint (list 10 principal) principal uint) (response (list 10 uint) uint))
     
     ;; Get amounts out for a given path
     ;; @param amount-in: input amount
     ;; @param path: swap path
     ;; @return (response (list uint) uint): output amounts and error code
-    (get-amounts-out (amount-in uint) (path (list 10 principal)) (response (list uint) uint))
+    (get-amounts-out (uint (list 10 principal)) (response (list 10 uint) uint))
     
     ;; Get amounts in for a desired output
     ;; @param amount-out: desired output amount
     ;; @param path: swap path
     ;; @return (response (list uint) uint): input amounts and error code
-    (get-amounts-in (amount-out uint) (path (list 10 principal)) (response (list uint) uint))
+    (get-amounts-in (uint (list 10 principal)) (response (list 10 uint) uint))
     
     ;; Remove liquidity from a pool
     ;; @param token-a: first token
@@ -672,7 +676,7 @@
     ;; @param to: recipient address
     ;; @param deadline: transaction deadline
     ;; @return (response (tuple (amount-a uint) (amount-b uint)) uint): removed amounts and error code
-    (remove-liquidity (token-a principal) (token-b principal) (liquidity uint) (amount-a-min uint) (amount-b-min uint) (to principal) (deadline uint) (response (tuple (amount-a uint) (amount-b uint)) uint))
+    (remove-liquidity (principal principal uint uint uint principal uint) (response (tuple (amount-a uint) (amount-b uint)) uint))
   )
 )
 
@@ -691,18 +695,18 @@
     ;; Distribute yields to stakeholders
     ;; @param total-yield: total yield available for distribution
     ;; @return (response uint uint): distributed amount and error code
-    (distribute-yields (total-yield uint) (response uint uint))
+    (distribute-yields (uint) (response uint uint))
     
     ;; Calculate optimal yield allocation
     ;; @param available-yield: yield available for allocation
     ;; @param strategies: list of yield strategies
     ;; @return (response (list 10 uint) uint): allocation amounts and error code
-    (calculate-optimal-allocation (available-yield uint) (strategies (list 10 principal)) (response (list 10 uint) uint))
+    (calculate-optimal-allocation (uint (list 10 principal)) (response (list 10 uint) uint))
     
     ;; Claim yields for a user
     ;; @param user: user principal
     ;; @return (response uint uint): claimed amount and error code
-    (claim-yields (user principal) (response uint uint))
+    (claim-yields (principal) (response uint uint))
     
     ;; Get system constants
     ;; @return (response (tuple ...) uint): system constants and error code
@@ -725,18 +729,18 @@
     ;; Submit a commitment for a transaction
     ;; @param commitment: hash commitment for the transaction
     ;; @return (response uint uint): commitment ID and error code
-    (submit-commitment (commitment (buff 32)) (response uint uint))
+    (submit-commitment ((buff 32)) (response uint uint))
     
     ;; Reveal and execute a committed transaction
     ;; @param commitment-id: commitment identifier
     ;; @param transaction-data: actual transaction data
     ;; @return (response bool uint): success flag and error code
-    (reveal-and-execute (commitment-id uint) (transaction-data (buff 1024)) (response bool uint))
+    (reveal-and-execute (uint (buff 1024)) (response bool uint))
     
     ;; Check if a commitment is valid
     ;; @param commitment-id: commitment identifier
     ;; @return (response bool uint): validity flag and error code
-    (is-commitment-valid (commitment-id uint) (response bool uint))
+    (is-commitment-valid (uint) (response bool uint))
     
     ;; Get MEV protection statistics
     ;; @return (response (tuple ...) uint): protection statistics and error code
@@ -761,23 +765,23 @@
     ;; @param audit-hash: hash of the audit report
     ;; @param report-uri: URI to the full audit report
     ;; @return (response uint uint): audit ID and error code
-    (submit-audit (contract-address principal) (audit-hash (string-ascii 64)) (report-uri (string-utf8 256)) (response uint uint))
+    (submit-audit (principal (string-ascii 64) (string-utf8 256)) (response uint uint))
 
     ;; Vote on an audit
     ;; @param audit-id: ID of the audit to vote on
     ;; @param approve: true to approve, false to reject
     ;; @return (response bool uint): success flag and error code
-    (vote (audit-id uint) (approve bool) (response bool uint))
+    (vote (uint bool) (response bool uint))
 
     ;; Finalize audit after voting period
     ;; @param audit-id: ID of the audit to finalize
     ;; @return (response bool uint): success flag and error code
-    (finalize-audit (audit-id uint) (response bool uint))
+    (finalize-audit (uint) (response bool uint))
 
     ;; Get audit details
     ;; @param audit-id: ID of the audit
     ;; @return (response (tuple ...) uint): audit details and error code
-    (get-audit (audit-id uint) (response (tuple
+    (get-audit (uint) (response (tuple
       (contract-address principal)
       (audit-hash (string-ascii 64))
       (auditor principal)
@@ -791,7 +795,7 @@
     ;; Get audit status
     ;; @param audit-id: ID of the audit
     ;; @return (response (tuple ...) uint): audit status and error code
-    (get-audit-status (audit-id uint) (response (tuple
+    (get-audit-status (uint) (response (tuple
       (status (string-ascii 20))
       (reason (optional (string-utf8 500)))
     ) uint))
@@ -799,7 +803,7 @@
     ;; Get audit votes
     ;; @param audit-id: ID of the audit
     ;; @return (response (tuple ...) uint): vote details and error code
-    (get-audit-votes (audit-id uint) (response (tuple
+    (get-audit-votes (uint) (response (tuple
       (for uint)
       (against uint)
       (voters (list 100 principal))
@@ -808,13 +812,13 @@
     ;; Admin: Set voting period
     ;; @param blocks: voting period in blocks
     ;; @return (response bool uint): success flag and error code
-    (set-voting-period (blocks uint) (response bool uint))
+    (set-voting-period (uint) (response bool uint))
 
     ;; Admin: Emergency pause an audit
     ;; @param audit-id: ID of the audit to pause
     ;; @param reason: reason for pausing
     ;; @return (response bool uint): success flag and error code
-    (emergency-pause-audit (audit-id uint) (reason (string-utf8 500)) (response bool uint))
+    (emergency-pause-audit (uint (string-utf8 500)) (response bool uint))
   )
 )
 
@@ -867,12 +871,12 @@
     ;; Check whether an account is the current owner
     ;; @param account: principal to check
     ;; @return (response bool uint): true if owner, false otherwise, and error code
-    (is-owner (account principal) (response bool uint))
+    (is-owner (principal) (response bool uint))
 
     ;; Transfer ownership to a new principal
     ;; @param new-owner: new owner principal
     ;; @return (response bool uint): success flag and error code
-    (transfer-ownership (new-owner principal) (response bool uint))
+    (transfer-ownership (principal) (response bool uint))
   )
 )
 
@@ -890,7 +894,7 @@
   (
     ;; Check if the contract is currently paused
     ;; @return bool: true if paused, false otherwise
-    (is-paused () bool)
+    (is-paused () (response bool uint))
     
     ;; Pause contract operations (admin only)
     ;; @return (response bool uint): success flag and error code
@@ -919,18 +923,18 @@
     ;; @param token-out: output token
     ;; @param amount-in: amount of input token
     ;; @return (response (tuple (route-id (buff 32)) (hops uint)) uint): route data and error code
-    (compute-best-route (token-in principal) (token-out principal) (amount-in uint) (response (tuple (route-id (buff 32)) (hops uint)) uint))
+    (compute-best-route (principal principal uint) (response (tuple (route-id (buff 32)) (hops uint)) uint))
     
     ;; Execute a pre-computed route
     ;; @param route-id: route identifier
     ;; @param recipient: recipient of output tokens
     ;; @return (response uint uint): output amount and error code
-    (execute-route (route-id (buff 32)) (recipient principal) (response uint uint))
+    (execute-route ((buff 32) principal) (response uint uint))
     
     ;; Get statistics about a route
     ;; @param route-id: route identifier
     ;; @return (response (tuple (hops uint) (estimated-out uint) (expires-at uint)) uint): route stats and error code
-    (get-route-stats (route-id (buff 32)) (response (tuple (hops uint) (estimated-out uint) (expires-at uint)) uint))
+    (get-route-stats ((buff 32)) (response (tuple (hops uint) (estimated-out uint) (expires-at uint)) uint))
   )
 )
 
@@ -952,12 +956,12 @@
     ;; @param fee-rate: fee in basis points
     ;; @param tick: initial tick
     ;; @return (response bool uint): success flag and error code
-    (initialize (token-a principal) (token-b principal) (fee-rate uint) (tick int) (response bool uint))
+    (initialize (principal principal uint int) (response bool uint))
     
     ;; Set the NFT contract for position management
     ;; @param contract-address: NFT contract address
     ;; @return (response bool uint): success flag and error code
-    (set-position-nft-contract (contract-address principal) (response bool uint))
+    (set-position-nft-contract (principal) (response bool uint))
     
     ;; Mint a new concentrated liquidity position
     ;; @param recipient: position owner
@@ -965,18 +969,18 @@
     ;; @param tick-upper: upper tick bound
     ;; @param amount: liquidity amount
     ;; @return (response (tuple (position-id uint) (liquidity uint) (amount-x uint) (amount-y uint)) uint): position data and error code
-    (mint-position (recipient principal) (tick-lower int) (tick-upper int) (amount uint) (response (tuple (position-id uint) (liquidity uint) (amount-x uint) (amount-y uint)) uint))
+    (mint-position (principal int int uint) (response (tuple (position-id uint) (liquidity uint) (amount-x uint) (amount-y uint)) uint))
     
     ;; Burn a concentrated liquidity position
     ;; @param position-id: position identifier
     ;; @return (response (tuple (fees-x uint) (fees-y uint)) uint): fees earned and error code
-    (burn-position (position-id uint) (response (tuple (fees-x uint) (fees-y uint)) uint))
+    (burn-position (uint) (response (tuple (fees-x uint) (fees-y uint)) uint))
     
     ;; Collect fees from a position
     ;; @param position-id: position identifier
     ;; @param recipient: fee recipient
     ;; @return (response (tuple (amount-x uint) (amount-y uint)) uint): collected amounts and error code
-    (collect-position (position-id uint) (recipient principal) (response (tuple (amount-x uint) (amount-y uint)) uint))
+    (collect-position (uint principal) (response (tuple (amount-x uint) (amount-y uint)) uint))
   )
 )
 
@@ -1001,7 +1005,7 @@
     ;; Get pool liquidity for a token
     ;; @param token: token to check liquidity for
     ;; @return (response uint uint): liquidity amount and error code
-    (get-liquidity (token principal) (response uint uint))
+    (get-liquidity (principal) (response uint uint))
     
     ;; Swap tokens in the pool
     ;; @param token-in: input token
@@ -1010,7 +1014,7 @@
     ;; @param min-amount-out: minimum acceptable output amount
     ;; @param recipient: recipient of output tokens
     ;; @return (response uint uint): output amount and error code
-    (swap (token-in principal) (token-out principal) (amount-in uint) (min-amount-out uint) (recipient principal) (response uint uint))
+    (swap (principal principal uint uint principal) (response uint uint))
     
     ;; Add liquidity to the pool
     ;; @param token-x-amount: amount of token-x to add
@@ -1019,7 +1023,7 @@
     ;; @param min-token-y-amount: minimum token-y amount (slippage protection)
     ;; @param recipient: recipient of liquidity tokens/shares
     ;; @return (response (tuple (liquidity uint) (token-x-amount uint) (token-y-amount uint)) uint): liquidity added and error code
-    (add-liquidity (token-x-amount uint) (token-y-amount uint) (min-token-x-amount uint) (min-token-y-amount uint) (recipient principal) (response (tuple (liquidity uint) (token-x-amount uint) (token-y-amount uint)) uint))
+    (add-liquidity (uint uint uint uint principal) (response (tuple (liquidity uint) (token-x-amount uint) (token-y-amount uint)) uint))
     
     ;; Remove liquidity from the pool
     ;; @param liquidity: amount of liquidity to remove
@@ -1027,21 +1031,21 @@
     ;; @param min-token-y-amount: minimum token-y amount (slippage protection)
     ;; @param recipient: recipient of removed tokens
     ;; @return (response (tuple (token-x-amount uint) (token-y-amount uint)) uint): tokens removed and error code
-    (remove-liquidity (liquidity uint) (min-token-x-amount uint) (min-token-y-amount uint) (recipient principal) (response (tuple (token-x-amount uint) (token-y-amount uint)) uint))
+    (remove-liquidity (uint uint uint principal) (response (tuple (token-x-amount uint) (token-y-amount uint)) uint))
     
     ;; Get amount out for a given amount in
     ;; @param token-in: input token
     ;; @param token-out: output token
     ;; @param amount-in: amount of input token
     ;; @return (response uint uint): expected output amount and error code
-    (get-amount-out (token-in principal) (token-out principal) (amount-in uint) (response uint uint))
+    (get-amount-out (principal principal uint) (response uint uint))
     
     ;; Get amount in for a desired amount out
     ;; @param token-in: input token
     ;; @param token-out: output token
     ;; @param amount-out: desired amount of output token
     ;; @return (response uint uint): required input amount and error code
-    (get-amount-in (token-in principal) (token-out principal) (amount-out uint) (response uint uint))
+    (get-amount-in (principal principal uint) (response uint uint))
   )
 )
 
@@ -1061,18 +1065,18 @@
     ;; @param amount: amount of BTC to wrap
     ;; @param btc-tx-id: Bitcoin transaction ID
     ;; @return (response uint uint): wrapped amount and error code
-    (wrap-btc (amount uint) (btc-tx-id (buff 32)) (response uint uint))
+    (wrap-btc (uint (buff 32)) (response uint uint))
     
     ;; Unwrap Stacks token back to Bitcoin
     ;; @param amount: amount to unwrap
     ;; @param btc-address: Bitcoin address to send to
     ;; @return (response bool uint): success flag and error code
-    (unwrap-btc (amount uint) (btc-address (buff 64)) (response bool uint))
+    (unwrap-btc (uint (buff 64)) (response bool uint))
     
     ;; Get wrapped Bitcoin balance for a user
     ;; @param user: user principal
     ;; @return (response uint uint): wrapped balance and error code
-    (get-wrapped-balance (user principal) (response uint uint))
+    (get-wrapped-balance (principal) (response uint uint))
   )
 )
 
@@ -1093,18 +1097,18 @@
     ;; Update funding rate for an asset
     ;; @param asset: asset to update funding rate for
     ;; @return (response (tuple ...) uint): funding rate data and error code
-    (update-funding-rate (asset principal) (response (tuple (funding-rate int) (index-price uint) (timestamp uint) (cumulative-funding int)) uint))
+    (update-funding-rate (principal) (response (tuple (funding-rate int) (index-price uint) (timestamp uint) (cumulative-funding int)) uint))
 
     ;; Apply funding to a position
     ;; @param position-owner: owner of the position
     ;; @param position-id: position identifier
     ;; @return (response (tuple ...) uint): funding payment data and error code
-    (apply-funding-to-position (position-owner principal) (position-id uint) (response (tuple (funding-rate int) (funding-payment uint) (new-collateral uint) (timestamp uint)) uint))
+    (apply-funding-to-position (principal uint) (response (tuple (funding-rate int) (funding-payment uint) (new-collateral uint) (timestamp uint)) uint))
 
     ;; Get current funding rate for an asset
     ;; @param asset: asset to get funding rate for
     ;; @return (response (tuple ...) uint): current funding rate data and error code
-    (get-current-funding-rate (asset principal) (response (tuple (rate int) (last-updated uint) (next-update uint)) uint))
+    (get-current-funding-rate (principal) (response (tuple (rate int) (last-updated uint) (next-update uint)) uint))
 
     ;; Get funding rate history
     ;; @param asset: asset to get history for
@@ -1112,14 +1116,14 @@
     ;; @param to-block: end block
     ;; @param limit: maximum number of entries
     ;; @return (response (list ...) uint): funding rate history and error code
-    (get-funding-rate-history (asset principal) (from-block uint) (to-block uint) (limit uint) (response (list 20 (tuple (rate int) (index-price uint) (open-interest-long uint) (open-interest-short uint) (timestamp uint))) uint))
+    (get-funding-rate-history (principal uint uint uint) (response (list 20 (tuple (rate int) (index-price uint) (open-interest-long uint) (open-interest-short uint) (timestamp uint))) uint))
 
     ;; Set funding parameters (admin only)
     ;; @param interval: funding interval in blocks
     ;; @param max-rate: maximum funding rate
     ;; @param sensitivity: funding rate sensitivity
     ;; @return (response bool uint): success flag and error code
-    (set-funding-parameters (interval uint) (max-rate uint) (sensitivity uint) (response bool uint))
+    (set-funding-parameters (uint uint uint) (response bool uint))
   )
 )
 
@@ -1142,30 +1146,30 @@
     ;; @param position-id: position identifier
     ;; @param max-slippage: maximum allowed slippage
     ;; @return (response bool uint): success flag and error code
-    (liquidate-position (position-owner principal) (position-id uint) (max-slippage uint) (response bool uint))
+    (liquidate-position (principal uint uint) (response bool uint))
 
     ;; Liquidate multiple positions in batch
     ;; @param positions: list of positions to liquidate
     ;; @param max-slippage: maximum allowed slippage
     ;; @return (response (list 20 (response bool uint)) uint): liquidation results and error code
-    (liquidate-positions (positions (list 20 (tuple (owner principal) (id uint)))) (max-slippage uint) (response (list 20 (response bool uint)) uint))
+    (liquidate-positions ((list 20 (tuple (owner principal) (id uint))) uint) (response (list 20 (response bool uint)) uint))
 
     ;; Check position health status
     ;; @param position-owner: owner of the position
     ;; @param position-id: position identifier
     ;; @return (response (tuple ...) uint): health metrics and error code
-    (check-position-health (position-owner principal) (position-id uint) (response (tuple (margin-ratio uint) (liquidation-price uint) (current-price uint) (health-factor uint) (is-liquidatable bool)) uint))
+    (check-position-health (principal uint) (response (tuple (margin-ratio uint) (liquidation-price uint) (current-price uint) (health-factor uint) (is-liquidatable bool)) uint))
 
     ;; Set liquidation reward parameters (admin only)
     ;; @param min-reward: minimum liquidation reward
     ;; @param max-reward: maximum liquidation reward
     ;; @return (response bool uint): success flag and error code
-    (set-liquidation-rewards (min-reward uint) (max-reward uint) (response bool uint))
+    (set-liquidation-rewards (uint uint) (response bool uint))
 
     ;; Set insurance fund address (admin only)
     ;; @param fund: new insurance fund address
     ;; @return (response bool uint): success flag and error code
-    (set-insurance-fund (fund principal) (response bool uint))
+    (set-insurance-fund (principal) (response bool uint))
   )
 )
 
@@ -1187,26 +1191,26 @@
     ;; @param position: position data
     ;; @param current-price: current market price
     ;; @return (response uint uint): liquidation price and error code
-    (get-liquidation-price (position (tuple (asset principal) (size int) (collateral uint) (entry-price uint) (maintenance-margin uint))) (current-price uint) (response uint uint))
+    (get-liquidation-price ((tuple (asset principal) (size int) (collateral uint) (entry-price uint) (maintenance-margin uint)) uint) (response uint uint))
 
     ;; Calculate margin ratio for a position
     ;; @param position: position data
     ;; @param current-price: current market price
     ;; @return (response uint uint): margin ratio and error code
-    (calculate-margin-ratio (position (tuple (asset principal) (size int) (collateral uint) (entry-price uint) (maintenance-margin uint))) (current-price uint) (response uint uint))
+    (calculate-margin-ratio ((tuple (asset principal) (size int) (collateral uint) (entry-price uint) (maintenance-margin uint)) uint) (response uint uint))
 
     ;; Check if position is at risk of liquidation
     ;; @param position: position data
     ;; @param current-price: current market price
     ;; @param maintenance-margin: maintenance margin requirement
     ;; @return (response bool uint): true if at risk, false otherwise, and error code
-    (is-position-at-risk (position (tuple (asset principal) (size int) (collateral uint) (entry-price uint))) (current-price uint) (maintenance-margin uint) (response bool uint))
+    (is-position-at-risk ((tuple (asset principal) (size int) (collateral uint) (entry-price uint)) uint uint) (response bool uint))
 
     ;; Calculate PnL for a position
     ;; @param position: position data
     ;; @param current-price: current market price
     ;; @return (response int uint): profit/loss amount and error code
-    (calculate-pnl (position (tuple (asset principal) (size int) (entry-price uint))) (current-price uint) (response int uint))
+    (calculate-pnl ((tuple (asset principal) (size int) (entry-price uint)) uint) (response int uint))
 
     ;; Get risk parameters
     ;; @return (response (tuple ...) uint): current risk parameters and error code
@@ -1230,12 +1234,12 @@
     ;; @param amount: amount of tokens to bid
     ;; @param price: bid price
     ;; @return (response uint uint): bid ID and error code
-    (submit-bid (amount uint) (price uint) (response uint uint))
+    (submit-bid (uint uint) (response uint uint))
 
     ;; Cancel a submitted bid
     ;; @param bid-id: bid identifier
     ;; @return (response bool uint): success flag and error code
-    (cancel-bid (bid-id uint) (response bool uint))
+    (cancel-bid (uint) (response bool uint))
 
     ;; Execute the batch auction
     ;; @return (response (tuple (clearing-price uint) (total-volume uint) (orders-filled uint)) uint): auction results and error code
@@ -1269,24 +1273,24 @@
     ;; @param amount: allocation amount
     ;; @param duration: budget duration in blocks
     ;; @return (response uint uint): budget ID and error code
-    (create-budget (name (string-ascii 64)) (description (string-utf8 256)) (amount uint) (duration uint) (response uint uint))
+    (create-budget ((string-ascii 64) (string-utf8 256) uint uint) (response uint uint))
 
     ;; Execute a budget allocation
     ;; @param budget-id: budget identifier
     ;; @param recipient: recipient address
     ;; @return (response bool uint): success flag and error code
-    (execute-allocation (budget-id uint) (recipient principal) (response bool uint))
+    (execute-allocation (uint principal) (response bool uint))
 
     ;; Get budget details
     ;; @param budget-id: budget identifier
     ;; @return (response (tuple ...) uint): budget details and error code
-    (get-budget (budget-id uint) (response (tuple (name (string-ascii 64)) (description (string-utf8 256)) (amount uint) (spent uint) (duration uint) (created-at uint) (status (string-ascii 20))) uint))
+    (get-budget (uint) (response (tuple (name (string-ascii 64)) (description (string-utf8 256)) (amount uint) (spent uint) (duration uint) (created-at uint) (status (string-ascii 20))) uint))
 
     ;; Update budget status
     ;; @param budget-id: budget identifier
     ;; @param status: new status
     ;; @return (response bool uint): success flag and error code
-    (update-budget-status (budget-id uint) (status (string-ascii 20)) (response bool uint))
+    (update-budget-status (uint (string-ascii 20)) (response bool uint))
   )
 )
 
@@ -1321,7 +1325,7 @@
     ;; Get task status
     ;; @param task-id: task identifier
     ;; @return (response (tuple ...) uint): task status and error code
-    (get-task-status (task-id uint) (response (tuple (status (string-ascii 20)) (last-executed uint) (next-execution uint) (success-count uint) (failure-count uint)) uint))
+    (get-task-status (uint) (response (tuple (status (string-ascii 20)) (last-executed uint) (next-execution uint) (success-count uint) (failure-count uint)) uint))
   )
 )
 
@@ -1339,13 +1343,13 @@
     ;; @param token-contract: the token contract to deposit
     ;; @param amount: amount of tokens to deposit
     ;; @return (response uint uint): deposited amount and error code
-    (deposit (token-contract principal) (amount uint) (response uint uint))
+    (deposit (principal uint) (response uint uint))
 
     ;; Withdraw tokens from the strategy
     ;; @param token-contract: the token contract to withdraw from
     ;; @param amount: amount of tokens to withdraw
     ;; @return (response uint uint): withdrawn amount and error code
-    (withdraw (token-contract principal) (amount uint) (response uint uint))
+    (withdraw (principal uint) (response uint uint))
 
     ;; Harvest rewards from the strategy
     ;; @return (response bool uint): success flag and error code
@@ -1374,15 +1378,24 @@
 ;; ===========================================
 (define-trait dual-stacking-trait
   (
-    (initialize (sbtc <sip-010-ft-trait>) (operator principal) (fee-bps uint) (response bool uint))
-    (record-delegations (cycle-id uint) (entries (list 200 (tuple (user principal) (amount uint)))) (response bool uint))
-    (deposit-reward (cycle-id uint) (token <sip-010-ft-trait>) (amount uint) (response bool uint))
-    (claim (token <sip-010-ft-trait>) (response uint uint))
-    (get-user-claimable (user principal) (response uint uint))
-    (get-cycle-stats (cycle-id uint) (response (tuple (total-delegated uint) (reward uint)) uint))
-    (set-operator (new-operator principal) (response bool uint))
-    (set-fee (new-fee-bps uint) (response bool uint))
-    (set-fee-recipient (recipient principal) (response bool uint))
+    (initialize (<sip-010-ft-trait> principal uint) (response bool uint))
+    (record-delegations (uint (list 200 (tuple (user principal) (amount uint)))) (response bool uint))
+    (deposit-reward (uint <sip-010-ft-trait> uint) (response bool uint))
+    (claim (<sip-010-ft-trait>) (response uint uint))
+    (get-user-claimable (principal) (response uint uint))
+    (get-cycle-stats (uint) (response (tuple (total-delegated uint) (reward uint)) uint))
+    (set-operator (principal) (response bool uint))
+    (set-fee (uint) (response bool uint))
+    (set-fee-recipient (principal) (response bool uint))
+  )
+)
+
+
+
+(define-trait role-nft-ops
+  (
+    (mint-role ((string-ascii 32) principal) (response uint uint))
+    (burn-role (uint) (response bool uint))
   )
 )
 

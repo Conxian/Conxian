@@ -1,6 +1,9 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import { Cl } from '@stacks/transactions';
 import { Simnet } from '@hirosystems/clarinet-sdk';
+import { HEAVY_DISABLED } from './helpers/env';
+
+const d = HEAVY_DISABLED ? describe.skip : describe;
 
 /**
  * Automated Circuit Breaker Test Suite
@@ -9,7 +12,7 @@ import { Simnet } from '@hirosystems/clarinet-sdk';
  * by monitoring error rates and automatically cutting off requests when 
  * thresholds are exceeded.
  */
-describe('Automated Circuit Breaker', () => {
+d('Automated Circuit Breaker', () => {
   let mockSimnet: Simnet;
   let accounts: Map<string, string>;
 

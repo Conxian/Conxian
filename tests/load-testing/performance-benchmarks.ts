@@ -1,6 +1,7 @@
 /**
  * Performance Benchmarks and Baseline Metrics
  * Defines expected performance thresholds for each system component
+ * Aligned with dimensional scaling system (10^3 increments)
  */
 
 export interface PerformanceBenchmark {
@@ -18,7 +19,7 @@ export interface PerformanceBenchmark {
 }
 
 export const PERFORMANCE_BENCHMARKS: PerformanceBenchmark[] = [
-  // Core Token Operations
+  // Core Token Operations - Dimension 0 (10^3)
   {
     component: 'cxd-token',
     operation: 'transfer',
@@ -38,7 +39,7 @@ export const PERFORMANCE_BENCHMARKS: PerformanceBenchmark[] = [
     criticalThresholds: { warningLevel: 0.8, errorLevel: 0.5, criticalLevel: 0.3 }
   },
   
-  // Staking Operations
+  // Staking Operations - Dimension 0 (10^3)
   {
     component: 'cxd-staking',
     operation: 'stake',
@@ -58,7 +59,7 @@ export const PERFORMANCE_BENCHMARKS: PerformanceBenchmark[] = [
     criticalThresholds: { warningLevel: 0.7, errorLevel: 0.4, criticalLevel: 0.2 }
   },
   
-  // Revenue Distribution
+  // Revenue Distribution - Dimension 0 (10^3)
   {
     component: 'revenue-distributor',
     operation: 'collect-revenue',
@@ -78,7 +79,7 @@ export const PERFORMANCE_BENCHMARKS: PerformanceBenchmark[] = [
     criticalThresholds: { warningLevel: 0.5, errorLevel: 0.2, criticalLevel: 0.1 }
   },
   
-  // System Coordination
+  // System Coordination - Dimension 0 (10^3)
   {
     component: 'token-system-coordinator',
     operation: 'get-system-statistics',
@@ -101,9 +102,10 @@ export const PERFORMANCE_BENCHMARKS: PerformanceBenchmark[] = [
 
 export interface SystemLoadProfile {
   phase: string;
+  dimension: number; // 0-5 representing 10^3 to 10^8
   totalTransactions: number;
   concurrentUsers: number;
-  transactionMix: Record<string, number>; // percentage of each operation type
+  transactionMix: Record<string, number>;
   expectedSystemTPS: number;
   resourceLimits: {
     maxMemoryMB: number;
@@ -115,7 +117,8 @@ export interface SystemLoadProfile {
 export const LOAD_PROFILES: SystemLoadProfile[] = [
   {
     phase: 'Bootstrap',
-    totalTransactions: 1000,
+    dimension: 0,
+    totalTransactions: 1000, // 10^3
     concurrentUsers: 10,
     transactionMix: {
       'token_mint': 30,
@@ -127,7 +130,8 @@ export const LOAD_PROFILES: SystemLoadProfile[] = [
   },
   {
     phase: 'Early Growth',
-    totalTransactions: 10000,
+    dimension: 1,
+    totalTransactions: 10000, // 10^4
     concurrentUsers: 100,
     transactionMix: {
       'token_transfer': 40,
@@ -140,7 +144,8 @@ export const LOAD_PROFILES: SystemLoadProfile[] = [
   },
   {
     phase: 'Scaling',
-    totalTransactions: 100000,
+    dimension: 2,
+    totalTransactions: 100000, // 10^5
     concurrentUsers: 1000,
     transactionMix: {
       'token_transfer': 45,
@@ -154,7 +159,8 @@ export const LOAD_PROFILES: SystemLoadProfile[] = [
   },
   {
     phase: 'High Load',
-    totalTransactions: 1000000,
+    dimension: 3,
+    totalTransactions: 1000000, // 10^6
     concurrentUsers: 5000,
     transactionMix: {
       'token_transfer': 50,
@@ -168,7 +174,8 @@ export const LOAD_PROFILES: SystemLoadProfile[] = [
   },
   {
     phase: 'Stress',
-    totalTransactions: 10000000,
+    dimension: 4,
+    totalTransactions: 10000000, // 10^7
     concurrentUsers: 10000,
     transactionMix: {
       'high_frequency': 60,
@@ -181,7 +188,8 @@ export const LOAD_PROFILES: SystemLoadProfile[] = [
   },
   {
     phase: 'Extreme Scale',
-    totalTransactions: 100000000,
+    dimension: 5,
+    totalTransactions: 100000000, // 10^8
     concurrentUsers: 25000,
     transactionMix: {
       'optimized_transfers': 70,
@@ -197,6 +205,7 @@ export interface GapAnalysisFramework {
   category: string;
   testAreas: string[];
   riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  applicableDimensions: number[]; // Which dimensions this applies to
   mitigationStrategies: string[];
 }
 
@@ -211,6 +220,7 @@ export const GAP_ANALYSIS_AREAS: GapAnalysisFramework[] = [
       'CPU utilization under load'
     ],
     riskLevel: 'HIGH',
+    applicableDimensions: [2, 3, 4, 5],
     mitigationStrategies: [
       'Implement horizontal scaling',
       'Add transaction batching',
@@ -228,6 +238,7 @@ export const GAP_ANALYSIS_AREAS: GapAnalysisFramework[] = [
       'Data corruption prevention'
     ],
     riskLevel: 'CRITICAL',
+    applicableDimensions: [0, 1, 2, 3, 4, 5],
     mitigationStrategies: [
       'Implement robust error handling',
       'Add state validation checks',
@@ -245,6 +256,7 @@ export const GAP_ANALYSIS_AREAS: GapAnalysisFramework[] = [
       'Contract call efficiency'
     ],
     riskLevel: 'HIGH',
+    applicableDimensions: [1, 2, 3, 4, 5],
     mitigationStrategies: [
       'Optimize critical paths',
       'Implement performance monitoring',
@@ -262,6 +274,7 @@ export const GAP_ANALYSIS_AREAS: GapAnalysisFramework[] = [
       'Attack resistance'
     ],
     riskLevel: 'CRITICAL',
+    applicableDimensions: [0, 1, 2, 3, 4, 5],
     mitigationStrategies: [
       'Implement robust rate limiting',
       'Add comprehensive validation',
@@ -279,6 +292,7 @@ export const GAP_ANALYSIS_AREAS: GapAnalysisFramework[] = [
       'Configuration management'
     ],
     riskLevel: 'MEDIUM',
+    applicableDimensions: [1, 2, 3, 4, 5],
     mitigationStrategies: [
       'Implement comprehensive monitoring',
       'Add automated operations',

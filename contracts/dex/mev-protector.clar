@@ -185,11 +185,38 @@
       (ok (map (lambda (r)
         (begin
           (try! (detect-sandwich-attack (get path r) (get amount-in r)))
-          (as-contract (contract-call? .multi-hop-router-v3 swap-exact-in-with-transfer (get path r) (get amount-in r) (get min-amount-out r) (get recipient r)))
+          (let ((ends (unwrap-panic (path-ends (get path r)))))
+            (as-contract (contract-call? .dimensional-advanced-router-dijkstra
+              swap-optimal-path
+              (get first ends)
+              (get last ends)
+              (get amount-in r)
+              (default-to u0 (get min-amount-out r))
+            ))
+          )
         )
       ) reveals))
     )
   )
+)
+
+(define-private (path-ends (path (list 20 principal)))
+  (let ((ends (fold path { first: none, last: none }
+                (lambda (p acc)
+                  (merge acc {
+                    first: (match (get first acc) f (some f) (some p)),
+                    last: (some p)
+                  })
+                ))))
+    (ok (tuple (first (unwrap-panic (get first ends))) (last (unwrap-panic (get last ends)))))
+  )
+)
+
+(define-private (get-price (path (list 20 principal)) (amount-in uint))
+  (let ((ends (unwrap-panic (path-ends path))))
+    (match (as-contract (contract-call? .dimensional-advanced-router-dijkstra estimate-output (get first ends) (get last ends) amount-in))
+      data (ok u0)
+      err err))
 )
 
 (define-private (detect-sandwich-attack (path (list 20 principal)) (amount-in uint))
@@ -199,18 +226,18 @@
     (price-before (try! (get-price path amount-in)))
     (price-after (try! (get-price path amount-in))) ;; This should ideally be a simulated price after the transaction
   )
-    (let ((deviation (/ (* (abs (- price-after price-before)) u10000) price-before)))
-      (if (> deviation u500) ;; 5% deviation
-        (err ERR_SANDWICH_ATTACK_DETECTED)
-        (ok true)
-      )
+    (if (is-eq price-before u0)
+      (ok true)
+      (let ((delta (if (>= price-after price-before) (- price-after price-before) (- price-before price-after))))
+        (let ((deviation (/ (* delta u10000) price-before)))
+          (if (> deviation u500) ;; 5% deviation
+            (err ERR_SANDWICH_ATTACK_DETECTED)
+            (ok true)
+          )
+        )
+      ))
     )
   )
-)
-
-(define-private (get-price (path (list 20 principal)) (amount-in uint))
-  (as-contract (contract-call? .multi-hop-router-v3 get-amount-out path amount-in))
-)
 
 (define-public (cancel-commitment (commitment-hash (buff 32)))
   (let ((commitment-entry (unwrap! (map-get? commitments { user: tx-sender, commitment-hash: commitment-hash }) ERR_COMMITMENT_NOT_FOUND)))

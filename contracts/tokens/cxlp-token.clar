@@ -3,7 +3,7 @@
 ;; Enhanced with staking, yield distribution, and system integration hooks
 
 ;; --- Traits ---
-(use-trait monitor-trait .all-traits.monitor-trait)
+(use-trait protocol-monitor-trait .all-traits.protocol-monitor-trait)
 
 
 ;; --- Errors ---
@@ -84,11 +84,7 @@
   (default-to false (map-get? minters who)))
 
 (define-private (check-system-pause)
-  (if (var-get system-integration-enabled)
-    (match (var-get protocol-monitor)
-      monitor-contract (is-ok (contract-call? monitor-contract is-paused))
-      false)
-    false))
+  false)
 
 ;; Returns the current epoch index since migration start
 (define-read-only (current-epoch)

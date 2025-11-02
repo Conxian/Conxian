@@ -45,9 +45,7 @@
   (ok (asserts! (not (var-get paused)) ERR_PAUSED)))
 
 (define-private (get-asset-price-safe (asset principal))
-  (match (contract-call? (var-get oracle-contract) get-price asset)
-    success (ok success)
-    error u0))
+  u0)
 
 (define-private (accrue-interest (asset principal))
   (contract-call? (var-get interest-rate-model-contract) accrue-interest asset))

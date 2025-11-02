@@ -86,21 +86,21 @@
 
 ;; Binary exponentiation for integer powers
 ;; Non-recursive approximation of pow using simple cases to avoid recursion
-(define-read-only (pow-fixed (base uint) (exp uint))
-  (if (is-eq exp u0)
+(define-read-only (pow-fixed (base uint) (power uint))
+  (if (is-eq power u0)
     (ok PRECISION)
-    (if (is-eq exp u1)
+    (if (is-eq power u1)
       (ok base)
       (ok PRECISION))))
 
 ;; Helper function for binary exponentiation (no pow usage; pure halving loop)
 ;; Removed recursion; not used by pow-fixed anymore
-(define-private (pow-step (result uint) (base uint) (exp uint))
+(define-private (pow-step (result uint) (base uint) (power uint))
   (ok result))
 
 ;; Power function (alias for pow-fixed)
-(define-read-only (pow (base uint) (exp uint))
-  (pow-fixed base exp))
+(define-read-only (pow (base uint) (power uint))
+  (pow-fixed base power))
 
 ;; ===========================================
 ;; SQUARE ROOT FUNCTION
