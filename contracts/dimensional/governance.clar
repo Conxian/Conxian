@@ -42,7 +42,7 @@
 })
 
 ;; Track if address has voted on a proposal
-(define-map has-voted {(proposal-id: uint, voter: principal)} bool)
+(define-map has-voted {proposal-id: uint, voter: principal} bool)
 
 ;; Track next proposal ID
 (define-data-var next-proposal-id uint u1)
@@ -85,7 +85,7 @@
 (define-public (cast-vote (proposal-id uint) (support bool))
   (let (
     (proposal (unwrap! (map-get? proposals {id: proposal-id}) (err u5001)))
-    (has-voted? (default-to false (map-get? has-voted {(proposal-id: proposal-id, voter: tx-sender)})))
+    (has-voted? (default-to false (map-get? has-voted {proposal-id: proposal-id, voter: tx-sender})))
     (weight (unwrap! (contract-call? (var-get governance-token) get-votes tx-sender block-height) (err u5001)))
   )
     (asserts! (and (>= block-height (get start-block proposal)) 
@@ -109,7 +109,7 @@
       votes: weight
     })
     
-    (map-set has-voted {(proposal-id: proposal-id, voter: tx-sender)} true)
+    (map-set has-voted {proposal-id: proposal-id, voter: tx-sender} true)
     
     (ok true)
   )

@@ -38,3 +38,16 @@ path = "../contracts/dimensional/position-nft.clar"
 depends_on = ["all-traits"]
 clarity_version = 3
 epoch = "3.0"
+
+# DEX Core (minimal)
+[disabled.circuit-breaker]
+path = "../contracts/security/circuit-breaker.clar"
+depends_on = ["all-traits"]
+clarity_version = 3
+epoch = "3.0"
+
+[contracts.advanced-router-dijkstra]
+path = "../contracts/dimensional/advanced-router-dijkstra.clar"
+depends_on = ["all-traits"]
+clarity_version = 3
+epoch = "3.0"

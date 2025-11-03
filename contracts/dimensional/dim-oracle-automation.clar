@@ -1,7 +1,7 @@
 (use-trait dimensional-oracle-trait .all-traits.dimensional-oracle-trait)
 
 ;; Implement required traits
-(impl-trait .all-traits.dimensional-oracle-trait)
+(impl-trait dimensional-oracle-trait)
 
 (define-constant ERR_UNAUTHORIZED u101)
 

@@ -1,4 +1,5 @@
-(impl-trait .all-traits.access-control-trait)
+(use-trait access-control-trait .all-traits.access-control-trait)
+(impl-trait access-control-trait)
 
 (define-constant ERR_UNAUTHORIZED (err u1001))
 (define-constant ERR_NFT (err u1002))

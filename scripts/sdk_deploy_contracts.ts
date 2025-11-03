@@ -53,7 +53,7 @@ const ORDER = [
   'math-lib-advanced',
   'oracle-aggregator-enhanced',
   'dex-factory-enhanced',
-  'multi-hop-router-v3',
+  'advanced-router-dijkstra',
   'concentrated-liquidity-pool',
   'vault-production',
   'treasury',

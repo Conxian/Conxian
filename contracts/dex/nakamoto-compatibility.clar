@@ -84,7 +84,7 @@
 (define-read-only (is-nakamoto-active)
   "Check if Nakamoto upgrade is active"
   (var-get nakamoto-activated))
-(define-read-only (get-blocks-per-time-unit (unit: (string-ascii 10))))10)))
+(define-read-only (get-blocks-per-time-unit (unit (string-ascii 10)))
   "Get block count per time unit for current network state"
   (if (is-nakamoto-active)
     (cond
@@ -104,6 +104,7 @@
       u0
     )
   )
+)
 (define-read-only (convert-legacy-timing (legacy-blocks uint))
   "Convert legacy block counts to Nakamoto equivalents"
   (if (is-nakamoto-active)

@@ -119,6 +119,8 @@ export default defineConfig({
   // Environment variables
   define: {
     'process.env.NODE_ENV': '"test"',
-    'process.env.CLARINET_MODE': '"test"'
+    'process.env.CLARINET_MODE': '"test"',
+    // Single source of truth: default tests compile the root manifest
+    'process.env.CLARINET_MANIFEST': '"Clarinet.toml"'
   }
 });

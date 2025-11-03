@@ -14,9 +14,9 @@
 (use-trait pool-trait .all-traits.pool-trait)
 
 ;; Implement required traits
-(impl-trait .all-traits.pausable-trait)
-(impl-trait .all-traits.ownable-trait)
-(impl-trait .all-traits.pool-trait)
+(impl-trait pausable-trait)
+(impl-trait ownable-trait)
+(impl-trait pool-trait)
 
 ;; ===========================================
 ;; CONSTANTS
@@ -295,7 +295,7 @@
               ;; Update global liquidity
               (var-set liquidity (+ (var-get liquidity) liquidity-amount))
 
-              (ok (tuple (position-id position-id) (liquidity liquidity-amount) (amount-x amount-x) (amount-y amount-y)))
+              (ok { position-id: position-id, liquidity: liquidity-amount, amount-x: amount-x, amount-y: amount-y })
             )
           )
         )

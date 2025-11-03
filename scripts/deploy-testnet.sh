@@ -21,7 +21,7 @@ DRY_RUN=${DRY_RUN:-0}
 CONTRACTS=(
   sip-010-trait strategy-trait vault-admin-trait vault-trait oracle-aggregator-trait \
   ownable-trait enhanced-caller-admin-trait math-lib-advanced oracle-aggregator-enhanced \
-  dex-factory-enhanced multi-hop-router-v3 concentrated-liquidity-pool vault-production \
+  dex-factory-enhanced advanced-router-dijkstra concentrated-liquidity-pool vault-production \
   treasury dao-governance conxian-registry analytics bounty-system \
   mock-ft CXVG creator-token cxvg-token cxlp-token
 )

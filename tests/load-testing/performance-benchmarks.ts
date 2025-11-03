@@ -97,6 +97,25 @@ export const PERFORMANCE_BENCHMARKS: PerformanceBenchmark[] = [
     maxErrorRate: 0.001,
     maxGasUsage: 200000,
     criticalThresholds: { warningLevel: 0.6, errorLevel: 0.3, criticalLevel: 0.1 }
+  },
+  // Router Benchmarks - Advanced Dijkstra
+  {
+    component: 'advanced-router-dijkstra',
+    operation: 'find-optimal-path',
+    expectedTPS: 500,
+    maxLatencyMs: 50,
+    maxErrorRate: 0.001,
+    maxGasUsage: 150000,
+    criticalThresholds: { warningLevel: 0.8, errorLevel: 0.6, criticalLevel: 0.4 }
+  },
+  {
+    component: 'advanced-router-dijkstra',
+    operation: 'estimate-output',
+    expectedTPS: 1000,
+    maxLatencyMs: 30,
+    maxErrorRate: 0.001,
+    maxGasUsage: 100000,
+    criticalThresholds: { warningLevel: 0.85, errorLevel: 0.65, criticalLevel: 0.45 }
   }
 ];
 

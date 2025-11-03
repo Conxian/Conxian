@@ -221,3 +221,18 @@
     )
   )
 )
+
+;; ===== Utility Functions =====
+;; Absolute value for signed integers
+(define-private (abs (x int))
+  (if (< x 0) (- 0 x) x)
+)
+
+;; Max/Min helpers for uint
+(define-private (max (a uint) (b uint))
+  (if (> a b) a b)
+)
+
+(define-private (min (a uint) (b uint))
+  (if (< a b) a b)
+)

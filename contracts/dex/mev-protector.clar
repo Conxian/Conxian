@@ -65,7 +65,7 @@
         salt: salt
       })
     )
-      (sha256 (to-consensus-buff payload))
+      (sha256 (unwrap-panic (to-consensus-buff? payload)))
     )
   )
 
@@ -82,10 +82,10 @@
 ;; Check circuit breaker status
 (define-private (check-circuit-breaker)
   (match (var-get circuit-breaker)
-    breaker (let ((is-tripped (try! (contract-call? breaker is-circuit-open))))
-          (if is-tripped (err ERR_CIRCUIT_OPEN) (ok true))))
-    (ok true)
-  )
+    breaker
+      (let ((is-tripped (try! (contract-call? breaker is-circuit-open))))
+        (if is-tripped (err ERR_CIRCUIT_OPEN) (ok true)))
+    (ok true))
 )
 
 ;; --- Admin Functions ---

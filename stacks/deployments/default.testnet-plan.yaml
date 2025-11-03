@@ -504,13 +504,7 @@ plan:
             path: "contracts\\traits\\security\\monitoring-trait.clar"
             anchor-block-only: true
             clarity-version: 3
-        - contract-publish:
-            contract-name: multi-hop-router-v3
-            expected-sender: ST3N0ZC9HBPDEBEJ1H1QFGMJF3PSNGW3FYZSVN513
-            cost: 79390
-            path: "contracts\\dex\\multi-hop-router-v3.clar"
-            anchor-block-only: true
-            clarity-version: 3
+        # Legacy multi-hop router v3 is disabled per PRD; entry removed.
         - contract-publish:
             contract-name: oracle-aggregator-trait
             expected-sender: ST3N0ZC9HBPDEBEJ1H1QFGMJF3PSNGW3FYZSVN513

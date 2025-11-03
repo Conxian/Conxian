@@ -122,16 +122,18 @@
   (let ((from-idx (unwrap! (map-get? token-index token-from) ERR_INVALID_NODE))
         (to-idx (unwrap! (map-get? token-index token-to) ERR_INVALID_NODE)))
     (match (map-get? graph-edges {from: from-idx, to: to-idx})
-      edge (let ((new-weight (calculate-edge-weight new-liquidity (get fee edge))))
-        (map-set graph-edges {from: from-idx, to: to-idx} (merge edge {
-          liquidity: new-liquidity,
-          weight: new-weight
-        }))
-        (map-set graph-edges {from: to-idx, to: from-idx} (merge edge {
-          liquidity: new-liquidity,
-          weight: new-weight
-        }))
-        (ok true))
+      edge
+        (let ((new-weight (calculate-edge-weight new-liquidity (get fee edge))))
+          (begin
+            (map-set graph-edges {from: from-idx, to: to-idx} (merge edge {
+              liquidity: new-liquidity,
+              weight: new-weight
+            }))
+            (map-set graph-edges {from: to-idx, to: from-idx} (merge edge {
+              liquidity: new-liquidity,
+              weight: new-weight
+            }))
+            (ok true)))
       (err ERR_INVALID_NODE))))
 
 (define-public (remove-token-node (token principal))

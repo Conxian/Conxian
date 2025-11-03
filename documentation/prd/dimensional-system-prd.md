@@ -95,3 +95,65 @@
 - Clarinet checks for foundation/core/test/root per milestone.
 - Static scans: banned functions, trait usage, encoding calls.
 - Unit/integration tests for router, factory, MEV, oracle, positions.
+
+## 13. Terminology and Component Naming (Unified)
+
+- Router (standard): Advanced Dijkstra Router
+  - Contract name: advanced-router-dijkstra
+  - Trait name: advanced-router-dijkstra-trait
+  - Legacy router v3: disabled in manifests; not a target for further development.
+- Oracle (standard): Dimensional Oracle
+  - Contract name: oracle-aggregator-v2 (also referenced as dimensional-oracle)
+  - Functionality: TWAP, manipulation detection, circuit breaker hooks.
+- Factory: dex-factory-v2 (multi-pool support)
+- Pools: concentrated-liquidity-pool, stable-swap, weighted-pool
+- MEV Protection: mev-protector (commit-reveal, batch auction, sandwich detection)
+- Encoding: canonical encoding via sha256(unwrap-panic (to-consensus-buff? payload)) only, implemented in centralized encoding utilities.
+
+## 14. Current Status Snapshot (as of 2025-11-02)
+
+- Manifests
+  - Foundation manifest normalization: completed (clarity_version=3, epoch="3.0").
+  - Test manifest: legacy multi-hop router v3 disabled; core compiles are reported clean.
+  - Root manifest: legacy router v3 disabling pending; contract name normalization pending.
+- Router
+  - Advanced Dijkstra router: designated as the canonical router; integration work ongoing.
+  - Legacy multi-hop router v3: present in codebase but disabled in test manifest; slated for root manifest disable.
+- Encoding
+  - Encoding utilities unified on sha256(unwrap-panic (to-consensus-buff? ...)) policy.
+  - Note: to-consensus-buff? is allowed only within canonical encoding utilities; non-standard conversions remain banned.
+- Traits & Static References
+  - Centralized trait usage via use-trait imports against the aggregator; avoid principal-qualified trait identifiers.
+  - Sweep for static ST* references is planned; replace with admin-set principals or trait-typed parameters.
+- Oracle & MEV
+  - Dimensional oracle (oracle-aggregator-v2) enhancements planned for TWAP/manipulation detection.
+  - MEV protections planned: commit-reveal, batch auction, sandwich detection; circuit-breaker integration.
+
+## 15. Cross-References
+
+- Execution Status: documentation/PRD_EXECUTION_UPDATE.md
+- Task Checklist: documentation/prd/tasks.md
+
+## 16. Revision History
+
+- 2025-11-02
+  - Added unified terminology section for router, oracle, factory, pools, MEV, and encoding.
+  - Documented current status snapshot to reflect the latest development and manifest states.
+  - Clarified encoding policy to explicitly include unwrap-panic inside canonical utilities and restrict to-consensus-buff? usage.
+  - Added cross-references to Execution Update and Task Checklist for alignment.
+ - 2025-11-03
+   - Integrated benchmarking addendum and quarterly review framework.
+   - Noted router integration tests and performance benchmarks for advanced-router-dijkstra.
+
+## 17. Benchmarking Alignment Addendum
+
+- Benchmarking report: documentation/benchmarking/benchmarking-report.md (authoritative for KPI targets and quarterly framework)
+- Alignment goals: meet/exceed Tier‑1 benchmarks across routing latency, quote accuracy, slippage, liquidity depth, oracle/MEV protections, and UX.
+- Implementation linkage: router standardization, oracle TWAP/manip thresholds, MEV batch auctions, liquidity incentives, UX transparency.
+
+## 18. Quarterly Review Framework
+
+- Inputs: CI perf logs, liquidity depth metrics, oracle/MEV alert stats, UX analytics.
+- Cadence: Quarterly executive review; monthly engineering checkpoints.
+- KPI targets: As specified in benchmarking-report.md; update targets annually.
+- Adjustments: Roadmap refinements based on KPI delta; publish in PRD_EXECUTION_UPDATE.md.

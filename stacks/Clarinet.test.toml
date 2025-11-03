@@ -1025,7 +1025,7 @@ path = "contracts/pools/weighted-pool.clar"
 
 [disabled.advanced-router-dijkstra]
 [contracts.advanced-router-dijkstra]
-path = "contracts/dimensional/advanced-router-dijkstra.clar"
+path = "../contracts/dimensional/advanced-router-dijkstra.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 depends_on = [ "all-traits",]
 
@@ -1062,7 +1062,7 @@ path = "contracts/mev-protector.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.mev-protector-dex]
-path = "contracts/dex/mev-protector.clar"
+path = "../contracts/dex/mev-protector.clar"
 address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
 
 [contracts.oracle-root]

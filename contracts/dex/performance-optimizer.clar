@@ -118,7 +118,7 @@
     average-gas-saved: (if (> (var-get total-optimizations) u0)
       (/ (var-get cumulative-gas-saved) (var-get total-optimizations))
       u0)
-  })))
+  }))
 
 (define-public (transfer-ownership (new-owner principal))
   (begin

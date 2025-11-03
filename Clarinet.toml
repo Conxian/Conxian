@@ -23,7 +23,7 @@ bitcoin_node_rpc_address = "https://blockstream.info/api"
 
 [contracts.all-traits]
 path = "contracts/traits/all-traits.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.all-traits"
 
 [accounts.wallet_1]
 address = "ST1SJ3DTE5DN7X54YDH5D64R3BCB6A2AG2ZQ8YPD5"
@@ -102,553 +102,553 @@ audit-registry = ".audit-registry"
 
 [contracts.audit-registry-audit-badge-nft]
 path = "contracts/audit-registry/audit-badge-nft.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.audit-registry-audit-badge-nft"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.audit-registry-audit-badge-nft"
 
 [contracts.audit-registry-audit-registry]
 path = "contracts/audit-registry/audit-registry.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.audit-registry-audit-registry"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.audit-registry-audit-registry"
 
 [contracts.automation-batch-processor]
 path = "contracts/automation/batch-processor.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.automation-batch-processor"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.automation-batch-processor"
 
 [contracts.automation-keeper-coordinator]
 path = "contracts/automation/keeper-coordinator.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.automation-keeper-coordinator"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.automation-keeper-coordinator"
 
 [contracts.batch-auction]
 path = "contracts/batch-auction.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.batch-auction"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.batch-auction"
 
 [contracts.btc-adapter]
 path = "contracts/btc-adapter.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.btc-adapter"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.btc-adapter"
 
 [contracts.budget-manager]
 path = "contracts/budget-manager.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.budget-manager"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.budget-manager"
 
 [contracts.circuit-breaker]
 path = "contracts/security/circuit-breaker.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.circuit-breaker"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.circuit-breaker"
 
 [contracts.dex-auto-compounder]
 path = "contracts/dex/auto-compounder.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dex-auto-compounder"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.dex-auto-compounder"
 
 [disabled.dex-batch-auction]
 path = "contracts/dex/batch-auction.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dex-batch-auction"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.dex-batch-auction"
 
 [contracts.dex-bond-factory]
 path = "contracts/dex/bond-factory.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dex-bond-factory"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.dex-bond-factory"
 
 [contracts.dex-bond-issuance-system]
 path = "contracts/dex/bond-issuance-system.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dex-bond-issuance-system"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.dex-bond-issuance-system"
 
 [contracts.dex-comprehensive-lending-system]
 path = "contracts/dex/comprehensive-lending-system.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dex-comprehensive-lending-system"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.dex-comprehensive-lending-system"
 
-[contracts.dex-concentrated-liquidity-pool]
+[disabled.dex-concentrated-liquidity-pool]
 path = "contracts/dex/concentrated-liquidity-pool.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dex-concentrated-liquidity-pool"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.dex-concentrated-liquidity-pool"
 
 [contracts.dex-cxd-bonding-curve-amm]
 path = "contracts/dex/cxd-bonding-curve-amm.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dex-cxd-bonding-curve-amm"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.dex-cxd-bonding-curve-amm"
 
 [contracts.dex-cxlp-migration-queue]
 path = "contracts/dex/cxlp-migration-queue.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dex-cxlp-migration-queue"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.dex-cxlp-migration-queue"
 
 [contracts.dex-cxvg-utility]
 path = "contracts/dex/cxvg-utility.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dex-cxvg-utility"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.dex-cxvg-utility"
 
 [contracts.dex-dex-factory-v2]
 path = "contracts/dex/dex-factory-v2.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dex-dex-factory-v2"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.dex-dex-factory-v2"
 
 [contracts.dex-dex-factory]
 path = "contracts/dex/dex-factory.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dex-dex-factory"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.dex-dex-factory"
 
 [contracts.dex-dex-pool]
 path = "contracts/dex/dex-pool.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dex-dex-pool"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.dex-dex-pool"
 
 [contracts.dex-distributed-cache-manager]
 path = "contracts/dex/distributed-cache-manager.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dex-distributed-cache-manager"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.dex-distributed-cache-manager"
 
 [contracts.dex-enhanced-yield-strategy]
 path = "contracts/dex/enhanced-yield-strategy.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dex-enhanced-yield-strategy"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.dex-enhanced-yield-strategy"
 
 [contracts.dex-enterprise-loan-manager]
 path = "contracts/dex/enterprise-loan-manager.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dex-enterprise-loan-manager"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.dex-enterprise-loan-manager"
 
 [disabled.dex-fee-manager]
 path = "contracts/dex/fee-manager.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dex-fee-manager"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.dex-fee-manager"
 
 [contracts.dimensional-dimensional-core]
 path = "contracts/dimensional/dimensional-core.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dimensional-dimensional-core"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.dimensional-dimensional-core"
 
 [contracts.dimensional-governance]
 path = "contracts/dimensional/governance.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dimensional-governance"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.dimensional-governance"
 
 [contracts.dimensional-position-nft]
 path = "contracts/dimensional/position-nft.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dimensional-position-nft"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.dimensional-position-nft"
 
 [contracts.lending-dimensional-vault]
 path = "contracts/lending/dimensional-vault.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.lending-dimensional-vault"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.lending-dimensional-vault"
 
 [contracts.lending-enterprise-module]
 path = "contracts/lending/enterprise-module.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.lending-enterprise-module"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.lending-enterprise-module"
 
 [contracts.risk-risk-oracle]
 path = "contracts/risk/risk-oracle.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.risk-risk-oracle"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.risk-risk-oracle"
 
 [contracts.dex-interest-rate-model]
 path = "contracts/dex/interest-rate-model.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dex-interest-rate-model"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.dex-interest-rate-model"
 
 [contracts.dex-legacy-adapter]
 path = "contracts/dex/legacy-adapter.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dex-legacy-adapter"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.dex-legacy-adapter"
 
 [contracts.dex-liquidation-manager]
 path = "contracts/dex/liquidation-manager.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dex-liquidation-manager"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.dex-liquidation-manager"
 
 [contracts.dex-liquidity-manager]
 path = "contracts/dex/liquidity-manager.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dex-liquidity-manager"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.dex-liquidity-manager"
 
 [contracts.dex-liquidity-optimization-engine]
 path = "contracts/dex/liquidity-optimization-engine.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dex-liquidity-optimization-engine"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.dex-liquidity-optimization-engine"
 
 [contracts.dex-manipulation-detector]
 path = "contracts/dex/manipulation-detector.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dex-manipulation-detector"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.dex-manipulation-detector"
 
 [contracts.dex-memory-pool-management]
 path = "contracts/dex/memory-pool-management.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dex-memory-pool-management"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.dex-memory-pool-management"
 
 [contracts.dex-mev-protector]
 path = "contracts/dex/mev-protector.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dex-mev-protector"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.dex-mev-protector"
 
 [contracts.dex-migration-manager]
 path = "contracts/dex/migration-manager.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dex-migration-manager"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.dex-migration-manager"
 
 [contracts.dex-monitoring-dashboard]
 path = "contracts/dex/monitoring-dashboard.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dex-monitoring-dashboard"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.dex-monitoring-dashboard"
 
 [contracts.dex-nakamoto-compatibility]
 path = "contracts/dex/nakamoto-compatibility.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dex-nakamoto-compatibility"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.dex-nakamoto-compatibility"
 
 [contracts.dex-oracle]
 path = "contracts/dex/oracle.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dex-oracle"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.dex-oracle"
 
 [contracts.dex-performance-optimizer]
 path = "contracts/dex/performance-optimizer.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dex-performance-optimizer"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.dex-performance-optimizer"
 
 [contracts.dex-predictive-scaling-system]
 path = "contracts/dex/predictive-scaling-system.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dex-predictive-scaling-system"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.dex-predictive-scaling-system"
 
 [contracts.dex-protocol-invariant-monitor]
 path = "contracts/dex/protocol-invariant-monitor.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dex-protocol-invariant-monitor"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.dex-protocol-invariant-monitor"
 
 [contracts.dex-real-time-monitoring-dashboard]
 path = "contracts/dex/real-time-monitoring-dashboard.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dex-real-time-monitoring-dashboard"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.dex-real-time-monitoring-dashboard"
 
 [contracts.dex-rebalancing-rules]
 path = "contracts/dex/rebalancing-rules.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dex-rebalancing-rules"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.dex-rebalancing-rules"
 
 [contracts.dex-sbtc-bond-integration]
 path = "contracts/dex/sbtc-bond-integration.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dex-sbtc-bond-integration"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.dex-sbtc-bond-integration"
 
 [contracts.dex-sbtc-flash-loan-extension]
 path = "contracts/dex/sbtc-flash-loan-extension.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dex-sbtc-flash-loan-extension"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.dex-sbtc-flash-loan-extension"
 
 [contracts.dex-sbtc-flash-loan-vault]
 path = "contracts/dex/sbtc-flash-loan-vault.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dex-sbtc-flash-loan-vault"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.dex-sbtc-flash-loan-vault"
 
 [contracts.dex-sbtc-integration]
 path = "contracts/dex/sbtc-integration.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dex-sbtc-integration"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.dex-sbtc-integration"
 
 [contracts.dex-sbtc-lending-integration]
 path = "contracts/dex/sbtc-lending-integration.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dex-sbtc-lending-integration"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.dex-sbtc-lending-integration"
 
 [contracts.dex-sbtc-oracle-adapter]
 path = "contracts/dex/sbtc-oracle-adapter.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dex-sbtc-oracle-adapter"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.dex-sbtc-oracle-adapter"
 
 [contracts.dex-stable-swap-pool]
 path = "contracts/dex/stable-swap-pool.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dex-stable-swap-pool"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.dex-stable-swap-pool"
 
 [contracts.dex-timelock-controller]
 path = "contracts/dex/timelock-controller.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dex-timelock-controller"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.dex-timelock-controller"
 
 [contracts.dex-token-emission-controller]
 path = "contracts/dex/token-emission-controller.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dex-token-emission-controller"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.dex-token-emission-controller"
 
 [contracts.dex-token-system-coordinator]
 path = "contracts/dex/token-system-coordinator.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dex-token-system-coordinator"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.dex-token-system-coordinator"
 
 [contracts.dex-transaction-batch-processor]
 path = "contracts/dex/transaction-batch-processor.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dex-transaction-batch-processor"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.dex-transaction-batch-processor"
 
 [contracts.dex-vault]
 path = "contracts/dex/vault.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dex-vault"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.dex-vault"
 
 [contracts.dex-weighted-swap-pool]
 path = "contracts/dex/weighted-swap-pool.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dex-weighted-swap-pool"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.dex-weighted-swap-pool"
 
 [contracts.dex-yield-distribution-engine]
 path = "contracts/dex/yield-distribution-engine.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dex-yield-distribution-engine"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.dex-yield-distribution-engine"
 
 [contracts.dex-yield-optimizer]
 path = "contracts/dex/yield-optimizer.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dex-yield-optimizer"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.dex-yield-optimizer"
 
 [contracts.dimensional-advanced-router-dijkstra]
 path = "contracts/dimensional/advanced-router-dijkstra.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dimensional-advanced-router-dijkstra"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.dimensional-advanced-router-dijkstra"
 
 [contracts.dimensional-concentrated-liquidity-pool-v2]
 path = "contracts/dimensional/concentrated-liquidity-pool-v2.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dimensional-concentrated-liquidity-pool-v2"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.dimensional-concentrated-liquidity-pool-v2"
 
-[contracts.dimensional-concentrated-liquidity-pool]
+[disabled.dimensional-concentrated-liquidity-pool]
 path = "contracts/dimensional/concentrated-liquidity-pool.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dimensional-concentrated-liquidity-pool"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.dimensional-concentrated-liquidity-pool"
 
 [contracts.dimensional-dim-graph]
 path = "contracts/dimensional/dim-graph.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dimensional-dim-graph"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.dimensional-dim-graph"
 
 [contracts.dimensional-dim-metrics]
 path = "contracts/dimensional/dim-metrics.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dimensional-dim-metrics"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.dimensional-dim-metrics"
 
 [contracts.dimensional-dim-oracle-automation]
 path = "contracts/dimensional/dim-oracle-automation.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dimensional-dim-oracle-automation"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.dimensional-dim-oracle-automation"
 
 [contracts.dimensional-dim-registry]
 path = "contracts/dimensional/dim-registry.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dimensional-dim-registry"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.dimensional-dim-registry"
 
 [contracts.dimensional-dim-revenue-adapter]
 path = "contracts/dimensional/dim-revenue-adapter.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dimensional-dim-revenue-adapter"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.dimensional-dim-revenue-adapter"
 
 [contracts.dimensional-dim-yield-stake]
 path = "contracts/dimensional/dim-yield-stake.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dimensional-dim-yield-stake"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.dimensional-dim-yield-stake"
 
 [contracts.dimensional-tokenized-bond-adapter]
 path = "contracts/dimensional/tokenized-bond-adapter.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dimensional-tokenized-bond-adapter"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.dimensional-tokenized-bond-adapter"
 
 [contracts.dimensional-tokenized-bond]
 path = "contracts/dimensional/tokenized-bond.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dimensional-tokenized-bond"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.dimensional-tokenized-bond"
 
 [contracts.enterprise-compliance-hooks]
 path = "contracts/enterprise/compliance-hooks.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.enterprise-compliance-hooks"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.enterprise-compliance-hooks"
 
 [contracts.enterprise-enterprise-api]
 path = "contracts/enterprise/enterprise-api.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.enterprise-enterprise-api"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.enterprise-enterprise-api"
 
 [contracts.governance-token]
 path = "contracts/governance-token.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.governance-token"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.governance-token"
 
 [contracts.governance-emergency-governance]
 path = "contracts/governance/emergency-governance.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.governance-emergency-governance"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.governance-emergency-governance"
 
 [contracts.governance-governance-signature-verifier]
 path = "contracts/governance/governance-signature-verifier.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.governance-governance-signature-verifier"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.governance-governance-signature-verifier"
 
 [contracts.governance-lending-protocol-governance]
 path = "contracts/governance/lending-protocol-governance.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.governance-lending-protocol-governance"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.governance-lending-protocol-governance"
 
 [contracts.governance-proposal-engine]
 path = "contracts/governance/proposal-engine.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.governance-proposal-engine"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.governance-proposal-engine"
 
 [contracts.governance-signed-data-base]
 path = "contracts/governance/signed-data-base.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.governance-signed-data-base"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.governance-signed-data-base"
 
 [contracts.governance-upgrade-controller]
 path = "contracts/governance/upgrade-controller.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.governance-upgrade-controller"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.governance-upgrade-controller"
 
 [disabled.interfaces-btc-adapter]
 path = "contracts/interfaces/btc-adapter.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.interfaces-btc-adapter"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.interfaces-btc-adapter"
 
 [contracts.lib-error-codes]
 path = "contracts/lib/error-codes.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.lib-error-codes"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.lib-error-codes"
 
 [contracts.lib-fixed-point-math]
 path = "contracts/lib/fixed-point-math.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.lib-fixed-point-math"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.lib-fixed-point-math"
 
 [contracts.lib-math-lib-advanced]
 path = "contracts/lib/math-lib-advanced.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.lib-math-lib-advanced"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.lib-math-lib-advanced"
 
 [contracts.lib-precision-calculator]
 path = "contracts/lib/precision-calculator.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.lib-precision-calculator"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.lib-precision-calculator"
 
 [contracts.libraries-concentrated-math]
 path = "contracts/libraries/concentrated-math.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.libraries-concentrated-math"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.libraries-concentrated-math"
 
 [contracts.optimization-helpers]
 path = "contracts/helpers/optimization-helpers.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.optimization-helpers"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.optimization-helpers"
 
-[contracts.mev-protector]
+[disabled.mev-protector]
 path = "contracts/mev-protector.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.mev-protector"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.mev-protector"
 
 [disabled.mocks-mock-dao]
 path = "contracts/mocks/mock-dao.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.mocks-mock-dao"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.mocks-mock-dao"
 
 [disabled.mocks-mock-metrics]
 path = "contracts/mocks/mock-metrics.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.mocks-mock-metrics"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.mocks-mock-metrics"
 
 [disabled.mocks-mock-oracle]
 path = "contracts/mocks/mock-oracle.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.mocks-mock-oracle"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.mocks-mock-oracle"
 
 [disabled.mocks-mock-strategy-a]
 path = "contracts/mocks/mock-strategy-a.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.mocks-mock-strategy-a"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.mocks-mock-strategy-a"
 
 [disabled.mocks-mock-strategy-b]
 path = "contracts/mocks/mock-strategy-b.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.mocks-mock-strategy-b"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.mocks-mock-strategy-b"
 
 [disabled.oracle-root]
 path = "contracts/oracle.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.oracle-root"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.oracle-root"
 
 [disabled.oracle-aggregator-v2]
 path = "contracts/oracle/oracle-aggregator-v2.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.oracle-aggregator-v2"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.oracle-aggregator-v2"
 
 [contracts.monitoring-analytics-aggregator]
 path = "contracts/monitoring/analytics-aggregator.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.monitoring-analytics-aggregator"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.monitoring-analytics-aggregator"
 
 [contracts.monitoring-finance-metrics]
 path = "contracts/monitoring/finance-metrics.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.monitoring-finance-metrics"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.monitoring-finance-metrics"
 
 [contracts.monitoring-monitoring-dashboard]
 path = "contracts/monitoring/monitoring-dashboard.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.monitoring-monitoring-dashboard"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.monitoring-monitoring-dashboard"
 
 [contracts.monitoring-performance-optimizer]
 path = "contracts/monitoring/performance-optimizer.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.monitoring-performance-optimizer"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.monitoring-performance-optimizer"
 
 [contracts.monitoring-price-stability-monitor]
 path = "contracts/monitoring/price-stability-monitor.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.monitoring-price-stability-monitor"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.monitoring-price-stability-monitor"
 
 [disabled.monitoring-system-monitor]
 path = "contracts/monitoring/system-monitor.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.monitoring-system-monitor"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.monitoring-system-monitor"
 
 [contracts.oracle-dimensional-oracle]
 path = "contracts/oracle/dimensional-oracle.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.oracle-dimensional-oracle"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.oracle-dimensional-oracle"
 
 [contracts.oracle-external-oracle-adapter]
 path = "contracts/oracle/external-oracle-adapter.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.oracle-external-oracle-adapter"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.oracle-external-oracle-adapter"
 
-[contracts.pools-concentrated-liquidity-pool]
+[disabled.pools-concentrated-liquidity-pool]
 path = "contracts/pools/concentrated-liquidity-pool.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.pools-concentrated-liquidity-pool"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.pools-concentrated-liquidity-pool"
 
 [contracts.pools-tiered-pools]
 path = "contracts/pools/tiered-pools.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.pools-tiered-pools"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.pools-tiered-pools"
 
 [contracts.proposal-engine]
 path = "contracts/proposal-engine.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.proposal-engine"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.proposal-engine"
 
 [contracts.rebalancing-rules]
 path = "contracts/rebalancing-rules.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.rebalancing-rules"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.rebalancing-rules"
 
 [contracts.rewards-rewards-distributor]
 path = "contracts/rewards/rewards-distributor.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.rewards-rewards-distributor"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.rewards-rewards-distributor"
 
 [contracts.rewards-yield-optimizer]
 path = "contracts/rewards/yield-optimizer.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.rewards-yield-optimizer"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.rewards-yield-optimizer"
 
 [contracts.security-pausable]
 path = "contracts/security/Pausable.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.security-pausable"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.security-pausable"
 
 [contracts.security-circuit-breaker]
 path = "contracts/security/circuit-breaker.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.security-circuit-breaker"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.security-circuit-breaker"
 
-[contracts.security-mev-protector]
+[disabled.security-mev-protector]
 path = "contracts/security/mev-protector.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.security-mev-protector"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.security-mev-protector"
 
 [contracts.security-rate-limiter]
 path = "contracts/security/rate-limiter.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.security-rate-limiter"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.security-rate-limiter"
 
 [contracts.test-test-access]
 path = "contracts/test/test-access.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.test-test-access"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.test-test-access"
 
 [contracts.tiered-pools]
 path = "contracts/tiered-pools.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.tiered-pools"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.tiered-pools"
 
 [contracts.tokens-cxd-price-initializer]
 path = "contracts/tokens/cxd-price-initializer.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.tokens-cxd-price-initializer"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.tokens-cxd-price-initializer"
 
 [contracts.tokens-cxd-token]
 path = "contracts/tokens/cxd-token.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.tokens-cxd-token"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.tokens-cxd-token"
 
 [contracts.tokens-cxlp-token]
 path = "contracts/tokens/cxlp-token.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.tokens-cxlp-token"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.tokens-cxlp-token"
 
 [contracts.tokens-cxs-token]
 path = "contracts/tokens/cxs-token.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.tokens-cxs-token"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.tokens-cxs-token"
 
 [contracts.tokens-cxtr-token]
 path = "contracts/tokens/cxtr-token.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.tokens-cxtr-token"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.tokens-cxtr-token"
 
 [contracts.tokens-cxvg-token]
 path = "contracts/tokens/cxvg-token.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.tokens-cxvg-token"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.tokens-cxvg-token"
 
 [contracts.tokens-token-system-coordinator]
 path = "contracts/tokens/token-system-coordinator.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.tokens-token-system-coordinator"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.tokens-token-system-coordinator"
 
 [contracts.core-dimensional-engine]
 path = "contracts/core/dimensional-engine.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.core-dimensional-engine"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.core-dimensional-engine"
 depends_on = ["all-traits", "utils-encoding"]
 
 [contracts.core-position-manager]
 path = "contracts/core/position-manager.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.core-position-manager"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.core-position-manager"
 depends_on = ["all-traits", "utils-encoding", "core-dimensional-engine"]
 
 [contracts.core-oracle-oracle-adapter]
 path = "contracts/core/oracle/oracle-adapter.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.core-oracle-oracle-adapter"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.core-oracle-oracle-adapter"
 depends_on = ["all-traits", "utils-encoding"]
 
 [contracts.risk-risk-manager]
 path = "contracts/risk/risk-manager.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.risk-risk-manager"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.risk-risk-manager"
 depends_on = ["all-traits", "utils-encoding"]
 
 [contracts.risk-liquidation-engine]
 path = "contracts/risk/liquidation-engine.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.risk-liquidation-engine"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.risk-liquidation-engine"
 depends_on = ["all-traits", "utils-encoding", "core-position-manager", "core-oracle-oracle-adapter", "risk-risk-manager"]
 
 [contracts.risk-funding-calculator]
 path = "contracts/risk/funding-calculator.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.risk-funding-calculator"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.risk-funding-calculator"
 depends_on = ["all-traits", "utils-encoding", "core-position-manager", "core-oracle-oracle-adapter"]
 
 [contracts.traits-errors]
 path = "contracts/traits/errors.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.traits-errors"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.traits-errors"
 
 [contracts.utils-encoding]
 path = "contracts/utils/encoding.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.utils-encoding"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.utils-encoding"
 
 [contracts.utils-migration-manager]
 path = "contracts/utils/migration-manager.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.utils-migration-manager"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.utils-migration-manager"
 
 [contracts.utils-utils]
 path = "contracts/utils/utils.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.utils-utils"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.utils-utils"
 
 [contracts.vaults-sbtc-vault]
 path = "contracts/vaults/sbtc-vault.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.vaults-sbtc-vault"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.vaults-sbtc-vault"
 
 [contracts.staking-dual-stacking-orchestrator]
 path = "contracts/staking/dual-stacking-orchestrator.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.staking-dual-stacking-orchestrator"
+address = "ST2Z52FZD0RB2KSR7K4416V7RHXQZKDRJ9KW2RS2P.staking-dual-stacking-orchestrator"
 depends_on = ["all-traits"]
 
 [disabled.position-factory]

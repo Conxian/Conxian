@@ -358,10 +358,22 @@
   )
 )
 
+;; Admin-configured dimensional token principal
+(define-data-var dimensional-token principal tx-sender)
+
+;; Owner-only: set dimensional token principal
+(define-public (set-dimensional-token (token principal))
+  (begin
+    (asserts! (is-eq tx-sender (var-get contract-owner)) (err u100))
+    (var-set dimensional-token token)
+    (ok true)
+  )
+)
+
 (define-private (get-position-asset (position {collateral: uint, size: int}))
   ;; In a real implementation, this would return the asset for the position
   ;; For now, we'll use the dimensional token
-  'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.dimensional-token
+  (var-get dimensional-token)
 )
 
 (define-private (calculate-pnl
