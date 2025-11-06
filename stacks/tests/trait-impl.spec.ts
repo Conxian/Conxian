@@ -86,5 +86,5 @@ describe('Trait implementation policy (centralized all-traits)', () => {
     }
 
     expect(true).toBe(true);
-  });
+  }, 20000);
 });

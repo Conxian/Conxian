@@ -123,7 +123,7 @@
       (let (
         (utilization (let ((ts (get total-supply state)) (tb (get total-borrows state)))
                        (if (> ts u0) (/ (* tb u10000) ts) u0)))
-        (borrow-rate (contract-call? (unwrap-panic (var-get risk-oracle)) get-borrow-rate utilization))
+        (borrow-rate (contract-call? (var-get risk-engine) get-borrow-rate utilization))
         (block-delta (- current-block last-updated))
         
         ;; Calculate interest

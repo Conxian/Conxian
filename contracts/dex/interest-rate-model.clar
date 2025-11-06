@@ -72,12 +72,18 @@
     (match (map-get? market-state { asset: asset })
       market
       (let (
+        (delta-cash (if (>= cash-change 0)
+          (default-to u0 (to-uint cash-change))
+          (default-to u0 (to-uint (- cash-change)))))
+        (delta-borrows (if (>= borrows-change 0)
+          (default-to u0 (to-uint borrows-change))
+          (default-to u0 (to-uint (- borrows-change)))))
         (new-total-cash (if (>= cash-change 0)
-          (+ (get total-cash market) (unwrap-panic (to-uint cash-change)))
-          (- (get total-cash market) (unwrap-panic (to-uint (- cash-change))))) )
+          (+ (get total-cash market) delta-cash)
+          (- (get total-cash market) delta-cash)))
         (new-total-borrows (if (>= borrows-change 0)
-          (+ (get total-borrows market) (unwrap-panic (to-uint borrows-change)))
-          (- (get total-borrows market) (unwrap-panic (to-uint (- borrows-change))))) )
+          (+ (get total-borrows market) delta-borrows)
+          (- (get total-borrows market) delta-borrows)))
       )
         (let ((new-total-supplies (+ new-total-cash new-total-borrows)))
           (map-set market-state { asset: asset }

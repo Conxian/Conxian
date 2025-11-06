@@ -57,7 +57,7 @@
     (proposal-id (var-get next-proposal-id))
     (voting-delay (var-get voting-delay))
     (voting-period (var-get voting-period))
-    (balance (unwrap! (contract-call? (unwrap-panic (var-get governance-token)) get-balance tx-sender) (err u5001)))
+    (balance (unwrap! (contract-call? (var-get governance-token) get-balance tx-sender) (err u5001)))
   )
     (asserts! (>= balance (var-get proposal-threshold)) ERR_INSUFFICIENT_BALANCE)
     

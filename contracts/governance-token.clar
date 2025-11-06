@@ -128,7 +128,7 @@
     (current-delegation (unwrap! (map-get? delegations { delegator: tx-sender, delegate: delegate }) (err ERR_UNAUTHORIZED)))
     (delegated-amount (get amount current-delegation))
   )
-    (try! (asserts! (>= delegated-amount amount) ERR_INSUFFICIENT_FUNDS))
+    (asserts! (>= delegated-amount amount) ERR_INSUFFICIENT_FUNDS)
 
     (if (> amount delegated-amount)
       ;; Undelegate all

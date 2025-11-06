@@ -29,13 +29,13 @@
 
 
 (define-private (ensure-owner (caller principal))
-  (ok (unwrap-panic (is-eq caller (var-get contract-owner)))))
+  (asserts! (is-eq caller (var-get contract-owner)) ERR_UNAUTHORIZED))
 
 (define-private (ensure-initialized)
-  (ok (unwrap-panic (var-get is-initialized))))
+  (asserts! (var-get is-initialized) ERR_NOT_INITIALIZED))
 
 (define-private (ensure-not-paused)
-  (ok (unwrap-panic (not (var-get is-paused)))))
+  (asserts! (not (var-get is-paused)) ERR_PAUSED))
 
 (define-private (get-reserve (token principal))
   (match (map-get? reserves { token: token })

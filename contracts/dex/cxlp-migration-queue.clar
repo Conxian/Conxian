@@ -166,7 +166,7 @@
         (asserts! (<= block-height intent-deadline) (err ERR_EPOCH_NOT_ACTIVE))
         
         ;; Check user has sufficient CXLP balance
-        (let ((user-balance (unwrap! (contract-call? (unwrap-panic (var-get cxlp-contract)) get-balance tx-sender) (err ERR_INSUFFICIENT_BALANCE))))
+        (let ((user-balance (unwrap! (contract-call? (var-get cxlp-contract) get-balance tx-sender) (err ERR_INSUFFICIENT_BALANCE))))
             (asserts! (>= user-balance cxlp-amount) (err ERR_INSUFFICIENT_BALANCE))
             
             ;; Calculate weight for this intent

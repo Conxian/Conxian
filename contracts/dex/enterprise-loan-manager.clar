@@ -224,17 +224,16 @@
     (var-set liquidity-pool-balance (- (var-get liquidity-pool-balance) principal-amount))
     
     ;; Issue bond if loan qualifies
-    (let ((bond-result
-            (if (>= principal-amount BOND_ISSUANCE_THRESHOLD)
-              (unwrap-panic (create-backing-bond loan-id principal-amount interest-rate maturity-block))
-              none)))
+    (let ((bond-issued (if (>= principal-amount BOND_ISSUANCE_THRESHOLD)
+                        (is-ok (create-backing-bond loan-id principal-amount interest-rate maturity-block))
+                        false)))
       
       ;; Update borrower credit profile
       (update-borrower-profile borrower principal-amount)
       
       ;; Emit event
       (print (tuple (event "enterprise-loan-created") (loan-id loan-id) (borrower borrower)
-                    (amount principal-amount) (interest-rate interest-rate) (bond-issued (is-some bond-result))))
+                    (amount principal-amount) (interest-rate interest-rate) (bond-issued bond-issued)))
       (ok loan-id))))
 
 ;; === Borrower Profile Management ===

@@ -41,7 +41,7 @@
 (define-public (deposit-reward (cycle-id uint) (token <sip-010-ft-trait>) (amount uint))
   (begin
     (asserts! (is-eq tx-sender (var-get operator)) ERR_UNAUTHORIZED)
-    (asserts! (is-eq token (var-get sbtc)) ERR_INVALID_TOKEN)
+    (asserts! (is-eq (contract-of token) (var-get sbtc)) ERR_INVALID_TOKEN)
     (let (
       (totals (default-to { total-delegated: u0, reward: u0 } (map-get? cycle-totals {cycle-id: cycle-id})))
       (total (get total-delegated totals))
@@ -62,7 +62,7 @@
     (if (is-eq amount u0)
       (ok u0)
       (begin
-        (asserts! (is-eq token (var-get sbtc)) ERR_INVALID_TOKEN)
+        (asserts! (is-eq (contract-of token) (var-get sbtc)) ERR_INVALID_TOKEN)
         (map-set claimable {user: recipient} u0)
         (match (as-contract (contract-call? token transfer amount tx-sender recipient none))
           result (ok amount)
