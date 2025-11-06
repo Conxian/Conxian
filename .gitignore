@@ -185,3 +185,7 @@ btc-wallet*
 clarinet-windows-x64.msi
 clarinet_check_output.txt
 .github/copilot-instructions.md
+contracts/dex/transaction-batch-processor.backup.clar
+contracts/dex/transaction-batch-processor.backup.clar
+contracts/dex/transaction-batch-processor.backup.clar
+.env
