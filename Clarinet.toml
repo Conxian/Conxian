@@ -346,7 +346,7 @@ path = "contracts/dex/token-system-coordinator.clar"
 address = "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM"
 depends_on = ["all-traits"]
 
-[contracts.dex-transaction-batch-processor]
+[disabled.dex-transaction-batch-processor]
 path = "contracts/dex/transaction-batch-processor.clar"
 address = "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM"
 
