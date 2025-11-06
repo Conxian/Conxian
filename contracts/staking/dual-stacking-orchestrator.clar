@@ -18,12 +18,12 @@
 (define-map user-delegations {cycle-id: uint, user: principal} uint)
 (define-map claimable {user: principal} uint)
 
-(define-public (initialize (sbtc-token <sip-010-ft-trait>) (new-operator principal) (fee-bps uint))
+(define-public (initialize (sbtc-token principal) (new-operator principal) (new-fee-bps uint))
   (begin
     (asserts! (is-eq tx-sender (var-get owner)) ERR_UNAUTHORIZED)
     (var-set sbtc sbtc-token)
     (var-set operator new-operator)
-    (var-set fee-bps fee-bps)
+    (var-set fee-bps new-fee-bps)
     (var-set fee-recipient new-operator)
     (ok true)
   )
