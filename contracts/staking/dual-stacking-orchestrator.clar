@@ -64,13 +64,8 @@
       (begin
         (asserts! (is-eq (contract-of token) (var-get sbtc)) ERR_INVALID_TOKEN)
         (map-set claimable {user: recipient} u0)
-        (match (as-contract (contract-call? token transfer amount tx-sender recipient none))
-          result (ok amount)
-          error (begin
-            (map-set claimable {user: recipient} amount)
-            error
-          )
-        )
+        (try! (as-contract (contract-call? (contract-of token) transfer amount tx-sender recipient none)))
+        (ok amount)
       )
     )
   )

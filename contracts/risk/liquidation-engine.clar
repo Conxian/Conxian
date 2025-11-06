@@ -43,10 +43,10 @@
   )
   (let (
     (current-block block-height)
-    (position (unwrap! (contract-call? (unwrap-panic (var-get position-manager-contract)) get-position-by-owner position-owner position-id) (err u4004)))
+    (position (unwrap! (contract-call? (var-get position-manager-contract) get-position-by-owner position-owner position-id) (err u4004)))
     (asset (get asset position))
-    (price (unwrap! (contract-call? (unwrap-panic (var-get oracle-contract)) get-price asset) (err u4005)))
-    (liquidation-price (unwrap! (contract-call? (unwrap-panic (var-get risk-manager-contract)) get-liquidation-price position price) (err u4006)))
+    (price (unwrap! (contract-call? (var-get oracle-contract) get-price asset) (err u4005)))
+    (liquidation-price (unwrap! (contract-call? (var-get risk-manager-contract) get-liquidation-price position price) (err u4006)))
   )
     ;; Verify position can be liquidated
     (asserts! (is-eq (get status position) ACTIVE) (err u4007))

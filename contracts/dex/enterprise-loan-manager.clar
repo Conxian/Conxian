@@ -229,7 +229,7 @@
                         false)))
       
       ;; Update borrower credit profile
-      (update-borrower-profile borrower principal-amount)
+      (try! (update-borrower-profile borrower principal-amount))
       
       ;; Emit event
       (print (tuple (event "enterprise-loan-created") (loan-id loan-id) (borrower borrower)

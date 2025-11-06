@@ -196,8 +196,7 @@
     (asset principal)
   )
   (let (
-    (price-tuple (unwrap! (contract-call? (unwrap-panic (var-get oracle-contract)) get-price asset) (err u0)))
-    (current-price (get price price-tuple))
+    (current-price (unwrap! (contract-call? (unwrap! (var-get oracle-contract) ERR_ORACLE_UNAVAILABLE) get-price asset) (err u0)))
     (liquidation (unwrap! (get-liquidation-price position asset) (err u0)))
     (current-block (block-height))
     

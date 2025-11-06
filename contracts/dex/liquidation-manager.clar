@@ -85,7 +85,7 @@
     (asserts! collateral-whitelisted (err u1008))  ;; ERR_ASSET_NOT_WHITELISTED
     
     ;; Delegate to lending system to check if position is underwater
-    (match (contract-call? ls is-position-underwater borrower debt-asset collateral-asset)
+    (match (contract-call? (unwrap-panic (var-get lending-system)) is-position-underwater borrower debt-asset collateral-asset)
       result (ok result)
       error error
     )

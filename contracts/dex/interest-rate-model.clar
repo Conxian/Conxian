@@ -73,11 +73,11 @@
       market
       (let (
         (delta-cash (if (>= cash-change 0)
-          (default-to u0 (to-uint cash-change))
-          (default-to u0 (to-uint (- cash-change)))))
+          (unwrap! (to-uint cash-change) ERR_INVALID_PARAMETER)
+          (unwrap! (to-uint (- cash-change)) ERR_INVALID_PARAMETER)))
         (delta-borrows (if (>= borrows-change 0)
-          (default-to u0 (to-uint borrows-change))
-          (default-to u0 (to-uint (- borrows-change)))))
+          (unwrap! (to-uint borrows-change) ERR_INVALID_PARAMETER)
+          (unwrap! (to-uint (- borrows-change)) ERR_INVALID_PARAMETER)))
         (new-total-cash (if (>= cash-change 0)
           (+ (get total-cash market) delta-cash)
           (- (get total-cash market) delta-cash)))
