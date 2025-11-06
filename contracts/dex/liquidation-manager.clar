@@ -77,7 +77,7 @@
   (collateral-asset principal)
 )
   (let (
-      (lending-system (unwrap! (var-get lending-system) (err u1008)))  ;; ERR_ASSET_NOT_WHITELISTED
+      (lsys (unwrap! (var-get lending-system) (err u1008)))  ;; ERR_ASSET_NOT_WHITELISTED
       (debt-whitelisted (default-to false (get is-whitelisted (map-get? whitelisted-assets { asset: debt-asset }))))
       (collateral-whitelisted (default-to false (get is-whitelisted (map-get? whitelisted-assets { asset: collateral-asset }))))
     )
@@ -85,7 +85,7 @@
     (asserts! collateral-whitelisted (err u1008))  ;; ERR_ASSET_NOT_WHITELISTED
     
     ;; Delegate to lending system to check if position is underwater
-    (match (contract-call? lending-system is-position-underwater borrower debt-asset collateral-asset)
+    (match (contract-call? lsys is-position-underwater borrower debt-asset collateral-asset)
       result (ok result)
       error error
     )
@@ -136,7 +136,7 @@
   )))
 )
   (let (
-      (lending-system (unwrap! (var-get lending-system) (err u1008)))  ;; ERR_ASSET_NOT_WHITELISTED
+      (lsys (unwrap! (var-get lending-system) (err u1008)))  ;; ERR_ASSET_NOT_WHITELISTED
       (positions-count (len positions))
     )
     (asserts! (not (var-get liquidation-paused)) (err u1001))  ;; ERR_LIQUIDATION_PAUSED
@@ -178,9 +178,9 @@
   (debt-amount uint)
 )
   (let (
-      (lending-system (unwrap! (var-get lending-system) (err u1008)))  ;; ERR_ASSET_NOT_WHITELISTED
+      (lsys (unwrap! (var-get lending-system) (err u1008)))  ;; ERR_ASSET_NOT_WHITELISTED
     )
-    (match (contract-call? lending-system get-liquidation-amounts borrower debt-asset collateral-asset debt-amount)
+    (match (contract-call? lsys get-liquidation-amounts borrower debt-asset collateral-asset debt-amount)
       (ok amounts) 
         (ok {
           max-debt-repayable: (get max-debt-repayable amounts),
