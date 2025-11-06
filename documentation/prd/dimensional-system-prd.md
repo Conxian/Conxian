@@ -22,9 +22,10 @@
 
 - Centralized traits via `.all-traits.<trait>` for imports and implementations; no principal-qualified trait ids.
 - Token parameters typed `<sip-010-ft-trait>`; dynamic dispatch for token calls.
-- Deterministic encoding: `sha256(unwrap-panic (to-consensus-buff? payload))`; strictly avoid non-standard conversions.
+- Deterministic encoding: `sha256(unwrap-panic (to-consensus-buff payload))`; strictly avoid non-standard conversions.
 - Nakamoto integration: `get-burn-block-info?` (>=6 conf), `get-tenure-info?`, `get-block-info?` via centralized `block-utils`.
 - Deterministic principal ordering: owner-managed `token-order` map.
+- Secrets & Wallets: no mnemonics in manifests; store in `.env` (gitignored). Derive deterministic wallets via `@stacks/wallet-sdk` and update configs programmatically.
 
 ## 5. Functional Requirements
 
@@ -54,14 +55,15 @@
 - Core manifest compiles cleanly (already satisfied).
 - Test manifest compiles with zero errors after remediation.
 - Root manifest compiles after normalization of contract names and references.
-- Encoding utilities use only `sha256(unwrap-panic (to-consensus-buff? ...))`.
+- Encoding utilities use only `sha256(unwrap-panic (to-consensus-buff ...))`.
 - Router integration targets advanced Dijkstra contract; legacy router disabled.
 - No banned/non-standard functions present in codebase.
+- Secrets are not stored in manifests; `.env` is authoritative for mnemonics. Wallet derivation script exists and config/wallets.* reflect derived addresses.
 
 ## 8. Gaps Identified (from checks)
 
 - Trait/contract misuse: direct ST1.* principals and `.all-traits` as contract calls.
-- Encoding divergence: `to-consensus-buff?` used; duplicate encoding utils.
+- Encoding divergence: `to-consensus-buff?` used; duplicate encoding utils. (Resolved: unified to `to-consensus-buff`.)
 - Legacy router v3 uses banned ops and undefined helpers.
 - MEV protector: response typing and parentheses errors; circuit-breaker handling.
 - Missing helpers: `max`, `range`; wrong arities and undefined functions in multiple modules.
@@ -108,7 +110,7 @@
 - Factory: dex-factory-v2 (multi-pool support)
 - Pools: concentrated-liquidity-pool, stable-swap, weighted-pool
 - MEV Protection: mev-protector (commit-reveal, batch auction, sandwich detection)
-- Encoding: canonical encoding via sha256(unwrap-panic (to-consensus-buff? payload)) only, implemented in centralized encoding utilities.
+- Encoding: canonical encoding via sha256(unwrap-panic (to-consensus-buff payload)) only, implemented in centralized encoding utilities.
 
 ## 14. Current Status Snapshot (as of 2025-11-02)
 
@@ -118,16 +120,22 @@
   - Root manifest: legacy router v3 disabling pending; contract name normalization pending.
 - Router
   - Advanced Dijkstra router: designated as the canonical router; integration work ongoing.
-  - Legacy multi-hop router v3: present in codebase but disabled in test manifest; slated for root manifest disable.
+  - Legacy multi-hop router v3: disabled in manifests; no active root/test entries post-alignment.
 - Encoding
-  - Encoding utilities unified on sha256(unwrap-panic (to-consensus-buff? ...)) policy.
-  - Note: to-consensus-buff? is allowed only within canonical encoding utilities; non-standard conversions remain banned.
+  - Encoding utilities unified on `sha256(unwrap-panic (to-consensus-buff ...))` policy.
+  - Non-standard conversions remain banned.
 - Traits & Static References
   - Centralized trait usage via use-trait imports against the aggregator; avoid principal-qualified trait identifiers.
   - Sweep for static ST* references is planned; replace with admin-set principals or trait-typed parameters.
 - Oracle & MEV
   - Dimensional oracle (oracle-aggregator-v2) enhancements planned for TWAP/manipulation detection.
   - MEV protections planned: commit-reveal, batch auction, sandwich detection; circuit-breaker integration.
+
+## 19. Secrets & Wallets (Operational Guidance)
+
+- Store mnemonics only in `.env` (gitignored). Never commit secrets to manifests.
+- Use `npm run derive:wallets` to deterministically derive system wallets from the approved mnemonic and update config files.
+- Align `DEPLOYER_ADDRESS` in `.env` with the derived deployer; the script aborts on mismatch.
 
 ## 15. Cross-References
 
@@ -139,11 +147,15 @@
 - 2025-11-02
   - Added unified terminology section for router, oracle, factory, pools, MEV, and encoding.
   - Documented current status snapshot to reflect the latest development and manifest states.
-  - Clarified encoding policy to explicitly include unwrap-panic inside canonical utilities and restrict to-consensus-buff? usage.
+  - Clarified encoding policy to explicitly include unwrap-panic inside canonical utilities and restrict to-consensus-buff usage.
   - Added cross-references to Execution Update and Task Checklist for alignment.
- - 2025-11-03
-   - Integrated benchmarking addendum and quarterly review framework.
-   - Noted router integration tests and performance benchmarks for advanced-router-dijkstra.
+- 2025-11-03
+  - Integrated benchmarking addendum and quarterly review framework.
+  - Noted router integration tests and performance benchmarks for advanced-router-dijkstra.
+- 2025-11-05
+  - Updated encoding policy to `to-consensus-buff` (no `?`) across PRD.
+  - Added Secrets & Wallets operational guidance; moved mnemonics to `.env` and added wallet derivation process.
+  - Status snapshot updated: manifests alignment (consistent deployer, testnet expected-sender), router v3 disabled, encoding unified.
 
 ## 17. Benchmarking Alignment Addendum
 

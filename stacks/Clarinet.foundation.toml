@@ -4,7 +4,7 @@ description = "Foundation-only manifest to bootstrap compilation and iterate upw
 clarinet_version = "3.8.1"
 
 [accounts.deployer]
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
 [contracts.all-traits]
 path = "../contracts/traits/all-traits.clar"
@@ -15,3 +15,51 @@ epoch = "3.0"
 path = "../contracts/utils/encoding.clar"
 clarity_version = 3
 epoch = "3.0"
+
+[contracts.block-utils]
+path = "../contracts/utils/block-utils.clar"
+clarity_version = 3
+epoch = "3.0"
+
+[contracts.dim-registry]
+path = "../contracts/dimensional/dim-registry.clar"
+clarity_version = 3
+epoch = "3.0"
+depends_on = ["all-traits"]
+
+[contracts.dimensional-oracle]
+path = "../contracts/oracle/dimensional-oracle.clar"
+clarity_version = 3
+epoch = "3.0"
+depends_on = ["all-traits", "utils-encoding"]
+
+[contracts.dimensional-advanced-router-dijkstra]
+path = "../contracts/dimensional/advanced-router-dijkstra.clar"
+clarity_version = 3
+epoch = "3.0"
+depends_on = ["all-traits"]
+
+[contracts.dimensional-position-nft]
+path = "../contracts/dimensional/position-nft.clar"
+clarity_version = 3
+epoch = "3.0"
+depends_on = ["all-traits"]
+
+[contracts.dimensional-concentrated-liquidity-pool-v2]
+path = "../contracts/dimensional/concentrated-liquidity-pool-v2.clar"
+clarity_version = 3
+epoch = "3.0"
+depends_on = ["all-traits"]
+
+[contracts.risk-risk-manager]
+path = "../contracts/risk/risk-manager.clar"
+clarity_version = 3
+epoch = "3.0"
+depends_on = ["all-traits", "utils-encoding"]
+
+[contracts.monitoring-finance-metrics]
+path = "../contracts/monitoring/finance-metrics.clar"
+clarity_version = 3
+epoch = "3.0"
+depends_on = ["all-traits"]
+

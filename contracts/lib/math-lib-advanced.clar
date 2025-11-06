@@ -98,9 +98,7 @@
 (define-private (pow-step (result uint) (base uint) (power uint))
   (ok result))
 
-;; Power function (alias for pow-fixed)
-(define-read-only (pow (base uint) (power uint))
-  (pow-fixed base power))
+;; Removed 'pow' alias to avoid name collisions; use 'pow-fixed' directly
 
 ;; ===========================================
 ;; SQUARE ROOT FUNCTION

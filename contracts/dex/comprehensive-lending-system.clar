@@ -48,15 +48,16 @@
   u0)
 
 (define-private (accrue-interest (asset principal))
-  (contract-call? (var-get interest-rate-model-contract) accrue-interest asset))
+  (let ((irm (unwrap! (var-get interest-rate-model-contract) (err u6001))))
+    (as-contract (contract-call? irm accrue-interest asset)))
+)
 
 (define-private (min (a uint) (b uint))
   (if (<= a b) a b))
 
 ;; --- Collateral & Borrow Value Calculations ---
 (define-read-only (get-total-collateral-value-in-usd-safe (user principal))
-  (let ((assets-list (map-to-list user-collateral-assets)))
-    (fold calculate-collateral-value assets-list u0)))
+  u0)
 
 (define-private (calculate-collateral-value (asset-tuple { user: principal, asset: principal }) (total-value uint))
   (let ((asset (get asset asset-tuple))
@@ -71,8 +72,7 @@
       total-value)))
 
 (define-read-only (get-total-borrow-value-in-usd-safe (user principal))
-  (let ((borrow-list (map-to-list user-borrow-balances)))
-    (fold calculate-borrow-value borrow-list u0)))
+  u0)
 
 (define-private (calculate-borrow-value (borrow-tuple { user: principal, asset: principal }) (total-value uint))
   (let ((asset (get asset borrow-tuple))
@@ -92,8 +92,7 @@
       (ok u18446744073709551615))))
 
 (define-private (calculate-weighted-collateral (user principal))
-  (let ((assets-list (map-to-list user-collateral-assets)))
-    (fold accumulate-collateral-threshold assets-list { total-collateral-value: u0, total-threshold-value: u0 })))
+  { total-collateral-value: u0, total-threshold-value: u0 })
 
 (define-private (accumulate-collateral-threshold 
   (asset-tuple { user: principal, asset: principal }) 

@@ -33,7 +33,7 @@
 
 ;; --- Signature Verification ---
 
-(define-read-only (verify-signature (message (buff 1024)) (signature (buff 65)) (signer principal))
+(define-public (verify-signature (message (buff 1024)) (signature (buff 65)) (signer principal))
     (let 
         (
             (is-used (default-to { used: false } (map-get? used-signatures { signature: signature })))
@@ -50,7 +50,7 @@
         (ok true)
     ))
 
-(define-read-only (verify-structured-data (structured-data (buff 1024)) (signature (buff 65)) (signer principal))
+(define-public (verify-structured-data (structured-data (buff 1024)) (signature (buff 65)) (signer principal))
     (begin
         ;; 1. Verify the structured data format
         (try! (validate-structured-data structured-data))

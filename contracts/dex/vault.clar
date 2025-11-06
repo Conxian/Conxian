@@ -116,7 +116,7 @@
     (if (> fee u0)
         (begin
           (map-set collected-fees asset (+ (default-to u0 (map-get? collected-fees asset)) fee))
-          (try! (contract-call? (var-get token-system-coordinator) trigger-revenue-distribution asset fee))
+          (try! (contract-call? (var-get token-system-coordinator) trigger-revenue-distribution))
           true)
         true)
     
@@ -205,7 +205,7 @@
     (map-set collected-fees asset u0)
     
     ;; Notify revenue distributor
-    (try! (contract-call? (var-get token-system-coordinator) trigger-revenue-distribution asset collected))
+    (try! (contract-call? (var-get token-system-coordinator) trigger-revenue-distribution))
     
     (ok collected)))
 

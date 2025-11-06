@@ -49,16 +49,16 @@
 
 (define-public (create-pool
     (type-id (string-ascii 32))
-    (token-a (contract-of sip-010-ft-trait))
-    (token-b (contract-of sip-010-ft-trait))
+    (token-a principal)
+    (token-b principal)
   )
   (let ((type-entry (map-get? pool-types { type-id: type-id })))
     (asserts! (is-some type-entry) ERR_TYPE_NOT_FOUND)
     (let ((impl (get impl (unwrap-panic type-entry))))
       ;; For minimal implementation, we simply record the mapping and return impl
       (map-set pools {
-        token-a: (contract-of token-a),
-        token-b: (contract-of token-b),
+        token-a: token-a,
+        token-b: token-b,
       } {
         type-id: type-id,
         pool: impl,
@@ -69,12 +69,12 @@
 )
 
 (define-read-only (get-pool
-    (token-a (contract-of sip-010-ft-trait))
-    (token-b (contract-of sip-010-ft-trait))
+    (token-a principal)
+    (token-b principal)
   )
   (let ((entry (map-get? pools {
-      token-a: (contract-of token-a),
-      token-b: (contract-of token-b),
+      token-a: token-a,
+      token-b: token-b,
     })))
     (ok (match entry
       e (some (get pool e))

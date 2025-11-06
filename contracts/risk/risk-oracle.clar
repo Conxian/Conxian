@@ -22,21 +22,21 @@
 })
 
 ;; Global risk parameters
-(define-data-var global-params {
-  base-maintenance-margin: uint,  ;; Base maintenance margin (in bps)
-  min-margin: uint,              ;; Minimum margin requirement (in bps)
-  max-leverage: uint,            ;; System-wide max leverage (in bps)
-  liquidation-penalty: uint,     ;; Penalty for liquidation (in bps)
-  insurance-fund-fee: uint,      ;; Insurance fund contribution (in bps)
-  oracle-freshness: uint         ;; Maximum allowed oracle staleness (in blocks)
-}) {
+(define-data-var global-params (tuple 
+  (base-maintenance-margin uint)  ;; Base maintenance margin (in bps)
+  (min-margin uint)              ;; Minimum margin requirement (in bps)
+  (max-leverage uint)            ;; System-wide max leverage (in bps)
+  (liquidation-penalty uint)     ;; Penalty for liquidation (in bps)
+  (insurance-fund-fee uint)      ;; Insurance fund contribution (in bps)
+  (oracle-freshness uint)        ;; Maximum allowed oracle staleness (in blocks)
+) {
   base-maintenance-margin: u500,   ;; 5%
   min-margin: u1000,              ;; 10%
   max-leverage: u2000,            ;; 20x
   liquidation-penalty: u500,      ;; 5%
   insurance-fund-fee: u10,        ;; 0.1%
   oracle-freshness: u25           ;; ~5 minutes
-}
+})
 
 ;; ===== Core Functions =====
 (define-public (set-oracle (oracle principal))
@@ -118,17 +118,16 @@
     )
     
     ;; Apply minimum margin requirement
-    (final-margin (max 
-      risk-adjusted-margin 
+    (final-margin (if (> risk-adjusted-margin (get min-margin global))
+      risk-adjusted-margin
       (get min-margin global)
     ))
   )
     (ok {
       initial-margin: final-margin,
       maintenance-margin: (get base-maintenance-margin global),
-      max-leverage: (min 
-        (get max-leverage params) 
-        (get max-leverage global)
+      max-leverage: (let ((mp (get max-leverage params)) (mg (get max-leverage global)))
+        (if (< mp mg) mp mg)
       )
     })
   )
@@ -146,7 +145,9 @@
     (params (unwrap! (map-get? asset-params {asset: asset}) (err ERR_INVALID_PARAM)))
     (global (var-get global-params))
     (is-long (> (get size position) 0))
-    (size-abs (abs (get size position)))
+    (size-abs (to-uint (if (>= (get size position) 0)
+      (get size position)
+      (- 0 (get size position)))))
     
     (liquidation-threshold (get liquidation-threshold params))
     (entry-price (get entry-price position))
@@ -159,7 +160,7 @@
           (numerator (- collateral (/ (* size-abs entry-price liquidation-threshold) u10000)))
           (denominator size-abs)
         )
-          (if (<= numerator 0) 
+          (if (<= numerator u0)
             u0  ;; Already liquidatable at any price
             (/ numerator denominator)
           )
@@ -185,7 +186,7 @@
   )
 )
 
-(define-read-only (check-position-health
+(define-public (check-position-health
     (position {
       size: int,
       entry-price: uint,
@@ -195,23 +196,23 @@
     (asset principal)
   )
   (let (
-    (oracle (unwrap! (var-get oracle-contract) ERR_ORACLE_UNAVAILABLE))
-    (current-price (unwrap! (contract-call? oracle get-price asset) (err u0)))
+    (price-tuple (unwrap! (contract-call? (unwrap-panic (var-get oracle-contract)) get-price asset) (err u0)))
+    (current-price (get price price-tuple))
     (liquidation (unwrap! (get-liquidation-price position asset) (err u0)))
     (current-block (block-height))
     
     ;; Calculate PnL
     (unrealized-pnl 
       (if (> (get size position) 0)  ;; Long position
-        (/ (* (abs (get size position)) (- current-price (get entry-price position))) 
-           (get entry-price position))
-        (/ (* (abs (get size position)) (- (get entry-price position) current-price))
-           (get entry-price position))
+        (/ (* (to-uint (if (>= (get size position) 0) (get size position) (- 0 (get size position)))) (- current-price (get entry-price position)))
+            (get entry-price position))
+        (/ (* (to-uint (if (>= (get size position) 0) (get size position) (- 0 (get size position)))) (- (get entry-price position) current-price))
+            (get entry-price position))
       )
     )
     
     (total-value (+ (get collateral position) unrealized-pnl))
-    (notional-value (/ (* (abs (get size position)) current-price) (pow u10 u8)))
+    (notional-value (/ (* (to-uint (if (>= (get size position) 0) (get size position) (- 0 (get size position)))) current-price) u100000000))
     
     (margin-ratio 
       (if (> notional-value 0) 

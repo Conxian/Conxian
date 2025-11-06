@@ -1,4 +1,5 @@
 (use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
+(use-trait finance-metrics-trait .all-traits.finance-metrics-trait)
 ;; yield-optimizer.clar
 ;; The central brain of the Conxian yield system.
 ;; This contract dynamically analyzes and allocates funds across various yield-generating
@@ -13,11 +14,15 @@
 (define-constant ERR_REBALANCE_FAILED (err u8006))
 (define-constant ERR_INVALID_CONTRACT (err u8007))
 (define-constant ERR_METRICS_CALL_FAILED (err u8008))
+;; default strategy engine not configured
+(define-constant ERR_ENGINE_NOT_SET (err u8009))
 
 ;; --- Data Variables ---
 (define-data-var admin principal tx-sender)
 (define-data-var vault-contract principal tx-sender)
-(define-data-var metrics-contract principal (as-contract tx-sender))
+(define-data-var metrics-contract principal (as-contract tx-sender))      
+;; optional integration with default strategy engine
+(define-data-var default-engine (optional principal) none)
 (define-data-var strategy-count uint u0)
 
 ;; --- Maps ---
@@ -44,12 +49,21 @@
 ;; @desc Sets the vault and metrics contracts.
 ;; @param vault The principal of the vault contract.
 ;; @param metrics The principal of the metrics contract.
-;; @returns An `(ok bool)` result indicating success, or an error.
-(define-public (set-contracts (vault principal) (metrics (contract-of metrics-trait)))
+;; @returns An `(ok bool)` result indicating success, or an error.        
+(define-public (set-contracts (vault principal) (metrics principal))
   (begin
     (asserts! (is-eq tx-sender (var-get admin)) ERR_UNAUTHORIZED)
     (var-set vault-contract vault)
     (var-set metrics-contract metrics)
+    (ok true)))
+
+;; @desc Sets the default strategy engine contract.
+;; @param engine The principal of the default strategy engine contract.
+;; @return (response bool) ok true or error if unauthorized.
+(define-public (set-default-engine (engine principal))
+  (begin
+    (asserts! (is-eq tx-sender (var-get admin)) ERR_UNAUTHORIZED)
+    (var-set default-engine (some engine))
     (ok true)))
 
 (define-public (add-strategy (contract principal))
@@ -121,3 +135,13 @@
     )
   )
 )
+
+;; === DEFAULT STRATEGY SHORTCUT ===
+;; @desc Returns engine-selected default strategy for asset and category
+;; @param asset trait-typed FT contract
+;; @param category string id e.g., "stable"
+;; @return (response principal) default strategy principal or error
+(define-read-only (get-default-strategy (asset (contract-of sip-010-ft-trait)) (category (string-ascii 32)))
+  (match (var-get default-engine)
+    e (contract-call? (unwrap-panic e) select-default-strategy (contract-of asset) category)
+    (err ERR_ENGINE_NOT_SET)))

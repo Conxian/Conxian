@@ -205,7 +205,7 @@
         )
           (asserts! (<= amount single-mint-cap) (err ERR_SINGLE_MINT_TOO_LARGE))
           (asserts! (<= (+ (get minted epoch-data) amount) annual-cap) (err ERR_EMISSION_CAP_EXCEEDED))
-          (try! (as-contract (contract-call? token-contract mint amount recipient)))
+          (try! (as-contract (contract-call? token-contract mint recipient amount)))
           (map-set epoch-emissions { token: token-principal, epoch: current-epoch-num } {
             minted: (+ (get minted epoch-data) amount),
             supply-at-start: (get supply-at-start epoch-data)
@@ -305,14 +305,13 @@
       ;; Can only reduce, not increase
       (asserts! (and (<= new-annual-bps (get max-annual-bps current-limits))
                      (<= new-single-mint-bps (get max-single-mint-bps current-limits)))
-               (err ERR_INVALID_AMOUNT))
+               (err ERR_INVALID_PARAMETERS))
 
       ;; Update the limits immediately (emergency)
       (map-set token-emission-limits token-contract
         (merge current-limits {
           max-annual-bps: new-annual-bps,
-          max-single-mint-bps: new-single-mint-bps,
-          last-updated: block-height
+          max-single-mint-bps: new-single-mint-bps
         }))
 
       (print {

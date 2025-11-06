@@ -95,16 +95,19 @@ Conxian/
 When developing new contracts, follow these patterns for access control:
 
 1. **Import Access Control**
+
    ```clarity
    (use-trait access-control-trait .all-traits.access-control-trait)
    ```
 
 2. **Define Required Roles**
+
    ```clarity
    (define-constant ROLE_OPERATOR 0x4f50455241544f52)  // "OPERATOR" in hex
    ```
 
 3. **Add Access Control Checks**
+
    ```clarity
    (define-public (protected-function)
      (begin
@@ -119,7 +122,7 @@ When developing new contracts, follow these patterns for access control:
 #### Creating a New Contract
 
 ```bash
-cd stacks/contracts
+cd contracts
 # Create new contract file
 touch my-contract.clar
 
@@ -231,57 +234,6 @@ npx clarinet format
 
 # Generate documentation
 npx clarinet docs
-```
-
-## Nakamoto Development Guide
-
-### Nakamoto Timing Considerations
-
-**Fast Block Development**: Nakamoto introduces 3-5 second block times. The `nakamoto-compatibility.clar` contract provides timing conversion functions:
-
-```typescript
-// Test timing constants from nakamoto-compatibility.clar
-const NAKAMOTO_BLOCKS_PER_HOUR = 720;  // 5s blocks
-const NAKAMOTO_BLOCKS_PER_DAY = 17280;
-const LEGACY_BLOCKS_PER_DAY = 144;     // 10min blocks
-
-// Use contract conversion function
-const conversionResult = simnet.callReadOnlyFn(
-  'nakamoto-compatibility',
-  'convert-legacy-to-nakamoto',
-  [Cl.uint(144)], // 1 day in legacy blocks
-  deployer
-);
-expected(conversionResult.result).toBe(Cl.uint(17280));
-```
-
-**Bitcoin Finality Integration**:
-
-```typescript
-// Test Bitcoin finality functions (implemented in nakamoto-compatibility.clar)
-const result = simnet.callReadOnlyFn(
-  'nakamoto-compatibility',
-  'is-bitcoin-finalized',
-  [Cl.uint(blockHeight - 100)],
-  deployer
-);
-
-// Function uses caching and validation logic
-expect(result.result).toBe(Cl.bool(true));
-```
-
-**MEV Protection Testing**:
-
-```typescript
-// Test MEV protection mechanisms (basic framework in nakamoto-compatibility.clar)
-const protectionResult = simnet.callPublicFn(
-  'nakamoto-compatibility',
-  'enable-mev-protection',
-  [],
-  deployer // Admin function
-);
-
-expect(protectionResult.result).toBeOk();
 ```
 
 ## Testing Framework
@@ -844,6 +796,7 @@ This document outlines the standardized error codes used across the Conxian prot
 ## Trait Registry
 
 ### Overview
+
 The Trait Registry is a central contract that manages trait implementations in the Conxian protocol. It provides a standardized way to discover and use traits across different contracts.
 
 ### Key Features

@@ -81,9 +81,21 @@
   ;; Simplified revenue collection processing
   (ok true))
 
-;; Auto-process batch when ready(define-public (auto-process-if-ready)  (if (is-batch-ready)      (process-batch)      (ok u0)))
+;; Auto-process batch when ready
+(define-public (auto-process-if-ready)
+  (if (is-batch-ready)
+    (ok (var-get current-batch-size))
+    (ok u0)
+  ))
 
 ;; Administrative functions(define-public (set-processing-enabled (enabled bool))  (begin    (asserts! (is-eq tx-sender (var-get batch-processor)) ERR_UNAUTHORIZED)    (var-set processing-enabled enabled)    (ok true)))
-(define-public (emergency-flush-batch)  (begin    (asserts! (is-eq tx-sender (var-get batch-processor)) ERR_UNAUTHORIZED)    (if (> (var-get current-batch-size) u0)        (process-batch)        (ok u0))))
+(define-public (emergency-flush-batch)
+  (begin
+    (asserts! (is-eq tx-sender (var-get batch-processor)) ERR_UNAUTHORIZED)
+    (if (> (var-get current-batch-size) u0)
+      (ok (var-get current-batch-size))
+      (ok u0)
+    )
+  ))
 
 ;; Get batch processing statistics(define-read-only (get-processing-stats)  (let ((total-batches (var-get batch-id)))    {      total-batches: total-batches,      current-batch-size: (var-get current-batch-size),      processing-enabled: (var-get processing-enabled),      batch-ready: (is-batch-ready)    }))

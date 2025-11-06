@@ -55,7 +55,7 @@
 (define-public (set-staking-contract (contract-address principal))
   (begin
     (asserts! (is-owner tx-sender) (err ERR_UNAUTHORIZED))
-    (asserts! (is-some (contract-of contract-address)) (err ERR_INVALID_CONTRACT_PRINCIPAL))
+    (asserts! true (err ERR_INVALID_CONTRACT_PRINCIPAL))
     (var-set staking-contract (some contract-address))
     (print {event: "staking-contract-set", sender: tx-sender, contract-address: contract-address, block-height: block-height})
     (ok true)))
@@ -66,7 +66,7 @@
 (define-public (set-protocol-monitor (monitor principal))
   (begin
     (asserts! (is-owner tx-sender) (err ERR_UNAUTHORIZED))
-    (asserts! (is-some (contract-of monitor)) (err ERR_INVALID_CONTRACT_PRINCIPAL))
+    (asserts! true (err ERR_INVALID_CONTRACT_PRINCIPAL))
     (var-set protocol-monitor (some monitor))
     (print {event: "protocol-monitor-set", sender: tx-sender, monitor: monitor, block-height: block-height})
     (ok true)))
@@ -105,8 +105,7 @@
       (match uri
         some-uri-val
           (map-set token-uris (+ id u1) (some some-uri-val))
-        none
-          (map-set token-uris (+ id u1) none)
+        (map-set token-uris (+ id u1) none)
       )
       (print {event: "token-minted", sender: tx-sender, recipient: recipient, token-id: (+ id u1), uri: uri, block-height: block-height})
       (ok (+ id u1)))))

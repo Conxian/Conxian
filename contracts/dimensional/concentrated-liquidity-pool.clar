@@ -14,9 +14,9 @@
 (use-trait pool-trait .all-traits.pool-trait)
 
 ;; Implement required traits
-(impl-trait pausable-trait)
-(impl-trait ownable-trait)
-(impl-trait pool-trait)
+(impl-trait .all-traits.pausable-trait)
+(impl-trait .all-traits.ownable-trait)
+(impl-trait .all-traits.pool-trait)
 
 ;; ===========================================
 ;; CONSTANTS

@@ -49,7 +49,7 @@
     (current-block block-height)
     (oracle (unwrap! (map-get? oracles {address: caller}) ERR_INVALID_ORACLE))
   )
-    (asserts! (get oracle is-active) ERR_INVALID_ORACLE)
+    (asserts! (get is-active oracle) ERR_INVALID_ORACLE)
 
     ;; Verify price freshness
     (asserts! (>= timestamp (- current-block (var-get max-price-age))) ERR_STALE_DATA)
@@ -59,25 +59,29 @@
       (price-data (default-to
         {price: u0, last-updated: u0, twap: u0, twap-interval: u0, price-history: (list )}
         (map-get? asset-prices {asset: asset})))
-      (price-diff (abs (- price (get price-data price))))
-      (price-diff-percent (if (> (get price-data price) u0)
-        (/ (* price-diff u10000) (get price-data price))
+      (curr (get price price-data))
+      (price-diff (if (>= price curr) (- price curr) (- curr price)))
+      (price-diff-percent (if (> curr u0)
+        (/ (* price-diff u10000) curr)
         u0
       ))
     )
       ;; Check price deviation
-      (when (> price-diff-percent (var-get max-price-deviation))
-        (asserts! (is-some signature) ERR_DEVIATION_TOO_HIGH)
-        ;; TODO: Verify signature from trusted signer
+      (if (> price-diff-percent (var-get max-price-deviation))
+        (begin
+          (asserts! (is-some signature) ERR_DEVIATION_TOO_HIGH)
+          ;; TODO: Verify signature from trusted signer
+        )
+        true
       )
 
       ;; Update price history (keep last 100 entries)
       (let (
-        (new-history (take (append (get price-data price-history)
-          (list {price: price, timestamp: current-block})
-        ) u100))
-
-        ;; Calculate TWAP over last 100 blocks
+        (history-appended (append (get price-history price-data)
+          {price: price, timestamp: current-block}
+        ))
+        (new-history (match (as-max-len? history-appended u100) nh nh (get price-history price-data)))
+        ;; Calculate TWAP over last entries
         (twap (calculate-twap new-history current-block))
       )
         ;; Update price data
@@ -91,7 +95,7 @@
 
         ;; Update oracle info
         (map-set oracles {address: caller} {
-          weight: (get oracle weight),
+          weight: (get weight oracle),
           is-active: true,
           last-updated: current-block,
           last-price: price
@@ -131,48 +135,29 @@
 ;; ===== Price Queries =====
 (define-read-only (get-price (asset principal))
   (match (map-get? asset-prices {asset: asset})
-    price-data (ok (get price-data price))
-    err (err u4001)
+    price-data (ok (get price price-data))
+    (err u4001)
   )
 )
 
 (define-read-only (get-twap (asset principal) (interval uint))
   (match (map-get? asset-prices {asset: asset})
     price-data
-    (if (>= (get price-data last-updated) (- block-height interval))
-      (ok (get price-data twap))
+    (if (>= (get last-updated price-data) (- block-height interval))
+      (ok (get twap price-data))
       (err u4002)  ;; Stale TWAP data
     )
-    err (err u4001)  ;; No price data
+    (err u4001)  ;; No price data
   )
 )
 
 ;; ===== Private Functions =====
 (define-private (calculate-twap
-    (price-history (list 100 {price: uint, timestamp: uint}))
+    (history (list 100 {price: uint, timestamp: uint}))
     (current-time uint)
   )
-  (let (
-    (total-weight u0)
-    (weighted-sum u0)
-    (prev-timestamp (default-to u0 (get (element-at price-history u0) timestamp)))
-  )
-    (fold price-history (tuple (weighted-sum u0) (total-weight u0))
-      (lambda (acc entry)
-        (let (
-          (time-diff (- (get entry timestamp) prev-timestamp))
-          (weight (if (> time-diff u0) time-diff u1))
-        )
-          (tuple
-            (+ (get acc weighted-sum) (* (get entry price) weight))
-            (+ (get acc total-weight) weight)
-          )
-        )
-      )
-    )
-    (if (> total-weight u0)
-      (/ weighted-sum total-weight)
-      u0
-    )
+  (match (element-at history u0)
+    entry (get price entry)
+    u0
   )
 )

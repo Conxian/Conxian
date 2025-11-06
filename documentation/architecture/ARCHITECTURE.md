@@ -13,12 +13,14 @@ This document outlines the Conxian on-chain DeFi framework architecture (current
 ## Core Contracts (Framework Level)
 
 ### Foundation Layer
+
 - `vault.clar` – Core user asset vault with an internal, metrics-driven yield engine.
 - `math-lib-advanced.clar` – Advanced mathematical functions (sqrt, pow, ln, exp) using Newton-Raphson and Taylor series
 - `fixed-point-math.clar` – Precise arithmetic operations with proper rounding modes for 18-decimal precision
 - `precision-calculator.clar` – Validation and benchmarking tools for mathematical operations
 
 ### Lending & Flash Loan Framework
+
 - `comprehensive-lending-system.clar` – Framework lending protocol with supply, borrow, liquidation, and flash loans
 - `flash-loan-vault.clar` – A specialized vault for executing ERC-3156 compatible flash loans.
 - `interest-rate-model.clar` – Dynamic interest rate calculation framework based on utilization curves
@@ -26,6 +28,7 @@ This document outlines the Conxian on-chain DeFi framework architecture (current
 - `lending-protocol-governance.clar` – Community governance framework for protocol parameters
 
 ### Token System
+
 - `cxd-staking.clar` – Staking contract for CXD tokens
 - `cxd-token.clar` – The main token contract for CXD
 - `CXLP-migration-queue.clar` – Manages the migration of CXLP tokens
@@ -36,24 +39,27 @@ This document outlines the Conxian on-chain DeFi framework architecture (current
 - `cxvg-utility.clar` – Utility contract for the governance token
 
 ### DEX Infrastructure
+
 - `dex-factory.clar` – Factory for creating DEX pools with advanced math integration
 - `dex-pool.clar` – Standard DEX pool with precision mathematics
 - `dex-router.clar` – Router for the DEX with multi-hop capabilities
 
 ### Monitoring & Security
+
 - `circuit-breaker.clar` – Automated circuit breaker for the system
 - `protocol-invariant-monitor.clar` – Monitors the protocol for invariants
 - `token-emission-controller.clar` – Controls the emission of new tokens
 - `token-system-coordinator.clar` – Coordinates the token system
 
 ### Additional Infrastructure Framework
+
 - `distributed-cache-manager.clar` – Basic distributed caching framework structure
 - `memory-pool-management.clar` – Memory pool optimization framework
 - `predictive-scaling-system.clar` – System scaling prediction framework
 - `real-time-monitoring-dashboard.clar` – Monitoring framework structure
 - `transaction-batch-processor.clar` – Transaction batch processing framework
   
-Traits & Interfaces are defined in `stacks/contracts/traits/all-traits.clar`.
+Traits & Interfaces are defined in `contracts/traits/all-traits.clar`.
 
 ## Differentiation via Bitcoin Layers (Planned / Partially Enabled)
 
@@ -111,13 +117,15 @@ Upcoming:
 
 **Core Implementation**: `dex-factory`, `dex-pool`, `dex-router`, `math-lib-advanced`, `fixed-point-math`
 
-**Mathematical Capabilities**: 
+**Mathematical Capabilities**:
+
 - Newton-Raphson square root for liquidity calculations
 - Binary exponentiation for weighted pool invariants  
 - Taylor series ln/exp for compound interest and advanced pricing models
 - 18-decimal precision arithmetic with proper rounding modes
 
 **Framework Features Available**:
+
 - Concentrated liquidity pool mathematics framework implemented
 - Weighted pool invariant calculation framework supported
 - TWAP oracle integration framework structure prepared
@@ -135,9 +143,9 @@ The "Dimensional DeFi System" is the core architectural innovation of the Conxia
 
 A key innovation in the Conxian protocol is its "dimensional" architecture. This refers to a graph-based representation of the entire DeFi ecosystem, where:
 
-*   **Nodes** are tokens.
-*   **Edges** are liquidity pools or other connections between tokens.
-*   **Edge Weights** are calculated based on liquidity, fees, and other factors.
+- **Nodes** are tokens.
+- **Edges** are liquidity pools or other connections between tokens.
+- **Edge Weights** are calculated based on liquidity, fees, and other factors.
 
 This allows for highly efficient trade routing. The `advanced-router-dijkstra.clar` contract uses Dijkstra's algorithm to find the optimal path for any given swap, minimizing slippage and fees.
 
@@ -145,7 +153,7 @@ This allows for highly efficient trade routing. The `advanced-router-dijkstra.cl
 
 While retail users will interact with this router through the standard `dex-router.clar`, institutions can integrate directly with the `advanced-router-dijkstra.clar` contract to:
 
-*   **Query for optimal paths:** Use `find-optimal-path` to determine the best route for a trade before execution.
-*   **Execute complex swaps:** The `swap-optimal-path` function allows for the execution of a swap along the most efficient route.
+- **Query for optimal paths:** Use `find-optimal-path` to determine the best route for a trade before execution.
+- **Execute complex swaps:** The `swap-optimal-path` function allows for the execution of a swap along the most efficient route.
 
 Updated: Sep 09, 2025

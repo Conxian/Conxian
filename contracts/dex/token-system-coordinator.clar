@@ -255,11 +255,11 @@
     
     (match (execute-staking-safe enhanced-amount)
       success (begin
-        (unwrap-panic (update-operation-status operation-id OP_STATUS_SUCCESS))
+        (update-operation-status operation-id OP_STATUS_SUCCESS)
         (ok success)
       )
       error (begin
-        (unwrap-panic (update-operation-status operation-id OP_STATUS_FAILED))
+        (update-operation-status operation-id OP_STATUS_FAILED)
         (err error)
       )
     )
@@ -280,11 +280,11 @@
           true
           true
         )
-        (unwrap-panic (update-operation-status operation-id OP_STATUS_SUCCESS))
+        (update-operation-status operation-id OP_STATUS_SUCCESS)
         (ok success)
       )
       error (begin
-        (unwrap-panic (update-operation-status operation-id OP_STATUS_FAILED))
+        (update-operation-status operation-id OP_STATUS_FAILED)
         (err error)
       )
     )
@@ -301,11 +301,11 @@
              (ok true)
              (err ERR_COMPONENT_UNAVAILABLE))
       success (begin
-        (unwrap-panic (update-operation-status operation-id OP_STATUS_SUCCESS))
+        (update-operation-status operation-id OP_STATUS_SUCCESS)
         (ok { proposal: proposal-id, vote: vote, locked-amount: cxvg-amount })
       )
       error (begin
-        (unwrap-panic (update-operation-status operation-id OP_STATUS_FAILED))
+        (update-operation-status operation-id OP_STATUS_FAILED)
         (err error)
       )
     )
@@ -388,11 +388,11 @@
                (err ERR_COMPONENT_UNAVAILABLE))
              (err ERR_COMPONENT_UNAVAILABLE))
       success (begin
-        (unwrap-panic (update-operation-status operation-id OP_STATUS_SUCCESS))
+        (update-operation-status operation-id OP_STATUS_SUCCESS)
         (ok success)
       )
       error (begin
-        (unwrap-panic (update-operation-status operation-id OP_STATUS_FAILED))
+        (update-operation-status operation-id OP_STATUS_FAILED)
         (err error)
       )
     )

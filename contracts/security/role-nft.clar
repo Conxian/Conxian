@@ -1,5 +1,5 @@
 (use-trait sip-009-nft-trait .all-traits.sip-009-nft-trait)
-(impl-trait sip-009-nft-trait)
+(impl-trait .all-traits.sip-009-nft-trait)
 
 (define-constant ERR_UNAUTHORIZED (err u2001))
 (define-constant ERR_TRANSFER_DISABLED (err u2002))

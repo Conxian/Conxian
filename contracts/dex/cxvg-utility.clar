@@ -143,7 +143,7 @@
       (var-set total-voting-power (+ (var-get total-voting-power) voting-power))
       
       ;; Update user benefits
-      (try! (update-user-benefits tx-sender tier))
+      (unwrap-panic (update-user-benefits tx-sender tier))
       
       ;; Create voting snapshot
       (map-set voting-snapshots 
@@ -203,11 +203,9 @@
     (begin
       (asserts! (>= bond-amount required-bond) (err ERR_INSUFFICIENT_BOND))
       
-      (match (map-get? user-locks tx-sender)
-        lock-info
-        (asserts! (>= (get voting-power lock-info) required-bond) (err ERR_INSUFFICIENT_BOND))
-        (err ERR_NO_LOCK_FOUND)
-      )
+      (asserts! (is-some (map-get? user-locks tx-sender)) (err ERR_NO_LOCK_FOUND))
+      (let ((lock-info (unwrap-panic (map-get? user-locks tx-sender))))
+        (asserts! (>= (get voting-power lock-info) required-bond) (err ERR_INSUFFICIENT_BOND)))
       
       (map-set proposal-bonds proposal-id
         {

@@ -1,7 +1,7 @@
 (use-trait dimensional-oracle-trait .all-traits.dimensional-oracle-trait)
 
 ;; Implement required traits
-(impl-trait dimensional-oracle-trait)
+(impl-trait .all-traits.dimensional-oracle-trait)
 
 (define-constant ERR_UNAUTHORIZED u101)
 
@@ -34,7 +34,7 @@
 (define-private (update-weight-iter (update {dim-id: uint, new-wt: uint}) (prev-result (response bool uint)))
   (begin
     (try! prev-result)
-    (match (contract-call? .dim-registry update-weight (get dim-id update) (get new-wt update))
+    (match (contract-call? .dim-registry update-dimension-weight (get dim-id update) (get new-wt update))
       success-val (ok true)
       error-val (err error-val)
     )

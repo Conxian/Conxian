@@ -31,6 +31,9 @@
 ;; Authorized registrars (e.g., factory contracts)
 (define-map authorized-registrars principal bool)
 
+;; Deterministic token ordering map: admin-managed order indices
+(define-map token-order {token: principal} uint)
+
 (define-public (set-contract-owner (new-owner principal))
   (begin
     (asserts! (is-eq tx-sender (var-get contract-owner)) (err ERR_UNAUTHORIZED))
@@ -107,3 +110,21 @@
 
 (define-read-only (get-all-dimensions)
   (ok (list)))
+
+;; === Deterministic Token Ordering ===
+
+(define-public (set-token-order (token principal) (order-index uint))
+  (begin
+    (asserts! (is-eq tx-sender (var-get contract-owner)) (err ERR_UNAUTHORIZED))
+    (map-set token-order {token: token} order-index)
+    (ok true)))
+
+(define-read-only (get-token-order (token principal))
+  (ok (default-to u0 (map-get? token-order {token: token}))))
+
+(define-read-only (order-pair (a principal) (b principal))
+  (let ((ia (default-to u0 (map-get? token-order {token: a})))
+        (ib (default-to u0 (map-get? token-order {token: b}))))
+    (ok (if (<= ia ib)
+          (tuple (base a) (quote b))
+          (tuple (base b) (quote a))))))

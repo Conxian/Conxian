@@ -1,6 +1,6 @@
 ;; Liquidation Manager Contract
 (use-trait liquidation-trait .all-traits.liquidation-trait)
-(impl-trait liquidation-trait)
+(impl-trait .all-traits.liquidation-trait)
 
 ;; Constants
 (define-constant CONTRACT_OWNER tx-sender)
@@ -8,8 +8,8 @@
 ;; Data variables
 (define-data-var admin principal CONTRACT_OWNER)
 (define-data-var liquidation-paused bool false)
-(define-data-var liquidation-incentive-bps u200)  ;; 2% default incentive
-(define-data-var close-factor-bps u5000)          ;; 50% default close factor
+(define-data-var liquidation-incentive-bps uint u200)  ;; 2% default incentive
+(define-data-var close-factor-bps uint u5000)          ;; 50% default close factor
 
 ;; Contract references
 (define-data-var lending-system (optional principal) none)
@@ -71,7 +71,7 @@
 
 ;; ==================== LIQUIDATION FUNCTIONS ====================
 
-(define-read-only (can-liquidate-position 
+(define-public (can-liquidate-position 
   (borrower principal) 
   (debt-asset principal) 
   (collateral-asset principal)
@@ -171,7 +171,7 @@
   )
 )
 
-(define-read-only (calculate-liquidation-amounts
+(define-public (calculate-liquidation-amounts
   (borrower principal)
   (debt-asset principal)
   (collateral-asset principal)

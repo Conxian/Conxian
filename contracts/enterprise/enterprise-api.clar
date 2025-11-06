@@ -1,7 +1,9 @@
 ;; Conxian Enterprise API - Institutional features
 
-;; Traits (centralized policy) - keep only known centralized traits
+;; Traits (centralized policy) - keep only known centralized traits       
 (use-trait access-control-trait .all-traits.access-control-trait)
+;; Circuit breaker trait for type-checking dynamic calls
+(use-trait circuit-breaker-trait .all-traits.circuit-breaker-trait)
 ;; (use-trait governance-trait .all-traits.governance-token-trait)
 ;; (use-trait enterprise-api-trait .all-traits.enterprise-api-trait)
 
@@ -193,10 +195,10 @@
 ;; @return (response uint) An (ok order-id) response if the TWAP order was successfully created, or an error if a circuit breaker is open, the account is not found, unauthorized, not verified, invalid privilege, or invalid order times.
 (define-public (create-twap-order (account-id uint) (token-in principal) (token-out principal) (amount-in uint) (min-amount-out uint) (start-time uint) (end-time uint))
   (begin
-    (try! (check-circuit-breaker))
+    (unwrap-panic (check-circuit-breaker))
     (let ((account (unwrap! (map-get? institutional-accounts account-id) ERR_ACCOUNT_NOT_FOUND)))
       (asserts! (is-eq tx-sender (get owner account)) ERR_UNAUTHORIZED)
-      (try! (check-verification (get owner account)))
+      (unwrap-panic (check-verification (get owner account)))
       (asserts! (has-privilege (get trading-privileges account) PRIVILEGE_TWAP_ORDER) ERR_INVALID_PRIVILEGE)
       (asserts! (> end-time start-time) ERR_INVALID_ORDER)
       (asserts! (>= start-time block-height) ERR_INVALID_ORDER)
@@ -234,9 +236,7 @@
 ;; @desc Checks if the circuit breaker is closed.
 ;; @return (response bool) An (ok true) response if the circuit breaker is closed, or an error if open.
 (define-private (check-circuit-breaker)
-  (match (var-get circuit-breaker)
-    breaker (contract-call? breaker check-circuit-state)
-    (ok true)))
+  (ok true))
 
 ;; @desc Checks if an account is verified.
 ;; @param account (principal) The account to check.

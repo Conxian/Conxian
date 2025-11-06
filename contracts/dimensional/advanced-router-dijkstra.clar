@@ -13,12 +13,12 @@
 (define-constant PRECISION u1000000)
 
 ;; Error codes
-(define-constant ERR_UNAUTHORIZED (err u6000))
-(define-constant ERR_NO_PATH (err u6001))
-(define-constant ERR_INVALID_NODE (err u6002))
-(define-constant ERR_GRAPH_FULL (err u6003))
-(define-constant ERR_SLIPPAGE (err u6004))
-(define-constant ERR_INVALID_AMOUNT (err u6005))
+(define-constant ERR_UNAUTHORIZED u6000)
+(define-constant ERR_NO_PATH u6001)
+(define-constant ERR_INVALID_NODE u6002)
+(define-constant ERR_GRAPH_FULL u6003)
+(define-constant ERR_SLIPPAGE u6004)
+(define-constant ERR_INVALID_AMOUNT u6005)
 
 ;; === DATA STRUCTURES ===
 
@@ -68,20 +68,20 @@
 ;; === ADMIN FUNCTIONS ===
 
 (define-public (add-token (token principal))
-  (let ((current-count (var-get node-count)))
-    (asserts! (< current-count MAX_NODES) ERR_GRAPH_FULL)
-    (asserts! (is-none (map-get? token-index token)) ERR_INVALID_NODE)
-    
-    (map-set graph-nodes current-count {
-      token: token,
-      index: current-count,
-      active: true
-    })
-    
-    (map-set token-index token current-count)
-    (var-set node-count (+ current-count u1))
-    
-    (ok current-count)))
+  (let ((cnt (var-get node-count)))
+    (if (>= cnt MAX_NODES)
+      (err ERR_GRAPH_FULL)
+      (if (is-some (map-get? token-index token))
+        (err ERR_INVALID_NODE)
+        (begin
+          (map-set graph-nodes cnt {
+            token: token,
+            index: cnt,
+            active: true
+          })
+          (map-set token-index token cnt)
+          (var-set node-count (+ cnt u1))
+          (ok cnt))))))
 
 (define-public (add-edge 
   (token-from principal)
@@ -91,36 +91,34 @@
   (liquidity uint)
   (fee uint))
   
-  (let ((from-idx (unwrap! (map-get? token-index token-from) ERR_INVALID_NODE))
-        (to-idx (unwrap! (map-get? token-index token-to) ERR_INVALID_NODE))
+  (let ((from-idx (unwrap! (map-get? token-index token-from) (err ERR_INVALID_NODE)))
+        (to-idx (unwrap! (map-get? token-index token-to) (err ERR_INVALID_NODE)))
         (weight (calculate-edge-weight liquidity fee)))
-    
-    (asserts! (validate-token-indices from-idx to-idx) ERR_INVALID_NODE)
-    
-    (map-set graph-edges {from: from-idx, to: to-idx} {
-      pool: pool,
-      pool-type: pool-type,
-      weight: weight,
-      liquidity: liquidity,
-      fee: fee,
-      active: true
-    })
-    
-    (map-set graph-edges {from: to-idx, to: from-idx} {
-      pool: pool,
-      pool-type: pool-type,
-      weight: weight,
-      liquidity: liquidity,
-      fee: fee,
-      active: true
-    })
-    
-    (var-set edge-count (+ (var-get edge-count) u2))
-    (ok true)))
+    (if (not (validate-token-indices from-idx to-idx))
+      (err ERR_INVALID_NODE)
+      (begin
+        (map-set graph-edges {from: from-idx, to: to-idx} {
+          pool: pool,
+          pool-type: pool-type,
+          weight: weight,
+          liquidity: liquidity,
+          fee: fee,
+          active: true
+        })
+        (map-set graph-edges {from: to-idx, to: from-idx} {
+          pool: pool,
+          pool-type: pool-type,
+          weight: weight,
+          liquidity: liquidity,
+          fee: fee,
+          active: true
+        })
+        (var-set edge-count (+ (var-get edge-count) u2))
+        (ok true)))))
 
 (define-public (update-edge-liquidity (token-from principal) (token-to principal) (new-liquidity uint))
-  (let ((from-idx (unwrap! (map-get? token-index token-from) ERR_INVALID_NODE))
-        (to-idx (unwrap! (map-get? token-index token-to) ERR_INVALID_NODE)))
+  (let ((from-idx (unwrap! (map-get? token-index token-from) (err ERR_INVALID_NODE)))
+        (to-idx (unwrap! (map-get? token-index token-to) (err ERR_INVALID_NODE))))
     (match (map-get? graph-edges {from: from-idx, to: to-idx})
       edge
         (let ((new-weight (calculate-edge-weight new-liquidity (get fee edge))))
@@ -137,7 +135,7 @@
       (err ERR_INVALID_NODE))))
 
 (define-public (remove-token-node (token principal))
-  (let ((token-idx (unwrap! (map-get? token-index token) ERR_INVALID_NODE)))
+  (let ((token-idx (unwrap! (map-get? token-index token) (err ERR_INVALID_NODE))))
     (map-set graph-nodes token-idx {
       token: token,
       index: token-idx,
@@ -149,26 +147,28 @@
 ;; === DIJKSTRA'S ALGORITHM ===
 
 (define-read-only (find-optimal-path (token-in principal) (token-out principal) (amount-in uint))
-  (let ((start-idx (unwrap! (map-get? token-index token-in) ERR_INVALID_NODE))
-        (end-idx (unwrap! (map-get? token-index token-out) ERR_INVALID_NODE)))
+  (let ((start-idx (unwrap! (map-get? token-index token-in) (err ERR_INVALID_NODE)))
+        (end-idx (unwrap! (map-get? token-index token-out) (err ERR_INVALID_NODE))))
     (if (is-eq start-idx end-idx)
       (ok {
         path: (list token-in),
         distance: u0,
         hops: u1
       })
-      ERR_NO_PATH)))
+      (err ERR_NO_PATH))))
 
 (define-public (swap-optimal-path (token-in principal) (token-out principal) (amount-in uint) (min-amount-out uint))
   (let ((path-result (try! (find-optimal-path token-in token-out amount-in))))
-    (asserts! (> amount-in u0) ERR_INVALID_AMOUNT)
-    (asserts! (>= amount-in min-amount-out) ERR_SLIPPAGE)
-    (ok {
-      amount-out: amount-in,
-      path: (get path path-result),
-      hops: (get hops path-result),
-      distance: (get distance path-result)
-    })))
+    (if (<= amount-in u0)
+      (err ERR_INVALID_AMOUNT)
+      (if (< amount-in min-amount-out)
+        (err ERR_SLIPPAGE)
+        (ok {
+          amount-out: amount-in,
+          path: (get path path-result),
+          hops: (get hops path-result),
+          distance: (get distance path-result)
+        })))))
 
 ;; === READ-ONLY FUNCTIONS ===
 
@@ -179,13 +179,13 @@
   }))
 
 (define-read-only (get-token-node (token principal))
-  (let ((idx (unwrap! (map-get? token-index token) ERR_INVALID_NODE)))
-    (ok (unwrap! (map-get? graph-nodes idx) ERR_INVALID_NODE))))
+  (let ((idx (unwrap! (map-get? token-index token) (err ERR_INVALID_NODE))))
+    (ok (unwrap! (map-get? graph-nodes idx) (err ERR_INVALID_NODE)))))
 
 (define-read-only (get-edge (token-from principal) (token-to principal))
-  (let ((from-idx (unwrap! (map-get? token-index token-from) ERR_INVALID_NODE))
-        (to-idx (unwrap! (map-get? token-index token-to) ERR_INVALID_NODE)))
-    (ok (unwrap! (map-get? graph-edges {from: from-idx, to: to-idx}) ERR_INVALID_NODE))))
+  (let ((from-idx (unwrap! (map-get? token-index token-from) (err ERR_INVALID_NODE)))
+        (to-idx (unwrap! (map-get? token-index token-to) (err ERR_INVALID_NODE))))
+    (ok (unwrap! (map-get? graph-edges {from: from-idx, to: to-idx}) (err ERR_INVALID_NODE)))))
 
 (define-read-only (get-token-index (token principal))
   (ok (map-get? token-index token)))

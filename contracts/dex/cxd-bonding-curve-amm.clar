@@ -82,7 +82,7 @@
     (let ((initializer (unwrap! (var-get price-initializer) ERR_NOT_INITIALIZED)))
       (let ((price-data (try! (contract-call? initializer get-price-with-minimum))))
         (update-price-cache price-data)
-        (ok price-data)))))
+        (ok true)))))
 
 (define-read-only (get-price)
   (let ((price-opt (var-get cached-price))

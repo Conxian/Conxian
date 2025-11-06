@@ -217,19 +217,15 @@
           )
             (let (
               (borrow-rate
-                (cond
-                  ((<= utilization k1) (+ base (/ (* utilization s1) WAD)))
-                  ((<= utilization k2) (+ base (+ (/ (* k1 s1) WAD) (/ (* (- utilization k1) s2) WAD))))
-                  (else
+                (if (<= utilization k1)
+                  (+ base (/ (* utilization s1) WAD))
+                  (if (<= utilization k2)
+                    (+ base (+ (/ (* k1 s1) WAD)
+                               (/ (* (- utilization k1) s2) WAD)))
                     (+ base
                        (+ (/ (* k1 s1) WAD)
                           (+ (/ (* (- k2 k1) s2) WAD)
-                             (/ (* (- utilization k2) jump) WAD)
-                          )
-                       )
-                    )
-                  )
-                )
+                             (/ (* (- utilization k2) jump) WAD))))))
               )
               (reserve-factor (match (get-asset-config asset)
                                 cfg (get reserve-factor cfg)

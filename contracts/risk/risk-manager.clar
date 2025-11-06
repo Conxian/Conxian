@@ -5,6 +5,10 @@
 (use-trait oracle-trait .all-traits.oracle-trait)
 (use-trait dimensional-trait .all-traits.dimensional-trait)
 
+;; Helpers
+(define-private (abs-int (x int))
+  (if (>= x 0) x (- 0 x)))
+
 
 ;; ===== Type Definitions =====
 (define-constant LOW u0)
@@ -25,16 +29,17 @@
     (current-price uint)
   )
   (let (
-    (size (abs (get position size)))
-    (collateral (get position collateral))
-    (notional-value (/ (* size current-price) (pow u10 u8)))  ;; Adjust for decimals
+    (size-abs-i (abs-int (get size position)))
+    (size-abs (to-uint size-abs-i))
+    (collateral (get collateral position))
+    (notional-value (/ (* size-abs current-price) (pow u10 u8)))  ;; Adjust for decimals
     (leverage (/ (* notional-value u100) collateral))
   )
     ;; Validate leverage
     (asserts! (<= leverage (var-get max-leverage)) (err u2000))
 
     ;; Validate position size
-    (asserts! (<= size (var-get max-position-size)) (err u2001))
+    (asserts! (<= size-abs (var-get max-position-size)) (err u2001))
 
     ;; Validate margin requirements
     (let ((initial-margin-required (/ (* notional-value (var-get maintenance-margin)) u10000)))
@@ -49,10 +54,10 @@
     (position {collateral: uint, size: int, entry-price: uint})
   )
   (let (
-    (size (get position size))
-    (collateral (get position collateral))
-    (is-long (> size 0))
-    (size-abs (abs size))
+    (size-i (get size position))
+    (collateral (get collateral position))
+    (is-long (> size-i 0))
+    (size-abs (to-uint (abs-int size-i)))
 
     (liquidation-price
       (if is-long

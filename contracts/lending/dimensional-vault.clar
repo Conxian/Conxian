@@ -15,8 +15,8 @@
 ;; ===== Data Variables =====
 (define-data-var owner principal tx-sender)
 (define-data-var is-paused bool false)
-(define-data-var oracle principal)
-(define-data-var risk-engine principal)
+(define-data-var oracle principal tx-sender)
+(define-data-var risk-engine principal tx-sender)
 
 ;; Vault state
 (define-data-var vault-state {
@@ -119,11 +119,11 @@
     (state (var-get vault-state))
     (last-updated (get last-updated state))
   )
-    (when (> current-block last-updated)
+    (if (> current-block last-updated)
       (let (
         (utilization (let ((ts (get total-supply state)) (tb (get total-borrows state)))
                        (if (> ts u0) (/ (* tb u10000) ts) u0)))
-        (borrow-rate (contract-call? (var-get risk-oracle) get-borrow-rate utilization))
+        (borrow-rate (contract-call? (unwrap-panic (var-get risk-oracle)) get-borrow-rate utilization))
         (block-delta (- current-block last-updated))
         
         ;; Calculate interest
@@ -148,6 +148,7 @@
           last-updated: current-block
         }))
       )
+      true
     )
   )
 )

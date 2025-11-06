@@ -11,7 +11,7 @@
 
 (define-data-var contract-owner principal tx-sender)
 (define-data-var fee uint u3000)
-(define-data-var current-tick int i0)
+(define-data-var current-tick int 0)
 
 (define-map positions { position-id: (buff 32) } { lower: int, upper: int, shares: uint })
 

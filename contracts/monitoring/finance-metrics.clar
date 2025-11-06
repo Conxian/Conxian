@@ -2,7 +2,7 @@
 ;; Unified financial metrics (EBITDA, CAPEX, OPEX) tracking and reporting
 
 (use-trait finance-metrics-trait .all-traits.finance-metrics-trait)
-(impl-trait finance-metrics-trait)
+(impl-trait .all-traits.finance-metrics-trait)
 
 ;; ===== Constants =====
 (define-constant ERR_UNAUTHORIZED (err u900))
@@ -25,11 +25,9 @@
 
 ;; ===== Private Functions =====
 (define-private (get-cumulative-total (module-id (string-ascii 32)) (category (string-ascii 8)))
-  (default-to u0 
-    (get total 
-      (default-to { total: u0, last-updated: u0 } 
-        (map-get? cumulative { module-id: module-id, category: category })
-      )
+  (get total 
+    (default-to { total: u0, last-updated: u0 } 
+      (map-get? cumulative { module-id: module-id, category: category })
     )
   )
 )
@@ -40,7 +38,7 @@
     (current-total (get-cumulative-total module-id category))
     (new-total (+ current-total amount))
   )
-    (map-set cumulative key { total: new-total, last-updated: block-height })
+    (map-set cumulative key { total: new-total, last-updated: (contract-call? .utils-block-utils get-burn-height) })
     true
   )
 )

@@ -1399,6 +1399,182 @@
   )
 )
 
+;; Minimal oracle trait for price queries
+(define-trait oracle-trait
+  (
+    (get-price (principal) (response uint uint))
+  )
+)
+
+;; Minimal finance metrics trait implemented by monitoring/finance-metrics
+(define-trait finance-metrics-trait
+  (
+    (set-writer-principal (principal) (response bool uint))
+    (set-contract-owner (principal) (response bool uint))
+    (record-ebitda ((string-ascii 32) uint) (response bool uint))
+    (record-capex ((string-ascii 32) uint) (response bool uint))
+    (record-opex ((string-ascii 32) uint) (response bool uint))
+    (get-aggregate ((string-ascii 32) (string-ascii 8) uint) (response uint uint))
+    (get-system-finance-summary (uint) (response (tuple (ebitda uint) (capex uint) (opex uint)) uint))
+    (get-contract-owner () (response principal uint))
+  )
+)
+
+;; Minimal dimensional engine trait placeholder
+(define-trait dimensional-trait
+  (
+    (get-version () (response uint uint))
+  )
+)
+
+;; Additional minimal trait stubs
+
+(define-trait amm-trait
+  (
+    (swap (principal principal uint uint principal) (response uint uint))
+    (add-liquidity (principal uint) (response uint uint))
+    (get-reserves (principal principal) (response (tuple (reserve-a uint) (reserve-b uint)) uint))
+  )
+)
+
+(define-trait analytics-aggregator-trait
+  (
+    (record-metric ((string-ascii 32) uint) (response bool uint))
+    (get-metric ((string-ascii 32)) (response uint uint))
+  )
+)
+
+(define-trait dimensional-core-trait
+  (
+    (get-version () (response uint uint))
+  )
+)
+
+(define-trait error-codes-trait
+  (
+    (get-code (uint) (response uint uint))
+  )
+)
+
+(define-trait factory-trait
+  (
+    (create-pool (principal principal uint) (response principal uint))
+    (register-pool (principal) (response bool uint))
+  )
+)
+
+(define-trait fixed-point-math-trait
+  (
+    (mul-down (uint uint) (response uint uint))
+    (div-down (uint uint) (response uint uint))
+  )
+)
+
+(define-trait governance-token-trait
+  (
+    (get-voting-power (principal) (response uint uint))
+    (has-voting-power (principal) (response bool uint))
+  )
+)
+
+(define-trait lending-system-trait
+  (
+    (deposit (principal uint) (response bool uint))
+    (withdraw (principal uint) (response bool uint))
+    (borrow (principal uint) (response uint uint))
+    (repay (principal uint) (response bool uint))
+  )
+)
+
+(define-trait math-trait
+  (
+    (sqrt (uint) (response uint uint))
+    (pow (uint uint) (response uint uint))
+  )
+)
+
+(define-trait monitoring-trait
+  (
+    (get-system-metrics () (response (tuple (latency uint) (throughput uint)) uint))
+  )
+)
+
+(define-trait performance-optimizer-trait
+  (
+    (optimize (principal) (response bool uint))
+  )
+)
+
+(define-trait pool-factory-trait
+  (
+    (create-pool (principal principal uint) (response principal uint))
+    (register-pool (principal) (response bool uint))
+  )
+)
+
+(define-trait price-initializer-trait
+  (
+    (get-price-with-minimum () (response (tuple (price uint) (min-price uint) (last-updated uint)) uint))
+  )
+)
+
+(define-trait proposal-engine-trait
+  (
+    (propose ((string-ascii 256) (list 10 principal) (list 10 uint) (list 10 (string-ascii 64)) (list 10 (buff 1024)) uint uint) (response uint uint))
+    (vote (uint bool uint) (response bool uint))
+    (execute (uint) (response bool uint))
+  )
+)
+
+(define-trait proposal-trait
+  (
+    (execute () (response bool uint))
+  )
+)
+
+(define-trait risk-oracle-trait
+  (
+    (calculate-margin-requirements (principal uint uint) (response (tuple (initial-margin uint) (maintenance-margin uint) (max-leverage uint)) uint))
+    (get-liquidation-price ((tuple (size int) (entry-price uint) (collateral uint)) principal) (response (tuple (price uint) (threshold uint) (is-liquidatable bool)) uint))
+    (check-position-health ((tuple (size int) (entry-price uint) (collateral uint) (last-updated uint)) principal) (response (tuple (margin-ratio uint) (liquidation-price uint) (is-liquidatable bool) (health-factor uint) (pnl (tuple (unrealized uint) (roi uint))) (position (tuple (size int) (value uint) (collateral uint) (entry-price uint) (current-price uint)))) uint))
+  )
+)
+
+(define-trait sip-010-ft-mintable-trait
+  (
+    (mint (principal uint) (response bool uint))
+    (burn (principal uint) (response bool uint))
+  )
+)
+
+(define-trait sip-010-trait
+  (
+    (transfer (uint principal principal (optional (buff 34))) (response bool uint))
+    (get-name () (response (string-ascii 32) uint))
+    (get-symbol () (response (string-ascii 10) uint))
+    (get-decimals () (response uint uint))
+    (get-balance (principal) (response uint uint))
+    (get-total-supply () (response uint uint))
+    (get-token-uri () (response (optional (string-utf8 256)) uint))
+  )
+)
+
+(define-trait sip-018-trait
+  (
+    (get-domain-separator () (response (buff 32) uint))
+    (get-structured-data-version () (response (string-ascii 16) uint))
+    (verify-signature ((buff 1024) (buff 65) principal) (response bool uint))
+    (verify-structured-data ((buff 1024) (buff 65) principal) (response bool uint))
+    (initialize-domain-separator ((buff 32)) (response bool uint))
+  )
+)
+
+(define-trait upgrade-controller-trait
+  (
+    (authorize-upgrade (principal (buff 32)) (response bool uint))
+  )
+)
+
 ;; ===========================================
 ;; END OF CENTRALIZED TRAIT DEFINITIONS
 ;; ===========================================

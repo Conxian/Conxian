@@ -357,3 +357,33 @@
   (match (map-get? liquidity-pools { asset: asset-contract })
     pool (some (get available-liquidity pool))
     none))
+
+;; =============================================================================
+;; STATS HELPER
+;; =============================================================================
+
+(define-private (update-flash-loan-stats (asset principal) (amount uint) (fee uint) (success bool))
+  (let (
+    (existing (default-to {
+      total-loans: u0,
+      total-volume: u0,
+      total-fees-collected: u0,
+      largest-loan: u0,
+      failed-loans: u0,
+      last-loan-block: u0
+    } (map-get? flash-loan-stats { asset: asset })))
+    (new-total-loans (+ (get total-loans existing) u1))
+    (new-total-volume (+ (get total-volume existing) amount))
+    (new-total-fees (+ (get total-fees-collected existing) fee))
+    (new-largest (if (> amount (get largest-loan existing)) amount (get largest-loan existing)))
+    (new-failed (+ (get failed-loans existing) (if success u0 u1)))
+  )
+    (map-set flash-loan-stats { asset: asset } {
+      total-loans: new-total-loans,
+      total-volume: new-total-volume,
+      total-fees-collected: new-total-fees,
+      largest-loan: new-largest,
+      failed-loans: new-failed,
+      last-loan-block: block-height
+    })
+    (ok true)))

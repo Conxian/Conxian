@@ -35,18 +35,18 @@
 })
 
 ;; ===== Core Functions =====
-(define-public (liquidate-position
+(define-private (liquidate-position-internal
     (position-owner principal)
     (position-id uint)
     (max-slippage uint)
+    (caller principal)
   )
   (let (
-    (caller tx-sender)
     (current-block block-height)
-    (position (unwrap! (contract-call? (var-get position-manager-contract) get-position-by-owner position-owner position-id) (err u4004)))
+    (position (unwrap! (contract-call? (unwrap-panic (var-get position-manager-contract)) get-position-by-owner position-owner position-id) (err u4004)))
     (asset (get asset position))
-    (price (unwrap! (contract-call? (var-get oracle-contract) get-price asset) (err u4005)))
-    (liquidation-price (unwrap! (contract-call? (var-get risk-manager-contract) get-liquidation-price position price) (err u4006)))
+    (price (unwrap! (contract-call? (unwrap-panic (var-get oracle-contract)) get-price asset) (err u4005)))
+    (liquidation-price (unwrap! (contract-call? (unwrap-panic (var-get risk-manager-contract)) get-liquidation-price position price) (err u4006)))
   )
     ;; Verify position can be liquidated
     (asserts! (is-eq (get status position) ACTIVE) (err u4007))
@@ -97,6 +97,14 @@
   )
 )
 
+(define-public (liquidate-position
+    (position-owner principal)
+    (position-id uint)
+    (max-slippage uint)
+  )
+  (liquidate-position-internal position-owner position-id max-slippage tx-sender)
+)
+
 ;; ===== Batch Liquidations =====
 (define-public (liquidate-positions
     (positions (list 20 {owner: principal, id: uint}))
@@ -105,10 +113,11 @@
   (let (
     (results (map
       (lambda (position)
-        (match (contract-call? .liquidation-engine liquidate-position
-          (get position owner)
-          (get position id)
+        (match (liquidate-position-internal
+          (get owner position)
+          (get id position)
           max-slippage
+          tx-sender
         )
           success (ok true)
           error error

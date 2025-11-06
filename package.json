@@ -28,12 +28,14 @@
     "ci": "node ./scripts/ensure-deps.js && node ./scripts/validate-docs.js && npx vitest run",
     "coverage": "vitest run --coverage",
     "update-autonomics": "tsx scripts/sdk_update_autonomics.ts",
-    "load-test": "artillery run load-test.yml"
+    "load-test": "artillery run load-test.yml",
+    "derive:wallets": "tsx scripts/derive_wallets.ts"
   },
   "dependencies": {
     "@stacks/blockchain-api-client": "8.13.1",
     "@stacks/network": "7.2.0",
     "@stacks/transactions": "^7.2.0",
+    "@stacks/wallet-sdk": "^7.2.0",
     "bignumber.js": "^9.1.2",
     "dotenv": "17.2.2",
     "node-fetch": "^3.3.2"

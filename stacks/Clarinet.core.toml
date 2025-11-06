@@ -4,7 +4,7 @@ description = "Core manifest: foundation + core contracts (dim-registry, dimensi
 clarinet_version = "3.8.1"
 
 [accounts.deployer]
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+address = "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM"
 
 [contracts.all-traits]
 path = "../contracts/traits/all-traits.clar"

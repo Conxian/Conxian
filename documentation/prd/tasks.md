@@ -5,8 +5,8 @@
 - [x] Create PRD (documentation/prd/dimensional-system-prd.md)
 - [x] Create tasks plan (this file)
 - [x] Normalize foundation manifest: add clarity_version=3, epoch="3.0"
-- [x] Unify encoding utils to sha256(to-consensus-buff? ...)
-- [x] Unify encoding utils to sha256(unwrap-panic (to-consensus-buff? ...))
+- [x] Unify encoding utils to sha256(to-consensus-buff ...)
+- [x] Unify encoding utils to sha256(unwrap-panic (to-consensus-buff ...))
 - [x] Clarinet check (foundation)
 
 ## Phase 2: Manifests & Router
@@ -26,9 +26,9 @@
 
 ### Manifest hygiene tasks (new)
 
-- [ ] Fix stacks/deployments/default.simnet-plan.yaml paths: prefix all paths with "..\\"
-- [ ] Update stacks/deployments/default.simnet-plan.yaml deployer address to ST3N0ZC9HBPDEBEJ1H1QFGMJF3PSNGW3FYZSVN513
-- [ ] Update deployments/default.testnet-plan.yaml expected-sender to ST3N0ZC9HBPDEBEJ1H1QFGMJF3PSNGW3FYZSVN513
+- [x] Fix stacks/deployments/default.simnet-plan.yaml paths: prefix all paths with "..\\"
+- [x] Update stacks/deployments/default.simnet-plan.yaml deployer address to STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ
+- [x] Update deployments/default.testnet-plan.yaml expected-sender to STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ
 
 ## Phase 3: Traits & Static References
 
@@ -60,12 +60,12 @@
 ## Phase 6: Root Manifest Normalization
 
 - [ ] De-duplicate [contracts.*] entries; fix names to match addresses
-- [ ] Ensure consistent deployer/address across manifests
+- [x] Ensure consistent deployer/address across manifests
 - [ ] Final Clarinet check (root)
 
 ## Verification
 
-- [ ] Static scan: ensure no banned functions (principal-to-buff-33/32, keccak256, non-canonical conversions). Note: to-consensus-buff? is allowed only within canonical encoding utilities paired with sha256 and unwrap-panic.
+- [ ] Static scan: ensure no banned functions (principal-to-buff-33/32, keccak256, non-canonical conversions). Note: to-consensus-buff is used only within canonical encoding utilities paired with sha256 and unwrap-panic.
 - [ ] Unit/integration tests for router/factory/MEV/oracle/positions
 - [ ] Benchmarking report updated quarterly with measured metrics (see documentation/benchmarking/benchmarking-report.md)
 
@@ -73,6 +73,17 @@
 
 - 2025-11-03
   - Added benchmarking instrumentation tasks and verification hooks; linked benchmarking report for quarterly updates.
+
+- 2025-11-05
+  - Updated encoding policy references to use to-consensus-buff (no question mark) with sha256 and unwrap-panic.
+  - Marked manifest hygiene tasks and consistent deployer alignment as completed; testnet and simnet plans updated.
+  - Added Secrets & Wallets phase for mnemonic handling and deterministic wallet derivation.
+
+## Phase 2c: Secrets & Wallets
+
+- [x] Remove mnemonic from manifests; store in .env (gitignored)
+- [x] Derive deterministic system wallets and update config/wallets.*.json
+- [x] Add wallet derivation script (npm run derive:wallets)
 
 ## Cross-References
 
