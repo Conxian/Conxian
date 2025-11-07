@@ -4,7 +4,7 @@
 
 import { describe, it, expect, beforeEach, beforeAll } from 'vitest';
 import { Cl, ClarityValue, cvToValue } from '@stacks/transactions';
-import { Simnet } from '@hirosystems/clarinet-sdk';
+import { Simnet } from '@stacks/clarinet-sdk';
 
 describe('Flash Loan Integration Tests', () => {
   const simnet: Simnet = (global as any).simnet;
@@ -14,7 +14,7 @@ describe('Flash Loan Integration Tests', () => {
   let flashLoanReceiver: string;
 
   beforeAll(async () => {
-    deployer = 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6';
+    deployer = 'STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ';
     wallet1 = 'ST1SJ3DTE5DN7X54YDH5D64R3BCB6A2AG2ZQ8YPD5';
     wallet2 = 'ST2CY5V39NHDPWSXMW9QDT3HC3GD6Q6XX4CFRK9AG';
     // Use the deployed test receiver contract for on-flash-loan callbacks

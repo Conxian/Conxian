@@ -16,7 +16,7 @@ const newCxdToken = `  cxdToken: {
     decimals: 6,
     totalSupply: 0,
     balances: new Map(),
-    owner: 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6',
+    owner: 'STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ',
     async mint(recipient: string, amount: number, options?: { from: string }) {
       // Check if the caller is the owner
       const caller = options?.from;

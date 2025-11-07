@@ -8,7 +8,7 @@ describe('Conxian Mathematical Functions Tests', () => {
   let precisionCalculatorContract: string;
 
   beforeEach(() => {
-    deployer = 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6';
+    deployer = 'STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ';
     mathLibContract = `${deployer}.math-lib-advanced`;
     fixedPointContract = `${deployer}.fixed-point-math`;
     precisionCalculatorContract = `${deployer}.precision-calculator`;

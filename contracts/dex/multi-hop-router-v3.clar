@@ -20,6 +20,8 @@
 (define-constant MAX_HOPS u5)
 (define-constant MAX_SLIPPAGE u1000) ;; 10% max slippage
 (define-constant ROUTE_TIMEOUT u100) ;; blocks
+;; 32-byte zero salt for deterministic placeholder route IDs
+(define-constant ZERO32 0x0000000000000000000000000000000000000000000000000000000000000000)
 
 ;; ===========================================
 ;; ERROR CODES
@@ -38,6 +40,14 @@
 
 (define-data-var route-counter uint u0)
 (define-data-var max-hops uint MAX_HOPS)
+;; Configurable route timeout (defaults to constant)
+(define-data-var route-timeout uint ROUTE_TIMEOUT)
+
+;; Principal index mapping (deterministic encoding without direct principal serialization)
+(define-map principal-index principal uint)
+
+;; Owner for administrative controls
+(define-data-var contract-owner principal tx-sender)
 
 ;; ===========================================
 ;; DATA MAPS
@@ -67,7 +77,9 @@
     ;; In production, this would use Dijkstra's algorithm
     (let ((best-route (find-best-route token-in token-out amount-in)))
       (if (is-some best-route)
-        (let ((route (unwrap-panic best-route)))
+        (let ((route (unwrap-panic best-route))
+              (maxh (var-get max-hops)))
+          (asserts! (<= (len (get hops route)) maxh) ERR_HOP_LIMIT_EXCEEDED)
           (map-set routes
             { route-id: route-id }
             {
@@ -77,7 +89,7 @@
               min-amount-out: (get min-amount-out route),
               hops: (get hops route),
               created-at: block-height,
-              expires-at: (+ block-height ROUTE_TIMEOUT)
+              expires-at: (+ block-height (var-get route-timeout))
             }
           )
           (ok (tuple (route-id route-id) (hops (len (get hops route)))))
@@ -127,6 +139,47 @@
                 (expires-at (get expires-at route))))
     (err ERR_INVALID_ROUTE)
   )
+)
+
+;; ===========================================
+;; ADMIN FUNCTIONS
+;; ===========================================
+
+(define-public (set-owner (new-owner principal))
+  (begin
+    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_INVALID_ROUTE)
+    (var-set contract-owner new-owner)
+    (ok true)
+  )
+)
+
+(define-public (set-principal-index (p principal) (idx uint))
+  (begin
+    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_INVALID_ROUTE)
+    (map-set principal-index p idx)
+    (ok true)
+  )
+)
+
+(define-public (set-max-hops (new-max uint))
+  (begin
+    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_INVALID_ROUTE)
+    (var-set max-hops new-max)
+    (ok true)
+  )
+)
+
+(define-public (set-route-timeout (new-timeout uint))
+  (begin
+    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_INVALID_ROUTE)
+    (var-set route-timeout new-timeout)
+    (ok true)
+  )
+)
+
+;; Read-only: get index for a principal
+(define-read-only (get-principal-index (p principal))
+  (ok (default-to u0 (map-get? principal-index p)))
 )
 
 ;; ===========================================
@@ -238,15 +291,32 @@
 )
 
 (define-private (generate-route-id (token-in principal) (token-out principal) (amount-in uint))
-  (sha256 (concat
-    (concat (principal-to-buff-33 token-in) (principal-to-buff-33 token-out))
-    (to-consensus-buff? amount-in)
-  ))
+  (let (
+    (in-idx (default-to u0 (map-get? principal-index token-in)))
+    (out-idx (default-to u0 (map-get? principal-index token-out)))
+  )
+    (unwrap-panic (contract-call? .utils-encoding encode-route-id in-idx out-idx amount-in ZERO32))
+  )
 )
 
 ;; ===========================================
 ;; UTILITY FUNCTIONS
 ;; ===========================================
+
+;; Temporary helper: fetch available pools for a token pair using Factory v2.
+;; In the current minimal setup, Factory v2 registers a single implementation per pair.
+;; This function returns a list of either 0 or 1 pool principals for routing.
+(define-private (get-pools-for-pair (token-in principal) (token-out principal))
+  (match (contract-call? .dex-factory-v2 get-pool token-in token-out)
+    (ok maybe-pool)
+      (match maybe-pool
+        (some pool) (list pool)
+        none (list)
+      )
+    (err e)
+      (list)
+  )
+)
 
 (define-public (set-max-hops (new-max uint))
   (begin

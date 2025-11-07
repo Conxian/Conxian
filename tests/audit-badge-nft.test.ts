@@ -2,7 +2,7 @@ import { Clarinet, Tx, Chain, Account, types } from 'https://deno.land/x/clarine
 import { assertEquals } from 'https://deno.land/std@0.170.0/testing/asserts.ts';
 
 // Constants
-const CONTRACT_OWNER = 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6';
+const CONTRACT_OWNER = 'STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ';
 const AUDIT_REGISTRY = `${CONTRACT_OWNER}.audit-registry`;
 const NFT_CONTRACT = `${CONTRACT_OWNER}.audit-badge-nft`;
 const ALICE = 'ST2JHG361ZXG51QTKY2NQCVBPPRRE2KZB1HR05NNC';

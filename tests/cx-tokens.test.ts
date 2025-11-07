@@ -4,7 +4,7 @@ import { getTestContracts } from './utils/token-helpers';
 
 // Mock test data
 const mockChain = {
-  deployer: 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6'
+  deployer: 'STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ'
 };
 
 const mockAccounts = new Map([

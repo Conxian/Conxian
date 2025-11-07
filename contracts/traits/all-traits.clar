@@ -237,7 +237,7 @@
 ;; flash loans from the protocol.
 ;;
 ;; Example usage:
-;;   (impl-trait flash_loan_receiver_trait)
+;;   (impl-trait .all-traits.flash-loan-receiver-trait)
 (define-trait flash-loan-receiver-trait
   (
     ;; Execute operations with borrowed funds
@@ -889,7 +889,6 @@
 ;;
 ;; Example usage:
 ;;   (use-trait pausable .all-traits.pausable-trait)
-;;   (impl-trait pausable_trait)
 (define-trait pausable-trait
   (
     ;; Check if the contract is currently paused
@@ -991,7 +990,7 @@
 ;; to be compatible with the Conxian DEX router and factory.
 ;;
 ;; Example usage:
-;;   (impl-trait pool_trait)
+;;   (use-trait pool .all-traits.pool-trait)
 (define-trait pool-trait
   (
     ;; Get the pool's token pair
@@ -1615,5 +1614,5 @@
 ;;
 ;; For trait usage:
 ;;   (use-trait <trait-name> .all-traits.<trait-name>)
-;;   (impl-trait <trait-name>)  ;; where <trait-name> is defined via use-trait
+;;   (impl-trait .all-traits.<trait-name>)  ;; where <trait-name> is defined via use-trait
 ;;

@@ -57,15 +57,11 @@
 
   (define-private (get-commitment-hash (path (list 20 principal)) (amount-in uint) (min-amount-out (optional uint)) (recipient principal) (salt (buff 32)))
     (let (
-      (payload {
-        path: (path->index-list path),
-        amount: amount-in,
-        min: min-amount-out,
-        rcpt: (principal->index recipient),
-        salt: salt
-      })
+      (path-indices (path->index-list path))
+      (rcpt-index (principal->index recipient))
     )
-      (sha256 (unwrap-panic (to-consensus-buff? payload)))
+      ;; Use canonical encoding utility contract to compute commitment
+      (unwrap-panic (contract-call? .utils-encoding encode-commitment path-indices amount-in min-amount-out rcpt-index salt))
     )
   )
 

@@ -1,116 +1,116 @@
 
 
 ;; compliance-hooks.clar
+;; Enterprise compliance hooks and registries for KYC/KYB, sanction screening, and whale gating references.
 
-;; ===== Traits =====
+(define-constant ERR_UNAUTHORIZED (err u92001))
+(define-constant ERR_INVALID_INPUT (err u92002))
 
-;; ===== Constants =====
-(define-constant ERR_UNAUTHORIZED (err u401))
-(define-constant ERR_ACCOUNT_NOT_VERIFIED (err u403))
-(define-constant ERR_INVALID_KYC_TIER (err u404))
+;; Admin
+(define-data-var admin principal tx-sender)
 
-;; ===== Data Variables =====
-(define-data-var contract-owner principal tx-sender)
-(define-data-var audit-event-counter uint u0)
+;; Enterprise KYB registry: principals approved for enterprise-grade access
+(define-map enterprise-kyb principal bool)
 
-;; ===== Data Maps =====
-(define-map verified-accounts principal { kyc-tier: uint, last-updated: uint })
-(define-map kyc-audit-trail uint { account: principal, action: uint, old-tier: uint, new-tier: uint, timestamp: uint })
+;; KYC attestations for users (basic boolean; real systems can include versioned attestations)
+(define-map user-kyc principal bool)
 
-;; ===== Private Functions =====
-(define-private (record-audit-event (account principal) (action uint) (old-tier uint) (new-tier uint))
-  (let (
-    (event-id (+ u1 (var-get audit-event-counter)))
-  )
-    (map-set kyc-audit-trail event-id {
-      account: account,
-      action: action,
-      old-tier: old-tier,
-      new-tier: new-tier,
-      timestamp: block-height
-    })
-    (var-set audit-event-counter event-id)
-    event-id
-  )
-)
+;; Sanction screening flags
+(define-map sanctioned principal bool)
 
-;; ===== Public Functions =====
+;; Whale gating thresholds (BTC-equivalent). Units are BTC whole units for simplicity.
+(define-data-var whale-threshold-btc uint u100)
 
-;; @desc Sets the KYC tier for a given account.
-;; @param account (principal) The principal of the account to set the KYC tier for.
-;; @param kyc-tier (uint) The new KYC tier for the account (e.g., u1 for basic, u2 for intermediate, u3 for advanced).
-;; @return (response bool) An (ok true) response if the KYC tier is successfully set, or an error if unauthorized or the tier is invalid.
-(define-public (set-kyc-tier (account principal) (kyc-tier uint))
+;; =====================
+;; Admin functions
+;; =====================
+
+(define-public (set-admin (new-admin principal))
   (begin
-    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
-    (asserts! (<= kyc-tier u3) ERR_INVALID_KYC_TIER)
-    (let (
-      (old-kyc-tier (default-to u0 (get kyc-tier (map-get? verified-accounts account))))
-    )
-      (map-set verified-accounts account { kyc-tier: kyc-tier, last-updated: block-height })
-      (record-audit-event account u3 old-kyc-tier kyc-tier)
-      (ok true)
-    )
+    (asserts! (is-eq tx-sender (var-get admin)) ERR_UNAUTHORIZED)
+    (var-set admin new-admin)
+    (ok true)
   )
 )
 
-;; @desc Verifies an account by setting its KYC tier to a basic level (u1).
-;; @param account (principal) The principal of the account to verify.
-;; @return (response bool) An (ok true) response if the account is successfully verified, or an error if unauthorized.
-(define-public (verify-account (account principal))
+(define-public (set-whale-threshold (btc uint))
   (begin
-    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
-    (let (
-      (old-kyc-tier (default-to u0 (get kyc-tier (map-get? verified-accounts account))))
-    )
-      (map-set verified-accounts account { kyc-tier: u1, last-updated: block-height })
-      (record-audit-event account u1 old-kyc-tier u1)
-      (ok true)
-    )
+    (asserts! (is-eq tx-sender (var-get admin)) ERR_UNAUTHORIZED)
+    (asserts! (> btc u0) ERR_INVALID_INPUT)
+    (var-set whale-threshold-btc btc)
+    (ok true)
   )
 )
 
-;; @desc Unverifies an account by removing it from the verified accounts map.
-;; @param account (principal) The principal of the account to unverify.
-;; @return (response bool) An (ok true) response if the account is successfully unverified, or an error if unauthorized.
-(define-public (unverify-account (account principal))
+;; Enterprise KYB
+(define-public (add-enterprise (p principal))
   (begin
-    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
-    (let (
-      (old-kyc-tier (default-to u0 (get kyc-tier (map-get? verified-accounts account))))
-    )
-      (map-delete verified-accounts account)
-      (record-audit-event account u2 old-kyc-tier u0)
-      (ok true)
-    )
+    (asserts! (is-eq tx-sender (var-get admin)) ERR_UNAUTHORIZED)
+    (map-set enterprise-kyb p true)
+    (ok true)
   )
 )
 
-;; ===== Read-Only Functions =====
-
-;; @desc Checks if an account is currently verified.
-;; @param account (principal) The principal of the account to check.
-;; @return (bool) True if the account is verified, false otherwise.
-(define-read-only (is-verified (account principal))
-  (is-some (map-get? verified-accounts account))
+(define-public (remove-enterprise (p principal))
+  (begin
+    (asserts! (is-eq tx-sender (var-get admin)) ERR_UNAUTHORIZED)
+    (map-delete enterprise-kyb p)
+    (ok true)
+  )
 )
 
-;; @desc Retrieves the KYC tier of an account.
-;; @param account (principal) The principal of the account to retrieve the KYC tier for.
-;; @return (uint) The KYC tier of the account (u0 if not verified or no tier set).
-(define-read-only (get-kyc-tier (account principal))
-  (default-to u0 (get kyc-tier (map-get? verified-accounts account)))
+;; User KYC
+(define-public (attest-kyc (user principal) (status bool))
+  (begin
+    (asserts! (is-eq tx-sender (var-get admin)) ERR_UNAUTHORIZED)
+    (map-set user-kyc user status)
+    (ok true)
+  )
 )
 
-;; @desc Retrieves a specific KYC audit event by its ID.
-;; @param event-id (uint) The ID of the audit event to retrieve.
-;; @return (optional {account: principal, action: uint, old-tier: uint, new-tier: uint, timestamp: uint}) The audit event details if it exists.
-(define-read-only (get-audit-event (event-id uint))
-  (map-get? kyc-audit-trail event-id)
+;; Sanction screening
+(define-public (set-sanctioned (user principal) (flag bool))
+  (begin
+    (asserts! (is-eq tx-sender (var-get admin)) ERR_UNAUTHORIZED)
+    (map-set sanctioned user flag)
+    (ok true)
+  )
 )
 
-;; @desc Retrieves the total number of KYC audit events recorded.
-;; @return (uint) The total count of audit events.
-(define-read-only (get-audit-event-count)
-  (var-get audit-event-counter)
+;; =====================
+;; Read-only checks
+;; =====================
+
+(define-read-only (is-enterprise (p principal))
+  (default-to false (map-get? enterprise-kyb p))
+)
+
+(define-read-only (is-kyc (user principal))
+  (default-to false (map-get? user-kyc user))
+)
+
+(define-read-only (is-sanctioned (user principal))
+  (default-to false (map-get? sanctioned user))
+)
+
+;; Simple whale check: caller provides BTC-equivalent activity (computed off-chain or by upstream modules)
+(define-read-only (is-whale (btc-equivalent uint))
+  (>= btc-equivalent (var-get whale-threshold-btc))
+)
+
+;; Composite compliance gating for sensitive operations
+;; Inputs:
+;; - user principal
+;; - btc-equivalent activity (optional aggregation provided by upstream)
+;; Returns true if user passes KYC and is not sanctioned.
+;; Whale detection prints an event for downstream gating; enterprise paths can require is-enterprise and is-kyc.
+(define-read-only (is-compliant-for-operation (user principal) (btc-equivalent uint))
+  (let ((kyc (default-to false (map-get? user-kyc user)))
+        (san (default-to false (map-get? sanctioned user)))
+        (whale (>= btc-equivalent (var-get whale-threshold-btc))))
+    (begin
+      (if whale (begin (print { event: "whale-detected", user: user, btc: btc-equivalent }) true) true)
+      (and kyc (not san))
+    )
+  )
 )

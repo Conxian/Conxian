@@ -24,8 +24,8 @@ Clarinet.test({
       'liquidate-position', 
       [
         types.principal(borrower.address), 
-        types.principal('ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.token'), 
-        types.principal('ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.collateral-token'), 
+        types.principal('STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ.token'), 
+        types.principal('STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ.collateral-token'), 
         types.uint(500), 
         types.uint(100)
       ], 

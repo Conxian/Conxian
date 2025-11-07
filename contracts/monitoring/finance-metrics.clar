@@ -38,7 +38,7 @@
     (current-total (get-cumulative-total module-id category))
     (new-total (+ current-total amount))
   )
-    (map-set cumulative key { total: new-total, last-updated: (contract-call? .utils-block-utils get-burn-height) })
+(map-set cumulative key { total: new-total, last-updated: (contract-call? .block-utils get-burn-height) })
     true
   )
 )

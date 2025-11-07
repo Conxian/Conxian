@@ -88,14 +88,14 @@
 ;; Governance Token Trait Functions
 (define-read-only (get-voting-power (account principal))
   (let (
-    (balance (unwrap! (get-balance account) (err ERR_UNAUTHORIZED)))
+    (balance (unwrap! (get-balance account) ERR_UNAUTHORIZED))
     (delegated-to-me (default-to u0 (get amount (map-get? delegated-amounts { account: account }))))
   )
     (ok (+ balance delegated-to-me))))
 
 (define-read-only (has-voting-power (account principal))
   (let (
-    (power (unwrap! (get-voting-power account) (err ERR_UNAUTHORIZED)))
+    (power (unwrap! (get-voting-power account) ERR_UNAUTHORIZED))
   )
     (ok (> power u0))))
 
@@ -125,7 +125,7 @@
 
 (define-public (undelegate-voting-power (delegate principal) (amount uint))
   (let (
-    (current-delegation (unwrap! (map-get? delegations { delegator: tx-sender, delegate: delegate }) (err ERR_UNAUTHORIZED)))
+    (current-delegation (unwrap! (map-get? delegations { delegator: tx-sender, delegate: delegate }) ERR_UNAUTHORIZED))
     (delegated-amount (get amount current-delegation))
   )
     (asserts! (>= delegated-amount amount) ERR_INSUFFICIENT_FUNDS)
@@ -154,7 +154,7 @@
 ;; Private helper functions
 (define-private (update-voting-power (account principal))
   (let (
-    (balance (unwrap! (get-balance account) (err ERR_UNAUTHORIZED)))
+    (balance (unwrap! (get-balance account) ERR_UNAUTHORIZED))
     (delegated-to-me (default-to u0 (get amount (map-get? delegated-amounts { account: account }))))
     (total-power (+ balance delegated-to-me))
   )
@@ -167,14 +167,14 @@
   (default-to u0 (get amount (map-get? delegated-amounts { account: account }))))
 
 (define-private (get-delegated-from (account principal))
-  (default-to u0 (get amount (map-get? delegations { owner: account }))))
+  u0)
 
 ;; Mint and Burn (for contract owner only)
 (define-public (mint (amount uint) (recipient principal))
   (begin
     (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
     (var-set token-supply (+ (var-get token-supply) amount))
-    (map-set token-balances { account: recipient } { amount: (+ (unwrap! (get-balance recipient) (err u0)) amount) })
+    (map-set token-balances { account: recipient } { amount: (+ (unwrap! (get-balance recipient) ERR_UNAUTHORIZED) amount) })
     (unwrap-panic (update-voting-power recipient))
     (print { event: "mint", recipient: recipient, amount: amount })
     (ok true)

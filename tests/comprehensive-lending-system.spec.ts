@@ -18,7 +18,7 @@ Clarinet.test({
     const supplyCall = Tx.contractCall(
       'comprehensive-lending-system', 
       'supply', 
-      [types.principal('ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.token'), types.uint(1000)], 
+      [types.principal('STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ.token'), types.uint(1000)], 
       wallet1.address
     );
     
