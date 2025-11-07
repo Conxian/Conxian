@@ -23,7 +23,7 @@ accounts:
   system:
     mnemonic: "theme apart absurd gasp river used vessel screen fiction slice slab ice jar hurt slam puppy snake life radar sign ship list excuse trick"
     balance: 100000000000000  # 100,000,000 STX
-  deployer: "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+  deployer: "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
   wallet_1: "ST1SJ3DTE5DN7X54YDH5D64R3BCB6A2AG2ZQ8YPD5"
   wallet_2: "ST2NEB84ASENDXKYGJPQW86YXQCEFEX2ZQPG87ND"
   wallet_3: "ST2REHHS5J3CERCRBEPMGH7921Q6PYKAADT7JP2VB"
@@ -144,7 +144,7 @@ security:
   invariant_monitoring_enabled: true
   pause_on_violation: true
   emergency_contacts:
-    - "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"  # Dev admin
+    - "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"  # Dev admin
   
 # Security Parameters
 security:
@@ -154,8 +154,8 @@ security:
   min_confirmations: 3  # Blocks to wait for confirmation
   
   # Access control
-  admin_multisig: "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
-  emergency_pause_role: "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+  admin_multisig: "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+  emergency_pause_role: "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
   
   # Rate limiting (per block)
   max_operations_per_block: 100
@@ -214,9 +214,9 @@ testing:
   system_validation_enabled: true
   
 test_accounts:
-  - "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+  - "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
   - "ST1SJ3DTE5DN7X54YDH5D64R3BCB6A2AG2ZQ8YPD5"  
-  - "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+  - "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
 test_amounts:
   small: 5000000       # 5 tokens
