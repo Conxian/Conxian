@@ -1,12 +1,36 @@
 # ---------------------------------------------------------------------------
 # 1. ENVIRONMENT & SECRETS
 # ---------------------------------------------------------------------------
+# Environment files (except example)
 !.env.example
+.env
+#.env.local
+#.env.development.local
+#.env.test.local
+#.env.production.local
 
-# Git hooks directory
-.githooks/
+# Security & Private Keys (CRITICAL)
+*.pem
+*.key
+*.p12
+*.private
+private-key*
+deployer-key*
+wallet-seed*
+mnemonic*
+secrets*
+*.pfx
+*.crt
+*.cert
 
-# Node / tooling
+# Configuration files
+config.local.json
+
+
+# ---------------------------------------------------------------------------
+# 2. DEVELOPMENT TOOLS & CACHE
+# ---------------------------------------------------------------------------
+# Node.js/JavaScript/Yarn/Lerna
 node_modules/
 npm-debug.log*
 yarn-debug.log*
@@ -19,176 +43,147 @@ __pycache__/
 *.pyo
 *.pyd
 .Python
-pip-log.txt
+pip-log.txt 
 pip-delete-this-directory.txt
 
 # Rust (legacy just in case)
 target/
 Cargo.lock
 
-# IDE specific files
-.vscode/
-.idea/
-*.swp
-*.swo
-
-# Local development
-.deployments/
+# Local development cache/dirs 
 .cache/
-
-# Logs
-logs/
-*.log
-
-# System Files
-.DS_Store
-Thumbs.db
-
-# Secrets
-*.pem
-*.key
-*.p12
-
-# Stacks blockchain specific
-.stacks-chain/
-.stacks-db/
-.chainstate/
-
-# Clarinet specific
-**/settings/Mainnet.toml
-**/settings/Testnet.toml
-.clarinet/
-artifacts/
-
-# Temporary files
-*.tmp
-*.temp
-.history/
-*.pfx
-*.crt
-*.cert
-
-# Local development
-.deployments/
-.cache/
-
-# Environment files (except example)
-!.env.example
-
-# Deployment artifacts
-*.deployed.json
-*.deployed.yaml
-
-# OS/editor
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-
-# Environment & Configuration
-#.env
-#.env.local
-#.env.development.local
-#.env.test.local
-#.env.production.local
-config.local.json
-
-# Clarinet/Stacks artifacts
-stacks/simnet/
-stacks/deployments/simnet/
-stacks/deployments/testnet/
-stacks/deployments/mainnet/
-clarinet.log
-.clarinet/
-stacks/.cache/
-*.devnet-plan.yaml.backup
-
-# Build artifacts
-/dist/
-/build/
-stacks/.cache/
-coverage/
-.nyc_output/
-
-# Testing artifacts
-test-results/
-junit.xml
-coverage.xml
-
-# Deployment artifacts
-deployment-registry-*.json
-wallet-*.json
-deployer-*.json
-private-keys-*.txt
-
-# Logs
-logs/
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-lerna-debug.log*
-
-# Prompt files (sensitive AI instructions)
-.github/chatmodes/*
-
-# Backup files (automatically generated)
-*.backup
-*.bak
-*.tmp
-*~
-.#*
-#*#
-
-# Security & Private Keys (CRITICAL)
-*.pem
-*.key
-*.private
-private-key*
-deployer-key*
-wallet-seed*
-mnemonic*
-secrets*
-
-# Temporary files
-temp/
-tmp/
 .tmp/
 .temp/
+temp/
+tmp/
+.history/
 
-# Conxian specific
-monitoring/logs/
-analytics/cache/
+# Git hooks directory 
+.githooks/
 
-# StacksOrbit standalone repository (separate GitHub repo)
-# See: https://github.com/Anya-org/stacksorbit
-stacksorbit/
 
-# Kiro IDE specific files
-#.kiro/*
+# ---------------------------------------------------------------------------
+# 3. BUILD & DEPLOYMENT ARTIFACTS 
+# ---------------------------------------------------------------------------
+/dist/
+/build/
+.deployments/
 
-# Bitcoin/Stacks specific
-*.wallet
-*.seed
-stx-wallet*
-btc-wallet*
-.kiro/specs/
-.secrets/
-clarinet-windows-x64.msi
-clarinet_check_output.txt
-.github/copilot-instructions.md
-contracts/dex/transaction-batch-processor.backup.clar
-contracts/dex/transaction-batch-processor.backup.clar
-contracts/dex/transaction-batch-processor.backup.clar
-.env
-.trae/rules/PRD_EXECUTION_UPDATE.md
-.trae/rules/tasks.md
-.trae/rules/dimensional-system-prd.md
+# Deployment artifacts 
+*.deployed.json 
+*.deployed.yaml 
+deployment-registry-*.json 
+wallet-*.json 
+deployer-*.json 
+private-keys-*.txt
+
+
+# ---------------------------------------------------------------------------
+# 4. TESTING & COVERAGE  
+# ---------------------------------------------------------------------------
+test-results/ 
+junit.xml 
+coverage.xml 
+coverage/ 
+.nyc_output/
+
+
+# ---------------------------------------------------------------------------  
+# 5. LOGS  
+# ---------------------------------------------------------------------------  
+logs/  
+clarinet.log  
+*.log  
+
+
+# ---------------------------------------------------------------------------  
+# 6. IDE & EDITOR FILES  
+# ---------------------------------------------------------------------------  
+.vscode/  
+.idea/  
+*~  
+.#*  
+*swp  
+*swo  
+
+
+# ---------------------------------------------------------------------------  
+7 # OS SPECIFIC FILES   
+8 # ---------------------------------------------------------------------------   
+9 .DS_Store   
+10 .DS_Store?   
+11 ._*   
+12 .Spotlight-V100   
+13 .Trashes   
+14 ehthumbs.db   
+15 Thumbs.db   
+
+
+16 # ---------------------------------------------------------------------------   
+17 # STACKS BLOCKCHAIN SPECIFIC   
+18 # ---------------------------------------------------------------------------   
+19 .stacks-chain/   
+20 .stacks-db/   
+21 .chainstate/   
+
+22 # Clarinet specific   
+23 **/settings/Mainnet.toml   
+24 **/settings/Testnet.toml   
+25 .clarinet/    
+26 artifacts/    
+27 clarinet-windows-x64.msi    
+28 clarinet_check_output.txt    
+
+29 # Stacks deployment directories    
+30 stacks/simnet/    
+31 stacks/deployments/simnet/    
+32 stacks/deployments/testnet/    
+33 stacks/deployments/mainnet/    
+34 stacks/.cache/
+
+35 # Bitcoin/Stacks wallet files    
+36 *.wallet    
+37 *.seed    
+38 stx-wallet*    
+39 btc-wallet*    
+
+
+40 # ---------------------------------------------------------------------------     
+41 # BACKUP & TEMPORARY FILES     
+42 # ---------------------------------------------------------------------------     
+43 *.backup     
+44 *.bak     
+45 *.tmp     
+46 *.temp     
+47 *~     
+
+
+48 # ---------------------------------------------------------------------------     
+49 # PROJECT SPECIFIC EXCLUSIONS     
+50 # ---------------------------------------------------------------------------     
+51 # Conxian specific     
+52 monitoring/logs/     
+53 analytics/cache/
+
+54 # StacksOrbit standalone repository (separate GitHub repo)      
+55 stacksorbit/
+
+56 # Kiro IDE specific files      
+57 .kiro/*      
+58 .kiro/specs/
+
+59 # Prompt files (sensitive AI instructions)      
+60 .github/charmodes/*      
+61 .github/copilot-instructions.md      
+
+62 # Trae rules documentation      
+63 .trae/rules/*      
+
+64 # Contract backups      
+65 contracts/dex/*backup.clar      
+
+66 backups/env/.env.*      
+
+67 *.devnet-plan.yaml.backup      
+
+68 *#
