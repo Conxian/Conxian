@@ -1,7 +1,7 @@
 import { Clarinet, Tx, Chain, Account, types } from 'https://deno.land/x/clarinet@v1.0.5/index.ts';
 import { assertEquals } from 'https://deno.land/std@0.125.0/testing/asserts.ts';
 
-const CONTRACT_OWNER = 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6';
+const CONTRACT_OWNER = 'STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ';
 const TRAIT_REGISTRY = `${CONTRACT_OWNER}.trait-registry`;
 
 // Standard trait contracts

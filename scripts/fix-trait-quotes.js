@@ -6,8 +6,8 @@
  * across all Clarity contracts in the Conxian protocol.
  * 
  * Pattern to fix:
- *   'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.trait-name
- *   → .all-traits.trait-name OR ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.trait-name
+ *   'STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ.all-traits.trait-name
+ *   → .all-traits.trait-name OR STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ.all-traits.trait-name
  * 
  * Usage: node scripts/fix-trait-quotes.js [--dry-run]
  */
@@ -63,8 +63,8 @@ function fixTraitQuotes(filePath) {
     let fixCount = 0;
     
     // Pattern 1: Single-quoted full path in use-trait
-    // 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.trait-name
-    const pattern1 = /'(ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6\.all-traits\.[a-zA-Z0-9\-]+)'/g;
+    // 'STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ.all-traits.trait-name
+    const pattern1 = /'(STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ\.all-traits\.[a-zA-Z0-9\-]+)'/g;
     const newContent1 = content.replace(pattern1, (match, traitPath) => {
       fixCount++;
       // Convert to relative notation for cleaner code
@@ -74,8 +74,8 @@ function fixTraitQuotes(filePath) {
     content = newContent1;
     
     // Pattern 2: Single-quoted full path with closing paren
-    // 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.trait-name)
-    const pattern2 = /'(ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6\.all-traits\.[a-zA-Z0-9\-]+)\)/g;
+    // 'STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ.all-traits.trait-name)
+    const pattern2 = /'(STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ\.all-traits\.[a-zA-Z0-9\-]+)\)/g;
     const newContent2 = content.replace(pattern2, (match, traitPath) => {
       fixCount++;
       const traitName = traitPath.split('.').pop();
@@ -97,7 +97,7 @@ function fixTraitQuotes(filePath) {
     content = newContent3;
     
     // Pattern 4: impl-trait with full quoted path (should be relative)
-    const pattern4 = /\(impl-trait\s+'(ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6\.all-traits\.[a-zA-Z0-9\-]+)\)/g;
+    const pattern4 = /\(impl-trait\s+'(STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ\.all-traits\.[a-zA-Z0-9\-]+)\)/g;
     const newContent4 = content.replace(pattern4, (match, traitPath) => {
       fixCount++;
       const traitName = traitPath.split('.').pop();

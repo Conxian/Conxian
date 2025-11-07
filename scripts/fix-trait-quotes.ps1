@@ -40,9 +40,9 @@ foreach ($file in $clarFiles) {
         $fileReplacements = 0
         
         # Pattern 1: Remove quotes from use-trait statements
-        # Before: (use-trait sip-010-ft-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-trait')
+        # Before: (use-trait sip-010-ft-trait 'STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ.all-traits.sip-010-ft-trait')
         # After:  (use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
-        $pattern1 = "'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6\.all-traits\."
+        $pattern1 = "'STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ\.all-traits\."
         $replacement1 = ".all-traits."
         if ($content -match $pattern1) {
             $content = $content -replace $pattern1, $replacement1
@@ -54,7 +54,7 @@ foreach ($file in $clarFiles) {
         }
         
         # Pattern 2: Remove quotes and trailing quote from use-trait
-        # Before: (use-trait bond-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.bond-trait')
+        # Before: (use-trait bond-trait 'STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ.all-traits.bond-trait')
         # After:  (use-trait bond-trait .all-traits.bond-trait)
         $pattern2 = "'\)"
         $replacement2 = ")"
@@ -68,9 +68,9 @@ foreach ($file in $clarFiles) {
         }
         
         # Pattern 3: Remove quotes from impl-trait statements
-        # Before: (impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.ownable-trait)
+        # Before: (impl-trait 'STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ.all-traits.ownable-trait)
         # After:  (impl-trait .all-traits.ownable-trait)
-        $pattern3 = "\(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6\.all-traits\."
+        $pattern3 = "\(impl-trait 'STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ\.all-traits\."
         $replacement3 = "(impl-trait .all-traits."
         if ($content -match $pattern3) {
             $matches3 = ([regex]::Matches($originalContent, $pattern3)).Count
@@ -82,9 +82,9 @@ foreach ($file in $clarFiles) {
         }
         
         # Pattern 4: Remove quotes from other principal references
-        # Before: 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.errors.err-trait
-        # After:  ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.errors.err-trait
-        $pattern4 = "'(ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6\.[a-z0-9-]+\.)"
+        # Before: 'STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ.errors.err-trait
+        # After:  STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ.errors.err-trait
+        $pattern4 = "'(STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ\.[a-z0-9-]+\.)"
         $replacement4 = '$1'
         if ($content -match $pattern4) {
             $matches4 = ([regex]::Matches($originalContent, $pattern4)).Count

@@ -15,7 +15,7 @@ const contractPrincipal = (deployer: Account, contractName: string) =>
 // Default configuration
 const DEFAULT_CONFIG = {
   // Oracle configuration
-  ORACLE_ADMIN: 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6',
+  ORACLE_ADMIN: 'STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ',
   
   // Circuit breaker configuration
   FAILURE_THRESHOLD: 300, // 3% in basis points
