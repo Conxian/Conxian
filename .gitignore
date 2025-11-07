@@ -6,10 +6,11 @@
 # 1. ENVIRONMENT & SECRETS
 # ---------------------------------------------------------------------------
 # Environment files
-!.env.example
 .env
 .env.*
+!.env.example
 !.env.example.*
+backups/env/**
 
 # Security & Private Keys (CRITICAL)
 *.pem
@@ -120,7 +121,7 @@ Thumbs.db
 .stacks-db/
 .chainstate/
 
-# Clarinet
+# Clarinet specific
 **/settings/Mainnet.toml
 **/settings/Testnet.toml
 .clarinet/
@@ -128,14 +129,14 @@ artifacts/
 clarinet-windows-x64.msi
 clarinet_check_output.txt
 
-# Deployment directories
+# Stacks deployment directories
 stacks/simnet/
 stacks/deployments/simnet/
 stacks/deployments/testnet/
 stacks/deployments/mainnet/
 stacks/.cache/
 
-# Wallet files
+# Bitcoin/Stacks wallet files
 *.wallet
 *.seed
 stx-wallet*
@@ -149,28 +150,33 @@ btc-wallet*
 *.tmp
 *.temp
 *~
-*#
 
 # ---------------------------------------------------------------------------
 # 10. PROJECT SPECIFIC EXCLUSIONS
 # ---------------------------------------------------------------------------
-# Monitoring & Analytics
+# Conxian specific
 monitoring/logs/
 analytics/cache/
 
-# External repositories
+# StacksOrbit standalone repository (separate GitHub repo)
 stacksorbit/
 
-# IDE specific
-.kiro/
+# Kiro IDE specific files
+.kiro/*
 .kiro/specs/
 
-# AI & Documentation
-.github/charmodes/
+# Prompt files (sensitive AI instructions)
+.github/chatmodes/*
 .github/copilot-instructions.md
-.trae/rules/
+
+# Trae rules documentation
+.trae/rules/*
 
 # Contract backups
 contracts/dex/*backup.clar
+
 backups/env/.env.*
+
 *.devnet-plan.yaml.backup
+
+*#
