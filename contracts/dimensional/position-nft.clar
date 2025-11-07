@@ -23,19 +23,31 @@
 (define-non-fungible-token dimensional-position-token uint)
 
 ;; Position metadata - dimensional specific
-(define-map dimensional-positions {id: uint} {
-  owner: principal,
-  core-contract: principal,
-  position-id: uint,
-  dimensional-data: (string-ascii 1024),
-  created-at: uint,
-  last-updated: uint,
-  metadata: (optional (string-utf8 1024))
-})
+(define-map dimensional-positions
+  { id: uint }
+  {
+    owner: principal,
+    core-contract: principal,
+    position-id: uint,
+    dimensional-data: (string-ascii 1024),
+    created-at: uint,
+    last-updated: uint,
+    metadata: (optional (string-utf8 1024)),
+  }
+)
 
 ;; Token approvals
-(define-map token-approvals {token-id: uint} principal)
-(define-map operator-approvals {owner: principal, operator: principal} bool)
+(define-map token-approvals
+  { token-id: uint }
+  principal
+)
+(define-map operator-approvals
+  {
+    owner: principal,
+    operator: principal,
+  }
+  bool
+)
 
 ;; ===== Core NFT Functions =====
 (define-read-only (get-token-uri (token-id uint))
@@ -46,25 +58,37 @@
   (ok (nft-get-owner? dimensional-position-token token-id))
 )
 
-(define-public (transfer (token-id uint) (sender principal) (recipient principal))
+(define-public (transfer
+    (token-id uint)
+    (sender principal)
+    (recipient principal)
+  )
   (match (nft-get-owner? dimensional-position-token token-id)
-    token-owner
-      (begin
-        (asserts! (or
+    token-owner (begin
+      (asserts!
+        (or
           (is-eq tx-sender token-owner)
-          (is-eq (some tx-sender) (map-get? token-approvals {token-id: token-id}))
-          (default-to false (map-get? operator-approvals {owner: token-owner, operator: tx-sender}))
-        ) (err ERR_NOT_APPROVED))
-
-        (match (nft-transfer? dimensional-position-token token-id sender recipient)
-          ok-val
-            (begin
-              (map-delete token-approvals {token-id: token-id})
-              (ok true)
-            )
-          err-code (err err-code)
+          (is-eq (some tx-sender)
+            (map-get? token-approvals { token-id: token-id })
+          )
+          (default-to false
+            (map-get? operator-approvals {
+              owner: token-owner,
+              operator: tx-sender,
+            })
+          )
         )
+        (err ERR_NOT_APPROVED)
       )
+
+      (match (nft-transfer? dimensional-position-token token-id sender recipient)
+        ok-val (begin
+          (map-delete token-approvals { token-id: token-id })
+          (ok true)
+        )
+        err-code (err err-code)
+      )
+    )
     (err ERR_NONEXISTENT_TOKEN)
   )
 )
@@ -72,26 +96,32 @@
 ;; ===== Position NFT Trait Implementation =====
 (define-public (mint-position-nft
     (recipient principal)
-    (position-data (tuple (position-id uint) (pool principal) (lower-tick int) (upper-tick int) (liquidity uint)))
+    (position-data {
+      position-id: uint,
+      pool: principal,
+      lower-tick: int,
+      upper-tick: int,
+      liquidity: uint,
+    })
   )
   (let (
-    (token-id (var-get next-token-id))
-    (current-block u0)
-  )
+      (token-id (var-get next-token-id))
+      (current-block u0)
+    )
     (asserts! (is-eq tx-sender (var-get owner)) (err ERR_UNAUTHORIZED))
 
     ;; Mint NFT
     (try! (nft-mint? dimensional-position-token token-id recipient))
 
     ;; Store dimensional position data
-    (map-set dimensional-positions {id: token-id} {
+    (map-set dimensional-positions { id: token-id } {
       owner: recipient,
       core-contract: (get pool position-data),
       position-id: (get position-id position-data),
       dimensional-data: "dimensional-position",
       created-at: current-block,
       last-updated: current-block,
-      metadata: none
+      metadata: none,
     })
 
     ;; Increment token ID
@@ -101,33 +131,42 @@
   )
 )
 
-(define-public (burn-position-nft (token-id uint) (token-owner principal))
-  (let (
-    (position (unwrap! (map-get? dimensional-positions {id: token-id}) (err ERR_NONEXISTENT_TOKEN)))
+(define-public (burn-position-nft
+    (token-id uint)
+    (token-owner principal)
   )
+  (let ((position (unwrap! (map-get? dimensional-positions { id: token-id })
+      (err ERR_NONEXISTENT_TOKEN)
+    )))
     (asserts! (is-eq tx-sender (get owner position)) (err ERR_UNAUTHORIZED))
 
     ;; Burn NFT
     (try! (nft-burn? dimensional-position-token token-id token-owner))
 
     ;; Remove position data
-    (map-delete dimensional-positions {id: token-id})
+    (map-delete dimensional-positions { id: token-id })
 
     (ok true)
   )
 )
 
-(define-public (transfer-position-nft (token-id uint) (sender principal) (recipient principal))
-  (let (
-    (position (unwrap! (map-get? dimensional-positions {id: token-id}) (err ERR_NONEXISTENT_TOKEN)))
+(define-public (transfer-position-nft
+    (token-id uint)
+    (sender principal)
+    (recipient principal)
   )
+  (let ((position (unwrap! (map-get? dimensional-positions { id: token-id })
+      (err ERR_NONEXISTENT_TOKEN)
+    )))
     (asserts! (is-eq tx-sender (get owner position)) (err ERR_UNAUTHORIZED))
 
     ;; Update position ownership
-    (map-set dimensional-positions {id: token-id} (merge position {
-      owner: recipient,
-      last-updated: u0
-    }))
+    (map-set dimensional-positions { id: token-id }
+      (merge position {
+        owner: recipient,
+        last-updated: u0,
+      })
+    )
 
     ;; Transfer NFT
     (try! (transfer token-id sender recipient))
@@ -137,13 +176,13 @@
 )
 
 (define-read-only (get-position-from-nft (token-id uint))
-  (match (map-get? dimensional-positions {id: token-id})
+  (match (map-get? dimensional-positions { id: token-id })
     position (ok {
       position-id: (get position-id position),
       pool: (get core-contract position),
       lower-tick: 0,
       upper-tick: 0,
-      liquidity: u0
+      liquidity: u0,
     })
     (err ERR_NONEXISTENT_TOKEN)
   )
@@ -157,7 +196,7 @@
 )
 
 (define-read-only (get-nft-metadata (token-id uint))
-  (match (map-get? dimensional-positions {id: token-id})
+  (match (map-get? dimensional-positions { id: token-id })
     position (ok (get metadata position))
     (err ERR_NONEXISTENT_TOKEN)
   )

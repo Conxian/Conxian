@@ -100,7 +100,7 @@
     (leverage uint)
   )
   (let (
-    (params (unwrap! (map-get? asset-params {asset: asset}) (err ERR_INVALID_PARAM)))
+    (params (unwrap! (map-get? asset-params {asset: asset}) ERR_INVALID_PARAM))
     (global (var-get global-params))
     (base-margin (/ u10000 leverage))
     
@@ -142,7 +142,7 @@
     (asset principal)
   )
   (let (
-    (params (unwrap! (map-get? asset-params {asset: asset}) (err ERR_INVALID_PARAM)))
+    (params (unwrap! (map-get? asset-params {asset: asset}) ERR_INVALID_PARAM))
     (global (var-get global-params))
     (is-long (> (get size position) 0))
     (size-abs (to-uint (if (>= (get size position) 0)

@@ -5,6 +5,7 @@
 (use-trait risk-trait .all-traits.risk-trait)
 (use-trait oracle-trait .all-traits.oracle-trait)
 (use-trait dimensional-trait .all-traits.dimensional-trait)
+(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
 
 ;; ===== Constants =====
 (define-constant ERR_UNAUTHORIZED (err u4000))
@@ -43,10 +44,9 @@
   )
   (let (
     (current-block block-height)
-    (position (unwrap! (contract-call? (var-get position-manager-contract) get-position-by-owner position-owner position-id) (err u4004)))
+    (position (unwrap! (contract-call? (contract-of dimensional-trait (unwrap-panic (var-get position-manager-contract))) get-position-by-owner position-owner position-id) (err u4004)))
     (asset (get asset position))
-    (price (unwrap! (contract-call? (var-get oracle-contract) get-price asset) (err u4005)))
-    (liquidation-price (unwrap! (contract-call? (var-get risk-manager-contract) get-liquidation-price position price) (err u4006)))
+    (price (unwrap! (contract-call? (contract-of oracle-trait (unwrap-panic (var-get oracle-contract))) get-price asset) (err u4005)))
   )
     ;; Verify position can be liquidated
     (asserts! (is-eq (get status position) ACTIVE) (err u4007))
@@ -70,14 +70,14 @@
         ))
         (remaining-collateral (- collateral-value reward-amount))
       )
-        ;; Transfer reward to liquidator
-        (try! (as-contract (contract-call? asset transfer reward-amount (as-contract tx-sender) caller none)))
+        ;; Transfer reward to liquidator via SIP-010
+        (try! (as-contract (contract-call? (contract-of sip-010-ft-trait asset) transfer reward-amount (as-contract tx-sender) caller none)))
 
         ;; Transfer remaining collateral to insurance fund
-        (try! (as-contract (contract-call? asset transfer remaining-collateral (as-contract tx-sender) (var-get insurance-fund) none)))
+        (try! (as-contract (contract-call? (contract-of sip-010-ft-trait asset) transfer remaining-collateral (as-contract tx-sender) (var-get insurance-fund) none)))
 
         ;; Close the position
-        (try! (contract-call? (var-get position-manager-contract) force-close-position position-owner position-id price))
+        (try! (contract-call? (contract-of dimensional-trait (unwrap-panic (var-get position-manager-contract))) force-close-position position-owner position-id price))
 
         ;; Record liquidation
         (map-set liquidations {
@@ -136,8 +136,8 @@
     (position-id uint)
   )
   (let (
-    (position (unwrap! (contract-call? (var-get position-manager-contract) get-position-by-owner position-owner position-id) (err u4004)))
-    (price (unwrap! (contract-call? (var-get oracle-contract) get-price (get asset position)) (err u4005)))
+    (position (unwrap! (contract-call? (contract-of dimensional-trait (unwrap-panic (var-get position-manager-contract))) get-position-by-owner position-owner position-id) (err u4004)))
+    (price (unwrap! (contract-call? (contract-of oracle-trait (unwrap-panic (var-get oracle-contract))) get-price (get asset position)) (err u4005)))
     (margin-ratio (calculate-margin-ratio position price))
     (liquidation-price (unwrap! (contract-call? (var-get risk-manager-contract) get-liquidation-price position price) (err u4006)))
   )
