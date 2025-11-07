@@ -19,6 +19,8 @@
 (define-constant ADJUSTMENT_COOLDOWN u144)          ;; ~1 day
 
 ;; State
+(define-data-var owner principal tx-sender)
+(define-data-var owner-contract principal tx-sender)
 (define-data-var is-initialized bool false)
 (define-data-var price-initializer (optional principal) none)
 (define-data-var amm-contract (optional principal) none)
@@ -38,7 +40,8 @@
 ;; @returns A response tuple with `(ok true)` if successful, `(err ERR_UNAUTHORIZED)` or `(err ERR_ALREADY_INITIALIZED)` otherwise.
 (define-public (initialize (price-initializer-principal principal) (amm-principal principal))
     (let ((caller tx-sender))
-        (asserts! (is-eq caller (contract-call? .all-traits.ownable-trait get-owner)) ERR_UNAUTHORIZED)
+        ;; Use configured owner contract, not aggregator as contract
+        (asserts! (is-eq caller (contract-call? (var-get owner-contract) get-owner)) ERR_UNAUTHORIZED)
         (asserts! (not (var-get is-initialized)) ERR_ALREADY_INITIALIZED)
         (asserts! (is-contract price-initializer-principal) ERR_INVALID_PRINCIPAL)
         (asserts! (is-contract amm-principal) ERR_INVALID_PRINCIPAL)
@@ -49,6 +52,16 @@
         (print {event: "initialized", sender: tx-sender, price-initializer: price-initializer-principal, amm-contract: amm-principal, block-height: block-height})
         (ok true)
     )
+)
+
+;; Admin: set owner contract principal (must be called by current owner)
+(define-public (set-owner-contract (p principal))
+  (begin
+    (asserts! (is-eq tx-sender (var-get owner)) ERR_UNAUTHORIZED)
+    (asserts! (is-contract p) ERR_INVALID_PRINCIPAL)
+    (var-set owner-contract p)
+    (ok true)
+  )
 )
 
 ;; ===== Core Monitoring =====

@@ -1,12 +1,11 @@
 ;; governance.clar
 ;; Governance and parameter management for dimensional engine
 
-(use-trait dimensional-core-trait .all-traits.dimensional-trait)
-(use-trait governance-token-trait .all-traits.governance-token-trait)
-(use-trait governance-trait .all-traits.governance-trait)
-
-(use-trait governance_trait .all-traits.governance-trait)
-(use-trait governance-trait .all-traits.governance-trait)
+;; Trait imports (ensure centralized traits are available; remove duplicates)
+(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
+;; (use-trait dimensional-core-trait .all-traits.dimensional-core-trait)
+;; (use-trait governance-token-trait .all-traits.governance-token-trait)
+;; (use-trait governance-trait .all-traits.governance-trait)
 
 ;; ===== Constants =====
 (define-constant ERR_UNAUTHORIZED (err u5000))
@@ -18,7 +17,7 @@
 
 ;; ===== Data Variables =====
 (define-data-var owner principal tx-sender)
-(define-data-var governance-token principal)
+(define-data-var governance-token principal tx-sender)
 (define-data-var voting-delay uint u100)  ;; ~20 minutes
 (define-data-var voting-period uint u720) ;; ~1 day
 (define-data-var proposal-threshold uint u100000000)  ;; 100 tokens
@@ -44,7 +43,7 @@
 })
 
 ;; Track if address has voted on a proposal
-(define-map has-voted {(proposal-id: uint, voter: principal)} bool)
+(define-map has-voted {proposal-id: uint, voter: principal} bool)
 
 ;; Track next proposal ID
 (define-data-var next-proposal-id uint u1)
@@ -87,21 +86,21 @@
 (define-public (cast-vote (proposal-id uint) (support bool))
   (let (
     (proposal (unwrap! (map-get? proposals {id: proposal-id}) (err u5001)))
-    (has-voted? (default-to false (map-get? has-voted {(proposal-id: proposal-id, voter: tx-sender)})))
+    (has-voted? (default-to false (map-get? has-voted {proposal-id: proposal-id, voter: tx-sender})))
     (weight (unwrap! (contract-call? (var-get governance-token) get-votes tx-sender block-height) (err u5001)))
   )
-    (asserts! (and (>= block-height (get proposal 'start-block)) 
-                  (<= block-height (get proposal 'end-block))) 
+    (asserts! (and (>= block-height (get start-block proposal)) 
+                  (<= block-height (get end-block proposal))) 
       ERR_VOTING_NOT_ACTIVE)
     (asserts! (not has-voted?) ERR_ALREADY_VOTED)
     
     ;; Update vote counts
     (if support
       (map-set proposals {id: proposal-id} (merge proposal {
-        'for-votes: (+ (get proposal 'for-votes) weight)
+        for-votes: (+ (get for-votes proposal) weight)
       }))
       (map-set proposals {id: proposal-id} (merge proposal {
-        'against-votes: (+ (get proposal 'against-votes) weight)
+        against-votes: (+ (get against-votes proposal) weight)
       }))
     )
     
@@ -111,7 +110,7 @@
       votes: weight
     })
     
-    (map-set has-voted {(proposal-id: proposal-id, voter: tx-sender)} true)
+    (map-set has-voted {proposal-id: proposal-id, voter: tx-sender} true)
     
     (ok true)
   )
@@ -120,32 +119,32 @@
 (define-public (execute (proposal-id uint))
   (let (
     (proposal (unwrap! (map-get? proposals {id: proposal-id}) (err u5001)))
-    (quorum (/ (* (+ (get proposal 'for-votes) (get proposal 'against-votes)) u100) 
+    (quorum (/ (* (+ (get for-votes proposal) (get against-votes proposal)) u100) 
               (unwrap! (contract-call? (var-get governance-token) total-supply) (err u5001))))
   )
-    (asserts! (is-eq tx-sender (get proposal 'proposer)) ERR_UNAUTHORIZED)
-    (asserts! (>= block-height (get proposal 'end-block)) ERR_VOTING_NOT_ACTIVE)
-    (asserts! (not (get proposal 'executed)) ERR_VOTING_CLOSED)
-    (asserts! (not (get proposal 'canceled)) ERR_VOTING_CLOSED)
-    (asserts! (> (get proposal 'for-votes) (get proposal 'against-votes)) ERR_VOTING_CLOSED)
+    (asserts! (is-eq tx-sender (get proposer proposal)) ERR_UNAUTHORIZED)
+    (asserts! (>= block-height (get end-block proposal)) ERR_VOTING_NOT_ACTIVE)
+    (asserts! (not (get executed proposal)) ERR_VOTING_CLOSED)
+    (asserts! (not (get canceled proposal)) ERR_VOTING_CLOSED)
+    (asserts! (> (get for-votes proposal) (get against-votes proposal)) ERR_VOTING_CLOSED)
     (asserts! (>= quorum u3000) ERR_VOTING_CLOSED)  ;; At least 30% quorum
     
     ;; Mark as executed
     (map-set proposals {id: proposal-id} (merge proposal {
-      'executed: true
+      executed: true
     }))
     
     ;; Execute the proposal
     (match (contract-call? 
-      (get proposal 'target) 
-      (get proposal 'function)
-      (get proposal 'args)
+      (get target proposal) 
+      (get function proposal)
+      (get args proposal)
     )
       result (ok result)
       error (begin
         ;; Revert execution status if call fails
         (map-set proposals {id: proposal-id} (merge proposal {
-          'executed: false
+          executed: false
         }))
         error
       )

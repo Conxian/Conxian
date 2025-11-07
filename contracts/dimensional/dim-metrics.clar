@@ -73,7 +73,7 @@
     
     (map-set metrics
       {dim-id: dim-id, metric-id: metric-id}
-      {value: value, last-updated: block-height}
+      {value: value, last-updated: (unwrap-panic (get-block-info? time (- block-height u1)))}
     )
     (ok true)
   )
@@ -109,7 +109,7 @@
     (asserts! (<= (get metric-id update) u2) ERR_INVALID_METRIC)
     (map-set metrics
       {dim-id: dim-id, metric-id: (get metric-id update)}
-      {value: (get value update), last-updated: block-height}
+      {value: (get value update), last-updated: (unwrap-panic (get-block-info? time (- block-height u1)))}
     )
     (ok dim-id)
   )

@@ -2,7 +2,7 @@
 ;; Implements unified liquidity provisioning for the DEX integration layer.
 
 ;; SIP-010: Fungible Token Standard
-(use-trait ft-trait .requirements.sip-010-trait-ft-standard.ft-trait)
+(use-trait ft-trait .all-traits.sip-010-ft-trait)
 
 ;; Constants
 ;; Error codes

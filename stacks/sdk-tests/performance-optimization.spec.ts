@@ -5,7 +5,7 @@ import {
   beforeAll,
   beforeEach,
 } from 'vitest';
-import type { Simnet } from '@hirosystems/clarinet-sdk';
+import type { Simnet } from '@stacks/clarinet-sdk';
 import { Cl } from '@stacks/transactions';
 
 declare module 'vitest' {

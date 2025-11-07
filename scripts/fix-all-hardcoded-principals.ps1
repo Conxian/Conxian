@@ -26,7 +26,7 @@ $totalReplacements = 0
 $errors = @()
 
 # Define the hardcoded principal to find
-$HARDCODED_PRINCIPAL = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+$HARDCODED_PRINCIPAL = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
 # List of files with hardcoded principals (from comprehensive analysis)
 $filesToFix = @(
@@ -76,7 +76,7 @@ foreach ($relativeFile in $filesToFix) {
         $fileReplacements = 0
         
         # Pattern 1: ST3...contract-name -> .contract-name
-        # Matches: ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.contract-name
+        # Matches: STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ.contract-name
         $pattern1 = "$HARDCODED_PRINCIPAL\.([a-z0-9-]+)"
         $matches1 = [regex]::Matches($content, $pattern1)
         if ($matches1.Count -gt 0) {
@@ -92,7 +92,7 @@ foreach ($relativeFile in $filesToFix) {
         }
         
         # Pattern 2: ST3...path.contract-name -> .path.contract-name
-        # Matches: ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.path.contract-name
+        # Matches: STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ.path.contract-name
         $pattern2 = "$HARDCODED_PRINCIPAL\.([a-z0-9-]+)\.([a-z0-9-]+)"
         $matches2 = [regex]::Matches($content, $pattern2)
         if ($matches2.Count -gt 0) {

@@ -123,7 +123,7 @@ npm test
 
   ```bash
   $ clarinet check
-  error: NoSuchContract("ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.all-traits")
+  error: NoSuchContract("STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ.all-traits")
   ```
 
   **Additional Issues Found**:

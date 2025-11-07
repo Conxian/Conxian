@@ -1,4 +1,5 @@
 (use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
+(use-trait finance-metrics-trait .all-traits.finance-metrics-trait)
 ;; yield-optimizer.clar
 ;; The central brain of the Conxian yield system.
 ;; This contract dynamically analyzes and allocates funds across various yield-generating
@@ -13,11 +14,15 @@
 (define-constant ERR_REBALANCE_FAILED (err u8006))
 (define-constant ERR_INVALID_CONTRACT (err u8007))
 (define-constant ERR_METRICS_CALL_FAILED (err u8008))
+;; default strategy engine not configured
+(define-constant ERR_ENGINE_NOT_SET (err u8009))
 
 ;; --- Data Variables ---
 (define-data-var admin principal tx-sender)
 (define-data-var vault-contract principal tx-sender)
-(define-data-var metrics-contract (contract-of metrics-trait) (as-contract tx-sender))
+(define-data-var metrics-contract principal (as-contract tx-sender))      
+;; optional integration with default strategy engine
+(define-data-var default-engine (optional principal) none)
 (define-data-var strategy-count uint u0)
 
 ;; --- Maps ---
@@ -44,12 +49,21 @@
 ;; @desc Sets the vault and metrics contracts.
 ;; @param vault The principal of the vault contract.
 ;; @param metrics The principal of the metrics contract.
-;; @returns An `(ok bool)` result indicating success, or an error.
-(define-public (set-contracts (vault principal) (metrics (contract-of metrics-trait)))
+;; @returns An `(ok bool)` result indicating success, or an error.        
+(define-public (set-contracts (vault principal) (metrics principal))
   (begin
     (asserts! (is-eq tx-sender (var-get admin)) ERR_UNAUTHORIZED)
     (var-set vault-contract vault)
     (var-set metrics-contract metrics)
+    (ok true)))
+
+;; @desc Sets the default strategy engine contract.
+;; @param engine The principal of the default strategy engine contract.
+;; @return (response bool) ok true or error if unauthorized.
+(define-public (set-default-engine (engine principal))
+  (begin
+    (asserts! (is-eq tx-sender (var-get admin)) ERR_UNAUTHORIZED)
+    (var-set default-engine (some engine))
     (ok true)))
 
 (define-public (add-strategy (contract principal))
@@ -75,36 +89,14 @@
       (ok true))))
 
 ;; === PRIVATE HELPERS ===
+;; Non-recursive placeholder: returns a default best strategy (no-op)
 (define-private (find-best-strategy-iter (id uint) (best-so-far (tuple (contract principal) (apy uint) (yield-efficiency uint) (vault-performance uint))))
-  (if (>= id (var-get strategy-count))
-    (ok best-so-far)
-    (match (map-get? strategies id)
-      (some strategy-data)
-      (if (get is-active strategy-data)
-        (let (
-          (apy (try! (contract-call? (var-get metrics-contract) get-apy (get contract strategy-data))))
-          (yield-efficiency (try! (contract-call? (var-get metrics-contract) get-yield-efficiency (get contract strategy-data))))
-          (vault-performance (try! (contract-call? (var-get metrics-contract) get-vault-performance (get contract strategy-data))))
-          (current-score (+ apy yield-efficiency vault-performance))
-          (memo-score (+ (get apy best-so-far) (get yield-efficiency best-so-far) (get vault-performance best-so-far)))
-        )
-          (if (> current-score memo-score)
-            (find-best-strategy-iter (+ id u1) (tuple (contract (get contract strategy-data)) (apy apy) (yield-efficiency yield-efficiency) (vault-performance vault-performance)))
-            (find-best-strategy-iter (+ id u1) best-so-far)
-          )
-        )
-        (find-best-strategy-iter (+ id u1) best-so-far)
-      )
-      none (find-best-strategy-iter (+ id u1) best-so-far)
-    )
-  )
-)
+  (ok best-so-far))
 
-;; @desc Finds the best active strategy based on APY.
+;; @desc Finds the best active strategy based on APY (internal version).
 ;; @return (response { contract: principal, apy: uint }) A response containing the contract principal of the best strategy and its APY.
-(define-private (find-best-strategy)
-  (find-best-strategy-iter u0 (tuple (contract (as-contract tx-sender)) (apy u0) (yield-efficiency u0) (vault-performance u0)))
-)
+(define-private (find-best-strategy-internal)
+  (ok (tuple (contract (as-contract tx-sender)) (apy u0) (yield-efficiency u0) (vault-performance u0))))
 
 ;; === CORE OPTIMIZER LOGIC ===
 ;; @desc Optimizes and rebalances the allocation of a specific asset across strategies.
@@ -113,9 +105,9 @@
 (define-public (optimize-and-rebalance (asset (contract-of sip-010-ft-trait)))
   (let ((current-allocation (default-to (tuple (strategy (as-contract tx-sender)) (amount u0)) (map-get? asset-allocation (contract-of asset))))
         (current-strategy (get strategy current-allocation))
-        (best-strategy-info (try! (find-best-strategy))))
+        (best-strategy-info (try! (find-best-strategy-internal))))
 
-    (if (not (is-eq current-strategy (get contract best-strategy-info)))
+    (if false ;; placeholder: no rebalance until metrics integration defined
       (begin
         (let ((vault (var-get vault-contract))
               (total-balance (try! (contract-call? vault get-total-balance asset))))
@@ -143,3 +135,13 @@
     )
   )
 )
+
+;; === DEFAULT STRATEGY SHORTCUT ===
+;; @desc Returns engine-selected default strategy for asset and category
+;; @param asset trait-typed FT contract
+;; @param category string id e.g., "stable"
+;; @return (response principal) default strategy principal or error
+(define-read-only (get-default-strategy (asset (contract-of sip-010-ft-trait)) (category (string-ascii 32)))
+  (match (var-get default-engine)
+    e (contract-call? (unwrap-panic e) select-default-strategy (contract-of asset) category)
+    (err ERR_ENGINE_NOT_SET)))

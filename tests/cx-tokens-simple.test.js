@@ -87,7 +87,7 @@ const baseContracts = {
     decimals: 6,
     totalSupply: 0,
     balances: new Map(),
-    owner: 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6',
+    owner: 'STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ',
     async mint(recipient: string, amount: number, options?: { from: string }) {
   // Check if the caller is the owner (or no specific caller is specified)
   const caller = options?.from || this.owner;
@@ -136,7 +136,7 @@ const baseContracts = {
     totalSupply: 0,
     balances: new Map(),
     delegates: new Map(),
-    owner: 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6',
+    owner: 'STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ',
     // Initialize with some balance for the owner to allow delegation tests to pass
     async initialize() {
       await this.mint('delegator', 1000000);
@@ -225,7 +225,7 @@ const baseContracts = {
     totalSupply: 0,
     balances: new Map(),
     migrationDeadline: 0,
-    owner: 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6',
+    owner: 'STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ',
     async mint(recipient: string, amount: number, options?: { from: string }) {
   // Check if the caller is the owner (or no specific caller is specified)
   const caller = options?.from || this.owner;
@@ -281,7 +281,7 @@ const baseContracts = {
     symbol: 'CXTR',
     decimals: 6,
     totalSupply: 0,
-    owner: 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6',
+    owner: 'STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ',
     async getName() {
       return { value: this.name };
     },
@@ -305,7 +305,7 @@ const baseContracts = {
   cxsToken: {
     name: 'Conxian Staking NFT',
     symbol: 'CXS',
-    owner: 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6',
+    owner: 'STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ',
     tokenId: 1,
     tokenOwners: new Map<number, string>(),
     tokenUris: new Map<number, string>(),
@@ -367,7 +367,7 @@ describe('CX* Token Contracts', () => {
       expect((await cxd.getSymbol()).value).toBe('CXD');
       expect((await cxd.getDecimals()).value).toBe(6);
       expect((await cxd.getTotalSupply()).value).toBe(0);
-      expect((await cxd.getOwner()).value).toBe('ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6');
+      expect((await cxd.getOwner()).value).toBe('STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ');
     });
 
     it('should allow owner to mint tokens', async () => {

@@ -1,19 +1,45 @@
-# Environment variables
+# ===========================================================================
+# CONXIAN PROTOCOL - GITIGNORE
+# ===========================================================================
+
+# ---------------------------------------------------------------------------
+# 1. ENVIRONMENT & SECRETS
+# ---------------------------------------------------------------------------
+# Environment files
 .env
-*.env.*
+.env.*
 !.env.example
+!.env.example.*
+backups/env/**
 
-# Git hooks directory
-.githooks/
+# Security & Private Keys (CRITICAL)
+*.pem
+*.key
+*.p12
+*.private
+*.pfx
+*.crt
+*.cert
+private-key*
+deployer-key*
+wallet-seed*
+mnemonic*
+secrets*
 
-# Node / tooling
+# Configuration
+config.local.json
+
+# ---------------------------------------------------------------------------
+# 2. DEVELOPMENT TOOLS & CACHE
+# ---------------------------------------------------------------------------
+# Node.js
 node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
 
-# Python/cache
+# Python
 __pycache__/
 *.pyc
 *.pyo
@@ -22,34 +48,75 @@ __pycache__/
 pip-log.txt
 pip-delete-this-directory.txt
 
-# Rust (legacy just in case)
+# Rust
 target/
 Cargo.lock
 
-# IDE specific files
+# Cache directories
+.cache/
+.tmp/
+.temp/
+temp/
+tmp/
+.history/
+.githooks/
+
+# ---------------------------------------------------------------------------
+# 3. BUILD & DEPLOYMENT ARTIFACTS
+# ---------------------------------------------------------------------------
+dist/
+build/
+.deployments/
+
+# Deployment artifacts
+*.deployed.json
+*.deployed.yaml
+deployment-registry-*.json
+wallet-*.json
+deployer-*.json
+private-keys-*.txt
+
+# ---------------------------------------------------------------------------
+# 4. TESTING & COVERAGE
+# ---------------------------------------------------------------------------
+test-results/
+junit.xml
+coverage.xml
+coverage/
+.nyc_output/
+
+# ---------------------------------------------------------------------------
+# 5. LOGS
+# ---------------------------------------------------------------------------
+logs/
+clarinet.log
+*.log
+
+# ---------------------------------------------------------------------------
+# 6. IDE & EDITOR FILES
+# ---------------------------------------------------------------------------
 .vscode/
 .idea/
+*~
+.#*
 *.swp
 *.swo
 
-# Local development
-.deployments/
-.cache/
-
-# Logs
-logs/
-*.log
-
-# System Files
+# ---------------------------------------------------------------------------
+# 7. OS SPECIFIC FILES
+# ---------------------------------------------------------------------------
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
 
-# Secrets
-*.pem
-*.key
-*.p12
-
-# Stacks blockchain specific
+# ---------------------------------------------------------------------------
+# 8. STACKS BLOCKCHAIN SPECIFIC
+# ---------------------------------------------------------------------------
+# Chain data
 .stacks-chain/
 .stacks-db/
 .chainstate/
@@ -59,129 +126,61 @@ Thumbs.db
 **/settings/Testnet.toml
 .clarinet/
 artifacts/
+clarinet-windows-x64.msi
+clarinet_check_output.txt
 
-# Temporary files
-*.tmp
-*.temp
-.history/
-*.pfx
-*.crt
-*.cert
-
-# Local development
-.deployments/
-.cache/
-
-# Environment files (except example)
-!.env.example
-
-# Deployment artifacts
-*.deployed.json
-*.deployed.yaml
-
-# OS/editor
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-
-# Environment & Configuration
-#.env
-#.env.local
-#.env.development.local
-#.env.test.local
-#.env.production.local
-config.local.json
-
-# Clarinet/Stacks artifacts
+# Stacks deployment directories
 stacks/simnet/
 stacks/deployments/simnet/
 stacks/deployments/testnet/
 stacks/deployments/mainnet/
-clarinet.log
-.clarinet/
 stacks/.cache/
-*.devnet-plan.yaml.backup
 
-# Build artifacts
-/dist/
-/build/
-stacks/.cache/
-coverage/
-.nyc_output/
+# Bitcoin/Stacks wallet files
+*.wallet
+*.seed
+stx-wallet*
+btc-wallet*
 
-# Testing artifacts
-test-results/
-junit.xml
-coverage.xml
-
-# Deployment artifacts
-deployment-registry-*.json
-wallet-*.json
-deployer-*.json
-private-keys-*.txt
-
-# Logs
-logs/
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-lerna-debug.log*
-
-# Prompt files (sensitive AI instructions)
-
-
-# Backup files (automatically generated)
+# ---------------------------------------------------------------------------
+# 9. BACKUP & TEMPORARY FILES
+# ---------------------------------------------------------------------------
 *.backup
 *.bak
 *.tmp
+*.temp
 *~
-.#*
-#*#
 
-# Security & Private Keys (CRITICAL)
-*.pem
-*.key
-*.private
-private-key*
-deployer-key*
-wallet-seed*
-mnemonic*
-secrets*
-
-# Temporary files
-temp/
-tmp/
-.tmp/
-.temp/
-
+# ---------------------------------------------------------------------------
+# 10. PROJECT SPECIFIC EXCLUSIONS
+# ---------------------------------------------------------------------------
 # Conxian specific
 monitoring/logs/
 analytics/cache/
 
 # StacksOrbit standalone repository (separate GitHub repo)
-# See: https://github.com/Anya-org/stacksorbit
 stacksorbit/
 
 # Kiro IDE specific files
-#.kiro/*
-
-# Bitcoin/Stacks specific
-*.wallet
-*.seed
-stx-wallet*
-btc-wallet*
+.kiro/*
 .kiro/specs/
-.secrets/
-clarinet-windows-x64.msi
-clarinet_check_output.txt
+
+# Prompt files (sensitive AI instructions)
+.github/chatmodes/*
 .github/copilot-instructions.md
+
+# Trae rules documentation
+.trae/rules/*
+
+# Contract backups
+contracts/dex/*backup.clar
+
+backups/env/.env.*
+
+*.devnet-plan.yaml.backup
+  
+compilation-errors-clean.txt
+stacks/security/audit-prep/*.txt
+deployments/*.simnet-plan.yaml
+stacks/deployments/*.simnet-plan.yaml
+*#

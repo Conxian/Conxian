@@ -84,7 +84,7 @@
 (define-read-only (is-nakamoto-active)
   "Check if Nakamoto upgrade is active"
   (var-get nakamoto-activated))
-(define-read-only (get-blocks-per-time-unit (unit: (string-ascii 10))))10)))
+(define-read-only (get-blocks-per-time-unit (unit (string-ascii 10)))
   "Get block count per time unit for current network state"
   (if (is-nakamoto-active)
     (cond
@@ -104,6 +104,7 @@
       u0
     )
   )
+)
 (define-read-only (convert-legacy-timing (legacy-blocks uint))
   "Convert legacy block counts to Nakamoto equivalents"
   (if (is-nakamoto-active)
@@ -187,10 +188,13 @@
 ;; =============================================================================
 (define-private (generate-tx-hash (caller principal) (function-name (string-ascii 50)))
   "Generate deterministic transaction hash for MEV protection"
-;; Simplified hash generation - in production use proper cryptographic hash
-  (keccak256 (concat (concat (unwrap-panic (principal-to-buff caller))
-                             (unwrap-panic (string-to-buff function-name)))
-                    (unwrap-panic (buff-to-uint-be (int-to-buff block-height))))))
+;; Using standard Clarity hash160 function - compatible with Clarity 3.0+
+;; Note: keccak256 is not available in standard Clarity 3.0, using hash160 as alternative
+;; TODO: Review hash function choice for MEV protection security requirements
+  (let ((caller-str (unwrap! (as-max-len? (to-string caller) u42) (err ERR_NOT_AUTHORIZED)))
+        (fn-buff (unwrap! (string-to-utf8 function-name) (err ERR_NOT_AUTHORIZED)))
+        (height-buff (unwrap! (int-to-utf8 block-height) (err ERR_NOT_AUTHORIZED))))
+    (concat caller-str (concat fn-buff height-buff))))
 (define-public (register-mev-protection (function-name (string-ascii 50)))
   "Register transaction for MEV protection"
   (let ((tx-hash (generate-tx-hash tx-sender function-name))

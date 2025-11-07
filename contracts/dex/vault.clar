@@ -2,7 +2,6 @@
 ;; Implements vault-trait and vault-admin-trait with full system integration
 
 ;; Traits
-(use-trait vault-trait)
 (use-trait ft-trait .all-traits.sip-010-ft-trait)
 
 ;; Error Constants
@@ -117,7 +116,7 @@
     (if (> fee u0)
         (begin
           (map-set collected-fees asset (+ (default-to u0 (map-get? collected-fees asset)) fee))
-          (try! (contract-call? (var-get token-system-coordinator) trigger-revenue-distribution asset fee))
+          (try! (contract-call? (var-get token-system-coordinator) trigger-revenue-distribution))
           true)
         true)
     
@@ -177,7 +176,7 @@
         true)
     
     ;; Transfer tokens to user
-    (try! (as-contract (contract-call? asset transfer net-amount (as-contract tx-sender) user none)))
+    (try! (contract-call? asset transfer net-amount (as-contract tx-sender) user none))
     
     ;; Notify monitoring system
     (notify-protocol-monitor "withdraw" (tuple (asset asset) (amount net-amount)))
@@ -206,7 +205,7 @@
     (map-set collected-fees asset u0)
     
     ;; Notify revenue distributor
-    (try! (contract-call? (var-get token-system-coordinator) trigger-revenue-distribution asset collected))
+    (try! (contract-call? (var-get token-system-coordinator) trigger-revenue-distribution))
     
     (ok collected)))
 
@@ -272,7 +271,7 @@
     (asserts! (> amount u0) ERR_INVALID_AMOUNT)
     
     ;; Emergency withdrawal - transfer assets directly
-    (try! (as-contract (contract-call? asset transfer amount (as-contract tx-sender) recipient none)))
+    (try! (contract-call? asset transfer amount (as-contract tx-sender) recipient none))
     
     ;; Update vault balance
     (let ((current-balance (default-to u0 (map-get? vault-balances asset))))

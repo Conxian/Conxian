@@ -78,7 +78,7 @@ const hasRole = await simnet.callReadOnlyFn(
 ```text
 Conxian/
 ├── contracts/                  # Smart contract source files
-├── stacks/sdk-tests/           # TypeScript test files
+├── tests/                      # TypeScript test files
 ├── documentation/              # Project documentation
 ├── settings/                   # Network configs (Testnet.toml)
 ├── .github/workflows/          # CI/CD workflows
@@ -95,16 +95,19 @@ Conxian/
 When developing new contracts, follow these patterns for access control:
 
 1. **Import Access Control**
+
    ```clarity
-   (use-trait access-control-trait .access-control.access-control-trait)
+   (use-trait access-control-trait .all-traits.access-control-trait)
    ```
 
 2. **Define Required Roles**
+
    ```clarity
    (define-constant ROLE_OPERATOR 0x4f50455241544f52)  // "OPERATOR" in hex
    ```
 
 3. **Add Access Control Checks**
+
    ```clarity
    (define-public (protected-function)
      (begin
@@ -119,7 +122,7 @@ When developing new contracts, follow these patterns for access control:
 #### Creating a New Contract
 
 ```bash
-cd stacks/contracts
+cd contracts
 # Create new contract file
 touch my-contract.clar
 
@@ -167,9 +170,9 @@ vim ../Clarinet.toml
 #### Test Structure
 
 ```typescript
-// sdk-tests/my-contract.spec.ts
+// tests/my-contract.spec.ts
 import { describe, expect, it, beforeEach } from 'vitest';
-import { Simnet } from '@hirosystems/clarinet-sdk';
+ import { Simnet } from '@stacks/clarinet-sdk';
 
 describe('My Contract Tests', () => {
   let simnet: Simnet;
@@ -198,16 +201,16 @@ describe('My Contract Tests', () => {
 
 ```bash
 # Run all tests
-npm test
+npx vitest run
 
 # Run specific test file
-npm test -- my-contract.spec.ts
+npx vitest run -- my-contract.spec.ts
 
 # Run tests with coverage
-npm run test:coverage
+npx vitest run --coverage
 
 # Run tests in watch mode
-npm run test:watch
+npx vitest watch
 ```
 
 #### Test Categories
@@ -233,64 +236,13 @@ npx clarinet format
 npx clarinet docs
 ```
 
-## Nakamoto Development Guide
-
-### Nakamoto Timing Considerations
-
-**Fast Block Development**: Nakamoto introduces 3-5 second block times. The `nakamoto-compatibility.clar` contract provides timing conversion functions:
-
-```typescript
-// Test timing constants from nakamoto-compatibility.clar
-const NAKAMOTO_BLOCKS_PER_HOUR = 720;  // 5s blocks
-const NAKAMOTO_BLOCKS_PER_DAY = 17280;
-const LEGACY_BLOCKS_PER_DAY = 144;     // 10min blocks
-
-// Use contract conversion function
-const conversionResult = simnet.callReadOnlyFn(
-  'nakamoto-compatibility',
-  'convert-legacy-to-nakamoto',
-  [Cl.uint(144)], // 1 day in legacy blocks
-  deployer
-);
-expected(conversionResult.result).toBe(Cl.uint(17280));
-```
-
-**Bitcoin Finality Integration**:
-
-```typescript
-// Test Bitcoin finality functions (implemented in nakamoto-compatibility.clar)
-const result = simnet.callReadOnlyFn(
-  'nakamoto-compatibility',
-  'is-bitcoin-finalized',
-  [Cl.uint(blockHeight - 100)],
-  deployer
-);
-
-// Function uses caching and validation logic
-expect(result.result).toBe(Cl.bool(true));
-```
-
-**MEV Protection Testing**:
-
-```typescript
-// Test MEV protection mechanisms (basic framework in nakamoto-compatibility.clar)
-const protectionResult = simnet.callPublicFn(
-  'nakamoto-compatibility',
-  'enable-mev-protection',
-  [],
-  deployer // Admin function
-);
-
-expect(protectionResult.result).toBeOk();
-```
-
 ## Testing Framework
 
 ### Test Environment Setup
 
 ```typescript
 // Test setup with Simnet
-import { Simnet } from '@hirosystems/clarinet-sdk';
+ import { Simnet } from '@stacks/clarinet-sdk';
 import { Cl } from '@stacks/transactions';
 
 // Initialize test environment
@@ -471,10 +423,10 @@ npx clarinet check --verbose
 
 ```bash
 # Run tests with detailed output
-npm test -- --reporter=verbose
+npx vitest run -- --reporter=verbose
 
 # Debug specific test
-npm test -- --grep "failing test name"
+npx vitest run -- --grep "failing test name"
 
 # Check simnet state
 console.log(simnet.getBlockHeight());
@@ -589,7 +541,7 @@ git push origin feature/my-feature
 
 - **Documentation**: Check `/documentation/` directory
 - **GitHub Issues**: [Report bugs or request features](https://github.com/Anya-org/Conxian/issues)
-- **Code Examples**: See `sdk-tests/` for comprehensive examples
+- **Code Examples**: See `tests/` for comprehensive examples
 - **Community**: Join development discussions
 
 ### Common Resources
@@ -844,6 +796,7 @@ This document outlines the standardized error codes used across the Conxian prot
 ## Trait Registry
 
 ### Overview
+
 The Trait Registry is a central contract that manages trait implementations in the Conxian protocol. It provides a standardized way to discover and use traits across different contracts.
 
 ### Key Features
@@ -872,7 +825,7 @@ The Trait Registry is a central contract that manages trait implementations in t
   "my-trait"  ;; trait name
   1           ;; version
   "Description of my trait"
-  'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.my-contract
+  'STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ.my-contract
   false       ;; deprecated
   none        ;; replacement (optional)
 )
@@ -882,13 +835,13 @@ The Trait Registry is a central contract that manages trait implementations in t
 
 ```clarity
 ;; 1. Define the trait registry constant
-(define-constant TRAIT_REGISTRY 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.trait-registry)
+(define-constant TRAIT_REGISTRY 'STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ.trait-registry)
 
 ;; 2. Resolve the trait at deployment time
 (use-trait my-trait (unwrap! (contract-call? TRAIT_REGISTRY get-trait-contract 'my-trait) (err u1000)))
 
 ;; 3. Implement the trait
-(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.my-trait)
+(impl-trait 'STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ.my-trait)
 ```
 
 #### Checking if a Trait is Deprecated

@@ -237,7 +237,7 @@ foreach ($file in $contractFiles) {
     # DISABLED: explicit-principal rewrites (breaks Clarinet parsing and SDK rules)
     # Keeping block for reference but not executing.
     if ($false) {
-        $allTraitsPrincipal = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+        $allTraitsPrincipal = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
         if ($File.FullName -notmatch "all-traits\.clar$") {
             $useTraitRelRegex = "\(use-trait\s+([a-zA-Z0-9\-]+)\s+\.all-traits\.([a-zA-Z0-9\-]+)\)"
             $implTraitRelRegex = "\(impl-trait\s+\.all-traits\.([a-zA-Z0-9\-]+)\)"
@@ -370,9 +370,9 @@ foreach ($file in $contractFiles) {
     # FIX 5: Remove any remaining quote syntax in trait references
     # =========================================================================
     
-    if ($content -match "'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6\.\S+") {
+    if ($content -match "'STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ\.\S+") {
         $pattern = @'
-'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6\.([^\.\s]+)\.([^\.\s]+)
+'STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ\.([^\.\s]+)\.([^\.\s]+)
 '@
         $replacement = '.all-traits.$2'
         $content = $content -replace $pattern, $replacement
@@ -699,7 +699,7 @@ function Align-Manifest {
     return $result
 }
 
-$CanonicalPrincipal = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+$CanonicalPrincipal = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 $manifestResults = @()
 $manifestResults += Align-Manifest -ManifestPath "Clarinet.toml" -CanonicalPrincipal $CanonicalPrincipal -EnforceAddresses
 $manifestResults += Align-Manifest -ManifestPath "stacks/Clarinet.test.toml" -CanonicalPrincipal $CanonicalPrincipal -EnforceAddresses # enforce addresses in tests too

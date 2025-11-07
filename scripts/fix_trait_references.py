@@ -9,7 +9,7 @@ from pathlib import Path
 
 # Configuration
 ROOT_DIR = Path(__file__).resolve().parent.parent
-PATTERN = r"'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6\.all-traits\.([\w-]+)"
+PATTERN = r"'STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ\.all-traits\.([\w-]+)"
 REPLACEMENT = r".all-traits.\1"
 
 print("Updating trait references...")

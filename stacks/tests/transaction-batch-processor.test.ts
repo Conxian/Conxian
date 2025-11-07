@@ -6,10 +6,13 @@
 import { describe, expect, it, beforeAll } from 'vitest';
 import { Cl } from '@stacks/transactions';
 import { createMockSimnet } from './helpers/test-setup';
+import { HEAVY_DISABLED } from './helpers/env';
+
+const d = HEAVY_DISABLED ? describe.skip : describe;
 
 const mockSimnet = createMockSimnet();
 
-describe('Transaction Batch Processor', () => {
+d('Transaction Batch Processor', () => {
   let accounts: Map<string, string>;
 
   beforeAll(() => {

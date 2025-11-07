@@ -1,7 +1,7 @@
 // Keeper Finance Cron - records finance metrics periodically
 // Usage: node scripts/keeper_finance_cron.js
 
-const { initSimnet } = require('@hirosystems/clarinet-sdk');
+const { initSimnet } = require('@stacks/clarinet-sdk');
 const { Cl } = require('@stacks/transactions');
 
 (async () => {

@@ -1,0 +1,53 @@
+[project]
+name = "Conxian Core"
+description = "Core manifest: foundation + core contracts (dim-registry, dimensional-oracle, position-nft)"
+clarinet_version = "3.8.1"
+
+[accounts.deployer]
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+
+[contracts.all-traits]
+path = "../contracts/traits/all-traits.clar"
+clarity_version = 3
+epoch = "3.0"
+
+[contracts.utils-encoding]
+path = "../contracts/utils/encoding.clar"
+clarity_version = 3
+epoch = "3.0"
+
+[contracts.block-utils]
+path = "../contracts/utils/block-utils.clar"
+clarity_version = 3
+epoch = "3.0"
+
+[contracts.dim-registry]
+path = "../contracts/dimensional/dim-registry.clar"
+depends_on = ["all-traits"]
+clarity_version = 3
+epoch = "3.0"
+
+[contracts.dimensional-oracle]
+path = "../contracts/oracle/dimensional-oracle.clar"
+depends_on = ["all-traits"]
+clarity_version = 3
+epoch = "3.0"
+
+[contracts.position-nft]
+path = "../contracts/dimensional/position-nft.clar"
+depends_on = ["all-traits"]
+clarity_version = 3
+epoch = "3.0"
+
+# DEX Core (minimal)
+[disabled.circuit-breaker]
+path = "../contracts/security/circuit-breaker.clar"
+depends_on = ["all-traits"]
+clarity_version = 3
+epoch = "3.0"
+
+[contracts.advanced-router-dijkstra]
+path = "../contracts/dimensional/advanced-router-dijkstra.clar"
+depends_on = ["all-traits"]
+clarity_version = 3
+epoch = "3.0"

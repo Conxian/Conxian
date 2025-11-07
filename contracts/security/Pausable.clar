@@ -1,6 +1,5 @@
-
-
 (use-trait pausable-trait .all-traits.pausable-trait)
+(impl-trait .all-traits.pausable-trait)
 (define-constant ERR_PAUSED (err u200))
 (define-constant ERR_NOT_PAUSED (err u201))
 (define-data-var paused bool false)

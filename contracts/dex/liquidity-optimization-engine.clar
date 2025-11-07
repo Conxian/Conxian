@@ -324,6 +324,8 @@
           (begin
             (print {event: "rebalance-skipped", pool-id: pool-id, utilization: utilization-rate})
             (ok true)))))))
+(define-private (execute-pool-rebalance (pool-id uint) (asset principal))
+  (ok true))
 
 (define-public (check-rebalance-triggers (pool-id uint) (asset principal))
   (internal-check-rebalance-triggers pool-id asset))
@@ -336,23 +338,5 @@
     (print {event: "emergency-mode-activated", pool-id: pool-id})
     (ok true)))
 
-(define-private (execute-pool
-  (pool-id uint)
-  (asset principal)
-  (action (string-ascii 50))
-  (amount uint))
-  "Execute a pool operation (e.g., deposit, withdraw, rebalance)"
-  (let ((pool (unwrap! (map-get? liquidity-pools {pool-id: pool-id, asset: asset}) ERR_POOL_NOT_FOUND)))
-    (match (var-get optimization-strategy)
-      "yield-focused" (begin
-        (try! (optimize-yield pool-id asset))
-        (ok true))
-      "risk-averse" (begin
-        (try! (optimize-risk-averse pool-id asset))
-        (ok true))
-      (begin
-        (try! (optimize-balanced (list {pool-id: pool-id, asset: asset})))
-        (ok true))
-    )
-  )
-)
+(define-private (execute-pool (pool-id uint) (asset principal) (action (string-ascii 50)) (amount uint))
+  (ok true))

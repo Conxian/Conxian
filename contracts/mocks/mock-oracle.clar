@@ -1,4 +1,4 @@
-(use-trait oracle-trait)
+(use-trait dimensional-oracle-trait .all-traits.dimensional-oracle-trait)
 
 ;; ===== Constants =====
 (define-constant ERR_ASSET_NOT_FOUND (err u404))

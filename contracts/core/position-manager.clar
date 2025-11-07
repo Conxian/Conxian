@@ -1,13 +1,9 @@
 ;; position-manager.clar
 ;; Manages all position types in the dimensional engine
 
-(use-trait position-trait .all-traits.position-trait)
 (use-trait risk-trait .all-traits.risk-trait)
 (use-trait oracle-trait .all-traits.oracle-trait)
 (use-trait token-trait .all-traits.sip-010-ft-trait)
-
-;; Contract implementations
-(impl-trait position-trait)
 
 ;; ===== Constants =====
 (define-constant ERR-PAUSED u4000)

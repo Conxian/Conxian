@@ -17,7 +17,7 @@ This document codifies standards for Conxian’s Stacks DeFi system to ensure se
 
 ## Vault Interface Standard (ERC‑4626 inspired)
 
-Introduce a standard vault trait for cross-system composability. This trait is defined at `stacks/contracts/traits/vault-trait.clar`.
+Introduce a standard vault trait for cross-system composability. This trait will be centralized in `contracts/traits/all-traits.clar` as `vault-trait` (planned).
 
 ```clarity
 (define-trait vault-trait
@@ -88,5 +88,5 @@ Notes:
 ## Status
 
 - Implemented: dynamic SIP-010 token usage in `vault.clar`.
-- Added: `vault-trait.clar` (not yet implemented by the current vault for compatibility).
+- Planned: `vault-trait` centralized in `contracts/traits/all-traits.clar` (not yet present).
 - Next: add wrappers or a `v2` vault to implement `vault-trait`, and standardize strategy/oracle traits.

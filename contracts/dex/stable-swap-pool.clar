@@ -9,8 +9,8 @@
 (define-constant ERR_INVARIANT_VIOLATION (err u3002))
 
 ;; --- Data Variables ---(define-data-var contract-owner principal tx-sender)
-(define-data-var token-x-trait principal .sip-010-ft-trait)
-(define-data-var token-y-trait principal .sip-010-ft-trait)
+(define-data-var token-x-trait principal tx-sender)
+(define-data-var token-y-trait principal tx-sender)
 (define-data-var balance-x uint u0)
 (define-data-var balance-y uint u0)
 (define-data-var amp-factor uint u1000) 
@@ -30,11 +30,15 @@
     (var-set balance-x (- (var-get balance-x) amount-x))
     (var-set balance-y (- (var-get balance-y) amount-y))
     
-    (ok (tuple (amount-x amount-x) (amount-y amount-y)))))
-  )))
+    (ok { amount-x: amount-x, amount-y: amount-y })
+  )
 (define-public (swap-x-for-y (amount-in uint))  (let ((current-balance-x (var-get balance-x))        (current-balance-y (var-get balance-y))        (amp (var-get amp-factor)))        (try! (contract-call? (var-get token-x-trait) transfer amount-in tx-sender (as-contract tx-sender) none))        (let ((new-balance-x (+ current-balance-x amount-in))          (new-balance-y (get-y new-balance-x current-balance-x current-balance-y amp)))                (asserts! (> new-balance-y u0) ERR_INVARIANT_VIOLATION)            (let ((amount-out (- current-balance-y new-balance-y)))        (var-set balance-x new-balance-x)        (var-set balance-y new-balance-y)                (try! (as-contract (contract-call? (var-get token-y-trait) transfer amount-out tx-sender tx-sender none)))                (ok amount-out)      )    )  ))
 
-;; --- Private Helper Functions ---(define-private (get-y (x1 uint) (x0 uint) (y0 uint) (amp uint))  
-
-;; Simplified calculation for stable swap invariant  (let ((d (* (+ x0 y0) amp)))    (/ d (+ x1 amp))  ))
+;; --- Private Helper Functions ---
+(define-private (get-y (x1 uint) (x0 uint) (y0 uint) (amp uint))
+  ;; Simplified calculation for stable swap invariant
+  (let ((d (* (+ x0 y0) amp)))
+    (/ d (+ x1 amp))
+  )
+)
 (define-private (get-amp-from-params (params (buff 256)))  (if (>= (len params) u4)    (ok (to-uint params))    (err u9998)  ))

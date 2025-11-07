@@ -1,11 +1,9 @@
 ;; enterprise-module.clar
 ;; Institutional lending with custom terms and compliance
 
-(use-trait enterprise .all-traits.enterprise-trait)
-(use-trait dimensional-core .all-traits.dimensional-core-trait)
-(use-trait risk-oracle .all-traits.risk-oracle-trait)
-(use-trait enterprise_trait .all-traits.enterprise-trait)
-.all-traits.enterprise-trait)
+;; (use-trait enterprise .all-traits.enterprise-trait)  ;; centralized traits: not defined; remove to avoid build error
+;; (use-trait dimensional-core .all-traits.dimensional-core-trait)
+;; (use-trait risk-oracle .all-traits.risk-oracle-trait)
 
 ;; ===== Constants =====
 (define-constant ERR_UNAUTHORIZED (err u9500))
@@ -16,8 +14,9 @@
 
 ;; ===== Data Variables =====
 (define-data-var owner principal tx-sender)
-(define-data-var kyc-provider principal)
-(define-data-var legal-registry principal)
+(define-data-var kyc-provider principal tx-sender)
+(define-data-var legal-registry principal tx-sender)
+ (define-data-var oracle principal tx-sender)
 
 ;; Enterprise accounts
 (define-map enterprises {id: uint} {
@@ -64,7 +63,7 @@
   )
     ;; Verify KYC
     (asserts! 
-      (contract-call? kyc-provider verify-kyc tx-sender kyc-proof) 
+      (contract-call? (var-get kyc-provider) verify-kyc tx-sender kyc-proof) 
       ERR_KYC_REQUIRED
     )
     
@@ -76,7 +75,7 @@
       kyc-verified: true,
       risk-limit: (calculate-risk-limit risk-tier),
       current-exposure: u0,
-      terms-hash: (sha256 ""),
+      terms-hash: (sha256 0x),
       created-at: current-block
     })
     
@@ -96,7 +95,7 @@
     (new-version (+ current-version u1))
     (terms-hash (sha256 terms))
   )
-    (asserts! (is-eq tx-sender (get enterprise 'admin)) ERR_UNAUTHORIZED)
+    (asserts! (is-eq tx-sender (get admin enterprise)) ERR_UNAUTHORIZED)
     (asserts! (> (len terms) u0) ERR_INVALID_TERMS)
     
     ;; Store new term sheet version
@@ -109,9 +108,9 @@
     })
     
     (ok {
-      'enterprise-id: enterprise-id,
-      'version: new-version,
-      'terms-hash: terms-hash
+      enterprise-id: enterprise-id,
+      version: new-version,
+      terms-hash: terms-hash
     })
   )
 )
@@ -125,13 +124,13 @@
     (enterprise (unwrap! (map-get? enterprises {id: enterprise-id}) (err u0)))
     (terms (unwrap! (map-get? term-sheets {enterprise-id: enterprise-id, version: version}) (err u0)))
   )
-    (asserts! (is-eq tx-sender (get enterprise 'admin)) ERR_UNAUTHORIZED)
+    (asserts! (is-eq tx-sender (get admin enterprise)) ERR_UNAUTHORIZED)
     
     ;; Verify signature
     (asserts! 
-      (contract-call? legal-registry verify-signature 
-        (get enterprise 'admin)
-        (get terms 'hash)
+      (contract-call? (var-get legal-registry) verify-signature 
+        (get admin enterprise)
+        (get hash terms)
         signature
       )
       ERR_INVALID_TERMS
@@ -140,14 +139,14 @@
     ;; Update terms with signature
     (map-set term-sheets {enterprise-id: enterprise-id, version: version} 
       (merge terms {
-        'signed-by: (some tx-sender)
+        signed-by: (some tx-sender)
       })
     )
     
     ;; Update active terms hash
     (map-set enterprises {id: enterprise-id} 
       (merge enterprise {
-        'terms-hash: (get terms 'hash)
+        terms-hash: (get hash terms)
       })
     )
     
@@ -163,9 +162,9 @@
   (let (
     (enterprise (unwrap! (map-get? enterprises {id: enterprise-id}) (err u0)))
     (facility (unwrap! (map-get? credit-facilities {enterprise-id: enterprise-id}) (err u0)))
-    (available-credit (- (get facility 'total-limit) (get facility 'drawn-amount)))
+    (available-credit (- (get total-limit facility) (get drawn-amount facility)))
   )
-    (asserts! (is-eq tx-sender (get enterprise 'admin)) ERR_UNAUTHORIZED
+    (asserts! (is-eq tx-sender (get admin enterprise)) ERR_UNAUTHORIZED)
     (asserts! (>= available-credit amount) ERR_LIMIT_EXCEEDED)
     
     ;; Verify collateral and calculate adjusted amount
@@ -179,14 +178,14 @@
       ;; Update facility state
       (map-set credit-facilities {enterprise-id: enterprise-id}
         (merge facility {
-          'drawn-amount: (+ (get facility 'drawn-amount) amount),
-          'last-drawn: block-height,
-          'next-payment: (+ block-height u20160)  ;; ~7 days at 30s/block
+          drawn-amount: (+ (get drawn-amount facility) amount),
+          last-drawn: block-height,
+          next-payment: (+ block-height u20160)  ;; ~7 days at 30s/block
         })
       )
       
       ;; Transfer funds
-      (contract-call? (get facility 'currency) transfer amount tx-sender)
+      (contract-call? (get currency facility) transfer amount tx-sender)
       
       (ok true)
     )
@@ -209,8 +208,8 @@
     (map-get-keys term-sheets {enterprise-id: enterprise-id})
     0
     (lambda (key max-version)
-      (if (> (get key 'version) max-version)
-        (ok (get key 'version))
+      (if (> (get version key) max-version)
+        (ok (get version key))
         (ok max-version)
       )
     )
@@ -223,8 +222,8 @@
     u0
     (lambda (asset sum)
       (let (
-        (price (unwrap! (contract-call? oracle get-price (get asset 'asset)) (err u0)))
-        (value (/ (* (get asset 'amount) price) (pow u10 u8)))  ;; Adjust for decimals
+        (price (unwrap! (contract-call? (var-get oracle) get-price (get asset asset)) (err u0)))
+        (value (/ (* (get amount asset) price) (pow u10 u8)))  ;; Adjust for decimals
       )
         (+ sum value)
       )
@@ -235,7 +234,7 @@
 (define-read-only (get-enterprise-collateral-ratio (enterprise-id uint))
   (let (
     (enterprise (unwrap! (map-get? enterprises {id: enterprise-id}) (err u0)))
-    (risk-tier (get enterprise 'risk-tier))
+    (risk-tier (get risk-tier enterprise))
   )
     (match risk-tier
       1 u150  ;; 150% for tier 1

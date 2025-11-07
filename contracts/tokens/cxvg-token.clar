@@ -6,9 +6,9 @@
 
 (define-data-var token-name (string-ascii 32) "Conxian Voting Token")
 (define-data-var token-symbol (string-ascii 10) "CXVG")
-(define-data-var token-decimals (uint) u6)
+(define-data-var token-decimals uint u6)
 (define-data-var token-uri (optional (string-utf8 256)) none)
-(define-data-var token-supply (uint) u0)
+(define-data-var token-supply uint u0)
 
 (define-fungible-token cxvg-token)
 
@@ -48,7 +48,7 @@
 ;; @param sender (principal) The sender of the tokens
 ;; @param recipient (principal) The recipient of the tokens
 ;; @returns (response bool uint)
-(define-public (transfer (amount uint) (sender principal) (recipient principal))
+(define-public (transfer (amount uint) (sender principal) (recipient principal) (memo (optional (buff 34))))
   (begin
     (asserts! (is-eq tx-sender sender) ERR-NOT-AUTHORIZED)
     (ft-transfer? cxvg-token amount sender recipient)))

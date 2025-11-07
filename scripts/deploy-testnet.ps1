@@ -31,12 +31,12 @@ Write-Host "🔑 Using deployer address: $deployerAddress" -ForegroundColor Yell
 
 # Update Clarinet.toml with the new address
 Write-Host "🔄 Updating Clarinet.toml with new deployer address..." -ForegroundColor Cyan
-(Get-Content "$PSScriptRoot/../Clarinet.toml") -replace 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6', $deployerAddress | Set-Content "$PSScriptRoot/../Clarinet.toml"
+(Get-Content "$PSScriptRoot/../Clarinet.toml") -replace 'STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ', $deployerAddress | Set-Content "$PSScriptRoot/../Clarinet.toml"
 
 # Update contract files with the new address
 Write-Host "🔄 Updating contract files with new deployer address..." -ForegroundColor Cyan
 Get-ChildItem -Path "$PSScriptRoot/../contracts" -Filter "*.clar" -Recurse | ForEach-Object {
-    (Get-Content $_.FullName) -replace 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6', $deployerAddress | Set-Content $_.FullName
+    (Get-Content $_.FullName) -replace 'STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ', $deployerAddress | Set-Content $_.FullName
 }
 
 # Set up GitHub secret if not already set

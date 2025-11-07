@@ -6,7 +6,7 @@ $ErrorActionPreference = "Stop"
 
 # Configuration
 $manifestPath = "$PSScriptRoot/../stacks/Clarinet.test.toml"
-$deployerAddress = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+$deployerAddress = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 $stacksNode = "https://stacks-node-api.testnet.stacks.co"
 
 # Colors for output

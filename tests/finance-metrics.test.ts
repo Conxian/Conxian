@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import { Cl } from '@stacks/transactions';
-import { initSimnet } from '@hirosystems/clarinet-sdk';
+import { initSimnet } from '@stacks/clarinet-sdk';
 
 /**
  * Finance Metrics Tests

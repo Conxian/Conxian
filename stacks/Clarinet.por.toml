@@ -1,0 +1,28 @@
+[project]
+name = "Conxian-PoR"
+description = "Minimal manifest for Proof of Reserves testing"
+clarinet_version = "3.8.1"
+
+[accounts.deployer]
+address = "ST1SJ3DTE5DN7X54YDH5D64R3BCB6A2AG2ZQ8YPD5"
+
+[contracts.all-traits]
+path = "../contracts/traits/all-traits.clar"
+clarity_version = 3
+epoch = "3.0"
+
+[contracts.proof-of-reserves]
+path = "../contracts/security/proof-of-reserves.clar"
+clarity_version = 3
+epoch = "3.0"
+depends_on = ["all-traits"]
+address = "ST1SJ3DTE5DN7X54YDH5D64R3BCB6A2AG2ZQ8YPD5"
+
+[contracts.utils-block-utils]
+path = "../contracts/utils/block-utils.clar"
+clarity_version = 3
+epoch = "3.0"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+
+[repl.remappings]
+utils-block-utils = ".utils-block-utils"

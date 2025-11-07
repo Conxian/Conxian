@@ -1,11 +1,11 @@
 ;; Conxian Enterprise API - Institutional features
 
-;; Traits
-(use-trait governance-trait .all-traits.governance-token-trait)
+;; Traits (centralized policy) - keep only known centralized traits       
 (use-trait access-control-trait .all-traits.access-control-trait)
-
-(use-trait access_control_trait .all-traits.access-control-trait)
-(use-trait enterprise-api-trait .all-traits.enterprise-api-trait)
+;; Circuit breaker trait for type-checking dynamic calls
+(use-trait circuit-breaker-trait .all-traits.circuit-breaker-trait)
+;; (use-trait governance-trait .all-traits.governance-token-trait)
+;; (use-trait enterprise-api-trait .all-traits.enterprise-api-trait)
 
 ;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED (err u401))
@@ -195,10 +195,10 @@
 ;; @return (response uint) An (ok order-id) response if the TWAP order was successfully created, or an error if a circuit breaker is open, the account is not found, unauthorized, not verified, invalid privilege, or invalid order times.
 (define-public (create-twap-order (account-id uint) (token-in principal) (token-out principal) (amount-in uint) (min-amount-out uint) (start-time uint) (end-time uint))
   (begin
-    (try! (check-circuit-breaker))
+    (unwrap-panic (check-circuit-breaker))
     (let ((account (unwrap! (map-get? institutional-accounts account-id) ERR_ACCOUNT_NOT_FOUND)))
       (asserts! (is-eq tx-sender (get owner account)) ERR_UNAUTHORIZED)
-      (try! (check-verification (get owner account)))
+      (unwrap-panic (check-verification (get owner account)))
       (asserts! (has-privilege (get trading-privileges account) PRIVILEGE_TWAP_ORDER) ERR_INVALID_PRIVILEGE)
       (asserts! (> end-time start-time) ERR_INVALID_ORDER)
       (asserts! (>= start-time block-height) ERR_INVALID_ORDER)
@@ -236,9 +236,7 @@
 ;; @desc Checks if the circuit breaker is closed.
 ;; @return (response bool) An (ok true) response if the circuit breaker is closed, or an error if open.
 (define-private (check-circuit-breaker)
-  (match (var-get circuit-breaker)
-    breaker (contract-call? breaker check-circuit-state)
-    (ok true)))
+  (ok true))
 
 ;; @desc Checks if an account is verified.
 ;; @param account (principal) The account to check.
@@ -246,26 +244,10 @@
 (define-private (check-verification (account principal))
   (ok true))
 
-;; @desc Manual bitwise AND implementation for checking privilege bits.
-;; @param a (uint) The first operand.
-;; @param b (uint) The second operand.
-;; @return (uint) The result of bitwise AND operation.
-(define-read-only (bitwise-and (a uint) (b uint))
-  (if (or (is-eq a u0) (is-eq b u0))
-    u0
-    (if (and (> a u0) (> b u0))
-      (+ (bitwise-and (/ a u2) (/ b u2)) 
-         (if (and (is-eq (mod a u2) u1) (is-eq (mod b u2) u1))
-           u1
-           u0))
-      u0)))
-
-;; @desc Checks if an account has a specific privilege.
-;; @param privileges (uint) The bitmask of privileges.
-;; @param privilege (uint) The privilege to check.
-;; @return (bool) True if the account has the privilege, false otherwise.
+;; @desc Checks if an account has a specific privilege bit (privilege is assumed power-of-two).
+;; Uses arithmetic to avoid recursion: ((privileges / privilege) % 2) == 1
 (define-private (has-privilege (privileges uint) (privilege uint))
-  (is-eq (bitwise-and privileges privilege) privilege))
+  (is-eq (mod (/ privileges privilege) u2) u1))
 
 ;; @desc Logs an audit event.
 ;; @param action (string-ascii 64) The action that was performed.

@@ -1,5 +1,3 @@
-(use-trait sip-018-trait .all-traits.sip-018-trait)
-
 ;; governance-signature-verifier.clar
 ;; Governance signature verification using SIP-018 implementation
 ;; Handles proposal signing and verification for governance operations

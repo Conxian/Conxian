@@ -1,6 +1,6 @@
 import { Cl, ClarityType, ClarityValue, ResponseOk, ResponseError, TupleCV, uintCV, standardPrincipalCV, someCV, noneCV, contractPrincipalCV } from '@stacks/transactions';
 import { describe, expect, it, beforeEach, beforeAll, afterEach } from 'vitest';
-import { Simnet } from '@hirosystems/clarinet-sdk';
+import { Simnet } from '@stacks/clarinet-sdk';
 
 // Helper function to parse response
 const parseResponse = (response: any) => {

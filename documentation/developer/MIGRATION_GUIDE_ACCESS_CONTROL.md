@@ -22,8 +22,8 @@ The new AccessControl system provides:
 2. Update your contract's trait implementation to include the access control trait:
 
 ```clarity
-(impl-trait 
-  'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.your-contract-trait
+(impl-trait
+  'STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ.your-contract-trait
   .access-control-trait.access-control-trait
 )
 ```
@@ -44,7 +44,7 @@ The new AccessControl system provides:
 ### After
 
 ```clarity
-(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.access-control.access-control-trait)
+(impl-trait 'STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ.access-control.access-control-trait)
 
 ;; Use the access control functions directly
 (define-public (only-admin)
@@ -84,14 +84,14 @@ For sensitive operations, use the time-delay functionality:
 
 ```clarity
 (define-public (update-risk-parameters (params {high: uint, medium: uint, low: uint}))
-  (let ((operation-id (unwrap! 
-    (contract-call? 
-      .access-control 
-      schedule 
-      'UPDATE_RISK_PARAMS 
-      (to-utf8 (to-json-string params)) 
+  (let ((operation-id (unwrap!
+    (contract-call?
+      .access-control
+      schedule
+      'UPDATE_RISK_PARAMS
+      (to-utf8 (to-json-string params))
       u5760  ;; 24 hours in blocks (assuming 15s block time)
-    ) 
+    )
     (err u1001)
   )))
     (ok operation-id)
@@ -151,7 +151,7 @@ describe('Admin functions', () => {
       [Cl.principal(admin), Cl.buffFromHex('0x41444d494e')], // ADMIN role
       admin
     );
-    
+
     const result = await simnet.callPublicFn(
       'your-contract',
       'set-parameter',

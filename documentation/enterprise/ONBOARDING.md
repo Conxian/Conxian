@@ -42,31 +42,11 @@ The enterprise system can be connected to a compliance contract.
 
 *   The contract owner sets the address of the compliance contract using `set-compliance-hook`.
 *   Once set, all trading functions in the `enterprise-api` will call the `is-verified` function in the compliance contract to ensure the user is authorized to trade.
-*   A reference implementation of a compliance contract is available in `compliance-hooks.clar`.
-
-## API Reference
-
-### `enterprise-api.clar`
-
-#### Public Functions
-
-##### `create-institutional-account`
-*   **Description:** Creates a new institutional account.
-*   **Parameters:**
-    *   `owner` (principal): The owner of the new account.
-    *   `tier-id` (uint): The tier level for the new account.
-*   **Returns:** `(response uint)` - The ID of the newly created account.
-
-##### `set-kyc-expiry`
-*   **Description:** Sets the KYC expiry for an institutional account.
-*   **Parameters:**
-    *   `account-id` (uint): The ID of the account to update.
-    *   `expiry` (optional uint): The block height when KYC expires.
-*   **Returns:** `(response bool)`
-
-### `compliance-hooks.clar`
-
-#### Public Functions
+*   A reference implementation of a compliance contract is available in `compliance-hooks.clar`. This contract includes the following functions:
+    *   `set-kyc-tier`: Sets the KYC tier for a given account.
+    *   `verify-account`: Verifies an account by setting its KYC tier to a basic level.
+    *   `unverify-account`: Removes the verification for an account.
+    *   `is-verified`: Checks if an account is currently verified.
 
 ##### `set-kyc-tier`
 *   **Description:** Sets the KYC tier for a given account.

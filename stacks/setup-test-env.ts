@@ -1,10 +1,12 @@
 // setup-test-env.ts
-import path from 'path';
+import { resolve } from 'path';
 
-// Set up global options required by clarinet SDK
+// Configure Clarinet SDK options for test environment
+const manifestPath = resolve(__dirname, 'Clarinet.toml');
+
 globalThis.options = {
   clarinet: {
-    manifestPath: path.resolve(__dirname, 'Clarinet.toml'),
+    manifestPath,
     initBeforeEach: true,
     coverage: false,
     coverageFilename: 'coverage.lcov',

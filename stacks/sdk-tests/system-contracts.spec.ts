@@ -1,6 +1,6 @@
 import { describe, expect, it, beforeEach, beforeAll } from 'vitest';
 import { Cl, ClarityType } from '@stacks/transactions';
-import { initSimnet } from '@hirosystems/clarinet-sdk/vitest';
+import { initSimnet } from '@stacks/clarinet-sdk/vitest';
 
 declare module 'vitest' {
   interface Assertion<T = any> {

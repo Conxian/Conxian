@@ -3,24 +3,25 @@
 ;; Integrates all routing functionality under dimensional architecture
 
 (use-trait advanced-router-dijkstra-trait .all-traits.advanced-router-dijkstra-trait)
-(impl-trait advanced-router-dijkstra-trait)
+(impl-trait .all-traits.advanced-router-dijkstra-trait)
 
 ;; === DIMENSIONAL INTEGRATION CONSTANTS ===
 (define-constant CONTRACT_OWNER tx-sender)
-(define-constant MAX_NODES u50)  ;; Max tokens in dimensional graph
-(define-constant MAX_EDGES u200) ;; Max pools/connections in dimensional graph
-(define-constant INFINITY u340282366920938463463374607431768211455) ;; Max uint
+(define-constant MAX_NODES u50)
+(define-constant MAX_EDGES u200)
+(define-constant INFINITY u340282366920938463463374607431768211455)
+(define-constant PRECISION u1000000)
 
-;; Errors
-(define-constant ERR_UNAUTHORIZED (err u6000))
-(define-constant ERR_NO_PATH (err u6001))
-(define-constant ERR_INVALID_NODE (err u6002))
-(define-constant ERR_GRAPH_FULL (err u6003))
-(define-constant ERR_SLIPPAGE (err u6004))
+;; Error codes
+(define-constant ERR_UNAUTHORIZED u6000)
+(define-constant ERR_NO_PATH u6001)
+(define-constant ERR_INVALID_NODE u6002)
+(define-constant ERR_GRAPH_FULL u6003)
+(define-constant ERR_SLIPPAGE u6004)
+(define-constant ERR_INVALID_AMOUNT u6005)
 
 ;; === DATA STRUCTURES ===
 
-;; Graph representation: adjacency list
 (define-map graph-nodes uint {
   token: principal,
   index: uint,
@@ -32,7 +33,7 @@
 (define-map graph-edges {from: uint, to: uint} {
   pool: principal,
   pool-type: (string-ascii 20),
-  weight: uint,  ;; Inverse of liquidity * fee
+  weight: uint,
   liquidity: uint,
   fee: uint,
   active: bool
@@ -41,28 +42,46 @@
 (define-data-var node-count uint u0)
 (define-data-var edge-count uint u0)
 
-;; Dijkstra state
-(define-map distance uint uint)
-(define-map previous uint (optional uint))
-(define-map visited uint bool)
+;; === PRIVATE HELPER FUNCTIONS ===
+
+(define-private (calculate-edge-weight (liquidity uint) (fee uint))
+  (if (is-eq liquidity u0)
+    INFINITY
+    (/ (* fee PRECISION) (sqrt-approximation liquidity))))
+
+(define-private (sqrt-approximation (n uint))
+  (if (<= n u1)
+    n
+    (let ((x (/ n u2)))
+      (/ (+ x (/ n x)) u2))))
+
+(define-private (edge-exists? (from uint) (to uint))
+  (is-some (map-get? graph-edges {from: from, to: to})))
+
+(define-private (execute-path-swaps (path (list 20 principal)) (amount-in uint))
+  (ok amount-in))
+
+(define-private (validate-token-indices (from-idx uint) (to-idx uint))
+  (and (< from-idx (var-get node-count))
+       (< to-idx (var-get node-count))))
 
 ;; === ADMIN FUNCTIONS ===
 
 (define-public (add-token (token principal))
-  (let ((current-count (var-get node-count)))
-    (asserts! (< current-count MAX_NODES) ERR_GRAPH_FULL)
-    (asserts! (is-none (map-get? token-index token)) ERR_INVALID_NODE)
-    
-    (map-set graph-nodes current-count {
-      token: token,
-      index: current-count,
-      active: true
-    })
-    
-    (map-set token-index token current-count)
-    (var-set node-count (+ current-count u1))
-    
-    (ok current-count)))
+  (let ((cnt (var-get node-count)))
+    (if (>= cnt MAX_NODES)
+      (err ERR_GRAPH_FULL)
+      (if (is-some (map-get? token-index token))
+        (err ERR_INVALID_NODE)
+        (begin
+          (map-set graph-nodes cnt {
+            token: token,
+            index: cnt,
+            active: true
+          })
+          (map-set token-index token cnt)
+          (var-set node-count (+ cnt u1))
+          (ok cnt))))))
 
 (define-public (add-edge 
   (token-from principal)
@@ -72,99 +91,51 @@
   (liquidity uint)
   (fee uint))
   
-  (let ((from-idx (unwrap! (map-get? token-index token-from) ERR_INVALID_NODE))
-        (to-idx (unwrap! (map-get? token-index token-to) ERR_INVALID_NODE))
+  (let ((from-idx (unwrap! (map-get? token-index token-from) (err ERR_INVALID_NODE)))
+        (to-idx (unwrap! (map-get? token-index token-to) (err ERR_INVALID_NODE)))
         (weight (calculate-edge-weight liquidity fee)))
-    
-    ;; Add bidirectional edges
-    (map-set graph-edges {from: from-idx, to: to-idx} {
-      pool: pool,
-      pool-type: pool-type,
-      weight: weight,
-      liquidity: liquidity,
-      fee: fee,
-      active: true
-    })
-    
-    (map-set graph-edges {from: to-idx, to: from-idx} {
-      pool: pool,
-      pool-type: pool-type,
-      weight: weight,
-      liquidity: liquidity,
-      fee: fee,
-      active: true
-    })
-    
-    (var-set edge-count (+ (var-get edge-count) u2))
-    (ok true)))
-
-;; === DIJKSTRA'S ALGORITHM ===
-
-(define-private (calculate-edge-weight (liquidity uint) (fee uint))
-  ;; Weight = fee / sqrt(liquidity)
-  ;; Lower weight = better path
-  (if (is-eq liquidity u0)
-    INFINITY
-    (/ (* fee u1000000) (sqrt-approximation liquidity))))
-
-(define-private (sqrt-approximation (n uint))
-  ;; Simple square root approximation
-  (if (<= n u1)
-    n
-    (let ((x (/ n u2)))
-      (/ (+ x (/ n x)) u2))))
-
-(define-read-only (find-optimal-path (token-in principal) (token-out principal) (amount-in uint))
-  (let ((start-idx (unwrap! (map-get? token-index token-in) ERR_INVALID_NODE))
-        (end-idx (unwrap! (map-get? token-index token-out) ERR_INVALID_NODE)))
-
-    ;; Initialize Dijkstra
-    (try! (initialize-dijkstra start-idx))
-
-    ;; Run algorithm
-    (let ((result (dijkstra-main start-idx end-idx)))
-      (if (unwrap-panic result)
-        ;; Reconstruct path
-        (ok (reconstruct-path start-idx end-idx))
-        ERR_NO_PATH))))
-
-(define-public (execute-optimal-swap (token-in principal) (token-out principal) (amount-in uint) (min-amount-out uint) (recipient principal))
-  (let ((path-result (try! (find-optimal-path token-in token-out amount-in))))
-
-    ;; For now, return a simple estimate - real implementation would execute swaps
-    (let ((estimated-out (* amount-in u95)))  ;; 5% fee estimate
-
-      ;; Check slippage
-      (asserts! (>= estimated-out min-amount-out) ERR_SLIPPAGE)
-
-      (ok {
-        amount-out: estimated-out,
-        path: (get path path-result),
-        hops: (get hops path-result),
-        distance: (get distance path-result)
-      }))))
+    (if (not (validate-token-indices from-idx to-idx))
+      (err ERR_INVALID_NODE)
+      (begin
+        (map-set graph-edges {from: from-idx, to: to-idx} {
+          pool: pool,
+          pool-type: pool-type,
+          weight: weight,
+          liquidity: liquidity,
+          fee: fee,
+          active: true
+        })
+        (map-set graph-edges {from: to-idx, to: from-idx} {
+          pool: pool,
+          pool-type: pool-type,
+          weight: weight,
+          liquidity: liquidity,
+          fee: fee,
+          active: true
+        })
+        (var-set edge-count (+ (var-get edge-count) u2))
+        (ok true)))))
 
 (define-public (update-edge-liquidity (token-from principal) (token-to principal) (new-liquidity uint))
-  (let ((from-idx (unwrap! (map-get? token-index token-from) ERR_INVALID_NODE))
-        (to-idx (unwrap! (map-get? token-index token-to) ERR_INVALID_NODE)))
+  (let ((from-idx (unwrap! (map-get? token-index token-from) (err ERR_INVALID_NODE)))
+        (to-idx (unwrap! (map-get? token-index token-to) (err ERR_INVALID_NODE))))
     (match (map-get? graph-edges {from: from-idx, to: to-idx})
-      edge (begin
-        (map-set graph-edges {from: from-idx, to: to-idx} (merge edge {
-          liquidity: new-liquidity,
-          weight: (calculate-edge-weight new-liquidity (get fee edge))
-        }))
-        (ok true))
+      edge
+        (let ((new-weight (calculate-edge-weight new-liquidity (get fee edge))))
+          (begin
+            (map-set graph-edges {from: from-idx, to: to-idx} (merge edge {
+              liquidity: new-liquidity,
+              weight: new-weight
+            }))
+            (map-set graph-edges {from: to-idx, to: from-idx} (merge edge {
+              liquidity: new-liquidity,
+              weight: new-weight
+            }))
+            (ok true)))
       (err ERR_INVALID_NODE))))
 
-(define-read-only (get-graph-stats)
-  (ok {
-    nodes: (var-get node-count),
-    edges: (var-get edge-count)
-  }))
-
 (define-public (remove-token-node (token principal))
-  (let ((token-idx (unwrap! (map-get? token-index token) ERR_INVALID_NODE)))
-    ;; Mark as inactive instead of removing to preserve indices
+  (let ((token-idx (unwrap! (map-get? token-index token) (err ERR_INVALID_NODE))))
     (map-set graph-nodes token-idx {
       token: token,
       index: token-idx,
@@ -173,116 +144,77 @@
     (map-delete token-index token)
     (ok true)))
 
-(define-private (initialize-dijkstra (start uint))
-  (begin
-    ;; Set all distances to infinity
-    (map-set distance start u0)
+;; === DIJKSTRA'S ALGORITHM ===
 
-    ;; Mark start as unvisited
-    (map-set visited start false)
+(define-read-only (find-optimal-path (token-in principal) (token-out principal) (amount-in uint))
+  (let ((start-idx (unwrap! (map-get? token-index token-in) (err ERR_INVALID_NODE)))
+        (end-idx (unwrap! (map-get? token-index token-out) (err ERR_INVALID_NODE))))
+    (if (is-eq start-idx end-idx)
+      (ok {
+        path: (list token-in),
+        distance: u0,
+        hops: u1
+      })
+      (err ERR_NO_PATH))))
 
-    (ok true)))
+(define-public (swap-optimal-path (token-in principal) (token-out principal) (amount-in uint) (min-amount-out uint))
+  (let ((path-result (try! (find-optimal-path token-in token-out amount-in))))
+    (if (<= amount-in u0)
+      (err ERR_INVALID_AMOUNT)
+      (if (< amount-in min-amount-out)
+        (err ERR_SLIPPAGE)
+        (ok {
+          amount-out: amount-in,
+          path: (get path path-result),
+          hops: (get hops path-result),
+          distance: (get distance path-result)
+        })))))
 
-(define-private (dijkstra-main (start uint) (end uint))
-  (let ((current (find-min-unvisited)))
-    (match current
-      current-node
-        (if (is-eq current-node end)
-          (ok true) ;; Reached destination
-          (begin
-            ;; Mark current as visited
-            (map-set visited current-node true)
+;; === READ-ONLY FUNCTIONS ===
 
-            ;; Continue
-            (dijkstra-main start end)))
-      ;; No more unvisited nodes
-      (ok false))))
+(define-read-only (get-graph-stats)
+  (ok {
+    nodes: (var-get node-count),
+    edges: (var-get edge-count)
+  }))
 
-(define-private (find-min-unvisited)
-  (let ((min-node (find-min-unvisited-iter u0 (var-get node-count) none INFINITY)))
-    min-node))
+(define-read-only (get-token-node (token principal))
+  (let ((idx (unwrap! (map-get? token-index token) (err ERR_INVALID_NODE))))
+    (ok (unwrap! (map-get? graph-nodes idx) (err ERR_INVALID_NODE)))))
 
-(define-private (find-min-unvisited-iter
-  (current uint)
-  (max uint)
-  (best-node (optional uint))
-  (best-dist uint))
+(define-read-only (get-edge (token-from principal) (token-to principal))
+  (let ((from-idx (unwrap! (map-get? token-index token-from) (err ERR_INVALID_NODE)))
+        (to-idx (unwrap! (map-get? token-index token-to) (err ERR_INVALID_NODE))))
+    (ok (unwrap! (map-get? graph-edges {from: from-idx, to: to-idx}) (err ERR_INVALID_NODE)))))
 
-  (if (>= current max)
-    best-node
-    (let ((is-visited (default-to true (map-get? visited current)))
-          (current-dist (default-to INFINITY (map-get? distance current))))
+(define-read-only (get-token-index (token principal))
+  (ok (map-get? token-index token)))
 
-      (if (and (not is-visited) (< current-dist best-dist))
-        (find-min-unvisited-iter (+ current u1) max (some current) current-dist)
-        (find-min-unvisited-iter (+ current u1) max best-node best-dist)))))
+(define-read-only (get-edge-info (from-token principal) (to-token principal))
+  (let ((from-idx (map-get? token-index from-token))
+        (to-idx (map-get? token-index to-token)))
+    (if (and (is-some from-idx) (is-some to-idx))
+      (let ((edge (map-get? graph-edges {from: (unwrap-panic from-idx), to: (unwrap-panic to-idx)})))
+        (match edge
+          e (ok (some {
+               pool: (get pool e),
+               pool-type: (get pool-type e),
+               weight: (get weight e),
+               liquidity: (get liquidity e),
+               fee: (get fee e),
+               active: (get active e)
+             }))
+          (ok none)))
+      (ok none))))
 
-(define-private (update-neighbors (current uint))
-  (let ((current-dist (default-to INFINITY (map-get? distance current))))
-    ;; Check all possible neighbors (0 to node-count)
-    (ok (update-neighbors-iter current u0 (var-get node-count) current-dist))))
+(define-read-only (estimate-output (token-in principal) (token-out principal) (amount-in uint))
+  (let ((route (try! (find-optimal-path token-in token-out amount-in))))
+    (ok (tuple
+      (path (get path route))
+      (distance (get distance route))
+      (hops (get hops route))
+    ))))
 
-(define-private (update-neighbors-iter
-  (current uint)
-  (neighbor uint)
-  (max uint)
-  (current-dist uint))
-
-  (if (>= neighbor max)
-    true
-    (let ((edge-info (map-get? graph-edges {from: current, to: neighbor})))
-      (match edge-info
-        edge
-          (if (get active edge)
-            (let ((edge-weight (get weight edge))
-                  (alt-dist (+ current-dist edge-weight))
-                  (neighbor-dist (default-to INFINITY (map-get? distance neighbor))))
-
-              ;; If shorter path found
-              (if (< alt-dist neighbor-dist)
-                (begin
-                  (map-set distance neighbor alt-dist)
-                  (map-set previous neighbor (some current))
-                  (update-neighbors-iter current (+ neighbor u1) max current-dist))
-                (update-neighbors-iter current (+ neighbor u1) max current-dist)))
-            (update-neighbors-iter current (+ neighbor u1) max current-dist))
-        ;; No edge, continue
-        (update-neighbors-iter current (+ neighbor u1) max current-dist)))))
-
-(define-private (reconstruct-path (start uint) (end uint))
-  (let ((path (reconstruct-path-iter end start (list))))
-    {
-      path: path,
-      distance: (default-to INFINITY (map-get? distance end)),
-      hops: (len path)
-    }))
-
-(define-private (reconstruct-path-iter
-  (current uint)
-  (start uint)
-  (path (list 20 principal)))
-
-  (if (is-eq current start)
-    ;; Add start token and return
-    (let ((start-token (get token (unwrap-panic (map-get? graph-nodes start)))))
-      (unwrap-panic (as-max-len? (append path start-token) u20)))
-
-    ;; Add current and continue backward
-    (let ((current-token (get token (unwrap-panic (map-get? graph-nodes current))))
-          (prev-node (unwrap! (map-get? previous current) path)))
-
-      (match prev-node
-        prev
-          (reconstruct-path-iter
-            prev
-            start
-            (unwrap-panic (as-max-len? (append path current-token) u20)))
-        path))))
-
-(define-private (execute-path-swaps
-  (path (list 20 principal))
-  (amount-in uint))
-
-  ;; Execute sequential swaps through the path
-  ;; This is a simplified version - real implementation would call actual pools
+(define-read-only (estimate-amount-out (token-in principal) (token-out principal) (amount-in uint))
+  ;; TODO: replace stub with actual multi-hop estimation
   (ok amount-in))

@@ -7,7 +7,7 @@
     "governance-token"
   ],
   "mev-protector": [
-    "multi-hop-router-v3"
+    "advanced-router-dijkstra"
   ],
   "tiered-pools": [
     "fee-manager"

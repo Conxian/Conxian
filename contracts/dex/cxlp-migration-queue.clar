@@ -5,7 +5,7 @@
 ;; Intent queue system for CXLP to CXD migration with pro-rata settlement
 ;; Prevents FCFS races and enables fair distribution based on duration-weighted requests
 
-(use-trait cxlp_migration_queue_trait .all-traits.cxlp-migration-queue-trait)
+
 
 
 ;; --- Constants ---
@@ -146,9 +146,13 @@
 
 ;; --- Intent Management ---
 
+;; Current epoch getter
+(define-read-only (get-current-epoch)
+  (ok (var-get current-epoch)))
+
 ;; Submit intent for current epoch
 (define-public (submit-intent (cxlp-amount uint))
-  (let ((current-epoch-num (unwrap! (get-current-epoch) (err ERR_MIGRATION_NOT_STARTED)))
+  (let ((current-epoch-num (var-get current-epoch))
         (user-duration (get-user-duration tx-sender)))
     (begin
       (asserts! (var-get migration-enabled) (err ERR_MIGRATION_NOT_STARTED))

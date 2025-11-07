@@ -93,13 +93,13 @@ test_math_contracts() {
         -H "Content-Type: application/json" \
         -H "X-API-Key: $HIRO_API_KEY" \
         -d '{
-            "contractAddress": "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6",
+            "contractAddress": "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ",
             "contractName": "math-lib-advanced",
             "functionName": "sqrt-fixed",
             "functionArgs": ["u4000000000000000000"],
-            "sender": "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+            "sender": "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
         }' \
-        "$STACKS_API_BASE/v2/contracts/call-read/ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6/math-lib-advanced/sqrt-fixed" \
+        "$STACKS_API_BASE/v2/contracts/call-read/STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ/math-lib-advanced/sqrt-fixed" \
         2>/dev/null | jq '.result' || echo "Math contract not deployed yet"
 }
 

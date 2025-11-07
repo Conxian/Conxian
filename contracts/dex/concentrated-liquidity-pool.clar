@@ -1,6 +1,7 @@
 ;; Concentrated Liquidity Pool (CLP) - Minimal adapter implementation for trait compliance and compilation
 
 (use-trait clp-pool-trait .all-traits.clp-pool-trait)
+(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
 
 (define-constant ERR_UNAUTHORIZED (err u1001))
 (define-constant ERR_INVALID_TICK (err u3001))
@@ -56,13 +57,13 @@
         (new-shares (+ (get shares existing) amount))
       )
         (map-set positions { position-id: position-id } { lower: (get lower existing), upper: (get upper existing), shares: new-shares })
-        (ok (tuple (shares new-shares)))
+        (ok { shares: new-shares })
       )
       (let (
         (new-shares amount)
       )
         (map-set positions { position-id: position-id } { lower: lower-tick, upper: upper-tick, shares: new-shares })
-        (ok (tuple (shares new-shares)))
+        (ok { shares: new-shares })
       )
     )
   )
@@ -80,7 +81,7 @@
       )
         (asserts! (>= shares amount) ERR_INVALID_AMOUNT)
         (map-set positions { position-id: position-id } { lower: (get lower p), upper: (get upper p), shares: (- shares amount) })
-        (ok (tuple (amount-out amount)))
+        (ok { amount-out: amount })
       )
       (err ERR_POSITION_NOT_FOUND)
     )
@@ -98,7 +99,7 @@
       (fee-amount (/ (* amount-in (var-get fee)) u10000))
       (amount-out (- amount-in fee-amount))
     )
-      (ok (tuple (amount-out amount-out)))
+      (ok { amount-out: amount-out })
     )
   )
 )
@@ -106,7 +107,7 @@
 ;; clp-pool-trait: get-position
 (define-read-only (get-position (position-id (buff 32)))
   (match (map-get? positions { position-id: position-id })
-    pos (ok (tuple (lower (get lower pos)) (upper (get upper pos)) (shares (get shares pos))))
+    pos (ok { lower: (get lower pos), upper: (get upper pos), shares: (get shares pos) })
     (err ERR_POSITION_NOT_FOUND)
   )
 )

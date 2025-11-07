@@ -3,7 +3,7 @@
 
 (use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
 
-(impl-trait sip-010-ft-trait)
+(impl-trait .all-traits.sip-010-ft-trait)
 
 ;; ===== Constants =====
 (define-constant TOKEN_NAME "Mock Token")
@@ -45,8 +45,8 @@
       (map-set balances recipient (+ recipient-balance amount))
       
       (match memo 
-        memo (print memo)
-        _ (ok 0)
+        m (print m)
+        (ok u0)
       )
       
       (ok true)
@@ -89,8 +89,20 @@
       (map-delete allowances {owner: sender, spender: tx-sender})
       (map-set allowances {owner: sender, spender: tx-sender} new-allowance)
     )
-    
-    (contract-call? .as-contract transfer amount sender recipient memo)
+    ;; Perform transfer logic directly (bypass transfer's tx-sender check)
+    (let (
+      (sender-balance (default-to u0 (map-get? balances sender)))
+      (recipient-balance (default-to u0 (map-get? balances recipient)))
+    )
+      (asserts! (>= sender-balance amount) ERR_INSUFFICIENT_BALANCE)
+      (map-set balances sender (- sender-balance amount))
+      (map-set balances recipient (+ recipient-balance amount))
+      (match memo 
+        m (print m)
+        (ok u0)
+      )
+      (ok true)
+    )
   )
 )
 
@@ -102,8 +114,8 @@
     (map-set allowances {owner: tx-sender, spender: spender} amount)
     
     (match memo 
-      memo (print memo)
-      _ (ok 0)
+      m (print m)
+      (ok u0)
     )
     
     (ok true)

@@ -10,7 +10,7 @@ plan:
       transactions:
         - contract-publish:
             contract-name: all-traits
-            expected-sender: ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6
+            expected-sender: STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ
             cost: 5000
             path: "contracts/traits/all-traits.clar"
             anchor-block-only: true
@@ -18,7 +18,7 @@ plan:
             epoch: "3.0"
         - contract-publish:
             contract-name: governance-token
-            expected-sender: ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6
+            expected-sender: STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ
             cost: 10000
             path: "contracts/governance/governance-token.clar"
             anchor-block-only: true

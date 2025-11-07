@@ -1,6 +1,4 @@
 ;; ===== Traits =====
-(use-trait sbtc-integration-trait .all-traits.sbtc-integration-trait)
-
 ;; sbtc-integration.clar
 ;; sBTC Integration Module for Conxian Protocol
 ;; Provides sBTC asset management, risk parameters, and oracle integration
@@ -22,8 +20,8 @@
 
 ;; Risk management constants
 ;; Basis points and rates are scaled by 1e6 (u1000000)
-(define-constant ONE (u1))
-(define-constant WAD (u1000000))
+(define-constant ONE u1)
+(define-constant WAD u1000000)
 
 (define-constant DEFAULT-LTV u700000)             ;; 70% in 1e6 scale
 (define-constant DEFAULT-LIQ-THRESHOLD u750000)   ;; 75%
@@ -219,28 +217,24 @@
           )
             (let (
               (borrow-rate
-                (cond
-                  ((<= utilization k1) (+ base (/ (* utilization s1) WAD)))
-                  ((<= utilization k2) (+ base (+ (/ (* k1 s1) WAD) (/ (* (- utilization k1) s2) WAD))))
-                  (else
+                (if (<= utilization k1)
+                  (+ base (/ (* utilization s1) WAD))
+                  (if (<= utilization k2)
+                    (+ base (+ (/ (* k1 s1) WAD)
+                               (/ (* (- utilization k1) s2) WAD)))
                     (+ base
                        (+ (/ (* k1 s1) WAD)
                           (+ (/ (* (- k2 k1) s2) WAD)
-                             (/ (* (- utilization k2) jump) WAD)
-                          )
-                       )
-                    )
-                  )
-                )
+                             (/ (* (- utilization k2) jump) WAD))))))
               )
-              (reserve-factor (default (get reserve-factor (get-asset-config asset)) u0))
+              (reserve-factor (match (get-asset-config asset)
+                                cfg (get reserve-factor cfg)
+                                u0))
             )
-              (ok (tuple (borrow-rate borrow-rate) (reserve-factor reserve-factor)))
+              (ok { borrow-rate: borrow-rate, reserve-factor: reserve-factor })
             )
           )
         )
         ERR-ASSET-NOT-FOUND
       )
-    )
   )
-)

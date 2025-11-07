@@ -19,7 +19,7 @@
     "test:all": "npm run test:contracts && npm run test:integration && npm run test:enterprise && npm run test:load && npm run test:tokens",
     "test:production": "npm run test:enterprise && npm run test:flash-loans && npm run test:integration && npm run test:tokens",
     "test:system": "vitest run tests/system-tests/ --config vitest.config.enhanced.ts",
-    "test:performance": "vitest run tests/performance/ --config vitest.config.enhanced.ts",
+    "test:performance": "vitest run tests/load-testing/ --config vitest.config.enhanced.ts",
     "clarinet:test": "clarinet test",
     "clarinet:check": "clarinet check",
     "check": "clarinet check",
@@ -28,25 +28,30 @@
     "ci": "node ./scripts/ensure-deps.js && node ./scripts/validate-docs.js && npx vitest run",
     "coverage": "vitest run --coverage",
     "update-autonomics": "tsx scripts/sdk_update_autonomics.ts",
-    "load-test": "artillery run load-test.yml"
+    "load-test": "artillery run load-test.yml",
+    "derive:wallets": "tsx scripts/derive_wallets.ts"
   },
   "dependencies": {
     "@stacks/blockchain-api-client": "8.13.1",
     "@stacks/network": "7.2.0",
     "@stacks/transactions": "^7.2.0",
+    "@stacks/wallet-sdk": "^7.2.0",
     "bignumber.js": "^9.1.2",
     "dotenv": "17.2.2",
     "node-fetch": "^3.3.2"
   },
   "devDependencies": {
-    "@hirosystems/clarinet-sdk": "3.8.0",
+    "@clarigen/core": "^3.2.0",
+    "@hirosystems/clarinet-sdk": "3.8.1",
+    "@stacks/clarinet-sdk": "3.9.0",
     "@types/node": "^24.5.2",
-    "@vitest/coverage-v8": "3.2.4",
-    "artillery": "^2.0.0",
+    "@vitest/coverage-v8": "^4.0.0",
+    "artillery": "^2.0.26",
     "ts-node": "^10.9.2",
     "tsx": "^4.7.1",
     "typescript": "^5.4.5",
-    "vitest": "^3.2.4"
+    "vitest": "^4.0.0",
+    "vitest-environment-clarinet": "3.0.1"
   },
   "private": true
 }

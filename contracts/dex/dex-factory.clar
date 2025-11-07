@@ -70,9 +70,10 @@
 )
 
 (define-private (check-pool-manager)
-  (let ((access-control (var-get access-control-contract)))
-    (ok (asserts! (unwrap! (contract-call? access-control has-role tx-sender u2) (err ERR_UNAUTHORIZED)) ERR_UNAUTHORIZED))
-  )
+  (let ((has (unwrap! (contract-call? (var-get access-control-contract) has-role "POOL_MANAGER" tx-sender) ERR_UNAUTHORIZED)))
+      (asserts! has ERR_UNAUTHORIZED)
+      (ok true)
+    ))
 )
 
 (define-private (check-circuit-breaker)
@@ -106,8 +107,9 @@
 
       (let ((pool-principal (unwrap! (contract-call? pool-impl create-pool (get token-a normalized-pair) (get token-b normalized-pair) fee-bps) (err ERR_SWAP_FAILED))))
 
-        ;; TODO: Register pool with dimensional registry when available
-        ;; (try! (contract-call? .dim-registry register-dimension pool-principal u100))
+        ;; Register pool component with dimensional registry (factory as caller)
+        (let ((registry (var-get dimensional-registry)))
+          (try! (as-contract (contract-call? registry register-component pool-principal u100))))
 
         (map-set pools normalized-pair pool-principal)
         (map-set pool-info pool-principal
@@ -140,6 +142,15 @@
   (begin
     (try! (check-is-owner))
     (var-set circuit-breaker new-circuit-breaker)
+    (ok true)
+  )
+)
+
+;; Owner-only: set dimensional registry contract
+(define-public (set-dimensional-registry (new-registry principal))
+  (begin
+    (try! (check-is-owner))
+    (var-set dimensional-registry new-registry)
     (ok true)
   )
 )

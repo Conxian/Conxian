@@ -27,7 +27,7 @@ on:
 # Environment configurations
 env:
   NODE_VERSION: '20'
-  CLARINET_VERSION: '3.8.0'
+  CLARINET_VERSION: '3.8.1'
   DOCKERHUB_USERNAME: ${{ vars.DOCKERHUB_USERNAME || 'conxian' }}
   IMAGE_NAME: 'conxian-protocol'
 
@@ -254,7 +254,7 @@ jobs:
           echo "# Deployment Report" > report.md
           echo "## Summary" >> report.md
           echo "- **Environment**: ${{ github.event.inputs.environment || 'staging' }}" >> report.md
-          echo "- **Status**: ${{ needs.post_deploy.result == 'success' && '✅ Success' : '❌ Failed' }}" >> report.md
+          echo "- **Status**: ${{ needs.post_deploy.result == 'success' && '✅ Success' || '❌ Failed' }}" >> report.md
           echo "- **Commit**: ${{ github.sha }}" >> report.md
           echo "- **Triggered by**: ${{ github.actor }}" >> report.md
           

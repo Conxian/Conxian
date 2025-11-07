@@ -28,17 +28,17 @@ if (Test-Path $poolPath) {
     $originalContent = $content
     
     # Fix use-trait with invalid principal path
-    $content = $content -replace '\(use-trait math-lib-concentrated ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6\.math\.math-lib-concentrated\)', '(use-trait math-lib-trait .all-traits.math-trait)'
+    $content = $content -replace '\(use-trait math-lib-concentrated STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ\.math\.math-lib-concentrated\)', '(use-trait math-lib-trait .all-traits.math-trait)'
     
     # Fix duplicate use-trait later in file (line 529)
-    $content = $content -replace '\(use-trait math-lib-concentrated-trait ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6\.math\.math-lib-concentrated\)', ''
+    $content = $content -replace '\(use-trait math-lib-concentrated-trait STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ\.math\.math-lib-concentrated\)', ''
     
     # Fix use-trait with ST3... reference
-    $content = $content -replace '\(use-trait err-trait ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6\.errors\.err-trait\)', ''
+    $content = $content -replace '\(use-trait err-trait STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ\.errors\.err-trait\)', ''
     
     # Remove duplicate get-tick-from-sqrt-price functions (keep only first one)
     # This regex finds the pattern and removes duplicates
-    $pattern = '\(define-read-only \(get-tick-from-sqrt-price \(sqrt-price uint\)\)\s+\(contract-call\? ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6\.math\.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price\)\s+\)'
+    $pattern = '\(define-read-only \(get-tick-from-sqrt-price \(sqrt-price uint\)\)\s+\(contract-call\? STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ\.math\.math-lib-concentrated get-tick-at-sqrt-ratio sqrt-price\)\s+\)'
     $matches = [regex]::Matches($content, $pattern)
     if ($matches.Count -gt 1) {
         Write-Host "  Found $($matches.Count) duplicate get-tick-from-sqrt-price functions" -ForegroundColor Yellow
@@ -72,10 +72,10 @@ if (Test-Path $batchPath) {
     $originalContent = $content
     
     # Remove invalid impl-trait
-    $content = $content -replace '\(impl-trait ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6\.batch-processor\.batch-processor-trait\)', ''
+    $content = $content -replace '\(impl-trait STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ\.batch-processor\.batch-processor-trait\)', ''
     
     # Fix remaining quote in impl-trait
-    $content = $content -replace "\(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6\.ownable-trait\)", '(impl-trait .all-traits.ownable-trait)'
+    $content = $content -replace "\(impl-trait 'STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ\.ownable-trait\)", '(impl-trait .all-traits.ownable-trait)'
     
     if ($content -ne $originalContent) {
         Write-Host "  ✅ Fixed batch processor paths" -ForegroundColor Green
@@ -92,14 +92,14 @@ Write-Host "📝 Fix 3: Searching for remaining quote issues" -ForegroundColor C
 $contractsPath = Join-Path $PSScriptRoot "..\contracts"
 $clarFiles = Get-ChildItem -Path $contractsPath -Filter "*.clar" -Recurse
 
-$quotePattern = "'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+$quotePattern = "'STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 foreach ($file in $clarFiles) {
     $content = Get-Content -Path $file.FullName -Raw
     if ($content -match $quotePattern) {
         $originalContent = $content
         
         # Remove remaining quotes
-        $content = $content -replace "'(ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6[^\s\)]+)", '$1'
+        $content = $content -replace "'(STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ[^\s\)]+)", '$1'
         
         if ($content -ne $originalContent) {
             $relativePath = $file.FullName.Replace($contractsPath, "").TrimStart('\', '/')

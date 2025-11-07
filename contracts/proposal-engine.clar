@@ -4,6 +4,8 @@
 
 ;; Traits
 (use-trait proposal-engine-trait .all-traits.proposal-engine-trait)
+;; TODO: proposal-engine-trait not defined in all-traits.clar
+;; (impl-trait .all-traits.proposal-engine-trait)
 
 ;; Constants
 (define-constant ERR_UNAUTHORIZED (err u100))
@@ -165,6 +167,12 @@
     )
   )
 
-;; Read-only Functions(define-read-only (get-proposal (proposal-id uint))  (ok (map-get? proposals { proposal-id: proposal-id })))
-(define-read-only (get-vote (proposal-id uint) (voter principal))  (ok (map-get? votes { proposal-id: proposal-id, voter: voter })))
-(define-read-only (get-contract-owner)  (ok (var-get contract-owner)))
+;; Read-only Functions
+(define-read-only (get-proposal (proposal-id uint))
+  (ok (map-get? proposals { proposal-id: proposal-id })))
+
+(define-read-only (get-vote (proposal-id uint) (voter principal))
+  (ok (map-get? votes { proposal-id: proposal-id, voter: voter })))
+
+(define-read-only (get-contract-owner)
+  (ok (var-get contract-owner)))

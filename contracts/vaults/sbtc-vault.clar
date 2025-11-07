@@ -1,5 +1,5 @@
 ;; ===== Traits =====
-(use-trait sip-010-ft-trait .sip-010-trait-ft-standard.sip-010-trait)
+(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
 
 ;; sbtc-vault.clar
 ;; Bitcoin asset management vault with sBTC wrapping/unwrapping

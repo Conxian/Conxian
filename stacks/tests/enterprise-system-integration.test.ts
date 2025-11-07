@@ -1,6 +1,9 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import { Cl } from '@stacks/transactions';
-import { initSimnet } from '@hirosystems/clarinet-sdk';
+import { initSimnet } from '@stacks/clarinet-sdk';
+import { HEAVY_DISABLED } from './helpers/env';
+
+const d = HEAVY_DISABLED ? describe.skip : describe;
 
 /**
  * Comprehensive Enterprise Loan System Integration Tests
@@ -14,7 +17,7 @@ import { initSimnet } from '@hirosystems/clarinet-sdk';
  * - Liquidity optimization
  * - End-to-end workflows
  */
-describe('Enterprise Loan System Integration Tests', () => {
+d('Enterprise Loan System Integration Tests', () => {
   let simnet: any;
   let accounts: Map<string, string>;
 

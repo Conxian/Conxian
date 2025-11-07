@@ -57,7 +57,7 @@ def extract_deployer_prefix(contracts_table: Dict) -> str:
             if addr and "." in addr:
                 return addr.split(".")[0]
     # Fallback to default placeholder
-    return "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+    return "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
 
 def main():

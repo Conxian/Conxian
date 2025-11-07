@@ -1,37 +1,37 @@
 version: "1.0"
 name: "Conxian Testnet Deployment"
 network: testnet
-deployer: ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6
+deployer: STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ
 
 # Deployment Configuration
 config:
   batch_size: 10
-  verification_delay: 30  # seconds between batches
+  verification_delay: 30 # seconds between batches
   max_retries: 3
   estimated_time: "4-6 hours"
-  required_balance: 10000  # STX
-  
+  required_balance: 10000 # STX
+
 # Pre-Deployment Checks
 pre_deployment_checks:
   - name: "Compilation Check"
     command: "clarinet check"
     expected: "0 errors"
     critical: true
-    
+
   - name: "Test Suite"
     command: "npm test"
     expected: ">95% pass rate"
     critical: true
-    
+
   - name: "Deployer Balance"
     check: "account_balance"
     minimum: 10000
     critical: true
-    
+
   - name: "Network Connectivity"
     endpoint: "https://api.testnet.hiro.so/v2/info"
     critical: true
-    
+
   - name: "Git Clean State"
     command: "git status --porcelain"
     expected: "empty or known files only"
@@ -51,7 +51,7 @@ deployment_order:
     post_verification:
       - check_contract_exists
       - validate_trait_definitions
-      
+
   # Phase 2: Tokens (5 contracts)
   - phase: 2
     name: "Token System"
@@ -67,7 +67,7 @@ deployment_order:
       - check_token_metadata
       - validate_sip010_interface
       - test_token_transfer
-      
+
   # Phase 3: DEX Core (10 contracts)
   - phase: 3
     name: "DEX Infrastructure"
@@ -89,7 +89,7 @@ deployment_order:
     post_verification:
       - test_pool_creation
       - validate_swap_functionality
-      
+
   # Phase 4: Dimensional System (10 contracts)
   - phase: 4
     name: "Dimensional Finance"
@@ -112,7 +112,7 @@ deployment_order:
       - test_bond_issuance
       - validate_dynamic_sip010_dispatch
       - check_position_nft_minting
-      
+
   # Phase 5: Vaults & Lending (5 contracts)
   - phase: 5
     name: "Vault & Lending System"
@@ -129,7 +129,7 @@ deployment_order:
     post_verification:
       - test_vault_deposit
       - validate_flash_loan_execution
-      
+
   # Phase 6: Governance (5 contracts)
   - phase: 6
     name: "Governance System"
@@ -145,7 +145,7 @@ deployment_order:
     post_verification:
       - test_governance_proposal
       - validate_access_control
-      
+
   # Phase 7: Security & Monitoring (5 contracts)
   - phase: 7
     name: "Security Infrastructure"
@@ -161,7 +161,7 @@ deployment_order:
     post_verification:
       - test_circuit_breaker
       - validate_rate_limiting
-      
+
   # Phase 8: Oracle & Automation (5 contracts)
   - phase: 8
     name: "Oracle & Automation"
@@ -182,7 +182,7 @@ post_deployment_verification:
   - name: "Contract Registry"
     action: "verify_all_contracts_deployed"
     contracts: 50
-    
+
   - name: "Token Metadata"
     action: "check_token_details"
     tokens:
@@ -191,7 +191,7 @@ post_deployment_verification:
       - cxlp-token
       - cxtr-token
       - cxs-token
-      
+
   - name: "Core Functionality"
     tests:
       - test_token_transfers
@@ -199,17 +199,17 @@ post_deployment_verification:
       - test_bond_issuance
       - test_vault_operations
       - test_governance_proposal
-      
+
   - name: "Security Controls"
     tests:
       - test_access_control
       - test_circuit_breaker
       - test_emergency_pause
-      
+
   - name: "Integration Tests"
     suite: "integration-validation.spec.ts"
     expected: "all tests pass"
-    
+
   - name: "Health Monitoring"
     action: "enable_monitoring"
     dashboard: "https://monitoring.conxian.io/testnet"
@@ -221,7 +221,7 @@ rollback_procedure:
     - "critical test failure"
     - "security vulnerability detected"
     - "unexpected behavior observed"
-    
+
   steps:
     - document_issue
     - notify_team
@@ -238,27 +238,27 @@ success_criteria:
   - post_verification_pass: true
   - no_critical_errors: true
   - health_monitoring_active: true
-  
+
 # Monitoring & Alerts
 monitoring:
   endpoints:
     - "https://api.testnet.hiro.so/v2/contracts/interface/{deployer}/{contract}"
-  
+
   metrics:
     - contract_call_success_rate
     - transaction_fees
     - block_confirmation_time
     - error_rates
-    
+
   alerts:
     - type: "contract_error"
       threshold: ">5 errors/hour"
       action: "notify_team"
-      
+
     - type: "gas_depletion"
       threshold: "<1000 STX"
       action: "pause_deployment"
-      
+
     - type: "network_issues"
       threshold: ">10% failed transactions"
       action: "investigate_network"
@@ -268,7 +268,7 @@ documentation:
   deployment_log: "deployments/testnet/deployment-{date}.log"
   contract_addresses: "deployments/testnet/contract-addresses.yaml"
   verification_report: "deployments/testnet/verification-report.md"
-  
+
 # Team Contacts
 contacts:
   deployment_lead: "dev-team@conxian.io"
@@ -280,14 +280,14 @@ notes: |
   This deployment plan covers 50 core contracts prioritized for testnet launch.
   Additional experimental contracts (sBTC integration, advanced features) will be
   deployed in subsequent phases after core system validation.
-  
+
   Critical fixes must be applied before deployment:
   - CONX-001: Quote syntax removal (62+ files)
   - CONX-002: lending-system-trait uncommented
   - CONX-003: Staged changes committed
-  
+
   Estimated deployment time: 4-6 hours
   Required balance: 10,000+ STX
   Network: Stacks Testnet
-  
+
   For emergency rollback, contact deployment lead immediately.

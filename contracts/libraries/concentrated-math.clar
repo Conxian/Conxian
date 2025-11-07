@@ -19,9 +19,9 @@
   (begin
     (asserts! (and (>= tick MIN_TICK) (<= tick MAX_TICK)) ERR_INVALID_TICK)
     (if (>= tick 0)
-      (let ((base-power (try! (contract-call? MATH_CONTRACT pow TICK_BASE (to-uint tick)))))
+      (let ((base-power (try! (contract-call? MATH_CONTRACT pow-fixed TICK_BASE (to-uint tick)))))
         (contract-call? MATH_CONTRACT sqrt base-power))
-      (let ((base-power (try! (contract-call? MATH_CONTRACT pow TICK_BASE (to-uint (- tick))))))
+      (let ((base-power (try! (contract-call? MATH_CONTRACT pow-fixed TICK_BASE (to-uint (- tick))))))
         (let ((sqrt-result (try! (contract-call? MATH_CONTRACT sqrt base-power))))
           (ok (/ Q64 sqrt-result))))
     )

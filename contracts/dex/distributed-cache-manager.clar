@@ -1,5 +1,6 @@
 ;; ===== Imports =====
-(use-trait cache-manager-trait .all-traits.cache-manager-trait)
+;; TODO: cache-manager-trait not defined in all-traits.clar
+;; (use-trait cache-manager-trait .all-traits.cache-manager-trait)
 
 ;; Distributed Cache Manager - Reduces latency by 60-80%
 ;; Implements multi-level caching with TTL and invalidation strategies
@@ -312,7 +313,7 @@
     (promote-l2-to-l1 key)
     (if (and (is-eq from-level CACHE_LEVEL_L3) (is-eq to-level CACHE_LEVEL_L2))
       (promote-l3-to-l2 key)
-      (ok false)  ;; Return false if no promotion was made
+      false  ;; Return false if no promotion was made
     )
   )
 )
@@ -380,8 +381,7 @@
     (map-delete l1-cache key)
     (map-delete l2-cache key)
     (map-delete l3-cache key)
-    (map-delete cache-ttl key)
-    (map-delete cache-access-count key)
+    ;; TTL and access-count maps removed in simplified version
     
     (ok true)
   )

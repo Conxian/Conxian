@@ -96,7 +96,8 @@
     ;; Check system operational status
     (match (var-get protocol-monitor)
       monitor-contract
-        (asserts! (unwrap! (contract-call? monitor-contract is-system-operational) (err ERR_SYSTEM_PAUSED)) (err ERR_SYSTEM_PAUSED))
+        (let ((paused (unwrap! (contract-call? monitor-contract is-paused) (err ERR_SYSTEM_PAUSED))))
+          (asserts! (not paused) (err ERR_SYSTEM_PAUSED)))
       true)
     
     ;; Calculate revenue splits
@@ -151,7 +152,7 @@
       }))))
 
 ;; Get dimensional metrics for revenue calculations
-(define-public (get-dimension-metrics (dim-id uint))
+(define-read-only (get-dimension-metrics (dim-id uint))
   (match (var-get dim-metrics-contract)
     metrics-contract
       (match (contract-call? metrics-contract get-metric dim-id u0) ;; TVL metric
@@ -229,7 +230,7 @@
     dim-metrics-contract: (var-get dim-metrics-contract)
   })
 
-(define-read-only (calculate-expected-dimensional-yield (dim-id uint) (stake-amount uint) (lock-period uint))
+(define-public (calculate-expected-dimensional-yield (dim-id uint) (stake-amount uint) (lock-period uint))
   ;; Calculate expected yield based on current metrics
   (match (get-dimension-metrics dim-id)
     metrics

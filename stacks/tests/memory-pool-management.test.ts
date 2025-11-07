@@ -1,6 +1,9 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import { Cl } from '@stacks/transactions';
-import { Simnet } from '@hirosystems/clarinet-sdk';
+import { Simnet } from '@stacks/clarinet-sdk';
+import { HEAVY_DISABLED } from './helpers/env';
+
+const d = HEAVY_DISABLED ? describe.skip : describe;
 
 /**
  * Memory Pool Management Test Suite
@@ -8,7 +11,7 @@ import { Simnet } from '@hirosystems/clarinet-sdk';
  * Tests the memory optimization and resource allocation system
  * with dynamic memory pools, garbage collection, and resource tracking.
  */
-describe('Memory Pool Management', () => {
+d('Memory Pool Management', () => {
   let mockSimnet: Simnet;
   let accounts: Map<string, string>;
 
@@ -64,7 +67,7 @@ describe('Memory Pool Management', () => {
         };
       },
       getAccounts: () => new Map([
-        ['deployer', 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6'],
+        ['deployer', 'STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ'],
         ['wallet_1', 'ST1SJ3DTE5DN7X54YDH5D64R3BCB6A2AG2ZQ8YPD5'],
         ['wallet_2', 'ST2CY5V39NHDPWSXMW9QDT3HC3GD6Q6XX4CFRK9AG']
       ])

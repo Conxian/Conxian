@@ -1,7 +1,7 @@
 ;; token-emission-controller.clar
 ;; Hard-coded emission rails with governance guards to prevent inflation abuse
 
-(use-trait sip-010-ft-mintable-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.all-traits.sip-010-ft-mintable-trait)
+(use-trait sip-010-ft-mintable-trait .all-traits.sip-010-ft-mintable-trait)
 
 ;; --- Constants ---
 (define-constant CONTRACT_OWNER tx-sender)
@@ -185,45 +185,41 @@
         u0))
     u0))
 
-(define-public (controlled-mint (token-contract <sip-010-ft-mintable-trait>) (recipient principal) (amount uint)))
-  (let ((token-principal (contract-of token-contract))
-        (current-epoch-num (var-get current-epoch)))
+(define-public (controlled-mint (token-contract <sip-010-ft-mintable-trait>) (recipient principal) (amount uint))
+  (let (
+    (token-principal (contract-of token-contract))
+    (current-epoch-num (var-get current-epoch))
+  )
     (begin
-      ;; Only governance or owner can mint
       (asserts! (or (is-eq tx-sender (var-get contract-owner))
-                   (is-some (var-get governance-contract)))
-               (err ERR_UNAUTHORIZED))
-      
-      ;; Validate token is supported
+                    (is-some (var-get governance-contract)))
+                (err ERR_UNAUTHORIZED))
       (let ((limits (unwrap! (map-get? token-emission-limits token-principal) (err ERR_INVALID_TOKEN))))
-        
-        ;; Advance epoch if needed
         (maybe-advance-epoch)
-        
-        ;; Get current supply and epoch data
-        (let ((current-supply (get-token-supply token-principal))
-              (epoch-data (default-to { minted: u0, supply-at-start: current-supply }
-                                     (map-get? epoch-emissions { token: token-principal, epoch: current-epoch-num })))
-              (annual-cap (/ (* (get supply-at-start epoch-data) (get max-annual-bps limits)) u10000))
-              (single-mint-cap (/ (* current-supply (get max-single-mint-bps limits)) u10000)))
-          
-          ;; Check single mint limit
+        (let (
+          (current-supply (get-token-supply token-principal))
+          (epoch-data (default-to { minted: u0, supply-at-start: current-supply }
+                                  (map-get? epoch-emissions { token: token-principal, epoch: current-epoch-num })))
+          (annual-cap (/ (* (get supply-at-start epoch-data) (get max-annual-bps limits)) u10000))
+          (single-mint-cap (/ (* current-supply (get max-single-mint-bps limits)) u10000))
+        )
           (asserts! (<= amount single-mint-cap) (err ERR_SINGLE_MINT_TOO_LARGE))
-          
-          ;; Check annual emission cap
           (asserts! (<= (+ (get minted epoch-data) amount) annual-cap) (err ERR_EMISSION_CAP_EXCEEDED))
-          
-          ;; Execute mint
-          (try! (as-contract (contract-call? token-contract mint amount recipient)))
-          
-          ;; Update epoch emissions
-          (map-set epoch-emissions { token: token-principal, epoch: current-epoch-num }
-            {
-              minted: (+ (get minted epoch-data) amount),
-              supply-at-start: (get supply-at-start epoch-data)
-            })
-          
-          (ok { amount: amount, epoch: current-epoch-num, remaining-cap: (- annual-cap (+ (get minted epoch-data) amount)) }))))))
+          (try! (as-contract (contract-call? token-contract mint recipient amount)))
+          (map-set epoch-emissions { token: token-principal, epoch: current-epoch-num } {
+            minted: (+ (get minted epoch-data) amount),
+            supply-at-start: (get supply-at-start epoch-data)
+          })
+          (ok {
+            amount: amount,
+            epoch: current-epoch-num,
+            remaining-cap: (- annual-cap (+ (get minted epoch-data) amount))
+          })
+        )
+      )
+    )
+  )
+)
 
 ;; --- Governance Functions ---
 
@@ -309,14 +305,13 @@
       ;; Can only reduce, not increase
       (asserts! (and (<= new-annual-bps (get max-annual-bps current-limits))
                      (<= new-single-mint-bps (get max-single-mint-bps current-limits)))
-               (err ERR_INVALID_AMOUNT))
+               (err ERR_INVALID_PARAMETERS))
 
       ;; Update the limits immediately (emergency)
       (map-set token-emission-limits token-contract
         (merge current-limits {
           max-annual-bps: new-annual-bps,
-          max-single-mint-bps: new-single-mint-bps,
-          last-updated: block-height
+          max-single-mint-bps: new-single-mint-bps
         }))
 
       (print {

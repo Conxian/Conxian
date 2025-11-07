@@ -1,5 +1,6 @@
 ;; ===== Traits =====
-(use-trait monitoring-dashboard-trait .all-traits.monitoring-dashboard-trait)
+;; TODO: monitoring-dashboard-trait not defined in all-traits.clar
+;; (use-trait monitoring-dashboard-trait .all-traits.monitoring-dashboard-trait)
 
 
 ;; Real-Time Monitoring Dashboard Contract
@@ -150,7 +151,7 @@
               })
             (var-set total-metrics (+ (var-get total-metrics) u1))))
         ;; Check for alert conditions
-        (try! (check-alert-conditions metric-name value))
+        (unwrap-panic (check-alert-conditions metric-name value))
         (ok true))
       (ok false))))
 

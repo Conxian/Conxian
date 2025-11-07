@@ -79,7 +79,7 @@ if (Test-Path $poolPath) {
     $originalContent = $content
     
     # Fix malformed trait path
-    $content = $content -replace "\(use-trait math-lib-concentrated 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6\.math\.math-lib-concentrated\)", "(use-trait math-trait .all-traits.math-trait)"
+    $content = $content -replace "\(use-trait math-lib-concentrated 'STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ\.math\.math-lib-concentrated\)", "(use-trait math-trait .all-traits.math-trait)"
     
     if ($content -ne $originalContent) {
         Write-Host "  ✅ Fixed math-lib trait reference" -ForegroundColor Green

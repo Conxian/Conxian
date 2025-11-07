@@ -3,6 +3,7 @@
 ;; Handles audit submissions, DAO voting, and NFT badge issuance
 
 ;; --- Traits ---
+(use-trait dao-trait .all-traits.dao-trait)
 
 ;; --- Constants ---
 (define-constant CONTRACT_OWNER tx-sender)
@@ -56,8 +57,8 @@
 
 (define-private (get-voting-weight (voter principal))
   (match (var-get dao-contract)
-    dao-principal 
-      (match (contract-call? dao-principal get-voting-power voter)
+    dao 
+      (match (contract-call? dao get-voting-power voter)
         weight (ok weight)
         error (ok u1)) ;; Default weight if DAO call fails
     (ok u1))) ;; Default weight if no DAO configured
@@ -84,7 +85,7 @@
     
     ;; Validate DAO voting power if configured
     (match (var-get dao-contract)
-      dc (match (contract-call? dc has-voting-power caller)
+      dao (match (contract-call? dao has-voting-power caller)
             has-power (asserts! has-power ERR_UNAUTHORIZED)
             error (err error))
       (ok true))

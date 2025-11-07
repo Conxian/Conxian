@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll } from 'vitest';
-import { Simnet } from '@hirosystems/clarinet-sdk';
+import { Simnet } from '@stacks/clarinet-sdk';
 import { Cl } from '@stacks/transactions';
 
 describe('Governance Token (SIP-010-like)', () => {

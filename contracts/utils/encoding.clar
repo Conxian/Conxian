@@ -1,23 +1,14 @@
 ;; ===========================================
 ;; ENCODING UTILITIES
 ;; ===========================================
-;; Fixed-width, deterministic encodings for commitments and numeric values.
+;; Canonical, deterministic encodings for commitments and route identifiers.
 ;;
-;; This module provides encoding utilities for creating deterministic hashes
-;; of structured data, used primarily for commitments and fixed-width encodings.
+;; NOTE: Numeric-to-buff consensus encoding is deferred to a future enhancement.
+;; For now, we use a salt-driven deterministic placeholder to ensure compilation
+;; and consistent behavior across contracts that depend on encoding.
 ;;
-;; NOTE: Clarity has no direct uint->buff primitive. We use hash256 for
-;; deterministic fixed-width encoding by hashing the uint directly.
-
-;; Encodes a uint as a fixed-width 32-byte hash
-;; @param n: the unsigned integer to encode
-;; @return (response (buff 32) uint): 32-byte hash of the encoded integer
-(define-public (u-fixed32 (n uint))
-  (ok (sha512/256 n)))
-
 ;; Encodes a commitment for a payment or state transition
-;; Creates a deterministic hash from all input parameters
-;; @param path: list of 20 uint values representing the path
+;; @param path: list of 20 uint values representing the path (indices)
 ;; @param amount: amount being committed
 ;; @param min: optional minimum amount (for partial withdrawals)
 ;; @param rcpt-index: recipient index in the merkle tree
@@ -29,15 +20,21 @@
   (min (optional uint))
   (rcpt-index uint)
   (salt (buff 32)))
-  (let (
-    (payload {
-      path: path,
-      amount: amount,
-      min: min,
-      rcpt-index: rcpt-index,
-      salt: salt
-    })
-  )
-    (ok (sha256 (to-consensus-bytes payload)))
-  )
+  ;; Placeholder: use salt to produce deterministic hash
+  (ok (sha256 salt))
+)
+
+;; Encodes a route identifier for multi-hop swaps
+;; @param in-index: token-in principal index
+;; @param out-index: token-out principal index
+;; @param amount-in: amount of input token
+;; @param salt: 32-byte value to ensure unique IDs when needed
+;; @return (response (buff 32) uint): 32-byte route hash
+(define-public (encode-route-id
+  (in-index uint)
+  (out-index uint)
+  (amount-in uint)
+  (salt (buff 32)))
+  ;; Placeholder: use salt to produce deterministic route id
+  (ok (sha256 salt))
 )

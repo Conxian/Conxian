@@ -11,7 +11,7 @@ export default defineConfig({
     globals: true,
     setupFiles: [
       './stacks/global-vitest.setup.ts',
-      './node_modules/@hirosystems/clarinet-sdk/vitest-helpers/src/vitest.setup.ts',
+      './node_modules/@stacks/clarinet-sdk/vitest-helpers/src/vitest.setup.ts',
     ],
     // Enable ESM support
     environmentOptions: {

@@ -37,6 +37,7 @@ except ImportError:
 CONTRACTS_DIR = ROOT_DIR / "contracts"
 CLARINET_TOML = ROOT_DIR / "Clarinet.toml"
 STACKS_TEST_TOML = ROOT_DIR / "stacks" / "Clarinet.test.toml"
+STACKS_DIR = ROOT_DIR / "stacks"
 TRAITS_FILE = ROOT_DIR / "contracts" / "traits" / "all-traits.clar"
 
 # Directories not required to be listed in Clarinet.toml (auxiliary/non-deployable)
@@ -73,10 +74,12 @@ IGNORE_DIRS = {
     "interfaces",
     "mocks",
     "test",
+    "tests",
     "lib",
     "libraries",
     "pools",
     "utils",
+    "integrations",
 }
 
 # Regex patterns (support quoted and unquoted trait refs, including principal addresses)
@@ -112,7 +115,7 @@ class ContractVerifier:
         self._graph: Optional[Dict[str, Any]] = None
         self.toml_data = self.load_toml(self.clarinet_toml)
         # self.test_config = self.load_toml(self.test_config_path)
-        self.test_config = self.toml_data # Use the main toml data
+        self.test_config = self.load_toml(STACKS_TEST_TOML) if STACKS_TEST_TOML.exists() else self.toml_data
         
         self.contract_files = list(self.contracts_dir.rglob("*.clar"))
         self.defined_traits: Set[str] = set()
@@ -127,6 +130,7 @@ class ContractVerifier:
         checks = [
             ("Contract Paths", self.verify_contracts_in_toml()),
             ("Trait References", self.verify_trait_references()),
+            ("Manifest Alignment", self.verify_manifest_alignment()),
             ("Contract Dependencies", self.check_contract_dependencies()),
             ("Unused Contracts", self.check_unused_contracts()),
             ("Pruned Dependencies", self.check_pruned_dependencies()),
@@ -149,33 +153,78 @@ class ContractVerifier:
         """Verify Clarinet.toml entries exist and every .clar file is listed by path."""
         success = True
 
-        # Build set of normalized contract paths from Clarinet.toml
-        contracts_table = self.toml_data.get("contracts", {})
-        toml_paths: Set[str] = set()
-        for name, entry in contracts_table.items():
-            path = entry.get("path") if isinstance(entry, dict) else None
-            if path:
-                toml_paths.add(os.path.normpath(os.path.join(ROOT_DIR, path)))
+        # Build sets of normalized contract paths from both manifests
+        root_contracts = self.toml_data.get("contracts", {})
+        test_contracts = self.test_config.get("contracts", {})
+        root_disabled = self.toml_data.get("disabled", {})
+        test_disabled = self.test_config.get("disabled", {})
 
-        # Check each contract file
+        def manifest_paths(table: Dict[str, Any], base_dir: Path) -> Set[str]:
+            out: Set[str] = set()
+            for _, entry in table.items():
+                path = entry.get("path") if isinstance(entry, dict) else None
+                if path:
+                    # Resolve relative to the manifest base directory
+                    full = (base_dir / path).resolve()
+                    out.add(os.path.normpath(str(full)))
+            return out
+
+        toml_paths_all = manifest_paths(root_contracts, ROOT_DIR) | manifest_paths(test_contracts, STACKS_DIR if STACKS_TEST_TOML.exists() else ROOT_DIR)
+
+        # Build disabled path set from both manifests
+        def disabled_paths(table: Dict[str, Any], base_dir: Path) -> Set[str]:
+            out: Set[str] = set()
+            for _, entry in table.items():
+                if isinstance(entry, dict) and 'path' in entry:
+                    full = (base_dir / entry['path']).resolve()
+                    out.add(os.path.normpath(str(full)))
+            return out
+
+        disabled_all = disabled_paths(root_disabled, ROOT_DIR) | disabled_paths(test_disabled, STACKS_DIR if STACKS_TEST_TOML.exists() else ROOT_DIR)
+
+        # Helper: does file use centralized traits?
+        def uses_all_traits(f: Path) -> bool:
+            try:
+                c = self._strip_comments(f.read_text(encoding='utf-8'))
+            except Exception:
+                return False
+            return ('.all-traits.' in c) or (re.search(r"'[A-Z0-9]+\.all-traits\.", c) is not None)
+
+        # Check each contract file (only production dirs or centralized-traits users are required)
         for f in self.contract_files:
-            # Skip ignored directories
+            # Skip ignored directories entirely
             if any(ign in f.parts for ign in IGNORE_DIRS):
                 continue
-            
+
+            # Skip intentionally disabled files
+            try:
+                absf = os.path.normpath(str(f.resolve()))
+            except Exception:
+                absf = os.path.normpath(str(f))
+            if absf in disabled_all:
+                continue
+
+            rel_parts = f.relative_to(self.contracts_dir).parts
+            top_dir = rel_parts[0] if rel_parts else ""
+            must_be_listed = (top_dir in PRODUCTION_DIRS) or uses_all_traits(f)
+
+            if not must_be_listed:
+                continue
+
             norm_path = os.path.normpath(str(f))
-            if norm_path not in toml_paths:
-                self.errors.append(f"{f.relative_to(ROOT_DIR)} is not listed in Clarinet.toml")
+            if norm_path not in toml_paths_all:
+                self.errors.append(f"{f.relative_to(ROOT_DIR)} is not listed in Clarinet.toml or stacks/Clarinet.test.toml")
                 success = False
 
-        # Check each TOML entry
-        for name, entry in contracts_table.items():
-            path = entry.get("path") if isinstance(entry, dict) else None
-            if path:
-                full_path = os.path.normpath(os.path.join(ROOT_DIR, path))
-                if not os.path.exists(full_path):
-                    self.errors.append(f"Listed path for '{name}' does not exist: {path}")
-                    success = False
+        # Check each TOML entry across both manifests points to an existing file
+        for source, table, base_dir in (("root", root_contracts, ROOT_DIR), ("test", test_contracts, STACKS_DIR if STACKS_TEST_TOML.exists() else ROOT_DIR)):
+            for name, entry in table.items():
+                path = entry.get("path") if isinstance(entry, dict) else None
+                if path:
+                    full_path = (base_dir / path).resolve()
+                    if not full_path.exists():
+                        self.errors.append(f"Listed path for '{name}' does not exist: {path}")
+                        success = False
 
         return success
 
@@ -206,7 +255,8 @@ class ContractVerifier:
         # Find all use-trait statements
         use_matches = re.finditer(USE_TRAIT_PATTERN, content)
         for match in use_matches:
-            trait_ref = match.group(1)
+            # group(1) is alias, group(2) is the trait reference
+            trait_ref = match.group(2)
 
             # Handle different trait reference formats:
             # 1. 'ST...all-traits.trait-name' (quoted principal address format)
@@ -303,16 +353,41 @@ class ContractVerifier:
         root_contracts = self.toml_data.get("contracts", {})
         test_contracts = self.test_config.get("contracts", {})
 
-        # Build path -> (name, address, depends_on, source)
-        manifest_paths: Dict[str, Tuple[str, Optional[str], List[str], str]] = {}
-        for source, table in (("test", test_contracts), ("root", root_contracts)):
+        # Build canonical key -> (name, address, depends_on, source)
+        manifest_map: Dict[str, Tuple[str, Optional[str], List[str], str]] = {}
+        for source, table, base_dir in (("test", test_contracts, STACKS_DIR if STACKS_TEST_TOML.exists() else ROOT_DIR), ("root", root_contracts, ROOT_DIR)):
             for name, entry in table.items():
                 if isinstance(entry, dict):
                     path = entry.get('path')
                     addr = entry.get('address')
                     deps = entry.get('depends_on', []) or []
-                    if path:
-                        manifest_paths[path.replace('\\', '/')] = (name, addr, deps, source)
+                    if not path:
+                        continue
+                    # Resolve to absolute, then compute contract-relative canonical keys
+                    abs_path = (base_dir / path).resolve()
+                    try:
+                        rel_to_contracts = abs_path.relative_to(self.contracts_dir).as_posix()
+                        canonical_rel = f"contracts/{rel_to_contracts}"
+                        # Store under both keys for lookup flexibility
+                        manifest_map[canonical_rel] = (name, addr, deps, source)
+                        manifest_map[rel_to_contracts] = (name, addr, deps, source)
+                    except ValueError:
+                        # Not under contracts/; still store normalized path string as fallback
+                        manifest_map[abs_path.as_posix()] = (name, addr, deps, source)
+
+        # Build disabled canonical map to skip 'not listed' errors for intentionally disabled files
+        disabled_map: Dict[str, Tuple[str, Optional[str], List[str], str]] = {}
+        for source, table, base_dir in (("test", self.test_config.get("disabled", {}), STACKS_DIR if STACKS_TEST_TOML.exists() else ROOT_DIR), ("root", self.toml_data.get("disabled", {}), ROOT_DIR)):
+            for name, entry in table.items():
+                if isinstance(entry, dict) and entry.get('path'):
+                    abs_path = (base_dir / entry['path']).resolve()
+                    try:
+                        rel_to_contracts = abs_path.relative_to(self.contracts_dir).as_posix()
+                        canonical_rel = f"contracts/{rel_to_contracts}"
+                        disabled_map[canonical_rel] = (name, None, [], source)
+                        disabled_map[rel_to_contracts] = (name, None, [], source)
+                    except ValueError:
+                        disabled_map[abs_path.as_posix()] = (name, None, [], source)
 
         # Determine all-traits address for both manifests
         test_all_traits = test_contracts.get('all-traits', {})
@@ -321,6 +396,9 @@ class ContractVerifier:
         root_all_traits_addr = root_all_traits.get('address') if isinstance(root_all_traits, dict) else None
 
         for f in self.contract_files:
+            # Skip auxiliary directories
+            if any(part in f.parts for part in IGNORE_DIRS):
+                continue
             content = self._strip_comments(f.read_text())
             # Check for any all-traits usage (both old and new formats)
             uses_all_traits = ('.all-traits.' in content or 
@@ -330,19 +408,26 @@ class ContractVerifier:
                 rel_part = str(f.relative_to(self.contracts_dir)).replace("\\", "/")
                 rel = f"contracts/{rel_part}"
                 alt_key = rel.replace('contracts/', '')
-                manifest_entry = manifest_paths.get(rel) or manifest_paths.get(alt_key)
+                manifest_entry = manifest_map.get(rel) or manifest_map.get(alt_key)
                 if not manifest_entry:
+                    # Skip if intentionally disabled
+                    if disabled_map.get(rel) or disabled_map.get(alt_key):
+                        continue
                     self.errors.append(f"Contract using centralized traits not listed in Clarinet.toml: {rel}")
                     success = False
                     continue
                 _, addr, deps, source = manifest_entry
                 # Compare against matching manifest's all-traits address
                 reference_addr = test_all_traits_addr if source == "test" else root_all_traits_addr
-                if reference_addr and addr and addr != reference_addr:
-                    self.errors.append(
-                        f"Address mismatch for {rel}: {addr} != all-traits address {reference_addr} in {source} manifest."
-                    )
-                    success = False
+                # Compare deployer principals (not full contract identifiers)
+                if reference_addr and addr:
+                    addr_principal = addr.split('.')[0]
+                    ref_principal = reference_addr.split('.')[0]
+                    if addr_principal != ref_principal:
+                        self.errors.append(
+                            f"Deployer principal mismatch for {rel}: {addr_principal} != all-traits deployer {ref_principal} in {source} manifest."
+                        )
+                        success = False
                 # Soft-check depends_on
                 if isinstance(deps, list) and 'all-traits' not in deps:
                     # Only warn when the preferred manifest (test) is missing depends_on

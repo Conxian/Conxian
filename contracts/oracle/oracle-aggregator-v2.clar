@@ -1,163 +1,152 @@
-;; Oracle Aggregator V2
-;; This contract aggregates prices from multiple oracle sources, calculates TWAP, and detects manipulation.
+;; Oracle Aggregator v2 - Weighted sources with TWAP and manipulation detection (minimal implementation)
 
-;; --- Constants ---
-(define-constant ERR_UNAUTHORIZED (err u1003))
-(define-constant ERR_INVALID_SOURCE (err u6001))
-(define-constant ERR_NO_SOURCES (err u6002))
-(define-constant ERR_INVALID_PRICE (err u6003))
-(define-constant ERR_DEVIATION_TOO_HIGH (err u6004))
-(define-constant ERR_CIRCUIT_OPEN (err u5000))
-(define-constant ERR_PRICE_MANIPULATION (err u6005))
-(define-constant ONE_HOUR_IN_BLOCKS u6)
-(define-constant MANIPULATION_DEVIATION_THRESHOLD u1000) ;; 10%
-(define-constant MAX_PRICE_AGE_BLOCKS u10)
-(define-constant TWAP_ALPHA u2000) ;; 20% weight for new price in EMA
+(use-trait oracle-trait .all-traits.oracle-trait)
 
-;; --- Data Variables ---
-(define-data-var contract-owner principal tx-sender)
-(define-data-var circuit-breaker principal tx-sender)
-(define-data-var oracle-sources (list 20 principal) (list))
-(define-data-var aggregation-enabled bool true)
-(define-map prices { token-a: principal, token-b: principal } { price: uint, last-updated: uint })
-(define-map twap { token-a: principal, token-b: principal } { price: uint, last-updated: uint })
-(define-map price-history { token-a: principal, token-b: principal } (list 100 uint))
+(define-constant ERR_UNAUTHORIZED (err u5001))
+(define-constant ERR_ASSET_NOT_FOUND (err u5002))
+(define-constant BPS u10000)
+(define-constant ERR_CIRCUIT_OPEN (err u5004))
 
-;; --- Utils ---
+;; Admin
+(define-data-var admin principal tx-sender)
+(define-data-var manipulation-threshold-bps uint u500) ;; 5% default
+(define-data-var twap-alpha-bps uint u1000) ;; 10% EMA weight for new observations
+(define-data-var circuit-breaker (optional principal) none)
+;; Degrade to TWAP when price age exceeds threshold (in blocks)
+(define-data-var stale-threshold-blocks uint u300)
 
-(define-private (list-contains-principal? (needle principal) (haystack (list 20 principal)))
-  (is-some (index-of haystack needle)))
+;; Per-asset store: latest price, TWAP (EMA), source weight, and timestamp
+(define-map asset-sources { asset: principal } {
+  price: uint,
+  twap: uint,
+  weight: uint,
+  total-weight: uint,
+  updated-at: uint
+})
 
-(define-private (append-capped-uint (xs (list 100 uint)) (x uint) (cap uint))
-  (let ((n (len xs)))
-    (if (< n cap)
-        (unwrap-panic (as-max-len? (append xs x) cap))
-        (let ((tail (unwrap-panic (slice? xs u1 n)))
-              (trimmed (unwrap-panic (as-max-len? tail cap))))
-          (unwrap-panic (as-max-len? (append trimmed x) cap))))))
-
-(define-private (median-uint (xs (list 20 uint)))
-  (let ((n (len xs)))
-    (asserts! (> n u0) ERR_INVALID_PRICE)
-    (asserts! (<= n u20) ERR_INVALID_PRICE) ;; Ensure list is not too large
-    (if (is-eq (mod n u2) u1)
-        ;; Odd number of elements - return middle element
-        (ok (unwrap-panic (element-at? xs (/ (- n u1) u2))))
-        ;; Even number of elements - return average of middle two elements
-        (let ((mid1 (unwrap-panic (element-at? xs (/ n u2))))
-              (mid2 (unwrap-panic (element-at? xs (- (/ n u2) u1)))))
-          (ok (/ (+ mid1 mid2) u2))))))
-
-;; --- Circuit Breaker ---
-(define-private (check-circuit-breaker)
-  (contract-call? (var-get circuit-breaker) is-circuit-open))
-
-;; --- Sources IO ---
-
-(define-private (get-prices-from-sources (sources (list 20 principal)) (token-a principal) (token-b principal))
-  (let ((collected (fold
-          (lambda (source acc)
-            (match (contract-call? source get-price token-a token-b)
-              price (unwrap-panic (as-max-len? (append acc price) u20))
-              (err u0)))
-          sources
-          (list))))
-    (asserts! (> (len collected) u0) ERR_NO_SOURCES)
-    (ok collected)))
-
-;; --- Public Admin ---
-
-(define-public (add-oracle-source (source principal))
+(define-public (set-admin (new-admin principal))
   (begin
-    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
-    (let ((sources (var-get oracle-sources)))
-      (asserts! (not (list-contains-principal? source sources)) (ok true))
-      (var-set oracle-sources (unwrap-panic (as-max-len? (append sources source) u20)))
-      (ok true))))
+    (asserts! (is-eq tx-sender (var-get admin)) ERR_UNAUTHORIZED)
+    (var-set admin new-admin)
+    (ok true)
+  )
+)
 
-(define-public (remove-oracle-source (source principal))
+(define-public (set-circuit-breaker (cb principal))
   (begin
-    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
-    (var-set oracle-sources (filter (lambda (s) (not (is-eq s source))) (var-get oracle-sources)))
-    (ok true)))
+    (asserts! (is-eq tx-sender (var-get admin)) ERR_UNAUTHORIZED)
+    (var-set circuit-breaker (some cb))
+    (ok true)
+  )
+)
 
-(define-public (set-circuit-breaker (new-circuit-breaker principal))
+(define-public (set-params (new-threshold-bps uint) (new-alpha-bps uint))
   (begin
-    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
-    (var-set circuit-breaker new-circuit-breaker)
-    (ok true)))
+    (asserts! (is-eq tx-sender (var-get admin)) ERR_UNAUTHORIZED)
+    (var-set manipulation-threshold-bps new-threshold-bps)
+    (var-set twap-alpha-bps new-alpha-bps)
+    (ok true)
+  )
+)
 
-(define-public (toggle-aggregation (enabled bool))
+(define-public (set-stale-threshold (blocks uint))
   (begin
-    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
-    (var-set aggregation-enabled enabled)
-    (ok true)))
+    (asserts! (is-eq tx-sender (var-get admin)) ERR_UNAUTHORIZED)
+    (var-set stale-threshold-blocks blocks)
+    (ok true)
+  )
+)
 
-;; --- Core ---
+;; Update price and twap (EMA)
+(define-public (set-source (asset principal) (price uint) (weight uint))
+  (begin
+    (asserts! (is-eq tx-sender (var-get admin)) ERR_UNAUTHORIZED)
+    (try! (check-circuit-breaker))
+    (let ((alpha (var-get twap-alpha-bps)))
+      (match (map-get? asset-sources { asset: asset })
+        entry
+          (let ((prev-twap (get twap entry))
+                (prev-price (get price entry))
+                (prev-total (get total-weight entry))
+                (sum-weight (+ prev-total weight))
+                (agg-price (if (> sum-weight u0)
+                               (/ (+ (* prev-price prev-total) (* price weight)) sum-weight)
+                               price)))
+            (map-set asset-sources { asset: asset } {
+              price: agg-price,
+              twap: (/ (+ (* alpha price) (* (- BPS alpha) prev-twap)) BPS),
+              weight: weight,
+              total-weight: sum-weight,
+              updated-at: block-height
+            })
+          )
+        ;; Initialize TWAP on first set
+        (map-set asset-sources { asset: asset } {
+          price: price,
+          twap: price,
+          weight: weight,
+          total-weight: weight,
+          updated-at: block-height
+        })
+      )
+    )
+    (ok true)
+  )
+)
 
-(define-public (update-price (token-a principal) (token-b principal))
-  (let ((sources (var-get oracle-sources)))
-    (asserts! (var-get aggregation-enabled) ERR_CIRCUIT_OPEN)
-    (asserts! (> (len sources) u0) ERR_NO_SOURCES)
-    (asserts! (not (try! (check-circuit-breaker))) ERR_CIRCUIT_OPEN)
-    (let ((prices-list (try! (get-prices-from-sources sources token-a token-b)))
-          (median-price (try! (median-uint prices-list))))
-      (try! (check-deviation median-price token-a token-b))
-      (try! (check-manipulation median-price token-a token-b))
-      (map-set prices { token-a: token-a, token-b: token-b } { price: median-price, last-updated: block-height })
-      (let ((hist (default-to (list) (map-get? price-history { token-a: token-a, token-b: token-b })))
-            (new-hist (append-capped-uint hist median-price u100)))
-        (map-set price-history { token-a: token-a, token-b: token-b } new-hist))
-      (try! (update-twap median-price token-a token-b))
-      (ok median-price))))
+;; Basic manipulation detection: deviation of latest price vs TWAP exceeds threshold
+(define-read-only (is-manipulated (asset principal))
+  (match (map-get? asset-sources { asset: asset })
+    entry
+      (let ((p (get price entry)) (t (get twap entry)) (thr (var-get manipulation-threshold-bps)))
+        (if (or (is-eq t u0) (is-eq p u0))
+          false
+          (let ((delta (if (>= p t) (- p t) (- t p))))
+            (> (/ (* delta BPS) t) thr)
+          )
+        )
+      )
+    false
+  )
+)
 
-(define-read-only (get-price (token-a principal) (token-b principal))
-  (ok (get price (unwrap! (map-get? prices { token-a: token-a, token-b: token-b }) ERR_INVALID_PRICE))))
+;; Minimal aggregator: return latest price when not manipulated; otherwise return TWAP (degraded mode)
+(define-read-only (get-price (asset principal))
+  (match (map-get? asset-sources { asset: asset })
+    entry
+      (let ((cb (check-circuit-breaker)))
+        (match cb
+          (ok okv)
+            (let ((age (- block-height (get updated-at entry)))
+                  (stale (>= age (var-get stale-threshold-blocks))))
+              (if (or stale (is-manipulated asset))
+                (ok (get twap entry))
+                (ok (get price entry))
+              )
+            )
+          (err e)
+            ;; When circuit is open, degrade to TWAP if available
+            (ok (get twap entry))
+        )
+      )
+    ERR_ASSET_NOT_FOUND
+  )
+)
 
-(define-read-only (get-twap (token-a principal) (token-b principal))
-  (ok (get price (unwrap! (map-get? twap { token-a: token-a, token-b: token-b }) ERR_INVALID_PRICE))))
+;; Get TWAP explicitly
+(define-read-only (get-twap (asset principal))
+  (match (map-get? asset-sources { asset: asset })
+    entry (ok (get twap entry))
+    ERR_ASSET_NOT_FOUND
+  )
+)
 
-(define-read-only (is-price-stale (token-a principal) (token-b principal))
-  (match (map-get? prices { token-a: token-a, token-b: token-b })
-    price-data (ok (> (- block-height (get last-updated price-data)) MAX_PRICE_AGE_BLOCKS))
-    (ok true)))
-
-;; --- Risk Checks ---
-
-(define-private (check-deviation (new-price uint) (token-a principal) (token-b principal))
-  (match (map-get? prices { token-a: token-a, token-b: token-b })
-    old-price-data
-    (let ((old-price (get price old-price-data))
-          (deviation (if (> new-price old-price)
-                        (- new-price old-price)
-                        (- old-price new-price)))
-          (threshold (/ (* old-price u500) u10000)))
-      (asserts! (<= deviation threshold) ERR_DEVIATION_TOO_HIGH)
-      (ok true))
-    (ok true)))
-
-(define-private (check-manipulation (new-price uint) (token-a principal) (token-b principal))
-  (let ((history (default-to (list) (map-get? price-history { token-a: token-a, token-b: token-b }))))
-    (if (>= (len history) u5)
-        (let ((sum (fold + history u0))
-              (average (/ sum (len history)))
-              (deviation (if (> new-price average)
-                            (- new-price average)
-                            (- average new-price)))
-              (threshold (/ (* average MANIPULATION_DEVIATION_THRESHOLD) u10000)))
-          (asserts! (<= deviation threshold) ERR_PRICE_MANIPULATION)
-          (ok true))
-        (ok true))))
-
-;; --- TWAP ---
-
-(define-private (update-twap (new-price uint) (token-a principal) (token-b principal))
-  (match (map-get? twap { token-a: token-a, token-b: token-b })
-    old-twap-data
-    (let ((old-twap (get price old-twap-data))
-          (ema-price (/ (+ (* new-price TWAP_ALPHA) (* old-twap (- u10000 TWAP_ALPHA))) u10000)))
-      (map-set twap { token-a: token-a, token-b: token-b } { price: ema-price, last-updated: block-height })
-      (ok true))
-    (begin
-      (map-set twap { token-a: token-a, token-b: token-b } { price: new-price, last-updated: block-height })
-      (ok true))))
+;; Circuit breaker check: returns ok true if closed, err if open
+(define-read-only (check-circuit-breaker)
+  (match (var-get circuit-breaker)
+    cb
+      (let ((open (try! (contract-call? cb is-circuit-open))))
+        (if open (err ERR_CIRCUIT_OPEN) (ok true)))
+    (ok true)
+  )
+)

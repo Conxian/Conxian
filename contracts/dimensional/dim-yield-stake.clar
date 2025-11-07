@@ -4,7 +4,7 @@
 ;; - Manage staking and lockups for different dimensions.
 ;; - Calculate and distribute yield based on dimension-specific metrics.
 
-(use-trait sip-010-trait .all-traits.sip-010-ft-trait)
+(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
 
 ;; ===== Constants =====
 (define-constant ERR_UNAUTHORIZED (err u101))
@@ -22,6 +22,9 @@
 (define-constant MAX_LOCK_PERIOD u262800) ;; ~5 years
 
 ;; ===== Data Variables =====
+(define-read-only (max (a uint) (b uint))
+  (if (> a b) a b))
+
 (define-data-var contract-owner principal tx-sender)
 (define-data-var dim-metrics-contract principal tx-sender)
 (define-data-var token-contract principal tx-sender)
@@ -128,7 +131,7 @@
 )
 
 ;; ===== Staking Functions =====
-(define-public (stake-dimension (dim-id uint) (amount uint) (lock-period uint) (token <sip-010-trait>))
+(define-public (stake-dimension (dim-id uint) (amount uint) (lock-period uint) (token <sip-010-ft-trait>))
   (begin
     (asserts! (is-not-paused) ERR_UNAUTHORIZED)
     (asserts! (> amount u0) ERR_INVALID_AMOUNT)
@@ -189,7 +192,7 @@
 )
 
 ;; ===== Claiming Functions =====
-(define-public (claim-rewards (dim-id uint) (token <sip-010-trait>))
+(define-public (claim-rewards (dim-id uint) (token <sip-010-ft-trait>))
   (let (
     (staker tx-sender)
     (stake-info (unwrap! (map-get? stakes {staker: staker, dim-id: dim-id}) ERR_NO_STAKE_FOUND))
@@ -226,7 +229,7 @@
   )
 )
 
-(define-public (claim-partial-rewards (dim-id uint) (token <sip-010-trait>))
+(define-public (claim-partial-rewards (dim-id uint) (token <sip-010-ft-trait>))
   (let (
     (staker tx-sender)
     (stake-info (unwrap! (map-get? stakes {staker: staker, dim-id: dim-id}) ERR_NO_STAKE_FOUND))
@@ -251,7 +254,7 @@
 )
 
 ;; ===== Private Functions =====
-(define-private (calculate-rewards-for-stake 
+(define-read-only (calculate-rewards-for-stake 
   (stake-info {amount: uint, unlock-height: uint, lock-period: uint, stake-height: uint, last-claim-height: uint}) 
   (dim-id uint)
 )
@@ -265,19 +268,19 @@
     (base-rate (get base-rate params))
     (k (get k params))
   )
-    ;; Get utilization metric from dim-metrics contract
-    (match (contract-call? .dim-metrics get-metric dim-id u1)
-      utilization-metric
-      (let (
-        (utilization (get value utilization-metric))
-        ;; APR = baseRate + k * Utilization
-        (apr (+ base-rate (/ (* k utilization) PRECISION)))
-        ;; Reward = (amount * apr * blocks_staked) / (PRECISION * BLOCKS_PER_YEAR)
-        (reward (/ (* staked-amount (* apr blocks-staked)) (* PRECISION BLOCKS_PER_YEAR)))
-      )
-        (ok reward)
-      )
-      ERR_METRIC_NOT_FOUND
+    (match (var-get dim-metrics-contract)
+      metrics-contract
+        (match (contract-call? metrics-contract get-metric dim-id u1)
+          utilization-metric
+            (let (
+              (utilization (get value utilization-metric))
+              (apr (+ base-rate (/ (* k utilization) PRECISION)))
+              (reward (/ (* staked-amount (* apr blocks-staked)) (* PRECISION BLOCKS_PER_YEAR)))
+            )
+              (ok reward)
+            )
+          ERR_METRIC_NOT_FOUND)
+      (err ERR_DIMENSION_NOT_CONFIGURED)
     )
   )
 )

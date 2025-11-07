@@ -16,9 +16,9 @@ function walk(dir, callback) {
 }
 
 const regexes = [
-  /ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6\.all-traits\./g,
+  /STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ\.all-traits\./g,
   /'\.all-traits\./g,
-  /'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6\.all-traits\./g
+  /'STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ\.all-traits\./g
 ];
 
 walk(CONTRACTS_DIR, file => {
