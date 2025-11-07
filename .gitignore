@@ -178,7 +178,9 @@ contracts/dex/*backup.clar
 backups/env/.env.*
 
 *.devnet-plan.yaml.backup
-
+  
 compilation-errors-clean.txt
 stacks/security/audit-prep/*.txt
+deployments/*.simnet-plan.yaml
+stacks/deployments/*.simnet-plan.yaml
 *#
