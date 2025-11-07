@@ -63,3 +63,9 @@ clarity_version = 3
 epoch = "3.0"
 depends_on = ["all-traits"]
 
+[contracts.proof-of-reserves]
+path = "../contracts/security/proof-of-reserves.clar"
+clarity_version = 3
+epoch = "3.0"
+depends_on = ["all-traits"]
+

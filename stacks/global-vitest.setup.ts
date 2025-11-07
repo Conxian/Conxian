@@ -1,5 +1,5 @@
 // global-vitest.setup.ts
-import { getSDK } from '@hirosystems/clarinet-sdk';
+import { getSDK } from '@stacks/clarinet-sdk';
 
 // Default to the minimal foundation manifest, but allow callers to override
 // This compiles only the validated foundation layer unless CLARINET_MANIFEST is provided

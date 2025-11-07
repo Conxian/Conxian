@@ -5,18 +5,18 @@ clarinet_version = "3.8.1"
 
 [accounts.deployer]
 balance = 100000000000000
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
 [contracts.all-traits]
 path = "../contracts/traits/all-traits.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
 [contracts.role-nft]
 path = "../contracts/security/role-nft.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
-depends_on = [ "all-traits", ]
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+depends_on = ["all-traits"]
 
 [contracts.role-manager]
 path = "../contracts/security/role-manager.clar"
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
-depends_on = [ "all-traits", ]
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+depends_on = ["all-traits"]
