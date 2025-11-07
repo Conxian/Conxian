@@ -1,6 +1,6 @@
-# Environment variables
-.env
-*.env.*
+# ---------------------------------------------------------------------------
+# 1. ENVIRONMENT & SECRETS
+# ---------------------------------------------------------------------------
 !.env.example
 
 # Git hooks directory
@@ -189,3 +189,6 @@ contracts/dex/transaction-batch-processor.backup.clar
 contracts/dex/transaction-batch-processor.backup.clar
 contracts/dex/transaction-batch-processor.backup.clar
 .env
+.trae/rules/PRD_EXECUTION_UPDATE.md
+.trae/rules/tasks.md
+.trae/rules/dimensional-system-prd.md
