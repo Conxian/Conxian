@@ -5,6 +5,7 @@ This document outlines the management and security practices for the Conxian pro
 ## Overview
 
 The system account is a privileged account used for protocol operations, including:
+
 - Contract deployments
 - Protocol parameter updates
 - Emergency interventions
@@ -20,11 +21,13 @@ Public Key: 0321397ade90f85e6d634bba310633f442cef6f9dae4df054c7a3a244e78192573
 ## Security Measures
 
 ### Key Management
+
 - The private key and mnemonic are stored in the `.env` file
 - Access to the `.env` file is restricted to authorized personnel only
 - The private key is never committed to version control
 
 ### Operational Security
+
 1. **Development Environment**
    - Use the test system account for development and testing
    - Never use production credentials in development
@@ -44,18 +47,20 @@ Public Key: 0321397ade90f85e6d634bba310633f442cef6f9dae4df054c7a3a244e78192573
 Contracts can reference the system account using the `system` principal:
 
 ```clarity
-(define-constant SYSTEM_CONTRACT 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.system)
+(define-constant SYSTEM_CONTRACT 'STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ.system)
 ```
 
 ## Emergency Procedures
 
 ### Key Compromise
+
 1. Immediately transfer all assets to a new, secure account
 2. Update all contract references to the new system account
 3. Update environment variables and deployment configurations
 4. Notify affected stakeholders
 
 ### Account Recovery
+
 1. Use the mnemonic to recover the account
 2. If mnemonic is lost, use the private key
 3. If both are lost, follow the emergency recovery procedures for each contract
@@ -80,9 +85,11 @@ To generate a new system account for production:
 
 1. Use a secure, offline environment
 2. Generate a new mnemonic:
+
    ```bash
    stx make_keychain
    ```
+
 3. Securely store the mnemonic and private key
 4. Update the `.env` file with the new credentials
 5. Deploy a new version of the system contract with the new address

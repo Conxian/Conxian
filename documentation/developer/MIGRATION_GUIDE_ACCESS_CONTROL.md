@@ -23,7 +23,7 @@ The new AccessControl system provides:
 
 ```clarity
 (impl-trait
-  'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.your-contract-trait
+  'STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ.your-contract-trait
   .access-control-trait.access-control-trait
 )
 ```
@@ -44,7 +44,7 @@ The new AccessControl system provides:
 ### After
 
 ```clarity
-(impl-trait 'ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6.access-control.access-control-trait)
+(impl-trait 'STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ.access-control.access-control-trait)
 
 ;; Use the access control functions directly
 (define-public (only-admin)
