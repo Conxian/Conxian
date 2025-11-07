@@ -3,6 +3,7 @@ import { resolve } from 'path';
 import { fileURLToPath } from 'url';
 
 const skipSdk = process.env.SKIP_SDK === '1';
+const manifest = process.env.CLARINET_MANIFEST ?? 'Clarinet.toml';
 const includeStatic = [
   'stacks/tests/**/foundation-*.spec.ts',
   'stacks/tests/core/core-shape.spec.ts',
@@ -13,6 +14,8 @@ const includeAll = [
   'stacks/tests/**/*.spec.ts',
   'stacks/sdk-tests/**/*.spec.ts',
   'tests/load-testing/**/*.test.ts',
+  'tests/interoperability/**/*.test.ts',
+  'tests/monitoring/**/*.test.ts',
 ];
 
 /**
@@ -39,9 +42,6 @@ export default defineConfig({
     // ESM support
     environmentOptions: {
       environment: 'node',
-      transformMode: {
-        web: [/\.[tj]sx?$/],
-      },
     },
     testTimeout: 60000, // Extended timeout for load tests
     hookTimeout: 30000,
@@ -54,19 +54,20 @@ export default defineConfig({
     // Global setup and teardown
     setupFiles: [
       './stacks/global-vitest.setup.ts',
-      ...(!skipSdk ? ['./node_modules/@hirosystems/clarinet-sdk/vitest-helpers/src/vitest.setup.ts'] : []),
+      ...(!skipSdk ? ['./node_modules/@stacks/clarinet-sdk/vitest-helpers/src/vitest.setup.ts'] : []),
     ],
     
     // Coverage configuration
     coverage: {
-      enabled: true,
+      enabled: false,
       provider: 'v8',
       reporter: ['text', 'json', 'html', 'lcov'],
       reportsDirectory: './coverage',
       include: skipSdk ? includeStatic : [
         'stacks/tests/**/*.spec.ts',
         'stacks/tests/**/*.test.ts',
-        'tests/load-testing/**/*.test.ts'
+        'tests/load-testing/**/*.test.ts',
+        'tests/monitoring/**/*.test.ts'
       ],
       exclude: [
         'stacks/tests/helpers/**',
@@ -120,7 +121,6 @@ export default defineConfig({
   define: {
     'process.env.NODE_ENV': '"test"',
     'process.env.CLARINET_MODE': '"test"',
-    // Single source of truth: default tests compile the root manifest
-    'process.env.CLARINET_MANIFEST': '"Clarinet.toml"'
+    'process.env.CLARINET_MANIFEST': JSON.stringify(manifest)
   }
 });
