@@ -1045,7 +1045,38 @@
     ;; @param token-out: output token
     ;; @param amount-out: desired amount of output token
     ;; @return (response uint uint): required input amount and error code
-    (get-amount-in (principal principal uint) (response uint uint))
+  (get-amount-in (principal principal uint) (response uint uint))
+  )
+)
+
+;; ===========================================
+;; DEX FACTORY V2 TRAIT
+;; ===========================================
+;; Interface for registering pool types and creating pools via the factory
+;; Supports pool discovery and retrieval
+;;
+;; Example usage:
+;;   (use-trait dex-factory-v2-trait .all-traits.dex-factory-v2-trait)
+(define-trait dex-factory-v2-trait
+  (
+    ;; Register a pool type implementation
+    ;; @param type-id: identifier for pool type (e.g., "constant-product", "stable", "weighted", "concentrated")
+    ;; @param impl: principal of implementation contract
+    ;; @return (response bool uint): success flag and error code
+    (register-pool-type ((string-ascii 32) principal) (response bool uint))
+
+    ;; Create a pool for a token pair using a given type
+    ;; @param type-id: pool type identifier
+    ;; @param token-a: first token principal
+    ;; @param token-b: second token principal
+    ;; @return (response principal uint): pool principal and error code
+    (create-pool ((string-ascii 32) principal principal) (response principal uint))
+
+    ;; Retrieve a pool principal for a given token pair
+    ;; @param token-a: first token principal
+    ;; @param token-b: second token principal
+    ;; @return (response (optional principal) uint): optional pool principal and error code
+    (get-pool (principal principal) (response (optional principal) uint))
   )
 )
 
