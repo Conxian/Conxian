@@ -2,8 +2,8 @@
 ;; Institutional lending with custom terms and compliance
 
 ;; (use-trait enterprise .all-traits.enterprise-trait)  ;; centralized traits: not defined; remove to avoid build error
-;; (use-trait dimensional-core .all-traits.dimensional-core-trait)
-;; (use-trait risk-oracle .all-traits.risk-oracle-trait)
+(use-trait dimensional-trait .all-traits.dimensional-trait)
+(use-trait dim-registry-trait .all-traits.dim-registry-trait)
 
 ;; ===== Constants =====
 (define-constant ERR_UNAUTHORIZED (err u9500))
@@ -14,9 +14,8 @@
 
 ;; ===== Data Variables =====
 (define-data-var owner principal tx-sender)
-(define-data-var kyc-provider principal tx-sender)
-(define-data-var legal-registry principal tx-sender)
- (define-data-var oracle principal tx-sender)
+(define-data-var dimensional-engine principal tx-sender)
+(define-data-var dim-registry principal tx-sender)
 
 ;; Enterprise accounts
 (define-map enterprises {id: uint} {
@@ -63,7 +62,7 @@
   )
     ;; Verify KYC
     (asserts! 
-      (contract-call? (var-get kyc-provider) verify-kyc tx-sender kyc-proof) 
+      (unwrap! (contract-call? (var-get dim-registry) verify-kyc tx-sender kyc-proof) (err ERR_KYC_REQUIRED))
       ERR_KYC_REQUIRED
     )
     
@@ -73,7 +72,7 @@
       legal-entity: legal-entity,
       risk-tier: risk-tier,
       kyc-verified: true,
-      risk-limit: (calculate-risk-limit risk-tier),
+      risk-limit: (unwrap! (contract-call? (var-get dimensional-engine) get-risk-limit risk-tier) (err ERR_INVALID_TERMS)),
       current-exposure: u0,
       terms-hash: (sha256 0x),
       created-at: current-block
@@ -128,7 +127,7 @@
     
     ;; Verify signature
     (asserts! 
-      (contract-call? (var-get legal-registry) verify-signature 
+      (unwrap! (contract-call? (var-get dim-registry) verify-signature
         (get admin enterprise)
         (get hash terms)
         signature
@@ -192,17 +191,39 @@
   )
 )
 
-;; ===== Internal Functions =====
-(define-private (calculate-risk-limit (risk-tier uint))
-  (match risk-tier
-    1 (* u1000000 u1000000)   ;; 1M
-    2 (* u5000000 u1000000)   ;; 5M
-    3 (* u25000000 u1000000)  ;; 25M
-    4 (* u100000000 u1000000) ;; 100M
-    (* u10000000 u1000000)    ;; 10M default
+(define-public (set-dimensional-engine (engine principal))
+  (begin
+    (asserts! (is-eq tx-sender (var-get owner)) ERR_UNAUTHORIZED)
+    (var-set dimensional-engine engine)
+    (ok true)
   )
 )
 
+(define-public (set-dim-registry (registry principal))
+  (begin
+    (asserts! (is-eq tx-sender (var-get owner)) ERR_UNAUTHORIZED)
+    (var-set dim-registry registry)
+    (ok true)
+  )
+)
+
+(define-public (set-dimensional-engine (engine principal))
+  (begin
+    (asserts! (is-eq tx-sender (var-get owner)) ERR_UNAUTHORIZED)
+    (var-set dimensional-engine engine)
+    (ok true)
+  )
+)
+
+(define-public (set-dim-registry (registry principal))
+  (begin
+    (asserts! (is-eq tx-sender (var-get owner)) ERR_UNAUTHORIZED)
+    (var-set dim-registry registry)
+    (ok true)
+  )
+)
+
+;; ===== Internal Functions =====
 (define-private (get-term-version (enterprise-id uint))
   (fold-while 
     (map-get-keys term-sheets {enterprise-id: enterprise-id})
@@ -222,7 +243,7 @@
     u0
     (lambda (asset sum)
       (let (
-        (price (unwrap! (contract-call? (var-get oracle) get-price (get asset asset)) (err u0)))
+        (price (unwrap! (contract-call? (var-get dimensional-engine) get-price (get asset asset)) (err u0)))
         (value (/ (* (get amount asset) price) (pow u10 u8)))  ;; Adjust for decimals
       )
         (+ sum value)

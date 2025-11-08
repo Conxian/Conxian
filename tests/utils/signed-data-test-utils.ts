@@ -10,7 +10,7 @@ import {
 import { StacksTestnet } from '@stacks/network';
 import { generateWallet, deriveNewAccount } from '@stacks/wallet-sdk';
 import { createHash } from 'crypto';
-import { principalCV, uintCV } from '@stacks/transactions/dist/clarity/types/principalCV';
+import { principalCV, uintCV } from '@stacks/transactions';
 import { ec as EC } from 'elliptic';
 
 export class SignedDataTestUtils {

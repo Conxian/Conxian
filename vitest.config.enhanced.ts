@@ -16,6 +16,8 @@ const includeAll = [
   'tests/load-testing/**/*.test.ts',
   'tests/interoperability/**/*.test.ts',
   'tests/monitoring/**/*.test.ts',
+  'tests/dimensional/**/*.ts',
+  'tests/**/*.ts',
 ];
 
 /**
@@ -34,7 +36,8 @@ export default defineConfig({
     exclude: [
       'stacks/tests/helpers/**',
       'node_modules/**',
-      'dist/**'
+      'dist/**',
+      'tests/utils/**',
     ],
     
     // Enhanced test environment

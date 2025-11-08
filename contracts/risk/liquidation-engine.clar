@@ -18,7 +18,7 @@
 (define-data-var owner principal tx-sender)
 (define-data-var oracle-contract principal tx-sender)  ;; Oracle contract for price feeds
 (define-data-var risk-manager-contract principal tx-sender)  ;; Risk manager contract
-(define-data-var position-manager-contract principal tx-sender)  ;; Position manager contract
+(define-data-var dimensional-engine-contract principal tx-sender)  ;; Dimensional engine contract
 (define-data-var min-liquidation-reward uint u100)  ;; 0.1%
 (define-data-var max-liquidation-reward uint u1000) ;; 1%
 (define-data-var insurance-fund principal tx-sender)
@@ -44,7 +44,7 @@
   )
   (let (
     (current-block block-height)
-    (position (unwrap! (contract-call? (contract-of dimensional-trait (unwrap-panic (var-get position-manager-contract))) get-position-by-owner position-owner position-id) (err u4004)))
+    (position (unwrap! (contract-call? (var-get dimensional-engine-contract) get-position position-owner position-id) (err u4004)))
     (asset (get asset position))
     (price (unwrap! (contract-call? (contract-of oracle-trait (unwrap-panic (var-get oracle-contract))) get-price asset) (err u4005)))
   )
@@ -77,7 +77,7 @@
         (try! (as-contract (contract-call? (contract-of sip-010-ft-trait asset) transfer remaining-collateral (as-contract tx-sender) (var-get insurance-fund) none)))
 
         ;; Close the position
-        (try! (contract-call? (contract-of dimensional-trait (unwrap-panic (var-get position-manager-contract))) force-close-position position-owner position-id price))
+        (try! (contract-call? (var-get dimensional-engine-contract) close-position position-owner position-id u0))
 
         ;; Record liquidation
         (map-set liquidations {
@@ -136,7 +136,7 @@
     (position-id uint)
   )
   (let (
-    (position (unwrap! (contract-call? (contract-of dimensional-trait (unwrap-panic (var-get position-manager-contract))) get-position-by-owner position-owner position-id) (err u4004)))
+    (position (unwrap! (contract-call? (var-get dimensional-engine-contract) get-position position-owner position-id) (err u4004)))
     (price (unwrap! (contract-call? (contract-of oracle-trait (unwrap-panic (var-get oracle-contract))) get-price (get asset position)) (err u4005)))
     (margin-ratio (calculate-margin-ratio position price))
     (liquidation-price (unwrap! (contract-call? (var-get risk-manager-contract) get-liquidation-price position price) (err u4006)))
@@ -168,10 +168,10 @@
   )
 )
 
-(define-public (set-position-manager-contract (position-manager principal))
+(define-public (set-dimensional-engine-contract (dimensional-engine principal))
   (begin
     (asserts! (is-eq tx-sender (var-get owner)) ERR_UNAUTHORIZED)
-    (var-set position-manager-contract position-manager)
+    (var-set dimensional-engine-contract dimensional-engine)
     (ok true)
   )
 )

@@ -12,6 +12,7 @@
 ;; Use centralized traits
 (use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
 (use-trait pool-trait .all-traits.pool-trait)
+(use-trait dim-registry-trait .all-traits.dim-registry-trait)
 
 ;; ===========================================
 ;; CONSTANTS
@@ -48,6 +49,7 @@
 
 ;; Owner for administrative controls
 (define-data-var contract-owner principal tx-sender)
+(define-data-var dim-registry principal tx-sender)
 
 ;; ===========================================
 ;; DATA MAPS
@@ -307,14 +309,17 @@
 ;; In the current minimal setup, Factory v2 registers a single implementation per pair.
 ;; This function returns a list of either 0 or 1 pool principals for routing.
 (define-private (get-pools-for-pair (token-in principal) (token-out principal))
-  (match (contract-call? .dex-factory-v2 get-pool token-in token-out)
-    (ok maybe-pool)
-      (match maybe-pool
-        (some pool) (list pool)
-        none (list)
-      )
-    (err e)
-      (list)
+  (match (contract-call? (var-get dim-registry) get-pools-for-pair token-in token-out)
+    (ok pools) pools
+    (err e) (list)
+  )
+)
+
+(define-public (set-dim-registry (registry principal))
+  (begin
+    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_INVALID_ROUTE)
+    (var-set dim-registry registry)
+    (ok true)
   )
 )
 

@@ -4,9 +4,11 @@ import {
     Provider,
     Receipt,
     ProviderRegistry,
-    Result 
+    Result,
+    principalCV,
+    bufferCV,
+    uintCV
 } from '@stacks/transactions';
-import { principalCV, bufferCV, uintCV } from '@stacks/transactions/dist/clarity/types/principalCV';
 import { SignedDataTestUtils } from './utils/signed-data-test-utils';
 
 describe('governance signature verifier', () => {

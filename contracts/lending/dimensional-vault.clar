@@ -2,8 +2,8 @@
 ;; Unified lending vault with risk-adjusted parameters
 
 ;; (use-trait vault-trait .all-traits.vault-trait)
-;; (use-trait dimensional-core .all-traits.dimensional-core-trait)
-;; (use-trait risk-oracle .all-traits.risk-oracle-trait)
+(use-trait dimensional-trait .all-traits.dimensional-trait)
+(use-trait dim-registry-trait .all-traits.dim-registry-trait)
 ;; ===== Constants =====
 (define-constant ERR_UNAUTHORIZED (err u9000))
 (define-constant ERR_INVALID_ASSET (err u9001))
@@ -15,8 +15,8 @@
 ;; ===== Data Variables =====
 (define-data-var owner principal tx-sender)
 (define-data-var is-paused bool false)
-(define-data-var oracle principal tx-sender)
-(define-data-var risk-engine principal tx-sender)
+(define-data-var dimensional-engine principal tx-sender)
+(define-data-var dim-registry principal tx-sender)
 
 ;; Vault state
 (define-data-var vault-state {
@@ -37,14 +37,6 @@
 (define-map user-supply {user: principal} uint)
 (define-map user-borrows {user: principal} uint)
 (define-map user-index {user: principal} uint)
-
-;; Asset configuration
-(define-map asset-config {asset: principal} {
-  is-listed: bool,
-  collateral-factor: uint,
-  reserve-factor: uint,
-  liquidation-bonus: uint
-})
 
 ;; ===== Core Functions =====
 (define-public (supply (amount uint) (supplier principal))
@@ -83,14 +75,14 @@
     
     (let (
       (asset (contract-caller))
-      (config (unwrap! (map-get? asset-config {asset: asset}) ERR_INVALID_ASSET))
+      (config (unwrap! (contract-call? (var-get dim-registry) get-asset-config asset) ERR_INVALID_ASSET))
       (available-liquidity (get-available-liquidity asset))
     )
       (asserts! (>= available-liquidity amount) ERR_INSUFFICIENT_LIQUIDITY)
       
       ;; Check borrowing power
       (let (
-        (borrow-ok (contract-call? (var-get risk-oracle) check-borrow-power borrower amount))
+        (borrow-ok (contract-call? (var-get dimensional-engine) check-borrow-power borrower amount))
       )
         (asserts! borrow-ok ERR_POSITION_UNHEALTHY)
       )
@@ -197,18 +189,18 @@
 )
 
 ;; ===== Admin Functions =====
-(define-public (set-oracle (new-oracle principal))
+(define-public (set-dimensional-engine (engine principal))
   (begin
     (asserts! (is-eq tx-sender (var-get owner)) ERR_UNAUTHORIZED)
-    (var-set oracle new-oracle)
+    (var-set dimensional-engine engine)
     (ok true)
   )
 )
 
-(define-public (set-risk-engine (engine principal))
+(define-public (set-dim-registry (registry principal))
   (begin
     (asserts! (is-eq tx-sender (var-get owner)) ERR_UNAUTHORIZED)
-    (var-set risk-engine engine)
+    (var-set dim-registry registry)
     (ok true)
   )
 )
@@ -217,22 +209,6 @@
   (begin
     (asserts! (is-eq tx-sender (var-get owner)) ERR_UNAUTHORIZED)
     (var-set is-paused paused)
-    (ok true)
-  )
-)
-
-(define-public (configure-asset 
-    (asset principal)
-    (config {
-      is-listed: bool,
-      collateral-factor: uint,
-      reserve-factor: uint,
-      liquidation-bonus: uint
-    })
-  )
-  (begin
-    (asserts! (is-eq tx-sender (var-get owner)) ERR_UNAUTHORIZED)
-    (map-set asset-config {asset: asset} config)
     (ok true)
   )
 )

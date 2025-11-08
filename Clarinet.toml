@@ -7,7 +7,8 @@
 [project]
 name = "Conxian"
 description = "A comprehensive, standardized Clarinet configuration for the Conxian DeFi protocol."
-clarinet_version = "3.8.1"
+clarinet_version = "3.9"
+epoch = "3.0"
 
 [network]
 api_endpoint = "https://api.hiro.so"
@@ -172,7 +173,7 @@ address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 path = "contracts/dex/cxvg-utility.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
-[contracts.dex-dex-factory-v2]
+[disabled.dex-dex-factory-v2]
 path = "contracts/dex/dex-factory-v2.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
@@ -469,16 +470,16 @@ address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 path = "contracts/lib/error-codes.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
-[disabled.lib-fixed-point-math]
+[contracts.lib-fixed-point-math]
 path = "contracts/lib/fixed-point-math.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
-[disabled.lib-math-lib-advanced]
+[contracts.lib-math-lib-advanced]
 path = "contracts/lib/math-lib-advanced.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
 # Alias to satisfy .math-lib-advanced static references
-[disabled.math-lib-advanced]
+[contracts.math-lib-advanced]
 path = "contracts/lib/math-lib-advanced.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
@@ -602,6 +603,11 @@ address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 path = "contracts/rewards/yield-optimizer.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
+[contracts.default-strategy-engine]
+path = "contracts/rewards/default-strategy-engine.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+depends_on = ["all-traits"]
+
 [disabled.security-pausable]
 path = "contracts/security/Pausable.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
@@ -669,19 +675,19 @@ path = "contracts/tokens/token-system-coordinator.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 depends_on = ["all-traits"]
 
-[disabled.core-dimensional-engine]
+[contracts.core-dimensional-engine]
 path = "contracts/core/dimensional-engine.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["all-traits", "utils-encoding"]
+depends_on = ["all-traits", "utils-encoding", "oracle-adapter"]
 
-[contracts.core-position-manager]
+[disabled.core-position-manager]
 path = "contracts/core/position-manager.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 depends_on = [
     "all-traits",
     "utils-encoding",
-    "core-dimensional-engine",
     "oracle-adapter",
+    "risk-manager"
 ]
 
 [contracts.core-oracle-oracle-adapter]
@@ -695,7 +701,7 @@ path = "contracts/core/oracle/oracle-adapter.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 depends_on = ["all-traits", "utils-encoding"]
 
-[contracts.risk-risk-manager]
+[disabled.risk-risk-manager]
 path = "contracts/risk/risk-manager.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 depends_on = ["all-traits", "utils-encoding"]
@@ -706,7 +712,7 @@ path = "contracts/risk/risk-manager.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 depends_on = ["all-traits", "utils-encoding"]
 
-[contracts.risk-liquidation-engine]
+[disabled.risk-liquidation-engine]
 path = "contracts/risk/liquidation-engine.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 depends_on = [
