@@ -35,10 +35,10 @@ Traits & Interfaces are defined in `contracts/traits/all-traits.clar`.
 
 With the successful consolidation of the core protocol into the Multi-Dimensional System, the roadmap is now focused on expanding the capabilities of the system and integrating new features.
 
-1. **Integrate DEX & Routing Logic:** Refactor the remaining DEX-related contracts, merging routing logic into the `advanced-router-dijkstra` and other core DEX functionalities into the `dimensional-engine`.
-2. **Incorporate Lending System:** Consolidate the remaining lending functionalities into the multi-dimensional framework, ensuring seamless interaction with the core trading and risk engine.
-3. **sBTC Integration**: BTC-native strategies and collateral support.
-4. **Advanced Risk Models**: VaR calculations and portfolio optimization using implemented math functions.
-5. **Cross-Chain Flash Loans**: Bridge integration for cross-chain arbitrage opportunities.
+1. **sBTC Integration**: BTC-native strategies and collateral support.
+2. **Advanced Risk Models**: VaR calculations and portfolio optimization using implemented math functions.
+3. **Cross-Chain Flash Loans**: Bridge integration for cross-chain arbitrage opportunities.
+4. **Governance V2**: On-chain governance module for protocol upgrades and parameter changes.
+5. **Permissionless Deployment**: Allow third-party developers to deploy new pools and strategies.
 
 Updated: Nov 07, 2025

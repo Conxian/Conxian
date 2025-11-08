@@ -41,7 +41,7 @@ Conxian addresses these by building a protocol where determinism, auditability, 
 - Core Components
   - Concentrated Liquidity Pools (Q64.64 math, sqrt-price-x96 semantics) and pool factory.
   - Advanced Dijkstra Router with tenure‑aware path validation and deterministic route hashing.
-  - Oracle Aggregator v2: TWAP, manipulation detection, circuit‑breaker integration.
+  - Unified `dimensional-engine`: Consolidates position management, risk, lending, DEX, and oracle logic.
   - MEV Protection: commit‑reveal, batch auctions, sandwich detection.
   - Proof of Reserves (PoR): on‑chain attestation verification using Merkle proofs.
   - Interoperability: Wormhole inbox/outbox and governance/PoR handlers.
@@ -87,14 +87,7 @@ Conxian addresses these by building a protocol where determinism, auditability, 
 - Governance
   - Proposal engine (trait‑driven), timelock controller, and audit registry integrations to steer policy upgrades.
 
-## 9. Oracle Aggregator v2 (contracts/oracle/oracle-aggregator-v2.clar)
-
-- Sources aggregated with dynamic weights; on‑chain EMA for TWAP with adjustable alpha.
-- Manipulation detection compares latest price vs TWAP against basis‑points threshold.
-- Circuit breaker hook: pricing degrades to TWAP when breaker is open or data is stale.
-- Read‑only interfaces expose `get-price` and `get-twap` with consistent error typing.
-
-## 10. Proof of Reserves (contracts/security/proof-of-reserves.clar)
+## 9. Proof of Reserves (contracts/security/proof-of-reserves.clar)
 
 - Per‑asset attestation: Merkle root, total reserves, auditor, version, and timestamps.
 - Verification reconstructs root from leaf+proof; staleness guard prevents outdated attestations.
@@ -175,10 +168,10 @@ Conxian addresses these by building a protocol where determinism, auditability, 
 
 ## 21. Roadmap & Milestones
 
-- M1: Foundation & encoding pass (canonical encoding, centralized traits) — completed/ongoing.
-- M2: Test harness normalization; advanced router integration; banned ops remediation.
-- M3: MEV batch auctions & sandwich detection; oracle/PoR integration hardening; compliance hooks.
-- M4: Full route orchestration across pooled types; production benchmarks and dashboards.
+- M1: Core Unification (oracle, risk, position management) — Complete.
+- M2: Advanced Router Integration and Test Harness Normalization.
+- M3: MEV Protection Hardening (batch auctions, sandwich detection).
+- M4: Full Route Orchestration and Production Benchmarking.
 
 ## 22. References & Standards
 
@@ -204,7 +197,7 @@ Conxian addresses these by building a protocol where determinism, auditability, 
 - Router: `contracts/dimensional/advanced-router-dijkstra.clar`
 - Pools: `contracts/dimensional/concentrated-liquidity-pool.clar` (+ stable/weighted variants)
 - Factory: `contracts/dex/dex-factory-v2.clar`
-- Oracle: `contracts/oracle/oracle-aggregator-v2.clar`
+- Core Engine: `contracts/core/dimensional-engine.clar`
 - MEV: `contracts/mev-protector.clar`
 - PoR: `contracts/security/proof-of-reserves.clar`
 - Interop: `contracts/interoperability/wormhole-{inbox,outbox,handlers}.clar`

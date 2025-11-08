@@ -3,7 +3,7 @@ import { Cl } from '@stacks/transactions';
 
 // Core simnet tests for dimensional-oracle feed management
 
-describe('Core simnet: dimensional-oracle feed management', () => {
+describe('Core simnet: dimensional-engine feed management', () => {
   it('adds and removes a price feed for an asset', () => {
     // @ts-ignore provided by global-vitest.setup.ts
     const simnet = global.simnet;
@@ -14,10 +14,10 @@ describe('Core simnet: dimensional-oracle feed management', () => {
     const asset = Cl.principal(deployer);
     const feed = Cl.principal(wallet1);
 
-    const add = simnet.callPublicFn('dimensional-oracle', 'add-price-feed', [asset, feed], deployer);
+    const add = simnet.callPublicFn('dimensional-engine', 'add-oracle', [feed, Cl.uint(100)], deployer);
     expect(add).toBeDefined();
 
-    const remove = simnet.callPublicFn('dimensional-oracle', 'remove-price-feed', [asset, feed], deployer);
+    const remove = simnet.callPublicFn('dimensional-engine', 'remove-oracle', [feed], deployer);
     expect(remove).toBeDefined();
   });
 });

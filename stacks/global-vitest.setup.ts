@@ -36,6 +36,7 @@ if (process.env.SKIP_SDK === '1') {
 } else {
 // Initialize a global simnet instance so Clarinet vitest helpers can manage sessions
 const sdk = await getSDK({
+  manifestPath,
   trackCosts: global.options.clarinet.costs,
   trackCoverage: global.options.clarinet.coverage,
 });

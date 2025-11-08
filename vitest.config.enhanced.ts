@@ -3,7 +3,7 @@ import { resolve } from 'path';
 import { fileURLToPath } from 'url';
 
 const skipSdk = process.env.SKIP_SDK === '1';
-const manifest = process.env.CLARINET_MANIFEST ?? 'Clarinet.toml';
+const manifest = process.env.CLARINET_MANIFEST ?? 'stacks/Clarinet.test.toml';
 const includeStatic = [
   'stacks/tests/**/foundation-*.spec.ts',
   'stacks/tests/core/core-shape.spec.ts',

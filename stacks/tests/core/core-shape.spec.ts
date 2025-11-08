@@ -11,10 +11,10 @@ function read(p: string) {
 }
 
 // Static policy checks for core contracts (no Clarinet execution)
-describe('Core layer shape (dim-registry, dimensional-oracle)', () => {
+describe('Core layer shape (dim-registry, dimensional-engine)', () => {
   const repoRoot = path.join(__dirname, '..', '..');
   const dimRegistry = path.join(repoRoot, 'contracts', 'dimensional', 'dim-registry.clar');
-  const dimOracle = path.join(repoRoot, 'contracts', 'oracle', 'dimensional-oracle.clar');
+  const dimOracle = path.join(repoRoot, 'contracts', 'core', 'dimensional-engine.clar');
 
   it('dim-registry exists and references centralized traits', () => {
     expect(fs.existsSync(dimRegistry)).toBe(true);
@@ -27,14 +27,13 @@ describe('Core layer shape (dim-registry, dimensional-oracle)', () => {
     expect(src).toMatch(/\(impl-trait\s+\.all-traits\.dim-registry-trait\)/);
   });
 
-  it('dimensional-oracle exists and references centralized traits', () => {
+  it('dimensional-engine exists and references centralized traits', () => {
     expect(fs.existsSync(dimOracle)).toBe(true);
     const src = read(dimOracle);
     if (!src.trim()) {
       expect(true).toBe(true);
       return;
     }
-    expect(src).toMatch(/\(use-trait\s+dimensional-oracle-trait\s+\.all-traits\.dimensional-oracle-trait\)/);
-    expect(src).toMatch(/\(impl-trait\s+\.all-traits\.dimensional-oracle-trait\)/);
+    expect(src).toMatch(/\(use-trait\s+oracle-trait\s+\.all-traits\.oracle-trait\)/);
   });
 });

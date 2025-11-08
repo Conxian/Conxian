@@ -78,9 +78,7 @@
   "sbtc-vault": [
     "all-traits"
   ],
-  "all-traits": [
-    "sip_010_ft_trait"
-  ],
+  "all-traits": [],
   "errors": [],
   "sip-010-ft-mintable-trait": [],
   "sip-018-trait": [],
