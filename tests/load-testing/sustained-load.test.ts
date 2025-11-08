@@ -90,4 +90,4 @@ test.concurrent('sustained load test', async ({ expect }) => {
   const successRate = (results.filter(Boolean).length / results.length) * 100;
   
   expect(successRate).toBeGreaterThan(99); // 99% success rate required
-}, { timeout: (DURATION_MINUTES + 2) * 60 * 1000 });
+}, (DURATION_MINUTES + 2) * 60 * 1000);

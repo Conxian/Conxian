@@ -173,7 +173,7 @@ address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 path = "contracts/dex/cxvg-utility.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
-[contracts.dex-dex-factory-v2]
+[disabled.dex-dex-factory-v2]
 path = "contracts/dex/dex-factory-v2.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
@@ -678,7 +678,7 @@ depends_on = ["all-traits"]
 [contracts.core-dimensional-engine]
 path = "contracts/core/dimensional-engine.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["all-traits", "utils-encoding"]
+depends_on = ["all-traits", "utils-encoding", "oracle-adapter"]
 
 [disabled.core-position-manager]
 path = "contracts/core/position-manager.clar"

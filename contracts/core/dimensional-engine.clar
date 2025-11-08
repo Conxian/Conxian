@@ -190,8 +190,8 @@
   (begin
     (let (
         (position (unwrap! (get-position position-owner position-id) (err u4004)))
-        (asset (get asset position))
-        (price (unwrap! (contract-call? .oracle-adapter .oracle-trait.get-price asset) (err u4005)))
+        (token (get token position))
+        (price (unwrap! (contract-call? .oracle-adapter .oracle-trait.get-price token) (err u4005)))
         (caller tx-sender)
         (current-block block-height)
     )
@@ -218,10 +218,10 @@
         (remaining-collateral (- collateral-value reward-amount))
       )
         ;; Transfer reward to liquidator via SIP-010
-        (try! (as-contract (contract-call? (get token position) .token-trait.transfer reward-amount (as-contract tx-sender) caller none)))
+        (try! (as-contract (contract-call? (get token position) .sip-010-ft-trait.transfer reward-amount (as-contract tx-sender) caller none)))
 
         ;; Transfer remaining collateral to insurance fund
-        (try! (as-contract (contract-call? (get token position) .token-trait.transfer remaining-collateral (as-contract tx-sender) (var-get insurance-fund) none)))
+        (try! (as-contract (contract-call? (get token position) .sip-010-ft-trait.transfer remaining-collateral (as-contract tx-sender) (var-get insurance-fund) none)))
 
         ;; Close the position
         (try! (close-position position-owner position-id u0))
@@ -512,7 +512,7 @@
       (asserts! (<= leverage MAX-LEVERAGE) (err ERR-INVALID-LEVERAGE))
 
       ;; Transfer collateral from user
-      (try! (contract-call? token .token-trait.transfer collateral-amount position-owner (as-contract tx-sender) none))
+      (try! (contract-call? token .sip-010-ft-trait.transfer collateral-amount position-owner (as-contract tx-sender) none))
 
       ;; Create position tuple
       (let (
@@ -577,7 +577,7 @@
       (asserts! (is-eq tx-sender position-owner) (err ERR-UNAUTHORIZED))
 
       ;; Transfer funds back to user
-      (try! (as-contract (contract-call? (get token position) .token-trait.transfer final-amount tx-sender position-owner none)))
+      (try! (as-contract (contract-call? (get token position) .sip-010-ft-trait.transfer final-amount tx-sender position-owner none)))
 
       ;; Update position status
       (map-set positions
