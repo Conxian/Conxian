@@ -15,7 +15,7 @@
 ;; ===== Data Variables =====
 (define-data-var owner principal tx-sender)
 (define-data-var oracle-contract principal tx-sender)  ;; Oracle contract for price feeds
-(define-data-var position-manager-contract principal tx-sender)  ;; Position manager contract
+(define-data-var dimensional-engine-contract principal tx-sender)  ;; Dimensional engine contract
 (define-data-var funding-interval uint u144)  ;; Default to daily funding
 (define-data-var max-funding-rate uint u100)  ;; 1% max funding rate
 (define-data-var funding-rate-sensitivity uint u500)  ;; 5% sensitivity
@@ -109,7 +109,7 @@
     (position-id uint)
   )
   (let (
-    (position (unwrap! (contract-call? (var-get position-manager-contract) get-position-by-owner position-owner position-id) (err u5005)))
+    (position (unwrap! (contract-call? (var-get dimensional-engine-contract) get-position position-owner position-id) (err u5005)))
     (current-time block-height)
     (asset (get asset position))
     (last-update (unwrap! (map-get? last-funding-update {asset: asset}) (err u5006)))
@@ -128,7 +128,7 @@
       (new-collateral (- (get position collateral) funding-payment))
     )
       ;; Update position collateral
-      (try! (contract-call? (var-get position-manager-contract) update-position
+      (try! (contract-call? (var-get dimensional-engine-contract) update-position
         position-owner
         position-id
         {collateral: (some new-collateral)}
@@ -182,10 +182,10 @@
   )
 )
 
-(define-public (set-position-manager-contract (position-manager principal))
+(define-public (set-dimensional-engine-contract (dimensional-engine principal))
   (begin
     (asserts! (is-eq tx-sender (var-get owner)) ERR_UNAUTHORIZED)
-    (var-set position-manager-contract position-manager)
+    (var-set dimensional-engine-contract dimensional-engine)
     (ok true)
   )
 )

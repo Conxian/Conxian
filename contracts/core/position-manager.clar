@@ -56,28 +56,34 @@
 
 ;; ===== Private Helper Functions =====
 (define-private (calculate-position-size (collateral uint) (leverage uint))
-  (/ (* collateral leverage) u100)
+  (begin
+    (/ (* collateral leverage) u100)
+  )
 )
 
 (define-private (calculate-min-amount-out (price uint) (slippage-tolerance uint))
-  (/ (* price (- BASIS-POINTS slippage-tolerance)) BASIS-POINTS)
+  (begin
+    (/ (* price (- BASIS-POINTS slippage-tolerance)) BASIS-POINTS)
+  )
 )
 
 (define-private (calculate-pnl (position-size int) (entry-price uint) (current-price uint))
-  (let (
-    (price-diff (if (>= current-price entry-price)
-                    (- current-price entry-price)
-                    (- entry-price current-price)))
-    (is-profit (>= current-price entry-price))
-    (abs-size (if (>= position-size 0) position-size (- 0 position-size)))
-    (pnl-value (/ (* (to-uint abs-size) price-diff) entry-price))
-  )
-    (if (and is-profit (>= position-size 0))
-        (to-int pnl-value)
-        (if (and (not is-profit) (< position-size 0))
-            (to-int pnl-value)
-            (- 0 (to-int pnl-value))
-        )
+  (begin
+    (let (
+      (price-diff (if (>= current-price entry-price)
+                      (- current-price entry-price)
+                      (- entry-price current-price)))
+      (is-profit (>= current-price entry-price))
+      (abs-size (if (>= position-size 0) position-size (- 0 position-size)))
+      (pnl-value (/ (* (to-uint abs-size) price-diff) entry-price))
+    )
+      (if (and is-profit (>= position-size 0))
+          (to-int pnl-value)
+          (if (and (not is-profit) (< position-size 0))
+              (to-int pnl-value)
+              (- 0 (to-int pnl-value))
+          )
+      )
     )
   )
 )
@@ -88,9 +94,11 @@
   (action (string-ascii 20)) 
   (data (string-utf8 1024))
 )
-  (map-set position-events
-    {owner: owner, position-id: position-id, timestamp: block-height}
-    {action: action, data: data, block-height: block-height, tx-sender: tx-sender}
+  (begin
+    (map-set position-events
+      {owner: owner, position-id: position-id, timestamp: block-height}
+      {action: action, data: data, block-height: block-height, tx-sender: tx-sender}
+    )
   )
 )
 
@@ -104,58 +112,60 @@
     (slippage-tolerance uint)
     (funding-int (string-ascii 20))
   )
-  (let (
-    (position-id (var-get next-position-id))
-    (current-block block-height)
-    (token-principal (contract-of token))
-    (price (unwrap! (contract-call? .oracle-adapter get-price token-principal) (err ERR-ORACLE-FAILURE)))
-    (position-size (calculate-position-size collateral-amount leverage))
-  )
-    ;; Validations
-    (asserts! (not (var-get is-paused)) (err ERR-PAUSED))
-    (asserts! (<= leverage MAX-LEVERAGE) (err ERR-INVALID-LEVERAGE))
-
-    ;; Transfer collateral from user
-    (try! (contract-call? token transfer collateral-amount position-owner (as-contract tx-sender) none))
-
-    ;; Create position tuple
+  (begin
     (let (
-      (new-position {
-        owner: position-owner,
-        id: position-id,
-        collateral: collateral-amount,
-        size: (to-int position-size),
-        entry-price: price,
-        entry-time: current-block,
-        last-funding: current-block,
-        last-updated: current-block,
-        position-type: pos-type,
-        status: "ACTIVE",
-        funding-interval: funding-int,
-        max-leverage: MAX-LEVERAGE,
-        maintenance-margin: MAINTENANCE-MARGIN,
-        time-decay: none,
-        volatility: none,
-        is-hedged: false,
-        tags: (list ),
-        version: u1,
-        metadata: none,
-        token: token-principal
-      })
+      (position-id (var-get next-position-id))
+      (current-block block-height)
+      (token-principal (contract-of token))
+      (price (unwrap! (contract-call? .oracle-adapter .oracle-trait.get-price token-principal) (err ERR-ORACLE-FAILURE)))
+      (position-size (calculate-position-size collateral-amount leverage))
     )
-      ;; Validate with risk manager
-      (try! (contract-call? .risk-manager validate-position new-position price))
+      ;; Validations
+      (asserts! (not (var-get is-paused)) (err ERR-PAUSED))
+      (asserts! (<= leverage MAX-LEVERAGE) (err ERR-INVALID-LEVERAGE))
 
-      ;; Store position
-      (map-set positions {owner: position-owner, id: position-id} new-position)
+      ;; Transfer collateral from user
+      (try! (contract-call? token .token-trait.transfer collateral-amount position-owner (as-contract tx-sender) none))
 
-      ;; Emit event
-      (emit-position-event position-owner position-id "OPEN" u"Position opened")
+      ;; Create position tuple
+      (let (
+        (new-position {
+          owner: position-owner,
+          id: position-id,
+          collateral: collateral-amount,
+          size: (to-int position-size),
+          entry-price: price,
+          entry-time: current-block,
+          last-funding: current-block,
+          last-updated: current-block,
+          position-type: pos-type,
+          status: "ACTIVE",
+          funding-interval: funding-int,
+          max-leverage: MAX-LEVERAGE,
+          maintenance-margin: MAINTENANCE-MARGIN,
+          time-decay: none,
+          volatility: none,
+          is-hedged: false,
+          tags: (list ),
+          version: u1,
+          metadata: none,
+          token: token-principal
+        })
+      )
+        ;; Validate with risk manager
+        (try! (contract-call? .risk-manager .risk-trait.validate-position new-position price))
 
-      ;; Increment position ID
-      (var-set next-position-id (+ position-id u1))
+        ;; Store position
+        (map-set positions {owner: position-owner, id: position-id} new-position)
 
-      (ok position-id)
+        ;; Emit event
+        (emit-position-event position-owner position-id "OPEN" u"Position opened")
+
+        ;; Increment position ID
+        (var-set next-position-id (+ position-id u1))
+
+        (ok position-id)
+      )
     )
   )
 )
@@ -165,50 +175,60 @@
     (position-id uint)
     (slippage-tolerance uint)
   )
-  (let (
-    (position (unwrap! (map-get? positions {owner: position-owner, id: position-id}) (err ERR-POSITION-NOT-FOUND)))
-    (current-block block-height)
-    (price (unwrap! (contract-call? .oracle-adapter get-price (get token position)) (err ERR-ORACLE-FAILURE)))
-    (pnl (calculate-pnl (get size position) (get entry-price position) price))
-    (final-amount (if (>= pnl 0)
-                      (+ (get collateral position) (to-uint pnl))
-                      (- (get collateral position) (to-uint (- 0 pnl)))))
-  )
-    ;; Validations
-    (asserts! (is-eq (get status position) "ACTIVE") (err ERR-POSITION-NOT-ACTIVE))
-    (asserts! (is-eq tx-sender position-owner) (err ERR-UNAUTHORIZED))
-
-    ;; Transfer funds back to user
-    (try! (as-contract (contract-call? (get token position) transfer final-amount tx-sender position-owner none)))
-
-    ;; Update position status
-    (map-set positions
-      {owner: position-owner, id: position-id}
-      (merge position {status: "CLOSED", last-updated: current-block})
+  (begin
+    (let (
+      (position (unwrap! (map-get? positions {owner: position-owner, id: position-id}) (err ERR-POSITION-NOT-FOUND)))
+      (current-block block-height)
+      (price (unwrap! (contract-call? .oracle-adapter .oracle-trait.get-price (get token position)) (err ERR-ORACLE-FAILURE)))
+      (pnl (calculate-pnl (get size position) (get entry-price position) price))
+      (final-amount (if (>= pnl 0)
+                        (+ (get collateral position) (to-uint pnl))
+                        (- (get collateral position) (to-uint (- 0 pnl)))))
     )
+      ;; Validations
+      (asserts! (is-eq (get status position) "ACTIVE") (err ERR-POSITION-NOT-ACTIVE))
+      (asserts! (is-eq tx-sender position-owner) (err ERR-UNAUTHORIZED))
 
-    ;; Emit event
-    (emit-position-event position-owner position-id "CLOSE" u"Position closed")
+      ;; Transfer funds back to user
+      (try! (as-contract (contract-call? (get token position) .token-trait.transfer final-amount tx-sender position-owner none)))
 
-    (ok true)
+      ;; Update position status
+      (map-set positions
+        {owner: position-owner, id: position-id}
+        (merge position {status: "CLOSED", last-updated: current-block})
+      )
+
+      ;; Emit event
+      (emit-position-event position-owner position-id "CLOSE" u"Position closed")
+
+      (ok true)
+    )
   )
 )
 
 ;; ===== Read-Only Functions =====
 (define-read-only (get-position (position-owner principal) (position-id uint))
-  (ok (map-get? positions {owner: position-owner, id: position-id}))
+  (begin
+    (ok (map-get? positions {owner: position-owner, id: position-id}))
+  )
 )
 
 (define-read-only (get-position-events (position-owner principal) (position-id uint) (limit uint))
-  (ok (map-get? position-events {owner: position-owner, position-id: position-id, timestamp: block-height}))
+  (begin
+    (ok (map-get? position-events {owner: position-owner, position-id: position-id, timestamp: block-height}))
+  )
 )
 
 (define-read-only (get-next-position-id)
-  (ok (var-get next-position-id))
+  (begin
+    (ok (var-get next-position-id))
+  )
 )
 
 (define-read-only (is-contract-paused)
-  (ok (var-get is-paused))
+  (begin
+    (ok (var-get is-paused))
+  )
 )
 
 ;; ===== Admin Functions =====

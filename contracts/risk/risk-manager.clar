@@ -7,7 +7,10 @@
 
 ;; Helpers
 (define-private (abs-int (x int))
-  (if (>= x 0) x (- 0 x)))
+  (begin
+    (if (>= x 0) x (- 0 x))
+  )
+)
 
 
 ;; ===== Type Definitions =====
@@ -28,48 +31,52 @@
     (position {collateral: uint, size: int, entry-price: uint})
     (current-price uint)
   )
-  (let (
-    (size-abs-i (abs-int (get size position)))
-    (size-abs (to-uint size-abs-i))
-    (collateral (get collateral position))
-    (notional-value (/ (* size-abs current-price) (pow u10 u8)))  ;; Adjust for decimals
-    (leverage (/ (* notional-value u100) collateral))
-  )
-    ;; Validate leverage
-    (asserts! (<= leverage (var-get max-leverage)) (err u2000))
-
-    ;; Validate position size
-    (asserts! (<= size-abs (var-get max-position-size)) (err u2001))
-
-    ;; Validate margin requirements
-    (let ((initial-margin-required (/ (* notional-value (var-get maintenance-margin)) u10000)))
-      (asserts! (>= collateral initial-margin-required) (err u2002))
+  (begin
+    (let (
+      (size-abs-i (abs-int (get size position)))
+      (size-abs (to-uint size-abs-i))
+      (collateral (get collateral position))
+      (notional-value (/ (* size-abs current-price) (pow u10 u8)))  ;; Adjust for decimals
+      (leverage (/ (* notional-value u100) collateral))
     )
+      ;; Validate leverage
+      (asserts! (<= leverage (var-get max-leverage)) (err u2000))
 
-    (ok true)
+      ;; Validate position size
+      (asserts! (<= size-abs (var-get max-position-size)) (err u2001))
+
+      ;; Validate margin requirements
+      (let ((initial-margin-required (/ (* notional-value (var-get maintenance-margin)) u10000)))
+        (asserts! (>= collateral initial-margin-required) (err u2002))
+      )
+
+      (ok true)
+    )
   )
 )
 
 (define-read-only (get-liquidation-price
     (position {collateral: uint, size: int, entry-price: uint})
   )
-  (let (
-    (size-i (get size position))
-    (collateral (get collateral position))
-    (is-long (> size-i 0))
-    (size-abs (to-uint (abs-int size-i)))
+  (begin
+    (let (
+      (size-i (get size position))
+      (collateral (get collateral position))
+      (is-long (> size-i 0))
+      (size-abs (to-uint (abs-int size-i)))
 
-    (liquidation-price
-      (if is-long
-        ;; Long position liquidation price
-        (/ (* (var-get liquidation-threshold) collateral) size-abs)
-        ;; Short position liquidation price
-        (/ (* collateral (var-get liquidation-threshold))
-           (- (* size-abs (var-get liquidation-threshold)) (* collateral u10000)))
+      (liquidation-price
+        (if is-long
+          ;; Long position liquidation price
+          (/ (* (var-get liquidation-threshold) collateral) size-abs)
+          ;; Short position liquidation price
+          (/ (* collateral (var-get liquidation-threshold))
+             (- (* size-abs (var-get liquidation-threshold)) (* collateral u10000)))
+        )
       )
     )
-  )
-    (ok liquidation-price)
+      (ok liquidation-price)
+    )
   )
 )
 
