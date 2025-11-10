@@ -1,4 +1,6 @@
-;; dimensional-engine.clar
+;; ============================================================
+;; DIMENSIONAL ENGINE (v3.9.0+)
+;; ============================================================
 ;; Core contract for the dimensional engine
 
 (use-trait dimensional-trait .all-traits.dimensional-trait)
@@ -7,55 +9,65 @@
 (use-trait risk-trait .all-traits.risk-trait)
 (use-trait token-trait .all-traits.sip-010-ft-trait)
 (use-trait finance-metrics-trait .all-traits.finance-metrics-trait)
+(use-trait base-contract .all-traits.base-contract-trait)
+(use-trait error-utils .all-traits.error-utils)
+(use-trait math-utils .all-traits.math-utils-trait)
+
+(impl-trait .all-traits.base-contract-trait)
+(impl-trait .all-traits.dimensional-engine-trait)
 
 ;; =============================================================================
-;; CONSTANTS AND ERROR CODES
+;; CONSTANTS
 ;; =============================================================================
-
-(define-constant CONTRACT_OWNER tx-sender)
-(define-constant ERR_NOT_AUTHORIZED (err u1000))
-(define-constant ERR_PAUSED (err u4000))
-(define-constant ERR_ORACLE_FAILURE (err u4001))
-(define-constant ERR_INVALID_LEVERAGE (err u1005))
-(define-constant ERR_INVALID_POSITION (err u1006))
-(define-constant ERR_POSITION_NOT_FOUND (err u1007))
-(define-constant ERR_INSUFFICIENT_COLLATERAL (err u1008))
-(define-constant ERR_INVALID_SIZE (err u1009))
-(define-constant ERR-POSITION-NOT-ACTIVE (err u4003))
-(define-constant MAX_LEVERAGE u2000)
-(define-constant MAINTENANCE_MARGIN u500)
 
 ;; Position constants
+;; Import constants from math-utils
+(use-constants 
+  PRECISION 
+  PERCENTAGE_PRECISION 
+  MATH_OVERFLOW 
+  DIVISION_BY_ZERO 
+  REENTRANCY_GUARD
+  from_contract .math-utils)
+
+;; Protocol-specific constants
 (define-constant MIN_LEVERAGE u100)
 (define-constant DEFAULT_MAX_LEVERAGE u2000)  ;; 20x
 (define-constant DEFAULT_MAINTENANCE_MARGIN u500)  ;; 5%
 (define-constant DEFAULT_PROTOCOL_FEE u30)  ;; 0.3%
 (define-constant SLIPPAGE_PRECISION u10000)
 (define-constant LEVERAGE_PRECISION u100)
+(define-constant FUNDING_INTERVAL u144)  ;; Default to daily funding
+(define-constant MAX_FUNDING_RATE u100)  ;; 1% max funding rate
+(define-constant FUNDING_RATE_SENSITIVITY u500)  ;; 5% sensitivity
+(define-constant LIQUIDATION_THRESHOLD u8000)  ;; 80%
+(define-constant MAX_POSITION_SIZE u1000000000000)  ;; 1M with 6 decimals
+(define-constant MIN_LIQUIDATION_REWARD u100)  ;; 0.1%
+(define-constant MAX_LIQUIDATION_REWARD u1000)  ;; 1%
 
 ;; =============================================================================
 ;; DATA VARIABLES
 ;; =============================================================================
 
-(define-data-var owner principal CONTRACT_OWNER)
+;; Position management
 (define-data-var next-position-id uint u0)
-(define-data-var is-paused bool false)
 (define-data-var protocol-fee-rate uint DEFAULT_PROTOCOL_FEE)
 (define-data-var total-positions-opened uint u0)
 (define-data-var total-volume uint u0)
 
-(define-data-var max-leverage uint u2000)  ;; 20x
-(define-data-var maintenance-margin uint u500)  ;; 5%
-(define-data-var liquidation-threshold uint u8000)  ;; 80%
-(define-data-var max-position-size uint u1000000000000)  ;; 1M with 6 decimals
-
-(define-data-var min-liquidation-reward uint u100)  ;; 0.1%
-(define-data-var max-liquidation-reward uint u1000) ;; 1%
+;; Risk parameters
+(define-data-var max-leverage uint DEFAULT_MAX_LEVERAGE)
+(define-data-var maintenance-margin uint DEFAULT_MAINTENANCE_MARGIN)
+(define-data-var liquidation-threshold uint LIQUIDATION_THRESHOLD)
+(define-data-var max-position-size uint MAX_POSITION_SIZE)
+(define-data-var min-liquidation-reward uint MIN_LIQUIDATION_REWARD)
+(define-data-var max-liquidation-reward uint MAX_LIQUIDATION_REWARD)
 (define-data-var insurance-fund principal tx-sender)
 
-(define-data-var funding-interval uint u144)  ;; Default to daily funding
-(define-data-var max-funding-rate uint u100)  ;; 1% max funding rate
-(define-data-var funding-rate-sensitivity uint u500)  ;; 5% sensitivity
+;; Funding parameters
+(define-data-var funding-interval uint FUNDING_INTERVAL)
+(define-data-var max-funding-rate uint MAX_FUNDING_RATE)
+(define-data-var funding-rate-sensitivity uint FUNDING_RATE_SENSITIVITY)
 
 ;; =============================================================================
 ;; DATA STRUCTURES
@@ -80,11 +92,44 @@
   cumulative-funding: int
 })
 
+;; Position data structure
+(define-map positions {
+  id: uint
+} {
+  owner: principal,
+  asset: principal,
+  collateral: uint,
+  size: uint,
+  entry-price: uint,
+  leverage: uint,
+  is-long: bool,
+  funding-rate: int,
+  last-updated: uint,
+  stop-loss: (optional uint),
+  take-profit: (optional uint),
+  is-active: bool
+})
 
-(define-public (update-funding-rate
-    (asset principal)
-  )
+;; Track user positions by asset
+(define-map user-positions {
+  user: principal,
+  asset: principal,
+  position-id: uint
+} bool)
+
+;; Track active positions by asset and direction
+(define-map active-positions {
+  asset: principal,
+  is-long: bool,
+  position-id: uint
+} bool)
+
+
+(define-public (update-funding-rate (asset principal))
   (begin
+    (try! (check-role ROLE_OPERATOR))
+    (try! (when-not-paused))
+    
     (let (
       (current-time block-height)
       (last-update (default-to
@@ -93,10 +138,10 @@
       ))
     )
       ;; Check if enough time has passed since last update
-      (asserts!
+      (try! (require! 
         (>= (- current-time (get last-update timestamp)) (var-get funding-interval))
-        (err u5001)
-      )
+        (err-with-context ERR_INVALID_INPUT (some (as-max-len? u"Funding rate update too soon" u100)))
+      ))
 
       ;; Get current index price and TWAP
       (let (
@@ -245,9 +290,49 @@
 
 (define-public (deposit-funds (amount uint) (token <sip-010-ft-trait>))
   (begin
+    (try! (when-not-paused))
+    (try! (with-reentrancy-guard (lambda () (ok true))))
+    (try! (validate-positive-amount amount))
+    (try! (validate-positive-amount amount))
+    
     (let ((user tx-sender))
       ;; Transfer the tokens from the user to this contract
       (try! (contract-call? token transfer amount user (as-contract tx-sender) none))
+      
+      ;; Update internal balance
+      (let ((current-balance (default-to u0 (map-get? internal-balances user))))
+        (map-set internal-balances user (+ current-balance amount))
+      )
+      
+      (ok true)
+    )
+  )
+)
+
+(define-public (withdraw-funds (amount uint) (token <sip-010-ft-trait>))
+  (begin
+    (try! (when-not-paused))
+    (try! (validate-positive-amount amount))
+    
+    (let ((user tx-sender)
+          (current-balance (default-to u0 (map-get? internal-balances user))))
+      
+      ;; Check sufficient balance
+      (try! (require! 
+        (>= current-balance amount)
+        (err-with-context ERR_INSUFFICIENT_BALANCE (some (as-max-len? u"Insufficient balance" u100)))
+      ))
+      
+      ;; Update internal balance before transfer to prevent reentrancy
+      (map-set internal-balances user (- current-balance amount))
+      
+      ;; Transfer tokens back to user
+      (try! (as-contract (contract-call? token transfer amount tx-sender user none)))
+      
+      (ok true)
+    )
+  )
+)
 
       ;; Update the user's internal balance
       (let ((current-balance (default-to u0 (map-get? internal-balances user))))
@@ -388,27 +473,428 @@
 
 (define-public (set-owner (new-owner principal))
   (begin
-    "Transfer contract ownership"
-    (asserts! (is-eq tx-sender (var-get owner)) ERR_NOT_AUTHORIZED)
-    (var-set owner new-owner)
-    (print { event: "owner-changed", old-owner: tx-sender, new-owner: new-owner })
+    (try! (transfer-ownership new-owner))
     (ok true)
   )
 )
 
 (define-public (set-paused (paused bool))
   (begin
-    "Pause or unpause contract"
-    (asserts! (is-eq tx-sender (var-get owner)) ERR_NOT_AUTHORIZED)
-    (var-set is-paused paused)
-    (print { event: "pause-status-changed", paused: paused })
+    (try! (if paused (pause) (unpause)))
     (ok true)
   )
 )
 
 (define-public (set-protocol-fee-rate (new-rate uint))
   (begin
-    "Update protocol fee rate"
+    (try! (check-role ROLE_ADMIN))
+    (try! (require! 
+      (and (>= new-rate u0) (<= new-rate u1000)) ;; 0-10% max fee
+      (err-with-context ERR_INVALID_INPUT (some (as-max-len? u"Invalid fee rate" u100)))
+    ))
+    
+    (var-set protocol-fee-rate new-rate)
+    (ok true)
+  )
+)
+
+(define-public (set-risk-parameters 
+    (new-max-leverage uint)
+    (new-maintenance-margin uint)
+    (new-liquidation-threshold uint)
+  )
+  (begin
+    (try! (check-role ROLE_ADMIN))
+    (try! (require! 
+      (and
+        (>= new-max-leverage MIN_LEVERAGE)
+        (<= new-max-leverage u5000) ;; 50x max leverage
+        (> new-maintenance-margin u0)
+        (< new-maintenance-margin u10000) ;; 100% max
+        (> new-liquidation-threshold new-maintenance-margin)
+        (<= new-liquidation-threshold u10000) ;; 100% max
+      )
+      (err-with-context ERR_INVALID_INPUT (some (as-max-len? u"Invalid risk parameters" u100)))
+    ))
+    
+    (var-set max-leverage new-max-leverage)
+    (var-set maintenance-margin new-maintenance-margin)
+    (var-set liquidation-threshold new-liquidation-threshold)
+    
+    (ok true)
+  )
+)
+
+(define-public (set-funding-parameters 
+    (new-funding-interval uint)
+    (new-max-funding-rate uint)
+    (new-sensitivity uint)
+  )
+  (begin
+    (try! (check-role ROLE_ADMIN))
+    (try! (require! 
+      (and
+        (> new-funding-interval u0)
+        (> new-max-funding-rate u0)
+        (> new-sensitivity u0)
+      )
+      (err-with-context ERR_INVALID_INPUT (some (as-max-len? u"Invalid funding parameters" u100)))
+    ))
+    
+    (var-set funding-interval new-funding-interval)
+    (var-set max-funding-rate new-max-funding-rate)
+    (var-set funding-rate-sensitivity new-sensitivity)
+    
+    (ok true)
+  )
+)
+
+(define-public (set-liquidation-rewards (min-reward uint) (max-reward uint))
+  (begin
+    (try! (check-role ROLE_ADMIN))
+    (try! (require! 
+      (and
+        (> min-reward u0)
+        (<= min-reward max-reward)
+        (<= max-reward u5000) ;; 50% max reward
+      )
+      (err-with-context ERR_INVALID_INPUT (some (as-max-len? u"Invalid liquidation rewards" u100)))
+    ))
+    
+    (var-set min-liquidation-reward min-reward)
+    (var-set max-liquidation-reward max-reward)
+    
+    (ok true)
+  )
+)
+
+(define-public (set-insurance-fund (fund principal))
+  (begin
+    (try! (check-role ROLE_ADMIN))
+    (try! (validate-address fund))
+    
+    (var-set insurance-fund fund)
+    (ok true)
+  )
+)
+
+;; =============================================================================
+;; POSITION MANAGEMENT
+;; =============================================================================
+
+(define-public (open-position 
+    (asset principal)
+    (collateral uint)
+    (leverage uint)
+    (is-long bool)
+    (stop-loss (optional uint))
+    (take-profit (optional uint))
+  )
+  (let (
+    (position-id (var-get next-position-id))
+    (current-time block-height)
+  )
+    (try! (when-not-paused))
+    (try! (validate-positive-amount collateral))
+    (try! (validate-positive-amount leverage))
+    
+    ;; Validate leverage
+    (try! (require! 
+      (and 
+        (>= leverage MIN_LEVERAGE) 
+        (<= leverage (var-get max-leverage))
+      )
+      (err-with-context ERR_INVALID_LEVERAGE (some (as-max-len? u"Invalid leverage" u100)))
+    ))
+    
+    ;; Calculate position size and fees
+    (let (
+      (position-size (* collateral leverage))
+      (fee (/ (* position-size (var-get protocol-fee-rate)) u10000))
+      (total-cost (+ collateral fee))
+    )
+      ;; Check if user has sufficient balance
+      (try! (require! 
+        (>= (default-to u0 (map-get? internal-balances tx-sender)) total-cost)
+        (err-with-context ERR_INSUFFICIENT_BALANCE (some (as-max-lans? u"Insufficient balance" u100)))
+      ))
+      
+      ;; Get current price from oracle (simplified - would use actual oracle in production)
+      (let ((price (try! (get-price asset))))
+        ;; Create new position
+        (map-set positions {id: position-id} {
+          owner: tx-sender,
+          asset: asset,
+          collateral: collateral,
+          size: position-size,
+          entry-price: price,
+          leverage: leverage,
+          is-long: is-long,
+          funding-rate: 0,
+          last-updated: current-time,
+          stop-loss: stop-loss,
+          take-profit: take-profit,
+          is-active: true
+        })
+        
+        ;; Update user's position tracking
+        (map-set user-positions {
+          user: tx-sender,
+          asset: asset,
+          position-id: position-id
+        } true)
+        
+        ;; Update active positions
+        (map-set active-positions {
+          asset: asset,
+          is-long: is-long,
+          position-id: position-id
+        } true)
+        
+        ;; Update state variables
+        (var-set next-position-id (+ position-id u1))
+        (var-set total-positions-opened (+ (var-get total-positions-opened) u1))
+        (var-set total-volume (+ (var-get total-volume) position-size))
+        
+        ;; Deduct collateral and fees from user's internal balance
+        (let ((current-balance (default-to u0 (map-get? internal-balances tx-sender))))
+          (map-set internal-balances tx-sender (- current-balance total-cost))
+        )
+        
+        ;; Emit event
+        (emit-position-opened position-id tx-sender asset collateral position-size 
+          leverage is-long price)
+        
+        (ok position-id)
+      )
+    )
+  )
+)
+
+(define-public (close-position (position-id uint) (slippage (optional uint)))
+  (let (
+    (position (try! (get-position position-id)))
+    (current-time block-height)
+  )
+    (try! (when-not-paused))
+    
+    ;; Check position exists and is active
+    (try! (require! 
+      (get position is-active)
+      (err-with-context ERR_POSITION_NOT_ACTIVE (some (as-max-len? u"Position not active" u100)))
+    ))
+    
+    ;; Check caller is position owner or has permission
+    (try! (require! 
+      (or 
+        (is-eq tx-sender (get position 'owner))
+        (unwrap! (has-role ROLE_LIQUIDATOR) false)
+      )
+      (err-with-context ERR_UNAUTHORIZED (some (as-max-len? u"Not authorized" u100)))
+    ))
+    
+    ;; Get current price and calculate P&L
+    (let* (
+      (price (try! (get-price (get position 'asset))))
+      (entry-price (get position 'entry-price))
+      (size (get position 'size))
+      (collateral (get position 'collateral))
+      (is-long (get position 'is-long))
+      
+      ;; Simplified P&L calculation (would include funding in production)
+      (price-diff (if is-long 
+        (- price entry-price)
+        (- entry-price price)
+      ))
+      (pnl (/ (* size price-diff) entry-price))
+      (total-returned (+ collateral pnl))
+      
+      ;; Apply slippage check if provided
+      (min-returned (if (is-none slippage) 
+        u0 
+        (* total-returned (- u10000 (unwrap-panic slippage))) 
+        u10000
+      ))
+    )
+      ;; Check if position is liquidatable (simplified)
+      (when (< total-returned (* collateral (var-get liquidation-threshold)) u10000)
+        (try! (require! 
+          (is-eq tx-sender (get position 'owner))
+          (err-with-context ERR_POSITION_LIQUIDATED (some (as-max-len? u"Position undercollateralized" u100)))
+        ))
+      )
+      
+      ;; Mark position as closed
+      (map-set positions {id: position-id} (merge (unwrap-panic position) {
+        is-active: false,
+        last-updated: current-time
+      }))
+      
+      ;; Remove from active positions
+      (map-delete active-positions {
+        asset: (get position 'asset),
+        is-long: is-long,
+        position-id: position-id
+      })
+      
+      ;; Transfer funds back to user (or liquidator)
+      (let ((recipient (if (>= pnl 0) 
+        (get position 'owner) 
+        (var-get insurance-fund)
+      )))
+        (map-set internal-balances recipient 
+          (+ (default-to u0 (map-get? internal-balances recipient)) total-returned)
+        )
+      )
+      
+      ;; Emit event
+      (emit-position-closed position-id (get position 'owner) total-returned pnl price)
+      
+      (ok {
+        'collateral-returned: total-returned,
+        'pnl: pnl
+      })
+    )
+  )
+)
+
+;; =============================================================================
+;; VIEW FUNCTIONS
+;; =============================================================================
+
+(define-read-only (get-position (position-id uint))
+  (let ((position (unwrap! (map-get? positions {id: position-id}) 
+    (err ERR_POSITION_NOT_FOUND)
+  )))
+    (ok position)
+  )
+)
+
+(define-read-only (get-open-interest (asset principal))
+  (let (
+    (long-positions (filter 
+      (lambda ((pos {is-long: bool, position-id: uint, active: bool})) 
+        (and (get pos 'active) (get pos 'is-long))
+      )
+      (map (lambda ((key {asset: principal, is-long: bool, position-id: uint}) 
+        (let ((pos (unwrap! (map-get? positions {id: (get key 'position-id)}) false)))
+          (if pos {
+            'is-long: (get key 'is-long),
+            'position-id: (get key 'position-id),
+            'active: (get pos 'is-active)
+          } false)
+        )
+      )) (map-keys active-positions))
+    ))
+    
+    (short-positions (filter 
+      (lambda ((pos {is-long: bool, position-id: uint, active: bool})) 
+        (and (get pos 'active) (not (get pos 'is-long)))
+      )
+      (map (lambda ((key {asset: principal, is-long: bool, position-id: uint}) 
+        (let ((pos (unwrap! (map-get? positions {id: (get key 'position-id)}) false)))
+          (if pos {
+            'is-long: (get key 'is-long),
+            'position-id: (get key 'position-id),
+            'active: (get pos 'is-active)
+          } false)
+        )
+      )) (map-keys active-positions))
+    ))
+    
+    (long-oi (fold (lambda (acc {position-id: uint}) 
+      (+ acc (get (unwrap! (map-get? positions {id: position-id}) 0) 'size u0))
+    ) u0 (map (lambda (p) {'position-id: (get p 'position-id)}) long-positions)))
+    
+    (short-oi (fold (lambda (acc {position-id: uint}) 
+      (+ acc (get (unwrap! (map-get? positions {id: position-id}) 0) 'size u0))
+    ) u0 (map (lambda (p) {'position-id: (get p 'position-id)}) short-positions)))
+  )
+    (ok {
+      'long: long-oi,
+      'short: short-oi
+    })
+  )
+)
+
+(define-read-only (get-protocol-stats)
+  (ok {
+    'total-positions-opened: (var-get total-positions-opened),
+    'total-volume: (var-get total-volume),
+    'total-fees-collected: u0,  ;; Would track this in production
+    'total-value-locked: (fold 
+      (lambda (acc {user: principal, balance: uint}) (+ acc balance))
+      u0
+      (map 
+        (lambda ((user principal)) 
+          {'user: user, 'balance: (default-to u0 (map-get? internal-balances user))}
+        )
+        (map get (map-keys internal-balances) (repeat (length (map-keys internal-balances)) 'user))
+      )
+    )
+  })
+)
+
+;; =============================================================================
+;; INTERNAL HELPERS
+;; =============================================================================
+
+(define-private (get-price (asset principal))
+  (ok u1000000)  ;; Simplified - would use oracle in production
+)
+
+(define-private (validate-position-params (collateral uint) (leverage uint))
+  (try! (validate-positive-amount collateral))
+  (try! (validate-positive-amount leverage))
+  
+  (try! (require! 
+    (and 
+      (>= leverage MIN_LEVERAGE) 
+      (<= leverage (var-get max-leverage))
+    )
+    (err-with-context ERR_INVALID_LEVERAGE (some (as-max-len? u"Invalid leverage" u100)))
+  ))
+  
+  (ok true)
+)
+
+(define-private (calculate-liquidation-price (position {entry-price: uint, leverage: uint, is-long: bool}))
+  (let (
+    (maintenance-margin (var-get maintenance-margin))
+    (entry-price (get position 'entry-price))
+    (leverage (get position 'leverage))
+    (is-long (get position 'is-long))
+  )
+    (if is-long
+      ;; Long position: liq_price = entry_price * (1 - 1/leverage + maintenance_margin)
+      (* entry-price 
+        (/ 
+          (- 
+            (+ 
+              (* leverage u10000) 
+              (- maintenance-margin (var-get maintenance-margin))
+            ) 
+            u10000
+          ) 
+          (* leverage u10000)
+        )
+      )
+      ;; Short position: liq_price = entry_price * (1 + 1/leverage - maintenance_margin)
+      (* entry-price 
+        (/ 
+          (+ 
+            (- 
+              (* leverage u10000) 
+              maintenance-margin
+            ) 
+            u10000
+          ) 
+          (* leverage u10000)
+        )
+      )
+    )
+  )
+)
     (asserts! (is-eq tx-sender (var-get owner)) ERR_NOT_AUTHORIZED)
     (asserts! (<= new-rate u1000) ERR_INVALID_POSITION) ;; Max 10%
     (var-set protocol-fee-rate new-rate)

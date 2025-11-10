@@ -1,7 +1,7 @@
 [project]
 name = "Conxian"
 description = "A comprehensive, standardized Clarinet configuration for the Conxian DeFi protocol."
-clarinet_version = "3.8.1"
+clarinet_version = "3.9.0"
 
 [network.devnet]
 stacks_node_rpc_address = "http://localhost:20443"

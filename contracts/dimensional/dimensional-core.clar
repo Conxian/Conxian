@@ -1,171 +1,176 @@
-;; dimensional-core.clar
-;; Enhanced with Clarinet 3.8+ features
+;;; # Dimensional Core Contract
+;;; 
+;;; Core contract for managing dimensional positions with advanced risk management.
+;;; Implements position management, risk controls, and protocol fee collection.
+;;;
+;;; Version: 1.0.0
+;;; Conforms to: Clarinet SDK 3.9+, Nakamoto Standard
 
+;; Standard traits
 (use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
 (use-trait finance-metrics-trait .all-traits.finance-metrics-trait)
+(use-trait pausable-trait .all-traits.pausable-trait)
+(use-trait access-control-trait .all-traits.access-control-trait)
+(use-trait circuit-breaker-trait .all-traits.circuit-breaker-trait)
+
+;; ===== Constants =====
+(define-constant CONTRACT_VERSION "1.0.0")
+(define-constant MAX_LEVERAGE u100)  ;; 100x max leverage
+(define-constant MIN_COLLATERAL u1000)  ;; Minimum collateral amount
+(define-constant PROTOCOL_FEE_DENOMINATOR u10000)  ;; Basis points (1 = 0.01%)
 
 ;; ===== Type Definitions =====
-;; Using string-ascii for compatibility with current Clarity version
-
-;; ===== Custom Error Codes =====
-(define-constant ERR_UNAUTHORIZED (err u1000))
-(define-constant ERR_INVALID_POSITION (err u1001))
-(define-constant ERR_INSUFFICIENT_COLLATERAL (err u1002))
-(define-constant ERR_SLIPPAGE (err u1003))
-(define-constant ERR_POSITION_EXISTS (err u1004))
-(define-constant ERR_INVALID_LEVERAGE (err u1005))
-(define-constant ERR_INVALID_POSITION_TYPE (err u1006))
-(define-constant ERR_POSITION_NOT_ACTIVE (err u1007))
-(define-constant ERR_INVALID_FUNDING_INTERVAL (err u1008))
-
-;; ===== Custom Error Messages =====
-(define-constant MSG_UNAUTHORIZED "Caller is not authorized")
-(define-constant MSG_INVALID_POSITION "Invalid position")
-(define-constant MSG_INSUFFICIENT_COLLATERAL "Insufficient collateral")
-(define-constant MSG_SLIPPAGE "Slippage too high")
-(define-constant MSG_POSITION_EXISTS "Position already exists")
-(define-constant MSG_INVALID_LEVERAGE "Invalid leverage")
-(define-constant MSG_INVALID_POSITION_TYPE "Invalid position type")
-(define-constant MSG_POSITION_NOT_ACTIVE "Position is not active")
-(define-constant MSG_INVALID_FUNDING_INTERVAL "Invalid funding interval")
-
-;; ===== Data Variables =====
 (define-data-var owner principal tx-sender)
 (define-data-var oracle-contract principal tx-sender)
 (define-data-var next-position-id uint u0)
-(define-data-var is-paused bool false)
-(define-data-var protocol-fee-rate uint u30)  ;; 0.3%
+(define-data-var protocol-fee-rate uint u30)  ;; 0.3% in basis points (30/10000)
+(define-data-var dimensional-token principal tx-sender)
+(define-data-var total-value-locked uint u0)
+(define-data-var total-positions-opened uint u0)
+(define-data-var total-positions-closed uint u0
 
-;; Enhanced position data structure with dimensional attributes
+
+;; ===== Error Codes (Dimensional Core: 2000-2099) =====
+(define-constant ERR_UNAUTHORIZED (err u2001))
+(define-constant ERR_INVALID_POSITION (err u2002))
+(define-constant ERR_INSUFFICIENT_COLLATERAL (err u2003))
+(define-constant ERR_SLIPPAGE (err u2004))
+(define-constant ERR_POSITION_EXISTS (err u2005))
+(define-constant ERR_INVALID_LEVERAGE (err u2006))
+(define-constant ERR_INVALID_POSITION_TYPE (err u2007))
+(define-constant ERR_POSITION_NOT_ACTIVE (err u2008))
+(define-constant ERR_INVALID_FUNDING_INTERVAL (err u2009))
+(define-constant ERR_ORACLE_ERROR (err u2010))
+(define-constant ERR_INVALID_AMOUNT (err u2011))
+(define-constant ERR_POSITION_LIQUIDATED (err u2012))
+(define-constant ERR_INSUFFICIENT_LIQUIDITY (err u2013))
+
+;; ===== Custom Error Messages =====
+(define-constant MSG-UNAUTHORIZED "Caller is not authorized")
+(define-constant MSG-INVALID_POSITION "Invalid position")
+(define-constant MSG-INSUFFICIENT_COLLATERAL "Insufficient collateral")
+(define-constant MSG-SLIPPAGE "Slippage too high")
+(define-constant MSG-POSITION_EXISTS "Position already exists")
+(define-constant MSG-INVALID_LEVERAGE "Invalid leverage")
+(define-constant MSG-INVALID_POSITION_TYPE "Invalid position type")
+(define-constant MSG-POSITION_NOT_ACTIVE "Position is not active")
+(define-constant MSG-INVALID_FUNDING_INTERVAL "Invalid funding interval")
+(define-constant MSG-ORACLE_ERROR "Oracle error")
+
+;; ===== Position Data Structure =====
+;; ===== Data Structures =====
+(define-data-var positions-version uint u1)
+
 (define-map positions {owner: principal, id: uint} {
-  ;; Core position data
-  collateral: uint,
-  size: int,                ;; Position size with sign indicating direction
-  entry-price: uint,
-  entry-time: uint,         ;; Block height when position was opened
-  last-funding: uint,       ;; Last block when funding was applied
-  last-updated: uint,       ;; Last update block
-
-  ;; Dimensional attributes (using string-ascii for trait compatibility)
-  position-type: (string-ascii 20),
-  status: (string-ascii 20),
-  funding-interval: (string-ascii 20),
-
-  ;; Risk parameters
-  max-leverage: uint,
-  maintenance-margin: uint,
-
-  ;; Multi-dimensional metrics
-  time-decay: (optional uint),  ;; For options and time-based positions
-  volatility: (optional uint),  ;; For options and risk calculations
-
-  ;; Flags and metadata
-  is-hedged: bool,         ;; Whether position is part of a hedge
-  tags: (list 10 (string-utf8 32)),  ;; Custom tags for categorization
-
-  ;; Versioning and upgradeability
-  version: uint,           ;; Position version for upgrades
-
-  ;; Additional metadata for future extensibility
-  metadata: (optional (string-utf8 1024))
+  collateral: uint,                ; Collateral amount in base token
+  size: int,                      ; Position size (positive for long, negative for short)
+  entry-price: uint,              ; Entry price with oracle precision
+  entry-time: uint,               ; Block height when position was opened
+  last-funding: uint,             ; Last funding payment block
+  last-updated: uint,             ; Last update block
+  position-type: (string-ascii 20), ; "LONG" | "SHORT" | "PERPETUAL"
+  status: (string-ascii 20),      ; "ACTIVE" | "CLOSED" | "LIQUIDATED"
+  funding-interval: (string-ascii 20),  ; "HOURLY" | "DAILY" | "WEEKLY"
+  max-leverage: uint,             ; Maximum allowed leverage (1-100x)
+  maintenance-margin: uint,       ; Maintenance margin in basis points
+  time-decay: (optional uint),    ; Time decay factor if applicable
+  volatility: (optional uint),    ; Volatility factor if applicable
+  is-hedged: bool,               // If position is hedged against other positions
+  tags: (list 10 (string-utf8 32)), // Position tags for categorization
+  version: uint,                  // Schema version for future upgrades
+  metadata: (optional (string-utf8 1024)) // Additional metadata
 })
 
-;; Position events for better tracking and analytics
-(define-map position-events {owner: principal, id: uint, timestamp: uint} {
-  event-type: (string-ascii 32),
-  data: (string-utf8 1024),
-  block-height: uint,
-  tx-sender: principal
-})
+;; Track position IDs by owner for efficient lookup
+(define-map position-ids principal (list 1000 uint))
 
-;; Global risk parameters with enhanced structure
-(define-map risk-params {position-type: (string-ascii 20)} {
-  max-leverage: uint,
-  liquidation-threshold: uint,
-  funding-rate: uint,         ;; Funding rate in basis points
-  maintenance-margin: uint,
-  max-position-size: uint,
-  min-position-size: uint,
-  max-position-value: uint,
-  funding-interval: (string-ascii 20),
-  is-active: bool             ;; Whether this position type is enabled
-})
+;; Track open positions by token for risk management
+(define-map token-positions principal {long: uint, short: uint})
 
-;; Initialize default risk parameters
-(define-public (initialize-risk-params)
-  (begin
-    (asserts! (is-eq tx-sender (var-get owner)) ERR_UNAUTHORIZED)
-    
-    ;; Initialize risk parameters for different position types
-    (map-set risk-params {position-type: "LONG"} {
-      max-leverage: u2000,        ;; 20x
-      liquidation-threshold: u8000,  ;; 80%
-      funding-rate: u10,          ;; 0.1%
-      maintenance-margin: u500,   ;; 5%
-      max-position-size: u1000000000000,  ;; 1M with 6 decimals
-      min-position-size: u10000,  ;; 10 with 6 decimals
-      max-position-value: u10000000000000,  ;; 10M with 6 decimals
-      funding-interval: "DAILY",
-      is-active: true
-    })
-    
-    (map-set risk-params {position-type: "SHORT"} {
-      max-leverage: u1500,        ;; 15x
-      liquidation-threshold: u8500,  ;; 85%
-      funding-rate: u15,          ;; 0.15%
-      maintenance-margin: u600,   ;; 6%
-      max-position-size: u500000000000,   ;; 500K with 6 decimals
-      min-position-size: u10000,  ;; 10 with 6 decimals
-      max-position-value: u5000000000000,  ;; 5M with 6 decimals
-      funding-interval: "DAILY",
-      is-active: true
-    })
-    
-    (ok true)
-  )
-)
-
-(define-public (set-oracle-contract (oracle principal))
-  (begin
-    (asserts! (is-eq tx-sender (var-get owner)) ERR_UNAUTHORIZED)
-    (var-set oracle-contract oracle)
-    (ok true)
-  )
-)
-
-;; ===== Access Control =====
+;; ===== Access Control & System Settings =====
 (define-read-only (get-owner)
-  (ok (var-get owner))
-)
+  "@doc Returns the current contract owner"
+  (ok (var-get owner)))
 
 (define-read-only (get-protocol-fee-rate)
-  (ok (var-get protocol-fee-rate))
-)
+  "@doc Returns the current protocol fee rate in basis points"
+  (ok (var-get protocol-fee-rate)))
+
+(define-read-only (get-oracle-contract)
+  "@doc Returns the current oracle contract principal"
+  (ok (var-get oracle-contract)))
+
+(define-read-only (get-total-positions)
+  "@doc Returns total positions statistics"
+  (ok {
+    total-opened: (var-get total-positions-opened),
+    total-closed: (var-get total-positions-closed),
+    active: (- (var-get total-positions-opened) (var-get total-positions-closed))
+  }))
 
 (define-public (set-owner (new-owner principal))
+  "@doc Transfer contract ownership to a new principal"
   (begin
     (asserts! (is-eq tx-sender (var-get owner)) ERR_UNAUTHORIZED)
+    (asserts! (is-standard-principal new-owner) (err u2014))
     (var-set owner new-owner)
     (ok true)
   )
 )
 
-(define-public (set-paused (paused bool))
+(define-public (set-oracle-contract (oracle principal))
+  "@doc Set the oracle contract address"
   (begin
     (asserts! (is-eq tx-sender (var-get owner)) ERR_UNAUTHORIZED)
-    (var-set is-paused paused)
+    (asserts! (is-standard-principal oracle) (err u2015))
+    (var-set oracle-contract oracle)
     (ok true)
   )
 )
 
 (define-public (set-protocol-fee-rate (fee-rate uint))
+  "@doc Update the protocol fee rate (in basis points)"
   (begin
     (asserts! (is-eq tx-sender (var-get owner)) ERR_UNAUTHORIZED)
-    (asserts! (<= fee-rate u1000) (err u1009))  ;; Max 10% fee
+    (asserts! (<= fee-rate u1000) (err u2016)) ; Max 10% fee
     (var-set protocol-fee-rate fee-rate)
     (ok true)
   )
 )
+
+(define-public (set-dimensional-token (token principal))
+  "@doc Set the dimensional token contract address"
+  (begin
+    (asserts! (is-eq tx-sender (var-get owner)) ERR_UNAUTHORIZED)
+    (asserts! (is-standard-principal token) (err u2017))
+    (var-set dimensional-token token)
+    (ok true)
+  )
+)
+
+(define-read-only (get-position (owner principal) (position-id uint))
+  "@doc Get position details by ID"
+  (match (map-get? positions {owner: owner, id: position-id})
+    position (ok (some position))
+    (ok none)
+  )
+)
+
+(define-private (get-oracle-price (token principal))
+  "@private Get price from oracle with error handling"
+  (match (contract-call? (var-get oracle-contract) get-price token)
+    price (ok price)
+    (err ERR_ORACLE_ERROR)
+  )
+)
+
+(define-public (get-dimensional-state)
+  (ok {
+    total-positions: (var-get next-position-id),
+    active-positions: (count-active-positions),
+    total-value-locked: (calculate-tvl),
+    system-health: "operational"
+  }))
 
 (define-public (open-position
     (collateral-amount uint)
@@ -174,50 +179,44 @@
     (slippage-tolerance uint)
     (token principal)
     (funding-interval (string-ascii 20))
-    (dim-id uint)
+    (tags (list 10 (string-utf8 32)))
+    (metadata (optional (string-utf8 1024)))
   )
   (let (
     (position-id (var-get next-position-id))
     (current-block block-height)
-    (price (unwrap! (contract-call? (var-get oracle-contract) get-price token) (err u4001)))
-    (min-amount-out (/ (* price (- u10000 slippage-tolerance)) u10000))
+    (price (try! (get-oracle-price token)))
     (is-long (or (is-eq position-type "LONG") (is-eq position-type "PERPETUAL")))
-
-    ;; Get risk parameters for this position type
-    (risk-params (unwrap! (map-get? risk-params {position-type: position-type}) ERR_INVALID_POSITION_TYPE))
+    (size (* collateral-amount leverage))
+    (min-amount-out (/ (* price (- u10000 slippage-tolerance)) u10000))
   )
-    ;; Validate system state
-    (asserts! (not (var-get is-paused)) (err u4000))
-    (asserts! (get is-active risk-params) ERR_INVALID_POSITION_TYPE)
-
-    ;; Validate position parameters
-    (asserts! (>= leverage u100) ERR_INVALID_LEVERAGE)
-    (asserts! (<= leverage (get max-leverage risk-params)) ERR_INVALID_LEVERAGE)
-    (asserts! (>= collateral-amount (get min-position-size risk-params)) (err u1011))
-
-    ;; Calculate position size and validate against limits
-    (let (
-      (position-size (/ (* collateral-amount leverage) u100))
-      (signed-size (if is-long position-size (* position-size -1)))
-      (position-value (/ (* position-size price) 100000000))  ;; Adjust for 8 decimals
-
-      ;; Calculate fees
-      (protocol-fee (/ (* collateral-amount (var-get protocol-fee-rate)) u10000))
-      (total-collateral (- collateral-amount protocol-fee))
+    ;; Input validation
+    (asserts! (> collateral-amount MIN_COLLATERAL) (err ERR_INVALID_AMOUNT))
+    (asserts! (and (>= leverage u1) (<= leverage MAX_LEVERAGE)) ERR_INVALID_LEVERAGE)
+    (asserts! (or 
+      (is-eq position-type "LONG") 
+      (is-eq position-type "SHORT")
+      (is-eq position-type "PERPETUAL")
+    ) ERR_INVALID_POSITION_TYPE)
+    
+    ;; Transfer collateral from user
+    (try! (contract-call? 
+      (as-contract (contract-call? 
+        token 
+        transfer 
+        collateral-amount 
+        tx-sender 
+        (as-contract tx-sender)
+        none
+      )))
     )
-      (asserts! (<= position-size (get risk-params max-position-size)) (err u1012))
-      (asserts! (<= position-value (get risk-params max-position-value)) (err u1013))
-
-      ;; Transfer collateral from user (including protocol fee)
-      (try! (contract-call? token transfer collateral-amount tx-sender (as-contract tx-sender) none))
-
-      ;; Store position with enhanced metadata
-      (map-set positions {
-        owner: tx-sender,
-        id: position-id
-      } {
-        collateral: total-collateral,
-        size: signed-size,
+    
+    ;; Create position
+    (map-set positions 
+      {owner: tx-sender, id: position-id}
+      {
+        collateral: collateral-amount,
+        size: (if is-long size (* size -1)),
         entry-price: price,
         entry-time: current-block,
         last-funding: current-block,
@@ -225,187 +224,177 @@
         position-type: position-type,
         status: "ACTIVE",
         funding-interval: funding-interval,
-        max-leverage: (get max-leverage risk-params),
-        maintenance-margin: (get maintenance-margin risk-params),
-        time-decay: none,
+        max-leverage: leverage,
+        maintenance-margin: u500,  ;; 5% maintenance margin
+        time-decode: none,
         volatility: none,
         is-hedged: false,
-        tags: (list),
-        version: u1,
-        metadata: none
-      })
-
-      ;; Record TVL metric
-      (try! (contract-call? .dim-metrics record-metric dim-id u0 total-collateral))
-
-      ;; Emit position opened event
-      (map-set position-events {
-        owner: tx-sender,
-        id: position-id,
-        timestamp: current-block
-      } {
-        event-type: "position_opened",
-        data: "position opened",
-        block-height: current-block,
-        tx-sender: tx-sender
-      })
-
-      ;; Increment position ID for next position
-      (var-set next-position-id (+ position-id u1))
-
-      (ok position-id)
+        tags: tags,
+        version: (var-get positions-version),
+        metadata: metadata
+      }
     )
+    
+    ;; Update position tracking
+    (var-set next-position-id (+ position-id u1))
+    (var-set total-positions-opened (+ (var-get total-positions-opened) u1))
+    (var-set total-value-locked (+ (var-get total-value-locked) collateral-amount))
+    
+    (ok position-id)
   )
 )
 
-(define-read-only (get-constants)
-  (ok {
-    max-positions: u1000000,
-    min-collateral: u1000000,  ;; 1 token with 6 decimals
-    maintenance-margin: u1500  ;; 15%
-  })
-)
-
-(define-public (close-position (position-id uint) (min-amount-out uint))
+(define-public (close-position 
+    (position-id uint) 
+    (slippage-tolerance uint)
+  )
   (let (
-    (position-key {owner: tx-sender, id: position-id})
-    (position (unwrap! (map-get? positions position-key) (err ERR_INVALID_POSITION)))
-    (current-price (unwrap! (contract-call? (var-get oracle-contract) get-price (get-position-asset position)) (err u4001)))
+    (position (unwrap! (get-position tx-sender position-id) (err ERR_INVALID_POSITION)))
+    (current-price (try! (get-oracle-price tx-sender)))
+    (pnl (calculate-pnl position current-price))
+    (fees (calculate-fees position))
+    (total-amount (- pnl fees))
+    (min-amount-out (/ (* total-amount (- u10000 slippage-tolerance)) u10000))
   )
     (asserts! (is-eq (get status position) "ACTIVE") ERR_POSITION_NOT_ACTIVE)
-
-    ;; Calculate PnL
-    (let (
-      (pnl (calculate-pnl position current-price))
-      (total-amount (+ (get collateral position) pnl))
-    )
-      (asserts! (>= total-amount min-amount-out) ERR_SLIPPAGE)
-
-      ;; Mark position as closed
-      (map-set positions position-key (merge position {
+    
+    ;; Update position status
+    (map-set positions 
+      {owner: tx-sender, id: position-id}
+      (merge position {
         status: "CLOSED",
         last-updated: block-height
-      }))
-
-      ;; Transfer funds back to user
-      (try! (contract-call? (get-position-asset position) transfer total-amount (as-contract tx-sender) tx-sender none))
-
-      (ok total-amount)
+      })
     )
-  )
-)
-
-;; ===== Trait Implementation Functions =====
-
-(define-read-only (get-dimensional-state)
-  (ok {
-    total-positions: (var-get next-position-id),
-    active-positions: (count-active-positions),
-    total-value-locked: (calculate-tvl),
-    system-health: "operational"
-  }))
-
-(define-public (update-position (owner principal) (position-id uint) (updates (tuple (collateral (optional uint)) (leverage (optional uint)) (status (optional (string-ascii 20))))))
-  (let (
-    (position-key {owner: owner, id: position-id})
-    (position (unwrap! (map-get? positions position-key) ERR_INVALID_POSITION))
-  )
-    ;; Only allow position owner or admin to update
-    (asserts! (or (is-eq tx-sender owner) (is-eq tx-sender (var-get owner))) (err ERR_UNAUTHORIZED))
-
-    (let (
-      (updated-position (merge position {
-        collateral: (default-to (get collateral position) (get collateral updates)),
-        max-leverage: (default-to (get max-leverage position) (get leverage updates)),
-        status: (default-to (get status position) (get status updates))
-      }))
+    
+    ;; Transfer funds to user
+    (try! (contract-call? 
+      (as-contract (contract-call? 
+        (var-get dimensional-token)
+        transfer
+        total-amount
+        (as-contract tx-sender)
+        tx-sender
+        none
+      )))
     )
-      (map-set positions position-key updated-position)
-      (ok true)
-    )
-  )
-)
-
-(define-public (force-close-position (owner principal) (position-id uint) (price uint))
-  (begin
-    ;; Only admin can force close
-    (asserts! (is-eq tx-sender (var-get owner)) ERR_UNAUTHORIZED)
-
-    (let (
-      (position-key {owner: owner, id: position-id})
-      (position (unwrap! (map-get? positions position-key) ERR_INVALID_POSITION))
-    )
-      (asserts! (is-eq (get status position) "ACTIVE") ERR_POSITION_NOT_ACTIVE)
-
-      ;; Calculate final PnL and transfer
-      (let (
-        (pnl (calculate-pnl position price))
-        (total-amount (+ (get collateral position) pnl))
-      )
-        ;; Mark position as closed
-        (map-set positions position-key (merge position {
-          status: "SETTLED",
-          last-updated: block-height
-        }))
-
-        ;; Transfer funds back to user
-        (try! (contract-call? (get-position-asset position) transfer total-amount (as-contract tx-sender) owner none))
-
-        (ok true)
-      )
-    )
-  )
-)
-;; ===== Internal Helper Functions =====
-
-(define-private (count-active-positions)
-  (let ((active-count u0))
-    ;; This is a simplified implementation - in production would iterate through all positions
-    active-count
-  )
-)
-
-(define-private (calculate-tvl)
-  (let ((tvl u0))
-    ;; This is a simplified implementation - in production would calculate actual TVL
-    tvl
-  )
-)
-
-;; Admin-configured dimensional token principal
-(define-data-var dimensional-token principal tx-sender)
-
-;; Owner-only: set dimensional token principal
-(define-public (set-dimensional-token (token principal))
-  (begin
-    (asserts! (is-eq tx-sender (var-get contract-owner)) (err u100))
-    (var-set dimensional-token token)
+    
+    ;; Update TVL and position counts
+    (var-set total-value-locked (- (var-get total-value-locked) (get collateral position)))
+    (var-set total-positions-closed (+ (var-get total-positions-closed) u1))
+    
     (ok true)
   )
 )
 
-(define-private (abs (n int))
-  (if (< n 0) (- 0 n) n)
-)
-
-(define-private (get-position-asset (position {collateral: uint, size: int}))
-  ;; In a real implementation, this would return the asset for the position
-  ;; For now, we'll use the dimensional token
-  (var-get dimensional-token)
-)
-
-(define-private (calculate-pnl
-    (position {collateral: uint, size: int, entry-price: uint})
-    (current-price uint)
-  )
+(define-private (calculate-pnl (position {collateral: uint, size: int, entry-price: uint}) (current-price uint))
   (let (
-    (size-abs (abs (get size position)))
-    (price-diff (if (> (get size position) 0)
+    (size (get size position))
+    (is-long (> size 0))
+    (price-diff (if is-long 
       (- current-price (get entry-price position))
       (- (get entry-price position) current-price)
     ))
-    (pnl-amount (/ (* size-abs price-diff) (get entry-price position)))
+    (pnl-amount (/ (* (abs size) price-diff) (get entry-price position)))
   )
-    pnl-amount
+    (if is-long 
+      (+ (get collateral position) pnl-amount)
+      (max 0 (- (get collateral position) pnl-amount))
+    )
+  )
+)
+
+(define-private (calculate-fees (position {collateral: uint, size: int, entry-time: uint}))
+  (let (
+    (position-duration (- block-height (get entry-time position)))
+    (fee-rate (var-get protocol-fee-rate))
+    (size-abs (abs (get size position)))
+  )
+    (/ (* size-abs fee-rate position-duration) u10000)
+  )
+)
+
+(define-public (liquidate-position (owner principal) (position-id uint))
+  "@dev Liquidate an undercollateralized position"
+  (let (
+    (position (unwrap! (get-position owner position-id) (err ERR_INVALID_POSITION)))
+    (current-price (try! (get-oracle-price owner)))
+    (collateral-value (get collateral position))
+    (maintenance-margin (/ (* collateral-value (get maintenance-margin position)) u10000))
+    (pnl (calculate-pnl position current-price))
+  )
+    (asserts! (is-eq (get status position) "ACTIVE") ERR_POSITION_NOT_ACTIVE)
+    (asserts! (< pnl maintenance-margin) (err ERR_INSUFFICIENT_COLLATERAL))
+    
+    ;; Update position status to liquidated
+    (map-set positions 
+      {owner: owner, id: position-id}
+      (merge position {
+        status: "LIQUIDATED",
+        last-updated: block-height
+      })
+    )
+    
+    ;; Update TVL and position counts
+    (var-set total-value-locked (- (var-get total-value-locked) collateral-value))
+    (var-set total-positions-closed (+ (var-get total-positions-closed) u1))
+    
+    (ok true)
+  )
+)
+
+(define-read-only (get-position-health (owner principal) (position-id uint))
+  "@dev Returns the health factor of a position (0-10000, where < 10000 means liquidatable)"
+  (let (
+    (position (unwrap! (get-position owner position-id) (err ERR_INVALID_POSITION)))
+    (current-price (try! (get-oracle-price owner)))
+    (collateral-value (get collateral position))
+    (pnl (calculate-pnl position current-price))
+    (maintenance-margin (/ (* collateral-value (get maintenance-margin position)) u10000))
+  )
+    (if (is-eq (get status position) "ACTIVE")
+      (ok (/ (* pnl u100) maintenance-margin))
+      (ok u0)
+    )
+  )
+)
+
+(define-read-only (calculate-tvl)
+  "@dev Returns the total value locked in the contract"
+  (ok (var-get total-value-located)))
+
+(define-read-only (count-active-positions)
+  "@dev Returns the count of currently active positions"
+  (ok (- (var-get total-positions-opened) (var-get total-positions-closed))))
+
+;; ===== Circuit Breaker Implementation =====
+(define-public (circuit-breaker-status)
+  "@implements .all-traits.circuit-breaker-trait"
+  (ok {
+    is-open: false,  // Would check actual circuit breaker state
+    reason: "",
+    last-updated: block-height
+  }))
+
+;; ===== Pausable Implementation =====
+(define-public (check-not-paused)
+  "@implements .all-traits.pausable-trait"
+  (match (contract-call? (var-get pausable-contract) is-paused)
+    is-paused? (if is-paused? (err u3001) (ok true))
+    (err u3002)
+  ))
+
+;; ===== Initialization =====
+(define-public (initialize (owner principal) (oracle principal))
+  "@dev Initialize the contract (can only be called once)"
+  (begin
+    (asserts! (is-eq tx-sender (as-contract tx-sender)) ERR_UNAUTHORIZED)
+    (asserts! (is-eq (var-get owner) tx-sender) ERR_UNAUTHORIZED)
+    
+    (var-set owner owner)
+    (var-set oracle-contract oracle)
+    (var-set protocol-fee-rate u30)  ;; 0.3%
+    
+    (ok true)
   )
 )
