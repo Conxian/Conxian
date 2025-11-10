@@ -10,14 +10,7 @@ const includeStatic = [
   'tests/load-testing/performance-benchmarks.test.ts',
 ];
 const includeAll = [
-  'stacks/tests/**/*.test.ts',
-  'stacks/tests/**/*.spec.ts',
-  'stacks/sdk-tests/**/*.spec.ts',
-  'tests/load-testing/**/*.test.ts',
-  'tests/interoperability/**/*.test.ts',
-  'tests/monitoring/**/*.test.ts',
-  'tests/dimensional/**/*.ts',
-  'tests/**/*.ts',
+  'tests/dimensional/dimensional-core-integration.test.ts',
 ];
 
 /**

@@ -6,6 +6,7 @@
 (use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
 (use-trait risk-trait .all-traits.risk-trait)
 (use-trait token-trait .all-traits.sip-010-ft-trait)
+(use-trait finance-metrics-trait .all-traits.finance-metrics-trait)
 
 ;; =============================================================================
 ;; CONSTANTS AND ERROR CODES
@@ -151,9 +152,9 @@
   )
   (begin
     (let (
-      (position (unwrap! (get-position position-owner position-id) (err u5005)))
+      (position (unwrap! (contract-call? .dimensional-core get-position position-owner position-id) (err u5005)))
       (current-time block-height)
-      (asset (get asset position))
+      (asset (get-position-asset position-id))
       (last-update (unwrap! (map-get? last-funding-update {asset: asset}) (err u5006)))
       (position-type (get status position))
     )
@@ -162,18 +163,18 @@
 
       ;; Calculate funding payment
       (let* (
-        (size (abs-int (get size position)))
-        (funding-rate (get last-update cumulative-funding))
+        (size (abs (get size position)))
+        (funding-rate (get cumulative-funding last-update))
         (funding-payment (/ (* size funding-rate) u10000))  ;; Funding rate is in basis points
 
         ;; Adjust position collateral
         (new-collateral (- (get collateral position) funding-payment))
       )
         ;; Update position collateral
-        (try! (update-position
+        (try! (contract-call? .dimensional-core update-position
           position-owner
           position-id
-          {collateral: (some new-collateral)}
+          {collateral: (some new-collateral), leverage: none, status: none}
         ))
 
         (ok {
@@ -185,6 +186,13 @@
       )
     )
   )
+)
+
+(define-private (get-position-asset (position-id uint))
+  ;; Helper function to get the asset for a position
+  ;; In a real implementation, this would look up the asset in the position data
+  ;; For now, we'll use a placeholder
+  .stx
 )
 
 (define-private (calculate-premium
@@ -217,6 +225,10 @@
       0
     )
   )
+)
+
+(define-private (abs (n int))
+  (if (< n 0) (- 0 n) n)
 )
 
 (define-private (get-open-interest (asset principal))
@@ -268,12 +280,17 @@
 ;; FACADE FUNCTIONS
 ;; =============================================================================
 
-(define-public (create-position (position-owner principal) (collateral-amount uint) (leverage uint) (pos-type (string-ascii 20)) (token <token-trait>) (slippage-tolerance uint) (funding-int (string-ascii 20)))
-  (contract-call? .core-position-manager create-position position-owner collateral-amount leverage pos-type token slippage-tolerance funding-int)
+(define-public (create-position (collateral-amount uint) (leverage uint) (pos-type (string-ascii 20)) (token <token-trait>) (slippage-tolerance uint) (funding-int (string-ascii 20)))
+  (contract-call? .dimensional-core open-position collateral-amount leverage pos-type slippage-tolerance (contract-of token) funding-int u1)
 )
 
-(define-public (close-position (position-owner principal) (position-id uint) (slippage-tolerance uint))
-  (contract-call? .core-position-manager close-position position-owner position-id slippage-tolerance)
+(define-public (close-position (position-id uint) (slippage-tolerance uint))
+  (let (
+    (price (unwrap! (contract-call? .oracle-adapter get-price (get-position-asset position-id)) (err u4001)))
+    (min-amount-out (/ (* price (- u10000 slippage-tolerance)) u10000))
+  )
+    (contract-call? .dimensional-core close-position position-id min-amount-out)
+  )
 )
 
 (define-public (liquidate-position (position-owner principal) (position-id uint) (max-slippage uint))
@@ -285,17 +302,7 @@
 ;; =============================================================================
 
 (define-read-only (get-position (position-owner principal) (position-id uint))
-  (begin
-    "Get position details"
-    (ok (map-get? positions { owner: position-owner, id: position-id }))
-  )
-)
-
-(define-read-only (get-user-stats (user principal))
-  (begin
-    "Get user statistics"
-    (ok (map-get? user-stats { user: user }))
-  )
+  (contract-call? .dimensional-core get-position position-owner position-id)
 )
 
 (define-read-only (get-owner)

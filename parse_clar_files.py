@@ -18,9 +18,9 @@ def parse_clarity_files(contracts_dir="contracts"):
     # Pattern 3: (use-trait <alias> '<principal>.<contract-name>)
     use_trait_pattern = re.compile(r"\(\s*use-trait\s+[^\s]+\s+'[A-Z0-9]+\.([a-zA-Z0-9_-]+)")
 
-    # Pattern 4: (impl-trait '<principal>.<trait-name>) or (impl-trait .<contract-name>.<trait-name>)
+    # Pattern 4: (impl-trait .all-traits.<trait-name>)
     # This is the most important pattern for dependency resolution.
-    impl_trait_pattern = re.compile(r"\(\s*impl-trait\s+'?\.?([^\s\)\.]+)")
+    impl_trait_pattern = re.compile(r"\(\s*impl-trait\s+\.all-traits\.([a-zA-Z0-9_-]+)")
 
     # Pattern 5: (contract-of <trait-alias>)
     contract_of_pattern = re.compile(r"\(\s*contract-of\s+([a-zA-Z0-9_-]+)\)")

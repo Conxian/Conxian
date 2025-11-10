@@ -29,156 +29,30 @@ path = "contracts/dimensional/position-nft.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 depends_on = [ "all-traits",]
 
-[contracts.dex-liquidity-optimization-engine]
-path = "contracts/dex/liquidity-optimization-engine.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-
-[contracts.dimensional-advanced-router-dijkstra]
-path = "contracts/dimensional/advanced-router-dijkstra.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = [ "all-traits",]
-
-[contracts.lib-precision-calculator]
-path = "contracts/lib/precision-calculator.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-
-[contracts.interop-wormhole-handlers]
-path = "contracts/interoperability/wormhole-handlers.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = [ "all-traits",]
-
-[contracts.dex-performance-optimizer]
-path = "contracts/dex/performance-optimizer.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-
-[contracts.dex-liquidity-manager]
-path = "contracts/dex/liquidity-manager.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-
-[contracts.dex-timelock-controller]
-path = "contracts/dex/timelock-controller.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-
-[contracts.dex-token-emission-controller]
-path = "contracts/dex/token-emission-controller.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-
-[contracts.test-test-access]
-path = "contracts/test/test-access.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-
-[contracts.dimensional-dim-registry]
-path = "contracts/dimensional/dim-registry.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = [ "all-traits",]
-
-[contracts.dex-enhanced-yield-strategy]
-path = "contracts/dex/enhanced-yield-strategy.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = [ "all-traits",]
-
-[contracts.default-strategy-engine]
-path = "contracts/rewards/default-strategy-engine.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = [ "all-traits",]
-
-[contracts.dimensional-dim-metrics]
-path = "contracts/dimensional/dim-metrics.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-
-[contracts.governance-emergency-governance]
-path = "contracts/governance/emergency-governance.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-
-[contracts.utils-block-utils]
-path = "contracts/utils/block-utils.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-
-[contracts.lib-fixed-point-math]
-path = "contracts/lib/fixed-point-math.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-
-[contracts.lib-math-lib-advanced]
-path = "contracts/lib/math-lib-advanced.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-
-[contracts.enterprise-enterprise-api]
-path = "contracts/enterprise/enterprise-api.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = [ "all-traits",]
-
 [contracts.automation-batch-processor]
 path = "contracts/automation/batch-processor.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
-[contracts.optimization-helpers]
-path = "contracts/helpers/optimization-helpers.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-
-[contracts.dex-liquidation-manager]
-path = "contracts/dex/liquidation-manager.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = [ "all-traits",]
-
-[contracts.dimensional-position-nft]
-path = "contracts/dimensional/position-nft.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = [ "all-traits",]
-
-[contracts.dex-real-time-monitoring-dashboard]
-path = "contracts/dex/real-time-monitoring-dashboard.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-
-[contracts.utils-migration-manager]
-path = "contracts/utils/migration-manager.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-
-[contracts.dex-token-system-coordinator]
-path = "contracts/dex/token-system-coordinator.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-
-[contracts.traits-errors]
-path = "contracts/traits/errors.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-
-[contracts.interop-wormhole-outbox]
-path = "contracts/interoperability/wormhole-outbox.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = [ "all-traits",]
-
 [contracts.lib-error-codes]
 path = "contracts/lib/error-codes.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-
-[contracts.interop-wormhole-inbox]
-path = "contracts/interoperability/wormhole-inbox.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = [ "all-traits",]
-
-[contracts.dex-enterprise-loan-manager]
-path = "contracts/dex/enterprise-loan-manager.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = [ "all-traits",]
-
-[contracts.governance-upgrade-controller]
-path = "contracts/governance/upgrade-controller.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
 [contracts.dex-protocol-invariant-monitor]
 path = "contracts/dex/protocol-invariant-monitor.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
-[contracts.dex-cxvg-utility]
-path = "contracts/dex/cxvg-utility.clar"
+[contracts.dimensional-position-nft]
+path = "contracts/dimensional/position-nft.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+depends_on = [ "all-traits",]
 
-[contracts.core-dimensional-engine]
-path = "contracts/core/dimensional-engine.clar"
+[contracts.dimensional-dim-registry]
+path = "contracts/dimensional/dim-registry.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = [ "all-traits", "core-position-manager", "risk-liquidation-engine",]
+depends_on = [ "all-traits",]
 
-[contracts.utils-encoding]
-path = "contracts/utils/encoding.clar"
+[contracts.enterprise-compliance-hooks]
+path = "contracts/enterprise/compliance-hooks.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
 [contracts.dex-distributed-cache-manager]
@@ -189,9 +63,144 @@ address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 path = "contracts/dimensional/dim-graph.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
-[contracts.enterprise-compliance-hooks]
-path = "contracts/enterprise/compliance-hooks.clar"
+[contracts.dimensional-dim-metrics]
+path = "contracts/dimensional/dim-metrics.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+
+[contracts.dimensional-core]
+path = "contracts/dimensional/dimensional-core.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+depends_on = ["dimensional-dim-metrics"]
+
+[contracts.dex-performance-optimizer]
+path = "contracts/dex/performance-optimizer.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+
+[contracts.dimensional-dim-metrics]
+path = "contracts/dimensional/dim-metrics.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+
+[contracts.traits-errors]
+path = "contracts/traits/errors.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+
+[contracts.optimization-helpers]
+path = "contracts/helpers/optimization-helpers.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+
+[contracts.interop-wormhole-outbox]
+path = "contracts/interoperability/wormhole-outbox.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+depends_on = [ "all-traits",]
+
+[contracts.dex-enhanced-yield-strategy]
+path = "contracts/dex/enhanced-yield-strategy.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+depends_on = [ "all-traits",]
+
+[contracts.dex-token-system-coordinator]
+path = "contracts/dex/token-system-coordinator.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+
+[contracts.lib-math-lib-advanced]
+path = "contracts/lib/math-lib-advanced.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+
+[contracts.test-test-access]
+path = "contracts/test/test-access.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+
+[contracts.dimensional-advanced-router-dijkstra]
+path = "contracts/dimensional/advanced-router-dijkstra.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+depends_on = [ "all-traits",]
+
+[contracts.default-strategy-engine]
+path = "contracts/rewards/default-strategy-engine.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+depends_on = [ "all-traits",]
+
+[contracts.dex-real-time-monitoring-dashboard]
+path = "contracts/dex/real-time-monitoring-dashboard.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+
+[contracts.dex-token-emission-controller]
+path = "contracts/dex/token-emission-controller.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+
+[contracts.utils-migration-manager]
+path = "contracts/utils/migration-manager.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+
+[contracts.dex-liquidity-manager]
+path = "contracts/dex/liquidity-manager.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+
+[contracts.dex-cxvg-utility]
+path = "contracts/dex/cxvg-utility.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+
+[contracts.dex-liquidation-manager]
+path = "contracts/dex/liquidation-manager.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+depends_on = [ "all-traits",]
+
+[contracts.dex-enterprise-loan-manager]
+path = "contracts/dex/enterprise-loan-manager.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+depends_on = [ "all-traits",]
+
+[contracts.dex-liquidity-optimization-engine]
+path = "contracts/dex/liquidity-optimization-engine.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+
+[contracts.core-dimensional-engine]
+path = "contracts/core/dimensional-engine.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+depends_on = [ "all-traits", "dimensional-core",]
+
+[contracts.governance-upgrade-controller]
+path = "contracts/governance/upgrade-controller.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+
+[contracts.lib-fixed-point-math]
+path = "contracts/lib/fixed-point-math.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+
+[contracts.enterprise-enterprise-api]
+path = "contracts/enterprise/enterprise-api.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+depends_on = [ "all-traits",]
+
+[contracts.lib-precision-calculator]
+path = "contracts/lib/precision-calculator.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+
+[contracts.utils-block-utils]
+path = "contracts/utils/block-utils.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+
+[contracts.governance-emergency-governance]
+path = "contracts/governance/emergency-governance.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+
+[contracts.interop-wormhole-handlers]
+path = "contracts/interoperability/wormhole-handlers.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+depends_on = [ "all-traits",]
+
+[contracts.utils-encoding]
+path = "contracts/utils/encoding.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+
+[contracts.dex-timelock-controller]
+path = "contracts/dex/timelock-controller.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+
+[contracts.interop-wormhole-inbox]
+path = "contracts/interoperability/wormhole-inbox.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+depends_on = [ "all-traits",]
 
 [contracts.governance-token]
 path = "contracts/governance-token.clar"
@@ -239,7 +248,6 @@ pool-template = ".pool-template"
 dex-router = ".dimensional-advanced-router-dijkstra"
 oracle-adapter = ".core-oracle-oracle-adapter"
 dimensional-engine = ".core-dimensional-engine"
-position-manager = ".core-position-manager"
 risk-manager = ".risk-risk-manager"
 liquidation-engine = ".risk-liquidation-engine"
 funding-calculator = ".risk-funding-calculator"

@@ -2,6 +2,7 @@
 ;; Enhanced with Clarinet 3.8+ features
 
 (use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
+(use-trait finance-metrics-trait .all-traits.finance-metrics-trait)
 
 ;; ===== Type Definitions =====
 ;; Using string-ascii for compatibility with current Clarity version
@@ -30,6 +31,7 @@
 
 ;; ===== Data Variables =====
 (define-data-var owner principal tx-sender)
+(define-data-var oracle-contract principal tx-sender)
 (define-data-var next-position-id uint u0)
 (define-data-var is-paused bool false)
 (define-data-var protocol-fee-rate uint u30)  ;; 0.3%
@@ -123,6 +125,14 @@
   )
 )
 
+(define-public (set-oracle-contract (oracle principal))
+  (begin
+    (asserts! (is-eq tx-sender (var-get owner)) ERR_UNAUTHORIZED)
+    (var-set oracle-contract oracle)
+    (ok true)
+  )
+)
+
 ;; ===== Access Control =====
 (define-read-only (get-owner)
   (ok (var-get owner))
@@ -164,11 +174,12 @@
     (slippage-tolerance uint)
     (token principal)
     (funding-interval (string-ascii 20))
+    (dim-id uint)
   )
   (let (
     (position-id (var-get next-position-id))
     (current-block block-height)
-    (price (unwrap! (contract-call? .dimensional-oracle get-price token) (err u4001)))
+    (price (unwrap! (contract-call? (var-get oracle-contract) get-price token) (err u4001)))
     (min-amount-out (/ (* price (- u10000 slippage-tolerance)) u10000))
     (is-long (or (is-eq position-type "LONG") (is-eq position-type "PERPETUAL")))
 
@@ -224,6 +235,9 @@
         metadata: none
       })
 
+      ;; Record TVL metric
+      (try! (contract-call? .dim-metrics record-metric dim-id u0 total-collateral))
+
       ;; Emit position opened event
       (map-set position-events {
         owner: tx-sender,
@@ -256,7 +270,7 @@
   (let (
     (position-key {owner: tx-sender, id: position-id})
     (position (unwrap! (map-get? positions position-key) (err ERR_INVALID_POSITION)))
-    (current-price (unwrap! (contract-call? .dimensional-oracle get-price (get-position-asset position)) (err u4001)))
+    (current-price (unwrap! (contract-call? (var-get oracle-contract) get-price (get-position-asset position)) (err u4001)))
   )
     (asserts! (is-eq (get status position) "ACTIVE") ERR_POSITION_NOT_ACTIVE)
 
@@ -368,6 +382,10 @@
     (var-set dimensional-token token)
     (ok true)
   )
+)
+
+(define-private (abs (n int))
+  (if (< n 0) (- 0 n) n)
 )
 
 (define-private (get-position-asset (position {collateral: uint, size: int}))

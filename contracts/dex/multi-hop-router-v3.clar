@@ -13,6 +13,7 @@
 (use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
 (use-trait pool-trait .all-traits.pool-trait)
 (use-trait dim-registry-trait .all-traits.dim-registry-trait)
+(use-trait dim-graph-trait .all-traits.dim-graph-trait)
 
 ;; ===========================================
 ;; CONSTANTS
@@ -50,6 +51,7 @@
 ;; Owner for administrative controls
 (define-data-var contract-owner principal tx-sender)
 (define-data-var dim-registry principal tx-sender)
+(define-data-var dim-graph principal tx-sender)
 
 ;; ===========================================
 ;; DATA MAPS
@@ -155,6 +157,14 @@
   )
 )
 
+(define-public (set-dim-graph (graph principal))
+  (begin
+    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_INVALID_ROUTE)
+    (var-set dim-graph graph)
+    (ok true)
+  )
+)
+
 (define-public (set-principal-index (p principal) (idx uint))
   (begin
     (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_INVALID_ROUTE)
@@ -248,13 +258,24 @@
 )
 
 (define-private (execute-multi-hop-swap (hops (list 10 {pool: principal, token-in: principal, token-out: principal})) (amount-in uint) (recipient principal))
-  (fold hops (ok amount-in)
-    (lambda (hop result)
-      (match result
-        (ok current-amount)
-        (contract-call? (get pool hop) swap (get token-in hop) (get token-out hop) current-amount u0 recipient)
-        err-result
-        err-result
+  (let (
+    (dim-graph-contract (var-get dim-graph))
+    (dim-registry-contract (var-get dim-registry))
+  )
+    (fold hops (ok amount-in)
+      (lambda (hop result)
+        (match result
+          (ok current-amount)
+          (let (
+            (from-dim (unwrap! (contract-call? dim-registry-contract get-dimension-id (get token-in hop)) (err ERR_INVALID_TOKEN)))
+            (to-dim (unwrap! (contract-call? dim-registry-contract get-dimension-id (get token-out hop)) (err ERR_INVALID_TOKEN)))
+          )
+            (try! (contract-call? dim-graph-contract set-edge from-dim to-dim current-amount))
+            (contract-call? (get pool hop) swap (get token-in hop) (get token-out hop) current-amount u0 recipient)
+          )
+          err-result
+          err-result
+        )
       )
     )
   )

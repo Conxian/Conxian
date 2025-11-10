@@ -33,7 +33,7 @@
   },
   "dependencies": {
     "@stacks/blockchain-api-client": "8.13.1",
-    "@stacks/network": "7.2.0",
+    "@stacks/network": "^7.2.0",
     "@stacks/transactions": "^7.2.0",
     "@stacks/wallet-sdk": "^7.2.0",
     "bignumber.js": "^9.1.2",
@@ -43,7 +43,7 @@
   },
   "devDependencies": {
     "@clarigen/core": "^3.2.0",
-    "@hirosystems/clarinet-sdk": "3.8.1",
+    "@hirosystems/clarinet-sdk": "^3.8.1",
     "@stacks/clarinet-sdk": "3.9.0",
     "@types/elliptic": "^6.4.18",
     "@types/node": "^24.5.2",
