@@ -2,6 +2,7 @@
 ;; Central coordinator for automated keeper tasks across the Conxian protocol
 ;; Manages automated interest accrual, liquidations, rebalancing, and fee distribution
 (use-trait keeper_coordinator_trait .all-traits.keeper-coordinator-trait)
+(use-trait rbac-trait .rbac-trait.rbac-trait)
 
 ;; ===== Constants =====
 (define-constant ERR_UNAUTHORIZED (err u9001))
@@ -20,7 +21,7 @@
 (define-constant TASK_METRICS_UPDATE u7)
 
 ;; ===== Data Variables =====
-(define-data-var contract-owner principal tx-sender)
+
 (define-data-var keeper-enabled bool true)
 (define-data-var last-execution-block uint u0)
 (define-data-var execution-interval uint u10) ;; Execute every 10 blocks (~10 minutes)
@@ -59,10 +60,10 @@
 
 ;; ===== Authorization =====
 (define-private (check-is-owner)
-  (ok (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)))
+  (ok (asserts! (is-ok (contract-call? .rbac-contract has-role "contract-owner")) ERR_UNAUTHORIZED)))
 
 (define-private (check-is-keeper)
-  (ok (asserts! (or (is-eq tx-sender (var-get contract-owner))
+  (ok (asserts! (or (is-ok (contract-call? .rbac-contract has-role "contract-owner"))
                     (default-to false (map-get? authorized-keepers tx-sender)))
                 ERR_UNAUTHORIZED)))
 

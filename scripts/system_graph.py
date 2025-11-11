@@ -15,7 +15,7 @@ import os
 import re
 import json
 from pathlib import Path
-from typing import Dict, List, Tuple, Set
+from typing import Dict, List, Tuple, Set, Any
 
 ROOT_DIR = Path(__file__).parent.parent
 CONTRACTS_DIR = ROOT_DIR / "contracts"
@@ -23,6 +23,13 @@ TESTS_DIR = ROOT_DIR / "tests"
 TRAITS_FILE = CONTRACTS_DIR / "traits" / "all-traits.clar"
 ARTIFACTS = ROOT_DIR / "artifacts"
 ARTIFACTS.mkdir(exist_ok=True)
+DIME_CONFIG_FILE = ROOT_DIR / "scripts" / "dime_config.json"
+
+def load_dime_config() -> Dict[str, Any]:
+    if DIME_CONFIG_FILE.exists():
+        with open(DIME_CONFIG_FILE, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    return {"dimes": {}, "contract_dime_mapping": {}}
 
 USE_TRAIT_RE = re.compile(r"\(use-trait\s+([^\s]+)\s+([^\s\)]+)\)")
 IMPL_TRAIT_RE = re.compile(r"\(impl-trait\s+([^\s\)]+)\)")
@@ -62,6 +69,8 @@ def node_id_for_path(p: Path) -> str:
 def build_system_graph(root_dir: Path = ROOT_DIR) -> Dict:
     contract_index = index_contracts()
     trait_names = load_traits()
+    dime_config = load_dime_config()
+    contract_dime_mapping = dime_config.get("contract_dime_mapping", {})
 
     nodes: Dict[str, Dict] = {}
     edges: List[Dict] = []
@@ -76,7 +85,12 @@ def build_system_graph(root_dir: Path = ROOT_DIR) -> Dict:
         content = strip_comments(path.read_text(encoding="utf-8"))
         ntype = "test" if TESTS_DIR in path.parents else "contract"
         nid = node_id_for_path(path)
-        nodes[nid] = {"id": nid, "type": ntype, "name": stem}
+        node_data = {"id": nid, "type": ntype, "name": stem}
+        if ntype == "contract":
+            dime = contract_dime_mapping.get(stem)
+            if dime:
+                node_data["dime"] = dime
+        nodes[nid] = node_data
 
         # use-trait
         for m in USE_TRAIT_RE.finditer(content):

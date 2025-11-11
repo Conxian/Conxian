@@ -1606,6 +1606,36 @@
 )
 
 ;; ===========================================
+;; POOL TRAIT
+;; ===========================================
+
+(define-trait pool-trait
+  (
+    ;; @desc Get the amount of input token required for a given amount of output token.
+    ;; @param token-in principal The input token.
+    ;; @param token-out principal The output token.
+    ;; @param amount-out uint The desired amount of output token.
+    ;; @returns (response uint uint) The amount-in required, or an error.
+    (get-amount-in (principal principal uint) (response uint uint))
+
+    ;; @desc Get the amount of output token received for a given amount of input token.
+    ;; @param token-in principal The input token.
+    ;; @param token-out principal The output token.
+    ;; @param amount-in uint The amount of input token.
+    ;; @returns (response uint uint) The amount-out received, or an error.
+    (get-amount-out (principal principal uint) (response uint uint))
+
+    ;; @desc Get the fee in basis points for the pool.
+    ;; @returns (response uint uint) The fee in basis points, or an error.
+    (get-fee-bps () (response uint uint))
+
+    ;; @desc Get the tokens managed by the pool.
+    ;; @returns (response (tuple (token-0 principal) (token-1 principal)) uint) The two tokens in the pool, or an error.
+    (get-tokens () (response (tuple (token-0 principal) (token-1 principal)) uint))
+  )
+)
+
+;; ===========================================
 ;; END OF CENTRALIZED TRAIT DEFINITIONS
 ;; ===========================================
 ;;

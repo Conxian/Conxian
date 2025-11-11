@@ -31,6 +31,10 @@
   }
 )
 
+;; @desc Sets the contract owner.
+;; @param new-owner The principal of the new owner.
+;; @returns (response bool uint) True if successful, or an error.
+;; @error ERR_UNAUTHORIZED if the transaction sender is not the current owner.
 (define-public (set-owner (new-owner principal))
   (begin
     (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
@@ -39,6 +43,11 @@
   )
 )
 
+;; @desc Registers a new pool type with its implementation contract.
+;; @param type-id A unique identifier for the pool type.
+;; @param impl The principal of the contract implementing this pool type.
+;; @returns (response bool uint) True if successful, or an error.
+;; @error ERR_UNAUTHORIZED if the transaction sender is not the contract owner.
 (define-public (register-pool-type
     (type-id (string-ascii 32))
     (impl principal)
@@ -50,6 +59,12 @@
   )
 )
 
+;; @desc Creates a new pool for a given token pair and pool type.
+;; @param type-id The identifier of the pool type to create.
+;; @param token-a The principal of the first token in the pair.
+;; @param token-b The principal of the second token in the pair.
+;; @returns (response principal uint) The principal of the created pool or an error.
+;; @error ERR_TYPE_NOT_FOUND if the specified pool type is not registered.
 (define-public (create-pool
     (type-id (string-ascii 32))
     (token-a principal)
@@ -71,6 +86,10 @@
   )
 )
 
+;; @desc Retrieves the pool principal for a given token pair.
+;; @param token-a The principal of the first token in the pair.
+;; @param token-b The principal of the second token in the pair.
+;; @returns (response (optional principal) uint) An optional principal of the pool or an error.
 (define-read-only (get-pool
     (token-a principal)
     (token-b principal)

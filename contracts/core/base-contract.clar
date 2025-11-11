@@ -1,8 +1,9 @@
-;; ============================================================
-;; CONXIAN PROTOCOL - BASE CONTRACT (v3.9.2+)
-;; ============================================================
-;; Base contract with common functionality for all Conxian contracts
+;; base-contract
+;; This contract serves as a foundational building block for other contracts in the Conxian ecosystem.
+;; It provides common functionalities such as contract ownership, pausing mechanisms, and basic error handling.
 
+(use-trait ownable-trait .all-traits.ownable-trait)
+(use-trait pausable-trait .all-traits.pausable-trait)
 (use-trait errors .all-traits.errors)
 (use-trait access-control .all-traits.access-control-trait)
 (use-trait pausable .all-traits.pausable-trait)
@@ -129,11 +130,11 @@
   (let (
     (caller tx-sender)
   )
-    (try! (only-owner))
+    (try! (contract-call? .rbac-contract has-role "contract-owner"))
     (try! (validate-address new-owner))
     
     (let ((previous-owner (var-get owner)))
-      (var-set owner new-owner)
+      (try! (contract-call? .rbac-contract set-role "contract-owner" new-owner))
       (emit-ownership-transferred previous-owner new-owner)
       (ok true)
     )
@@ -142,7 +143,7 @@
 
 ;; Pause the contract
 (define-public (pause)
-  (try! (has-role ROLE_ADMIN))
+  (try! (contract-call? .rbac-contract has-role "contract-owner"))
   (try! (when-not-paused))
   
   (var-set paused true)
@@ -152,7 +153,7 @@
 
 ;; Unpause the contract
 (define-public (unpause)
-  (try! (has-role ROLE_ADMIN))
+  (try! (contract-call? .rbac-contract has-role "contract-owner"))
   (try! (when-paused))
   
   (var-set paused false)

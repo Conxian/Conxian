@@ -11,7 +11,8 @@
 (define-constant ERR_NOT_PENDING_OWNER (err u1007))
 
 ;; State
-(define-data-var contract-owner principal tx-sender)
+(use-trait rbac-trait .rbac-trait.rbac-trait)
+
 (define-data-var pending-owner (optional principal) none)
 
 ;; Implementation of ownable-trait
@@ -21,16 +22,19 @@
 (define-read-only (is-owner (who principal))
   (ok (is-eq who (var-get contract-owner))))
 
+;; @desc Transfer ownership of the contract to a new address.
+;; @param new-owner (principal) - The address of the new owner.
+;; @returns (response bool uint) - Ok(true) if successful, Err(ERR_UNAUTHORIZED) otherwise.
 (define-public (transfer-ownership (new-owner principal))
   (begin
-    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_NOT_OWNER)
-    (asserts! (is-eq (is-none (var-get pending-owner)) true) ERR_TRANSFER_PENDING)
-    (var-set pending-owner (some new-owner))
-    (ok true)))
+    (asserts! (is-ok (contract-call? .rbac-contract has-role "contract-owner")) (err ERR_UNAUTHORIZED))
+    (ok (var-set pending-owner (some new-owner)))))
 
-(define-public (claim-ownership)
-  (let ((pending (unwrap! (var-get pending-owner) ERR_NO_PENDING_OWNER)))
-    (asserts! (is-eq tx-sender pending) ERR_NOT_PENDING_OWNER)
-    (var-set contract-owner pending)
-    (var-set pending-owner none)
-    (ok true)))
+;; @desc Accept ownership of the contract.
+;; @returns (response bool uint) - Ok(true) if successful, Err(ERR_UNAUTHORIZED) otherwise.
+(define-public (accept-ownership)
+  (begin
+    (asserts! (is-some (var-get pending-owner)) (err ERR_UNAUTHORIZED))
+    (asserts! (is-eq tx-sender (unwrap-panic (var-get pending-owner))) (err ERR_UNAUTHORIZED))
+    (try! (contract-call? .rbac-contract set-role "contract-owner" tx-sender))
+    (ok (var-set pending-owner none))))

@@ -2,12 +2,16 @@
 
 ;; auto-compounder.clar
 
+(use-trait yield-optimizer-trait .all-traits.yield-optimizer-trait)
+(use-trait metrics-trait .all-traits.metrics-trait)
+(use-trait rbac-trait .rbac-trait.rbac-trait)
+
 ;; This contract automatically compounds rewards for users.(define-constant ERR_UNAUTHORIZED (err u8000))
 (define-constant ERR_NOTHING_TO_COMPOUND (err u8001))
 (define-constant ERR_STRATEGY_ALREADY_EXISTS (err u8002))
 (define-constant ERR_STRATEGY_NOT_FOUND (err u8003))
 (define-constant ERR_CIRCUIT_OPEN (err u8004))
-(define-data-var contract-owner principal tx-sender)
+
 (define-data-var yield-optimizer (contract-of yield-optimizer-trait) (as-contract tx-sender))
 (define-data-var metrics-contract (contract-of metrics-trait) (as-contract tx-sender))
 (define-data-var compounding-fee-bps uint u10) 
@@ -64,6 +68,18 @@
       (ok compounded-amount))))
 
 ;; Remove duplicate conflicting definition of compound-all with traited token(define-read-only (get-position (user principal) (token principal))  (map-get? user-positions (tuple (user user) (token token))))
-(define-public (set-yield-optimizer-contract (optimizer (contract-of yield-optimizer-trait)))  (begin    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)    (var-set yield-optimizer optimizer)    (ok true)))
-(define-public (set-metrics-contract (metrics (contract-of metrics-trait)))  (begin    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)    (var-set metrics-contract metrics)    (ok true)))
+(define-public (set-yield-optimizer-contract (optimizer (contract-of yield-optimizer-trait)))
+  (begin
+    (asserts! (is-ok (contract-call? .rbac-contract has-role "contract-owner")) (err ERR_UNAUTHORIZED))
+    (var-set yield-optimizer optimizer)
+    (ok true)
+  )
+)
+(define-public (set-metrics-contract (metrics (contract-of metrics-trait)))
+  (begin
+    (asserts! (is-ok (contract-call? .rbac-contract has-role "contract-owner")) (err ERR_UNAUTHORIZED))
+    (var-set metrics-contract metrics)
+    (ok true)
+  )
+)
 (define-read-only (get-total-deployed)  (ok (var-get total-deposited)))

@@ -5,6 +5,7 @@
 ;; --- Traits ---
 (use-trait protocol-monitor-trait .all-traits.protocol-monitor-trait)
 (use-trait sip-009-nft-trait .all-traits.sip-009-nft-trait)
+(use-trait rbac-trait .rbac-trait.rbac-trait)
 
 ;; --- Errors ---
 (define-constant ERR_UNAUTHORIZED u100)
@@ -17,7 +18,7 @@
 (define-constant ERR_INVALID_URI u107)
 
 ;; --- Storage ---
-(define-data-var contract-owner principal tx-sender)
+
 (define-data-var last-token-id uint u0)
 (define-data-var transfers-enabled bool false)
 (define-map owners uint principal)
@@ -41,20 +42,13 @@
 ;; @desc Sets the contract owner.
 ;; @param new-owner The principal of the new contract owner.
 ;; @returns (ok true) if successful, (err ERR_UNAUTHORIZED) if called by a non-owner.
-(define-public (set-contract-owner (new-owner principal))
-  (begin
-    (asserts! (is-owner tx-sender) (err ERR_UNAUTHORIZED))
-    (asserts! (not (is-eq new-owner (as-contract tx-sender))) (err ERR_INVALID_RECIPIENT))
-    (var-set contract-owner new-owner)
-    (print {event: "contract-owner-set", sender: tx-sender, new-owner: new-owner, block-height: block-height})
-    (ok true)))
 
 ;; @desc Sets the principal of the staking contract.
 ;; @param contract-address The principal of the staking contract.
 ;; @returns (ok true) if successful, (err ERR_UNAUTHORIZED) if called by a non-owner.
 (define-public (set-staking-contract (contract-address principal))
   (begin
-    (asserts! (is-owner tx-sender) (err ERR_UNAUTHORIZED))
+    (asserts! (is-ok (contract-call? .rbac-contract has-role "contract-owner")) (err ERR_UNAUTHORIZED))
     (asserts! true (err ERR_INVALID_CONTRACT_PRINCIPAL))
     (var-set staking-contract (some contract-address))
     (print {event: "staking-contract-set", sender: tx-sender, contract-address: contract-address, block-height: block-height})
@@ -65,7 +59,7 @@
 ;; @returns (ok true) if successful, (err ERR_UNAUTHORIZED) if called by a non-owner.
 (define-public (set-protocol-monitor (monitor principal))
   (begin
-    (asserts! (is-owner tx-sender) (err ERR_UNAUTHORIZED))
+    (asserts! (is-ok (contract-call? .rbac-contract has-role "contract-owner")) (err ERR_UNAUTHORIZED))
     (asserts! true (err ERR_INVALID_CONTRACT_PRINCIPAL))
     (var-set protocol-monitor (some monitor))
     (print {event: "protocol-monitor-set", sender: tx-sender, monitor: monitor, block-height: block-height})

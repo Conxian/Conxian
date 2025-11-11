@@ -28,9 +28,9 @@ sys.path.insert(0, str(ROOT_DIR))
 
 # Now that the path is set, we can import build_graph
 try:
-    from build_graph import SystemGraph
+    from system_graph import SystemGraph, load_dime_config, DIME_CONFIG_FILE
 except ImportError:
-    print("Warning: 'build_graph' module not found. Graph-related features will be disabled.")
+    print("Warning: 'system_graph' module not found. Graph-related features will be disabled.")
     SystemGraph = None
 
 # Configuration
@@ -105,11 +105,13 @@ class ContractVerifier:
         self.do_autofix_impl_traits = autofix_impl_traits
 
         try:
-            from build_graph import SystemGraph
+            from system_graph import SystemGraph, load_dime_config, DIME_CONFIG_FILE
             # SystemGraph expects the repository root_dir; pass ROOT_DIR here.
             self.system_graph: Optional[SystemGraph] = SystemGraph(ROOT_DIR)
+            self.dim_config = load_dime_config()
+            self.contract_dim_mapping = self.dim_config.get("contract_dime_mapping", {})
         except ImportError:
-            print("Warning: 'build_graph' module not found. Graph-related features will be disabled.")
+            print("Warning: 'system_graph' module not found. Graph-related features will be disabled.")
             self.system_graph = None
 
         self._graph: Optional[Dict[str, Any]] = None
@@ -508,6 +510,15 @@ class ContractVerifier:
             more = "" if len(cycles) <= 5 else f" (+{len(cycles)-5} more)"
             self.warnings.append("Call graph cycles detected: " + " | ".join(pretty) + more)
 
+        # 5) Dim analysis
+        dim_contracts: Dict[str, List[str]] = {dim: [] for dim in self.dim_config.get("dimes", {}).keys()}
+        for node in graph.get("nodes", []):
+            if node.get("type") == "contract" and "dim" in node:
+                dim_contracts[node["dim"]].append(node["name"])
+
+        for dim, contracts in dim_contracts.items():
+            if contracts:
+                self.warnings.append(f"Contracts in {dim} dim: {', '.join(sorted(contracts))}")
 
         return True
 

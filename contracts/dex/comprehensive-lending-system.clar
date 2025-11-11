@@ -38,6 +38,12 @@
 (define-data-var por-contract (optional principal) none)
 (define-data-var enforce-por-borrow bool false)
 
+;; Monitoring and risk parameters
+(define-data-var monitoring-contract (optional principal) none)
+(define-data-var borrow-safety-buffer-bps uint u0)
+(define-data-var min-health-factor-precision uint u0)
+(define-data-var capacity-alert-threshold-bps uint u0)
+
 ;; --- Admin Setters ---
 (define-public (set-owner (new-owner principal))
   (begin
@@ -140,11 +146,9 @@
     (map-set supported-assets { asset: asset } { collateral-factor: collateral-factor, liquidation-threshold: liquidation-threshold, liquidation-bonus: liquidation-bonus })
     (let ((current (var-get supported-asset-list)))
       (asserts! (< (len current) u100) ERR_INSUFFICIENT_LIQUIDITY)
-      (var-set supported-asset-list (concat current (list asset)))
-      (ok true)
-    )
-  )
-)
+      (var-set supported-asset-list (unwrap-panic (as-max-len? (append current asset) u100)))
+      (ok true))
+    ))
 
 ;; Admin: remove an asset from supported list
 (define-public (remove-supported-asset (asset principal))
@@ -167,20 +171,19 @@
 
 ;; Helper: remove target asset from list
 (define-private (filter-assets (assets (list 100 principal)) (target principal))
-  (fold
-    (lambda (a acc)
-      (if (is-eq a target) acc (concat acc (list a)))
-    )
-    assets
-    (list))
-)
+  (let ((filtered-list (fold
+                          (lambda (a acc)
+                            (if (is-eq a target) acc (append acc a)))
+                          assets
+                          (list))))
+    (unwrap-panic (as-max-len? filtered-list u100))))
 
 ;; --- Private Helper Functions ---
-(define-private (check-is-owner) 
-  (ok (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)))
+(define-private (check-is-owner)
+  (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED))
 
-(define-private (check-not-paused) 
-  (ok (asserts! (not (var-get paused)) ERR_PAUSED)))
+(define-private (check-not-paused)
+  (asserts! (not (var-get paused)) ERR_PAUSED))
 
 (define-private (get-asset-price-safe (asset principal))
   ;; Fetch price from configured oracle; fallback to dex-oracle; return 0 on error
@@ -229,9 +232,9 @@
         asset-info
           (let ((balance (default-to u0 (get balance (map-get? user-supply-balances { user: user, asset: asset }))))
                 (price (get-asset-price-safe asset)))
-            (+ total-value (/ (* balance (get collateral-factor asset-info) price) (* PRECISION PRECISION))))
-        total-value)
-      total-value)))
+              (+ total-value (/ (* balance (get collateral-factor asset-info) price) PRECISION)))
+          total-value)
+        total-value)))
 
 (define-read-only (get-total-borrow-value-in-usd-safe (user principal))
   (let ((assets (var-get supported-asset-list)))
@@ -297,7 +300,7 @@
         asset-info
           (let ((balance (default-to u0 (get balance (map-get? user-supply-balances { user: user, asset: asset }))))
                 (price (get-asset-price-safe asset))
-                (collateral-value (/ (* balance (get collateral-factor asset-info) price) (* PRECISION PRECISION))))
+                (collateral-value (/ (* balance (get collateral-factor asset-info) price) PRECISION))
             { 
               total-collateral-value: (+ (get total-collateral-value accumulator) collateral-value),
               total-threshold-value: (+ (get total-threshold-value accumulator) 

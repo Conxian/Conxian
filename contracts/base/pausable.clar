@@ -1,5 +1,6 @@
-;; File: contracts/base/pausable.clar
-;; Base contract for pausable functionality
+;; pausable
+;; This contract provides a mechanism to pause and unpause contract functionality, typically used for emergency stops or upgrades.
+;; Only the contract owner can pause or unpause the contract.
 
 (use-trait pausable-trait .all-traits.pausable-trait)
 (use-trait ownable-trait .all-traits.ownable-trait)
@@ -10,6 +11,7 @@
 (define-constant ERR_ALREADY_UNPAUSED (err u1002))
 (define-constant ERR_PAUSED (err u1003))
 
+(use-trait rbac-trait .rbac-trait.rbac-trait)
 ;; State variable to track pause status
 (define-data-var paused bool false)
 
@@ -25,12 +27,7 @@
 ;; Pause the contract (only callable by owner)
 (define-public (pause)
   (begin
-    ;; Verify caller is the owner
-    (let ((owner (contract-call? .ownable get-owner)))
-      (asserts! (is-ok owner) ERR_NOT_OWNER)
-      (asserts! (is-eq tx-sender (unwrap-panic owner)) ERR_NOT_OWNER)
-    )
-    
+    (asserts! (is-ok (contract-call? .rbac-contract has-role "contract-owner")) (err ERR_NOT_OWNER))
     ;; Ensure contract is not already paused
     (asserts! (not (var-get paused)) ERR_ALREADY_PAUSED)
     
@@ -43,12 +40,7 @@
 ;; Unpause the contract (only callable by owner)
 (define-public (unpause)
   (begin
-    ;; Verify caller is the owner
-    (let ((owner (contract-call? .ownable get-owner)))
-      (asserts! (is-ok owner) ERR_NOT_OWNER)
-      (asserts! (is-eq tx-sender (unwrap-panic owner)) ERR_NOT_OWNER)
-    )
-    
+    (asserts! (is-ok (contract-call? .rbac-contract has-role "contract-owner")) (err ERR_NOT_OWNER))
     ;; Ensure contract is currently paused
     (asserts! (var-get paused) ERR_ALREADY_UNPAUSED)
     

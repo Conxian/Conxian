@@ -1,0 +1,13 @@
+{
+    "dimes": {
+        "DeFi": [],
+        "CeFi": [],
+        "Enterprise": [],
+        "Automated-System": []
+    },
+    "contract_dime_mapping": {
+        "cxd-price-initializer": "DeFi",
+        "dual-stacking-orchestrator": "DeFi",
+        "dimensional-oracle": "DeFi"
+    }
+}
