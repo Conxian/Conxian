@@ -19,6 +19,7 @@
 (define-constant TASK_FEE_DISTRIBUTION u5)
 (define-constant TASK_BOND_COUPON_PROCESS u6)
 (define-constant TASK_METRICS_UPDATE u7)
+(define-constant TASK_AUTOMATION_MANAGER u8) ;; Added
 
 ;; ===== Data Variables =====
 
@@ -52,6 +53,7 @@
 (define-data-var yield-optimizer-contract (optional principal) none)
 (define-data-var revenue-distributor-contract (optional principal) none)
 (define-data-var bond-contract (optional principal) none)
+(define-data-var automation-manager-contract (optional principal) none) ;; Added
 
 ;; Performance metrics
 (define-data-var total-tasks-executed uint u0)
@@ -131,6 +133,12 @@
     (var-set bond-contract (some contract))
     (ok true)))
 
+(define-public (set-automation-manager-contract (contract principal))
+  (begin
+    (try! (check-is-owner))
+    (var-set automation-manager-contract (some contract))
+    (ok true)))
+
 (define-public (configure-task (task-id uint) (enabled bool) (interval uint) (priority uint) (gas-limit uint))
   (begin
     (try! (check-is-owner))
@@ -163,9 +171,10 @@
       (execute-task-if-ready TASK_FEE_DISTRIBUTION)
       (execute-task-if-ready TASK_BOND_COUPON_PROCESS)
       (execute-task-if-ready TASK_METRICS_UPDATE)
+      (execute-task-if-ready TASK_AUTOMATION_MANAGER) ;; Added
     )))
       (ok {
-        tasks-attempted: u7,
+        tasks-attempted: u8,
         block: block-height,
         keeper: tx-sender
       }))))
@@ -197,7 +206,9 @@
                             (execute-bond-processing)
                             (if (is-eq task-id TASK_METRICS_UPDATE)
                                 (execute-metrics-update)
-                                (err ERR_INVALID_TASK))))))))))
+                                (if (is-eq task-id TASK_AUTOMATION_MANAGER) ;; Added
+                                    (execute-automation-manager)
+                                    (err ERR_INVALID_TASK))))))))))
     
     ;; Update task config with last run time
     (map-set task-config task-id (merge config {last-run: block-height}))
@@ -282,6 +293,15 @@
   ;; Update system-wide performance metrics
   (ok true))
 
+;; Task 8: Automation Manager
+(define-private (execute-automation-manager)
+  (match (var-get automation-manager-contract)
+    contract-principal
+    ;; In production, call actual automation manager function
+    ;; (contract-call? contract-principal execute-automation)
+    (ok true)
+    ERR_TASK_FAILED))
+
 ;; ===== Read-Only Functions =====
 
 (define-read-only (get-keeper-status)
@@ -321,10 +341,21 @@
     liquidation: (var-get liquidation-contract),
     yield-optimizer: (var-get yield-optimizer-contract),
     revenue-distributor: (var-get revenue-distributor-contract),
-    bond: (var-get bond-contract)
+    bond: (var-get bond-contract),
+    automation-manager: (var-get automation-manager-contract) ;; Added
   })
 
 ;; Check if keeper should execute
 (define-read-only (should-execute-now)
   (and (var-get keeper-enabled)
        (>= (- block-height (var-get last-execution-block)) (var-get execution-interval))))
+
+(define-data-var tasks (list 10 {name: (string-ascii 32), contract: principal, enabled: bool}) 
+  (
+    {name: "interest-accrual", contract: .interest-rate-model, enabled: true},
+    {name: "oracle-update", contract: .oracle-aggregator-v2, enabled: true},
+    {name: "liquidation", contract: .liquidation-engine, enabled: true},
+    {name: "fee-distribution", contract: .fee-distributor, enabled: true},
+    {name: "automation-manager", contract: .automation-manager, enabled: true}  
+  )
+)
