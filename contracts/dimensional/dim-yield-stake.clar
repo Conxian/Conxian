@@ -4,17 +4,18 @@
 ;; - Manage staking and lockups for different dimensions.
 ;; - Calculate and distribute yield based on dimension-specific metrics.
 
-(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
+(use-trait sip-010-ft-trait .sip-010-trait)
 
 ;; ===== Constants =====
-(define-constant ERR_UNAUTHORIZED (err u101))
-(define-constant ERR_LOCKUP_NOT_EXPIRED (err u102))
-(define-constant ERR_NO_STAKE_FOUND (err u103))
-(define-constant ERR_INVALID_AMOUNT (err u104))
-(define-constant ERR_DIMENSION_NOT_CONFIGURED (err u105))
-(define-constant ERR_METRIC_NOT_FOUND (err u106))
-(define-constant ERR_INVALID_LOCK_PERIOD (err u107))
-(define-constant ERR_TRANSFER_FAILED (err u108))
+;; Standardized Conxian error codes (800-range for dimensional modules)
+(define-constant ERR_UNAUTHORIZED u800)
+(define-constant ERR_LOCKUP_NOT_EXPIRED u813)
+(define-constant ERR_NO_STAKE_FOUND u814)
+(define-constant ERR_INVALID_AMOUNT u801)
+(define-constant ERR_DIMENSION_NOT_CONFIGURED u815)
+(define-constant ERR_METRIC_NOT_FOUND u816)
+(define-constant ERR_INVALID_LOCK_PERIOD u817)
+(define-constant ERR_TRANSFER_FAILED u818)
 
 (define-constant BLOCKS_PER_YEAR u52560)
 (define-constant PRECISION u10000)
@@ -72,7 +73,7 @@
 ;; ===== Owner Functions =====
 (define-public (set-contract-owner (new-owner principal))
   (begin
-    (asserts! (is-owner) ERR_UNAUTHORIZED)
+    (asserts! (is-owner) (err ERR_UNAUTHORIZED))
     (var-set contract-owner new-owner)
     (ok true)
   )
@@ -80,7 +81,7 @@
 
 (define-public (set-dim-metrics-contract (metrics-addr principal))
   (begin
-    (asserts! (is-owner) ERR_UNAUTHORIZED)
+    (asserts! (is-owner) (err ERR_UNAUTHORIZED))
     (var-set dim-metrics-contract metrics-addr)
     (ok true)
   )
@@ -88,7 +89,7 @@
 
 (define-public (set-token-contract (token-addr principal))
   (begin
-    (asserts! (is-owner) ERR_UNAUTHORIZED)
+    (asserts! (is-owner) (err ERR_UNAUTHORIZED))
     (var-set token-contract token-addr)
     (ok true)
   )
@@ -96,9 +97,9 @@
 
 (define-public (set-dimension-params (dim-id uint) (base-rate uint) (k uint))
   (begin
-    (asserts! (is-owner) ERR_UNAUTHORIZED)
-    (asserts! (<= base-rate u5000) ERR_INVALID_AMOUNT) ;; Max 50% base rate
-    (asserts! (<= k u10000) ERR_INVALID_AMOUNT) ;; Max 100% multiplier
+    (asserts! (is-owner) (err ERR_UNAUTHORIZED))
+    (asserts! (<= base-rate u5000) (err ERR_INVALID_AMOUNT)) ;; Max 50% base rate
+    (asserts! (<= k u10000) (err ERR_INVALID_AMOUNT)) ;; Max 100% multiplier
     (map-set dimension-params 
       {dim-id: dim-id} 
       {base-rate: base-rate, k: k, enabled: true}
@@ -109,9 +110,9 @@
 
 (define-public (toggle-dimension (dim-id uint) (enabled bool))
   (begin
-    (asserts! (is-owner) ERR_UNAUTHORIZED)
+    (asserts! (is-owner) (err ERR_UNAUTHORIZED))
     (let (
-      (params (unwrap! (map-get? dimension-params {dim-id: dim-id}) ERR_DIMENSION_NOT_CONFIGURED))
+      (params (unwrap! (map-get? dimension-params {dim-id: dim-id}) (err ERR_DIMENSION_NOT_CONFIGURED)))
     )
       (map-set dimension-params
         {dim-id: dim-id}
@@ -124,7 +125,7 @@
 
 (define-public (pause-contract (pause bool))
   (begin
-    (asserts! (is-owner) ERR_UNAUTHORIZED)
+    (asserts! (is-owner) (err ERR_UNAUTHORIZED))
     (var-set paused pause)
     (ok true)
   )
@@ -133,18 +134,18 @@
 ;; ===== Staking Functions =====
 (define-public (stake-dimension (dim-id uint) (amount uint) (lock-period uint) (token <sip-010-ft-trait>))
   (begin
-    (asserts! (is-not-paused) ERR_UNAUTHORIZED)
-    (asserts! (> amount u0) ERR_INVALID_AMOUNT)
-    (asserts! (and (>= lock-period MIN_LOCK_PERIOD) (<= lock-period MAX_LOCK_PERIOD)) ERR_INVALID_LOCK_PERIOD)
+    (asserts! (is-not-paused) (err ERR_UNAUTHORIZED))
+    (asserts! (> amount u0) (err ERR_INVALID_AMOUNT))
+    (asserts! (and (>= lock-period MIN_LOCK_PERIOD) (<= lock-period MAX_LOCK_PERIOD)) (err ERR_INVALID_LOCK_PERIOD))
     
     (let (
       (staker tx-sender)
-      (params (unwrap! (map-get? dimension-params {dim-id: dim-id}) ERR_DIMENSION_NOT_CONFIGURED))
+      (params (unwrap! (map-get? dimension-params {dim-id: dim-id}) (err ERR_DIMENSION_NOT_CONFIGURED)))
       (current-height block-height)
       (unlock-height (+ current-height lock-period))
       (existing-stake (map-get? stakes {staker: staker, dim-id: dim-id}))
     )
-      (asserts! (get enabled params) ERR_DIMENSION_NOT_CONFIGURED)
+      (asserts! (get enabled params) (err ERR_DIMENSION_NOT_CONFIGURED))
       
       ;; Transfer tokens to contract
       (try! (contract-call? token transfer amount staker (as-contract tx-sender) none))
@@ -195,11 +196,11 @@
 (define-public (claim-rewards (dim-id uint) (token <sip-010-ft-trait>))
   (let (
     (staker tx-sender)
-    (stake-info (unwrap! (map-get? stakes {staker: staker, dim-id: dim-id}) ERR_NO_STAKE_FOUND))
+    (stake-info (unwrap! (map-get? stakes {staker: staker, dim-id: dim-id}) (err ERR_NO_STAKE_FOUND)))
     (unlock-height (get unlock-height stake-info))
     (staked-amount (get amount stake-info))
   )
-    (asserts! (>= block-height unlock-height) ERR_LOCKUP_NOT_EXPIRED)
+    (asserts! (>= block-height unlock-height) (err ERR_LOCKUP_NOT_EXPIRED))
     
     ;; Calculate rewards
     (let (
@@ -213,7 +214,7 @@
       
       ;; Update dimension totals
       (let (
-        (totals (unwrap! (map-get? dimension-totals {dim-id: dim-id}) ERR_DIMENSION_NOT_CONFIGURED))
+        (totals (unwrap! (map-get? dimension-totals {dim-id: dim-id}) (err ERR_DIMENSION_NOT_CONFIGURED)))
       )
         (map-set dimension-totals
           {dim-id: dim-id}
@@ -232,7 +233,7 @@
 (define-public (claim-partial-rewards (dim-id uint) (token <sip-010-ft-trait>))
   (let (
     (staker tx-sender)
-    (stake-info (unwrap! (map-get? stakes {staker: staker, dim-id: dim-id}) ERR_NO_STAKE_FOUND))
+    (stake-info (unwrap! (map-get? stakes {staker: staker, dim-id: dim-id}) (err ERR_NO_STAKE_FOUND)))
     (current-height block-height)
   )
     ;; Calculate rewards since last claim
@@ -279,7 +280,7 @@
             )
               (ok reward)
             )
-          ERR_METRIC_NOT_FOUND)
+          (err ERR_METRIC_NOT_FOUND))
       (err ERR_DIMENSION_NOT_CONFIGURED)
     )
   )
@@ -302,7 +303,7 @@
   (match (map-get? stakes {staker: staker, dim-id: dim-id})
     stake-info
     (calculate-rewards-for-stake stake-info dim-id)
-    ERR_NO_STAKE_FOUND
+    (err ERR_NO_STAKE_FOUND)
   )
 )
 

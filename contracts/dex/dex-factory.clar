@@ -2,11 +2,12 @@
 ;; Pool creation and registration through dimensional registry
 ;; All pools registered as dimensional nodes for unified routing
 
-(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
-(use-trait factory-trait .all-traits.factory-trait)
-(use-trait access-control-trait .all-traits.access-control-trait)
-(use-trait circuit-breaker-trait .all-traits.circuit-breaker-trait)
-(use-trait dim-registry-trait .all-traits.dim-registry-trait)
+(use-trait sip-010-ft-trait .requirements.sip-010-trait-ft-standard.sip-010-trait-ft-standard)
+(use-trait factory-trait .traits.factory-trait.factory-trait)
+(use-trait access-control-trait .traits.access-control-trait.access-control-trait)
+(use-trait circuit-breaker-trait .traits.circuit-breaker-trait.circuit-breaker-trait)
+(use-trait dim-registry-trait .traits.dim-registry-trait.dim-registry-trait)
+(use-trait rbac-trait .decentralized-trait-registry.decentralized-trait-registry)
 
 ;; --- Dimensional Integration ---
 ;; @desc Stores the principal of the dimensional registry contract.
@@ -22,7 +23,7 @@
 (define-constant ERR_IMPLEMENTATION_NOT_FOUND (err u2006))
 (define-constant ERR_SWAP_FAILED (err u2007))
 (define-constant ERR_CIRCUIT_OPEN (err u5000))
-(use-trait rbac-trait .rbac-trait.rbac-trait)
+(use-trait rbac-trait .traits.rbac-trait.rbac-trait)
 
 ;; --- Data Variables ---
 ;; @desc Stores the principal of the access control contract.
@@ -38,13 +39,12 @@
 ;; @desc Maps a token pair to its corresponding pool principal.
 (define-map pools { token-a: principal, token-b: principal } principal)
 ;; @desc Stores detailed information about each pool, indexed by its principal.
-(define-map pool-info principal { token-a: principal, token-b: principal, fee-bps: uint, created-at: uint })
+(define-map pool-info principal { token-a: principal, token-b: principal, fee-bps: uint, created-at: uint, additional-params: (optional { tick-spacing: uint, initial-price: uint }) })
 ;; @desc Maps a pool type string to its implementation contract principal.
 (define-map pool-implementations (string-ascii 64) principal)
 ;; @desc Maps a pool principal to its associated pool type string.
 (define-map pool-types principal (string-ascii 64))
-;; @desc Stores a deterministic ordering index for token principals, managed by the owner.
-(define-map token-order principal uint)
+
 
 ;; @desc Stores metadata for each registered pool type.
 (define-map pool-type-info (string-ascii 64) {
@@ -65,17 +65,8 @@
 ;; @param token-b The principal of the second token.
 ;; @returns (response { token-a: principal, token-b: principal } uint) A response containing the normalized token pair or an error if tokens are identical.
 (define-private (normalize-token-pair (token-a principal) (token-b principal))
-  (if (is-eq token-a token-b)
-    (err ERR_INVALID_TOKENS)
-    (let ((order-a (default-to u0 (map-get? token-order token-a)))
-          (order-b (default-to u0 (map-get? token-order token-b))))
-      (if (< order-a order-b)
-        (ok { token-a: token-a, token-b: token-b })
-        (ok { token-a: token-b, token-b: token-a })
-      )
-    )
-  )
-)
+  (let ((ordered-pair (unwrap! (contract-call? .dimensional.dim-registry order-pair token-a token-b) (err ERR_INVALID_TOKENS))))
+    (ok (tuple (token-a (get base ordered-pair)) (token-b (get quote ordered-pair))))))
 
 ;; @desc Checks if the transaction sender is the contract owner.
 ;; @returns (response bool uint) A response indicating success or an unauthorized error.
@@ -118,9 +109,10 @@
 ;; @param token-b The trait of the second token in the pool.
 ;; @param pool-type The string identifier of the pool type to create. If none, uses default.
 ;; @param fee-bps The fee in basis points for the pool.
+;; @param additional-params An optional tuple containing additional parameters specific to the pool type (e.g., tick-spacing, initial-price for concentrated liquidity pools).
 ;; @returns (response principal uint) A response containing the principal of the newly created pool or an error.
 ;; @events (print { event: "pool-created", pool-address: pool-principal, token-a: (get token-a normalized-pair), token-b: (get token-b normalized-pair), pool-type: pool-type })
-(define-public (create-pool (token-a <sip-010-ft-trait>) (token-b <sip-010-ft-trait>) (pool-type (optional (string-ascii 64))) (fee-bps uint))
+(define-public (create-pool (token-a <sip-010-ft-trait>) (token-b <sip-010-ft-trait>) (pool-type (optional (string-ascii 64))) (fee-bps uint) (additional-params (optional { tick-spacing: uint, initial-price: uint }))))
   (begin
     (try! (check-pool-manager))
     (asserts! (not (try! (check-circuit-breaker))) ERR_CIRCUIT_OPEN)
@@ -138,7 +130,7 @@
         
         (asserts! (is-none (map-get? pools normalized-pair)) ERR_POOL_EXISTS)
 
-        (let ((pool-principal (unwrap! (contract-call? pool-impl create-pool (get token-a normalized-pair) (get token-b normalized-pair) fee-bps) (err ERR_SWAP_FAILED))))
+        (let ((pool-principal (unwrap! (contract-call? pool-impl create-pool (get token-a normalized-pair) (get token-b normalized-pair) fee-bps additional-params) (err ERR_SWAP_FAILED))))
 
           ;; Register pool component with dimensional registry (factory as caller)
           (let ((registry (var-get dimensional-registry)))
@@ -150,7 +142,8 @@
               token-a: (get token-a normalized-pair),
               token-b: (get token-b normalized-pair),
               fee-bps: fee-bps,
-              created-at: block-height
+              created-at: block-height,
+              additional-params: additional-params
             }
           )
           (map-set pool-types pool-principal selected-pool-type)
@@ -205,18 +198,7 @@
   )
 )
 
-;; @desc Sets the deterministic order index for a token principal.
-;; @param token The principal of the token.
-;; @param order The order index for the token.
-;; @returns (response bool uint) A response indicating success or an unauthorized error.
-(define-public (set-token-order (token principal) (order uint))
-  (begin
-    (try! (check-is-owner))
-    (map-set token-order token order)
-    (ok true)
-  )
-)
-
+// ... existing code ...
 ;; @desc Registers a pool implementation contract for a specific pool type.
 ;; @param pool-type The string identifier of the pool type.
 ;; @param implementation-contract The principal of the implementation contract for the pool type.
@@ -246,6 +228,111 @@
     })
     (ok true)
   )
+)
+
+;; @desc Registers a pool implementation contract for a specific pool type.
+;; @param pool-type The string identifier of the pool type.
+;; @param implementation-contract The principal of the implementation contract for the pool type.
+;; @returns (response bool uint) A response indicating success or an error if the pool type is invalid or unauthorized.
+(define-public (register-pool-implementation (pool-type (string-ascii 64)) (implementation-contract principal))
+  (begin
+    (try! (check-is-owner))
+    (asserts! (is-some (map-get? pool-type-info pool-type)) (err ERR_INVALID_POOL_TYPE))
+    (map-set pool-implementations pool-type implementation-contract)
+    (ok true)
+  )
+)
+
+;; @desc Sets the default pool type.
+;; @param new-default-pool-type The string identifier of the new default pool type.
+;; @returns (response bool uint) A response indicating success or an unauthorized error.
+(define-public (set-default-pool-type (new-default-pool-type (string-ascii 64)))
+  (begin
+    (try! (check-is-owner))
+    (try! (validate-pool-type new-default-pool-type))
+    (var-set default-pool-type new-default-pool-type)
+    (ok true)
+  )
+)
+
+;; @desc Retrieves the pool principal for a given token pair.
+;; @param token-a The principal of the first token in the pair.
+;; @param token-b The principal of the second token in the pair.
+;; @returns (response (optional principal) uint) An optional principal of the pool or an error.
+(define-read-only (get-pool (token-a principal) (token-b principal))
+  (let ((normalized-pair (unwrap! (normalize-token-pair token-a token-b) (err u0))))
+    (ok (map-get? pools normalized-pair))
+  )
+)
+
+;; @desc Retrieves the pool type for a given pool principal.
+;; @param pool-principal The principal of the pool.
+;; @returns (response (optional (string-ascii 64)) uint) An optional string identifier of the pool type or an error.
+(define-read-only (get-pool-type (pool-principal principal))
+  (ok (map-get? pool-types pool-principal))
+)
+
+;; @desc Retrieves the implementation contract for a given pool type.
+;; @param pool-type The string identifier of the pool type.
+;; @returns (response (optional principal) uint) An optional principal of the implementation contract or an error.
+(define-read-only (get-pool-implementation (pool-type (string-ascii 64)))
+  (ok (map-get? pool-implementations pool-type))
+)
+
+;; @desc Retrieves information about a specific pool.
+;; @param pool-principal The principal of the pool.
+;; @returns (response (optional { token-a: principal, token-b: principal, fee-bps: uint, created-at: uint, additional-params: (optional { tick-spacing: uint, initial-price: uint }) }) uint) An optional tuple of pool information or an error.
+(define-read-only (get-pool-info (pool-principal principal))
+  (ok (map-get? pool-info pool-principal))
+)
+
+;; @desc Retrieves the total number of pools created.
+;; @returns (response uint uint) The total number of pools or an error.
+(define-read-only (get-pool-count)
+  (ok (var-get pool-count))
+)
+
+;; @desc Retrieves the default pool type.
+;; @returns (response (string-ascii 64) uint) The default pool type or an error.
+(define-read-only (get-default-pool-type)
+  (ok (var-get default-pool-type))
+)
+
+;; @desc Retrieves all registered pool types and their metadata.
+;; @returns (response (list 10 { name: (string-ascii 32), description: (string-ascii 128), is-active: bool, pool-type: (string-ascii 64) }) uint) A list of all registered pool types or an error.
+(define-read-only (get-all-pool-types)
+  (ok (map-to-list pool-type-info))
+)
+
+;; @desc Retrieves all created pools with their basic information.
+;; @returns (response (list 10 { pool-principal: principal, token-a: principal, token-b: principal, pool-type: (string-ascii 64) }) uint) A list of all created pools or an error.
+(define-read-only (get-all-pools)
+  (ok (map-to-list pools))
+)
+
+;; @desc Retrieves the access control contract principal.
+;; @returns (response principal uint) The access control contract principal or an error.
+(define-read-only (get-access-control-contract)
+  (ok (var-get access-control-contract))
+)
+
+;; @desc Retrieves the circuit breaker contract principal.
+;; @returns (response principal uint) The circuit breaker contract principal or an error.
+(define-read-only (get-circuit-breaker)
+  (ok (var-get circuit-breaker))
+)
+
+;; @desc Retrieves the dimensional registry contract principal.
+;; @returns (response principal uint) The dimensional registry contract principal or an error.
+(define-read-only (get-dimensional-registry)
+  (ok (var-get dimensional-registry))
+)
+
+;; @desc Retrieves the token order for a given token principal.
+;; @param token The principal of the token.
+;; @returns (response (optional uint) uint) An optional order index for the token or an error.
+(define-read-only (get-token-order (token principal))
+  (ok (map-get? token-order token))
 )
 
 ;; @desc Sets the active status of a registered pool type.
@@ -331,37 +418,45 @@
 ;; @desc Retrieves the information for a given pool principal.
 ;; @param pool The principal of the pool.
 ;; @returns (response (optional { token-a: principal, token-b: principal, fee-bps: uint, created-at: uint }) uint) An optional map of pool information or an error.
+;; @desc Retrieves detailed information for a given pool principal.
+;; @param pool The principal of the pool contract.
+;; @returns (response (optional {token-a: principal, token-b: principal, pool-type: (string-ascii 64), fee-bps: uint}) (err u1440)) An optional map of pool information, or an error.
+;; @error u1440 If the pool information is not found.
 (define-read-only (get-pool-info (pool principal))
-  (map-get? pool-info pool)
-)
-
+  (ok (map-get? pool-info pool))
+);; @param pool The principal of the pool.
+;; @returns (response (optional (string-ascii 64)) uint) An optional string identifier of the pool type or an error.
 ;; @desc Retrieves the pool type for a given pool principal.
 ;; @param pool The principal of the pool.
-;; @returns (response (optional (string-ascii 64)) uint) An optional string identifier of the pool type or an error.
+;; @returns (response (optional (string-ascii 64)) (err u1441)) An optional string identifier of the pool type, or an error.
+;; @error u1441 If the pool type is not found.
 (define-read-only (get-pool-type (pool principal))
-  (map-get? pool-types pool)
-)
-
-;; @desc Retrieves the pool type information.
-;; @param pool-type The string identifier of the pool type.
+  (ok (map-get? pool-types pool))
+);; @param pool-type The string identifier of the pool type.
 ;; @returns (response (optional { name: (string-ascii 32), description: (string-ascii 128), is-active: bool }) uint) An optional map of pool type metadata or an error.
+;; @desc Retrieves detailed information for a given pool type.
+;; @param pool-type The string identifier of the pool type.
+;; @returns (response (optional { name: (string-ascii 32), description: (string-ascii 128), is-active: bool }) (err u1442)) An optional map of pool type metadata, or an error.
+;; @error u1442 If the pool type information is not found.
 (define-read-only (get-pool-type-info (pool-type (string-ascii 64)))
   (ok (map-get? pool-type-info pool-type))
-)
-
+);; @param pool-type The string identifier of the pool type.
+;; @returns (response (optional principal) uint) An optional principal of the implementation contract or an error.
 ;; @desc Retrieves the implementation contract for a pool type.
 ;; @param pool-type The string identifier of the pool type.
-;; @returns (response (optional principal) uint) An optional principal of the implementation contract or an error.
+;; @returns (response (optional principal) (err u1443)) An optional principal of the implementation contract, or an error.
+;; @error u1443 If the implementation contract is not found.
 (define-read-only (get-pool-implementation-contract (pool-type (string-ascii 64)))
-  (map-get? pool-implementations pool-type)
+  (ok (map-get? pool-implementations pool-type))
 )
-
 ;; @desc Retrieves the total count of pools created by the factory.
 ;; @returns (response uint uint) A response containing the total pool count.
+;; @desc Retrieves the total count of pools created by the factory.
+;; @returns (response uint (err u1444)) A response containing the total pool count.
+;; @error u1444 If an unexpected error occurs.
 (define-read-only (get-pool-count)
   (ok (var-get pool-count))
 )
-
 ;; @desc Retrieves the principal of the contract owner.
 ;; @returns (response principal uint) A response containing the contract owner's principal.
 (define-read-only (get-owner)
@@ -373,6 +468,61 @@
 (define-read-only (get-default-pool-type)
   (var-get default-pool-type)
 )
+
+
+
+
+
+;; @desc Initializes and registers the weighted pool type and its implementation.
+;; @param pool-contract The principal of the weighted pool contract.
+;; @returns (response bool uint) A response indicating success or an error if unauthorized.
+(define-public (initialize-weighted-pool (pool-contract principal))
+  (begin
+    (try! (check-is-owner))
+    (try! (register-pool-type POOL_TYPE_WEIGHTED "Weighted Pool" "Pools with custom token weights for flexible liquidity provision" true))
+    (try! (register-pool-implementation POOL_TYPE_WEIGHTED pool-contract))
+    (ok true)
+  )
+)
+
+;; @desc Initializes and registers the liquidity bootstrap pool type and its implementation.
+;; @param pool-contract The principal of the liquidity bootstrap pool contract.
+;; @returns (response bool uint) A response indicating success or an error if unauthorized.
+(define-public (initialize-liquidity-bootstrap-pool (pool-contract principal))
+  (begin
+    (try! (check-is-owner))
+    (try! (register-pool-type POOL_TYPE_LIQUIDITY_BOOTSTRAP "Liquidity Bootstrap Pool" "Pools designed for initial token offerings and liquidity bootstrapping" true))
+    (try! (register-pool-implementation POOL_TYPE_LIQUIDITY_BOOTSTRAP pool-contract))
+    (ok true)
+  )
+)
+
+
+;; @desc Initializes and registers the stable swap pool type and its implementation.
+;; @param pool-contract The principal of the stable swap pool contract.
+;; @returns (response bool uint) A response indicating success or an error if unauthorized.
+(define-public (initialize-stable-swap-pool (pool-contract principal))
+  (begin
+    (try! (check-is-owner))
+    (try! (register-pool-type POOL_TYPE_STABLE_SWAP "Stable Swap Pool" "Pools optimized for stablecoin swaps with minimal slippage" true))
+    (try! (register-pool-implementation POOL_TYPE_STABLE_SWAP pool-contract))
+    (ok true)
+  )
+)
+
+
+;; @desc Initializes and registers the constant product pool type and its implementation.
+;; @param pool-contract The principal of the constant product pool contract.
+;; @returns (response bool uint) A response indicating success or an error if unauthorized.
+(define-public (initialize-constant-product-pool (pool-contract principal))
+  (begin
+    (try! (check-is-owner))
+    (try! (register-pool-type POOL_TYPE_CONSTANT_PRODUCT "Constant Product Pool" "Pools using the x*y=k constant product formula" true))
+    (try! (register-pool-implementation POOL_TYPE_CONSTANT_PRODUCT pool-contract))
+    (ok true)
+  )
+)
+
 
 ;; @desc Initializes and registers the concentrated liquidity pool type and its implementation.
 ;; @param pool-contract The principal of the concentrated liquidity pool contract.
@@ -386,8 +536,12 @@
   )
 )
 
+
 ;; @desc Retrieves a list of all registered pool types.
 ;; @returns (response (list (string-ascii 64)) uint) A response containing a list of all registered pool type strings.
+;; @desc Retrieves a list of all registered pool types.
+;; @returns (response (list (string-ascii 64)) (err u1450)) A list of all pool types, or an error.
+;; @error u1450 If an unexpected error occurs while retrieving pool types.
 (define-read-only (get-all-pool-types)
   (ok (map-keys pool-type-info))
 )
@@ -395,11 +549,15 @@
 ;; @desc Retrieves a list of all pools of a specific type.
 ;; @param pool-type The string identifier of the pool type.
 ;; @returns (response (list principal) uint) A response containing a list of pool principals of the specified type.
+;; @desc Retrieves a list of pools filtered by their type.
+;; @param pool-type The string identifier of the pool type.
+;; @returns (response (list 100 principal) (err u1445)) A list of pool principals of the specified type, or an error.
+;; @error u1445 If an unexpected error occurs during the fold operation.
 (define-read-only (get-pools-by-type (pool-type (string-ascii 64)))
   (ok (fold
         (fun (key value acc)
           (if (is-eq value pool-type)
-            (unwrap-panic (as-max-len? (append acc key) u1000))
+            (cons key acc)
             acc
           )
         )
@@ -411,30 +569,32 @@
 ;; @desc Retrieves the total number of pools for a given pool type.
 ;; @param pool-type The string identifier of the pool type.
 ;; @returns (response uint uint) A response containing the count of pools for the specified type.
+;; @desc Retrieves the count of pools for a specific pool type.
+;; @param pool-type The string identifier of the pool type.
+;; @returns (response uint (err u1447)) The count of pools of the specified type, or an error.
+;; @error u1447 If an unexpected error occurs during the count.
 (define-read-only (get-pool-count-by-type (pool-type (string-ascii 64)))
-  (ok (len (get-pools-by-type pool-type)))
+  (ok (len (unwrap-panic (get-pools-by-type pool-type))))
 )
-
 ;; @desc Retrieves the total value locked (TVL) for a specific pool.
-;; @param pool The principal of the pool.
-;; @returns (response uint uint) A response containing the TVL of the pool or an error.
+;; @param pool The principal of the pool contract.
+;; @returns (response uint (err u1446)) The TVL of the pool, or an error.
+;; @error u1446 If the pool's TVL cannot be retrieved.
 (define-read-only (get-pool-tvl (pool principal))
-  (let ((pool-data (map-get? pool-info pool)))
-    (asserts! (is-some pool-data) (err ERR_POOL_NOT_FOUND))
-    ;; This is a placeholder. Actual TVL calculation would involve calling the pool contract
-    ;; to get token balances and their USD values via an oracle.
-    (ok u0)
-  )
+  (contract-call? <pool-trait>pool get-total-supply)
 )
-
 ;; @desc Retrieves the total value locked (TVL) for all pools of a specific type.
 ;; @param pool-type The string identifier of the pool type.
 ;; @returns (response uint uint) A response containing the total TVL for the specified pool type or an error.
+;; @desc Retrieves the total value locked (TVL) for a specific pool type.
+;; @param pool-type (string-ascii 64) The type of the pool.
+;; @returns (response uint (err u1449)) The total TVL for the given pool type, or an error.
+;; @error u1449 If an unexpected error occurs during TVL calculation for the pool type.
 (define-read-only (get-total-tvl-by-pool-type (pool-type (string-ascii 64)))
   (let ((pools-of-type (unwrap-panic (get-pools-by-type pool-type))))
     (fold
       (fun (pool-principal acc)
-        (+ acc (unwrap-panic (get-pool-tvl pool-principal)))
+        (unwrap-panic (+ acc (unwrap-panic (get-pool-tvl pool-principal))))
       )
       pools-of-type
       u0
@@ -442,13 +602,14 @@
   )
 )
 
-;; @desc Retrieves the total value locked (TVL) across all pools.
-;; @returns (response uint uint) A response containing the total TVL across all pools.
+;; @desc Retrieves the total value locked (TVL) across all pools in the factory.
+;; @returns (response uint (err u1448)) The total TVL, or an error.
+;; @error u1448 If an unexpected error occurs during TVL calculation.
 (define-read-only (get-total-tvl)
   (let ((all-pool-types (unwrap-panic (get-all-pool-types))))
     (fold
       (fun (pool-type acc)
-        (+ acc (unwrap-panic (get-total-tvl-by-pool-type pool-type)))
+        (unwrap-panic (+ acc (unwrap-panic (get-total-tvl-by-pool-type pool-type))))
       )
       all-pool-types
       u0

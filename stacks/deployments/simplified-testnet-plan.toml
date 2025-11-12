@@ -7,66 +7,55 @@ stacks-node = "https://stacks-node-api.testnet.stacks.co"
 [[plan.batches]]
 id = 0
 
-  [[plan.batches.transactions]]
-  contract-publish = {
-    contract-name = "all-traits",
-    expected-sender = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ",
-    cost = 500000,
-    path = "contracts/traits/all-traits.clar",
-    anchor-block-only = true,
-    clarity-version = 3,
-    epoch = "3.0"
-  }
-
 [[plan.batches]]
 id = 1
 
-  [[plan.batches.transactions]]
-  contract-publish = {
+[[plan.batches.transactions]]
+contract-publish = {
     contract-name = "cxd-token",
-    expected-sender = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ",
-    cost = 1000000,
-    path = "contracts/tokens/cxd-token.clar",
-    anchor-block-only = true,
-    clarity-version = 3,
-    epoch = "3.0"
+expected-sender = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ",
+cost = 1000000,
+path = "contracts/tokens/cxd-token.clar",
+anchor-block-only = true,
+clarity-version = 3,
   }
 
+epoch = "3.0"
 [[plan.batches]]
 id = 2
 
-  [[plan.batches.transactions]]
-  contract-publish = {
+[[plan.batches.transactions]]
+contract-publish = {
     contract-name = "governance-token",
-    expected-sender = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ",
-    cost = 1000000,
-    path = "contracts/governance/governance-token.clar",
-    anchor-block-only = true,
-    clarity-version = 3,
-    epoch = "3.0"
+expected-sender = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ",
+cost = 1000000,
+path = "contracts/governance/governance-token.clar",
+anchor-block-only = true,
+clarity-version = 3,
   }
 
+epoch = "3.0"
 [[plan.batches]]
 id = 3
 
-  [[plan.batches.transactions]]
-  contract-publish = {
+[[plan.batches.transactions]]
+contract-publish = {
     contract-name = "role-nft",
-    expected-sender = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ",
-    cost = 500000,
-    path = "contracts/security/role-nft.clar",
-    anchor-block-only = true,
-    clarity-version = 3,
-    epoch = "3.0"
+expected-sender = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ",
+cost = 500000,
+path = "contracts/security/role-nft.clar",
+anchor-block-only = true,
+clarity-version = 3,
   }
 
-  [[plan.batches.transactions]]
-  contract-publish = {
+epoch = "3.0"
+[[plan.batches.transactions]]
+contract-publish = {
     contract-name = "role-manager",
-    expected-sender = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ",
-    cost = 500000,
-    path = "contracts/security/role-manager.clar",
-    anchor-block-only = true,
-    clarity-version = 3,
-    epoch = "3.0"
+expected-sender = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ",
+cost = 500000,
+path = "contracts/security/role-manager.clar",
+anchor-block-only = true,
+clarity-version = 3,
   }
+epoch = "3.0"

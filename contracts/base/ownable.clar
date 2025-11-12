@@ -11,7 +11,7 @@
 (define-constant ERR_NOT_PENDING_OWNER (err u1007))
 
 ;; State
-(use-trait rbac-trait .rbac-trait.rbac-trait)
+(use-trait rbac-trait .decentralized-trait-registry.decentralized-trait-registry)
 
 (define-data-var pending-owner (optional principal) none)
 

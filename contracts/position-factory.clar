@@ -2,9 +2,9 @@
 ;; Factory contract for creating and managing position NFTs.
 
 ;; SIP-010: Fungible Token Standard
-(use-trait ft-trait .all-traits.sip-010-ft-trait)
+(use-trait ft-trait .sip-010-trait)
 ;; SIP-011: Non-Fungible Token Standard
-(use-trait nft-trait .all-traits.sip-009-nft-trait)
+(use-trait nft-trait .sip-009-nft-trait)
 
 ;; Constants
 ;; Error codes

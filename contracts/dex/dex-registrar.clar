@@ -2,7 +2,7 @@
 ;; This contract is responsible for registering the DEX components
 ;; with the dimensional registry.
 
-(use-trait dim-registry-trait .all-traits.dim-registry-trait)
+(use-trait dim-registry-trait .traits.dim-registry-trait.dim-registry-trait)
 
 (define-constant ERR_UNAUTHORIZED (err u101))
 (define-constant DEX_ROUTER_WEIGHT u100)
@@ -25,4 +25,4 @@
     (try! (contract-call? registry register-component .dex-factory-v2 DEX_FACTORY_WEIGHT))
     (ok true)
   )
-)
+)

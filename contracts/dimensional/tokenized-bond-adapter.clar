@@ -1,11 +1,11 @@
 (use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
+(use-trait sip-000-governance-trait .all-traits.sip-000-governance-trait)
 ;; tokenized-bond-adapter.clar
 ;; Integration adapter for tokenized bonds to connect with enhanced tokenomics system
 ;; Routes bond proceeds and coupon payments through revenue distribution system
 
 
 ;; --- Constants ---
-(define-constant CONTRACT_OWNER tx-sender)
 (define-constant PRECISION u100000000)
 
 ;; --- Errors ---
@@ -14,9 +14,10 @@
 (define-constant ERR_BOND_NOT_FOUND u852)
 (define-constant ERR_SYSTEM_PAUSED u853)
 (define-constant ERR_CONTRACT_NOT_SET u854)
+(define-constant ERR_GOVERNANCE_CALL u855)
 
 ;; --- Storage ---
-(define-data-var contract-owner principal CONTRACT_OWNER)
+(define-data-var governance-contract (optional principal) none)
 (define-data-var revenue-distributor (optional principal) none)
 (define-data-var token-coordinator (optional principal) none)
 (define-data-var protocol-monitor (optional principal) none)
@@ -40,10 +41,14 @@
 (define-data-var total-distributed-bond-revenue uint u0)
 
 ;; --- Admin Functions ---
-(define-public (set-contract-owner (new-owner principal))
+
+;; @desc Sets the governance contract principal.
+;; @param new-governance-contract The principal of the new governance contract.
+;; @returns A response tuple with ok true if successful, or an error code.
+(define-public (set-governance-contract (new-governance-contract principal))
   (begin
-    (asserts! (is-eq tx-sender (var-get contract-owner)) (err ERR_UNAUTHORIZED))
-    (var-set contract-owner new-owner)
+    (asserts! (is-eq tx-sender (unwrap! (var-get governance-contract) (err ERR_GOVERNANCE_CALL))) (err ERR_UNAUTHORIZED))
+    (var-set governance-contract (some new-governance-contract))
     (ok true)))
 
 (define-public (configure-system-contracts
@@ -51,7 +56,7 @@
     (coordinator principal)
     (monitor principal))
   (begin
-    (asserts! (is-eq tx-sender (var-get contract-owner)) (err ERR_UNAUTHORIZED))
+    (asserts! (is-eq tx-sender (unwrap! (var-get governance-contract) (err ERR_GOVERNANCE_CALL))) (err ERR_UNAUTHORIZED))
     (var-set revenue-distributor (some revenue-dist))
     (var-set token-coordinator (some coordinator))
     (var-set protocol-monitor (some monitor))
@@ -61,7 +66,7 @@
     (bond-proceeds-share uint)
     (coupon-share uint))
   (begin
-    (asserts! (is-eq tx-sender (var-get contract-owner)) (err ERR_UNAUTHORIZED))
+    (asserts! (is-eq tx-sender (unwrap! (var-get governance-contract) (err ERR_GOVERNANCE_CALL))) (err ERR_UNAUTHORIZED))
     (asserts! (<= bond-proceeds-share u5000) (err ERR_INVALID_AMOUNT)) ;; Max 50%
     (asserts! (<= coupon-share u5000) (err ERR_INVALID_AMOUNT)) ;; Max 50%
     (var-set bond-revenue-share bond-proceeds-share)
@@ -70,7 +75,7 @@
 
 (define-public (register-bond (bond-contract principal))
   (begin
-    (asserts! (is-eq tx-sender (var-get contract-owner)) (err ERR_UNAUTHORIZED))
+    (asserts! (is-eq tx-sender (unwrap! (var-get governance-contract) (err ERR_GOVERNANCE_CALL))) (err ERR_UNAUTHORIZED))
     (map-set registered-bonds bond-contract true)
     (map-set bond-revenue-stats bond-contract 
       { total-proceeds: u0, total-coupons: u0, distributed-to-holders: u0, last-payment: u0 })
@@ -285,13 +290,13 @@
 ;; Emergency functions
 (define-public (pause-bond-integration)
   (begin
-    (asserts! (is-eq tx-sender (var-get contract-owner)) (err ERR_UNAUTHORIZED))
+    (asserts! (is-eq tx-sender (unwrap! (var-get governance-contract) (err ERR_GOVERNANCE_CALL))) (err ERR_UNAUTHORIZED))
     ;; Implementation would disable bond revenue routing
     (ok true)))
 
 (define-public (emergency-withdraw-bond-funds (bond-contract principal) (amount uint) (token <sip-010-ft-trait>))
   (begin
-    (asserts! (is-eq tx-sender (var-get contract-owner)) (err ERR_UNAUTHORIZED))
+    (asserts! (is-eq tx-sender (unwrap! (var-get governance-contract) (err ERR_GOVERNANCE_CALL))) (err ERR_UNAUTHORIZED))
     ;; Emergency withdrawal function
     (try! (as-contract (contract-call? token transfer amount (as-contract tx-sender) tx-sender none)))
     (ok amount)))

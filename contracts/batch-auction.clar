@@ -1,6 +1,6 @@
 ;; batch-auction.clar
 ;; Implements a batch auction mechanism for fair execution
-(use-trait batch-auction-trait .all-traits.batch-auction-trait)
+(use-trait batch-auction-trait .batch-auction-trait)
 
 
 ;; ===== Constants =====

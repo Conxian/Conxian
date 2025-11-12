@@ -2,6 +2,8 @@
 
 ;; Implements MEV protection mechanisms
 
+(use-trait rbac-trait .decentralized-trait-registry.decentralized-trait-registry)
+
 ;; ===== Constants =====
 (define-constant ERR_UNAUTHORIZED (err u100))
 (define-constant ERR_INVALID_COMMITMENT (err u101))

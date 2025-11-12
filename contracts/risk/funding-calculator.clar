@@ -219,24 +219,34 @@
   )
 )
 
+;; @desc Returns the absolute value of an integer.
+;; @param x (int) The integer.
+;; @returns (uint) The absolute value.
+(define-private (abs-int (x int))
+  (if (< x i0)
+    (- u0 x) ;; Negate the integer to get its absolute value
+    (to-uint x)
+  )
+)
+
 (define-private (calculate-funding-rate
     (premium int)
     (oi-long uint)
     (oi-short uint)
   )
   (let (
-    (oi-diff (abs (- oi-long oi-short)))
+    (oi-diff (abs-int (- (to-int oi-long) (to-int oi-short)))) ;; Use abs-int and convert to int for subtraction
     (oi-total (+ oi-long oi-short))
     (sensitivity (var-get funding-rate-sensitivity))
   )
     (if (> oi-total u0)
       (let (
-        (imbalance (/ (* oi-diff u10000) oi-total))
+        (imbalance (/ (* (to-int oi-diff) u10000) (to-int oi-total)))
         (funding-rate (/ (* premium (+ u10000 (/ (* imbalance sensitivity) u100))) u10000))
       )
         funding-rate
       )
-      0
+      i0 ;; Return i0 for consistency with int type
     )
   )
 )

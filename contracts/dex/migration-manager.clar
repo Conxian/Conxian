@@ -4,9 +4,9 @@
 ;; This contract facilitates the migration of liquidity and positions between different versions of pools or protocols.
 ;; It ensures a smooth transition for users and maintains data integrity during upgrades.
 
-(use-trait rbac-trait .rbac-trait.rbac-trait)
-(use-trait ft-trait .all-traits.ft-trait)
-(use-trait lp-token-trait .all-traits.lp-token-trait)
+(use-trait rbac-trait .traits.rbac-trait.rbac-trait)
+(use-trait ft-trait .sip-010-trait-ft-standard.sip-010-trait)
+(use-trait lp-token-trait .traits.lp-token-trait.lp-token-trait)
 
 
 (define-constant ERR_UNAUTHORIZED (err u9300))

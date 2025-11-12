@@ -2,7 +2,7 @@
 ;; Enhanced Oracle System with TWAP and Manipulation Detection
 
 ;; --- Traits ---
-(use-trait oracle-trait .all-traits.oracle-trait)
+(use-trait oracle-trait .traits.oracle-trait.oracle-trait)
 
 ;; --- Constants ---
 ;; @constant ERR_UNAUTHORIZED (err u100) - Returned when the caller is not authorized to perform the action.
@@ -17,6 +17,8 @@
 (define-constant ERR_PRICE_MANIPULATION (err u104))
 ;; @constant ERR_CIRCUIT_BREAKER_TRIPPED (err u105) - Returned when the circuit breaker is tripped.
 (define-constant ERR_CIRCUIT_BREAKER_TRIPPED (err u105))
+;; @constant TWAP-LOOK-BACK-WINDOW uint - The number of blocks to look back for TWAP calculation.
+(define-constant TWAP-LOOK-BACK-WINDOW u100)
 
 ;; --- Data Variables ---
 ;; @var contract-owner principal - The principal of the contract owner.
@@ -33,7 +35,11 @@
 
 ;; @map asset-twap { asset: principal } { price: uint, last-updated: uint }
 ;; Stores the time-weighted average price (TWAP) for each asset and its last update block height.
-(define-map asset-twap { asset: principal } { price: uint, last-updated: uint })
+(define-map asset-twap { asset: principal } { price: uint, last-updated: uint, total-supply: uint })
+
+;; @map price-observations { asset: principal, block: uint } { price: uint, total-supply: uint }
+;; Stores historical price observations for TWAP calculation.
+(define-map price-observations { asset: principal, block: uint } { price: uint, total-supply: uint })
 
 ;; --- Public Functions ---
 
@@ -86,15 +92,22 @@
 ;; @param oracle principal - The principal of the oracle contract.
 ;; @param asset principal - The principal of the asset.
 ;; @param price uint - The price reported by the oracle.
+;; @param total-supply uint - The total supply of the asset.
 ;; @returns (response bool uint) - (ok true) on success, or an error if unauthorized, oracle not found, or manipulation detected.
-(define-public (update-price (oracle principal) (asset principal) (price uint))
+(define-public (update-price (oracle principal) (asset principal) (price uint) (total-supply uint))
   (begin
     (asserts! (is-some (map-get? registered-oracles { oracle-principal: oracle })) ERR_INVALID_ORACLE)
     (try! (check-manipulation asset price))
     (try! (check-circuit-breaker))
-    ;; In a real implementation, this would involve more complex TWAP calculation
-    ;; and aggregation from multiple oracles.
-    (map-set asset-twap { asset: asset } { price: price, last-updated: block-height })
+    
+    ;; Store the current observation
+    (map-set price-observations { asset: asset, block: block-height } { price: price, total-supply: total-supply })
+
+    ;; Calculate and update TWAP
+    (let ((twap-result (calculate-twap asset TWAP-LOOK-BACK-WINDOW)))
+      (asserts! (is-ok twap-result) (unwrap-err twap-result)) ;; Propagate error from TWAP calculation
+      (map-set asset-twap { asset: asset } { price: (unwrap-panic twap-result), last-updated: block-height, total-supply: total-supply })
+    )
     (ok true)
   )
 )
@@ -108,7 +121,7 @@
   (let ((twap-entry (map-get? asset-twap { asset: asset })))
     (asserts! (is-some twap-entry) ERR_NO_ORACLES)
     (let ((last-updated (get last-updated (unwrap-panic twap-entry))))
-      (asserts! (<= (- block-height last-updated) u100) ERR_STALE_PRICE) ;; Example staleness check
+      (asserts! (<= (- block-height last-updated) TWAP-LOOK-BACK-WINDOW) ERR_STALE_PRICE) ;; Use TWAP-LOOK-BACK-WINDOW for staleness check
       (ok (get price (unwrap-panic twap-entry)))
     )
   )
@@ -129,7 +142,7 @@
 ;; @returns (response bool uint) - (ok true) if no manipulation, (err ERR_PRICE_MANIPULATION) if detected.
 (define-private (check-manipulation (asset principal) (price uint))
   (match (var-get manipulation-detector-contract)
-    (some detector) (contract-call? detector check-price asset asset price u0) ;; Assuming asset as token-a and token-b for simplicity
+    (some detector) (contract-call? .dex.manipulation-detector check-price asset asset price) ;; Assuming asset as token-a and token-b for simplicity
     (ok true)
   )
 )
@@ -138,7 +151,46 @@
 ;; @returns (response bool uint) - (ok true) if circuit breaker is not tripped, (err ERR_CIRCUIT_BREAKER_TRIPPED) if tripped.
 (define-private (check-circuit-breaker)
   (match (var-get circuit-breaker-contract)
-    (some breaker) (asserts! (not (try! (contract-call? breaker is-circuit-open))) ERR_CIRCUIT_BREAKER_TRIPPED)
+    (some breaker) (asserts! (not (try! (contract-call? .security.circuit-breaker is-circuit-open))) ERR_CIRCUIT_BREAKER_TRIPPED)
     (ok true)
+  )
+)
+
+;; @desc Calculates the time-weighted average price (TWAP) for an asset over a specified look-back window.
+;; @param asset principal - The principal of the asset.
+;; @param look-back-window uint - The number of blocks to look back for observations.
+;; @returns (response uint uint) - (ok twap-price) on success, or an error if no observations are found.
+(define-private (calculate-twap (asset principal) (look-back-window uint))
+  (let (
+    (current-block block-height)
+    (start-block (- current-block look-back-window))
+    (total-price-sum u0)
+    (total-weight-sum u0)
+  )
+    ;; Iterate through price-observations within the look-back window
+    ;; This is a simplified iteration. In a real scenario, you might need to fetch
+    ;; observations more efficiently or store them in a way that allows easier iteration.
+    ;; For now, we'll assume we can iterate and filter.
+    (map-fold price-observations
+      (lambda (key-obs value-obs accumulator)
+        (if (and (is-eq (get asset key-obs) asset) (>= (get block key-obs) start-block))
+          (let (
+            (price (get price value-obs))
+            (total-supply (get total-supply value-obs))
+          )
+            (var-set total-price-sum (+ total-price-sum (* price total-supply)))
+            (var-set total-weight-sum (+ total-weight-sum total-supply))
+            (ok true)
+          )
+          (ok true)
+        )
+      )
+      (ok true)
+    )
+
+    (if (> total-weight-sum u0)
+      (ok (/ total-price-sum total-weight-sum))
+      (err ERR_NO_ORACLES)
+    )
   )
 )

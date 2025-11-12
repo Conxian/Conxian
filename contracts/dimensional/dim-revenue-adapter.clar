@@ -3,10 +3,10 @@
 ;; Consolidates ALL revenue flows: DEX fees, vault performance, lending interest, migration fees
 ;; Replaces separate revenue-distributor.clar with dimensional architecture
 
-(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
+(use-trait sip-010-ft-trait .sip-010-trait)
+(use-trait sip-000-governance-trait .sip-000-governance-trait)
 
 ;; --- Constants ---
-(define-constant CONTRACT_OWNER tx-sender)
 (define-constant PRECISION u100000000)
 
 ;; --- Errors ---
@@ -15,9 +15,10 @@
 (define-constant ERR_SYSTEM_PAUSED u802)
 (define-constant ERR_REVENUE_DISTRIBUTION_FAILED u803)
 (define-constant ERR_CONTRACT_NOT_SET u804)
+(define-constant ERR_GOVERNANCE_CALL u805)
 
 ;; --- Storage ---
-(define-data-var contract-owner principal CONTRACT_OWNER)
+(define-data-var governance-contract (optional principal) none)
 (define-data-var revenue-distributor (optional principal) none)
 (define-data-var token-coordinator (optional principal) none)
 (define-data-var protocol-monitor (optional principal) none)
@@ -40,10 +41,13 @@
 (define-map dimension-revenue { dim-id: uint } { total-collected: uint, last-distribution: uint })
 
 ;; --- Admin Functions ---
-(define-public (set-contract-owner (new-owner principal))
+;; @desc Sets the governance contract principal.
+;; @param new-governance-contract The principal of the new governance contract.
+;; @returns A response tuple with ok true if successful, or an error code.
+(define-public (set-governance-contract (new-governance-contract principal))
   (begin
-    (asserts! (is-eq tx-sender (var-get contract-owner)) (err ERR_UNAUTHORIZED))
-    (var-set contract-owner new-owner)
+    (asserts! (is-eq tx-sender (unwrap! (var-get governance-contract) (err ERR_GOVERNANCE_CALL))) (err ERR_UNAUTHORIZED))
+    (var-set governance-contract (some new-governance-contract))
     (ok true)))
 
 (define-public (configure-system-contracts
@@ -51,7 +55,7 @@
     (coordinator principal)
     (monitor principal))
   (begin
-    (asserts! (is-eq tx-sender (var-get contract-owner)) (err ERR_UNAUTHORIZED))
+    (asserts! (is-eq tx-sender (unwrap! (var-get governance-contract) (err ERR_GOVERNANCE_CALL))) (err ERR_UNAUTHORIZED))
     (var-set revenue-distributor (some revenue-dist))
     (var-set token-coordinator (some coordinator))
     (var-set protocol-monitor (some monitor))
@@ -62,7 +66,7 @@
     (registry-contract principal)
     (metrics-contract principal))
   (begin
-    (asserts! (is-eq tx-sender (var-get contract-owner)) (err ERR_UNAUTHORIZED))
+    (asserts! (is-eq tx-sender (unwrap! (var-get governance-contract) (err ERR_GOVERNANCE_CALL))) (err ERR_UNAUTHORIZED))
     (var-set dim-yield-contract (some yield-contract))
     (var-set dim-registry-contract (some registry-contract))
     (var-set dim-metrics-contract (some metrics-contract))
@@ -73,7 +77,7 @@
     (treasury-share-new uint)
     (reserve-share-new uint))
   (begin
-    (asserts! (is-eq tx-sender (var-get contract-owner)) (err ERR_UNAUTHORIZED))
+    (asserts! (is-eq tx-sender (unwrap! (var-get governance-contract) (err ERR_GOVERNANCE_CALL))) (err ERR_UNAUTHORIZED))
     (asserts! (is-eq (+ token-holder-share treasury-share-new reserve-share-new) u10000) (err ERR_INVALID_AMOUNT))
     (var-set dimensional-revenue-share token-holder-share)
     (var-set treasury-share treasury-share-new)
@@ -185,7 +189,7 @@
     (payment-token <sip-010-ft-trait>)
     (bond-holders-count uint))
   (begin
-    (asserts! (is-eq tx-sender (var-get contract-owner)) (err ERR_UNAUTHORIZED)) ;; Only owner can report for now
+    (asserts! (is-eq tx-sender (unwrap! (var-get governance-contract) (err ERR_GOVERNANCE_CALL))) (err ERR_UNAUTHORIZED)) ;; Only owner can report for now
     (asserts! (> coupon-amount u0) (err ERR_INVALID_AMOUNT))
     
     ;; Route a portion of bond coupons to token holders
@@ -199,6 +203,7 @@
                      (as-contract tx-sender)
                      token-holder-portion
                      payment-token))
+              (var-set total-distributed-revenue (+ (var-get total-distributed-revenue) token-holder-portion))
               true)
           false)
         true)
@@ -243,13 +248,6 @@
 ;; Emergency pause dimensional integration
 (define-public (pause-dimensional-integration)
   (begin
-    (asserts! (is-eq tx-sender (var-get contract-owner)) (err ERR_UNAUTHORIZED))
+    (asserts! (is-eq tx-sender (unwrap! (var-get governance-contract) (err ERR_GOVERNANCE_CALL))) (err ERR_UNAUTHORIZED))
     ;; Implementation would disable revenue routing
     (ok true)))
-
-
-
-
-
-
-

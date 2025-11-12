@@ -5,24 +5,20 @@ clarinet_version = "3.9"
 epoch = "3.0"
 
 # ---------- Core Contracts ----------
-[contracts.all-traits]
-path = "contracts/traits/all-traits.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
 [contracts.ownable]
 path = "contracts/base/ownable.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["all-traits"]
 
 [contracts.pausable]
 path = "contracts/base/pausable.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["all-traits", "ownable"]
+depends_on = ["ownable"]
 
 [contracts.roles]
 path = "contracts/access/roles.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["all-traits", "ownable"]
+depends_on = ["ownable"]
 
 [contracts.standard-errors]
 path = "contracts/errors/standard-errors.clar"
@@ -32,12 +28,11 @@ address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 [contracts.dim-metrics]
 path = "contracts/dimensional/dim-metrics.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["all-traits"]
 
 [contracts.dimensional-core]
 path = "contracts/dimensional/dimensional-core.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["all-traits", "dim-metrics", "pausable"]
+depends_on = ["dim-metrics", "pausable"]
 
 [contracts.dimensional-engine]
 path = "contracts/core/dimensional-engine.clar"
@@ -60,7 +55,6 @@ address = "ST2REHHS5J3CERCRBEPMGH7921Q6PYKAADT7JP2VB"
 # ---------- REPL Remappings ----------
 [repl.remappings]
 # Core
-all-traits = ".all-traits"
 dim-metrics = ".dim-metrics"
 dimensional-core = ".dimensional-core"
 dimensional-engine = ".dimensional-engine"
@@ -114,6 +108,7 @@ dim-graph = ".dim-graph"
 dim-oracle-automation = ".dim-oracle-automation"
 dim-revenue-adapter = ".dim-revenue-adapter"
 dim-yield-stake = ".dim-yield-stake"
+decentralized-trait-registry = ".decentralized-trait-registry"
 
 # Math
 math-lib-advanced = ".math-lib-advanced"
@@ -127,388 +122,281 @@ lending-protocol-governance = ".lending-protocol-governance"
 governance-signature-verifier = ".governance-signature-verifier"
 audit-registry = ".audit-registry"
 
+[repl.remote_data]
+enabled = true
+api_url = "https://api.testnet.hiro.so"
+initial_height = 927272
+
 # ---------- Remaining Contracts ----------
 [contracts.governance]
-path = "contracts/access/governance.clar"
+path = "contracts/dimensional/governance.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["all-traits"]
 
 [contracts.audit_registry]
 path = "contracts/audit-registry/audit-registry.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["all-traits"]
 
 [contracts.keeper_coordinator]
 path = "contracts/automation/keeper-coordinator.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["all-traits"]
 
 [contracts.timelock_controller]
-path = "contracts/automation/timelock-controller.clar"
+path = "contracts/dex/timelock-controller.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["all-traits"]
+
 
 [contracts.base_contract]
 path = "contracts/base/base-contract.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["all-traits"]
 
 [contracts.conxian_protocol]
 path = "contracts/core/conxian-protocol.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["all-traits"]
 
 [contracts.concentrated_liquidity_pool]
 path = "contracts/dex/concentrated-liquidity-pool.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["all-traits"]
 
 [contracts.dex_factory_v2]
 path = "contracts/dex/dex-factory-v2.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["all-traits"]
 
 [contracts.dex_factory]
 path = "contracts/dex/dex-factory.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["all-traits"]
 
 [contracts.manipulation_detector]
 path = "contracts/dex/manipulation-detector.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["all-traits"]
 
 [contracts.mev_protector]
 path = "contracts/dex/mev-protector.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["all-traits"]
 
 [contracts.multi_hop_router_v3]
 path = "contracts/dex/multi-hop-router-v3.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["all-traits"]
 
 [contracts.oracle_aggregator_v2]
 path = "contracts/dex/oracle-aggregator-v2.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["all-traits"]
 
 [contracts.oracle]
 path = "contracts/dex/oracle.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["all-traits"]
 
 [contracts.pool_template]
 path = "contracts/dex/pool-template.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["all-traits"]
 
 [contracts.dim_graph]
 path = "contracts/dimensional/dim-graph.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["all-traits"]
 
 [contracts.dim_oracle_automation]
 path = "contracts/dimensional/dim-oracle-automation.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["all-traits"]
 
 [contracts.dim_registry]
 path = "contracts/dimensional/dim-registry.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["all-traits"]
 
 [contracts.dim_revenue_adapter]
 path = "contracts/dimensional/dim-revenue-adapter.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["all-traits"]
 
 [contracts.dim_yield_stake]
 path = "contracts/dimensional/dim-yield-stake.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["all-traits"]
 
-[contracts.dimensional_oracle]
-path = "contracts/dimensional/dimensional-oracle.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["all-traits"]
+[contracts.dimensional-oracle]
+path = "contracts/oracle/dimensional-oracle.clar"
+
+[contracts.mock-token]
+path = "contracts/mocks/mock-token.clar"
 
 [contracts.enterprise_api]
 path = "contracts/enterprise/enterprise-api.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["all-traits"]
 
 [contracts.enterprise_loan_manager]
 path = "contracts/enterprise/enterprise-loan-manager.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["all-traits"]
 
 [contracts.interest_rate_model]
-path = "contracts/enterprise/interest-rate-model.clar"
+path = "contracts/dex/interest-rate-model.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["all-traits"]
 
 [contracts.liquidity_optimization_engine]
-path = "contracts/enterprise/liquidity-optimization-engine.clar"
+path = "contracts/dex/liquidity-optimization-engine.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["all-traits"]
 
 [contracts.lending_pool]
 path = "contracts/lending/lending-pool.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["all-traits"]
 
 [contracts.lending_pool_core]
 path = "contracts/lending/lending-pool-core.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["all-traits"]
 
 [contracts.lending_pool_rewards]
 path = "contracts/lending/lending-pool-rewards.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["all-traits"]
 
 [contracts.lending_pool_v2]
 path = "contracts/lending/lending-pool-v2.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["all-traits"]
 
 [contracts.lending_protocol_governance]
-path = "contracts/lending/lending-protocol-governance.clar"
+path = "contracts/governance/lending-protocol-governance.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["all-traits"]
-
-[contracts.reserve_config]
-path = "contracts/lending/reserve-config.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["all-traits"]
 
 [contracts.fixed_point_math]
 path = "contracts/math/fixed-point-math.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["all-traits"]
 
 [contracts.math_lib_advanced]
-path = "contracts/math/math-lib-advanced.clar"
+path = "contracts/lib/math-lib-advanced.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["all-traits"]
 
 [contracts.math_lib_concentrated]
 path = "contracts/math/math-lib-concentrated.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["all-traits"]
 
 [contracts.precision_calculator]
-path = "contracts/math/precision-calculator.clar"
+path = "contracts/lib/precision-calculator.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["all-traits"]
 
 [contracts.position_factory]
-path = "contracts/pools/position-factory.clar"
+path = "contracts/position-factory.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["all-traits"]
 
 [contracts.rebalancing_rules]
-path = "contracts/pools/rebalancing-rules.clar"
+path = "contracts/dex/rebalancing-rules.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["all-traits"]
 
-[contracts.self_launch_coordinator]
-path = "contracts/pools/self-launch-coordinator.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["all-traits"]
 
 [contracts.tiered_pools]
 path = "contracts/pools/tiered-pools.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["all-traits"]
 
 [contracts.proposal_engine]
-path = "contracts/proposals/proposal-engine.clar"
+path = "contracts/governance/proposal-engine.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["all-traits"]
 
 [contracts.funding_calculator]
 path = "contracts/risk/funding-calculator.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["all-traits"]
 
 [contracts.liquidation_engine]
 path = "contracts/risk/liquidation-engine.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["all-traits"]
 
 [contracts.risk_manager]
 path = "contracts/risk/risk-manager.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["all-traits"]
+
+
+[contracts.sbtc_integration]
+path = "contracts/dex/sbtc-integration.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
 [contracts.btc_adapter]
 path = "contracts/sbtc/btc-adapter.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["all-traits"]
 
-[contracts.sbtc_integration]
-path = "contracts/sbtc/sbtc-integration.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["all-traits"]
 
-[contracts.sbtc_lending_system]
-path = "contracts/sbtc/sbtc-lending-system.clar"
+[contracts.sip_010_ft_standard]
+path = "contracts/requirements/sip-010-trait-ft-standard.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["all-traits"]
 
-[contracts.sbtc_oracle_adapter]
-path = "contracts/sbtc/sbtc-oracle-adapter.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["all-traits"]
-
-[contracts.sip_009_nft_trait]
-path = "contracts/sips/sip-009-nft-trait.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["all-traits"]
-
-[contracts.sip_010_ft_trait]
-path = "contracts/sips/sip-010-ft-trait.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["all-traits"]
-
-[contracts.sip_010_token]
-path = "contracts/sips/sip-010-token.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["all-traits"]
 
 [contracts.cxd_price_initializer]
 path = "contracts/tokens/cxd-price-initializer.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["all-traits"]
 
 [contracts.cxd_token]
 path = "contracts/tokens/cxd-token.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["all-traits"]
 
 [contracts.cxlp_token]
 path = "contracts/tokens/cxlp-token.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["all-traits"]
 
 [contracts.cxs_token]
 path = "contracts/tokens/cxs-token.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["all-traits"]
 
 [contracts.cxtr_token]
 path = "contracts/tokens/cxtr-token.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["all-traits"]
 
 [contracts.cxvg_token]
 path = "contracts/tokens/cxvg-token.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["all-traits"]
 
 [contracts.token_system_coordinator]
 path = "contracts/tokens/token-system-coordinator.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["all-traits"]
 
 [contracts.errors_trait]
 path = "contracts/traits/errors.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["all-traits"]
 
-[contracts.pool_trait]
-path = "contracts/traits/pool-trait.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["all-traits"]
 
 [contracts.block_utils]
 path = "contracts/utils/block-utils.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["all-traits"]
 
 [contracts.encoding]
 path = "contracts/utils/encoding.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["all-traits"]
 
 [contracts.error_utils]
 path = "contracts/utils/error-utils.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["all-traits"]
 
 [contracts.migration_manager]
 path = "contracts/utils/migration-manager.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["all-traits"]
 
 [contracts.rbac]
 path = "contracts/utils/rbac.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["all-traits"]
 
 [contracts.utils]
 path = "contracts/utils/utils.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["all-traits"]
+
+[contracts.rbac_trait]
+path = "contracts/access/traits/access-traits.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+
+[contracts.decentralized_trait_registry]
+path = "contracts/decentralized-trait-registry.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
 [contracts.validation]
 path = "contracts/utils/validation.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["all-traits"]
 
-[contracts.sbtc_vault]
-path = "contracts/vaults/sbtc-vault.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["all-traits"]
-
-[contracts.vault_registrar]
-path = "contracts/vaults/vault-registrar.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["all-traits"]
 
 [contracts.batch_auction]
-path = "contracts/batch-auction.clar"
+path = "contracts/dex/batch-auction.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["all-traits"]
 
 [contracts.budget_manager]
 path = "contracts/budget-manager.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["all-traits"]
 
 [contracts.governance_token_root]
 path = "contracts/governance-token.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["all-traits"]
 
 [contracts.mev_protector_root]
-path = "contracts/mev-protector.clar"
+path = "contracts/mev/mev-protector-root.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["all-traits"]
 
 [contracts.position_factory_root]
-path = "contracts/position-factory.clar"
+path = "contracts/mev/position-factory-root.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["all-traits"]
-
-[contracts.proposal_engine_root]
-path = "contracts/proposal-engine.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["all-traits"]
-
-[contracts.rebalancing_rules_root]
-path = "contracts/rebalancing-rules.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["all-traits"]
-
-[contracts.self_launch_coordinator_root]
-path = "contracts/self-launch-coordinator.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["all-traits"]
-
-[contracts.tiered_pools_root]
-path = "contracts/tiered-pools.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["all-traits"]

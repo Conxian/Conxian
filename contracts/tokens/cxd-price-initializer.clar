@@ -1,9 +1,9 @@
 ;; cxd-price-initializer.clar
 ;; Handles initial price setting and management for CXD token
 
-(use-trait token-trait .all-traits.sip-010-ft-trait)
-(use-trait governance-trait .all-traits.governance-token-trait)
-(use-trait oracle-trait .all-traits.oracle-trait)
+(use-trait token-trait .sip-010-trait)
+(use-trait governance-trait .governance-token-trait)
+(use-trait oracle-trait .oracle-trait)
 
 ;; Constants
 (define-constant ERR_UNAUTHORIZED (err u1000))
@@ -47,7 +47,7 @@
     (let (
         (caller tx-sender)
     )
-        (asserts! (is-eq caller (contract-call? .all-traits.ownable-trait get-owner)) ERR_UNAUTHORIZED)
+        (asserts! (is-eq caller (var-get contract-owner)) ERR_UNAUTHORIZED)
         (asserts! (not (var-get is-initialized)) ERR_ALREADY_INITIALIZED)
         (asserts! (> initial-price-amount u0) ERR_INVALID_PRICE)
         (asserts! (> min-price-amount u0) ERR_INVALID_PRICE)
@@ -199,3 +199,4 @@
         timelock-end: (var-get timelock-end-block)
     })
 )
+

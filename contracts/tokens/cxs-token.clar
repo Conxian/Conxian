@@ -3,9 +3,9 @@
 ;; Implements SIP-009 NFT standard with staking and governance features
 
 ;; --- Traits ---
-(use-trait protocol-monitor-trait .all-traits.protocol-monitor-trait)
-(use-trait sip-009-nft-trait .all-traits.sip-009-nft-trait)
-(use-trait rbac-trait .rbac-trait.rbac-trait)
+(use-trait protocol-monitor-trait .protocol-monitor-trait)
+(use-trait sip-009-nft-trait .sip-009-nft-trait)
+(use-trait rbac-trait .decentralized-trait-registry.decentralized-trait-registry)
 
 ;; --- Errors ---
 (define-constant ERR_UNAUTHORIZED u100)

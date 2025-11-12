@@ -2,9 +2,9 @@
 
 ;; enterprise-loan-manager.clar
 
-(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
+(use-trait sip-010-ft-trait .requirements.sip-010-trait-ft-standard.sip-010-trait-ft-standard)
 ;; Dynamic dispatch for yield distribution
-(use-trait yield-distribution-trait .all-traits.yield-distribution-trait)
+(use-trait yield-distribution-trait .traits.yield-distribution-trait.yield-distribution-trait)
 
 ;; Constants
 (define-constant ERR_UNAUTHORIZED (err u7001))

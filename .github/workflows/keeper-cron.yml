@@ -3,32 +3,32 @@ name: Conxian Keeper & Autonomics
 on:
   schedule:
     # Run every 10 minutes during active hours (9 AM - 9 PM UTC)
-    - cron: '*/10 9-21 * * *'
+    - cron: "*/10 9-21 * * *"
     # Run every hour during off hours
-    - cron: '0 22,23,0,1,2,3,4,5,6,7,8 * * *'
+    - cron: "0 22,23,0,1,2,3,4,5,6,7,8 * * *"
   workflow_dispatch:
     inputs:
       force_execution:
-        description: 'Force execution regardless of conditions'
+        description: "Force execution regardless of conditions"
         required: false
         default: false
         type: boolean
       target_network:
-        description: 'Target network for operations'
+        description: "Target network for operations"
         required: false
-        default: 'mainnet'
+        default: "mainnet"
         type: choice
         options:
-        - mainnet
-        - testnet
+          - mainnet
+          - testnet
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: false
 
 env:
-  NODE_VERSION: '20'
-  CLARINET_VERSION: '3.8.1'
+  NODE_VERSION: "20"
+  CLARINET_VERSION: "3.8.1"
   NETWORK: ${{ github.event.inputs.target_network != '' && github.event.inputs.target_network || 'mainnet' }}
   FORCE_EXECUTION: ${{ github.event.inputs.force_execution != '' && github.event.inputs.force_execution || 'false' }}
 
@@ -51,14 +51,14 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: "20"
+          cache: "npm"
           cache-dependency-path: package-lock.json
 
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: "3.11"
 
       - name: Install Dependencies
         run: |
@@ -69,28 +69,28 @@ jobs:
         id: health
         run: |
           echo "🏥 Running system health check..."
-          
+
           # Network connectivity check
           if curl -s "https://api.hiro.so/v1/info" > /dev/null; then
             echo "network-status=healthy" >> $GITHUB_OUTPUT
           else
             echo "network-status=degraded" >> $GITHUB_OUTPUT
           fi
-          
+
           # Vault status check (read-only)
           if bash scripts/oracle_ops.sh health-check > health.log 2>&1; then
             echo "vault-status=healthy" >> $GITHUB_OUTPUT
           else
             echo "vault-status=degraded" >> $GITHUB_OUTPUT
           fi
-          
+
           # Treasury status check
           if bash scripts/monitor-health.sh &> treasury.log; then
             echo "treasury-status=healthy" >> $GITHUB_OUTPUT
           else
             echo "treasury-status=degraded" >> $GITHUB_OUTPUT
           fi
-          
+
           echo "✅ Health check completed"
 
       - name: Upload Health Reports
@@ -136,14 +136,14 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: "20"
+          cache: "npm"
           cache-dependency-path: package-lock.json
 
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: "3.11"
 
       - name: Install Dependencies
         run: |
@@ -153,7 +153,7 @@ jobs:
       - name: Setup Environment
         run: |
           echo "🔧 Setting up ${{ matrix.operation.name }} environment..."
-          
+
           # Create secure environment variables
           echo "NETWORK=${{ env.NETWORK }}" >> $GITHUB_ENV
           echo "OPERATION_MODE=automated" >> $GITHUB_ENV
@@ -169,7 +169,7 @@ jobs:
           if [ -z "$VAULT_CONTRACT_ADDRESS" ]; then
             MISSING_SECRETS="$MISSING_SECRETS VAULT_CONTRACT_ADDRESS"
           fi
-          
+
           if [ -n "$MISSING_SECRETS" ]; then
             echo "⚠️ Missing required secrets:$MISSING_SECRETS"
             echo "Please add these secrets in repository Settings → Secrets and variables → Actions"
@@ -182,10 +182,10 @@ jobs:
         timeout-minutes: ${{ matrix.operation.timeout }}
         run: |
           echo "🤖 Executing ${{ matrix.operation.name }}..."
-          
+
           # Set up logging
           LOG_FILE="${{ matrix.operation.name }}-$(date -u +%Y%m%d_%H%M%S).log"
-          
+
           # Execute with comprehensive logging
           if ${{ matrix.operation.script }} 2>&1 | tee "$LOG_FILE"; then
             echo "✅ ${{ matrix.operation.name }} completed successfully"
@@ -220,7 +220,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: "3.11"
 
       - name: Install Dependencies
         run: |
@@ -230,7 +230,7 @@ jobs:
       - name: Run Watchdog
         run: |
           echo "🐕 Running keeper watchdog..."
-          
+
           # Create comprehensive monitoring report
           python scripts/keeper_watchdog.py \
             --network ${{ env.NETWORK }} \
@@ -241,11 +241,11 @@ jobs:
       - name: Validate Operations
         run: |
           echo "🔍 Validating keeper operations..."
-          
+
           python -c "
           import json
           import sys
-          
+
           try:
               with open('watchdog-report.json') as f:
                   report = json.load(f)
@@ -293,13 +293,13 @@ jobs:
       - name: Emergency Protocols
         run: |
           echo "🚨 Emergency protocols activated!"
-          
+
           # Log emergency state
           echo "Emergency triggered at: $(date -u)" > emergency.log
           echo "Trigger reason: System health degraded or operation failed" >> emergency.log
           echo "Network: ${{ env.NETWORK }}" >> emergency.log
           echo "Health status: ${{ needs.health-check.outputs.vault-status }}" >> emergency.log
-          
+
           # Implement emergency response
           echo "📞 Emergency response procedures:"
           echo "1. System monitoring intensified"
@@ -340,7 +340,7 @@ jobs:
           echo "| Autonomics | ${{ needs.autonomics.result == 'success' && '🟢 Success' || '🔴 Failed' }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Watchdog | ${{ needs.watchdog.result == 'success' && '🟢 Active' || '🔴 Issues' }} |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           if [[ "${{ needs.health-check.outputs.network-status }}" == "healthy" && 
                 "${{ needs.autonomics.result }}" == "success" ]]; then
             echo "### ✅ All systems operational" >> $GITHUB_STEP_SUMMARY

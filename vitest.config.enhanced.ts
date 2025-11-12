@@ -11,6 +11,7 @@ const includeStatic = [
 ];
 const includeAll = [
   'tests/dimensional/dimensional-core-integration.test.ts',
+  'tests/dex/**/*.test.ts',
 ];
 
 /**
@@ -120,3 +121,4 @@ export default defineConfig({
     'process.env.CLARINET_MANIFEST': JSON.stringify(manifest)
   }
 });
+

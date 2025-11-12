@@ -2,9 +2,9 @@
 ;; This contract acts as an adapter for integrating external oracle providers, allowing the system to fetch and use off-chain data.
 ;; It supports multiple oracle sources, manages their authorization, and aggregates price data to mitigate manipulation risks.
 
-(use-trait rbac-trait .rbac-trait.rbac-trait)
-(use-trait oracle-trait .all-traits.oracle-trait)
-(use-trait ft-trait .all-traits.ft-trait)
+(use-trait rbac-trait .decentralized-trait-registry.decentralized-trait-registry)
+(use-trait oracle-trait .oracle.oracle-trait)
+(use-trait ft-trait .sip-010-trait-ft-standard.sip-010-trait)
 (define-constant ERR_INVALID_ORACLE_SOURCE (err u1001))
 (define-constant ERR_INVALID_PRICE_DATA (err u1002))
 (define-constant ERR_PRICE_TOO_OLD (err u1003))

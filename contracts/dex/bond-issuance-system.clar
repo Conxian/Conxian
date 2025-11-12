@@ -27,7 +27,7 @@
 (define-data-var authorized-issuers (list 10 principal) (list tx-sender))
 (define-data-var enterprise-loan-manager (optional principal) none)
 (define-data-var yield-distribution-engine (optional principal) none)
-(define-data-var circuit-breaker principal .circuit-breaker)
+(define-data-var circuit-breaker principal .traits.circuit-breaker-trait.circuit-breaker-trait)
 
 ;; ===== Data Maps =====
 (define-map bond-series uint {
@@ -52,7 +52,7 @@
 
 ;; ===== Circuit Breaker =====
 (define-private (check-circuit-breaker)
-  (contract-call? .circuit-breaker is-circuit-open))
+  (contract-call? (var-get circuit-breaker) is-circuit-open))
 
 ;; ===== Private Helper Functions =====
 (define-private (is-contract-owner)

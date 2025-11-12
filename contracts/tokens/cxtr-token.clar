@@ -4,7 +4,7 @@
 ;; Enhanced with system integration hooks for coordinator interface
 
 ;; --- Traits ---
-(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
+(use-trait sip-010-ft-trait .sip-010-trait)
 
 ;; --- Constants ---
 (define-constant TRAIT_REGISTRY .trait-registry)

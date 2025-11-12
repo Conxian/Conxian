@@ -1,7 +1,7 @@
 ;; File: contracts/access/roles.clar
 ;; Role-based access control implementation
 
-(use-trait ownable-trait .all-traits.ownable-trait)
+(use-trait ownable-trait .ownable.ownable-trait)
 
 (define-constant ERR_NOT_OWNER (err u1000))
 (define-constant ERR_ROLE_EXISTS (err u1001))

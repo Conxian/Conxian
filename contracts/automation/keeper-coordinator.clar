@@ -2,7 +2,7 @@
 ;; Central coordinator for automated keeper tasks across the Conxian protocol
 ;; Manages automated interest accrual, liquidations, rebalancing, and fee distribution
 (use-trait keeper_coordinator_trait .all-traits.keeper-coordinator-trait)
-(use-trait rbac-trait .rbac-trait.rbac-trait)
+(use-trait rbac-trait .decentralized-trait-registry.decentralized-trait-registry)
 
 ;; ===== Constants =====
 (define-constant ERR_UNAUTHORIZED (err u9001))

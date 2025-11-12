@@ -2,8 +2,8 @@
 ;; This contract is responsible for registering the vault components
 ;; with the dimensional registry.
 
-(use-trait dim-registry-trait .all-traits.dim-registry-trait)
-(use-trait rbac-trait .rbac-trait.rbac-trait)
+(use-trait dim-registry-trait .dim-registry-trait)
+(use-trait rbac-trait .decentralized-trait-registry.decentralized-trait-registry)
 
 (define-constant ERR_UNAUTHORIZED (err u101))
 (define-constant SBTC_VAULT_WEIGHT u100)

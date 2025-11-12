@@ -10,13 +10,6 @@ plan:
     - id: 0
       transactions:
         - contract-publish:
-            contract-name: all-traits
-            expected-sender: STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ
-            cost: 476260
-            path: "contracts\\traits\\all-traits.clar"
-            anchor-block-only: true
-            clarity-version: 1
-        - contract-publish:
             contract-name: Pausable
             expected-sender: STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ
             cost: 9600

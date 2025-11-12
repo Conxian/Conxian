@@ -2,8 +2,8 @@
 ;; Institutional lending with custom terms and compliance
 
 ;; (use-trait enterprise .all-traits.enterprise-trait)  ;; centralized traits: not defined; remove to avoid build error
-(use-trait dimensional-trait .all-traits.dimensional-trait)
-(use-trait dim-registry-trait .all-traits.dim-registry-trait)
+(use-trait dimensional-trait .dimensional.dimensional-trait)
+(use-trait dim-registry-trait .dimensional.dim-registry-trait)
 
 ;; ===== Constants =====
 (define-constant ERR_UNAUTHORIZED (err u9500))
@@ -266,3 +266,4 @@
     )
   )
 )
+

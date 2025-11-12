@@ -41,4 +41,4 @@ Policy checks
 
 Questions
 
-- See `README.md` Quick Start and `documentation/prd/dimensional-system-prd.md` for architecture and requirements.
+- See `README.md` Quick Start and `documentation/architecture/ARCHITECTURE.md` for architecture and requirements.

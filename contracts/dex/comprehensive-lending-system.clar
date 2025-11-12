@@ -2,29 +2,32 @@
 ;; Refactored for clarity, security, and correctness.
 
 ;; --- Traits ---
-(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
-(use-trait lending-system-trait .all-traits.lending-system-trait)
+(use-trait sip-010-ft-trait .requirements.sip-010-trait-ft-standard.sip-010-trait-ft-standard)
+(use-trait lending-system-trait .traits.lending-system-trait.lending-system-trait)
+(use-trait rbac-trait .decentralized-trait-registry.decentralized-trait-registry)
+(use-trait err-trait .traits.error-codes-trait.error-codes-trait)
 
 ;; --- Constants ---
 (define-constant LENDING_SERVICE "lending-service")
-(define-constant ERR_CIRCUIT_BREAKER_OPEN (err u1016))
-(define-constant ERR_UNAUTHORIZED (err u1001))
-(define-constant ERR_PAUSED (err u1002))
-(define-constant ERR_INVALID_ASSET (err u1007))
-(define-constant ERR_INSUFFICIENT_COLLATERAL (err u1008))
-(define-constant ERR_TRANSFER_FAILED (err u1010))
-(define-constant ERR_ZERO_AMOUNT (err u1011))
+(define-constant PRECISION u1000000000000000000) ;; 1e18
+(define-constant BPS u10000) ;; basis points scale
+
+;; Error codes from standard-errors.clar
+(define-constant ERR_UNAUTHORIZED (err u1100))
+(define-constant ERR_PAUSED (err u1003))
+(define-constant ERR_INVALID_ASSET (err u1310))
+(define-constant ERR_INSUFFICIENT_COLLATERAL (err u1311))
+(define-constant ERR_TRANSFER_FAILED (err u1202))
+(define-constant ERR_ZERO_AMOUNT (err u1207))
 (define-constant ERR_HEALTH_CHECK_FAILED (err u1013))
-(define-constant ERR_INSUFFICIENT_LIQUIDITY (err u1014))
+(define-constant ERR_INSUFFICIENT_LIQUIDITY (err u1307))
 (define-constant ERR_ALREADY_SET (err u1015))
 (define-constant ERR_POSITION_HEALTHY (err u1017))
 (define-constant ERR_LIQUIDATION_THRESHOLD_NOT_FOUND (err u1018))
 (define-constant ERR_INVALID_TUPLE (err u1019))
-;; Proof of Reserves integration errors
-(define-constant ERR_POR_STALE (err u1020))
-(define-constant ERR_POR_MISSING (err u1021))
-(define-constant PRECISION u1000000000000000000) ;; 1e18
-(define-constant BPS u10000) ;; basis points scale
+(define-constant ERR_POR_STALE (err u1507))
+(define-constant ERR_POR_MISSING (err u1506))
+(define-constant ERR_CIRCUIT_BREAKER_OPEN (err u5007))
 
 ;; --- Data Variables ---
 (define-data-var contract-owner principal tx-sender)
@@ -45,81 +48,113 @@
 (define-data-var capacity-alert-threshold-bps uint u0)
 
 ;; --- Admin Setters ---
+;; @notice Sets the new contract owner.
+;; @param new-owner The principal of the new contract owner.
+;; @returns A response tuple with `(ok true)` if successful, `(err ERR_UNAUTHORIZED)` otherwise.
 (define-public (set-owner (new-owner principal))
   (begin
-    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
+    (asserts! (contract-call? (var-get access-control-contract) has-role "contract-owner" tx-sender) ERR_UNAUTHORIZED)
     (var-set contract-owner new-owner)
     (ok true)
   )
 )
 
+;; @notice Sets the oracle contract address.
+;; @param oracle The principal of the oracle contract.
+;; @returns A response tuple with `(ok true)` if successful, `(err ERR_UNAUTHORIZED)` otherwise.
 (define-public (set-oracle (oracle principal))
   (begin
-    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
+    (asserts! (contract-call? (var-get access-control-contract) has-role "contract-owner" tx-sender) ERR_UNAUTHORIZED)
     (var-set oracle-contract oracle)
     (ok true)
   )
 )
 
+;; @notice Sets the interest rate model contract address.
+;; @param irm The principal of the interest rate model contract.
+;; @returns A response tuple with `(ok true)` if successful, `(err ERR_UNAUTHORIZED)` otherwise.
 (define-public (set-interest-rate-model (irm principal))
   (begin
-    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
+    (asserts! (contract-call? (var-get access-control-contract) has-role "contract-owner" tx-sender) ERR_UNAUTHORIZED)
     (var-set interest-rate-model-contract irm)
     (ok true)
   )
 )
 
+;; @notice Sets the loan liquidation manager contract address.
+;; @param lm The principal of the loan liquidation manager contract.
+;; @returns A response tuple with `(ok true)` if successful, `(err ERR_UNAUTHORIZED)` otherwise.
 (define-public (set-liquidation-manager (lm principal))
   (begin
-    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
+    (asserts! (contract-call? (var-get access-control-contract) has-role "contract-owner" tx-sender) ERR_UNAUTHORIZED)
     (var-set loan-liquidation-manager-contract lm)
     (ok true)
   )
 )
 
+;; @notice Sets the access control contract address.
+;; @param ac The principal of the access control contract.
+;; @returns A response tuple with `(ok true)` if successful, `(err ERR_UNAUTHORIZED)` otherwise.
 (define-public (set-access-control (ac principal))
   (begin
-    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
+    (asserts! (contract-call? (var-get access-control-contract) has-role "contract-owner" tx-sender) ERR_UNAUTHORIZED)
     (var-set access-control-contract ac)
     (ok true)
   )
 )
 
+;; @notice Sets the circuit breaker contract address.
+;; @param cb The principal of the circuit breaker contract.
+;; @returns A response tuple with `(ok true)` if successful, `(err ERR_UNAUTHORIZED)` otherwise.
 (define-public (set-circuit-breaker (cb principal))
   (begin
-    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
+    (asserts! (contract-call? (var-get access-control-contract) has-role "contract-owner" tx-sender) ERR_UNAUTHORIZED)
     (var-set circuit-breaker-contract (some cb))
     (ok true)
   )
 )
 ;; Configure Proof of Reserves enforcement
+;; @notice Configures the Proof of Reserves (PoR) contract address.
+;; @param por The principal of the PoR contract.
+;; @returns A response tuple with `(ok true)` if successful, `(err ERR_UNAUTHORIZED)` otherwise.
 (define-public (set-proof-of-reserves (por principal))
   (begin
-    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
+    (asserts! (contract-call? (var-get access-control-contract) has-role "contract-owner" tx-sender) ERR_UNAUTHORIZED)
     (var-set por-contract (some por))
     (ok true)
   )
 )
 
+;; @notice Sets whether Proof of Reserves (PoR) enforcement is active for borrows.
+;; @param flag A boolean indicating whether to enforce PoR for borrows (true) or not (false).
+;; @returns A response tuple with `(ok true)` if successful, `(err ERR_UNAUTHORIZED)` otherwise.
 (define-public (set-enforce-por-borrow (flag bool))
   (begin
-    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
+    (asserts! (contract-call? (var-get access-control-contract) has-role "contract-owner" tx-sender) ERR_UNAUTHORIZED)
     (var-set enforce-por-borrow flag)
     (ok true)
   )
 )
 ;; Monitoring and risk parameter setters
+;; @notice Sets the monitoring contract address.
+;; @param mc The principal of the monitoring contract.
+;; @returns A response tuple with `(ok true)` if successful, `(err ERR_UNAUTHORIZED)` otherwise.
 (define-public (set-monitoring (mc principal))
   (begin
-    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
+    (asserts! (contract-call? (var-get access-control-contract) has-role "contract-owner" tx-sender) ERR_UNAUTHORIZED)
     (var-set monitoring-contract (some mc))
     (ok true)
   )
 )
 
+;; @notice Sets various risk parameters for the lending system.
+;; @param buffer-bps The borrow safety buffer in basis points.
+;; @param min-hf The minimum health factor precision.
+;; @param alert-thr-bps The capacity alert threshold in basis points.
+;; @returns A response tuple with `(ok true)` if successful, `(err ERR_UNAUTHORIZED)` otherwise.
 (define-public (set-risk-params (buffer-bps uint) (min-hf uint) (alert-thr-bps uint))
   (begin
-    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
+    (asserts! (contract-call? (var-get access-control-contract) has-role "contract-owner" tx-sender) ERR_UNAUTHORIZED)
     (var-set borrow-safety-buffer-bps buffer-bps)
     (var-set min-health-factor-precision min-hf)
     (var-set capacity-alert-threshold-bps alert-thr-bps)
@@ -137,23 +172,31 @@
 (define-data-var supported-asset-list (list 100 principal) (list))
 
 ;; Admin: register or update supported asset parameters
+;; @notice Adds a new asset to the list of supported assets or updates its parameters.
+;; @param asset The principal of the asset to add or update.
+;; @param collateral-factor The collateral factor for the asset in basis points.
+;; @param liquidation-threshold The liquidation threshold for the asset in basis points.
+;; @param liquidation-bonus The liquidation bonus for the asset in basis points.
+;; @returns A response tuple with `(ok true)` if successful, `(err ERR_UNAUTHORIZED)` or `(err ERR_INVALID_TUPLE)` or `(err ERR_INSUFFICIENT_LIQUIDITY)` otherwise.
 (define-public (add-supported-asset (asset principal) (collateral-factor uint) (liquidation-threshold uint) (liquidation-bonus uint))
   (begin
-    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
+    (asserts! (contract-call? (var-get access-control-contract) has-role "contract-owner" tx-sender) ERR_UNAUTHORIZED)
     (asserts! (<= collateral-factor BPS) ERR_INVALID_TUPLE)
     (asserts! (and (>= liquidation-threshold u5000) (<= liquidation-threshold BPS)) ERR_INVALID_TUPLE)
     (asserts! (<= liquidation-bonus u2000) ERR_INVALID_TUPLE)
     (map-set supported-assets { asset: asset } { collateral-factor: collateral-factor, liquidation-threshold: liquidation-threshold, liquidation-bonus: liquidation-bonus })
     (let ((current (var-get supported-asset-list)))
       (asserts! (< (len current) u100) ERR_INSUFFICIENT_LIQUIDITY)
-      (var-set supported-asset-list (unwrap-panic (as-max-len? (append current asset) u100)))
-      (ok true))
-    ))
+      (var-set supported-asset-list (unwrap-panic (as-max-len? (append current asset) u100))))
+    (ok true)))
 
 ;; Admin: remove an asset from supported list
+;; @notice Removes an asset from the list of supported assets.
+;; @param asset The principal of the asset to remove.
+;; @returns A response tuple with `(ok true)` if successful, `(err ERR_UNAUTHORIZED)` otherwise.
 (define-public (remove-supported-asset (asset principal))
   (begin
-    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
+    (asserts! (contract-call? (var-get access-control-contract) has-role "contract-owner" tx-sender) ERR_UNAUTHORIZED)
     (map-delete supported-assets { asset: asset })
     (var-set supported-asset-list (filter-assets (var-get supported-asset-list) asset))
     (ok true)
@@ -180,7 +223,7 @@
 
 ;; --- Private Helper Functions ---
 (define-private (check-is-owner)
-  (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED))
+  (asserts! (contract-call? (var-get access-control-contract) has-role "contract-owner" tx-sender) ERR_UNAUTHORIZED))
 
 (define-private (check-not-paused)
   (asserts! (not (var-get paused)) ERR_PAUSED))
@@ -205,6 +248,9 @@
   (if (<= a b) a b))
 
 ;; --- Collateral & Borrow Value Calculations ---
+;; @notice Calculates the total collateral value in USD for a given user, safely handling errors.
+;; @param user The principal of the user.
+;; @returns The total collateral value in USD as a uint.
 (define-read-only (get-total-collateral-value-in-usd-safe (user principal))
   (let ((assets (var-get supported-asset-list)))
     (fold
@@ -236,6 +282,9 @@
           total-value)
         total-value)))
 
+;; @notice Calculates the total borrow value in USD for a given user, safely handling errors.
+;; @param user The principal of the user.
+;; @returns The total borrow value in USD as a uint.
 (define-read-only (get-total-borrow-value-in-usd-safe (user principal))
   (let ((assets (var-get supported-asset-list)))
     (fold
@@ -257,6 +306,9 @@
     (+ total-value (/ (* balance price) PRECISION))))
 
 ;; --- Health Factor Calculation ---
+;; @notice Calculates the health factor for a given user.
+;; @param user The principal of the user.
+;; @returns A response tuple with `(ok uint)` representing the health factor, or an error.
 (define-read-only (get-health-factor (user principal))
   (let ((collateral-data (calculate-weighted-collateral user))
         (collateral-value (get total-collateral-value collateral-data))
@@ -328,10 +380,14 @@
 
 (define-private (check-circuit-breaker)
   (match (var-get circuit-breaker-contract)
-    breaker (contract-call? breaker check-circuit-state LENDING_SERVICE)
+    breaker (unwrap! (contract-call? breaker check-circuit-state LENDING_SERVICE) ERR_CIRCUIT_BREAKER_OPEN)
     (ok true)))
 
 ;; --- Core Functions ---
+;; @notice Supplies an asset to the lending pool.
+;; @param asset The trait of the asset to supply.
+;; @param amount The amount of the asset to supply.
+;; @returns A response tuple with `(ok true)` if successful, or an error code.
 (define-public (supply (asset <sip-010-ft-trait>) (amount uint))
   (match (supply-internal asset amount)
     success (begin (try! (call-circuit-breaker-success)) (ok success))
@@ -351,6 +407,10 @@
         (map-set user-collateral-assets { user: tx-sender, asset: asset-principal } true)
         (ok true)))))
 
+;; @notice Withdraws an asset from the lending pool.
+;; @param asset The trait of the asset to withdraw.
+;; @param amount The amount of the asset to withdraw.
+;; @returns A response tuple with `(ok true)` if successful, or an error code.
 (define-public (withdraw (asset <sip-010-ft-trait>) (amount uint))
   (match (withdraw-internal asset amount)
     success (begin (try! (call-circuit-breaker-success)) (ok success))
@@ -381,6 +441,10 @@
           (record-user-metrics tx-sender)
           (ok true))))))
 
+;; @notice Borrows an asset from the lending pool.
+;; @param asset The trait of the asset to borrow.
+;; @param amount The amount of the asset to borrow.
+;; @returns A response tuple with `(ok true)` if successful, or an error code.
 (define-public (borrow (asset <sip-010-ft-trait>) (amount uint))
   (match (borrow-internal asset amount)
     success (begin (try! (call-circuit-breaker-success)) (ok success))
@@ -407,6 +471,10 @@
           (record-user-metrics tx-sender)
           (ok true))))))
 
+;; @notice Repays a borrowed asset to the lending pool.
+;; @param asset The trait of the asset to repay.
+;; @param amount The amount of the asset to repay.
+;; @returns A response tuple with `(ok true)` if successful, or an error code.
 (define-public (repay (asset <sip-010-ft-trait>) (amount uint))
   (match (repay-internal asset amount)
     success (begin (try! (call-circuit-breaker-success)) (ok success))
@@ -427,6 +495,13 @@
         (ok true)))))
 
 ;; --- Liquidation ---
+;; @notice Liquidates a borrower's position.
+;; @param liquidator The principal of the liquidator.
+;; @param borrower The principal of the borrower whose position is being liquidated.
+;; @param repay-asset The trait of the asset used to repay the borrow.
+;; @param collateral-asset The trait of the collateral asset to seize.
+;; @param repay-amount The amount of the repay-asset to use for liquidation.
+;; @returns A response tuple with `(ok { repaid: uint, seized: uint })` if successful, or an error code.
 (define-public (liquidate 
   (liquidator principal) 
   (borrower principal) 
@@ -478,17 +553,21 @@
   )
 )
 ;; Admin: pause and resume protocol operations
+;; @notice Pauses protocol operations.
+;; @returns A response tuple with `(ok true)` if successful, `(err ERR_UNAUTHORIZED)` otherwise.
 (define-public (pause)
   (begin
-    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
+    (asserts! (contract-call? (var-get access-control-contract) has-role "contract-owner" tx-sender) ERR_UNAUTHORIZED)
     (var-set paused true)
     (ok true)
   )
 )
 
+;; @notice Resumes protocol operations.
+;; @returns A response tuple with `(ok true)` if successful, `(err ERR_UNAUTHORIZED)` otherwise.
 (define-public (resume)
   (begin
-    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
+    (asserts! (contract-call? (var-get access-control-contract) has-role "contract-owner" tx-sender) ERR_UNAUTHORIZED)
     (var-set paused false)
     (ok true)
   )

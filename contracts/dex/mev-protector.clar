@@ -1,7 +1,8 @@
 ;; MEV Protector Contract
 ;; Implements protection against front-running and sandwich attacks
 
-(use-trait mev-protector-trait .all-traits.mev-protector-trait)
+(use-trait mev-protector-trait .traits.mev-protector-trait)
+(use-trait circuit-breaker-trait .traits.circuit-breaker-trait)
 
 ;; --- Constants ---
 ;; @desc Error: Unauthorized access.
@@ -95,7 +96,7 @@
       (rcpt-index (principal->index recipient))
     )
       ;; Use canonical encoding utility contract to compute commitment
-      (unwrap-panic (contract-call? .utils-encoding encode-commitment path-indices amount-in min-amount-out rcpt-index salt))
+      (unwrap-panic (contract-call? .utils.encoding encode-commitment path-indices amount-in min-amount-out rcpt-index salt))
     )
   )
 
@@ -120,7 +121,7 @@
 (define-private (check-circuit-breaker)
   (match (var-get circuit-breaker)
     breaker
-      (let ((is-tripped (try! (contract-call? breaker is-circuit-open))))
+      (let ((is-tripped (try! (contract-call? .security.circuit-breaker is-circuit-open))))
         (if is-tripped (err ERR_CIRCUIT_OPEN) (ok true)))
     (ok true))
 )

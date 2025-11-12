@@ -15,33 +15,33 @@
 ;; @desc Get the name of the token
 ;; @returns (string-ascii 32)
 (define-read-only (get-name)
-  (ok (var-get token-name)))
+  (var-get token-name))
 
 ;; @desc Get the symbol of the token
 ;; @returns (string-ascii 10)
 (define-read-only (get-symbol)
-  (ok (var-get token-symbol)))
+  (var-get token-symbol))
 
 ;; @desc Get the number of decimals for the token
 ;; @returns (uint)
 (define-read-only (get-decimals)
-  (ok (var-get token-decimals)))
+  (var-get token-decimals))
 
 ;; @desc Get the total supply of the token
 ;; @returns (uint)
 (define-read-only (get-total-supply)
-  (ok (var-get token-supply)))
+  (var-get token-supply))
 
 ;; @desc Get the token URI
 ;; @returns (optional (string-utf8 256))
 (define-read-only (get-token-uri)
-  (ok (var-get token-uri)))
+  (var-get token-uri))
 
 ;; @desc Get the balance of a principal
 ;; @param owner (principal) The principal to check the balance of
 ;; @returns (uint)
 (define-read-only (get-balance (owner principal))
-  (ok (ft-get-balance cxvg-token owner)))
+  (ft-get-balance cxvg-token owner))
 
 ;; @desc Transfer tokens from one principal to another
 ;; @param amount (uint) The amount of tokens to transfer
@@ -93,4 +93,4 @@
 ;; @desc Get the contract owner
 ;; @returns (principal)
 (define-read-only (get-contract-owner)
-  (ok (var-get contract-owner)))
+  (var-get contract-owner))

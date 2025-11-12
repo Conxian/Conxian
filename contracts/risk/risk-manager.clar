@@ -1,9 +1,9 @@
 ;; risk-manager.clar
 ;; Risk management for the dimensional engine
 
-(use-trait risk-trait .all-traits.risk-trait)
-(use-trait oracle-trait .all-traits.oracle-trait)
-(use-trait dimensional-trait .all-traits.dimensional-trait)
+(use-trait risk-trait .risk.risk-trait)
+(use-trait oracle-trait .oracle.oracle-trait)
+(use-trait dimensional-trait .dimensional.dimensional-trait)
 
 ;; Helpers
 (define-private (abs-int (x int))
@@ -115,3 +115,4 @@
     (ok true)
   )
 )
+

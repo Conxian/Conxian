@@ -5,10 +5,10 @@
 ;; Compatibility: Clarity 3.0+
 ;; =============================================================================
 
-(use-trait utils-trait .all-traits.utils-trait)
+(use-trait utils-trait .utils-trait.utils-trait)
 
 ;; Implement the trait
-(impl-trait .all-traits.utils-trait)
+(impl-trait .utils-trait.utils-trait)
 
 (define-public (principal-to-buff (p principal))
   ;; Convert principal to buffer using standard Clarity functions

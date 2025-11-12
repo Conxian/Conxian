@@ -2,20 +2,26 @@
 
 ;; Conxian Yield Optimizer - Automated yield strategies
 
-;; --- Constants ---(define-constant ERR_UNAUTHORIZED (err u601))
+(use-trait circuit-breaker-trait .traits.circuit-breaker-trait.circuit-breaker-trait)
+
+;; --- Constants ---
+(define-constant ERR_UNAUTHORIZED (err u601))
 (define-constant ERR_STRATEGY_NOT_FOUND (err u602))
 (define-constant ERR_INVALID_STRATEGY (err u603))
 (define-constant ERR_CIRCUIT_OPEN (err u604))
 (define-data-var contract-owner principal tx-sender)
 (define-data-var strategy-counter uint u0)
-(define-data-var circuit-breaker (optional principal) none)
+(define-data-var circuit-breaker-contract (optional <circuit-breaker-trait>) none)
 
 ;; --- Maps ---
 
 ;; Maps a strategy ID to its details(define-map strategies uint {  name: (string-ascii 64),  contract: principal,  risk-level: uint,  yield-target: uint,  created-at: uint,  last-rebalanced: uint,  total-compounded-rewards: uint,  total-gas-cost: uint})
 
 ;; Maps a user and strategy ID to their deposit information(define-map user-deposits { user: principal, strategy-id: uint } { amount: uint, deposited-at: uint })
-(define-private (check-circuit-breaker)  (ok true))
+(define-private (check-circuit-breaker)
+  (let ((breaker-contract (unwrap! (var-get circuit-breaker-contract) ERR_INVALID_STRATEGY)))
+    (asserts! (not (contract-call? breaker-contract is-circuit-open)) ERR_CIRCUIT_OPEN)
+    (ok true)))
 (define-public (auto-compound (strategy-id uint) (token principal))
   (begin
     (let ((strategy (unwrap! (map-get? strategies strategy-id) ERR_STRATEGY_NOT_FOUND)))
@@ -49,7 +55,7 @@
 (define-public (deposit (strategy-id uint) (token principal) (amount uint))    (begin        (try! (check-circuit-breaker))        (let ((strategy (unwrap! (map-get? strategies strategy-id) ERR_STRATEGY_NOT_FOUND)))            (try! (contract-call? token transfer amount tx-sender (get contract strategy) none))            (let ((user-deposit (default-to { amount: u0, deposited-at: block-height } (map-get? user-deposits { user: tx-sender, strategy-id: strategy-id }))))                (map-set user-deposits { user: tx-sender, strategy-id: strategy-id } {                    amount: (+ (get amount user-deposit) amount),                    deposited-at: block-height                })                (ok true)            )        )    ))
 (define-public (withdraw (strategy-id uint) (token principal) (amount uint))    (begin        (try! (check-circuit-breaker))        (let ((strategy (unwrap! (map-get? strategies strategy-id) ERR_STRATEGY_NOT_FOUND)))            (let ((user-deposit (unwrap! (map-get? user-deposits { user: tx-sender, strategy-id: strategy-id }) (err u0))))                (asserts! (>= (get amount user-deposit) amount) (err u0))                (let ((sc (get contract strategy)))                  (print { event: "strategy-withdraw", strategy: sc, token: token, amount: amount }))                (map-set user-deposits { user: tx-sender, strategy-id: strategy-id } {                    amount: (- (get amount user-deposit) amount),                    deposited-at: block-height                })                (ok true)            )        )    ))
 
-;; --- Admin Functions ---(define-public (set-circuit-breaker (cb principal))    (begin        (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)        (var-set circuit-breaker (some cb))        (ok true)    ))
+;; --- Admin Functions ---(define-public (set-circuit-breaker (cb <circuit-breaker-trait>))    (begin        (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)        (var-set circuit-breaker-contract (some cb))        (ok true)    ))
 (define-public (transfer-ownership (new-owner principal))  (begin    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)    (var-set contract-owner new-owner)    (ok true)  ))
 
 ;; --- Read-Only Functions ---(define-read-only (get-strategy-details (strategy-id uint))  (map-get? strategies strategy-id))

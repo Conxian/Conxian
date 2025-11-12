@@ -1,9 +1,7 @@
 ;; mock-token.clar
 ;; Mock ERC-20 token for testing
 
-(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
 
-(impl-trait .all-traits.sip-010-ft-trait)
 
 ;; ===== Constants =====
 (define-constant TOKEN_NAME "Mock Token")
@@ -21,35 +19,47 @@
 (define-data-var admin principal (as-contract tx-sender))
 
 ;; Balances
-(define-map balances principal uint)
+(define-map balances
+  principal
+  uint
+)
 
 ;; Allowances
-(define-map allowances {
-  owner: principal,
-  spender: principal
-} uint)
+(define-map allowances
+  {
+    owner: principal,
+    spender: principal,
+  }
+  uint
+)
 
 ;; ===== Public Functions =====
-(define-public (transfer (amount uint) (sender principal) (recipient principal) (memo (optional (buff 34))))
+(define-public (transfer
+    (amount uint)
+    (sender principal)
+    (recipient principal)
+    (memo (optional (buff 34)))
+  )
   (begin
-    (asserts! (or (is-eq tx-sender sender) (is-eq tx-sender (as-contract tx-sender))) ERR_UNAUTHORIZED)
-    (asserts! (> amount u0) ERR_INVALID_AMOUNT)
-    
-    (let (
-      (sender-balance (default-to u0 (map-get? balances sender)))
-      (recipient-balance (default-to u0 (map-get? balances recipient)))
+    (asserts! 
+      (or (is-eq tx-sender sender) (is-eq tx-sender (as-contract tx-sender)))
+      ERR_UNAUTHORIZED
     )
+    (asserts! (> amount u0) ERR_INVALID_AMOUNT)
+
+    (let (
+        (sender-balance (default-to u0 (map-get? balances sender)))
+        (recipient-balance (default-to u0 (map-get? balances recipient)))
+      )
       (asserts! (>= sender-balance amount) ERR_INSUFFICIENT_BALANCE)
-      
+
       (map-set balances sender (- sender-balance amount))
       (map-set balances recipient (+ recipient-balance amount))
-      
-      (match memo 
-        m (print m)
-        (ok u0)
+
+      (match memo
+        m (begin (print m) (ok true))
+        (ok true)
       )
-      
-      (ok true)
     )
   )
 )
@@ -78,64 +88,105 @@
   (ok none)
 )
 
-(define-public (transfer-from (amount uint) (sender principal) (recipient principal) (memo (optional (buff 34))))
-  (let (
-    (allowance (default-to u0 (map-get? allowances {owner: sender, spender: tx-sender})))
-    (new-allowance (- allowance amount))
+(define-public (transfer-from
+    (amount uint)
+    (sender principal)
+    (recipient principal)
+    (memo (optional (buff 34)))
   )
+  (let (
+      (allowance (default-to u0
+        (map-get? allowances {
+          owner: sender,
+          spender: tx-sender,
+        })
+      ))
+      (new-allowance (- allowance amount))
+    )
     (asserts! (>= allowance amount) ERR_UNAUTHORIZED)
-    
+
     (if (<= new-allowance u0)
-      (map-delete allowances {owner: sender, spender: tx-sender})
-      (map-set allowances {owner: sender, spender: tx-sender} new-allowance)
+      (map-delete allowances {
+        owner: sender,
+        spender: tx-sender,
+      })
+      (map-set allowances {
+        owner: sender,
+        spender: tx-sender,
+      }
+        new-allowance
+      )
     )
     ;; Perform transfer logic directly (bypass transfer's tx-sender check)
     (let (
-      (sender-balance (default-to u0 (map-get? balances sender)))
-      (recipient-balance (default-to u0 (map-get? balances recipient)))
-    )
+        (sender-balance (default-to u0 (map-get? balances sender)))
+        (recipient-balance (default-to u0 (map-get? balances recipient)))
+      )
       (asserts! (>= sender-balance amount) ERR_INSUFFICIENT_BALANCE)
       (map-set balances sender (- sender-balance amount))
       (map-set balances recipient (+ recipient-balance amount))
-      (match memo 
-        m (print m)
-        (ok u0)
+      (match memo
+        m (begin (print m) (ok true))
+        (ok true)
       )
       (ok true)
     )
   )
 )
 
-(define-public (approve (spender principal) (amount uint) (memo (optional (buff 34))))
+(define-public (approve
+    (spender principal)
+    (amount uint)
+    (memo (optional (buff 34)))
+  )
   (begin
     (asserts! (is-eq tx-sender (as-contract tx-sender)) ERR_UNAUTHORIZED)
     (asserts! (> amount u0) ERR_INVALID_AMOUNT)
-    
-    (map-set allowances {owner: tx-sender, spender: spender} amount)
-    
-    (match memo 
-      m (print m)
-      (ok u0)
+
+    (map-set allowances {
+      owner: tx-sender,
+      spender: spender,
+    }
+      amount
     )
-    
+
+    (match memo
+      m (begin (print m) (ok true))
+      (ok true)
+    )
+
     (ok true)
   )
 )
 
-(define-public (get-allowance (owner principal) (spender principal))
-  (ok (default-to u0 (map-get? allowances {owner: owner, spender: spender})))
+(define-public (get-allowance
+    (owner principal)
+    (spender principal)
+  )
+  (ok (default-to u0
+    (map-get? allowances {
+      owner: owner,
+      spender: spender,
+    })
+  ))
 )
 
 ;; ===== Admin Functions =====
-(define-public (mint (amount uint) (recipient principal))
+(define-public (mint
+    (amount uint)
+    (recipient principal)
+  )
   (begin
-    (asserts! (or (is-eq tx-sender admin) (is-eq tx-sender (as-contract tx-sender))) ERR_UNAUTHORIZED)
-    (asserts! (> amount u0) ERR_INVALID_AMOUNT)
-    
-    (let (
-      (current-supply (var-get total-supply))
-      (recipient-balance (default-to u0 (map-get? balances recipient)))
+    (asserts!
+      (or (is-eq tx-sender admin) (is-eq tx-sender (as-contract tx-sender)))
+      ERR_UNAUTHORIZED
     )
+    (asserts! (> amount u0) ERR_INVALID_AMOUNT)
+
+    (let (
+        (current-supply (var-get total-supply))
+        (recipient-balance (default-to u0 (map-get? balances recipient)))
+      )
       (var-set total-supply (+ current-supply amount))
       (map-set balances recipient (+ recipient-balance amount))
       (ok true)
@@ -146,13 +197,13 @@
 (define-public (burn (amount uint))
   (begin
     (asserts! (> amount u0) ERR_INVALID_AMOUNT)
-    
+
     (let (
-      (balance (default-to u0 (map-get? balances tx-sender)))
-      (current-supply (var-get total-supply))
-    )
+        (balance (default-to u0 (map-get? balances tx-sender)))
+        (current-supply (var-get total-supply))
+      )
       (asserts! (>= balance amount) ERR_INSUFFICIENT_BALANCE)
-      
+
       (var-set total-supply (- current-supply amount))
       (map-set balances tx-sender (- balance amount))
       (ok true)

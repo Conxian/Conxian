@@ -1,6 +1,6 @@
 ;; DEX Oracle - Minimal implementation of oracle-trait
 
-(use-trait oracle-trait .all-traits.oracle-trait)
+(use-trait oracle-trait .oracle-trait.oracle-trait)
 
 ;; --- Constants ---
 ;; @constant ERR_ASSET_NOT_FOUND (err u404) - Returned when the requested asset price is not found.

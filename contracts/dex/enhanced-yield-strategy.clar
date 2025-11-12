@@ -2,6 +2,7 @@
 ;; Implements strategy-trait for vault integration
 
 ;; Trait imports
+(use-trait strategy-trait .traits.strategy-trait.strategy-trait)
 
 ;; Constants
 (define-constant ERR_UNAUTHORIZED (err u1001))

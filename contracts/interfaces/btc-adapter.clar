@@ -1,4 +1,4 @@
-(use-trait btc-adapter-trait .all-traits.btc-adapter-trait)
+(use-trait btc-adapter-trait .btc-adapter.btc-adapter-trait)
 ;; btc-adapter.clar
 ;; Facilitates Bitcoin Layer Integration
 
@@ -72,3 +72,4 @@
   )
 )
 
+

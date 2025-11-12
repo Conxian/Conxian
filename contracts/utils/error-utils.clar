@@ -98,7 +98,7 @@
     ((unwrap!-or-err response error)
       (match response
         (ok value) (ok value)
-        (err _) (err error)
+        (err e) (err error)
       )
     )
   )

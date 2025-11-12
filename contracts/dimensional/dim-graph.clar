@@ -5,10 +5,11 @@
 ;; - This contract allows for the analysis of risk contagion and net exposure.
 
 ;; ===== Constants =====
-(define-constant ERR_UNAUTHORIZED (err u101))
-(define-constant ERR_INVALID_DIMENSION (err u102))
-(define-constant ERR_DIMENSION_DISABLED (err u103))
-(define-constant ERR_SELF_EDGE (err u104))
+;; Standardized Conxian error codes (800-range for dimensional modules)
+(define-constant ERR_UNAUTHORIZED u800)
+(define-constant ERR_INVALID_DIMENSION u819)
+(define-constant ERR_DIMENSION_DISABLED u807)
+(define-constant ERR_SELF_EDGE u820)
 
 ;; ===== Data Variables =====
 (define-data-var contract-owner principal tx-sender)
@@ -30,7 +31,7 @@
 ;; ===== Owner Functions =====
 (define-public (set-contract-owner (new-owner principal))
   (begin
-    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
+    (asserts! (is-eq tx-sender (var-get contract-owner)) (err ERR_UNAUTHORIZED))
     (var-set contract-owner new-owner)
     (ok true)
   )
@@ -38,7 +39,7 @@
 
 (define-public (set-writer-principal (new-writer principal))
   (begin
-    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
+    (asserts! (is-eq tx-sender (var-get contract-owner)) (err ERR_UNAUTHORIZED))
     (var-set writer-principal new-writer)
     (ok true)
   )
@@ -46,7 +47,7 @@
 
 (define-public (enable-dimension (dim-id uint) (enabled bool))
   (begin
-    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
+    (asserts! (is-eq tx-sender (var-get contract-owner)) (err ERR_UNAUTHORIZED))
     (map-set dimension-enabled
       {dim-id: dim-id}
       {enabled: enabled}
@@ -63,10 +64,10 @@
 ;; @returns (response bool uint)
 (define-public (set-edge (f uint) (t uint) (flow-amt uint))
   (begin
-    (asserts! (is-eq tx-sender (var-get writer-principal)) ERR_UNAUTHORIZED)
-    (asserts! (not (is-eq f t)) ERR_SELF_EDGE)
-    (asserts! (is-dimension-enabled f) ERR_DIMENSION_DISABLED)
-    (asserts! (is-dimension-enabled t) ERR_DIMENSION_DISABLED)
+    (asserts! (is-eq tx-sender (var-get writer-principal)) (err ERR_UNAUTHORIZED))
+    (asserts! (not (is-eq f t)) (err ERR_SELF_EDGE))
+    (asserts! (is-dimension-enabled f) (err ERR_DIMENSION_DISABLED))
+    (asserts! (is-dimension-enabled t) (err ERR_DIMENSION_DISABLED))
     
     (map-set edge 
       {from-dim: f, to-dim: t} 
@@ -79,7 +80,7 @@
 ;; Batch update multiple edges
 (define-public (set-edges (updates (list 20 {from-dim: uint, to-dim: uint, flow: uint})))
   (begin
-    (asserts! (is-eq tx-sender (var-get writer-principal)) ERR_UNAUTHORIZED)
+    (asserts! (is-eq tx-sender (var-get writer-principal)) (err ERR_UNAUTHORIZED))
     (fold set-edge-iter updates (ok true))
   )
 )
@@ -100,9 +101,9 @@
 )
   (begin
     (try! prev-result)
-    (asserts! (not (is-eq (get from-dim update) (get to-dim update))) ERR_SELF_EDGE)
-    (asserts! (is-dimension-enabled (get from-dim update)) ERR_DIMENSION_DISABLED)
-    (asserts! (is-dimension-enabled (get to-dim update)) ERR_DIMENSION_DISABLED)
+    (asserts! (not (is-eq (get from-dim update) (get to-dim update))) (err ERR_SELF_EDGE))
+    (asserts! (is-dimension-enabled (get from-dim update)) (err ERR_DIMENSION_DISABLED))
+    (asserts! (is-dimension-enabled (get to-dim update)) (err ERR_DIMENSION_DISABLED))
     
     (map-set edge
       {from-dim: (get from-dim update), to-dim: (get to-dim update)}

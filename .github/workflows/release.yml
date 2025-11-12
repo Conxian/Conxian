@@ -3,22 +3,22 @@ name: Conxian Release Pipeline
 on:
   push:
     tags:
-      - 'v*'
+      - "v*"
   release:
     types: [published]
   workflow_dispatch:
     inputs:
       release_type:
-        description: 'Type of release'
+        description: "Type of release"
         required: true
-        default: 'patch'
+        default: "patch"
         type: choice
         options:
-        - patch
-        - minor
-        - major
+          - patch
+          - minor
+          - major
       pre_release:
-        description: 'Mark as pre-release'
+        description: "Mark as pre-release"
         required: false
         default: false
         type: boolean
@@ -28,9 +28,9 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  NODE_VERSION: '20'
-  CLARINET_VERSION: '3.8.1'
-  PYTHON_VERSION: '3.11'
+  NODE_VERSION: "20"
+  CLARINET_VERSION: "3.8.1"
+  PYTHON_VERSION: "3.11"
 
 jobs:
   security-gate:
@@ -73,7 +73,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+          cache: "npm"
           cache-dependency-path: package-lock.json
 
       - name: Install Clarinet
@@ -156,7 +156,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+          cache: "npm"
           cache-dependency-path: package-lock.json
 
       - name: Install Clarinet
@@ -186,7 +186,8 @@ jobs:
     name: GitHub Release
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    needs: [security-gate, pre-release-testing, version-management, build-artifacts]
+    needs:
+      [security-gate, pre-release-testing, version-management, build-artifacts]
     permissions:
       contents: write
     steps:
@@ -203,17 +204,17 @@ jobs:
         run: |
           cat > body.md <<'EOF'
           # Conxian Release
-          
+
           ## What's New
           EOF
           echo "${{ needs.version-management.outputs.changelog }}" >> body.md
           cat >> body.md <<'EOF'
-          
+
           ## Artifacts
           - Contracts package
           - Scripts package
           - Checksums
-          
+
           ## Security
           - Contracts compiled & tests passed
           - Basic security gate completed
@@ -235,7 +236,14 @@ jobs:
     name: Pipeline Summary
     runs-on: ubuntu-latest
     timeout-minutes: 5
-    needs: [security-gate, pre-release-testing, version-management, build-artifacts, github-release]
+    needs:
+      [
+        security-gate,
+        pre-release-testing,
+        version-management,
+        build-artifacts,
+        github-release,
+      ]
     if: always()
     permissions:
       contents: read

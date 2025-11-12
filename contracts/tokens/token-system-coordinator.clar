@@ -10,6 +10,8 @@
 ;; - User status aggregation
 ;; - Revenue distribution triggers
 
+(use-trait rbac-trait .decentralized-trait-registry.decentralized-trait-registry)
+
 ;; Error codes
 (define-constant ERR_UNAUTHORIZED (err u100))
 (define-constant ERR_INVALID_TOKEN (err u101))

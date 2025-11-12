@@ -13,8 +13,7 @@ address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 [accounts.wallet_1]
 address = "ST1SJ3DTE5DN7X54YDH5D64R3BCB6A2AG2ZQ8YPD5"
 
-[contracts.all-traits]
-path = "../contracts/traits/all-traits.clar"
+
 
 [contracts.dim-metrics]
 path = "../contracts/dimensional/dim-metrics.clar"

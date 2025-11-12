@@ -1,11 +1,11 @@
 ;; liquidation-engine.clar
 ;; Handles position liquidations in the dimensional engine
 
-(use-trait liquidation-trait .all-traits.liquidation-trait)
-(use-trait risk-trait .all-traits.risk-trait)
-(use-trait oracle-trait .all-traits.oracle-trait)
-(use-trait dimensional-trait .all-traits.dimensional-trait)
-(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
+(use-trait liquidation-trait .liquidation-trait)
+(use-trait risk-trait .risk-trait)
+(use-trait oracle-trait .oracle-trait)
+(use-trait dimensional-trait .dimensional-trait)
+(use-trait ft-trait .sip-010-trait)
 
 ;; ===== Constants =====
 (define-constant ERR_UNAUTHORIZED (err u4000))

@@ -2,7 +2,7 @@
 ;; This contract is responsible for registering the lending components
 ;; with the dimensional registry.
 
-(use-trait dim-registry-trait .all-traits.dim-registry-trait)
+(use-trait dim-registry-trait .dimensional.dim-registry-trait)
 
 (define-constant ERR_UNAUTHORIZED (err u101))
 (define-constant LENDING_VAULT_WEIGHT u100)
@@ -25,4 +25,4 @@
     (try! (contract-call? registry register-component .enterprise-module ENTERPRISE_MODULE_WEIGHT))
     (ok true)
   )
-)
+)

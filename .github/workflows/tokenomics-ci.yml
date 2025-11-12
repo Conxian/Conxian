@@ -2,17 +2,17 @@ name: Conxian Enhanced Tokenomics CI/CD
 
 on:
   push:
-    branches: [ main, develop, enhancements ]
+    branches: [main, develop, enhancements]
     paths:
-      - 'contracts/**'
-      - 'tests/**'
-      - 'scripts/**'
+      - "contracts/**"
+      - "tests/**"
+      - "scripts/**"
   pull_request:
-    branches: [ main, develop, enhancements ]
+    branches: [main, develop, enhancements]
     paths:
-      - 'contracts/**'
-      - 'tests/**'
-      - 'scripts/**'
+      - "contracts/**"
+      - "tests/**"
+      - "scripts/**"
   workflow_dispatch: {}
 
 concurrency:
@@ -20,8 +20,8 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  NODE_VERSION: '20'
-  CLARINET_VERSION: '3.8.1'
+  NODE_VERSION: "20"
+  CLARINET_VERSION: "3.8.1"
 
 jobs:
   # =============================================================================
@@ -30,34 +30,34 @@ jobs:
   lint-and-format:
     runs-on: ubuntu-latest
     name: Lint and Format Check
-    
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ env.NODE_VERSION }}
-        
-    - name: Install Clarinet
-      run: |
-        echo "Using project-pinned Clarinet via npx"
-        
-    - name: Verify Clarinet installation
-      run: npx clarinet --version
-      
-    - name: Check Clarity syntax
-      run: npx clarinet check
-      
-    - name: Run contract analysis
-      timeout-minutes: 10
-      run: npx clarinet check
-      
-    - name: Lint documentation
-      run: |
-        npm install -g markdownlint-cli
-        markdownlint documentation/**/*.md || true
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install Clarinet
+        run: |
+          echo "Using project-pinned Clarinet via npx"
+
+      - name: Verify Clarinet installation
+        run: npx clarinet --version
+
+      - name: Check Clarity syntax
+        run: npx clarinet check
+
+      - name: Run contract analysis
+        timeout-minutes: 10
+        run: npx clarinet check
+
+      - name: Lint documentation
+        run: |
+          npm install -g markdownlint-cli
+          markdownlint documentation/**/*.md || true
 
   # =============================================================================
   # UNIT TESTS
@@ -66,40 +66,40 @@ jobs:
     runs-on: ubuntu-latest
     name: Unit Tests
     needs: lint-and-format
-    
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ env.NODE_VERSION }}
-        cache: 'npm'
-        
-    - name: Install Dependencies
-      run: npm ci --no-audit --no-fund
-      
-    - name: Install Clarinet
-      run: |
-        echo "Using project-pinned Clarinet via npx"
-        
-    - name: Run Clarity unit tests
-      run: npm test
-        
-    - name: Run TypeScript unit tests
-      run: npm test
-      
-    - name: Generate test coverage report
-      run: |
-        npm run test:coverage || true
-        
-    - name: Upload coverage reports
-      uses: codecov/codecov-action@v3
-      with:
-        file: ./coverage/lcov.info
-        flags: unittests
-        name: codecov-umbrella
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+
+      - name: Install Dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Install Clarinet
+        run: |
+          echo "Using project-pinned Clarinet via npx"
+
+      - name: Run Clarity unit tests
+        run: npm test
+
+      - name: Run TypeScript unit tests
+        run: npm test
+
+      - name: Generate test coverage report
+        run: |
+          npm run test:coverage || true
+
+      - name: Upload coverage reports
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./coverage/lcov.info
+          flags: unittests
+          name: codecov-umbrella
 
   # =============================================================================
   # INTEGRATION TESTS
@@ -108,42 +108,42 @@ jobs:
     runs-on: ubuntu-latest
     name: Integration Tests
     needs: unit-tests
-    
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ env.NODE_VERSION }}
-        cache: 'npm'
-        
-    - name: Install Dependencies
-      run: npm ci --no-audit --no-fund
-      
-    - name: Install Clarinet
-      run: |
-        echo "Using project-pinned Clarinet via npx"
-        
-    - name: Start Clarinet devnet
-      timeout-minutes: 5
-      run: |
-        npx clarinet devnet start &
-        sleep 30
-        
-    - name: Run integration tests
-      run: npm run test:integration || echo 'Integration tests not configured'
-        
-    - name: Run cross-contract interaction tests
-      run: |
-        echo "Testing cross-contract interactions..."
-        npm run test:integration || echo 'Integration tests not configured'
-        
-    - name: Stop Clarinet devnet
-      if: always()
-      run: |
-        pkill clarinet || true
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+
+      - name: Install Dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Install Clarinet
+        run: |
+          echo "Using project-pinned Clarinet via npx"
+
+      - name: Start Clarinet devnet
+        timeout-minutes: 5
+        run: |
+          npx clarinet devnet start &
+          sleep 30
+
+      - name: Run integration tests
+        run: npm run test:integration || echo 'Integration tests not configured'
+
+      - name: Run cross-contract interaction tests
+        run: |
+          echo "Testing cross-contract interactions..."
+          npm run test:integration || echo 'Integration tests not configured'
+
+      - name: Stop Clarinet devnet
+        if: always()
+        run: |
+          pkill clarinet || true
 
   # =============================================================================
   # SYSTEM VALIDATION TESTS
@@ -153,36 +153,36 @@ jobs:
     name: System Validation Tests
     needs: integration-tests
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
-    
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ env.NODE_VERSION }}
-        cache: 'npm'
-        
-    - name: Install Dependencies
-      run: npm ci --no-audit --no-fund
-      
-    - name: Install Clarinet
-      run: |
-        echo "Using project-pinned Clarinet via npx"
-        
-    - name: Run system validation tests
-      run: npm run test:system || echo 'System tests not configured'
-        
-    - name: Validate deployment readiness
-      run: |
-        echo "Validating deployment configuration..."
-        ./scripts/deploy-tokenomics.sh simnet development true
-        
-    - name: Performance benchmarks
-      run: |
-        echo "Running performance benchmarks..."
-        npm run test:performance || true
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+
+      - name: Install Dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Install Clarinet
+        run: |
+          echo "Using project-pinned Clarinet via npx"
+
+      - name: Run system validation tests
+        run: npm run test:system || echo 'System tests not configured'
+
+      - name: Validate deployment readiness
+        run: |
+          echo "Validating deployment configuration..."
+          ./scripts/deploy-tokenomics.sh simnet development true
+
+      - name: Performance benchmarks
+        run: |
+          echo "Running performance benchmarks..."
+          npm run test:performance || true
 
   # =============================================================================
   # SECURITY ANALYSIS
@@ -191,32 +191,32 @@ jobs:
     runs-on: ubuntu-latest
     name: Security Analysis
     needs: lint-and-format
-    
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Install Clarinet
-      run: |
-        echo "Using project-pinned Clarinet via npx"
-        
-    - name: Run security analysis
-      timeout-minutes: 5
-      run: |
-        echo "Running Clarity security analysis..."
-        npx clarinet check
-        
-    - name: Check for common vulnerabilities
-      run: |
-        echo "Checking for common smart contract vulnerabilities..."
-        # Add security scanning tools here
-        grep -r "panic" contracts/ && echo "WARNING: panic found" || true
-        grep -r "unwrap-panic" contracts/ && echo "WARNING: unwrap-panic found" || true
-        
-    - name: Audit contract complexity
-      run: |
-        echo "Analyzing contract complexity..."
-        find contracts/ -name "*.clar" -exec wc -l {} + | sort -n
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Clarinet
+        run: |
+          echo "Using project-pinned Clarinet via npx"
+
+      - name: Run security analysis
+        timeout-minutes: 5
+        run: |
+          echo "Running Clarity security analysis..."
+          npx clarinet check
+
+      - name: Check for common vulnerabilities
+        run: |
+          echo "Checking for common smart contract vulnerabilities..."
+          # Add security scanning tools here
+          grep -r "panic" contracts/ && echo "WARNING: panic found" || true
+          grep -r "unwrap-panic" contracts/ && echo "WARNING: unwrap-panic found" || true
+
+      - name: Audit contract complexity
+        run: |
+          echo "Analyzing contract complexity..."
+          find contracts/ -name "*.clar" -exec wc -l {} + | sort -n
 
   # =============================================================================
   # DEPLOYMENT VALIDATION
@@ -226,33 +226,33 @@ jobs:
     name: Deployment Validation
     needs: [unit-tests, integration-tests]
     if: github.ref == 'refs/heads/main'
-    
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Install Clarinet
-      run: |
-        echo "Using project-pinned Clarinet via npx"
-        
-    - name: Validate deployment scripts
-      run: |
-        echo "Validating deployment orchestration..."
-        chmod +x scripts/deploy-tokenomics.sh
-        ./scripts/deploy-tokenomics.sh simnet development true
-        
-    - name: Generate deployment artifacts
-      run: |
-        echo "Generating deployment artifacts..."
-        mkdir -p artifacts/deployments
-        npx clarinet check
-        
-    - name: Upload deployment artifacts
-      uses: actions/upload-artifact@v3
-      with:
-        name: deployment-artifacts
-        path: artifacts/deployments/
-        retention-days: 30
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Clarinet
+        run: |
+          echo "Using project-pinned Clarinet via npx"
+
+      - name: Validate deployment scripts
+        run: |
+          echo "Validating deployment orchestration..."
+          chmod +x scripts/deploy-tokenomics.sh
+          ./scripts/deploy-tokenomics.sh simnet development true
+
+      - name: Generate deployment artifacts
+        run: |
+          echo "Generating deployment artifacts..."
+          mkdir -p artifacts/deployments
+          npx clarinet check
+
+      - name: Upload deployment artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: deployment-artifacts
+          path: artifacts/deployments/
+          retention-days: 30
 
   # =============================================================================
   # TESTNET DEPLOYMENT (on main branch)
@@ -264,42 +264,42 @@ jobs:
     if: github.ref == 'refs/heads/main'
     env:
       TESTNET_DEPLOYER_KEY: ${{ secrets.TESTNET_DEPLOYER_KEY }}
-    
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Install Clarinet
-      run: |
-        echo "Using project-pinned Clarinet via npx"
-        
-    - name: Validate secrets
-      if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork == false }}
-      run: |
-        if [ -z "$TESTNET_DEPLOYER_KEY" ]; then
-          echo "⚠️ TESTNET_DEPLOYER_KEY secret not configured"
-          echo "Please add this secret in repository Settings → Secrets and variables → Actions"
-          exit 1
-        fi
-        echo "✅ Required secrets validated"
-        
-    - name: Configure testnet environment
-      if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork == false }}
-      run: |
-        echo "Configuring testnet deployment..."
-        # Configure deployment keys and settings
-        
-    - name: Deploy to testnet
-      if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork == false }}
-      run: |
-        echo "Deploying to Stacks testnet..."
-        ./scripts/deploy-tokenomics.sh testnet staging false
-        
-    - name: Verify testnet deployment
-      if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork == false }}
-      run: |
-        echo "Verifying testnet deployment..."
-        # Add deployment verification steps
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Clarinet
+        run: |
+          echo "Using project-pinned Clarinet via npx"
+
+      - name: Validate secrets
+        if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork == false }}
+        run: |
+          if [ -z "$TESTNET_DEPLOYER_KEY" ]; then
+            echo "⚠️ TESTNET_DEPLOYER_KEY secret not configured"
+            echo "Please add this secret in repository Settings → Secrets and variables → Actions"
+            exit 1
+          fi
+          echo "✅ Required secrets validated"
+
+      - name: Configure testnet environment
+        if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork == false }}
+        run: |
+          echo "Configuring testnet deployment..."
+          # Configure deployment keys and settings
+
+      - name: Deploy to testnet
+        if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork == false }}
+        run: |
+          echo "Deploying to Stacks testnet..."
+          ./scripts/deploy-tokenomics.sh testnet staging false
+
+      - name: Verify testnet deployment
+        if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork == false }}
+        run: |
+          echo "Verifying testnet deployment..."
+          # Add deployment verification steps
 
   # =============================================================================
   # NOTIFICATION AND REPORTING
@@ -309,20 +309,20 @@ jobs:
     name: Notify Completion
     needs: [unit-tests, integration-tests, security-analysis]
     if: always()
-    
+
     steps:
-    - name: Notify success
-      if: ${{ needs.unit-tests.result == 'success' && needs.integration-tests.result == 'success' }}
-      run: |
-        echo "✅ All tokenomics tests passed successfully!"
-        
-    - name: Notify failure
-      if: ${{ needs.unit-tests.result == 'failure' || needs.integration-tests.result == 'failure' }}
-      run: |
-        echo "❌ Tokenomics tests failed. Check logs for details."
-        exit 1
-        
-    - name: Generate test report
-      run: |
-        echo "Generating comprehensive test report..."
-        # Add test report generation logic
+      - name: Notify success
+        if: ${{ needs.unit-tests.result == 'success' && needs.integration-tests.result == 'success' }}
+        run: |
+          echo "✅ All tokenomics tests passed successfully!"
+
+      - name: Notify failure
+        if: ${{ needs.unit-tests.result == 'failure' || needs.integration-tests.result == 'failure' }}
+        run: |
+          echo "❌ Tokenomics tests failed. Check logs for details."
+          exit 1
+
+      - name: Generate test report
+        run: |
+          echo "Generating comprehensive test report..."
+          # Add test report generation logic

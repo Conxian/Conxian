@@ -2,6 +2,7 @@
 
 ;; ===== Traits =====
 (use-trait pool-factory-trait .all-traits.pool-factory-trait)
+(use-trait fee-manager-trait .all-traits.fee-manager-trait)
 
 ;; ===== Constants =====
 (define-constant ERR_UNAUTHORIZED (err u100))
@@ -29,11 +30,24 @@
 (define-private (check-is-owner)
   (ok (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)))
 
-(define-private (validate-fee-tier (fee-tier-id uint))
-  (match (contract-call? .fee-manager get-fee-tier fee-tier-id)
-    success (ok true)
-    error ERR_INVALID_FEE_TIER))
+(define-data-var fee-manager-contract (optional principal) none)
 
+(define-private (validate-fee-tier (fee-tier-id uint))
+  (let ((fee-manager (unwrap! (var-get fee-manager-contract) (err ERR_FEE_MANAGER_NOT_SET))))
+    (match (contract-call? fee-manager get-fee-tier fee-tier-id)
+      success (ok true)
+      error ERR_INVALID_FEE_TIER)))
+
+(define-constant ERR_FEE_MANAGER_NOT_SET (err u1000))
+
+;; ===== Admin Functions =====
+(define-public (set-fee-manager-contract (new-fee-manager principal))
+  (begin
+    (unwrap-panic (check-is-owner))
+    (var-set fee-manager-contract (some new-fee-manager))
+    (ok true)
+  )
+) 
 ;; ===== Public Functions =====
 (define-public (create-pool 
   (pool-id principal) 
@@ -41,17 +55,13 @@
   (token-y principal) 
   (fee-tier-id uint))
   (begin
-    (try! (check-is-owner))
-    (asserts! (is-none (map-get? pools {pool-id: pool-id})) ERR_POOL_ALREADY_EXISTS)
-    (try! (validate-fee-tier fee-tier-id))
-    
-    (map-set pools {pool-id: pool-id} {
-      token-x: token-x,
-      token-y: token-y,
-      fee-tier-id: fee-tier-id,
-      active: true
-    })
-    (ok true)))
+    (unwrap-panic (check-is-owner))
+    (asserts! (is-none (contract-call? .pool-registry get-pool-data pool-id)) ERR_POOL_ALREADY_EXISTS)
+    (asserts! (validate-fee-tier fee-tier-id) ERR_INVALID_FEE_TIER)
+    (ok (contract-call? .pool-factory create-pool pool-id token-x token-y fee-tier-id))
+  )
+)
+
 
 (define-public (set-pool-fee-tier (pool-id principal) (new-fee-tier-id uint))
   (begin

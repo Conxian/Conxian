@@ -1,7 +1,7 @@
 ;; Oracle - Minimal implementation of oracle-trait
 ;; Provides price feed functionality for assets
 
-(use-trait dimensional-oracle-trait .all-traits.dimensional-oracle-trait)
+(use-trait dimensional-oracle-trait .dimensional-oracle.dimensional-oracle-trait)
 
 ;; Error codes
 (define-constant ERR_ASSET_NOT_FOUND (err u404))
