@@ -18,6 +18,8 @@
 (define-constant PROPOSAL_STATUS_ACTIVE u2)
 (define-constant PROPOSAL_STATUS_EXECUTED u3)
 (define-constant PROPOSAL_STATUS_REJECTED u4)
+(define-constant PROPOSAL_STATUS_QUEUED u5)
+(define-constant TIMELOCK_CONTRACT .timelock)
 
 ;; ===========================================
 ;; DATA STRUCTURES
@@ -26,6 +28,7 @@
 (define-data-var voting-period uint u10080)  ;; 1 week in blocks
 (define-data-var voting-delay uint u144)     ;; 1 day in blocks
 (define-data-var proposal-threshold uint u1000000000000)  ;; 1M tokens
+(define-data-var timelock-delay uint u10080)  ;; 1 week in blocks
 
 ;; Proposal structure
 define-map proposals {
@@ -40,7 +43,8 @@ define-map proposals {
   against-votes: uint,
   abstain-votes: uint,
   state: uint,
-  executed: bool
+  executed: bool,
+  eta: (optional uint)
 }
 
 ;; Voting power snapshots
@@ -86,7 +90,8 @@ define-map votes {
           against-votes: u0,
           abstain-votes: u0,
           state: PROPOSAL_STATUS_PENDING,
-          executed: false
+          executed: false,
+          eta: none
         })
         
         ;; Take voting power snapshot
@@ -160,20 +165,24 @@ define-map votes {
         (asserts! (>= quorum (var-get quorum-threshold)) ERR_QUORUM_NOT_MET)
         (asserts! majority ERR_PROPOSAL_FAILED)
         
-        ;; Execute proposal
-        (match (get proposal-type proposal)
-          PARAMETER_CHANGE (execute-parameter-change proposal)
-          UPGRADE_CONTRACT (execute-contract-upgrade proposal)
-          TREASURY_SPEND (execute-treasury-spend proposal)
-          (err ERR_UNKNOWN_PROPOSAL_TYPE)
+        ;; Queue proposal in timelock
+        (let ((eta (+ block-height (var-get timelock-delay))))
+          (contract-call? TIMELOCK_CONTRACT queue-transaction
+            (get target-contract proposal)
+            u0
+            (to-consensus-buff? {
+              function: (get function-name proposal),
+              args: (get parameters proposal)
+            })
+            eta
+          )
+          
+          ;; Update proposal state to queued
+          (map-set proposals {proposal-id: proposal-id} (merge proposal {
+            state: PROPOSAL_STATUS_QUEUED,
+            eta: (some eta)
+          }))
         )
-        
-        ;; Update proposal state
-        (map-set proposals {proposal-id: proposal-id} (merge proposal {
-          executed: true,
-          state: PROPOSAL_STATUS_EXECUTED
-        }))
-        
         (ok true)
       )
     )
@@ -204,6 +213,7 @@ define-map votes {
           "voting-delay" (var-set voting-delay value)
           "quorum-threshold" (var-set quorum-threshold value)
           "proposal-threshold" (var-set proposal-threshold value)
+          "timelock-delay" (var-set timelock-delay value)
           ;; Add more parameters as needed
           (err ERR_UNKNOWN_PARAMETER)
         )
