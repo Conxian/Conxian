@@ -7,11 +7,11 @@
 ;;; Conforms to: Clarinet SDK 3.9+, Nakamoto Standard
 
 ;; Standard traits
-(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
-(use-trait finance-metrics-trait .all-traits.finance-metrics-trait)
-(use-trait pausable-trait .all-traits.pausable-trait)
-(use-trait access-control-trait .all-traits.access-control-trait)
-(use-trait circuit-breaker-trait .all-traits.circuit-breaker-trait)
+(use-trait sip-010-ft-trait .sip-010-ft-trait.sip-010-ft-trait)
+(use-trait finance-metrics-trait .finance-metrics-trait.finance-metrics-trait)
+(use-trait pausable-trait .pausable-trait.pausable-trait)
+(use-trait access-control-trait .access-control-trait.access-control-trait)
+(use-trait circuit-breaker-trait .circuit-breaker-trait.circuit-breaker-trait)
 
 ;; ===== Constants =====
 (define-constant CONTRACT_VERSION "1.0.0")
@@ -27,7 +27,7 @@
 (define-data-var dimensional-token principal tx-sender)
 (define-data-var total-value-locked uint u0)
 (define-data-var total-positions-opened uint u0)
-(define-data-var total-positions-closed uint u0
+(define-data-var total-positions-closed uint u0)
 
 
 ;; ===== Error Codes (Dimensional Core: 2000-2099) =====
@@ -44,6 +44,7 @@
 (define-constant ERR_INVALID_AMOUNT (err u2011))
 (define-constant ERR_POSITION_LIQUIDATED (err u2012))
 (define-constant ERR_INSUFFICIENT_LIQUIDITY (err u2013))
+(define-constant ERR_UNWRAP_FAILED (err u2018))
 
 ;; ===== Custom Error Messages =====
 (define-constant MSG-UNAUTHORIZED "Caller is not authorized")
@@ -75,7 +76,7 @@
   maintenance-margin: uint,       ; Maintenance margin in basis points
   time-decay: (optional uint),    ; Time decay factor if applicable
   volatility: (optional uint),    ; Volatility factor if applicable
-  is-hedged: bool,               // If position is hedged against other positions
+  is-hedged: bool,               ;; If position is hedged against other positions
   tags: (list 10 (string-utf8 32)), // Position tags for categorization
   version: uint,                  // Schema version for future upgrades
   metadata: (optional (string-utf8 1024)) // Additional metadata
@@ -115,8 +116,8 @@
     (asserts! (is-standard-principal new-owner) (err u2014))
     (var-set owner new-owner)
     (ok true)
-  )
-)
+  ))
+
 
 (define-public (set-oracle-contract (oracle principal))
   "@doc Set the oracle contract address"
@@ -167,8 +168,8 @@
 (define-public (get-dimensional-state)
   (ok {
     total-positions: (var-get next-position-id),
-    active-positions: (count-active-positions),
-    total-value-locked: (calculate-tvl),
+    active-positions: (unwrap! (count-active-positions) ERR_UNWRAP_FAILED),
+    total-value-locked: (unwrap! (calculate-tvl) ERR_UNWRAP_FAILED),
     system-health: "operational"
   }))
 
@@ -226,7 +227,7 @@
         funding-interval: funding-interval,
         max-leverage: leverage,
         maintenance-margin: u500,  ;; 5% maintenance margin
-        time-decode: none,
+        time-decay: none,
         volatility: none,
         is-hedged: false,
         tags: tags,
@@ -314,6 +315,39 @@
   )
 )
 
+(define-private (calculate-liquidation-price (position {entry-price: uint, leverage: uint, is-long: bool}))
+  "@dev Calculates the liquidation price for a given position"
+  (let (
+    (entry-price (get position entry-price))
+    (leverage (get position leverage))
+    (is-long (get position is-long))
+    (m-margin (get position maintenance-margin))
+  )
+    (if is-long
+      ;; Long position: liq_price = entry_price * (1 - 1/leverage + maintenance_margin)
+      (* entry-price
+        (/
+          (+
+            (- (* leverage u10000) u10000)
+            m-margin
+          )
+          (* leverage u10000)
+        )
+      )
+      ;; Short position: liq_price = entry_price * (1 + 1/leverage - maintenance_margin)
+      (* entry-price
+        (/
+          (-
+            (+ (* leverage u10000) u10000)
+            m-margin
+          )
+          (* leverage u10000)
+        )
+      )
+    )
+  )
+)
+
 (define-public (liquidate-position (owner principal) (position-id uint))
   "@dev Liquidate an undercollateralized position"
   (let (
@@ -361,15 +395,15 @@
 
 (define-read-only (calculate-tvl)
   "@dev Returns the total value locked in the contract"
-  (ok (var-get total-value-located)))
+  (ok (var-get total-value-locked)))
 
 (define-read-only (count-active-positions)
   "@dev Returns the count of currently active positions"
   (ok (- (var-get total-positions-opened) (var-get total-positions-closed))))
 
 ;; ===== Circuit Breaker Implementation =====
-(define-public (circuit-breaker-status)
-  "@implements .all-traits.circuit-breaker-trait"
+(define-read-only (circuit-breaker-status)
+  "@dev Returns the circuit breaker status"
   (ok {
     is-open: false,  // Would check actual circuit breaker state
     reason: "",
@@ -377,21 +411,22 @@
   }))
 
 ;; ===== Pausable Implementation =====
+(define-data-var pausable-contract principal tx-sender)
+
 (define-public (check-not-paused)
-  "@implements .all-traits.pausable-trait"
+  "@dev Check if the contract is not paused"
   (match (contract-call? (var-get pausable-contract) is-paused)
     is-paused? (if is-paused? (err u3001) (ok true))
     (err u3002)
   ))
 
 ;; ===== Initialization =====
-(define-public (initialize (owner principal) (oracle principal))
+(define-public (initialize (new-owner principal) (oracle principal))
   "@dev Initialize the contract (can only be called once)"
   (begin
     (asserts! (is-eq tx-sender (as-contract tx-sender)) ERR_UNAUTHORIZED)
-    (asserts! (is-eq (var-get owner) tx-sender) ERR_UNAUTHORIZED)
     
-    (var-set owner owner)
+    (var-set owner new-owner)
     (var-set oracle-contract oracle)
     (var-set protocol-fee-rate u30)  ;; 0.3%
     

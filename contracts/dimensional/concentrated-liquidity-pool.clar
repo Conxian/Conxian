@@ -8,15 +8,15 @@
 ;; functionality for the Conxian DEX protocol.
 
 ;; Use centralized traits
-(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
-(use-trait ownable-trait .all-traits.ownable-trait)
-(use-trait pausable-trait .all-traits.pausable-trait)
-(use-trait pool-trait .all-traits.pool-trait)
+(use-trait sip-010-ft-trait .sip-010-ft-trait.sip-010-ft-trait)
+(use-trait ownable-trait .access-control-trait.access-control-trait)
+(use-trait pausable-trait .pausable-trait.pausable-trait)
+(use-trait pool-trait .pool-trait.pool-trait)
 
 ;; Implement required traits
-(impl-trait .all-traits.pausable-trait)
-(impl-trait .all-traits.ownable-trait)
-(impl-trait .all-traits.pool-trait)
+(impl-trait .pausable-trait.pausable-trait)
+(impl-trait .access-control-trait.access-control-trait)
+(impl-trait .pool-trait.pool-trait)
 
 ;; ===========================================
 ;; CONSTANTS
@@ -206,7 +206,7 @@
     (var-set sqrt-price-x96 initial-sqrt-price-x96)
 
     ;; Calculate initial tick
-    (let ((initial-tick (unwrap! (contract-call? .math-lib-concentrated sqrt-price-x96-to-tick initial-sqrt-price-x96) ERR_INVALID_INPUT)))
+    (let ((initial-tick (unwrap! (contract-call? .math-lib-concentrated.math-lib-concentrated sqrt-price-x96-to-tick initial-sqrt-price-x96) ERR_INVALID_INPUT)))
       (var-set current-tick initial-tick)
       (var-set is-initialized true)
       (ok true)
@@ -243,11 +243,11 @@
     (asserts! (is-valid-tick tick-upper) ERR_INVALID_TICK_RANGE)
 
     ;; Mint NFT position
-    (let ((position-id (unwrap! (contract-call? (var-get position-nft-contract) mint recipient) ERR_UNAUTHORIZED)))
+    (let ((position-id (unwrap! (contract-call? (var-get position-nft-contract) mint recipient) (err ERR_UNAUTHORIZED))))
       ;; Calculate liquidity
-      (let ((sqrt-price-lower (unwrap! (contract-call? .math-lib-concentrated tick-to-sqrt-price-x96 tick-lower) ERR_INVALID_INPUT))
-            (sqrt-price-upper (unwrap! (contract-call? .math-lib-concentrated tick-to-sqrt-price-x96 tick-upper) ERR_INVALID_INPUT))))
-        (let ((liquidity-amount (unwrap! (contract-call? .math-lib-concentrated get-liquidity-for-amounts
+      (let ((sqrt-price-lower (unwrap! (contract-call? .math-lib-concentrated.math-lib-concentrated tick-to-sqrt-price-x96 tick-lower) ERR_INVALID_INPUT))
+            (sqrt-price-upper (unwrap! (contract-call? .math-lib-concentrated.math-lib-concentrated tick-to-sqrt-price-x96 tick-upper) ERR_INVALID_INPUT))))
+        (let ((liquidity-amount (unwrap! (contract-call? .math-lib-concentrated.math-lib-concentrated get-liquidity-for-amounts
                                                           (var-get sqrt-price-x96)
                                                           sqrt-price-lower
                                                           sqrt-price-upper
@@ -257,7 +257,7 @@
           (asserts! (> liquidity-amount u0) ERR_ZERO_LIQUIDITY)
 
           ;; Calculate actual amounts needed
-          (let ((amounts (unwrap! (contract-call? .math-lib-concentrated get-amounts-for-liquidity
+          (let ((amounts (unwrap! (contract-call? .math-lib-concentrated.math-lib-concentrated get-amounts-for-liquidity
                                                    (var-get sqrt-price-x96)
                                                    sqrt-price-lower
                                                    sqrt-price-upper
@@ -411,8 +411,8 @@
         (current-liquidity (var-get liquidity)))
 
     ;; Validate price limit
-    (let ((min-sqrt-price (unwrap! (contract-call? .math-lib-concentrated tick-to-sqrt-price-x96 MIN_TICK) ERR_INVALID_INPUT))
-(max-sqrt-price (unwrap! (contract-call? .math-lib-concentrated tick-to-sqrt-price-x96 MAX_TICK) ERR_INVALID_INPUT)))
+    (let ((min-sqrt-price (unwrap! (contract-call? .math-lib-concentrated.math-lib-concentrated tick-to-sqrt-price-x96 MIN_TICK) ERR_INVALID_INPUT))
+(max-sqrt-price (unwrap! (contract-call? .math-lib-concentrated.math-lib-concentrated tick-to-sqrt-price-x96 MAX_TICK) ERR_INVALID_INPUT)))
 
       (asserts! (if zero-for-one
                    (or (is-eq sqrt-price-limit-x96 u0) (> sqrt-price-limit-x96 min-sqrt-price))
@@ -485,7 +485,7 @@
     (asserts! (if zero-for-one
                  (is-eq token-out (var-get pool-token-y))
                  (is-eq token-out (var-get pool-token-x))) ERR_INVALID_INPUT)
-    (contract-call? .math-lib-concentrated get-amount-out
+    (contract-call? .math-lib-concentrated.math-lib-concentrated get-amount-out
                     (var-get sqrt-price-x96)
                     (var-get liquidity)
                     amount-in

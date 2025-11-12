@@ -2,10 +2,10 @@
 ;; NFT representation of dimensional positions
 ;; This is a dimensional-specific implementation that differs from the main position-nft.clar
 
-(use-trait sip-009-nft-trait .all-traits.sip-009-nft-trait)
+(use-trait sip-009-nft-trait .sip-009-nft-trait.sip-009-nft-trait)
 
 ;; Implement required traits
-(impl-trait .all-traits.sip-009-nft-trait)
+(impl-trait .sip-009-nft-trait.sip-009-nft-trait)
 
 ;; ===== Constants =====
 (define-constant ERR_UNAUTHORIZED u6000)

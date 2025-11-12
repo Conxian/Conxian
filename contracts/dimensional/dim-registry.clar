@@ -3,18 +3,19 @@
 ;; Registry for ALL system components under dimensional architecture
 ;; Manages DEX pools, vaults, lending systems, and cross-protocol integrations
 
-(use-trait dim-registry-trait .all-traits.dim-registry-trait)
+(use-trait dim-registry-trait .dim-registry-trait.dim-registry-trait)
 
-(impl-trait .all-traits.dim-registry-trait)
+(impl-trait .dim-registry-trait.dim-registry-trait)
 
 ;; Constants
 (define-constant TRAIT_REGISTRY .trait-registry)
-(define-constant ERR_UNAUTHORIZED u101)
-(define-constant ERR_INVALID_WEIGHT u102)
-(define-constant ERR_DIMENSION_EXISTS u103)
-(define-constant ERR_DIMENSION_NOT_FOUND u104)
-(define-constant ERR_ORACLE_EXISTS u105)
-(define-constant ERR_ORACLE_NOT_FOUND u106)
+;; Standardized Conxian error codes (800-range for dimensional modules)
+(define-constant ERR_UNAUTHORIZED u800)
+(define-constant ERR_INVALID_WEIGHT u808)
+(define-constant ERR_DIMENSION_EXISTS u809)
+(define-constant ERR_DIMENSION_NOT_FOUND u810)
+(define-constant ERR_ORACLE_EXISTS u811)
+(define-constant ERR_ORACLE_NOT_FOUND u812)
 
 (define-data-var oracle-principal principal tx-sender)
 (define-data-var contract-owner principal tx-sender)
