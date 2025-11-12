@@ -74,7 +74,7 @@
 (define-public (register-trait-interface (trait-name (string-ascii 64)) (description (string-ascii 256)))
   (begin
     (asserts! (is-eq tx-sender (var-get contract-owner)) (err ERR_UNAUTHORIZED))
-    (asserts! (not (map-contains trait-interfaces trait-name)) (err ERR_TRAIT_ALREADY_REGISTERED))
+    (asserts! (not (is-some (map-get? trait-interfaces trait-name))) (err ERR_TRAIT_ALREADY_REGISTERED))
     (map-set trait-interfaces trait-name {name: trait-name, description: description})
     (ok true)
   )
@@ -88,11 +88,11 @@
 (define-public (register-trait-implementation (trait-name (string-ascii 64)) (implementation-principal principal) (version uint))
   (begin
     (asserts! (is-eq tx-sender (var-get contract-owner)) (err ERR_UNAUTHORIZED))
-    (asserts! (map-contains trait-interfaces trait-name) (err ERR_TRAIT_NOT_FOUND))
-    (asserts! (not (map-contains trait-implementations {
+    (asserts! (is-some (map-get? trait-interfaces trait-name)) (err ERR_TRAIT_NOT_FOUND))
+    (asserts! (not (is-some (map-get? trait-implementations {
       "trait-name": trait-name,
       "implementation-principal": implementation-principal
-    })) (err ERR_IMPLEMENTATION_ALREADY_REGISTERED))
+    }))) (err ERR_IMPLEMENTATION_ALREADY_REGISTERED))
 
     (map-set trait-implementations {
       "trait-name": trait-name,
@@ -112,7 +112,7 @@
 (define-public (activate-trait-implementation (trait-name (string-ascii 64)) (implementation-principal principal))
   (begin
     (asserts! (is-eq tx-sender (var-get governance-contract)) (err ERR_NOT_GOVERNANCE_CONTRACT))
-    (asserts! (map-contains trait-interfaces trait-name) (err ERR_TRAIT_NOT_FOUND))
+    (asserts! (is-some (map-get? trait-interfaces trait-name)) (err ERR_TRAIT_NOT_FOUND))
     (let
       ((impl-data (map-get? trait-implementations {
         "trait-name": trait-name,
@@ -122,7 +122,7 @@
       (asserts! (is-eq (get status (unwrap-panic impl-data)) "pending") (err ERR_ALREADY_ACTIVE))
 
       ;; Deactivate current active implementation if exists
-      (if (map-contains active-trait-implementations trait-name)
+      (if (is-some (map-get? active-trait-implementations trait-name))
         (let
           ((current-active-impl (unwrap-panic (map-get? active-trait-implementations trait-name))))
           (map-set trait-implementations {
@@ -152,8 +152,8 @@
 (define-public (deactivate-trait-implementation (trait-name (string-ascii 64)))
   (begin
     (asserts! (is-eq tx-sender (var-get governance-contract)) (err ERR_NOT_GOVERNANCE_CONTRACT))
-    (asserts! (map-contains trait-interfaces trait-name) (err ERR_TRAIT_NOT_FOUND))
-    (asserts! (map-contains active-trait-implementations trait-name) (err ERR_NOT_ACTIVE))
+    (asserts! (is-some (map-get? trait-interfaces trait-name)) (err ERR_TRAIT_NOT_FOUND))
+    (asserts! (is-some (map-get? active-trait-implementations trait-name)) (err ERR_NOT_ACTIVE))
 
     (let
       ((current-active-impl (unwrap-panic (map-get? active-trait-implementations trait-name))))
@@ -215,7 +215,7 @@
          (new-version (get "new-version" (unwrap-panic proposal-data))))
 
         ;; Deactivate current active implementation if exists
-        (if (map-contains active-trait-implementations trait-name)
+        (if (is-some (map-get? active-trait-implementations trait-name))
           (let
             ((current-active-impl (unwrap-panic (map-get? active-trait-implementations trait-name))))
             (map-set trait-implementations {

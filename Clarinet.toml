@@ -37,9 +37,37 @@ depends_on = ["dim-metrics", "pausable"]
 [contracts.dimensional-engine]
 path = "contracts/core/dimensional-engine.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["dimensional-core"]
+depends_on = ["dimensional-core", "sip-010-ft-trait", "oracle-aggregator-v2-trait", "risk-trait", "finance-metrics-trait", "math-trait", "risk-liquidation-engine", "oracle-adapter"]
 
-# ---------- Test Accounts ----------
+# ---------- Traits ----------
+
+[contracts.sip-010-ft-trait]
+path = "contracts/traits/sip-010-ft-trait.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+
+[contracts.oracle-aggregator-v2-trait]
+path = "contracts/traits/oracle-aggregator-v2-trait.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+
+[contracts.risk-trait]
+path = "contracts/traits/risk-trait.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+
+[contracts.finance-metrics-trait]
+path = "contracts/traits/finance-metrics-trait.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+
+[contracts.math-trait]
+path = "contracts/traits/math-trait.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+
+[contracts.risk-liquidation-engine]
+path = "contracts/risk/liquidation-engine.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+
+[contracts.oracle-adapter]
+path = "contracts/oracle/external-oracle-adapter.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 [accounts.deployer]
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
@@ -397,6 +425,23 @@ address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 path = "contracts/mev/mev-protector-root.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
-[contracts.position_factory_root]
-path = "contracts/mev/position-factory-root.clar"
+[contracts.batch-auction-trait]
+path = "contracts/traits/batch-auction-trait.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+
+[contracts.clp-pool-trait]
+path = "contracts/traits/clp-pool-trait.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+
+[contracts.pool-registry]
+path = "contracts/pools/pool-registry.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+
+[contracts.pool-factory]
+path = "contracts/pools/pool-factory.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+
+[contracts.governance-voting]
+path = "contracts/governance/voting.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+depends_on = ["governance-token"]

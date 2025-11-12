@@ -1,4 +1,3 @@
-(use-trait sip-000-governance-trait .sip-000-governance-trait)
 ;; dim-metrics.clar
 ;; Dimensional Metrics Aggregation
 ;; Responsibilities:

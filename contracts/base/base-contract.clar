@@ -35,10 +35,10 @@
 ;; ======================
 
 ;; Roles (aligned with role-manager.clar)
-(define-constant ROLE_ADMIN (string-to-uint "admin"))
-(define-constant ROLE_MANAGER (string-to-uint "manager"))
-(define-constant ROLE_OPERATOR (string-to-uint "operator"))
-(define-constant ROLE_LIQUIDATOR (string-to-uint "liquidator"))
+(define-constant ROLE_ADMIN u1)
+(define-constant ROLE_MANAGER u2)
+(define-constant ROLE_OPERATOR u3)
+(define-constant ROLE_LIQUIDATOR u4)
 
 ;; Role storage (using same map as role-manager for consistency)
 (define-map roles principal uint)

@@ -3,24 +3,14 @@
 ;; ============================================================
 ;; Core contract for the dimensional engine
 
-(use-trait oracle-trait .oracle-aggregator-v2-trait.oracle-aggregator-v2-trait)
-(use-trait sip-010-ft-trait .sip-010-ft-trait.sip-010-ft-trait)
-(use-trait risk-trait .risk-trait.risk-trait)
-(use-trait finance-metrics-trait .finance-metrics-trait.finance-metrics-trait)
-(use-trait math-utils .math-trait.math-trait)
+(use-trait "oracle-trait" .oracle-aggregator-v2-trait.oracle-aggregator-v2-trait)
+(use-trait "sip-010-ft-trait" .sip-010-ft-trait.sip-010-ft-trait)
+(use-trait "risk-trait" .risk-trait.risk-trait)
+(use-trait "finance-metrics-trait" .finance-metrics-trait.finance-metrics-trait)
+(use-trait "math-utils" .math-trait.math-trait)
 
-;; CONSTANTS
 ;; CONSTANTS
 ;; =============================================================================
-
-;; Import constants from math-utils
-(use-constants 
-  PRECISION 
-  PERCENTAGE_PRECISION 
-  MATH_OVERFLOW 
-  DIVISION_BY_ZERO 
-  REENTRANCY_GUARD
-  from_contract .math-utils)
 
 ;; Protocol-specific constants
 (define-constant MIN_LEVERAGE u100)
@@ -229,7 +219,7 @@
   ;; Helper function to get the asset for a position
   ;; In a real implementation, this would look up the asset in the position data
   ;; For now, we'll use a placeholder
-  .stx
+  'ST000000000000000000002AMW42H  ;; STX principal
 )
 
 (define-private (calculate-premium
@@ -341,7 +331,7 @@
 ;; FACADE FUNCTIONS
 ;; =============================================================================
 
-(define-public (create-position (collateral-amount uint) (leverage uint) (pos-type (string-ascii 20)) (token <token-trait>) (slippage-tolerance uint) (funding-int (string-ascii 20)))
+(define-public (create-position (collateral-amount uint) (leverage uint) (pos-type (string-ascii 20)) (token <sip-010-ft-trait>) (slippage-tolerance uint) (funding-int (string-ascii 20)))
   (contract-call? .dimensional-core open-position collateral-amount leverage pos-type slippage-tolerance (contract-of token) funding-int u1)
 )
 
@@ -692,11 +682,12 @@
       ))
     )
       ;; Check if position is liquidatable (simplified)
-      (when (< total-returned (* collateral (var-get liquidation-threshold)) u10000)
+      (if (< total-returned (* collateral (var-get liquidation-threshold)) u10000)
         (try! (require! 
-          (is-eq tx-sender (get position owner))
+          (is-eq tx-sender (get owner position))
           (err u1001)
         ))
+        true
       )
       
       ;; Mark position as closed

@@ -1,12 +1,18 @@
 ;; File: contracts/access/roles.clar
 ;; Role-based access control implementation
 
-(use-trait ownable-trait .ownable.ownable-trait)
+(use-trait "access-control-trait" .access-control-trait.access-control-trait)
+
+;; Implement access control
+(impl-trait .access-control-trait.access-control-trait)
+
+;; Owner data variable
+(define-data-var contract-owner principal tx-sender)
 
 (define-constant ERR_NOT_OWNER (err u1000))
-(define-constant ERR_ROLE_EXISTS (err u1001))
-(define-constant ERR_ROLE_NOT_FOUND (err u1002))
-(define-constant ERR_NOT_AUTHORIZED (err u1003))
+(define-constant ERR_ROLE_EXISTS (err u2000))
+(define-constant ERR_ROLE_NOT_FOUND (err u2001))
+(define-constant ERR_NOT_AUTHORIZED (err u2002))
 (define-constant ERR_INVALID_ROLE (err u1004))
 
 ;; Role definitions - using string-ascii 32 for role names
@@ -26,10 +32,7 @@
 (define-public (grant-role (who principal) (role (string-ascii 32)))
   (begin
     ;; Only the contract owner can grant roles
-    (let ((owner (contract-call? .ownable get-owner)))
-      (asserts! (is-ok owner) ERR_NOT_OWNER)
-      (asserts! (is-eq tx-sender (unwrap-panic owner)) ERR_NOT_OWNER)
-    )
+    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_NOT_OWNER)
     
     ;; Set the role for the address
     (map-set roles { who: who, role: role } true)
@@ -38,17 +41,14 @@
   )
 )
 
-;; Revoke a role from an address
-(define-public (revoke-role (who principal) (role (string-ascii 32)))
+;; Revoke a role from the transaction sender
+(define-public (revoke-role (role-name (string-ascii 32)))
   (begin
     ;; Only the contract owner can revoke roles
-    (let ((owner (contract-call? .ownable get-owner)))
-      (asserts! (is-ok owner) ERR_NOT_OWNER)
-      (asserts! (is-eq tx-sender (unwrap-panic owner)) ERR_NOT_OWNER)
-    )
+    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_NOT_OWNER)
     
-    ;; Remove the role from the address
-    (map-delete roles { who: who, role: role })
+    ;; Remove the role from tx-sender
+    (map-delete roles { who: tx-sender, role: role-name })
     
     (ok true)
   )
@@ -69,8 +69,31 @@
 )
 
 ;; Public function to check if an address has a specific role
-(define-read-only (has-role (who principal) (role (string-ascii 32)))
-  (ok (default-to false (map-get? roles { who: who, role: role })))
+(define-read-only (has-role (role-name (string-ascii 32)))
+  (ok (default-to false (map-get? roles { who: tx-sender, role: role-name })))
+)
+
+;; Get the principal assigned to a role
+(define-read-only (get-role-principal (role-name (string-ascii 32)))
+  (ok (some { authorized-principal: (var-get contract-owner) }))
+)
+
+;; Initialize access control
+(define-public (initialize-access-control (initial-owner principal))
+  (begin
+    (asserts! (is-eq tx-sender (as-contract tx-sender)) ERR_NOT_OWNER)
+    (var-set contract-owner initial-owner)
+    (ok true)
+  )
+)
+
+;; Transfer ownership
+(define-public (transfer-ownership (new-owner principal))
+  (begin
+    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_NOT_OWNER)
+    (var-set contract-owner new-owner)
+    (ok true)
+  )
 )
 
 ;; Convenience functions for common roles
