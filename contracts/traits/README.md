@@ -1,51 +1,78 @@
-# Conxian Protocol - Modular Traits System
+# Conxian Protocol - Traits System
 
-## 🚀 MODULAR TRAITS ARCHITECTURE - Nakamoto Speed Optimized
+## Overview
 
-**As of October 2025**: The Conxian Protocol now uses a **modular trait system** designed for optimal compilation speed and sub-second Nakamoto block times.
+The Conxian Protocol uses a comprehensive set of traits to define the interfaces for its various smart contracts. This ensures a consistent and interoperable system.
 
-### Key Benefits:
-- **70% smaller compilation units** (from 223-line monolithic to 6 focused modules)
-- **Parallel compilation** support for faster builds
-- **Domain isolation** for better maintainability
-- **Selective loading** reduces memory footprint
-- **Backward compatibility** maintained for existing contracts
+## Trait Files
 
-## Architecture Overview
+- `access-control-trait.clar`
+- `access-traits.clar`
+- `advanced-router-dijkstra-trait.clar`
+- `audit-registry-trait.clar`
+- `base-traits.clar`
+- `batch-auction-trait.clar`
+- `bond-factory-trait.clar`
+- `bond-trait.clar`
+- `btc-adapter-trait.clar`
+- `budget-manager-trait.clar`
+- `central-traits-registry.clar`
+- `circuit-breaker-trait.clar`
+- `clp-pool-trait.clar`
+- `concentrated-liquidity-trait.clar`
+- `cross-protocol-trait.clar`
+- `dao-trait.clar`
+- `dex-trait.clar`
+- `dex-traits.clar`
+- `dim-registry-trait.clar`
+- `dimensional-oracle-trait.clar`
+- `dimensional-traits.clar`
+- `error-codes-trait.clar`
+- `errors.clar`
+- `factory-trait.clar`
+- `fee-manager-trait.clar`
+- `finance-metrics-trait.clar`
+- `fixed-point-math-trait.clar`
+- `flash-loan-receiver-trait.clar`
+- `ft-mintable-trait.clar`
+- `funding-trait.clar`
+- `governance-token-trait.clar`
+- `governance-traits.clar`
+- `keeper-coordinator-trait.clar`
+- `lending-system-trait.clar`
+- `liquidation-trait.clar`
+- `math-trait.clar`
+- `mev-protector-trait.clar`
+- `monitoring-security-traits.clar`
+- `monitoring-trait.clar`
+- `multi-hop-router-v3-trait.clar`
+- `oracle-aggregator-v2-trait.clar`
+- `oracle-risk-traits.clar`
+- `pausable-trait.clar`
+- `performance-optimizer-trait.clar`
+- `pool-factory-trait.clar`
+- `pool-trait.clar`
+- `price-initializer-trait.clar`
+- `proposal-engine-trait.clar`
+- `proposal-trait.clar`
+- `protocol-monitor-trait.clar`
+- `rbac-trait.clar`
+- `risk-oracle-trait.clar`
+- `risk-trait.clar`
+- `router-trait.clar`
+- `signed-data-base-trait.clar`
+- `sip-009-nft-trait.clar`
+- `sip-010-ft-mintable-trait.clar`
+- `sip-010-ft-trait.clar`
+- `sip-010-trait.clar`
+- `sip-018-trait.clar`
+- `stable-swap-pool-trait.clar`
+- `staking-trait.clar`
+- `upgrade-controller-trait.clar`
+- `utils-trait.clar`
+- `weighted-swap-pool-trait.clar`
 
-### Modular Trait Files
-
-| Module | Purpose | Size | Key Traits |
-|--------|---------|------|------------|
-| **`base-traits.clar`** | Core infrastructure | ~79 lines | `ownable-trait`, `pausable-trait`, `rbac-trait`, `math-trait` |
-| **`dex-traits.clar`** | DEX functionality | ~55 lines | `sip-010-ft-trait`, `pool-trait`, `factory-trait` |
-| **`governance-traits.clar`** | Voting & governance | ~35 lines | `dao-trait`, `governance-token-trait` |
-| **`dimensional-traits.clar`** | Multi-dimensional DeFi | ~40 lines | `dimensional-trait`, `dim-registry-trait` |
-| **`oracle-risk-traits.clar`** | Price feeds & risk | ~45 lines | `oracle-aggregator-v2-trait`, `risk-trait`, `liquidation-trait` |
-| **`monitoring-security-traits.clar`** | System monitoring | ~35 lines | `protocol-monitor-trait`, `circuit-breaker-trait` |
-| **`all-traits.clar`** | Backward compatibility | ~241 lines | Imports + re-exports all traits |
-
-### Smart Import System
-
-```clarity
-;; For existing contracts (backward compatible)
-(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
-
-;; For performance-critical new contracts (direct module import)
-(use-trait sip-010-ft-trait .dex-traits.sip-010-ft-trait)
-```
-
-## Current Status
-
-### Modular Traits System
-
-- **6 Domain Modules**: Focused trait files by functionality
-- **Smart Compilation**: Selective loading reduces memory usage
-- **Parallel Processing**: Independent compilation of modules
-- **Backward Compatible**: `all-traits.clar` maintains existing imports
-- **Performance Optimized**: 70% smaller compilation units
-
-### Error System
+## Error System
 
 - **Comprehensive**: 100+ error codes
 - **Categorized**: Grouped by error type
@@ -67,120 +94,22 @@
 | 9000-9999 | System | `ERR_INTEGRATION_DISABLED` |
 | 10000+ | Advanced | `ERR_CIRCUIT_TRIPPED` |
 
-## Trait Categories by Module
-
-### Base Traits Module (`base-traits.clar`)
-
-**Core Infrastructure Traits:**
-- **`ownable-trait`**: Contract ownership management
-- **`pausable-trait`**: Emergency pause functionality
-- **`rbac-trait`**: Role-based access control
-- **`math-trait`**: Mathematical operations (mul-div, sqrt, pow, ln)
-
-### DEX Traits Module (`dex-traits.clar`)
-
-**Decentralized Exchange Traits:**
-- **`sip-010-ft-trait`**: Standard fungible token interface
-- **`pool-trait`**: Liquidity pool operations
-- **`factory-trait`**: Pool creation and management
-
-### Governance Traits Module (`governance-traits.clar`)
-
-**Governance & Voting Traits:**
-- **`dao-trait`**: Proposal and voting system
-- **`governance-token-trait`**: Voting power management
-
-### Dimensional Traits Module (`dimensional-traits.clar`)
-
-**Multi-Dimensional DeFi Traits:**
-- **`dimensional-trait`**: Position management across dimensions
-- **`dim-registry-trait`**: Dimensional node registration
-
-### Oracle & Risk Traits Module (`oracle-risk-traits.clar`)
-
-**Price Feeds & Risk Management:**
-- **`oracle-aggregator-v2-trait`**: Price feed aggregation
-- **`risk-trait`**: Risk parameter management
-- **`liquidation-trait`**: Position liquidation logic
-
-### Monitoring & Security Traits Module (`monitoring-security-traits.clar`)
-
-**System Monitoring & Security:**
-- **`protocol-monitor-trait`**: Health monitoring and alerts
-- **`circuit-breaker-trait`**: Emergency circuit breaking
-
 ## Usage
-
-### Import Patterns
-
-#### Option A: Backward Compatible (Recommended for existing contracts)
-```clarity
-;; Use centralized import for all existing contracts
-(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
-(use-trait ownable-trait .all-traits.ownable-trait)
-(use-trait pool-trait .all-traits.pool-trait)
-```
-
-#### Option B: Direct Module Import (For performance-critical new contracts)
-```clarity
-;; Import directly from specific modules for better compilation speed
-(use-trait sip-010-ft-trait .dex-traits.sip-010-ft-trait)
-(use-trait ownable-trait .base-traits.ownable-trait)
-(use-trait pool-trait .dex-traits.pool-trait)
-```
 
 ### Example Contract Implementation
 
 ```clarity
-;; Backward compatible approach
-(use-trait vault-trait .all-traits.vault-trait)
-
-(define-trait my-vault-implementation
-  (
-    (implements .all-traits.vault-trait)
-    ;; Additional functions specific to this implementation
-  )
-)
-
-;; Or direct module approach for new contracts
-(use-trait sip-010-ft-trait .dex-traits.sip-010-ft-trait)
-(use-trait ownable-trait .base-traits.ownable-trait)
+(use-trait sip-010-ft-trait .sip-010-ft-trait.sip-010-ft-trait)
+(use-trait ownable-trait .ownable-trait.ownable-trait)
 ```
-
-## Migration Guide
-
-### For Existing Contracts
-
-1. **No changes required** - All existing contracts continue working
-2. **Optional optimization**: Gradually migrate to direct module imports for performance-critical contracts
-
-### For New Contracts
-
-- Use **direct module imports** for better compilation performance
-- Import only the traits you need from relevant modules
-- Follow domain-specific organization
-
-### Module Selection Guide
-
-| If you need... | Import from module | Example |
-|----------------|-------------------|---------|
-| Token interfaces | `dex-traits` | `sip-010-ft-trait` |
-| Access control | `base-traits` | `ownable-trait`, `rbac-trait` |
-| Governance | `governance-traits` | `dao-trait` |
-| Price feeds | `oracle-risk-traits` | `oracle-aggregator-v2-trait` |
-| Risk management | `oracle-risk-traits` | `liquidation-trait` |
-| System monitoring | `monitoring-security-traits` | `circuit-breaker-trait` |
-| Multi-dimensional DeFi | `dimensional-traits` | `dimensional-trait` |
 
 ## Development Guidelines
 
 ### Adding New Traits
 
-1. **Identify the domain** - Which module does the trait belong to?
-2. **Add to appropriate module** - Update the specific trait file
-3. **Update all-traits.clar** - Add import and re-export for backward compatibility
-4. **Update Clarinet.toml** - Ensure the module is deployed
-5. **Update documentation** - Add to this README
+1. **Create a new trait file** in the `contracts/traits` directory.
+2. **Add to `Clarinet.toml`** - Ensure the trait is deployed.
+3. **Update documentation** - Add to this README.
 
 ### Trait Standards
 
@@ -190,40 +119,6 @@
 - Follow Clarity best practices
 - Include proper documentation comments
 - Consider gas optimization for frequently called functions
-
-### Performance Considerations
-
-- **Use direct imports** for contracts that call traits frequently
-- **Use backward-compatible imports** for contracts with simple trait usage
-- **Minimize trait dependencies** to reduce compilation overhead
-- **Test compilation performance** when adding new traits
-
-## Error Code Standards
-
-### Access Control Errors (u100-u199)
-
-- `ERR_NOT_AUTHORIZED` (u100)
-- `ERR_INVALID_ROLE` (u101)
-- `ERR_ROLE_ALREADY_GRANTED` (u102)
-
-### Pausing Errors (u200-u299)
-
-- `ERR_PAUSED` (u200)
-- `ERR_NOT_PAUSED` (u201)
-
-### Liquidation Errors (u1000-u1099)
-
-- `ERR_LIQUIDATION_PAUSED` (u1001)
-- `ERR_POSITION_NOT_UNDERWATER` (u1004)
-- `ERR_SLIPPAGE_TOO_HIGH` (u1005)
-
-## Error Code Usage
-
-Always reference errors from `errors.clar`:
-
-```clarity
-(asserts! (is-eq caller sender) ERR_UNAUTHORIZED)
-```
 
 ## Testing
 

@@ -1,95 +1,75 @@
-# Contract Guide: The Conxian DEX
+# Contract Guide: `multi-hop-router-v3.clar`
 
-**Primary Contracts:** `contracts/dex-router.clar`, `contracts/dex-factory.clar`, `contracts/dex-pool.clar`
-**Trait:** `contracts/traits/pool-trait.clar`
+**Primary Contract:** `contracts/dex/multi-hop-router-v3.clar`
 
-## 1. Introduction to the DEX Architecture
+## 1. Introduction to the DEX Router
 
-The Conxian Decentralized Exchange (DEX) is a suite of smart contracts that allows users to trade SIP-010 tokens and provide liquidity to earn fees. The architecture is designed to be modular and extensible, separating the logic for routing, pool creation, and the pools themselves.
+The `multi-hop-router-v3.clar` contract is the primary entry point for executing trades on the Conxian DEX. It is designed to find the most efficient path for a token swap, even if it requires multiple "hops" through different liquidity pools.
 
-The three main components are:
+## 2. Key Concepts
 
--   **The Factory (`dex-factory.clar`):** A registry contract that creates and keeps track of all liquidity pools. For any given pair of tokens, there is a single, unique pool managed by the factory.
--   **The Router (`dex-router.clar`):** The primary entry point for users. It provides user-friendly functions to interact with the DEX, such as swapping tokens and managing liquidity. It looks up pools in the factory and executes the requested actions.
--   **The Pools (e.g., `dex-pool.clar`):** Individual contracts that hold reserves of two tokens and implement the core logic for swapping and liquidity provision. All pools must adhere to the `pool-trait`, which defines a standard interface for DEX pools.
+### Multi-Hop Routing
 
-## 2. The DEX Workflow
+-   The router uses Dijkstra's algorithm to find the shortest path between two tokens, which translates to the best possible exchange rate for the user.
+-   Routes can involve multiple intermediate pools to achieve the best price.
 
-### How to Swap Tokens
+### Route Proposal and Execution
 
-A token swap is a two-step process from a developer's perspective:
+-   **Proposing a Route:** Before a trade can be executed, a user must first "propose" a route. This is done by calling the `propose-route` function, which computes the best path and returns a `route-id`.
+-   **Executing a Route:** Once a route has been proposed, it can be executed by calling the `execute-route` function with the `route-id`.
 
-1.  **Resolve the Pool:** First, you need to find the correct liquidity pool for the token pair you want to trade. You do this by calling `resolve-pool` on the `dex-router.clar` contract, which in turn calls `get-pool` on the factory.
-2.  **Execute the Swap:** Once you have the principal of the pool contract, you call one of the router's swap functions (e.g., `swap-exact-in-direct`), passing the pool principal as a parameter. The router then calls the `swap` function on the specified pool to execute the trade.
+### Slippage Protection
 
-### How to Provide Liquidity
+-   When proposing a route, users can specify a `min-amount-out`, which is the minimum amount of the output token they are willing to accept. This protects them from unfavorable price changes (slippage) that may occur between the time a route is proposed and when it is executed.
 
-Adding or removing liquidity follows a similar pattern:
+## 3. How to Swap Tokens
 
-1.  **Resolve the Pool:** Find the pool for the token pair using `resolve-pool`.
-2.  **Add/Remove Liquidity:** Call the appropriate function on the router (`add-liquidity-direct` or `remove-liquidity-direct`), passing the pool principal and other required parameters.
+### Step 1: Propose a Route
 
-## 3. Multi-Hop Routing
+Call the `propose-route` function with the following parameters:
 
-Multi-hop routing allows users to trade between two tokens that do not have a direct liquidity pool by routing the trade through an intermediary token (e.g., swapping Token A for STX, and then STX for Token B).
+-   `token-in`: The token you want to sell.
+-   `token-out`: The token you want to buy.
+-   `amount-in`: The amount of `token-in` you want to sell.
+-   `min-amount-out`: The minimum amount of `token-out` you are willing to accept.
+-   `route-timeout`: The number of blocks after which the proposed route expires.
 
-The `dex-router.clar` contract includes a function `swap-exact-in-multi-hop` for this purpose.
+This function will return a `route-id`.
 
-**Important Note:** As of the current version, the multi-hop functionality is a **placeholder** and is not fully implemented. The function exists in the ABI but does not perform a multi-step trade. This feature is planned for a future release.
+### Step 2: Execute the Route
 
-## 4. Key Functions in `dex-router.clar`
+Call the `execute-route` function with the following parameters:
 
-### Liquidity Functions
+-   `route-id`: The ID of the route you want to execute.
+-   `min-amount-out`: The minimum amount of the output token you are willing to accept.
+-   `recipient`: The address that will receive the output tokens.
 
-**`add-liquidity-direct`**
-Adds liquidity to a specified pool.
--   **Parameters:**
-    -   `pool <pool-trait>`: The pool contract to add liquidity to.
-    -   `dx uint`: The amount of token X to add.
-    -   `dy uint`: The amount of token Y to add.
-    -   `min-shares uint`: The minimum number of liquidity pool shares to accept.
-    -   `deadline uint`: A block height by which the transaction must be confirmed.
+## 4. Key Functions
 
-**`remove-liquidity-direct`**
-Removes liquidity from a specified pool.
--   **Parameters:**
-    -   `pool <pool-trait>`: The pool contract to remove liquidity from.
-    -   `shares uint`: The number of liquidity pool shares to burn.
-    -   `min-dx uint`: The minimum amount of token X to receive.
-    -   `min-dy uint`: The minimum amount of token Y to receive.
-    -   `deadline uint`: A block height by which the transaction must be confirmed.
-
-### Swap Functions
-
-**`swap-exact-in-direct`**
-Swaps an exact amount of an input token for a minimum amount of an output token.
--   **Parameters:**
-    -   `pool <pool-trait>`: The pool contract to trade with.
-    -   `amount-in uint`: The exact amount of the input token to swap.
-    -   `min-out uint`: The minimum amount of the output token you are willing to accept (slippage protection).
-    -   `x-to-y bool`: The direction of the swap (`true` for token X to Y, `false` for Y to X).
-    -   `deadline uint`: A block height by which the transaction must be confirmed.
-
-### Read-Only Functions
-
-**`resolve-pool`**
-Finds the liquidity pool for a given pair of tokens.
--   **Parameters:** `token-x principal`, `token-y principal`
--   **Returns:** `(optional principal)` - The principal of the pool contract if it exists.
-
-**`get-amount-out-direct`**
-Gets a price quote for a swap without executing it.
--   **Parameters:** `pool <pool-trait>`, `amount-in uint`, `x-to-y bool`
--   **Returns:** `(ok uint)` - The expected amount of the output token.
+| Function Name         | Parameters                                                                                                                              | Description                                                                                                                            |
+| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `propose-route`       | `token-in principal`, `token-out principal`, `amount-in uint`, `min-amount-out uint`, `route-timeout uint`                                 | Computes the best route for a swap and returns a `route-id`.                                                                           |
+| `execute-route`       | `route-id (buff 32)`, `min-amount-out uint`, `recipient principal`                                                                        | Executes a previously proposed route.                                                                                                  |
+| `compute-best-route`  | `token-in principal`, `token-out principal`, `amount-in uint`                                                                             | A read-only function that computes the best route and returns the path and the expected output amount.                                |
+| `get-route-stats`     | `route-id (buff 32)`                                                                                                                    | A read-only function that returns statistics for a given route, such as the number of hops and the expiration block.                   |
 
 ## 5. Error Codes
 
-These are the primary error codes defined in `dex-router.clar`.
-
-| Code   | Name                     | Description                                      |
-| ------ | ------------------------ | ------------------------------------------------ |
-| `u100` | `ERR_DEADLINE`           | The transaction was not confirmed before the deadline. |
-| `u101` | `ERR_NOT_FOUND`          | The requested item (e.g., a pool) was not found. |
-| `u102` | `ERR_INVALID_POOL`       | The provided pool principal is not a valid pool. |
-| `u103` | `ERR_INVALID_AMOUNTS`    | An amount provided was invalid (e.g., zero).     |
-| `u104` | `ERR_INSUFFICIENT_FUNDS` | The contract or user has insufficient funds.     |
+| Code    | Name                            | Description                                      |
+| ------- | ------------------------------- | ------------------------------------------------ |
+| `u1400` | `ERR_INVALID_ROUTE`             | The specified route is invalid.                  |
+| `u1401` | `ERR_ROUTE_NOT_FOUND`           | The specified route was not found.               |
+| `u1402` | `ERR_INSUFFICIENT_OUTPUT`       | The actual output of the swap was less than the minimum specified. |
+| `u1403` | `ERR_HOP_LIMIT_EXCEEDED`        | The route exceeds the maximum number of hops.     |
+| `u1404` | `ERR_INVALID_TOKEN`             | An invalid token was specified.                  |
+| `u1405` | `ERR_ROUTE_EXPIRED`             | The route has expired.                           |
+| `u1406` | `ERR_REENTRANCY_GUARD`          | A reentrancy error occurred.                     |
+| `u1407` | `ERR_NO_PATH_FOUND`             | No valid path was found between the two tokens.   |
+| `u1408` | `ERR_DIJKSTRA_INIT_FAILED`      | The Dijkstra algorithm failed to initialize.      |
+| `u1409` | `ERR_POOL_NOT_FOUND`            | A required liquidity pool was not found.         |
+| `u1410` | `ERR_GET_AMOUNT_IN_FAILED`      | Failed to get the input amount for a swap.       |
+| `u1411` | `ERR_REENTRANCY_GUARD_TRIGGERED`| A reentrancy guard was triggered.                |
+| `u1412` | `ERR_SLIPPAGE_TOLERANCE_EXCEEDED`| The slippage tolerance was exceeded.             |
+| `u1413` | `ERR_INVALID_PATH`              | The specified path is invalid.                   |
+| `u1414` | `ERR_SWAP_FAILED`               | A swap failed.                                   |
+| `u1415` | `ERR_TOKEN_TRANSFER_FAILED`     | A token transfer failed.                         |

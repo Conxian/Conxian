@@ -1,12 +1,11 @@
 # Conxian Protocol Architecture
 
-This document outlines the current Conxian protocol architecture, a comprehensive multi-dimensional DeFi system deployed on Stacks blockchain with 239+ smart contracts implementing advanced DeFi functionality.
+This document outlines the current Conxian protocol architecture, a comprehensive multi-dimensional DeFi system deployed on Stacks blockchain with 255+ smart contracts implementing advanced DeFi functionality.
 
 ## Current Implementation Status
 
-**Last Updated**: November 12, 2025
-**Contract Count**: 239 smart contracts across 15+ modules
-**Public Functions**: 991+ documented functions
+**Last Updated**: November 13, 2025
+**Contract Count**: 255 smart contracts
 **Key Features**: DEX, Lending, Governance, Multi-Dimensional DeFi, Security, Monitoring
 
 ## Architecture Principles
@@ -19,134 +18,208 @@ This document outlines the current Conxian protocol architecture, a comprehensiv
 
 ## Core Contract Modules
 
-### 1. DEX Module (54 contracts)
+### Access Control
+- `access/`
+- `access/roles.clar`
+- `access/traits/access-traits.clar`
 
-#### Core Infrastructure
+### Audit Registry
+- `audit-registry/`
+- `audit-registry/audit-registry.clar`
 
-- `multi-hop-router-v3.clar`: Advanced routing with Dijkstra's algorithm
-- `dex-factory-v2.clar`: Enhanced pool factory with validation
-- `concentrated-liquidity-pool.clar`: Tick-based concentrated liquidity with NFT positions
-- `dex-registrar.clar`: Component registry and integration points
+### Automation
+- `automation/`
+- `automation/keeper-coordinator.clar`
 
-#### Advanced Features
+### Base
+- `base/`
+- `base/base-contract.clar`
+- `base/ownable.clar`
+- `base/pausable.clar`
 
-- `mev-protector.clar`: MEV protection and manipulation detection
-- `batch-auction.clar`: Batch auction system for fair execution
-- `liquidity-optimization-engine.clar`: AI-driven liquidity management
-- `yield-distribution-engine.clar`: Smart yield distribution
+### Core
+- `core/`
+- `core/conxian-protocol.clar`
+- `core/dimensional-engine.clar`
 
-#### Cross-Chain Integration
+### DEX
+- `dex/`
+- `dex/batch-auction.clar`
+- `dex/concentrated-liquidity-pool.clar`
+- `dex/dex-factory-v2.clar`
+- `dex/dex-factory.clar`
+- `dex/dimensional-advanced-router-dijkstra.clar`
+- `dex/interest-rate-model.clar`
+- `dex/liquidity-optimization-engine.clar`
+- `dex/manipulation-detector.clar`
+- `dex/mev-protector.clar`
+- `dex/multi-hop-router-v3.clar`
+- `dex/oracle-aggregator-v2.clar`
+- `dex/oracle.clar`
+- `dex/pool-template.clar`
+- `dex/rebalancing-rules.clar`
+- `dex/sbtc-integration.clar`
+- `dex/timelock-controller.clar`
 
-- `sbtc-integration.clar`: sBTC bridge integration
-- `sbtc-flash-loan-vault.clar`: Cross-chain flash loans
-- `wormhole-bridge-adapter.clar`: Wormhole cross-chain functionality
+### Dimensional
+- `dimensional/`
+- `dimensional/dim-graph.clar`
+- `dimensional/dim-metrics.clar`
+- `dimensional/dim-oracle-automation.clar`
+- `dimensional/dim-registry.clar`
+- `dimensional/dim-revenue-adapter.clar`
+- `dimensional/dim-yield-stake.clar`
+- `dimensional/dimensional-core.clar`
+- `dimensional/governance.clar`
 
-### 2. Dimensional Module (15 contracts)
+### Enterprise
+- `enterprise/`
+- `enterprise/enterprise-api.clar`
+- `enterprise/enterprise-loan-manager.clar`
 
-#### Core Dimensional System
+### Errors
+- `errors/`
+- `errors/standard-errors.clar`
 
-- `dimensional-core.clar`: Main protocol coordinator and position management
-- `dim-registry.clar`: Component registry with deterministic token ordering
-- `dim-graph.clar`: Graph-based dimensional routing and optimization
-- `advanced-router-dijkstra.clar`: Dijkstra-based optimal pathfinding
+### Governance
+- `governance/`
+- `governance/lending-protocol-governance.clar`
+- `governance/proposal-engine.clar`
+- `governance/voting.clar`
 
-#### Staking & Yield
+### Helpers
+- `helpers/`
 
-- `dim-yield-stake.clar`: Dimensional staking with utilization-based yields
-- `dim-revenue-adapter.clar`: Revenue collection and distribution
-- `dim-metrics.clar`: Multi-dimensional metrics tracking
+### Integrations
+- `integrations/`
 
-#### Advanced Features
+### Interfaces
+- `interfaces/`
 
-- `position-nft.clar`: NFT-based position management
-- `tokenized-bond.clar`: Bond tokenization for debt instruments
-- `tokenized-bond-adapter.clar`: Bond integration adapter
+### Interoperability
+- `interoperability/`
 
-### 3. Lending Module (8 contracts)
+### Lending
+- `lending/`
+- `lending/lending-pool.clar`
+- `lending/lending-pool-core.clar`
+- `lending/lending-pool-rewards.clar`
+- `lending/lending-pool-v2.clar`
 
-#### Core Lending
+### Lib
+- `lib/`
+- `lib/math-lib-advanced.clar`
+- `lib/precision-calculator.clar`
 
-- `comprehensive-lending-system.clar`: Full-featured lending protocol
-- `enterprise-loan-manager.clar`: Institutional loan management
-- `interest-rate-model.clar`: Dynamic interest rate calculations
-- `liquidation-manager.clar`: Automated liquidation system
+### Libraries
+- `libraries/`
 
-#### Integration
+### Math
+- `math/`
+- `math/fixed-point-math.clar`
+- `math/math-lib-concentrated.clar`
 
-- `sbtc-lending-integration.clar`: sBTC collateral support
-- `cross-protocol-integrator.clar`: Multi-protocol integration
+### MEV
+- `mev/`
+- `mev/mev-protector-root.clar`
 
-### 4. Governance Module (7 contracts)
+### Mocks
+- `mocks/`
+- `mocks/mock-token.clar`
 
-#### Core Governance
+### Monitoring
+- `monitoring/`
 
-- `proposal-engine.clar`: Decentralized proposal system
-- `upgrade-controller.clar`: Protocol upgrade management
-- `emergency-governance.clar`: Emergency governance mechanisms
+### Oracle
+- `oracle/`
+- `oracle/dimensional-oracle.clar`
+- `oracle/external-oracle-adapter.clar`
 
-#### Supporting Infrastructure
+### Pools
+- `pools/`
+- `pools/pool-registry.clar`
+- `pools/tiered-pools.clar`
 
-- `governance-signature-verifier.clar`: Signature verification
-- `signed-data-base.clar`: Signed data management
-- `lending-protocol-governance.clar`: Specialized lending governance
+### Requirements
+- `requirements/`
+- `requirements/sip-010-trait-ft-standard.clar`
 
-### 5. Security Module (8 contracts)
+### Rewards
+- `rewards/`
 
-#### Core Security
+### Risk
+- `risk/`
+- `risk/funding-calculator.clar`
+- `risk/liquidation-engine.clar`
+- `risk/risk-manager.clar`
 
-- `circuit-breaker.clar`: Emergency pause and recovery system
-- `protocol-invariant-monitor.clar`: Protocol health monitoring
-- `automated-circuit-breaker.clar`: Automated protection mechanisms
+### Router
+- `router/`
 
-#### Advanced Protection
+### sBTC
+- `sbtc/`
+- `sbtc/btc-adapter.clar`
 
-- `manipulation-detector.clar`: Market manipulation detection
-- `rebalancing-rules.clar`: Automated rebalancing safeguards
-- `timelock-controller.clar`: Time-locked operations
+### Security
+- `security/`
+- `security/circuit-breaker.clar`
 
-### 6. Oracle Module (5 contracts)
+### Staking
+- `staking/`
 
-#### Price Feeds
+### Test
+- `test/`
 
-- `oracle-aggregator-v2.clar`: Multi-source price aggregation
-- `oracle.clar`: Base oracle functionality
-- `sbtc-oracle-adapter.clar`: sBTC price feeds
+### Tokens
+- `tokens/`
+- `tokens/cxd-price-initializer.clar`
+- `tokens/cxd-token.clar`
+- `tokens/cxlp-token.clar`
+- `tokens/cxs-token.clar`
+- `tokens/cxtr-token.clar`
+- `tokens/cxvg-token.clar`
+- `tokens/token-system-coordinator.clar`
 
-#### Automation
+### Traits
+- `traits/`
+- `traits/base-traits.clar`
+- `traits/batch-auction-trait.clar`
+- `traits/central-traits-registry.clar`
+- `traits/clp-pool-trait.clar`
+- `traits/dao-trait.clar`
+- `traits/dex-traits.clar`
+- `traits/dimensional-traits.clar`
+- `traits/errors.clar`
+- `traits/finance-metrics-trait.clar`
+- `traits/governance-traits.clar`
+- `traits/math-trait.clar`
+- `traits/monitoring-security-traits.clar`
+- `traits/oracle-aggregator-v2-trait.clar`
+- `traits/oracle-risk-traits.clar`
+- `traits/risk-trait.clar`
+- `traits/sip-010-ft-trait.clar`
 
-- `dim-oracle-automation.clar`: Automated oracle updates
-- `price-impact-calculator.clar`: Price impact analysis
+### Utils
+- `utils/`
+- `utils/block-utils.clar`
+- `utils/encoding.clar`
+- `utils/error-utils.clar`
+- `utils/migration-manager.clar`
+- `utils/rbac.clar`
+- `utils/utils.clar`
+- `utils/validation.clar`
 
-### 7. Token Module (8 contracts)
-
-#### Core Tokens
-
-- `cxd-token.clar`: Primary protocol token
-- `cxtr-token.clar`: Treasury reserve token
-- `cxvg-token.clar`: Governance token
-- `cxlp-token.clar`: Liquidity provider tokens
-
-#### System Tokens
-
-- `cxs-token.clar`: Secondary system token
-- `token-system-coordinator.clar`: Token coordination
-- `token-emission-controller.clar`: Emission management
-
-### 8. Core Module (2 contracts)
-
-#### Protocol Coordination
-
-- `conxian-protocol.clar`: Central protocol coordinator
-- `core.clar`: Core protocol functionality
+### Vaults
+- `vaults/`
 
 ## Mathematical Foundation
 
 ### Advanced Math Libraries
 
-- `math-lib-advanced.clar`: Newton-Raphson sqrt, binary exponentiation, Taylor series
-- `fixed-point-math.clar`: 18-decimal precision arithmetic
-- `math-lib-concentrated.clar`: Concentrated liquidity math functions
-- `precision-calculator.clar`: Mathematical operation validation
+- `math/fixed-point-math.clar`: 18-decimal precision arithmetic
+- `lib/math-lib-advanced.clar`
+- `math/math-lib-concentrated.clar`
+- `lib/precision-calculator.clar`
 
 ## Integration Points
 
@@ -216,7 +289,6 @@ This document outlines the current Conxian protocol architecture, a comprehensiv
 - **Advanced Risk Models**: VaR calculations and portfolio optimization
 - **Permissionless Deployment**: Third-party integration framework
 - **Governance V2**: Enhanced on-chain governance
-
 ---
 
-**Implementation Note**: This architecture reflects the current state of the Conxian protocol as of November 2025. The system has evolved from the original "Multi-Dimensional Engine" concept to a more modular, production-ready architecture with 239+ contracts across 15+ modules.
+**Implementation Note**: This architecture reflects the current state of the Conxian protocol as of November 2025.

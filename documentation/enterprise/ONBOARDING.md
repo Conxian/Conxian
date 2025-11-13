@@ -35,8 +35,8 @@ across several specialized contracts.
 Enterprise users can integrate with Conxian through direct smart contract calls.
 The main entry points include:
 
-* **Lending Protocol:** `enterprise-loan-manager.clar` for institutional loan management
-* **Compliance System:** `compliance-hooks.clar` for regulatory compliance integration
+* **Lending Protocol:** `contracts/enterprise/enterprise-loan-manager.clar` for institutional loan management
+* **Compliance System:** `contracts/enterprise/compliance-hooks.clar` for regulatory compliance integration
 * **Cross-Protocol Operations:** Various contracts for seamless DeFi interactions
 
 ### 2. API Integration

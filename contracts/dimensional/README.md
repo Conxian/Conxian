@@ -20,12 +20,12 @@ This module provides a comprehensive multi-dimensional DeFi framework with:
 - `dimensional-core.clar`: Main dimensional protocol coordinator with position management
 - `dim-registry.clar`: Registry for dimensional components with deterministic token ordering
 - `dim-graph.clar`: Graph-based dimensional routing and optimization
+- `dim-metrics.clar`: Multi-dimensional metrics tracking and analytics
 
 ### Staking & Yield
 
 - `dim-yield-stake.clar`: Dimensional staking with utilization-based yields
 - `dim-revenue-adapter.clar`: Revenue collection and distribution across dimensions
-- `dim-metrics.clar`: Multi-dimensional metrics tracking and analytics
 
 ### Advanced Features
 
@@ -37,6 +37,11 @@ This module provides a comprehensive multi-dimensional DeFi framework with:
 
 - `advanced-router-dijkstra.clar`: Advanced routing using Dijkstra's algorithm for optimal paths
 - `dim-oracle-automation.clar`: Automated oracle updates for dimensional metrics
+
+### Other Contracts
+- `concentrated-liquidity-pool-v2.clar`
+- `concentrated-liquidity-pool.clar`
+- `governance.clar`
 
 ## Dimensions
 
@@ -65,21 +70,21 @@ Enterprise APIs with compliance integration and advanced order types.
 ### Staking in Dimensions
 
 ```clarity
-(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
+(use-trait sip-010-ft-trait .dex-traits.sip-010-ft-trait)
 (contract-call? .dim-yield-stake stake-dimension dim-id amount lock-period token-contract)
 ```
 
 ### Opening Dimensional Positions
 
 ```clarity
-(use-trait dimensional-core-trait .all-traits.dimensional-core-trait)
+(use-trait dimensional-core-trait .dimensional-traits.dimensional-core-trait)
 (contract-call? .dimensional-core open-position collateral-amount leverage position-type slippage-tolerance token funding-interval tags metadata)
 ```
 
 ### Calculating Revenue Allocation
 
 ```clarity
-(use-trait dim-revenue-adapter-trait .all-traits.dim-revenue-adapter-trait)
+(use-trait dim-revenue-adapter-trait .dimensional-traits.dim-revenue-adapter-trait)
 (contract-call? .dim-revenue-adapter calculate-dimensional-allocation total-budget)
 ```
 
@@ -93,6 +98,6 @@ Enterprise APIs with compliance integration and advanced order types.
 
 ## Related Documentation
 
-- [Conxian Protocol Architecture](../architecture/ARCHITECTURE.md)
+- [Conxian Protocol Architecture](../../architecture/ARCHITECTURE.md)
 - [Multi-Hop Router Documentation](../dex/README.md)
-- [Oracle Integration Guide](../guides/oracle-integration.md)
+- [Oracle Integration Guide](../../guides/oracle-integration.md)

@@ -25,19 +25,6 @@ The lending module provides comprehensive DeFi lending functionality including:
 - **Regulatory compliance** features for institutional users
 - **API integration** for traditional finance systems
 
-**Key Features:**
-
-```clarity
-;; Enterprise loan origination
-(create-enterprise-loan borrower collateral-assets loan-amount loan-terms)
-
-;; Risk assessment
-(assess-enterprise-risk borrower collateral-value loan-amount)
-
-;; Regulatory reporting
-(generate-compliance-report loan-id)
-```
-
 #### Dimensional Vault (`dimensional-vault.clar`)
 
 - **Multi-dimensional asset management** across protocols
@@ -46,31 +33,18 @@ The lending module provides comprehensive DeFi lending functionality including:
 - **Risk-parity allocation** across different asset classes
 - **Automated yield harvesting** and compounding
 
-**Vault Operations:**
-
-```clarity
-;; Deposit to dimensional vault
-(deposit-to-vault assets amounts vault-id)
-
-;; Rebalance vault allocation
-(rebalance-vault vault-id target-allocation)
-
-;; Harvest yields across dimensions
-(harvest-dimensional-yields vault-id)
-```
-
 ### Lending Pool System
 
 #### Core Pool Contracts
 
-- **Lending Pool Core**: Central lending logic and state management
-- **Lending Pool V2**: Enhanced version with improved gas efficiency
-- **Lending Pool Rewards**: Incentive distribution for liquidity providers
+- **Lending Pool (`lending-pool.clar`)**: The main lending pool contract.
+- **Lending Pool Core (`lending-pool-core.clar`)**: Central lending logic and state management
+- **Lending Pool V2 (`lending-pool-v2.clar`)**: Enhanced version with improved gas efficiency
+- **Lending Pool Rewards (`lending-pool-rewards.clar`)**: Incentive distribution for liquidity providers
 
 #### Pool Management
 
-- **Lending Registrar**: Registration and management of lending pools
-- **Pool Factory**: Creation and configuration of new lending pools
+- **Lending Registrar (`lending-registrar.clar`)**: Registration and management of lending pools
 
 ## Lending Mechanics
 
@@ -245,10 +219,3 @@ Where:
 - **Liquidation penalties** to discourage risky behavior
 - **Interest rate buffers** for protocol sustainability
 - **Insurance mechanisms** for catastrophic losses
-
-## Related Documentation
-
-- [Lending Protocol Guide](../documentation/guides/LENDING_PROTOCOL.md)
-- [Enterprise Integration](../documentation/guides/ENTERPRISE_INTEGRATION.md)
-- [Risk Management Framework](../documentation/security/RISK_MANAGEMENT.md)
-- [Dimensional Finance](../documentation/guides/DIMENSIONAL_FINANCE.md)

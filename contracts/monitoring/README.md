@@ -25,19 +25,6 @@ The monitoring module delivers enterprise-grade observability and analytics incl
 - **Multi-dimensional views** of protocol performance
 - **API endpoints** for external monitoring tools
 
-**Dashboard Features:**
-
-```clarity
-;; Get protocol overview
-(get-protocol-overview)
-
-;; Set up custom alerts
-(create-alert alert-config)
-
-;; Retrieve historical metrics
-(get-historical-metrics metric-type time-range)
-```
-
 ### Analytics & Reporting
 
 #### Analytics Aggregator (`analytics-aggregator.clar`)
@@ -47,19 +34,6 @@ The monitoring module delivers enterprise-grade observability and analytics incl
 - **Trend identification** and predictive modeling
 - **Custom report generation** for different stakeholders
 - **Data export** capabilities for external analysis
-
-**Analytics Functions:**
-
-```clarity
-;; Generate usage report
-(generate-usage-report time-period)
-
-;; Calculate protocol efficiency
-(calculate-efficiency-metrics)
-
-;; Identify performance bottlenecks
-(identify-bottlenecks)
-```
 
 #### Finance Metrics (`finance-metrics.clar`)
 
@@ -79,19 +53,6 @@ The monitoring module delivers enterprise-grade observability and analytics incl
 - **Automated optimizations** for improved efficiency
 - **Performance benchmarking** against industry standards
 
-**Optimization Features:**
-
-```clarity
-;; Analyze contract gas usage
-(analyze-gas-usage contract-address)
-
-;; Optimize function execution
-(optimize-function function-selector)
-
-;; Generate performance report
-(generate-performance-report)
-```
-
 ### Stability & Risk Monitoring
 
 #### Price Stability Monitor (`price-stability-monitor.clar`)
@@ -101,19 +62,6 @@ The monitoring module delivers enterprise-grade observability and analytics incl
 - **Market anomaly detection** and alerting
 - **Depegging risk assessment** for stable assets
 - **Arbitrage opportunity identification**
-
-**Stability Monitoring:**
-
-```clarity
-;; Monitor asset volatility
-(track-volatility asset-pair)
-
-;; Check stability thresholds
-(check-stability-thresholds)
-
-;; Generate stability report
-(generate-stability-report)
-```
 
 #### System Monitor (`system-monitor.clar`)
 
@@ -274,10 +222,3 @@ The monitoring module delivers enterprise-grade observability and analytics incl
 - **Lazy evaluation** for complex calculations
 - **Incremental updates** for real-time metrics
 - **Compression** for historical data storage
-
-## Related Documentation
-
-- [Monitoring Architecture](../documentation/architecture/MONITORING_ARCHITECTURE.md)
-- [Analytics Guide](../documentation/guides/ANALYTICS_GUIDE.md)
-- [Performance Optimization](../documentation/guides/PERFORMANCE_OPTIMIZATION.md)
-- [Alert System Configuration](../documentation/guides/ALERT_CONFIGURATION.md)
