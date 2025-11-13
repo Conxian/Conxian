@@ -9,7 +9,7 @@ Conxian smart contracts.
 
 ### Prerequisites
 
-- Clarinet SDK v3.8.0 (via root `package.json`) and Clarinet CLI v3.8.0 on PATH
+- Clarinet SDK v3.9.0 (via root `package.json`) and Clarinet CLI v3.9.0 on PATH
 - Node.js (v18+)
 - Git for version control
 
@@ -24,7 +24,7 @@ cd Conxian
 npm ci
 
 # Verify setup
-clarinet check   # ✅ 65+ contracts (syntax validation)
+clarinet check   # ✅ 255+ contracts (syntax validation)
 npx vitest run --config ./vitest.config.enhanced.ts   # 🔄 Framework tests
 ```
 
@@ -90,31 +90,20 @@ Conxian/
 
 ## Development Workflow
 
-### 1. Access Control Integration
+### 1. Modular Trait Integration
 
-When developing new contracts, follow these patterns for access control:
+When developing new contracts, follow these patterns for trait integration:
 
-1. **Import Access Control**
+1. **Import Modular Traits**
 
    ```clarity
-   (use-trait access-control-trait .all-traits.access-control-trait)
+   (use-trait sip-010-ft-trait .dex-traits.sip-010-ft-trait)
    ```
 
-2. **Define Required Roles**
+2. **Implement Traits**
 
    ```clarity
-   (define-constant ROLE_OPERATOR 0x4f50455241544f52)  // "OPERATOR" in hex
-   ```
-
-3. **Add Access Control Checks**
-
-   ```clarity
-   (define-public (protected-function)
-     (begin
-       (try! (contract-call? .access-control has-role ROLE_OPERATOR (as-contract tx-sender)))
-       ;; Function logic here
-     )
-   )
+   (impl-trait .dex-traits.sip-010-ft-trait)
    ```
 
 ### 2. Smart Contract Development
@@ -252,57 +241,6 @@ const deployer = accounts.get('deployer')!;
 const user1 = accounts.get('wallet_1')!;
 ```
 
-### Nakamoto Testing Patterns
-
-#### Testing Fast Block Functions
-
-```typescript
-// Test epoch calculations with Nakamoto timing
-const epochResult = simnet.callReadOnlyFn(
-  'nakamoto-compatibility',
-  'get-nakamoto-epoch-length',
-  [],
-  deployer
-);
-
-expect(epochResult.result).toBe(Cl.uint(120960)); // 1 week in Nakamoto blocks
-```
-
-#### Testing Bitcoin Finality
-
-```typescript
-// Test finality-dependent operations (framework implementation)
-const finalityResult = simnet.callReadOnlyFn(
-  'nakamoto-compatibility',
-  'is-bitcoin-finalized',
-  [Cl.uint(simnet.blockHeight - 10)],
-  deployer
-);
-
-// Basic finality detection with caching
-expected(finalityResult.result).toBe(Cl.bool(true));
-```
-
-#### Testing Cross-Chain Operations
-
-```typescript
-// Test Wormhole bridge functionality (development framework - events only)
-const bridgeResult = simnet.callPublicFn(
-  'wormhole-integration',
-  'initiate-bridge-transfer',
-  [
-    Cl.contractPrincipal(deployer, 'test-token'),
-    Cl.uint(1000000),
-    Cl.uint(2), // Ethereum (framework only)
-    Cl.bufferFromHex('0x742d35cc6548c63e02e4286d82bae9b8feff4bc8')
-  ],
-  user1
-);
-
-// Returns sequence number and fee (event emission framework)
-expected(bridgeResult.result).toBeOk();
-```
-
 ### Common Test Patterns
 
 #### Testing Public Functions
@@ -412,10 +350,9 @@ npx clarinet deployment status --mainnet
 
 ```bash
 # Check syntax errors
-npx clarinet check --contract problematic-contract --sdk-version 3.7.0
+npx clarinet check --contract problematic-contract
 
 # View detailed error messages
-npx clarinet check --verbose --sdk-version 3.7.0
 npx clarinet check --verbose
 ```
 
@@ -592,7 +529,7 @@ The pipeline consists of several key stages:
 | Variable | Description | Required | Default |
 |----------|-------------|----------|---------|
 | `NODE_VERSION` | Node.js version | No | 20 |
-| `CLARINET_VERSION` | Clarinet version | No | 3.7.0 |
+| `CLARINET_VERSION` | Clarinet version | No | 3.9.0 |
 | `DOCKERHUB_USERNAME` | Docker Hub username | Yes | - |
 | `IMAGE_NAME` | Docker image name | No | Conxian-protocol |
 
@@ -792,102 +729,3 @@ This document outlines the standardized error codes used across the Conxian prot
 3. Update this documentation when adding new error codes
 4. Include descriptive error messages in the contract code
 5. Log relevant context with errors when possible
-
-## Trait Registry
-
-### Overview
-
-The Trait Registry is a central contract that manages trait implementations in the Conxian protocol. It provides a standardized way to discover and use traits across different contracts.
-
-### Key Features
-
-1. **Centralized Trait Management**
-   - Single source of truth for all trait implementations
-   - Easy discovery of available traits
-   - Versioning support for traits
-
-2. **Trait Lifecycle**
-   - Register new trait implementations
-   - Deprecate old traits
-   - Suggest replacements for deprecated traits
-
-3. **Metadata**
-   - Rich metadata for each trait
-   - Version tracking
-   - Descriptions and documentation
-
-### Usage
-
-#### Registering a New Trait
-
-```clarity
-(register-trait
-  "my-trait"  ;; trait name
-  1           ;; version
-  "Description of my trait"
-  'STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ.my-contract
-  false       ;; deprecated
-  none        ;; replacement (optional)
-)
-```
-
-#### Using a Trait in Your Contract
-
-```clarity
-;; 1. Define the trait registry constant
-(define-constant TRAIT_REGISTRY 'STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ.trait-registry)
-
-;; 2. Resolve the trait at deployment time
-(use-trait my-trait (unwrap! (contract-call? TRAIT_REGISTRY get-trait-contract 'my-trait) (err u1000)))
-
-;; 3. Implement the trait
-(impl-trait 'STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ.my-trait)
-```
-
-#### Checking if a Trait is Deprecated
-
-```clarity
-(contract-call? TRAIT_REGISTRY is-trait-deprecated 'my-trait)
-```
-
-#### Finding a Replacement for a Deprecated Trait
-
-```clarity
-(contract-call? TRAIT_REGISTRY get-trait-replacement 'deprecated-trait)
-```
-
-### Best Practices
-
-1. **Always Use the Registry**
-   - Never hardcode trait principals in your contracts
-   - Always resolve traits through the registry
-
-2. **Versioning**
-   - Increment version numbers for breaking changes
-   - Document changes between versions
-
-3. **Deprecation**
-   - Mark old traits as deprecated when replacing them
-   - Always provide a replacement when deprecating
-   - Keep deprecated traits in the registry for backward compatibility
-
-4. **Error Handling**
-   - Always handle cases where a trait might not be found
-   - Use meaningful error codes
-
-### Initialization
-
-Use the provided initialization script to register standard traits:
-
-```typescript
-import { initializeTraitRegistry } from '../scripts/init-trait-registry';
-
-// In your test or deployment script
-await initializeTraitRegistry(chain, deployer);
-```
-
-### Security Considerations
-
-- Only the contract owner can register or update traits
-- Always verify the trait contract address before using it
-- Be cautious when updating existing trait implementations

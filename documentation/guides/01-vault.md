@@ -1,6 +1,6 @@
 # Contract Guide: `vault.clar`
 
-**Primary Contract:** `contracts/vault.clar`
+**Primary Contract:** `contracts/dex/vault.clar`
 
 ## 1. Introduction
 
@@ -89,5 +89,5 @@ These functions can only be called by the `yield-optimizer-contract`.
 | `u6003` | `ERR_INSUFFICIENT_BALANCE` | The user does not have enough balance to withdraw.     |
 | `u6004` | `ERR_INVALID_AMOUNT`       | The specified amount is zero.                          |
 | `u6005` | `ERR_CAP_EXCEEDED`         | The deposit would exceed the asset's cap.              |
-| `u6006` | `ERR_INVALID_ASSET`        | The specified asset is not supported by the vault.     |
+| `u6006` | `ERR_NOT_SUPPORTED`        | The specified asset is not supported by the vault.     |
 | `u6013` | `ERR_OPTIMIZER_ONLY`       | The caller is not the registered yield optimizer contract. |

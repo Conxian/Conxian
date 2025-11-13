@@ -24,29 +24,6 @@ The pools module provides flexible liquidity pool infrastructure supporting:
 - **Automatic compounding** of trading fees
 - **Slippage protection** with customizable tolerance
 
-**Key Functions:**
-
-```clarity
-;; Create liquidity position
-(create-position tick-lower tick-upper amount-0 amount-1 recipient)
-
-;; Add liquidity to existing position
-(add-liquidity position-id amount-0 amount-1 recipient)
-
-;; Remove liquidity
-(remove-liquidity position-id liquidity-amount recipient)
-
-;; Collect accrued fees
-(collect-fees position-id recipient)
-```
-
-**Position Management:**
-
-- **NFT-backed positions** with unique identifiers
-- **Metadata storage** for position parameters
-- **Transferable positions** between users
-- **Merge/split operations** for position management
-
 ### Tiered Pools (`tiered-pools.clar`)
 
 **Pool Structure:**
@@ -56,12 +33,15 @@ The pools module provides flexible liquidity pool infrastructure supporting:
 - **Liquidity incentives** for higher fee tiers
 - **Automatic rebalancing** between tiers
 
-**Tier Benefits:**
+### Pool Factory (`pool-factory.clar`)
 
-- **Fee Tier 0.01%**: Best for stable pairs, low fees
-- **Fee Tier 0.05%**: Balanced for most pairs
-- **Fee Tier 0.30%**: Higher fees for volatile pairs
-- **Fee Tier 1.00%**: Maximum fees for exotic pairs
+- Creates and manages liquidity pools
+- Supports multiple pool types
+
+### Pool Registry (`pool-registry.clar`)
+
+- A registry of all liquidity pools
+- Provides a way to look up pools by token pairs
 
 ## Pool Economics
 
@@ -242,10 +222,3 @@ Fee Tiers:
 - **Liquidity conversion** with optimal pricing
 - **Position merging** for concentrated liquidity
 - **Fee tier optimization** based on market conditions
-
-## Related Documentation
-
-- [Concentrated Liquidity Guide](../documentation/guides/CONCENTRATED_LIQUIDITY.md)
-- [Pool Architecture](../documentation/architecture/POOL_ARCHITECTURE.md)
-- [LP Token Standard](../documentation/standards/LP_TOKEN_STANDARD.md)
-- [Yield Farming Guide](../documentation/guides/YIELD_FARMING.md)

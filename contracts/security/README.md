@@ -25,19 +25,6 @@ The security module provides enterprise-grade security infrastructure including:
 - **Sandwich attack detection** and prevention
 - **Gas price monitoring** and optimization
 
-**Key Functions:**
-
-```clarity
-;; Submit order to batch auction
-(submit-batch-order token-in token-out amount-in min-out deadline)
-
-;; Execute batch auction
-(execute-batch-auction batch-id)
-
-;; Check MEV protection status
-(get-mev-protection-level)
-```
-
 ### Rate Limiting (`rate-limiter.clar`)
 
 **Request Throttling:**
@@ -48,19 +35,6 @@ The security module provides enterprise-grade security infrastructure including:
 - **Whitelist/blacklist** functionality for privileged users
 - **Time-window tracking** for rate calculation
 
-**Configuration:**
-
-```clarity
-;; Set user rate limit
-(set-user-limit user max-requests-per-hour)
-
-;; Set global rate limit
-(set-global-limit max-requests-per-block)
-
-;; Check rate limit status
-(get-user-remaining-limit user)
-```
-
 ### Proof of Reserves (`proof-of-reserves.clar`)
 
 **Reserve Verification:**
@@ -70,19 +44,6 @@ The security module provides enterprise-grade security infrastructure including:
 - **Multi-signature validation** for reserve updates
 - **Auditor integration** for third-party verification
 - **Real-time reserve monitoring** and alerts
-
-**Reserve Management:**
-
-```clarity
-;; Update reserve proof
-(update-reserve-proof new-merkle-root signatures)
-
-;; Verify user reserves
-(verify-user-reserves user amount)
-
-;; Get total verified reserves
-(get-total-verified-reserves)
-```
 
 ### Access Control Systems
 
@@ -100,14 +61,11 @@ The security module provides enterprise-grade security infrastructure including:
 - **Staking requirements** for role maintenance
 - **Reputation system** integration
 
-### Pausable Infrastructure (`Pausable.clar`)
+### Pausable Infrastructure
 
-**Emergency Controls:**
-
-- **Protocol-wide pausing** for critical emergencies
-- **Selective pausing** for specific functions
-- **Timelocked pauses** to prevent abuse
-- **Multi-signature requirements** for pause activation
+- **Pausable (`Pausable.clar`)**: Emergency stop functionality across the protocol.
+- **Circuit Breaker (`circuit-breaker.clar`)**: A simple circuit breaker.
+- **Enhanced Circuit Breaker (`enhanced-circuit-breaker.clar`)**: A more advanced circuit breaker with more features.
 
 ## Security Architecture
 
@@ -262,10 +220,3 @@ The security module provides enterprise-grade security infrastructure including:
 - **Layered security** to minimize performance impact
 - **Configurable security levels** based on risk tolerance
 - **Off-chain computation** for complex validations
-
-## Related Documentation
-
-- [Security Architecture](../documentation/architecture/SECURITY_ARCHITECTURE.md)
-- [MEV Protection Guide](../documentation/security/MEV_PROTECTION.md)
-- [Access Control Standard](../documentation/standards/ACCESS_CONTROL.md)
-- [Emergency Response Procedures](../documentation/security/EMERGENCY_PROCEDURES.md)

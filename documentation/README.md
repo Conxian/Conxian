@@ -25,18 +25,12 @@ This is the central documentation hub for the Conxian DeFi platform. All documen
 
 - [`developer/DEVELOPER_GUIDE.md`](./developer/DEVELOPER_GUIDE.md) - **Development setup and contributing**
 - [`developer/MIGRATION_GUIDE_ACCESS_CONTROL.md`](./developer/MIGRATION_GUIDE_ACCESS_CONTROL.md) - **Access control migration guide**
-- [`standards`](./standards) - **Development standards and guidelines**
-- [`api`](./api) - **Smart contract API reference**
 
 ### 🏗️ Architecture & Design
 
 - [`architecture/ARCHITECTURE.md`](./architecture/ARCHITECTURE.md) - **System architecture and design**
 - [`architecture/adr/`](./architecture/adr/) - **Architecture decision records**
 - [`whitepaper/Conxian-Whitepaper.md`](./whitepaper/Conxian-Whitepaper.md) - **Technical whitepaper**
-
-### 🚀 Deployment & Operations
-
-- [`deployment`](./deployment) - **Deployment configuration and guides**
 
 ### 🔒 Security & Compliance
 
@@ -66,17 +60,6 @@ This is the central documentation hub for the Conxian DeFi platform. All documen
 | Understand the system architecture | [Architecture](./architecture/ARCHITECTURE.md) |
 | Contribute code | [Developer Guide](./developer/DEVELOPER_GUIDE.md) |
 | Review security | [Security](./security/SECURITY.md) |
-| Understand contracts | [API Reference](./api) |
-
-## 📋 Documentation Standards
-
-All documentation follows these principles:
-
-- **🎯 User-focused**: Written for specific audiences
-- **✅ Actionable**: Provides clear steps and examples
-- **🔄 Current**: Reflects actual implementation
-- **📝 Concise**: No redundancy or outdated information
-- **🔍 Searchable**: Well-structured with clear headings
 
 ## 🗂️ File Organization
 
@@ -97,7 +80,6 @@ documentation/
 ├── architecture/            # System design and specifications
 │   ├── ARCHITECTURE.md      # System architecture
 │   └── adr/                 # Architecture decision records
-├── deployment               # Deployment configuration
 ├── security/                # Security and compliance
 │   └── SECURITY.md          # Security features and audit info
 ├── guides/                  # How-to guides and tutorials
@@ -113,8 +95,6 @@ documentation/
 │   ├── ROADMAP.md          # Development plans
 │   └── CHANGELOG.md        # Version history
 ├── whitepaper/             # Technical whitepaper
-├── standards               # Development standards
-├── api                     # Smart contract API reference
 └── [additional files]      # Analytics, metrics, strategies
 ```
 
@@ -136,4 +116,4 @@ When adding new documentation:
 
 ---
 
-*Last updated: November 12, 2025* | *Documentation reorganized for clarity and maintainability*
+*Last updated: November 13, 2025* | *Documentation reorganized for clarity and maintainability*

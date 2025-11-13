@@ -10,14 +10,14 @@ The DEX module contains a complete suite of decentralized exchange contracts sup
 - **Advanced Routing**: Dijkstra's algorithm for optimal multi-hop pathfinding
 - **Yield Farming**: Auto-compounding, staking, and reward distribution
 - **Lending Protocols**: Enterprise-grade lending with collateral management
-- **Cross-Chain Integration**: sBTC and Wormhole integration
+- **Cross-Chain Integration**: sBTC integration
 - **MEV Protection**: Batch auctions and manipulation detection
 - **Oracle Systems**: Multi-source price feeds and aggregation
 - **Governance**: Protocol upgrades and parameter management
 
 ## Contract Categories
 
-### Core DEX Infrastructure (25+ contracts)
+### Core DEX Infrastructure
 
 #### Routing & Swaps
 
@@ -39,7 +39,7 @@ The DEX module contains a complete suite of decentralized exchange contracts sup
 - `liquidity-manager.clar`: Advanced liquidity management and rebalancing
 - `liquidity-optimization-engine.clar`: AI-driven liquidity optimization and automated market making
 
-### Yield Farming & Staking (15+ contracts)
+### Yield Farming & Staking
 
 #### Auto-Compounding
 
@@ -51,7 +51,6 @@ The DEX module contains a complete suite of decentralized exchange contracts sup
 
 - `token-emission-controller.clar`: Controls token emissions and inflation schedules
 - `token-system-coordinator.clar`: Coordinates token economics across the protocol
-- `rewards\default-strategy-engine.clar`: Default reward distribution strategies
 
 #### Enhanced Yield
 
@@ -59,7 +58,7 @@ The DEX module contains a complete suite of decentralized exchange contracts sup
 - `cxvg-utility.clar`: CXVG token utility and governance features
 - `cxlp-migration-queue.clar`: Migration system for LP token upgrades
 
-### Lending & Borrowing (8 contracts)
+### Lending & Borrowing
 
 #### Enterprise Lending
 
@@ -74,7 +73,7 @@ The DEX module contains a complete suite of decentralized exchange contracts sup
 - `interest-rate-model.clar`: Dynamic interest rate calculations
 - `liquidation-manager.clar`: Automated liquidation system for under-collateralized positions
 
-### MEV Protection & Security (7 contracts)
+### MEV Protection & Security
 
 #### MEV Protection
 
@@ -88,7 +87,7 @@ The DEX module contains a complete suite of decentralized exchange contracts sup
 - `timelock-controller.clar`: Time-locked execution for critical protocol changes
 - `performance-optimizer.clar`: Gas optimization and performance monitoring
 
-### Cross-Chain Integration (6 contracts)
+### Cross-Chain Integration
 
 #### sBTC Integration
 
@@ -98,16 +97,15 @@ The DEX module contains a complete suite of decentralized exchange contracts sup
 - `sbtc-bond-integration.clar`: Bond issuance using sBTC collateral
 - `sbtc-lending-integration.clar`: Lending protocol integration with sBTC
 
-### Oracle & Price Feeds (4 contracts)
+### Oracle & Price Feeds
 
 #### Price Oracles
 
 - `oracle-aggregator-v2.clar`: Multi-source price feed aggregation
 - `oracle.clar`: Basic oracle functionality
-- `external-oracle-adapter.clar`: External oracle integration (Chainlink, etc.)
 - `sbtc-oracle-adapter.clar`: sBTC-specific price feeds
 
-### Monitoring & Analytics (3 contracts)
+### Monitoring & Analytics
 
 #### Real-Time Monitoring
 
@@ -115,19 +113,18 @@ The DEX module contains a complete suite of decentralized exchange contracts sup
 - `monitoring-dashboard.clar`: Dashboard for protocol metrics
 - `predictive-scaling-system.clar`: Predictive scaling based on market conditions
 
-### Automation & Utilities (3 contracts)
+### Automation & Utilities
 
 #### Automation
 
-- `automation\keeper-coordinator.clar`: Keeper network coordination
-- `automation\batch-processor.clar`: Batch processing for efficient execution
+- `transaction-batch-processor.clar`: Batch processing for efficient execution
 
 #### Utilities
 
 - `distributed-cache-manager.clar`: Distributed caching for performance optimization
 - `nakamoto-compatibility.clar`: Stacks 2.1 Nakamoto upgrade compatibility layer
 
-### Legacy & Migration (2 contracts)
+### Legacy & Migration
 
 #### Legacy Support
 
@@ -139,7 +136,7 @@ The DEX module contains a complete suite of decentralized exchange contracts sup
 ### Creating a Concentrated Liquidity Position
 
 ```clarity
-(use-trait pool-trait .all-traits.pool-trait)
+(use-trait pool-trait .dex-traits.pool-trait)
 (contract-call? .concentrated-liquidity-pool create-position
   { token-0: token-a, token-1: token-b }
   tick-lower
@@ -155,7 +152,7 @@ The DEX module contains a complete suite of decentralized exchange contracts sup
 ### Multi-Hop Token Swap
 
 ```clarity
-(use-trait router-trait .all-traits.router-trait)
+(use-trait router-trait .dex-traits.router-trait)
 ;; Propose route first
 (contract-call? .multi-hop-router-v3 propose-route
   token-in token-out amount-in min-amount-out route-timeout)
@@ -168,7 +165,7 @@ The DEX module contains a complete suite of decentralized exchange contracts sup
 ### Staking LP Tokens
 
 ```clarity
-(use-trait staking-trait .all-traits.staking-trait)
+(use-trait staking-trait .staking-traits.staking-trait)
 (contract-call? .auto-compounder stake-tokens
   pool-token amount lock-period)
 ```
@@ -176,7 +173,7 @@ The DEX module contains a complete suite of decentralized exchange contracts sup
 ### Lending Protocol
 
 ```clarity
-(use-trait lending-trait .all-traits.lending-trait)
+(use-trait lending-trait .lending-traits.lending-trait)
 (contract-call? .comprehensive-lending-system borrow
   asset amount collateral-asset collateral-amount)
 ```
@@ -217,11 +214,3 @@ The DEX module contains a complete suite of decentralized exchange contracts sup
 - **Distributed caching** for frequently accessed data
 - **Predictive scaling** based on market conditions
 - **Optimized storage patterns** for minimal on-chain costs
-
-## Related Documentation
-
-- [DEX Architecture](../documentation/architecture/DEX_ARCHITECTURE.md)
-- [Multi-Hop Routing Guide](../documentation/guides/MULTI_HOP_ROUTING.md)
-- [Yield Farming Strategies](../documentation/guides/YIELD_STRATEGIES.md)
-- [Lending Protocol](../documentation/guides/LENDING_PROTOCOL.md)
-- [MEV Protection](../documentation/security/MEV_PROTECTION.md)
