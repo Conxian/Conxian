@@ -1,4 +1,4 @@
-# AIP-2: Implement Time-Weighted Voting Power
+# CXIP-2: Implement Time-Weighted Voting Power
 
 ## Simple Summary
 

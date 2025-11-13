@@ -1,10 +1,9 @@
 ;; File: contracts/access/roles.clar
 ;; Role-based access control implementation
 
-(use-trait "access-control-trait" .access-control-trait.access-control-trait)
+(use-trait access-control-trait .access-traits.access-traits)
+(impl-trait .access-traits.access-traits)
 
-;; Implement access control
-(impl-trait .access-control-trait.access-control-trait)
 
 ;; Owner data variable
 (define-data-var contract-owner principal tx-sender)
@@ -22,7 +21,7 @@
 (define-constant ROLE_OPERATOR "operator")
 
 ;; Data storage for role assignments
-(define-map roles {who: principal, role: (string-ascii 32)} bool)
+(define-map roles {who: principal, role: (string-ascii 32)} ())
 
 ;; ===========================================
 ;; Public functions
@@ -35,47 +34,28 @@
     (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_NOT_OWNER)
     
     ;; Set the role for the address
-    (map-set roles { who: who, role: role } true)
+    (map-set roles { who: who, role: role } ())
     
     (ok true)
   )
 )
 
-;; Revoke a role from the transaction sender
-(define-public (revoke-role (role-name (string-ascii 32)))
+;; Revoke a role from an address
+(define-public (revoke-role (who principal) (role (string-ascii 32)))
   (begin
     ;; Only the contract owner can revoke roles
     (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_NOT_OWNER)
     
-    ;; Remove the role from tx-sender
-    (map-delete roles { who: tx-sender, role: role-name })
+    ;; Remove the role from address
+    (map-delete roles { who: who, role: role })
     
     (ok true)
   )
 )
 
-;; ===========================================
-;; Internal functions
-;; ===========================================
-
-;; Internal function to check if the transaction sender has a specific role
-(define-private (check-role (role (string-ascii 32)))
-  (let ((has-role-val (default-to false (map-get? roles { who: tx-sender, role: role }))))
-    (if has-role-val
-      (ok true)
-      (err ERR_NOT_AUTHORIZED)
-    )
-  )
-)
-
-;; Public function to check if an address has a specific role
-(define-read-only (has-role (role-name (string-ascii 32)))
-  (ok (default-to false (map-get? roles { who: tx-sender, role: role-name })))
-)
-
-;; Get the principal assigned to a role
-(define-read-only (get-role-principal (role-name (string-ascii 32)))
-  (ok (some { authorized-principal: (var-get contract-owner) }))
+;; Check if the transaction sender has a specific role
+(define-public (has-role (who principal) (role (string-ascii 32)))
+  (ok (default-to false (map-get? roles { who: who, role: role })))
 )
 
 ;; Initialize access control
@@ -103,5 +83,5 @@
 (define-public (revoke-admin (who principal))
   (revoke-role who ROLE_ADMIN))
 
-(define-read-only (is-admin (who principal))
+(define-public (is-admin (who principal))
   (has-role who ROLE_ADMIN))

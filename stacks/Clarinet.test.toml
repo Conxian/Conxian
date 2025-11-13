@@ -19,21 +19,16 @@ address = "ST1SJ3DTE5DN7X54YDH5D64R3BCB6A2AG2ZQ8YPD5"
 path = "../contracts/dimensional/dim-metrics.clar"
 depends_on = ["all-traits"]
 
-[contracts.dimensional-core]
-path = "../contracts/dimensional/dimensional-core.clar"
-depends_on = ["dim-metrics"]
-
-[contracts.dimensional-engine]
-path = "../contracts/core/dimensional-engine.clar"
-depends_on = ["dimensional-core"]
 
 [contracts.mock-token]
 path = "../contracts/mocks/mock-token.clar"
 depends_on = ["all-traits"]
 
-[contracts.dimensional-oracle]
-path = "../contracts/oracle/dimensional-oracle.clar"
-depends_on = ["mock-oracle"]
+
+
+
+
+
 
 [contracts.mock-oracle]
 path = "../contracts/mocks/mock-oracle.clar"

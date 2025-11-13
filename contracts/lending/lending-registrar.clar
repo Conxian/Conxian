@@ -25,4 +25,4 @@
     (try! (contract-call? registry register-component .enterprise-module ENTERPRISE_MODULE_WEIGHT))
     (ok true)
   )
-)
+)

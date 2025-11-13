@@ -3,7 +3,7 @@
 ;; Handles audit submissions, DAO voting, and NFT badge issuance
 
 ;; --- Traits ---
-(use-trait dao-trait .dao-trait)
+(use-trait "dao-trait" .traits.dao-trait.dao-trait)
 
 ;; --- Constants ---
 (define-constant CONTRACT_OWNER tx-sender)

@@ -179,7 +179,7 @@
 (define-public (propose-trait-upgrade (proposal-id uint) (trait-name (string-ascii 64)) (new-implementation-principal principal) (new-version uint))
   (begin
     (asserts! (is-eq tx-sender (var-get governance-contract)) (err ERR_NOT_GOVERNANCE_CONTRACT))
-    (asserts! (map-contains trait-interfaces trait-name) (err ERR_TRAIT_NOT_FOUND))
+    (asserts! (is-some (map-get? trait-interfaces trait-name)) (err ERR_TRAIT_NOT_FOUND))
     ;; Check if the new implementation is already registered and pending or active
     (let
       ((new-impl-data (map-get? trait-implementations {
@@ -254,18 +254,18 @@
 ;; @desc Gets all registered implementations for a given trait name.
 ;; @param trait-name The name of the trait interface.
 ;; @returns (response (list 100 {principal: principal, version: uint, status: (string-ascii 16)}) uint) A list of implementations.
-(define-read-only (get-trait-implementations (trait-name (string-ascii 64)))
-  (ok (map-fold
-    (fun (key value acc)
-      (if (is-eq (get "trait-name" key) trait-name)
-        (cons (merge key value) acc)
-        acc
-      )
-    )
-    (list)
-    trait-implementations
-  ))
-)
+;; (define-read-only (get-trait-implementations (trait-name (string-ascii 64)))
+;;   (ok (map-fold
+;;     (fun (key value acc)
+;;       (if (is-eq (get "trait-name" key) trait-name)
+;;         (cons (merge key value) acc)
+;;         acc
+;;       )
+;;     )
+;;     (list)
+;;     trait-implementations
+;;   ))
+;; )
 
 ;; @desc Sets the governance contract principal. Only callable by the contract owner.
 ;; @param new-governance-contract The principal of the new governance contract.

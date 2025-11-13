@@ -1,8 +1,9 @@
-(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
-(use-trait finance-metrics-trait .all-traits.finance-metrics-trait)
-(use-trait rbac-trait .decentralized-trait-registry.decentralized-trait-registry)
-(use-trait yield-strategy-trait .all-traits.yield-strategy-trait)
-(use-trait err-trait .errors.standard-errors)
+(use-trait sip-010-ft-trait .dex-traits.sip-010-ft-trait)
+(use-trait finance-metrics-trait .dex-traits.finance-metrics-trait)
+(use-trait rbac-trait .base-traits.rbac-trait)
+;; Note: yield-strategy-trait and err-trait need to be added to appropriate modules or created
+;; (use-trait yield-strategy-trait .base-traits.yield-strategy-trait)
+;; (use-trait err-trait .base-traits.err-trait)
 
 ;; yield-optimizer.clar
 ;; The central brain of the Conxian yield system.

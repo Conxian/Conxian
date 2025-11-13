@@ -1,7 +1,7 @@
 ;; keeper-coordinator.clar
 ;; Central coordinator for automated keeper tasks across the Conxian protocol
 ;; Manages automated interest accrual, liquidations, rebalancing, and fee distribution
-(use-trait keeper_coordinator_trait .all-traits.keeper-coordinator-trait)
+(use-trait keeper_coordinator_trait .keeper-coordinator-trait.keeper-coordinator-trait)
 (use-trait rbac-trait .decentralized-trait-registry.decentralized-trait-registry)
 
 ;; ===== Constants =====
@@ -52,7 +52,7 @@
 (define-data-var liquidation-contract (optional principal) none)
 (define-data-var yield-optimizer-contract (optional principal) none)
 (define-data-var revenue-distributor-contract (optional principal) none)
-(define-data-var bond-contract (optional principal) none)
+(define-data-var rbac-contract (optional principal) none)
 (define-data-var automation-manager-contract (optional principal) none) ;; Added
 
 ;; Performance metrics
@@ -62,12 +62,18 @@
 
 ;; ===== Authorization =====
 (define-private (check-is-owner)
-  (ok (asserts! (is-ok (contract-call? .rbac-contract has-role "contract-owner")) ERR_UNAUTHORIZED)))
+  (match (var-get rbac-contract)
+    rbac-principal
+    (ok (asserts! (is-ok (contract-call? rbac-principal has-role "contract-owner")) ERR_UNAUTHORIZED))
+    ERR_UNAUTHORIZED))
 
 (define-private (check-is-keeper)
-  (ok (asserts! (or (is-ok (contract-call? .rbac-contract has-role "contract-owner"))
-                    (default-to false (map-get? authorized-keepers tx-sender)))
-                ERR_UNAUTHORIZED)))
+  (match (var-get rbac-contract)
+    rbac-principal
+    (ok (asserts! (or (is-ok (contract-call? rbac-principal has-role "contract-owner"))
+                      (default-to false (map-get? authorized-keepers tx-sender)))
+                  ERR_UNAUTHORIZED))
+    ERR_UNAUTHORIZED))
 
 (define-private (check-keeper-enabled)
   (ok (asserts! (var-get keeper-enabled) ERR_KEEPER_PAUSED)))
@@ -133,10 +139,10 @@
     (var-set bond-contract (some contract))
     (ok true)))
 
-(define-public (set-automation-manager-contract (contract principal))
+(define-public (set-rbac-contract (contract principal))
   (begin
     (try! (check-is-owner))
-    (var-set automation-manager-contract (some contract))
+    (var-set rbac-contract (some contract))
     (ok true)))
 
 (define-public (configure-task (task-id uint) (enabled bool) (interval uint) (priority uint) (gas-limit uint))

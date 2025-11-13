@@ -25,4 +25,4 @@
     (try! (contract-call? registry register-component .dex-factory-v2 DEX_FACTORY_WEIGHT))
     (ok true)
   )
-)
+)

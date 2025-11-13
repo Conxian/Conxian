@@ -37,7 +37,16 @@ depends_on = ["dim-metrics", "pausable"]
 [contracts.dimensional-engine]
 path = "contracts/core/dimensional-engine.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["dimensional-core", "sip-010-ft-trait", "oracle-aggregator-v2-trait", "risk-trait", "finance-metrics-trait", "math-trait", "risk-liquidation-engine", "oracle-adapter"]
+depends_on = [
+    "dimensional-core",
+    "sip-010-ft-trait",
+    "oracle-aggregator-v2-trait",
+    "risk-trait",
+    "finance-metrics-trait",
+    "math-trait",
+    "risk-liquidation-engine",
+    "oracle-adapter",
+]
 
 # ---------- Traits ----------
 
@@ -61,6 +70,10 @@ address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 path = "contracts/traits/math-trait.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
+[contracts.dao-trait]
+path = "contracts/traits/dao-trait.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+
 [contracts.risk-liquidation-engine]
 path = "contracts/risk/liquidation-engine.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
@@ -68,6 +81,7 @@ address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 [contracts.oracle-adapter]
 path = "contracts/oracle/external-oracle-adapter.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+
 [accounts.deployer]
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
@@ -437,11 +451,52 @@ address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 path = "contracts/pools/pool-registry.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
-[contracts.pool-factory]
-path = "contracts/pools/pool-factory.clar"
+# ---------- Modular Trait System ----------
+[contracts.base-traits]
+path = "contracts/traits/base-traits.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+
+[contracts.dex-traits]
+path = "contracts/traits/dex-traits.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+
+[contracts.governance-traits]
+path = "contracts/traits/governance-traits.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+
+[contracts.dimensional-traits]
+path = "contracts/traits/dimensional-traits.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+
+[contracts.oracle-risk-traits]
+path = "contracts/traits/oracle-risk-traits.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+
+[contracts.monitoring-security-traits]
+path = "contracts/traits/monitoring-security-traits.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+
+[contracts.central-traits-registry]
+path = "contracts/traits/central-traits-registry.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
 [contracts.governance-voting]
 path = "contracts/governance/voting.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 depends_on = ["governance-token"]
+
+[contracts.utils.encoding]
+path = "contracts/utils/encoding.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+
+[contracts.security.circuit-breaker]
+path = "contracts/security/circuit-breaker.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+
+[contracts.dimensional-advanced-router-dijkstra]
+path = "contracts/dex/dimensional-advanced-router-dijkstra.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+
+[contracts.dim-registry]
+path = "contracts/dimensional/dim-registry.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"

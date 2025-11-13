@@ -5,8 +5,8 @@ const accounts = simnet.getAccounts();
 const deployer = accounts.get("deployer")!;
 const wallet_1 = accounts.get("wallet_1")!;
 
-describe("Dimensional Core Integration Test", () => {
-  it("opens a position and records metrics", () => {
+describe("Dimensional Core Integration Test", () =\u003e {
+  it("opens a position and records metrics", () =\u003e {
     simnet.callPublicFn(
       "dimensional-core",
       "set-oracle-contract",

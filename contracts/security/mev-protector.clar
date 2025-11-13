@@ -4,10 +4,10 @@
 ;; @author Conxian
 ;; @version 1.0.0
 
-(use-trait mev-protector-trait .all-traits.mev-protector-trait)
-(use-trait ft-trait .all-traits.sip-010-ft-trait)
-(use-trait rbac-trait .all-traits.rbac-trait)
-(use-trait err-trait .errors.standard-errors.standard-errors)
+(use-trait mev-protector-trait .monitoring-security-traits.mev-protector-trait)
+(use-trait ft-trait .sip-010-ft-trait.sip-010-ft-trait)
+(use-trait rbac-trait .base-traits.rbac-trait)
+(use-trait err-trait .standard-errors.err-trait)
 
 ;; --- Constants ---
 (define-constant BPS u10000)

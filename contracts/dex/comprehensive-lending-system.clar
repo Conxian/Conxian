@@ -2,7 +2,7 @@
 ;; Refactored for clarity, security, and correctness.
 
 ;; --- Traits ---
-(use-trait sip-010-ft-trait .requirements.sip-010-trait-ft-standard.sip-010-trait-ft-standard)
+(use-trait sip-010-ft-trait .sip-010-ft-trait.sip-010-ft-trait)
 (use-trait lending-system-trait .traits.lending-system-trait.lending-system-trait)
 (use-trait rbac-trait .decentralized-trait-registry.decentralized-trait-registry)
 (use-trait err-trait .traits.error-codes-trait.error-codes-trait)

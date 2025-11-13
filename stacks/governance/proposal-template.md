@@ -1,4 +1,4 @@
-# AIP-1: Conxian Improvement Proposal Template
+# CXIP-1: Conxian Improvement Proposal Template
 
 ## Simple Summary
 

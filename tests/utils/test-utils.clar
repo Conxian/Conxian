@@ -1,10 +1,10 @@
 ;; ============================================================
-;; TEST UTILITIES FOR CONXIAN PROTOCOL (v3.9.0+)
+;; TEST UTILITIES FOR CONXIAN PROTOCOL (v:0.1)
 ;; ============================================================
 ;; Reusable test utilities for the Conxian test suite
 
-(use-trait token .all-traits.sip-010-ft-trait)
-(use-trait dimensional-engine .all-traits.dimensional-engine-trait)
+(use-trait token .sip-010-ft-trait.sip-010-ft-trait)
+(use-trait dimensional-engine .dimensional-engine-interface.dimensional-engine-trait)
 
 ;; ======================
 ;; TEST ACCOUNTS

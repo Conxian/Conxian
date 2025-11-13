@@ -126,9 +126,8 @@
       (map-set balances sender (- sender-balance amount))
       (map-set balances recipient (+ recipient-balance amount))
       (match memo
-        m (begin (print m) (ok true))
-        (ok true)
-      )
+        m (begin (print m) true)
+        true)
       (ok true)
     )
   )
@@ -151,8 +150,8 @@
     )
 
     (match memo
-      m (begin (print m) (ok true))
-      (ok true)
+      m (begin (print m) true)
+      true
     )
 
     (ok true)
@@ -178,7 +177,7 @@
   )
   (begin
     (asserts!
-      (or (is-eq tx-sender admin) (is-eq tx-sender (as-contract tx-sender)))
+      (or (is-eq tx-sender (var-get admin)) (is-eq tx-sender (as-contract tx-sender)))
       ERR_UNAUTHORIZED
     )
     (asserts! (> amount u0) ERR_INVALID_AMOUNT)
@@ -213,7 +212,7 @@
 
 (define-public (set-admin (new-admin principal))
   (begin
-    (asserts! (is-eq tx-sender admin) ERR_UNAUTHORIZED)
+    (asserts! (is-eq tx-sender (var-get admin)) ERR_UNAUTHORIZED)
     (var-set admin new-admin)
     (ok true)
   )

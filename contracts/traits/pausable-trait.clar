@@ -6,7 +6,7 @@
 ;; This trait provides functions to pause and resume contract operations.
 ;;
 ;; Example usage:
-;;   (use-trait pausable .all-traits.pausable-trait)
+;;   (use-trait pausable .pausable-trait.pausable-trait)
 (define-trait pausable-trait
   (
     ;; Check if the contract is currently paused

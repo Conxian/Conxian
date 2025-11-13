@@ -3,8 +3,7 @@
 ;; Enhanced with staking, yield distribution, and system integration hooks
 
 ;; --- Traits ---
-(use-trait protocol-monitor-trait .all-traits.protocol-monitor-trait)
-
+(use-trait sip-010-ft-trait .dex-traits.sip-010-ft-trait)
 
 ;; --- Errors ---
 (define-constant ERR_UNAUTHORIZED u100)

@@ -1,4 +1,4 @@
-# AIP-5: Vault Precision and Withdrawal Security
+# CXIP-5: Vault Precision and Withdrawal Security
 
 ## Simple Summary
 

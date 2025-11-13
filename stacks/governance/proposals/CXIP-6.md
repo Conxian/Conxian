@@ -1,4 +1,4 @@
-# AIP-6: Oracle Security and Circuit Breaker Implementation
+# CXIP-6: Oracle Security and Circuit Breaker Implementation
 
 ## Simple Summary
 Implement critical security enhancements for the oracle system including circuit breakers, heartbeat monitoring, and price validation to ensure system stability during market volatility.
@@ -7,7 +7,7 @@ Implement critical security enhancements for the oracle system including circuit
 This proposal addresses critical security gaps in the oracle system by implementing circuit breakers, price validation, and monitoring mechanisms to prevent oracle manipulation and ensure price feed reliability.
 
 ## Motivation
-Recent security reviews identified vulnerabilities in the current oracle implementation that could lead to price manipulation or system instability during extreme market conditions. This AIP aims to harden the oracle system against such risks.
+Recent security reviews identified vulnerabilities in the current oracle implementation that could lead to price manipulation or system instability during extreme market conditions. This CXIP aims to harden the oracle system against such risks.
 
 ## Specification
 

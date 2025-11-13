@@ -1,5 +1,5 @@
 ;; cxvg-token.clar
-;; Conxian Voting Token (SIP-010 FT)
+(use-trait sip-010-ft-trait .dex-traits.sip-010-ft-trait)
 
 (define-constant ERR-NOT-AUTHORIZED u100)
 (define-constant ERR-INVALID-AMOUNT u101)
@@ -93,4 +93,4 @@
 ;; @desc Get the contract owner
 ;; @returns (principal)
 (define-read-only (get-contract-owner)
-  (var-get contract-owner))
+  (var-get contract-owner))

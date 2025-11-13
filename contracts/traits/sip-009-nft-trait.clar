@@ -15,7 +15,7 @@
     ;; @param sender The principal sending the NFT.
     ;; @param recipient The principal receiving the NFT.
     ;; @returns (response bool uint) True if successful, or an error.
-    (transfer (token-id uint) (sender principal) (recipient principal)) (response bool uint))
+    (transfer (token-id uint) (sender principal) (recipient principal) (response bool uint))
 
     ;; @desc Returns the last token ID that has been minted.
     ;; @returns (response uint uint) The last token ID.
@@ -24,11 +24,11 @@
     ;; @desc Returns the metadata URI for a token.
     ;; @param token-id The ID of the token.
     ;; @returns (response (optional (string-utf8 256)) uint) The URI if found, or none.
-    (get-token-uri (token-id uint)) (response (optional (string-utf8 256)) uint))
+    (get-token-uri (token-id uint) (response (optional (string-utf8 256)) uint))
 
     ;; @desc Returns the owner of a token.
     ;; @param token-id The ID of the token.
     ;; @returns (response (optional principal) uint) The owner principal if found, or none.
-    (get-owner (token-id uint)) (response (optional principal) uint))
+    (get-owner (token-id uint) (response (optional principal) uint))
   )
 )

@@ -1,4 +1,4 @@
-# AIP-4: Bounty System Security Hardening
+# CXIP-4: Bounty System Security Hardening
 
 ## Simple Summary
 

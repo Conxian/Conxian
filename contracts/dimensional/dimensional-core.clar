@@ -9,9 +9,9 @@
 ;; Standard traits
 (use-trait sip-010-ft-trait .sip-010-ft-trait.sip-010-ft-trait)
 (use-trait finance-metrics-trait .finance-metrics-trait.finance-metrics-trait)
-(use-trait pausable-trait .pausable-trait.pausable-trait)
-(use-trait access-control-trait .access-control-trait.access-control-trait)
-(use-trait circuit-breaker-trait .circuit-breaker-trait.circuit-breaker-trait)
+(use-trait pausable-trait .base-traits.pausable-trait)
+(use-trait access-control-trait .base-traits.rbac-trait)
+(use-trait circuit-breaker-trait .monitoring-security-traits.circuit-breaker-trait)
 
 ;; ===== Constants =====
 (define-constant CONTRACT_VERSION "1.0.0")
@@ -359,20 +359,20 @@
   )
     (asserts! (is-eq (get status position) "ACTIVE") ERR_POSITION_NOT_ACTIVE)
     (asserts! (< pnl maintenance-margin) (err ERR_INSUFFICIENT_COLLATERAL))
-    
+
     ;; Update position status to liquidated
-    (map-set positions 
+    (map-set positions
       {owner: owner, id: position-id}
       (merge position {
         status: "LIQUIDATED",
         last-updated: block-height
       })
     )
-    
+
     ;; Update TVL and position counts
     (var-set total-value-locked (- (var-get total-value-locked) collateral-value))
     (var-set total-positions-closed (+ (var-get total-positions-closed) u1))
-    
+
     (ok true)
   )
 )
@@ -405,7 +405,7 @@
 (define-read-only (circuit-breaker-status)
   "@dev Returns the circuit breaker status"
   (ok {
-    is-open: false,  // Would check actual circuit breaker state
+    is-open: false,
     reason: "",
     last-updated: block-height
   }))

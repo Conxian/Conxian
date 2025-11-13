@@ -10,9 +10,9 @@
 ;; - Integration with regulatory systems
 
 ;; Use centralized traits
-(use-trait rbac-trait .all-traits.rbac-trait)
-(use-trait oracle-trait .all-traits.oracle-trait)
-(use-trait compliance-trait .all-traits.compliance-trait)
+(use-trait rbac-trait .traits.rbac-trait.rbac-trait)
+(use-trait oracle-trait .oracle-trait.oracle-trait)
+(use-trait compliance-trait .compliance-trait.compliance-trait)
 
 ;; ===========================================
 ;; CONSTANTS
@@ -133,8 +133,8 @@ define-map recovery-actions {
 ;; Check if caller has permission to manage circuit breakers
 (define-private (can-manage-circuit (caller principal))
   (or
-    (contract-call? .all-traits.rbac-trait is-owner caller)
-    (contract-call? .all-traits.rbac-trait has-role caller "circuit-admin")
+    (contract-call? .traits.rbac-trait.rbac-trait is-owner caller)
+    (contract-call? .traits.rbac-trait.rbac-trait has-role caller "circuit-admin")
   )
 )
 
@@ -368,7 +368,7 @@ define-map recovery-actions {
       ;; If governance approval is required, check if it's been granted
       (if (and 
             (get requires-governance-approval circuit)
-            (not (contract-call? .all-traits.rbac-trait has-role tx-sender "governance")))
+            (not (contract-call? .traits.rbac-trait.rbac-trait has-role tx-sender "governance")))
         (err ERR_UNAUTHORIZED)
         (begin
           ;; Update circuit state

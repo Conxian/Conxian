@@ -3,7 +3,7 @@
 
 (use-trait funding-trait .all-traits.funding-trait)
 (use-trait oracle-trait .all-traits.oracle-trait)
-(use-trait dimensional-trait .all-traits.dimensional-trait)
+(use-trait dimensional-trait .traits.dimensional-trait.dimensional-trait)
 
 
 ;; ===== Constants =====

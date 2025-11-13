@@ -1,10 +1,10 @@
 
 
-(use-trait dimensional-oracle-trait .dimensional-oracle-trait.dimensional-oracle-trait)
-(use-trait sip-010-ft-trait .sip-010-ft-trait.sip-010-ft-trait)
+;; (use-trait dimensional-oracle-trait .dimensional-oracle-trait.dimensional-oracle-trait)
+;; (use-trait sip-010-ft-trait .sip-010-ft-trait.sip-010-ft-trait)
 
 ;; Implement required traits
-(impl-trait .dimensional-oracle-trait.dimensional-oracle-trait)
+;; (impl-trait .dimensional-oracle-trait.dimensional-oracle-trait)
 ;; Implements a robust price oracle with multiple data sources and deviation checks
 
 
@@ -269,4 +269,4 @@
   )
 )
 
-
+

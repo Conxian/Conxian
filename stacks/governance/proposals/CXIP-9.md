@@ -1,4 +1,4 @@
-# AIP-9: Comprehensive Testing and Monitoring Framework
+# CXIP-9: Comprehensive Testing and Monitoring Framework
 
 ## Simple Summary
 Implement an extensive testing framework and monitoring system to ensure protocol stability, security, and performance under various conditions.
@@ -7,7 +7,7 @@ Implement an extensive testing framework and monitoring system to ensure protoco
 This proposal establishes a robust testing strategy and monitoring infrastructure to maintain protocol integrity, detect issues early, and ensure reliable operation in production.
 
 ## Motivation
-As the protocol grows in complexity, a comprehensive testing and monitoring framework is essential to maintain security and reliability. This AIP addresses gaps in current testing coverage and monitoring capabilities.
+As the protocol grows in complexity, a comprehensive testing and monitoring framework is essential to maintain security and reliability. This CXIP addresses gaps in current testing coverage and monitoring capabilities.
 
 ## Specification
 

@@ -1,0 +1,19 @@
+Doc-Version,1.0
+Doc-Owner,Engineering
+Doc-Date,2025-11-12
+Doc-Id,REV-CAPM-001
+
+Component,Current Status,Gap Severity,Solution Pathway,Estimated Effort (pts),SDK Dependency,Notes
+Concentrated Liquidity Pool (CLP),Compiles with stubs,P1,Custom dev + math-lib alignment,13,Clarity core,Replace stubs with real tick math and SIP-010 flows
+DEX Factory v2,Compiles (owner-only),P2,Immediate fix (done),3,Clarity core,Removed external access-control dependency; owner guard in place
+Multi-Hop Router v3,Compiles minimal,P1,Incremental dev to neighbors+Dijkstra,8,Clarity core,Single-hop working path planned
+Oracle Aggregator v2,Compiles,P2,Enhance tests + detector wiring,5,Clarinet SDK,Finalize TWAP + deviation thresholds
+Manipulation Detector,Compiles simplified,P1,Custom dev or trait binding,6,Clarity core,Removed circuit breaker dynamic calls for compile
+MEV Protector,Partial compile,P1,Trait import fix + encoding utils,8,Clarity core,Replace lambda map with named fn; encoding principal
+Enterprise API,Compiles,P2,Immediate fixes (done),4,Clarity core,Err-trait replaced; audit logging added
+Lending System (Comprehensive),Compiles with issues,P0,Phased fixes across helpers,21,Clarity core,Pause checks; interest accrual; health math
+Tokens (SIP-010),Mixed,P1,Trait path normalization,7,Clarity core,Ensure trait signatures across tokens
+Math Libraries,Available,P2,Function alignment (log/pow),5,Clarity core,Remove unsupported functions; use integer-safe versions
+Governance,Mixed,P1,Trait/contract reference fix,8,Clarity core,Governance-token principal alignment
+Utils (encoding/rbac/validation),Mixed,P1,Remove unsupported macros,6,Clarity core,Remove define-event/map-fold/principal-to-buff?
+Test Manifests,Scoped,P2,Progressive expansion,3,Clarinet SDK,Start small and expand with compile gates

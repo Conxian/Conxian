@@ -104,11 +104,11 @@ Based on extensive analysis of 15+ leading DeFi protocols across Stacks and Ethe
 #### 2.1.1 Security & Governance Foundation
 
 - **AIP Implementation**: 5/5 security protocols active
-  - AIP-1: Emergency Pause Integration ✅
-  - AIP-2: Time-Weighted Voting ✅
-  - AIP-3: Treasury Multi-Sig ✅
-  - AIP-4: Bounty Security Hardening ✅
-  - AIP-5: Vault Precision ✅
+  - CXIP-1: Emergency Pause Integration ✅
+  - CXIP-2: Time-Weighted Voting ✅
+  - CXIP-3: Treasury Multi-Sig ✅
+  - CXIP-4: Bounty Security Hardening ✅
+  - CXIP-5: Vault Precision ✅
 - **Timelock Controls**: All admin functions with delays
 - **Circuit Breakers**: Volatility/volume/liquidity protection
 - **Multi-sig Treasury**: Secure fund management

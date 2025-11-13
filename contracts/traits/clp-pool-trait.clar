@@ -7,7 +7,7 @@
 ;; with tick-based positioning and NFT management.
 ;;
 ;; Example usage:
-;;   (use-trait clp-pool .all-traits.clp-pool-trait)
+;;   (use-trait clp-pool .clp-pool-trait.clp-pool-trait)
 (define-trait clp-pool-trait
   (
     ;; Initialize the pool with token pair and fee

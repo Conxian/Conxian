@@ -53,4 +53,4 @@
                 (map-delete owners token-id)
                 (ok true))
         (ok true)))))
-
+

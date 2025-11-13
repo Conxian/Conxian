@@ -10,7 +10,7 @@
 ;; - User status aggregation
 ;; - Revenue distribution triggers
 
-(use-trait rbac-trait .decentralized-trait-registry.decentralized-trait-registry)
+(use-trait rbac-trait .base-traits.rbac-trait)
 
 ;; Error codes
 (define-constant ERR_UNAUTHORIZED (err u100))
@@ -34,7 +34,7 @@
 (define-data-var contract-owner principal tx-sender)
 (define-data-var paused bool false)
 (define-data-var emergency-mode bool false)
-(define-data-var revenue-distributor principal .revenue-distributor)
+(define-data-var revenue-distributor principal tx-sender)
 (define-data-var last-operation-id uint u0)
 (define-data-var total-registered-tokens uint u0)
 (define-data-var total-users uint u0)

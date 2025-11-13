@@ -22,7 +22,7 @@ The contract manages the entire lifecycle of a proposal, from creation to execut
 
 -   For a vote to be considered valid, a minimum percentage of the total governance token supply must participate in the vote. This is known as the quorum (`QUORUM_BPS`). If the quorum is not met, the proposal cannot pass, even if it has more "for" votes than "against" votes.
 
-### Time-Weighted Voting (AIP-2)
+### Time-Weighted Voting (CXIP-2)
 
 -   To reward long-term token holders and mitigate the influence of flash-loan-acquired voting power, the DAO uses a time-weighted voting system. The longer a user has held their tokens, the more voting power they have. This encourages long-term alignment with the protocol's success.
 

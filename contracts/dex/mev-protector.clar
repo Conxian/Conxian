@@ -1,8 +1,7 @@
 ;; MEV Protector Contract
 ;; Implements protection against front-running and sandwich attacks
 
-(use-trait mev-protector-trait .traits.mev-protector-trait)
-(use-trait circuit-breaker-trait .traits.circuit-breaker-trait)
+ 
 
 ;; --- Constants ---
 ;; @desc Error: Unauthorized access.
@@ -79,8 +78,12 @@
 ;; @desc Converts a list of principals representing a path into a list of their corresponding numeric indices.
 ;; @param path (list 20 principal) - The list of principals in the path.
 ;; @returns (list 20 uint) - A list of numeric indices.
+(define-private (principal->index-fn (p principal))
+  (principal->index p)
+)
+
 (define-private (path->index-list (path (list 20 principal)))
-  (map (lambda (p) (principal->index p)) path)
+  (map principal->index-fn path)
 )
 
 ;; @desc Computes the commitment hash for a given swap.
@@ -113,7 +116,7 @@
 ;; @param path (list 20 principal) - The list of principals in the path.
 ;; @returns (list 20 uint) - A list of numeric indices.
 (define-private (path->to-index-list (path (list 20 principal)))
-  (map (lambda (p) (principal->index p)) path)
+  (map principal->index-fn path)
 )
 
 ;; @desc Checks the status of the circuit breaker.

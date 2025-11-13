@@ -6,7 +6,7 @@
 ;; managing protocol-wide configuration, authorized contracts, and emergency controls.
 
 ;; Use centralized traits
-(use-trait rbac-trait .all-traits.rbac-trait)
+(use-trait rbac-trait .traits.rbac-trait.rbac-trait)
 
 ;; ===========================================
 ;; CONSTANTS
@@ -80,7 +80,7 @@
       { key: key }
       { value: value, updated-at: block-height }
     )
-    (log-protocol-event "config-updated" (concat key " updated"))
+    (log-protocol-event "config-updated" (unwrap-panic (to-consensus-buff? (concat key " updated"))))
     (ok true)
   )
 )
@@ -97,12 +97,12 @@
         (map-set authorized-contracts contract-principal
           { authorized: true, authorized-at: block-height, authorized-by: tx-sender }
         )
-        (log-protocol-event "contract-authorized" "contract authorized")
+        (log-protocol-event "contract-authorized" (unwrap-panic (to-consensus-buff? "contract authorized")))
       )
       (begin
         (asserts! (is-authorized-contract contract-principal) ERR_CONTRACT_NOT_AUTHORIZED)
         (map-delete authorized-contracts contract-principal)
-        (log-protocol-event "contract-revoked" "contract authorization revoked")
+        (log-protocol-event "contract-revoked" (unwrap-panic (to-consensus-buff? "contract authorization revoked")))
       )
     )
     (ok true)
@@ -116,8 +116,8 @@
     (asserts! (is-protocol-owner) ERR_UNAUTHORIZED)
     (var-set emergency-paused pause)
     (if pause
-      (log-protocol-event "protocol-paused" "emergency pause activated")
-      (log-protocol-event "protocol-unpaused" "emergency pause deactivated")
+      (log-protocol-event "protocol-paused" (unwrap-panic (to-consensus-buff? "emergency pause activated")))
+      (log-protocol-event "protocol-unpaused" (unwrap-panic (to-consensus-buff? "emergency pause deactivated")))
     )
     (ok true)
   )
@@ -129,7 +129,7 @@
   (begin
     (asserts! (is-protocol-owner) ERR_UNAUTHORIZED)
     (var-set protocol-owner new-owner)
-    (log-protocol-event "ownership-transferred" "protocol ownership updated")
+    (log-protocol-event "ownership-transferred" (unwrap-panic (to-consensus-buff? "protocol ownership updated")))
     (ok true)
   )
 )
@@ -192,5 +192,5 @@
   (map-set protocol-config { key: "emergency-delay" } { value: u1008, updated-at: block-height }) ;; ~1 week in blocks
 
   ;; Log initialization
-  (log-protocol-event "protocol-initialized" "Conxian Protocol v1 initialized")
+  (log-protocol-event "protocol-initialized" (unwrap-panic (to-consensus-buff? "Conxian Protocol v1 initialized")))
 )

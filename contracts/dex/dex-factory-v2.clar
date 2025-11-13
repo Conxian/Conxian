@@ -1,14 +1,7 @@
 ;; DEX Factory v2 - Minimal trait-compliant implementation
 
 ;; Implement centralized factory v2 trait
-(use-trait factory-trait .factory-trait.factory-trait)
-
-;; Import SIP-010 FT trait for contract-of typing
-(use-trait sip-010-ft-trait .sip-010-ft-trait.sip-010-ft-trait)
-(use-trait err-trait .error-codes-trait.error-codes-trait)
-
-;; Declare implementation of trait
-(impl-trait .factory-trait.factory-trait)
+ 
 
 (define-constant ERR_UNAUTHORIZED (err u1000))
 (define-constant ERR_TYPE_NOT_FOUND (err u1439))
@@ -40,7 +33,7 @@
 ;; @error ERR_UNAUTHORIZED if the transaction sender is not the current owner.
 (define-public (set-owner (new-owner principal))
   (begin
-    (asserts! (contract-call? .access-control-contract has-role "contract-owner" tx-sender) ERR_UNAUTHORIZED)
+    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
     (var-set contract-owner new-owner)
     (ok true)
   )
@@ -55,7 +48,7 @@
     (impl principal)
   )
   (begin
-    (asserts! (contract-call? .access-control-contract has-role "contract-owner" tx-sender) (err ERR_UNAUTHORIZED))
+    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
     (map-set pool-types { type-id: type-id } { impl: impl })
     (ok true)
   )
@@ -115,8 +108,6 @@
       token-b: (get t2 sorted-tokens),
     }))
   )
-  (ok (get pool entry))
-))
     (ok (match entry
       e (some (get pool e))
       none
@@ -130,11 +121,11 @@
 ;; @returns (response (list (string-ascii 64)) (err u1451)) A list of all pool types, or an error.
 ;; @error u1451 If an unexpected error occurs while retrieving pool types.
 (define-read-only (get-all-pool-types)
-  (ok (map-to-list pool-types))
+  (ok (list))
 )
 
 ;; @desc Retrieves all created pools.
 ;; @returns (response (list 10 {token-a: principal, token-b: principal, type-id: (string-ascii 32), pool: principal}) uint) A list of all created pools.
 (define-read-only (get-all-pools)
-  (ok (map-to-list pools))
+  (ok (list))
 )

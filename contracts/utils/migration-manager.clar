@@ -1,7 +1,7 @@
 ;; migration-manager.clar
 ;; Manages contract migrations and upgrades
 
-(use-trait rbac-trait .decentralized-trait-registry.decentralized-trait-registry)
+(use-trait rbac-trait .base-traits.rbac-trait)
 
 ;; ===== Constants =====
 (define-constant ERR_UNAUTHORIZED (err u100))

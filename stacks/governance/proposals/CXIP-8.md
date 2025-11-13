@@ -1,4 +1,4 @@
-# AIP-8: Enhanced Liquidation System
+# CXIP-8: Enhanced Liquidation System
 
 ## Simple Summary
 Implement a robust liquidation system with improved incentives, risk parameters, and flash loan attack prevention to ensure protocol solvency during market stress.
@@ -7,7 +7,7 @@ Implement a robust liquidation system with improved incentives, risk parameters,
 This proposal enhances the liquidation mechanism with dynamic parameters, improved incentive structures, and protection against flash loan attacks while maintaining protocol solvency.
 
 ## Motivation
-The current liquidation system has several limitations that could be exploited during market volatility. This AIP addresses these gaps to ensure the protocol remains solvent under various market conditions.
+The current liquidation system has several limitations that could be exploited during market volatility. This CXIP addresses these gaps to ensure the protocol remains solvent under various market conditions.
 
 ## Specification
 

@@ -2,7 +2,7 @@
 ;; Manages an insurance fund for covering potential losses within the dimensional system.
 
 ;; SIP-010: Fungible Token Standard
-(use-trait ft-trait .all-traits.sip-010-ft-trait)
+(use-trait ft-trait .traits.sip-010-ft-trait.sip-010-ft-trait)
 
 ;; Constants
 ;; Error codes

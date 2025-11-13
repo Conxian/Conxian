@@ -1,228 +1,113 @@
-;; base-contract
+;; Base Contract
 ;; This contract serves as a foundational building block for other contracts in the Conxian ecosystem.
 ;; It provides common functionalities such as contract ownership, pausing mechanisms, and basic error handling.
 
-(use-trait access-control-trait .access-control-trait.access-control-trait)
-(use-trait pausable-trait .pausable-trait.pausable-trait)
-(use-trait errors .errors.errors)
-(use-trait pausable .pausable-trait.pausable-trait)
-(use-trait math-utils .math-trait.math-trait)
+(use-trait access-control-trait .base-traits.rbac-trait)
+(use-trait pausable-trait .base-traits.pausable-trait)
+(use-trait math-utils .base-traits.math-trait)
 
-(impl-trait .access-control-trait.access-control-trait)
-(impl-trait .pausable-trait.pausable-trait)
+(impl-trait .base-traits.rbac-trait)
+(impl-trait .base-traits.pausable-trait)
+(impl-trait .base-traits.math-trait)
 
-;; ======================
-;; CONSTANTS
-;; ======================
-
-(define-constant CONTRACT_VERSION "3.9.2")
-
-;; ======================
-;; DATA VARIABLES
-;; ======================
-
-;; Contract owner
-(define-data-var owner principal tx-sender)
-
-;; Pause state
-(define-data-var paused bool false)
-
-;; Reentrancy guard
+;; ===== Reentrancy Guard =====
 (define-data-var reentrancy-guard bool false)
 
-;; ======================
-;; ACCESS CONTROL
-;; ======================
-
-;; Roles (aligned with role-manager.clar)
-(define-constant ROLE_ADMIN u1)
-(define-constant ROLE_MANAGER u2)
-(define-constant ROLE_OPERATOR u3)
-(define-constant ROLE_LIQUIDATOR u4)
-
-;; Role storage (using same map as role-manager for consistency)
-(define-map roles principal uint)
-
-;; ======================
-;; MODIFIERS
-;; ======================
-
 (define-private (non-reentrant)
-  (if (var-get reentrancy-guard)
-      (err u1003)  ;; REENTRANCY_GUARD
-      (ok true)
+  (asserts! (not (var-get reentrancy-guard)) (err u1000))
+  (ok true)
+)
+
+(define-public (with-reentrancy-guard (inner (function () (response uint uint))))
+  (let 
+    (
+      (check (try! (non-reentrant)))
+      (var-set reentrancy-guard true)
+      (result (try! (inner)))
+    )
+    (var-set reentrancy-guard false)
+    (ok result)
   )
 )
 
-;; ======================
-;; REENTRANCY PROTECTION
-;; ======================
+;; ===== Circuit Breaker =====
+(define-data-var circuit-breaker-contract (optional principal) none)
 
-(define-private (with-reentrancy-guard (inner (function () (response uint uint))))
-  (let (
-    { _: (try! (non-reentrant)) }
-    (var-set reentrancy-guard true)
-    result: (try! (inner))
-  )
-  (var-set reentrancy-guard false)
-  (ok result)
-))
-
-;; ======================
-;; EVENTS
-;; ======================
-
-(define-event OwnershipTransferred 
-  ((previous-owner principal) 
-   (new-owner principal))
-)
-
-(define-event Paused (address: principal))
-(define-event Unpaused (address: principal))
-
-(define-event RoleGranted
-  ((role uint)
-   (account principal)
-   (sender principal))
-)
-
-(define-event RoleRevoked
-  ((role uint)
-   (account principal)
-   (sender principal))
-)
-
-;; ======================
-;; MODIFIERS
-;; ======================
-
-;; Only allow the contract owner
-(define-private (only-owner)
-  (if (is-eq tx-sender (var-get owner))
-    (ok true)
-    (err ERR_NOT_OWNER)
+(define-private (check-circuit-breaker)
+  (match (var-get circuit-breaker-contract)
+    contract (contract-call? contract is-circuit-open)
+    (ok false)
   )
 )
 
-;; Only allow when not paused
-(define-private (when-not-paused)
-  (if (var-get paused)
-    (err ERR_CONTRACT_PAUSED)
+(define-public (set-circuit-breaker-contract (contract principal))
+  (begin
+    (asserts! (is-eq tx-sender (var-get contract-owner)) (err u1001))
+    (var-set circuit-breaker-contract (some contract))
     (ok true)
   )
 )
 
-;; Only allow when paused
-(define-private (when-paused)
-  (if (var-get paused)
-    (ok true)
-    (err ERR_CONTRACT_NOT_PAUSED)
-  )
-)
+;; ===== Common Error Codes =====
+(define-constant ERR_UNAUTHORIZED (err u1000))
+(define-constant ERR_INVALID_INPUT (err u1001))
+(define-constant ERR_CONTRACT_PAUSED (err u1002))
+(define-constant ERR_REENTRANCY (err u1003))
+(define-constant ERR_CIRCUIT_OPEN (err u1004))
 
-;; ======================
-;; PUBLIC FUNCTIONS
-;; ======================
+;; ===== Owner Functions =====
+(define-data-var contract-owner principal tx-sender)
 
-;; Transfer ownership to a new address
 (define-public (transfer-ownership (new-owner principal))
-  (let (
-    (caller tx-sender)
-  )
-    (try! (contract-call? .rbac-contract has-role "contract-owner"))
-    (try! (validate-address new-owner))
-    
-    (let ((previous-owner (var-get owner)))
-      (try! (contract-call? .rbac-contract set-role "contract-owner" new-owner))
-      (emit-ownership-transferred previous-owner new-owner)
-      (ok true)
-    )
-  )
-)
-
-;; Pause the contract
-(define-public (pause)
-  (try! (contract-call? .rbac-contract has-role "contract-owner"))
-  (try! (when-not-paused))
-  
-  (var-set paused true)
-  (emit-paused tx-sender)
-  (ok true)
-)
-
-;; Unpause the contract
-(define-public (unpause)
-  (try! (contract-call? .rbac-contract has-role "contract-owner"))
-  (try! (when-paused))
-  
-  (var-set paused false)
-  (emit-unpaused tx-sender)
-  (ok true)
-)
-
-;; Grant a role to an address
-(define-public (grant-role (role uint) (account principal))
-  (try! (has-role ROLE_ADMIN))
-  (try! (validate-address account))
-  
-  (map-set roles account role)
-  (emit-role-granted role account tx-sender)
-  (ok true)
-)
-
-;; Revoke a role from an address
-(define-public (revoke-role (role uint) (account principal))
-  (try! (has-role ROLE_ADMIN))
-  
-  (map-delete roles account)
-  (emit-role-revoked role account tx-sender)
-  (ok true)
-)
-
-;; ======================
-;; VIEW FUNCTIONS
-;; ======================
-
-;; Check if an address has a specific role
-(define-read-only (has-role (role uint) (account principal))
-  (ok (is-eq (default-to u0 (map-get? roles account)) role))
-)
-
-;; Check if the contract is paused
-(define-read-only (is-paused)
-  (ok (var-get paused))
-)
-
-;; Get the current owner
-(define-read-only (get-owner)
-  (ok (var-get owner))
-)
-
-;; Get the contract version
-(define-read-only (get-version)
-  (ok CONTRACT_VERSION)
-)
-
-;; ======================
-;; INTERNAL HELPERS
-;; ======================
-
-;; Internal function to validate addresses
-(define-private (validate-address (addr principal))
-  (if (is-eq addr 'ST000000000000000000002AMW42H)
-    (err ERR_INVALID_ADDRESS)
+  (begin
+    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
+    (var-set contract-owner new-owner)
     (ok true)
   )
 )
 
-;; Internal function to check if sender has a role
-(define-private (check-role (role (string-ascii 32)))
-  (let (
-    (has-role (default-to false (map-get? roles { who: tx-sender, role: role })))
+;; ===== Pausable Functions =====
+(define-data-var paused bool false)
+
+(define-public (pause)
+  (begin
+    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
+    (var-set paused true)
+    (ok true)
   )
-    (if has-role
-      (ok true)
-      (err ERR_UNAUTHORIZED)
-    )
+)
+
+(define-public (unpause)
+  (begin
+    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
+    (var-set paused false)
+    (ok true)
+  )
+)
+
+(define-private (check-not-paused)
+  (asserts! (not (var-get paused)) ERR_CONTRACT_PAUSED)
+  (ok true)
+)
+
+;; ===== Math Utilities =====
+(define-private (safe-mul (a uint) (b uint))
+  (let 
+    ((result (* a b)))
+    (asserts! (<= result u340282366920938463463374607431768211455) (err u2000)) ;; Max uint128
+    (ok result)
+  )
+)
+
+(define-private (safe-div (a uint) (b uint))
+  (asserts! (not (is-eq b u0)) (err u2001)) ;; Division by zero
+  (ok (/ a b))
+)
+
+;; ===== Initialization =====
+(define-public (initialize (owner principal))
+  (begin
+    (var-set contract-owner owner)
+    (ok true)
   )
 )

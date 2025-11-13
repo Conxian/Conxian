@@ -1,4 +1,4 @@
-# AIP-7: Enhanced Access Control and Security Framework
+# CXIP-7: Enhanced Access Control and Security Framework
 
 ## Simple Summary
 
@@ -10,7 +10,7 @@ This proposal establishes a robust access control framework across all protocol 
 
 ## Motivation
 
-The current implementation lacks granular access controls and emergency mechanisms, exposing the protocol to governance attacks and operational risks. This AIP addresses these gaps with a standardized approach to permissions.
+The current implementation lacks granular access controls and emergency mechanisms, exposing the protocol to governance attacks and operational risks. This CXIP addresses these gaps with a standardized approach to permissions.
 
 ## Specification
 

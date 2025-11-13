@@ -1,23 +1,23 @@
 ;; Conxian Enterprise API - Institutional features
 
-;; Traits (centralized policy) - keep only known centralized traits       
-(use-trait access-control-trait .access-control.access-control-trait)
-(use-trait err-trait .errors.standard-errors.standard-errors)
-(use-trait circuit-breaker-trait .circuit-breaker.circuit-breaker-trait)
-(use-trait governance-trait .governance-token.governance-token-trait)
-(use-trait enterprise-api-trait .enterprise-api.enterprise-api-trait)
+;; Traits - using modular decentralized system
+(use-trait access-control-trait .base-traits.rbac-trait)
+(use-trait circuit-breaker-trait .monitoring-security-traits.circuit-breaker-trait)
+(use-trait governance-trait .governance-traits.governance-token-trait)
+;; Note: enterprise-api-trait needs to be created or mapped
+;; (use-trait enterprise-api-trait .base-traits.enterprise-api-trait)
 
 ;; --- Constants ---
-(define-constant ERR_UNAUTHORIZED (err-trait err-unauthorized))
-(define-constant ERR_ACCOUNT_NOT_FOUND (err-trait err-account-not-found))
-(define-constant ERR_INVALID_TIER (err-trait err-invalid-tier))
-(define-constant ERR_INVALID_ORDER (err-trait err-invalid-order))
-(define-constant ERR_ORDER_NOT_FOUND (err-trait err-order-not-found))
-(define-constant ERR_ACCOUNT_NOT_VERIFIED (err-trait err-account-not-verified))
-(define-constant ERR_CIRCUIT_OPEN (err-trait err-circuit-open))
-(define-constant ERR_INVALID_FEE_DISCOUNT (err-trait err-invalid-fee-discount))
-(define-constant ERR_INVALID_PRIVILEGE (err-trait err-invalid-privilege))
-(define-constant ERR_DEX_ROUTER_NOT_SET (err-trait err-dex-router-not-set))
+(define-constant ERR_UNAUTHORIZED (err u1100))
+(define-constant ERR_ACCOUNT_NOT_FOUND (err u2001))
+(define-constant ERR_INVALID_TIER (err u2002))
+(define-constant ERR_INVALID_ORDER (err u2003))
+(define-constant ERR_ORDER_NOT_FOUND (err u2004))
+(define-constant ERR_ACCOUNT_NOT_VERIFIED (err u2005))
+(define-constant ERR_CIRCUIT_OPEN (err u2006))
+(define-constant ERR_INVALID_FEE_DISCOUNT (err u2007))
+(define-constant ERR_INVALID_PRIVILEGE (err u2008))
+(define-constant ERR_DEX_ROUTER_NOT_SET (err u2009))
 
 ;; Privilege constants
 (define-constant PRIVILEGE_TWAP_ORDER u1)
@@ -110,8 +110,8 @@
 ;; @return (response bool) An (ok true) response if the circuit breaker was successfully set, or an error if unauthorized.
 (define-public (set-circuit-breaker (breaker principal))
   (begin
-    (asserts! (contract-call? .access-control-contract has-role "contract-owner" tx-sender) (err-trait err-unauthorized))
-    (data-var-set circuit-breaker (some breaker))
+    (asserts! (contract-call? .access-control-contract has-role "contract-owner" tx-sender) ERR_UNAUTHORIZED)
+    (var-set circuit-breaker (some breaker))
     (ok true)))
 
 ;; --- Account Management ---
@@ -122,16 +122,16 @@
 ;; @return (response uint) An (ok account-id) response if the account was successfully created, or an error if unauthorized or the tier is invalid.
 (define-public (create-institutional-account (owner principal) (tier-id uint))
   (begin
-    (asserts! (contract-call? .access-control-contract has-role "enterprise-admin" tx-sender) (err-trait err-unauthorized))
-    (unwrap! (map-get? tier-configurations tier-id) (err-trait err-invalid-tier))
-    (let ((account-id (+ u1 (data-var-get account-counter))))
+    (asserts! (contract-call? .access-control-contract has-role "enterprise-admin" tx-sender) ERR_UNAUTHORIZED)
+    (unwrap! (map-get? tier-configurations tier-id) ERR_INVALID_TIER)
+    (let ((account-id (+ u1 (var-get account-counter))))
       (map-set institutional-accounts account-id {
         owner: owner,
         kyc-expiry: none,
         trading-privileges: u0,
         tier-id: tier-id
       })
-      (data-var-set account-counter account-id)
+      (var-set account-counter account-id)
       (log-audit-event "create-institutional-account" account-id "Account created")
       (ok account-id))))
 
@@ -141,8 +141,8 @@
 ;; @return (response bool) An (ok true) response if the KYC expiry was successfully set, or an error if unauthorized or the account is not found.
 (define-public (set-kyc-expiry (account-id uint) (expiry (optional uint)))
   (begin
-    (asserts! (contract-call? .access-control-contract has-role "enterprise-admin" tx-sender) (err-trait err-unauthorized))
-    (let ((account (unwrap! (map-get? institutional-accounts account-id) (err-trait err-account-not-found))))
+    (asserts! (contract-call? .access-control-contract has-role "enterprise-admin" tx-sender) ERR_UNAUTHORIZED)
+    (let ((account (unwrap! (map-get? institutional-accounts account-id) ERR_ACCOUNT_NOT_FOUND)))
       (map-set institutional-accounts account-id (merge account {kyc-expiry: expiry}))
       (log-audit-event "set-kyc-expiry" account-id "KYC expiry updated")
       (ok true))))
@@ -153,8 +153,8 @@
 ;; @return (response bool) An (ok true) response if the privileges were successfully set, or an error if unauthorized or the account is not found.
 (define-public (set-trading-privileges (account-id uint) (privileges uint))
   (begin
-    (asserts! (contract-call? .access-control-contract has-role "enterprise-admin" tx-sender) (err-trait err-unauthorized))
-    (let ((account (unwrap! (map-get? institutional-accounts account-id) (err-trait err-account-not-found))))
+    (asserts! (contract-call? .access-control-contract has-role "enterprise-admin" tx-sender) ERR_UNAUTHORIZED)
+    (let ((account (unwrap! (map-get? institutional-accounts account-id) ERR_ACCOUNT_NOT_FOUND)))
       (map-set institutional-accounts account-id (merge account {trading-privileges: privileges}))
       (log-audit-event "set-trading-privileges" account-id "Trading privileges updated")
       (ok true))))
@@ -165,9 +165,9 @@
 ;; @return (response bool) An (ok true) response if the account tier was successfully updated, or an error if unauthorized, the account is not found, or the new tier is invalid.
 (define-public (update-account-tier (account-id uint) (new-tier-id uint))
   (begin
-    (asserts! (contract-call? .access-control-contract has-role "enterprise-admin" tx-sender) (err-trait err-unauthorized))
-    (unwrap! (map-get? tier-configurations new-tier-id) (err-trait err-invalid-tier))
-    (let ((account (unwrap! (map-get? institutional-accounts account-id) (err-trait err-account-not-found))))
+    (asserts! (contract-call? .access-control-contract has-role "enterprise-admin" tx-sender) ERR_UNAUTHORIZED)
+    (unwrap! (map-get? tier-configurations new-tier-id) ERR_INVALID_TIER)
+    (let ((account (unwrap! (map-get? institutional-accounts account-id) ERR_ACCOUNT_NOT_FOUND)))
       (map-set institutional-accounts account-id (merge account {tier-id: new-tier-id}))
       (log-audit-event "update-account-tier" account-id "Account tier updated")
       (ok true))))
@@ -183,7 +183,7 @@
 ;; @return (response bool) An (ok true) response if the tier configuration was successfully set, or an error if unauthorized.
 (define-public (set-tier-configuration (tier-id uint) (name (string-ascii 32)) (fee-discount-rate uint) (min-volume uint) (max-volume uint))
   (begin
-    (asserts! (contract-call? .access-control-contract has-role "enterprise-admin" tx-sender) (err-trait err-unauthorized))
+    (asserts! (contract-call? .access-control-contract has-role "enterprise-admin" tx-sender) ERR_UNAUTHORIZED)
     (map-set tier-configurations tier-id {
       name: name,
       fee-discount-rate: fee-discount-rate,
@@ -442,3 +442,13 @@
 ;; @return (response (optional {timestamp: uint, action: (string-ascii 64), account-id: uint, details: (string-ascii 256)})) The audit event details or none if not found.
 (define-read-only (get-audit-event (event-id uint))
   (ok (map-get? audit-trail event-id)))
+(define-private (log-audit-event (action (string-ascii 64)) (id uint) (details (string-ascii 256)))
+  (let (
+    (ts block-height)
+    (next (var-get audit-event-counter))
+  )
+    (var-set audit-event-counter (+ next u1))
+    (map-set audit-trail next { timestamp: ts, action: action, account-id: id, details: details })
+    (ok true)
+  )
+)

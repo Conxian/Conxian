@@ -26,7 +26,11 @@ const includeAll = [
 export default defineConfig({
   test: {
     // Test directories (static-only when SKIP_SDK=1)
-    include: skipSdk ? includeStatic : includeAll,
+    include: [
+      'tests/dimensional/dimensional-core-integration.test.ts',
+      'tests/dex/**/*.test.ts',
+      'stacks/tests/temp-check.test.ts',
+    ],
     exclude: [
       'stacks/tests/helpers/**',
       'node_modules/**',

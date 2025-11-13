@@ -7,7 +7,7 @@
 ;; where multiple orders are collected and executed at a single price.
 ;;
 ;; Example usage:
-;;   (use-trait batch-auction .all-traits.batch-auction-trait)
+;;   (use-trait batch-auction .batch-auction-trait.batch-auction-trait)
 (define-trait batch-auction-trait
   (
     ;; Submit a bid to the batch auction

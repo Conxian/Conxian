@@ -2,9 +2,9 @@
 ;; This contract acts as an adapter for integrating external oracle providers, allowing the system to fetch and use off-chain data.
 ;; It supports multiple oracle sources, manages their authorization, and aggregates price data to mitigate manipulation risks.
 
-(use-trait rbac-trait .decentralized-trait-registry.decentralized-trait-registry)
-(use-trait oracle-trait .oracle.oracle-trait)
-(use-trait ft-trait .sip-010-trait-ft-standard.sip-010-trait)
+(use-trait rbac-trait .base-traits.rbac-trait)
+(use-trait oracle-trait .oracle-risk-traits.oracle-trait)
+(use-trait ft-trait .sip-010-ft-trait.sip-010-ft-trait)
 (define-constant ERR_INVALID_ORACLE_SOURCE (err u1001))
 (define-constant ERR_INVALID_PRICE_DATA (err u1002))
 (define-constant ERR_PRICE_TOO_OLD (err u1003))
@@ -132,7 +132,10 @@
     (begin
         (asserts! (is-owner) ERR_UNAUTHORIZED)
         (asserts! (var-get initialized) ERR_NOT_INITIALIZED)
-        (map-update oracle-sources { source-id: source-id } { is-active: active })
+        (let (
+            (current-source (unwrap! (map-get? oracle-sources { source-id: source-id }) ERR_ORACLE_SOURCE_NOT_FOUND))
+        )
+        (map-set oracle-sources { source-id: source-id } (merge current-source { is-active: active }))
         (ok true)
     )
 )

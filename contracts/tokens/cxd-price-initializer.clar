@@ -1,9 +1,9 @@
 ;; cxd-price-initializer.clar
 ;; Handles initial price setting and management for CXD token
 
-(use-trait token-trait .sip-010-trait)
-(use-trait governance-trait .governance-token-trait)
-(use-trait oracle-trait .oracle-trait)
+(use-trait "token-trait" .traits.sip-010-ft-trait.sip-010-ft-trait)
+(use-trait "governance-trait" .traits.governance-token-trait.governance-token-trait)
+(use-trait "oracle-trait" .traits.oracle-aggregator-v2-trait.oracle-aggregator-v2-trait)
 
 ;; Constants
 (define-constant ERR_UNAUTHORIZED (err u1000))
@@ -101,7 +101,7 @@
         (timelock (unwrap-panic (var-get timelock-end-block)))
     )
         (asserts! (var-get is-initialized) ERR_NOT_INITIALIZED)
-        (asserts! (contract-call? .all-traits.governance-token-trait has-voting-power caller) ERR_UNAUTHORIZED)
+        (asserts! (contract-call? .traits.governance-token-trait.governance-token-trait has-voting-power caller) ERR_UNAUTHORIZED)
         (asserts! (>= block-height timelock) (err (try! (as-max-len? (concat "Timelocked until block " (unwrap-panic (to-uint timelock))) u128))))
         (asserts! (>= new-price current-min) ERR_INVALID_PRICE)
         
@@ -128,7 +128,7 @@
         (timelock (unwrap-panic (var-get timelock-end-block)))
     )
         (asserts! (var-get is-initialized) ERR_NOT_INITIALIZED)
-        (asserts! (contract-call? .all-traits.governance-token-trait has-voting-power caller) ERR_UNAUTHORIZED)
+        (asserts! (contract-call? .traits.governance-token-trait.governance-token-trait has-voting-power caller) ERR_UNAUTHORIZED)
         (asserts! (>= block-height timelock) (err (try! (as-max-len? (concat "Timelocked until block " (unwrap-panic (to-uint timelock))) u128))))
         (asserts! (<= new-min-price current-price) ERR_INVALID_PRICE)
         

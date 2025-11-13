@@ -1,5 +1,5 @@
 (use-trait sip-010-ft-trait .sip-010-ft-trait.sip-010-ft-trait)
-(use-trait staking-trait .staking-trait.staking-trait)
+(use-trait staking-trait .staking-traits.staking-trait)
 
 (define-constant ERR_UNAUTHORIZED (err u9100))
 (define-constant ERR_INVALID_TOKEN (err u9101))

@@ -48,10 +48,12 @@
 ;; ===== Common Validations =====
 
 ;; Validate an amount (positive uint)
-(define-read-only (validate-amount (amount uint))
-    (asserts! (is-valid-uint amount u1 u115792089237316195423570985008687907853269984665640564039457584007913129639935) (err u1001))  ;; Invalid amount
+(define-read-only (validate-amount (amount uint) (min-val uint) (max-val uint))
+    (asserts! (>= amount min-val) (err u1001))
+    (asserts! (<= amount max-val) (err u1002))
     (ok true)
 )
+
 ;; Validate an address (principal)
 (define-read-only (validate-address (addr principal))
     (asserts! (is-valid-principal addr) (err u1002))  ;; Invalid address

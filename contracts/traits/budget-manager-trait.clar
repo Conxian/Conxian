@@ -7,7 +7,7 @@
 ;; allocations and budget proposals within the DAO governance system.
 ;;
 ;; Example usage:
-;;   (use-trait budget-manager .all-traits.budget-manager-trait)
+;;   (use-trait budget-manager .budget-manager-trait.budget-manager-trait)
 (define-trait budget-manager-trait
   (
     ;; Create a new budget allocation

@@ -1,4 +1,4 @@
-# AIP-3: Treasury Multi-Sig Security Enhancement
+# CXIP-3: Treasury Multi-Sig Security Enhancement
 
 ## Simple Summary
 

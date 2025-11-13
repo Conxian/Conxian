@@ -2,12 +2,12 @@
 ;; Pool creation and registration through dimensional registry
 ;; All pools registered as dimensional nodes for unified routing
 
-(use-trait sip-010-ft-trait .requirements.sip-010-trait-ft-standard.sip-010-trait-ft-standard)
-(use-trait factory-trait .traits.factory-trait.factory-trait)
-(use-trait access-control-trait .traits.access-control-trait.access-control-trait)
-(use-trait circuit-breaker-trait .traits.circuit-breaker-trait.circuit-breaker-trait)
-(use-trait dim-registry-trait .traits.dim-registry-trait.dim-registry-trait)
-(use-trait rbac-trait .decentralized-trait-registry.decentralized-trait-registry)
+(use-trait "sip-010-ft-trait" .dex-traits.sip-010-ft-trait)
+(use-trait "factory-trait" .dex-traits.factory-trait)
+(use-trait "access-control-trait" .base-traits.rbac-trait)
+(use-trait "circuit-breaker-trait" .monitoring-security-traits.circuit-breaker-trait)
+(use-trait "dim-registry-trait" .dimensional-traits.dim-registry-trait)
+(use-trait "rbac-trait" .base-traits.rbac-trait)
 
 ;; --- Dimensional Integration ---
 ;; @desc Stores the principal of the dimensional registry contract.

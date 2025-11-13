@@ -6,7 +6,7 @@
 ;; allowing rapid response to critical issues while maintaining decentralized governance.
 
 ;; Use centralized traits
-(use-trait rbac-trait .all-traits.rbac-trait)
+(use-trait rbac-trait .traits.rbac-trait.rbac-trait)
 
 ;; ===========================================
 ;; CONSTANTS
@@ -88,8 +88,8 @@
 
 (define-private (is-authorized-breaker)
   (or
-    (contract-call? .all-traits.rbac-trait is-owner tx-sender)
-    (contract-call? .all-traits.rbac-trait has-role tx-sender "emergency-breaker")
+    (contract-call? .traits.rbac-trait.rbac-trait is-owner tx-sender)
+    (contract-call? .traits.rbac-trait.rbac-trait has-role tx-sender "emergency-breaker")
   )
 )
 
@@ -221,7 +221,7 @@
 ;; @desc Resume from global emergency pause
 (define-public (resume-global-emergency)
   (begin
-    (asserts! (contract-call? .all-traits.rbac-trait is-owner tx-sender) ERR_UNAUTHORIZED)
+    (asserts! (contract-call? .traits.rbac-trait.rbac-trait is-owner tx-sender) ERR_UNAUTHORIZED)
     (asserts! (var-get global-emergency-pause) ERR_NOT_PAUSED)
 
     (var-set global-emergency-pause false)
@@ -237,7 +237,7 @@
 ;; @param execution-delay Delay before execution (blocks)
 (define-public (propose-recovery (circuit-type uint) (description (string-ascii 256)) (execution-delay uint))
   (begin
-    (asserts! (contract-call? .all-traits.rbac-trait has-role tx-sender "governance") ERR_UNAUTHORIZED)
+    (asserts! (contract-call? .traits.rbac-trait.rbac-trait has-role tx-sender "governance") ERR_UNAUTHORIZED)
 
     (let ((proposal-id (+ u1 (var-get max-pause-duration)))) ;; Simple counter
       (map-set recovery-proposals
@@ -262,7 +262,7 @@
 ;; @param proposal-id The recovery proposal to execute
 (define-public (execute-recovery (proposal-id uint))
   (begin
-    (asserts! (contract-call? .all-traits.rbac-trait has-role tx-sender "governance") ERR_UNAUTHORIZED)
+    (asserts! (contract-call? .traits.rbac-trait.rbac-trait has-role tx-sender "governance") ERR_UNAUTHORIZED)
 
     (let ((proposal (unwrap! (map-get? recovery-proposals { proposal-id: proposal-id }) ERR_CIRCUIT_NOT_FOUND)))
       (asserts! (>= block-height (get execution-time proposal)) ERR_INVALID_DURATION)

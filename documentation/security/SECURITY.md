@@ -34,7 +34,7 @@ Access Control Roles:
 - Event logging for all access control changes
 - Time-delayed role revocation for safety
 
-### 2. Emergency Pause System (AIP-1)
+### 2. Emergency Pause System (CXIP-1)
 
 Status: ACTIVE
 
@@ -54,7 +54,7 @@ Emergency Controls:
 - Granular control over individual system components
 - Automatic resume after investigation period
 
-### 2. Time-Weighted Voting (AIP-2)
+### 2. Time-Weighted Voting (CXIP-2)
 
 Status: ACTIVE
 
@@ -74,7 +74,7 @@ Vote Weight Calculation:
 - Sybil voting schemes
 - Vote buying attempts
 
-### 3. Treasury Multi-Signature (AIP-3)
+### 3. Treasury Multi-Signature (CXIP-3)
 
 Status: ACTIVE
 
@@ -94,7 +94,7 @@ Multi-Sig Requirements:
 - Regular key rotation procedures
 - Emergency recovery mechanisms
 
-### 4. Bounty Security Hardening (AIP-4)
+### 4. Bounty Security Hardening (CXIP-4)
 
 Status: ACTIVE
 
@@ -114,7 +114,7 @@ Bounty Protections:
 - Payment escrow system
 - Community dispute resolution
 
-### 5. Vault Precision (AIP-5)
+### 5. Vault Precision (CXIP-5)
 
 Status: ACTIVE
 

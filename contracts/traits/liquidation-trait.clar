@@ -7,7 +7,7 @@
 ;; batch liquidations, and position health monitoring.
 ;;
 ;; Example usage:
-;;   (use-trait liquidation .all-traits.liquidation-trait)
+;;   (use-trait liquidation .liquidation-trait.liquidation-trait)
 ;;   (define-public (liquidate-user-position (liquidation-contract principal) (position-id uint))
 ;;     (contract-call? liquidation-contract liquidate-position tx-sender position-id max-slippage))
 (define-trait liquidation-trait

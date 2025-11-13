@@ -9,13 +9,14 @@
 ;; - Atomic execution with rollback on failure
 ;; - Route optimization for best prices
 
-;; Use centralized traits
-(use-trait rbac-trait .all-traits.rbac-trait)
-(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
-(use-trait pool-trait .all-traits.pool-trait)
-(use-trait dim-registry-trait .all-traits.dim-registry-trait)
-(use-trait dim-graph-trait .all-traits.dim-graph-trait)
-(use-trait err-trait .all-traits.err-trait)
+;; Use decentralized modular traits
+(use-trait rbac-trait .base-traits.rbac-trait)
+(use-trait sip-010-ft-trait .sip-010-ft-trait.sip-010-ft-trait)
+(use-trait pool-trait .dex-traits.pool-trait)
+(use-trait dim-registry-trait .dim-registry-trait.dim-registry-trait)
+;; Note: dim-graph-trait and err-trait need to be added to modules or created
+(use-trait dim-graph-trait .dimensional-traits.dim-graph-trait)
+(use-trait err-trait .standard-errors.err-trait)
 
 ;; ===========================================
 ;; CONSTANTS
@@ -42,12 +43,12 @@
 (define-constant ERR_DIJKSTRA_INIT_FAILED (err u1408)) ;; New error code for Dijkstra initialization failed
 (define-constant ERR_POOL_NOT_FOUND (err u1409)) ;; New error code for pool not found
 (define-constant ERR_GET_AMOUNT_IN_FAILED (err u1410)) ;; New error code for get amount in failed
-(define-constant ERR_ROUTE_ALREADY_EXECUTED (err-trait err-route-already-executed))
-(define-constant ERR_REENTRANCY_GUARD_TRIGGERED (err-trait err-reentrancy-guard-triggered))
-(define-constant ERR_SLIPPAGE_TOLERANCE_EXCEEDED (err-trait err-slippage-tolerance-exceeded))
-(define-constant ERR_INVALID_PATH (err-trait err-invalid-path))
-(define-constant ERR_SWAP_FAILED (err-trait err-swap-failed))
-(define-constant ERR_TOKEN_TRANSFER_FAILED (err-trait err-token-transfer-failed))
+(define-constant ERR_ROUTE_ALREADY_EXECUTED (err u1416)) ;; New error code for route already executed
+(define-constant ERR_REENTRANCY_GUARD_TRIGGERED (err u1411)) ;; New error code for reentrancy guard triggered
+(define-constant ERR_SLIPPAGE_TOLERANCE_EXCEEDED (err u1412)) ;; New error code for slippage tolerance exceeded
+(define-constant ERR_INVALID_PATH (err u1413)) ;; New error code for invalid path
+(define-constant ERR_SWAP_FAILED (err u1414)) ;; New error code for swap failed
+(define-constant ERR_TOKEN_TRANSFER_FAILED (err u1415)) ;; New error code for token transfer failed
 
 ;; ==========================================================================
 ;; Data Variables
@@ -120,7 +121,7 @@
       (ok maybe-pool)
       (if (is-some maybe-pool)
         (let ((pool (unwrap-panic maybe-pool)))
-          (contract-call? <pool-trait>pool get-amount-in token-in token-out amount-out)
+          (contract-call? pool get-amount-in token-in token-out amount-out)
         )
         (err u1437) ;; ERR_POOL_NOT_FOUND
       )
@@ -252,6 +253,13 @@
       (var-set route-counter (+ current-route-id u1))
       (ok current-route-id)
     )
+  )
+)
+
+(define-public (set-factory (factory principal))
+  (begin
+    (var-set dim-registry factory)
+    (ok true)
   )
 )
 

@@ -2,8 +2,9 @@
 ;; This contract provides a mechanism to pause and unpause contract functionality, typically used for emergency stops or upgrades.
 ;; Only the contract owner can pause or unpause the contract.
 
-(use-trait "pausable-trait" .pausable-trait.pausable-trait)
-(use-trait "ownable-trait" .ownable-trait.ownable-trait)
+;; --- Traits ---
+(use-trait "pausable-trait" .traits.pausable-trait.pausable-trait)
+(use-trait "ownable-trait" .traits.ownable-trait.ownable-trait)
 
 ;; Error codes
 (define-constant ERR_CONTRACT_PAUSED (err u1000))
@@ -13,7 +14,7 @@
 (define-constant ERR_ALREADY_UNPAUSED (err u1004))
 (define-constant ERR_PAUSED (err u1005))
 
-(use-trait rbac-trait .decentralized-trait-registry.decentralized-trait-registry)
+(use-trait "rbac-trait" .traits.rbac-trait.rbac-trait)
 ;; State variable to track pause status
 (define-data-var is-paused bool false)
 
@@ -56,14 +57,6 @@
 (define-public (check-not-paused)
   (begin
     (asserts! (not (var-get is-paused)) ERR_ALREADY_PAUSED)
-    (ok true)
-  )
-)
-
-;; Helper function for derived contracts
-(define-private (when-not-paused)
-  (if (var-get is-paused)
-    (err ERR_PAUSED)
     (ok true)
   )
 )

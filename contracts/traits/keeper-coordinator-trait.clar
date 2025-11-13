@@ -7,7 +7,7 @@
 ;; such as interest accrual, liquidations, and protocol maintenance.
 ;;
 ;; Example usage:
-;;   (use-trait keeper .all-traits.keeper-coordinator-trait)
+;;   (use-trait keeper .keeper-coordinator-trait.keeper-coordinator-trait)
 (define-trait keeper-coordinator-trait
   (
     ;; Execute automated interest accrual

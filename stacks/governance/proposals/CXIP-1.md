@@ -1,4 +1,4 @@
-# AIP-1: Enable Emergency Pause for Vault
+# CXIP-1: Enable Emergency Pause for Vault
 
 ## Simple Summary
 
@@ -35,39 +35,39 @@ enhancement.
 
 ## Test Cases
 
-- ✅ Only multi-sig can pause/unpause (verified in production test suite)
-- ✅ Vault operations are disabled when paused
-- ✅ Vault operations resume when unpaused
-- ✅ Emergency pause function exists and is accessible
-- ✅ Vault admin controls verified in testing
+- Only multi-sig can pause/unpause (verified in production test suite)
+- Vault operations are disabled when paused
+- Vault operations resume when unpaused
+- Emergency pause function exists and is accessible
+- Vault admin controls verified in testing
 
-## Implementation Status ✅ **COMPLETE**
+## Implementation Status 
 
-- ✅ Emergency pause function exists in DAO governance
-- ✅ Vault admin controls verified through testing
-- ✅ Multi-sig framework operational
-- ✅ **COMPLETED:** Integration with vault contract
-- ✅ **Implementation File:** `/emergency-pause-implementation.clar`
-- ✅ **Circuit breaker pattern implemented**
-- ✅ **Multi-role authorization system deployed**
-- ✅ **Emergency withdrawal protection active**
-- ✅ **Automated anomaly detection integrated**
+- Emergency pause function exists in DAO governance
+- Vault admin controls verified through testing
+- Multi-sig framework operational
+- **COMPLETED:** Integration with vault contract
+- **Implementation File:** `contracts/governance/emergency-governance.clar`
+- **Circuit breaker pattern implemented**
+- **Multi-role authorization system deployed**
+- **Emergency withdrawal protection active**
+- **Automated anomaly detection integrated**
 
-## Test Results ✅ **ALL PASSING**
+## Test Results **ALL PASSING**
 
 ```text
-✅ Vault admin controls verified
-✅ DAO governance emergency pause function accessible
-✅ Emergency pause implementation tested and verified
-✅ All 30 tests passing with emergency controls
-✅ Circuit breaker pattern operational
-✅ Multi-sig authorization working
-✅ Production deployment ready
+Vault admin controls verified
+DAO governance emergency pause function accessible
+Emergency pause implementation tested and verified
+All 30 tests passing with emergency controls
+Circuit breaker pattern operational
+Multi-sig authorization working
+Production deployment ready
 ```
 
 ## Implementation Details
 
-**File Generated:** `emergency-pause-implementation.clar`
+**File Generated:** `contracts/governance/emergency-governance.clar`
 
 - Circuit breaker pattern for all critical operations
 - Multi-role pause/unpause controls with 3/5 signatures

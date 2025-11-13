@@ -3,11 +3,11 @@
 ;; ============================================================
 ;; Core contract for the dimensional engine
 
-(use-trait "oracle-trait" .oracle-aggregator-v2-trait.oracle-aggregator-v2-trait)
-(use-trait "sip-010-ft-trait" .sip-010-ft-trait.sip-010-ft-trait)
-(use-trait "risk-trait" .risk-trait.risk-trait)
-(use-trait "finance-metrics-trait" .finance-metrics-trait.finance-metrics-trait)
-(use-trait "math-utils" .math-trait.math-trait)
+(use-trait oracle-trait .oracle-aggregator-v2-trait.oracle-aggregator-v2-trait)
+(use-trait sip-010-ft-trait .sip-010-ft-trait.sip-010-ft-trait)
+(use-trait risk-trait .risk-trait.risk-trait)
+(use-trait finance-metrics-trait .finance-metrics-trait.finance-metrics-trait)
+(use-trait math-utils .math-trait.math-trait)
 
 ;; CONSTANTS
 ;; =============================================================================
@@ -51,11 +51,34 @@
 (define-data-var max-funding-rate uint MAX_FUNDING_RATE)
 (define-data-var funding-rate-sensitivity uint FUNDING_RATE_SENSITIVITY)
 
-;; =============================================================================
-;; DATA STRUCTURES
-;; =============================================================================
+;; Contract state
+(define-data-var owner principal tx-sender)
+(define-data-var is-paused bool false)
 
+;; Position tracking maps
+(define-map positions
+  {id: uint}
+  {
+    owner: principal,
+    asset: principal,
+    collateral: uint,
+    size: uint,
+    entry-price: uint,
+    leverage: uint,
+    is-long: bool,
+    funding-rate: uint,
+    last-updated: uint,
+    stop-loss: (optional uint),
+    take-profit: (optional uint),
+    is-active: bool
+  }
+)
+
+(define-map user-positions {user: principal, asset: principal, position-id: uint} bool)
+(define-map active-positions {asset: principal, is-long: bool, position-id: uint} bool)
 (define-map internal-balances principal uint)
+(define-data-var max-funding-rate uint MAX_FUNDING_RATE)
+(define-data-var funding-rate-sensitivity uint FUNDING_RATE_SENSITIVITY)
 
 (define-map funding-rate-history {
   asset: principal,
@@ -328,33 +351,14 @@
 
 
 ;; =============================================================================
-;; FACADE FUNCTIONS
+;; FACADE FUNCTIONS - REMOVED TEMPORARILY
 ;; =============================================================================
-
-(define-public (create-position (collateral-amount uint) (leverage uint) (pos-type (string-ascii 20)) (token <sip-010-ft-trait>) (slippage-tolerance uint) (funding-int (string-ascii 20)))
-  (contract-call? .dimensional-core open-position collateral-amount leverage pos-type slippage-tolerance (contract-of token) funding-int u1)
-)
-
-(define-public (close-position (position-id uint) (slippage-tolerance uint))
-  (let (
-    (price (unwrap! (contract-call? .oracle-adapter get-price (get-position-asset position-id)) (err u4001)))
-    (min-amount-out (/ (* price (- u10000 slippage-tolerance)) u10000))
-  )
-    (contract-call? .dimensional-core close-position position-id min-amount-out)
-  )
-)
-
-(define-public (liquidate-position (position-owner principal) (position-id uint) (max-slippage uint))
-  (contract-call? .risk-liquidation-engine liquidate-position position-owner position-id max-slippage)
-)
+;; These functions reference contracts that don't exist yet
+;; Will be re-added when dimensional-core and other contracts are implemented
 
 ;; =============================================================================
 ;; READ-ONLY FUNCTIONS
 ;; =============================================================================
-
-(define-read-only (get-position (position-owner principal) (position-id uint))
-  (contract-call? .dimensional-core get-position position-owner position-id)
-)
 
 (define-read-only (get-owner)
   (begin
@@ -663,9 +667,8 @@
     (let* (
       (price (try! (get-price (get position 'asset))))
       (entry-price (get position 'entry-price))
-      (size (get position 'size))
-      (collateral (get position collateral))
-      (is-long (get position is-long))
+      (collateral (get position 'collateral))
+      (is-long (get position 'is-long))
       
       ;; Simplified P&L calculation (would include funding in production)
       (price-diff (if is-long 
@@ -682,9 +685,9 @@
       ))
     )
       ;; Check if position is liquidatable (simplified)
-      (if (< total-returned (* collateral (var-get liquidation-threshold)) u10000)
+      (if (< total-returned (/ (* collateral (var-get liquidation-threshold)) u10000))
         (try! (require! 
-          (is-eq tx-sender (get owner position))
+          (is-eq tx-sender (get position 'owner))
           (err u1001)
         ))
         true
@@ -698,14 +701,14 @@
       
       ;; Remove from active positions
       (map-delete active-positions {
-        asset: (get position asset),
+        asset: (get position 'asset),
         is-long: is-long,
         position-id: position-id
       })
       
       ;; Transfer funds back to user (or liquidator)
       (let ((recipient (if (>= pnl u0) 
-        (get position owner) 
+        (get position 'owner) 
         (var-get insurance-fund)
       )))
         (map-set internal-balances recipient 
@@ -714,7 +717,7 @@
       )
       
       ;; Emit event
-      (emit-position-closed position-id (get position owner) total-returned pnl price)
+      (emit-position-closed position-id (get position 'owner) total-returned pnl price)
       
       (ok {
         collateral-returned: total-returned,
@@ -795,7 +798,7 @@
         (lambda ((user principal)) 
           {user: user, balance: (default-to u0 (map-get? internal-balances user))}
         )
-        (map get (map-keys internal-balances) (repeat (length (map-keys internal-balances)) user))
+        (map-keys internal-balances)
       )
     )
   })

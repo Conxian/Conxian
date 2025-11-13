@@ -2,8 +2,8 @@
 ;; Conxian Revenue Token (SIP-010 FT) - accrues protocol revenue to holders off-contract
 ;; Enhanced with integration hooks for staking, revenue distribution, and system monitoring
 ;; --- Traits ---
-(use-trait sip-010-ft-trait .sip-010-trait-ft-standard.sip-010-trait)
-(use-trait protocol-monitor-trait .protocol-monitor.protocol-monitor-trait)
+(use-trait sip-010-ft-trait .dex-traits.sip-010-ft-trait)
+(use-trait protocol-monitor-trait .monitoring-security-traits.protocol-monitor-trait)
 ;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED u100)
 (define-constant ERR_NOT_ENOUGH_BALANCE u101)
@@ -199,7 +199,7 @@
         (map-set balances recipient (unwrap! (safe-add rec-bal amount) (err ERR_OVERFLOW))))
       
       (and (notify-transfer amount sender recipient) true)
-      (ok true))))
+      (ok true)))
 
 (define-read-only (get-balance (who principal))
   (ok (default-to u0 (map-get? balances who))))

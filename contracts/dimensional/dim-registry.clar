@@ -3,9 +3,8 @@
 ;; Registry for ALL system components under dimensional architecture
 ;; Manages DEX pools, vaults, lending systems, and cross-protocol integrations
 
-(use-trait dim-registry-trait .dim-registry-trait.dim-registry-trait)
-
-(impl-trait .dim-registry-trait.dim-registry-trait)
+(use-trait dim-registry-trait .dimensional-traits.dim-registry-trait)
+(impl-trait .dimensional-traits.dim-registry-trait)
 
 ;; Constants
 (define-constant TRAIT_REGISTRY .trait-registry)
@@ -16,11 +15,25 @@
 (define-constant ERR_DIMENSION_NOT_FOUND u810)
 (define-constant ERR_ORACLE_EXISTS u811)
 (define-constant ERR_ORACLE_NOT_FOUND u812)
+(define-constant ERR_NODE_EXISTS u813)
+(define-constant ERR_NODE_NOT_FOUND u814)
 
 (define-data-var oracle-principal principal tx-sender)
 (define-data-var contract-owner principal tx-sender)
 ;; Next dimension ID generator
 (define-data-var next-dim-id uint u1)
+
+;; Node registry
+(define-map registered-nodes
+  { id: uint }
+  {
+    principal: principal,
+    type: (string-ascii 32),
+    metadata: (optional (string-utf8 256)),
+    active: bool
+  }
+)
+(define-data-var next-node-id uint u1)
 
 ;; Dimension weights registry
 (define-map dimension-weights {dim-id: uint} {weight: uint})
@@ -90,6 +103,29 @@
       (map-set component-dimensions component id)
       (var-set next-dim-id (+ id u1))
       (ok id))))
+
+(define-read-only (get-node (node-id uint))
+  (ok (map-get? registered-nodes { id: node-id })))
+
+(define-public (register-node (node-principal principal) (node-type (string-ascii 32)) (metadata (optional (string-utf8 256))))
+  (begin
+    (asserts! (is-eq tx-sender (var-get contract-owner)) (err ERR_UNAUTHORIZED))
+    (let ((id (var-get next-node-id)))
+      (map-set registered-nodes { id: id } {
+        principal: node-principal,
+        type: node-type,
+        metadata: metadata,
+        active: true
+      })
+      (var-set next-node-id (+ id u1))
+      (ok id))))
+
+(define-public (update-node-status (node-id uint) (active bool))
+  (begin
+    (asserts! (is-eq tx-sender (var-get contract-owner)) (err ERR_UNAUTHORIZED))
+    (let ((node (unwrap! (map-get? registered-nodes { id: node-id }) (err ERR_NODE_NOT_FOUND))))
+      (map-set registered-nodes { id: node-id } (merge node { active: active }))
+      (ok true))))
 
 
 (define-public (register-oracle (oracle principal))

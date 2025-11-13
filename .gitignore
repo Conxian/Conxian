@@ -186,3 +186,4 @@ stacks/security/audit-prep/*.txt
 deployments/*.simnet-plan.yaml
 stacks/deployments/*.simnet-plan.yaml
 *#
+clarinet-installer.msi

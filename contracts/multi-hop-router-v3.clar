@@ -3,7 +3,7 @@
 
 ;; Traits
 (use-trait ft-trait .sip-010-trait-ft-standard.ft-trait)
-(use-trait pool-trait .all-traits.pool-trait)
+(use-trait pool-trait .pool-trait.pool-trait)
 
 ;; Constants
 (define-constant ERR-UNAUTHORIZED u1000)

@@ -7,7 +7,7 @@
 ;; swap paths across multiple liquidity pools.
 ;;
 ;; Example usage:
-;;   (use-trait router .all-traits.multi-hop-router-v3-trait)
+;;   (use-trait router .multi-hop-router-v3-trait.multi-hop-router-v3-trait)
 (define-trait multi-hop-router-v3-trait
   (
     ;; Compute the best route for a token swap
