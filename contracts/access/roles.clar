@@ -2,8 +2,7 @@
 ;; Role-based access control implementation
 
 (use-trait access-control-trait .access-traits.access-traits)
-(impl-trait .access-traits.access-traits)
-
+(impl-trait .central-traits-registry.access-control-trait)
 
 ;; Owner data variable
 (define-data-var contract-owner principal tx-sender)

@@ -5,3 +5,5 @@
 | 1 | Trait Implementation Mismatches | traits | Open | 2025-11-13 |
 | 2 | Unresolved Contract References | core | Open | 2025-11-13 |
 | 3 | Function Signature Issues | utils | Open | 2025-11-13 |
+| 4 | Line Endings | CRLF in .clar files | Converted to LF | 2025-11-13 |
+

@@ -22,6 +22,8 @@
 (define-constant ERR_SANDWICH_ATTACK_DETECTED (err u6007))
 ;; @desc Error: Circuit breaker is open, preventing transactions.
 (define-constant ERR_CIRCUIT_OPEN (err u6008))
+;; @desc The principal of the router contract.
+(define-constant ROUTER_CONTRACT principal '.dimensional-advanced-router-dijkstra)
 
 ;; --- Data Variables ---
 ;; @desc The principal of the contract owner.
@@ -258,8 +260,7 @@
         (begin
           (try! (detect-sandwich-attack (get path r) (get amount-in r)))
           (let ((ends (unwrap-panic (path-ends (get path r)))))
-            (as-contract (contract-call? .dimensional-advanced-router-dijkstra
-              swap-optimal-path
+            (as-contract (contract-call? ROUTER_CONTRACT swap-optimal-path
               (get first ends)
               (get last ends)
               (get amount-in r)
@@ -293,7 +294,7 @@
 ;; @returns (response uint uint) - The simulated price, or an error.
 (define-private (get-price (path (list 20 principal)) (amount-in uint))
   (let ((ends (unwrap-panic (path-ends path))))
-    (match (as-contract (contract-call? .dimensional-advanced-router-dijkstra estimate-output (get first ends) (get last ends) amount-in))
+    (match (as-contract (contract-call? ROUTER_CONTRACT estimate-output (get first ends) (get last ends) amount-in))
       data (ok u0)
       err err))
 )

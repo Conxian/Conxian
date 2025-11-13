@@ -6,7 +6,10 @@
 (define-constant ERR_UNAUTHORIZED (err-trait err-unauthorized))
 (define-constant ERR_ASSET_NOT_FOUND (err-trait err-asset-not-found))
 (define-constant ERR_CIRCUIT_OPEN (err-trait err-circuit-open))
+(define-constant ERR_INVALID_PRICE (err-trait err-invalid-price))
 (define-constant BPS u10000)
+(define-constant MIN_PRICE u100)  ;; $0.0000000000000001 (1e-16)
+(define-constant MAX_PRICE (* u1000000000000000000 u1000000))  ;; $1M with 18 decimals
 
 ;; Admin
 (define-data-var manipulation-threshold-bps uint u500) ;; 5% default
@@ -23,6 +26,15 @@
   total-weight: uint,
   updated-at: uint
 })
+
+(define-private (get-block-height)
+  (unwrap! (get-block-info? block-height) (err u0))
+)
+
+(define-private (is-stale (updated-at uint))
+  (let ((current-height (get-block-height)))
+    (>= (- current-height updated-at) (var-get stale-threshold-blocks)))
+)
 
 (define-public (set-admin (new-admin principal))
   (begin
@@ -62,6 +74,7 @@
   (begin
     (asserts! (contract-call? .access-control.access-control-contract has-role "contract-owner" tx-sender) (err ERR_UNAUTHORIZED))
     (try! (check-circuit-breaker))
+    (asserts! (and (>= price MIN_PRICE) (<= price MAX_PRICE)) ERR_INVALID_PRICE)
     (let ((alpha (var-get twap-alpha-bps)))
       (match (map-get? asset-sources { asset: asset })
         entry
@@ -77,7 +90,7 @@
               twap: (/ (+ (* alpha price) (* (- BPS alpha) prev-twap)) BPS),
               weight: weight,
               total-weight: new-total-weight,
-              updated-at: block-height
+              updated-at: (get-block-height)
             })
           )
         ;; Initialize TWAP on first set
@@ -86,7 +99,7 @@
           twap: price,
           weight: weight,
           total-weight: weight,
-          updated-at: block-height
+          updated-at: (get-block-height)
         })
       )
     )
@@ -117,7 +130,7 @@
       (let ((cb (check-circuit-breaker)))
         (match cb
           (ok okv)
-            (let ((age (- block-height (get updated-at entry)))
+            (let ((age (- (get-block-height) (get updated-at entry)))
                   (stale (>= age (var-get stale-threshold-blocks))))
               (if (or stale (is-manipulated asset))
                 (ok (get twap entry))

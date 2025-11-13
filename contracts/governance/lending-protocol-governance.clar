@@ -330,12 +330,19 @@
     proposal-type: uint, target-contract: (optional principal), function-name: (optional (string-ascii 50)),
     parameters: (optional (list 10 uint)), for-votes: uint, against-votes: uint, abstain-votes: uint,
     start-block: uint, end-block: uint, queue-block: (optional uint), execution-block: (optional uint),
-    state: uint, created-at: uint}))
-  (let ((param-info (unwrap! (map-get? parameter-proposals proposal-id) ERR_INVALID_PARAMETERS)))
-    ;; This would call the target contract to update the parameter
-    ;; Implementation depends on target contract interface
-    (ok true)))
+    state: uint, created-at: uint})
+  (let ((param-info (unwrap! (map-get? parameter-proposals proposal-id) ERR_INVALID_PARAMETERS))
+        (target-contract (get target-contract param-info))
+        (param-name (get parameter-name param-info))
+        (new-value (get proposed-value param-info)))
+    (contract-call? target-contract update-parameter param-name new-value)))
 
 ;; @desc Executes a treasury spending proposal.
 ;; @param proposal-id The ID of the treasury spending proposal.
-;; @return response bool uint A response tuple indicating success
+;; @return response bool uint A response tuple indicating success or failure.
+(define-private (execute-treasury-proposal (proposal-id uint))
+  (let ((treasury-info (unwrap! (map-get? treasury-proposals proposal-id) ERR_INVALID_PARAMETERS))
+        (recipient (get recipient treasury-info))
+        (amount (get amount treasury-info))
+        (token (get token treasury-info)))
+    (contract-call? token transfer recipient amount)))
