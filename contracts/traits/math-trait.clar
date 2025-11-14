@@ -1,43 +1,42 @@
 ;; ===========================================
 ;; MATH TRAIT
 ;; ===========================================
-;; Interface for common mathematical operations
-;;
+;; @desc Interface for common mathematical operations.
 ;; This trait provides basic mathematical functions that can be used
 ;; across various contracts for consistent calculations.
 ;;
-;; Example usage:
-;;   (use-trait math .math-trait.math-trait)
+;; @example
+;; (use-trait math .math-trait.math-trait)
 (define-trait math-trait
   (
-    ;; Add two unsigned integers
-    ;; @param a: first number
-    ;; @param b: second number
-    ;; @return (response uint uint): sum and error code
+    ;; @desc Add two unsigned integers.
+    ;; @param a: The first number.
+    ;; @param b: The second number.
+    ;; @returns (response uint uint): The sum of the two numbers, or an error code.
     (add (uint uint) (response uint uint))
 
-    ;; Subtract two unsigned integers
-    ;; @param a: first number
-    ;; @param b: second number
-    ;; @return (response uint uint): difference and error code
+    ;; @desc Subtract two unsigned integers.
+    ;; @param a: The first number.
+    ;; @param b: The second number.
+    ;; @returns (response uint uint): The difference of the two numbers, or an error code.
     (sub (uint uint) (response uint uint))
 
-    ;; Multiply two unsigned integers
-    ;; @param a: first number
-    ;; @param b: second number
-    ;; @return (response uint uint): product and error code
+    ;; @desc Multiply two unsigned integers.
+    ;; @param a: The first number.
+    ;; @param b: The second number.
+    ;; @returns (response uint uint): The product of the two numbers, or an error code.
     (mul (uint uint) (response uint uint))
 
-    ;; Divide two unsigned integers
-    ;; @param a: numerator
-    ;; @param b: denominator
-    ;; @return (response uint uint): quotient and error code
+    ;; @desc Divide two unsigned integers.
+    ;; @param a: The numerator.
+    ;; @param b: The denominator.
+    ;; @returns (response uint uint): The quotient of the two numbers, or an error code.
     (div (uint uint) (response uint uint))
 
-    ;; Calculate percentage
-    ;; @param amount: base amount
-    ;; @param percentage: percentage to calculate
-    ;; @return (response uint uint): calculated amount and error code
+    ;; @desc Calculate a percentage of an amount.
+    ;; @param amount: The base amount.
+    ;; @param percentage: The percentage to calculate.
+    ;; @returns (response uint uint): The calculated amount, or an error code.
     (calculate-percentage (uint uint) (response uint uint))
   )
 )

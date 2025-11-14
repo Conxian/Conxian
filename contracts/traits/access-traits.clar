@@ -1,15 +1,24 @@
 ;; access-traits.clar
-;; Defines access control traits for the Conxian protocol
-
+;; @desc Defines access control traits for the Conxian protocol.
+;; This trait provides a simplified interface for role management.
 (define-trait access-control-trait
   (
-    ;; Grant a role to a principal
+    ;; @desc Grant a role to a principal.
+    ;; @param role: The role to grant.
+    ;; @param user: The principal to grant the role to.
+    ;; @returns (response bool uint) True if successful, otherwise an error.
     (grant-role (principal principal) (response bool uint))
     
-    ;; Revoke a role from a principal
+    ;; @desc Revoke a role from a principal.
+    ;; @param role: The role to revoke.
+    ;; @param user: The principal to revoke the role from.
+    ;; @returns (response bool uint) True if successful, otherwise an error.
     (revoke-role (principal principal) (response bool uint))
     
-    ;; Check if a principal has a role
+    ;; @desc Check if a principal has a role.
+    ;; @param role: The role to check for.
+    ;; @param user: The principal to check.
+    ;; @returns (response bool uint) True if the principal has the role, otherwise false.
     (has-role (principal principal) (response bool uint))
   )
 )

@@ -1,61 +1,53 @@
-;; ===========================================
-;; Conxian Protocol Core Coordinator
-;; ===========================================
-
+;; @desc Conxian Protocol Core Coordinator
 ;; This contract serves as the central coordination point for the Conxian Protocol,
 ;; managing protocol-wide configuration, authorized contracts, and emergency controls.
 
-;; Use centralized traits
 (use-trait rbac-trait .traits.rbac-trait.rbac-trait)
 
-;; ===========================================
-;; CONSTANTS
-;; ===========================================
-
+;; @constants
+;; @var ERR_UNAUTHORIZED: The caller is not authorized to perform this action.
 (define-constant ERR_UNAUTHORIZED (err u1001))
-(define-constant ERR_INVALID_CONFIG_KEY (err u1002))
-(define-constant ERR_CONTRACT_ALREADY_AUTHORIZED (err u1003))
-(define-constant ERR_CONTRACT_NOT_AUTHORIZED (err u1004))
-(define-constant ERR_PROTOCOL_PAUSED (err u1005))
+;; @var ERR_INVALID_CONFIG_KEY: The specified configuration key is invalid.
+(define-constant ERR_INVALID_CONFIG_KEY (err u1005))
+;; @var ERR_CONTRACT_ALREADY_AUTHORIZED: The specified contract is already authorized.
+(define-constant ERR_CONTRACT_ALREADY_AUTHORIZED (err u9001))
+;; @var ERR_CONTRACT_NOT_AUTHORIZED: The specified contract is not authorized.
+(define-constant ERR_CONTRACT_NOT_AUTHORIZED (err u9001))
+;; @var ERR_PROTOCOL_PAUSED: The protocol is currently paused.
+(define-constant ERR_PROTOCOL_PAUSED (err u1003))
 
-;; ===========================================
-;; DATA VARIABLES
-;; ===========================================
-
-;; Protocol owner (can be updated via governance)
+;; @data-vars
+;; @var protocol-owner: The principal of the protocol owner.
 (define-data-var protocol-owner principal tx-sender)
-
-;; Emergency pause state
+;; @var emergency-paused: A boolean indicating if the protocol is in an emergency pause.
 (define-data-var emergency-paused bool false)
-
-;; Protocol version for upgrades
+;; @var protocol-version: The version of the protocol.
 (define-data-var protocol-version uint u1)
-
-;; ===========================================
-;; DATA MAPS
-;; ===========================================
-
-;; Protocol-wide configuration
+;; @var protocol-config: A map of protocol-wide configuration.
 (define-map protocol-config { key: (string-ascii 32) } { value: uint, updated-at: uint })
-
-;; Authorized contracts registry
+;; @var authorized-contracts: A map of authorized contracts.
 (define-map authorized-contracts principal { authorized: bool, authorized-at: uint, authorized-by: principal })
-
-;; Protocol events tracking
+;; @var protocol-events: A map of protocol events.
 (define-map protocol-events { event-id: uint } { event-type: (string-ascii 32), data: (buff 256), timestamp: uint })
 
-;; ===========================================
-;; PRIVATE FUNCTIONS
-;; ===========================================
-
+;; --- Private Functions ---
+;; @desc Check if the caller is the protocol owner.
+;; @returns (bool): True if the caller is the protocol owner, false otherwise.
 (define-private (is-protocol-owner)
   (is-eq tx-sender (var-get protocol-owner))
 )
 
+;; @desc Check if a contract is authorized.
+;; @param contract-principal: The principal of the contract to check.
+;; @returns (bool): True if the contract is authorized, false otherwise.
 (define-private (is-authorized-contract (contract-principal principal))
   (default-to false (get authorized (map-get? authorized-contracts contract-principal)))
 )
 
+;; @desc Log a protocol event.
+;; @param event-type: The type of the event.
+;; @param data: The data associated with the event.
+;; @returns (uint): The ID of the new event.
 (define-private (log-protocol-event (event-type (string-ascii 32)) (data (buff 256)))
   (let ((event-id (+ (var-get protocol-version) u1)))
     (map-set protocol-events
@@ -66,13 +58,11 @@
   )
 )
 
-;; ===========================================
-;; PUBLIC FUNCTIONS
-;; ===========================================
-
-;; @desc Update protocol configuration (owner only)
-;; @param key Configuration key
-;; @param value Configuration value
+;; --- Public Functions ---
+;; @desc Update a protocol configuration value (owner only).
+;; @param key: The configuration key.
+;; @param value: The configuration value.
+;; @returns (response bool uint): An `ok` response with `true` on success, or an error code.
 (define-public (update-protocol-config (key (string-ascii 32)) (value uint))
   (begin
     (asserts! (is-protocol-owner) ERR_UNAUTHORIZED)
@@ -85,9 +75,10 @@
   )
 )
 
-;; @desc Authorize a contract for protocol interactions
-;; @param contract-principal The contract to authorize
-;; @param authorized Whether to authorize or revoke
+;; @desc Authorize or de-authorize a contract for protocol interactions.
+;; @param contract-principal: The contract to authorize.
+;; @param authorized: A boolean indicating whether to authorize or de-authorize.
+;; @returns (response bool uint): An `ok` response with `true` on success, or an error code.
 (define-public (authorize-contract (contract-principal principal) (authorized bool))
   (begin
     (asserts! (is-protocol-owner) ERR_UNAUTHORIZED)
@@ -109,8 +100,9 @@
   )
 )
 
-;; @desc Emergency pause/unpause protocol
-;; @param pause Whether to pause or unpause
+;; @desc Pause or unpause the protocol in an emergency.
+;; @param pause: A boolean indicating whether to pause or unpause.
+;; @returns (response bool uint): An `ok` response with `true` on success, or an error code.
 (define-public (emergency-pause (pause bool))
   (begin
     (asserts! (is-protocol-owner) ERR_UNAUTHORIZED)
@@ -123,8 +115,9 @@
   )
 )
 
-;; @desc Update protocol owner (owner only, with safety delay)
-;; @param new-owner The new protocol owner
+;; @desc Transfer ownership of the protocol (owner only, with safety delay).
+;; @param new-owner: The principal of the new protocol owner.
+;; @returns (response bool uint): An `ok` response with `true` on success, or an error code.
 (define-public (transfer-ownership (new-owner principal))
   (begin
     (asserts! (is-protocol-owner) ERR_UNAUTHORIZED)
@@ -134,12 +127,10 @@
   )
 )
 
-;; ===========================================
-;; READ-ONLY FUNCTIONS
-;; ===========================================
-
-;; @desc Get protocol configuration value
-;; @param key Configuration key
+;; --- Read-Only Functions ---
+;; @desc Get a protocol configuration value.
+;; @param key: The configuration key.
+;; @returns (optional uint): The configuration value, or none if not found.
 (define-read-only (get-protocol-config (key (string-ascii 32)))
   (match (map-get? protocol-config { key: key })
     config (some (get value config))
@@ -147,44 +138,46 @@
   )
 )
 
-;; @desc Check if contract is authorized
-;; @param contract-principal The contract to check
+;; @desc Check if a contract is authorized.
+;; @param contract-principal: The contract to check.
+;; @returns (bool): True if the contract is authorized, false otherwise.
 (define-read-only (is-authorized (contract-principal principal))
   (is-authorized-contract contract-principal)
 )
 
-;; @desc Get protocol owner
+;; @desc Get the protocol owner.
+;; @returns (principal): The principal of the protocol owner.
 (define-read-only (get-protocol-owner)
   (var-get protocol-owner)
 )
 
-;; @desc Get emergency pause status
+;; @desc Get the emergency pause status.
+;; @returns (bool): True if the protocol is in an emergency pause, false otherwise.
 (define-read-only (get-emergency-status)
   (var-get emergency-paused)
 )
 
-;; @desc Get protocol version
+;; @desc Get the protocol version.
+;; @returns (uint): The version of the protocol.
 (define-read-only (get-protocol-version)
   (var-get protocol-version)
 )
 
-;; @desc Get contract authorization details
-;; @param contract-principal The contract to check
+;; @desc Get the authorization details for a contract.
+;; @param contract-principal: The contract to check.
+;; @returns (optional { ... }): A tuple containing the authorization details, or none if not found.
 (define-read-only (get-contract-authorization (contract-principal principal))
   (map-get? authorized-contracts contract-principal)
 )
 
-;; @desc Get protocol event details
-;; @param event-id The event ID to retrieve
+;; @desc Get the details for a protocol event.
+;; @param event-id: The ID of the event to retrieve.
+;; @returns (optional { ... }): A tuple containing the event details, or none if not found.
 (define-read-only (get-protocol-event (event-id uint))
   (map-get? protocol-events { event-id: event-id })
 )
 
-;; ===========================================
-;; CONTRACT INITIALIZATION
-;; ===========================================
-
-;; Initialize protocol with basic configuration
+;; --- Initialization ---
 (begin
   ;; Set initial configuration
   (map-set protocol-config { key: "max-slippage" } { value: u1000, updated-at: block-height }) ;; 10% max slippage

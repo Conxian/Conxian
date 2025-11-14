@@ -1,22 +1,21 @@
 ;; ===========================================
 ;; UPGRADE CONTROLLER TRAIT
 ;; ===========================================
-;; Interface for managing contract upgrades.
-;;
+;; @desc Interface for managing contract upgrades.
 ;; This trait defines functions for initiating and finalizing contract upgrades.
 ;;
-;; Example usage:
-;;   (use-trait upgrade-ctrl .upgrade-controller-trait)
+;; @example
+;; (use-trait upgrade-ctrl .upgrade-controller-trait)
 (define-trait upgrade-controller-trait
   (
-    ;; Initiate a contract upgrade.
-    ;; @param new-contract: principal of the new contract to upgrade to
-    ;; @return (response bool uint): success flag and error code
+    ;; @desc Initiate a contract upgrade.
+    ;; @param new-contract: The principal of the new contract to upgrade to.
+    ;; @returns (response bool uint): A boolean indicating success or failure, or an error code.
     (initiate-upgrade (principal) (response bool uint))
 
-    ;; Finalize a contract upgrade.
-    ;; @param new-contract: principal of the new contract that was upgraded to
-    ;; @return (response bool uint): success flag and error code
+    ;; @desc Finalize a contract upgrade.
+    ;; @param new-contract: The principal of the new contract that was upgraded to.
+    ;; @returns (response bool uint): A boolean indicating success or failure, or an error code.
     (finalize-upgrade (principal) (response bool uint))
   )
 )

@@ -1,60 +1,59 @@
 ;; ===========================================
 ;; MEV PROTECTOR TRAIT
 ;; ===========================================
-;; Interface for MEV (Maximum Extractable Value) protection mechanisms
-;;
+;; @desc Interface for MEV (Maximum Extractable Value) protection mechanisms.
 ;; This trait provides functions for protecting users from MEV attacks
 ;; including front-running, sandwich attacks, and fair ordering.
 ;;
-;; Example usage:
-;;   (use-trait mev-protector .mev-protector-trait.mev-protector-trait)
+;; @example
+;; (use-trait mev-protector .mev-protector-trait.mev-protector-trait)
 (define-trait mev-protector-trait
   (
-    ;; Submit commit-reveal transaction
-    ;; @param commit-hash: hash of transaction details
-    ;; @param encrypted-payload: encrypted transaction data
-    ;; @return (response uint uint): commit ID and error code
+    ;; @desc Submit a commit-reveal transaction.
+    ;; @param commit-hash: The hash of the transaction details.
+    ;; @param encrypted-payload: The encrypted transaction data.
+    ;; @returns (response uint uint): The commit ID, or an error code.
     (submit-commit ((buff 32) (buff 1024)) (response uint uint))
     
-    ;; Reveal and execute committed transaction
-    ;; @param commit-id: commit identifier
-    ;; @param reveal-data: revealed transaction details
-    ;; @param signature: user signature
-    ;; @return (response bool uint): success flag and error code
+    ;; @desc Reveal and execute a committed transaction.
+    ;; @param commit-id: The commit identifier.
+    ;; @param reveal-data: The revealed transaction details.
+    ;; @param signature: The user's signature.
+    ;; @returns (response bool uint): A boolean indicating success or failure, or an error code.
     (reveal-and-execute (uint (buff 512) (buff 65)) (response bool uint))
     
-    ;; Submit batch auction order
-    ;; @param orders: array of orders to batch
-    ;; @param batch-deadline: deadline for batch execution
-    ;; @return (response uint uint): batch ID and error code
+    ;; @desc Submit a batch auction order.
+    ;; @param orders: An array of orders to batch.
+    ;; @param batch-deadline: The deadline for the batch execution.
+    ;; @returns (response uint uint): The batch ID, or an error code.
     (submit-batch-auction ((list 50 (tuple (user principal) (token-in principal) (token-out principal) (amount-in uint) (min-amount-out uint))) uint) (response uint uint))
     
-    ;; Execute batch auction
-    ;; @param batch-id: batch identifier
-    ;; @param clearing-price: uniform clearing price
-    ;; @return (response bool uint): success flag and error code
+    ;; @desc Execute a batch auction.
+    ;; @param batch-id: The batch identifier.
+    ;; @param clearing-price: The uniform clearing price.
+    ;; @returns (response bool uint): A boolean indicating success or failure, or an error code.
     (execute-batch-auction (uint uint) (response bool uint))
     
-    ;; Detect sandwich attack attempt
-    ;; @param transaction: transaction to analyze
-    ;; @param mempool-state: current mempool state
-    ;; @return (response bool uint): attack detected flag and error code
+    ;; @desc Detect a sandwich attack attempt.
+    ;; @param transaction: The transaction to analyze.
+    ;; @param mempool-state: The current mempool state.
+    ;; @returns (response bool uint): A boolean indicating if an attack was detected, or an error code.
     (detect-sandwich-attack ((buff 1024) (buff 2048)) (response bool uint))
     
-    ;; Get fair ordering for transactions
-    ;; @param transactions: array of transactions to order
-    ;; @return (response (list 50 (buff 32)) uint): fair ordering and error code
+    ;; @desc Get a fair ordering for a set of transactions.
+    ;; @param transactions: An array of transactions to order.
+    ;; @returns (response (list 50 (buff 32)) uint): The fair ordering, or an error code.
     (get-fair-ordering ((list 50 (buff 1024))) (response (list 50 (buff 32)) uint))
     
-    ;; Set MEV protection parameters
-    ;; @param commit-timeout: timeout for commit-reveal
-    ;; @param batch-size: maximum batch size
-    ;; @param protection-level: protection level (0-3)
-    ;; @return (response bool uint): success flag and error code
+    ;; @desc Set the MEV protection parameters.
+    ;; @param commit-timeout: The timeout for the commit-reveal scheme.
+    ;; @param batch-size: The maximum batch size.
+    ;; @param protection-level: The protection level (0-3).
+    ;; @returns (response bool uint): A boolean indicating success or failure, or an error code.
     (set-protection-params (uint uint uint) (response bool uint))
     
-    ;; Get MEV protection statistics
-    ;; @return (response (tuple ...) uint): protection stats and error code
+    ;; @desc Get the MEV protection statistics.
+    ;; @returns (response (tuple ...) uint): A tuple containing the protection statistics, or an error code.
     (get-protection-stats () (response (tuple 
       (commits-submitted uint)
       (reveals-executed uint)
@@ -63,15 +62,15 @@
       (total-protected-volume uint)
     ) uint))
     
-    ;; Check if user has active protection
-    ;; @param user: user principal
-    ;; @return (response bool uint): protection active flag and error code
+    ;; @desc Check if a user has active protection.
+    ;; @param user: The principal of the user.
+    ;; @returns (response bool uint): A boolean indicating if the user has active protection, or an error code.
     (has-active-protection (principal) (response bool uint))
     
-    ;; Get user protection history
-    ;; @param user: user principal
-    ;; @param limit: maximum number of records
-    ;; @return (response (list 20 (tuple ...)) uint): protection history and error code
+    ;; @desc Get the protection history for a user.
+    ;; @param user: The principal of the user.
+    ;; @param limit: The maximum number of records to return.
+    ;; @returns (response (list 20 (tuple ...)) uint): A list of the user's protection history, or an error code.
     (get-user-protection-history (principal uint) (response (list 20 (tuple 
       (timestamp uint)
       (protection-type (string-ascii 20))

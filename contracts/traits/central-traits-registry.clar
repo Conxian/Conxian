@@ -1,10 +1,13 @@
 ;; ===========================================
 ;; CENTRAL TRAITS REGISTRY
 ;; ===========================================
-;; Conxian Protocol Trait Registry
-;; SDK 3.9+ & Nakamoto Standard
+;; @desc Conxian Protocol Trait Registry. This contract serves as a central registry for all traits in the protocol.
+;; It imports and re-exports traits from various modules, providing a single, consistent entry point for other contracts.
+;; This modular approach optimizes compilation speed and improves organization.
 ;;
-;; ARCHITECTURE: Modular trait system for optimal compilation speed
+;; @sdk SDK 3.9+ & Nakamoto Standard
+;;
+;; @architecture Modular trait system for optimal compilation speed
 ;; - Domain-specific trait files for better organization
 ;; - Import-based composition for minimal compilation overhead
 ;; - Backward compatibility maintained for existing contracts

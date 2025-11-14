@@ -1,36 +1,35 @@
 ;; ===========================================
 ;; AUDIT REGISTRY TRAIT
 ;; ===========================================
-;; Interface for audit registry and voting system
-;;
+;; @desc Interface for audit registry and voting system.
 ;; This trait provides functions to submit audits, vote on them,
 ;; and manage the audit approval process.
 ;;
-;; Example usage:
-;;   (use-trait audit-registry-trait .audit-registry-trait.audit-registry-trait)
+;; @example
+;; (use-trait audit-registry-trait .audit-registry-trait.audit-registry-trait)
 (define-trait audit-registry-trait
   (
-    ;; Submit a new audit
-    ;; @param contract-address: address of contract being audited
-    ;; @param audit-hash: hash of the audit report
-    ;; @param report-uri: URI to the full audit report
-    ;; @return (response uint uint): audit ID and error code
+    ;; @desc Submit a new audit.
+    ;; @param contract-address: The address of the contract being audited.
+    ;; @param audit-hash: The hash of the audit report.
+    ;; @param report-uri: The URI to the full audit report.
+    ;; @returns (response uint uint): The ID of the newly created audit, or an error code.
     (submit-audit (principal (string-ascii 64) (string-utf8 256)) (response uint uint))
 
-    ;; Vote on an audit
-    ;; @param audit-id: ID of the audit to vote on
-    ;; @param approve: true to approve, false to reject
-    ;; @return (response bool uint): success flag and error code
+    ;; @desc Vote on an audit.
+    ;; @param audit-id: The ID of the audit to vote on.
+    ;; @param approve: true to approve the audit, false to reject it.
+    ;; @returns (response bool uint): A boolean indicating success or failure, or an error code.
     (vote (uint bool) (response bool uint))
 
-    ;; Finalize audit after voting period
-    ;; @param audit-id: ID of the audit to finalize
-    ;; @return (response bool uint): success flag and error code
+    ;; @desc Finalize an audit after the voting period has ended.
+    ;; @param audit-id: The ID of the audit to finalize.
+    ;; @returns (response bool uint): A boolean indicating success or failure, or an error code.
     (finalize-audit (uint) (response bool uint))
 
-    ;; Get audit details
-    ;; @param audit-id: ID of the audit
-    ;; @return (response (optional (tuple ...)) uint): audit details and error code
+    ;; @desc Get the details of a specific audit.
+    ;; @param audit-id: The ID of the audit to retrieve.
+    ;; @returns (response (optional (tuple ...)) uint): A tuple containing the audit details, or none if the audit is not found.
     (get-audit-details (uint) (response (optional (tuple
       (contract-address principal)
       (audit-hash (string-ascii 64))
@@ -41,8 +40,8 @@
       (approved bool)
     )) uint))
 
-    ;; Get the total number of audits
-    ;; @return (response uint uint): total audits and error code
+    ;; @desc Get the total number of audits submitted to the registry.
+    ;; @returns (response uint uint): The total number of audits, or an error code.
     (get-total-audits () (response uint uint))
   )
 )

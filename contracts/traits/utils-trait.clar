@@ -1,32 +1,31 @@
 ;; ===========================================
 ;; UTILS TRAIT
 ;; ===========================================
-;; Interface for common utility functions
-;;
+;; @desc Interface for common utility functions.
 ;; This trait provides a collection of general-purpose utility functions
 ;; that can be used across various contracts.
 ;;
-;; Example usage:
-;;   (use-trait utils .utils-trait.utils-trait)
+;; @example
+;; (use-trait utils .utils-trait.utils-trait)
 (define-trait utils-trait
   (
-    ;; Check if a principal is a contract owner
-    ;; @param p: principal to check
-    ;; @return (response bool uint): true if owner, false otherwise
+    ;; @desc Check if a principal is the contract owner.
+    ;; @param p: The principal to check.
+    ;; @returns (response bool uint): True if the principal is the contract owner, false otherwise.
     (is-contract-owner (principal) (response bool uint))
 
-    ;; Get the current block height
-    ;; @return (response uint uint): current block height
+    ;; @desc Get the current block height.
+    ;; @returns (response uint uint): The current block height.
     (get-block-height () (response uint uint))
 
-    ;; Convert a uint to a string
-    ;; @param u: uint to convert
-    ;; @return (response (string-ascii 20) uint): string representation
+    ;; @desc Convert a uint to a string.
+    ;; @param u: The uint to convert.
+    ;; @returns (response (string-ascii 20) uint): The string representation of the uint.
     (uint-to-string (uint) (response (string-ascii 20) uint))
 
-    ;; Convert a principal to a string
-    ;; @param p: principal to convert
-    ;; @return (response (string-ascii 41) uint): string representation
+    ;; @desc Convert a principal to a string.
+    ;; @param p: The principal to convert.
+    ;; @returns (response (string-ascii 41) uint): The string representation of the principal.
     (principal-to-string (principal) (response (string-ascii 41) uint))
   )
 )

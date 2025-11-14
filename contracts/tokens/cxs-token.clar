@@ -1,72 +1,98 @@
-;; cxs-token.clar
-;; Conxian Staking Token (SIP-009 NFT) - represents staked positions in the Conxian protocol
-;; Implements SIP-009 NFT standard with staking and governance features
+;; @contract Conxian Staking Token (CXS)
+;; @version 1.0.0
+;; @author Conxian Protocol
+;; @desc This contract implements the Conxian Staking Token (CXS), a SIP-009 compliant non-fungible token.
+;; Each NFT represents a unique staked position in the Conxian protocol, providing a clear and transferable
+;; representation of a user's stake.
 
 ;; --- Traits ---
 (use-trait protocol-monitor-trait .protocol-monitor-trait.protocol-monitor-trait)
 (use-trait sip-010-ft-trait .dex-traits.sip-010-ft-trait)
 (use-trait rbac-trait .rbac-trait.rbac-trait)
 
-;; --- Errors ---
-(define-constant ERR_UNAUTHORIZED u100)
-(define-constant ERR_NOT_OWNER u101)
-(define-constant ERR_TRANSFER_DISABLED u102)
-(define-constant ERR_NO_SUCH_TOKEN u103)
-(define-constant ERR_SYSTEM_PAUSED u104)
-(define-constant ERR_INVALID_CONTRACT_PRINCIPAL u105)
-(define-constant ERR_INVALID_RECIPIENT u106)
-(define-constant ERR_INVALID_URI u107)
+;; --- Constants ---
 
-;; --- Storage ---
+;; @var ERR_UNAUTHORIZED The caller is not authorized to perform the action.
+(define-constant ERR_UNAUTHORIZED u1001)
+;; @var ERR_NOT_OWNER The caller is not the owner of the token.
+(define-constant ERR_NOT_OWNER u1002)
+;; @var ERR_TRANSFER_DISABLED Token transfers are currently disabled.
+(define-constant ERR_TRANSFER_DISABLED u3004)
+;; @var ERR_NO_SUCH_TOKEN The specified token does not exist.
+(define-constant ERR_NO_SUCH_TOKEN u3006)
+;; @var ERR_SYSTEM_PAUSED The system is currently paused.
+(define-constant ERR_SYSTEM_PAUSED u1003)
+;; @var ERR_INVALID_CONTRACT_PRINCIPAL The provided contract principal is invalid.
+(define-constant ERR_INVALID_CONTRACT_PRINCIPAL u9001)
+;; @var ERR_INVALID_RECIPIENT The specified recipient is invalid.
+(define-constant ERR_INVALID_RECIPIENT u3007)
+;; @var ERR_INVALID_URI The provided URI is invalid.
+(define-constant ERR_INVALID_URI u3006)
 
+;; --- Data Variables and Maps ---
+
+;; @var last-token-id The ID of the last token minted.
 (define-data-var last-token-id uint u0)
+;; @var transfers-enabled A boolean indicating if token transfers are enabled.
 (define-data-var transfers-enabled bool false)
+;; @var owners A map of token IDs to their owners.
 (define-map owners uint principal)
+;; @var token-uris A map of token IDs to their metadata URIs.
 (define-map token-uris uint (optional (string-utf8 256)))
-
-;; Integration contracts
+;; @var staking-contract The principal of the staking contract.
 (define-data-var staking-contract (optional principal) none)
+;; @var protocol-monitor The principal of the protocol monitor contract.
 (define-data-var protocol-monitor (optional principal) none)
 
-;; --- Helpers ---
+;; --- Private Functions ---
+
+;; @desc Checks if the system is paused.
+;; @returns A boolean indicating if the system is paused.
+(define-private (check-system-pause)
+    (if (is-some (var-get protocol-monitor))
+        (unwrap! (contract-call? (unwrap-panic (var-get protocol-monitor)) is-paused) false)
+        false
+    )
+)
+
+;; --- Read-Only Functions ---
+
+;; @desc Checks if a principal is the contract owner.
+;; @param who The principal to check.
+;; @returns A boolean indicating if the principal is the owner.
 (define-read-only (is-owner (who principal))
   (is-eq who (var-get contract-owner)))
 
+;; @desc Checks if a token exists.
+;; @param id The ID of the token to check.
+;; @returns A boolean indicating if the token exists.
 (define-read-only (exists (id uint))
   (is-some (map-get? owners id)))
 
-(define-private (check-system-pause)
-  false)
-
-;; --- Configuration ---
-;; @desc Sets the contract owner.
-;; @param new-owner The principal of the new contract owner.
-;; @returns (ok true) if successful, (err ERR_UNAUTHORIZED) if called by a non-owner.
+;; --- Admin Functions ---
 
 ;; @desc Sets the principal of the staking contract.
 ;; @param contract-address The principal of the staking contract.
-;; @returns (ok true) if successful, (err ERR_UNAUTHORIZED) if called by a non-owner.
+;; @returns A response indicating success or failure.
 (define-public (set-staking-contract (contract-address principal))
   (begin
-    (asserts! (is-ok (contract-call? .rbac-contract has-role "contract-owner")) (err ERR_UNAUTHORIZED))
-    (asserts! true (err ERR_INVALID_CONTRACT_PRINCIPAL))
+    (asserts! (is-ok (contract-call? .rbac-trait has-role "contract-owner")) (err ERR_UNAUTHORIZED))
     (var-set staking-contract (some contract-address))
     (print {event: "staking-contract-set", sender: tx-sender, contract-address: contract-address, block-height: block-height})
     (ok true)))
 
 ;; @desc Sets the principal of the protocol monitor contract.
 ;; @param monitor The principal of the protocol monitor contract.
-;; @returns (ok true) if successful, (err ERR_UNAUTHORIZED) if called by a non-owner.
+;; @returns A response indicating success or failure.
 (define-public (set-protocol-monitor (monitor principal))
   (begin
-    (asserts! (is-ok (contract-call? .rbac-contract has-role "contract-owner")) (err ERR_UNAUTHORIZED))
-    (asserts! true (err ERR_INVALID_CONTRACT_PRINCIPAL))
+    (asserts! (is-ok (contract-call? .rbac-trait has-role "contract-owner")) (err ERR_UNAUTHORIZED))
     (var-set protocol-monitor (some monitor))
     (print {event: "protocol-monitor-set", sender: tx-sender, monitor: monitor, block-height: block-height})
     (ok true)))
 
 ;; @desc Enables token transfers.
-;; @returns (ok true) if successful, (err ERR_UNAUTHORIZED) if called by a non-owner.
+;; @returns A response indicating success or failure.
 (define-public (enable-transfers)
   (begin
     (asserts! (is-owner tx-sender) (err ERR_UNAUTHORIZED))
@@ -75,7 +101,7 @@
     (ok true)))
 
 ;; @desc Disables token transfers.
-;; @returns (ok true) if successful, (err ERR_UNAUTHORIZED) if called by a non-owner.
+;; @returns A response indicating success or failure.
 (define-public (disable-transfers)
   (begin
     (asserts! (is-owner tx-sender) (err ERR_UNAUTHORIZED))
@@ -84,10 +110,11 @@
     (ok true)))
 
 ;; --- Mint / Burn ---
+
 ;; @desc Mints a new NFT and assigns it to a recipient.
 ;; @param recipient The principal to receive the new NFT.
 ;; @param uri An optional URI for the token metadata.
-;; @returns (ok id) if successful, (err ERR_UNAUTHORIZED) if called by a non-owner, (err ERR_SYSTEM_PAUSED) if the system is paused.
+;; @returns The ID of the newly minted token, or an error.
 (define-public (mint (recipient principal) (uri (optional (string-utf8 256))))
   (let ((id (var-get last-token-id)))
     (begin
@@ -106,7 +133,7 @@
 
 ;; @desc Burns an NFT, removing it from circulation.
 ;; @param id The ID of the token to burn.
-;; @returns (ok true) if successful, (err ERR_NO_SUCH_TOKEN) if the token does not exist, (err ERR_NOT_OWNER) if called by a non-owner, (err ERR_SYSTEM_PAUSED) if the system is paused.
+;; @returns A response indicating success or failure.
 (define-public (burn (id uint))
   (let ((owner (unwrap! (map-get? owners id) (err ERR_NO_SUCH_TOKEN))))
     (begin
@@ -118,11 +145,12 @@
       (ok true))))
 
 ;; --- SIP-009 Interface ---
+
 ;; @desc Transfers an NFT from one principal to another.
 ;; @param id The ID of the token to transfer.
 ;; @param sender The principal of the current owner.
 ;; @param recipient The principal of the new owner.
-;; @returns (ok true) if successful, (err ERR_UNAUTHORIZED) if tx-sender is not the sender, (err ERR_NOT_OWNER) if sender is not the owner, (err ERR_TRANSFER_DISABLED) if transfers are disabled, (err ERR_SYSTEM_PAUSED) if the system is paused.
+;; @returns A response indicating success or failure.
 (define-public (transfer (id uint) (sender principal) (recipient principal))
   (let ((owner (unwrap! (map-get? owners id) (err ERR_NO_SUCH_TOKEN))))
     (begin
@@ -137,22 +165,22 @@
 
 ;; @desc Gets the owner of a given token ID.
 ;; @param id The ID of the token.
-;; @returns (ok (optional principal)) The principal of the owner, or none if the token does not exist.
+;; @returns The principal of the owner, or none if the token does not exist.
 (define-read-only (get-owner (id uint))
   (ok (map-get? owners id)))
 
 ;; @desc Returns the ID of the last minted token.
-;; @returns (ok uint) The ID of the last minted token.
+;; @returns The ID of the last minted token.
 (define-read-only (get-last-token-id)
   (ok (var-get last-token-id)))
 
 ;; @desc Returns the URI of a given token ID.
 ;; @param id The ID of the token.
-;; @returns (ok (optional (string-utf8 256))) The URI of the token, or none if not set.
+;; @returns The URI of the token, or none if not set.
 (define-read-only (get-token-uri (id uint))
   (ok (map-get? token-uris id)))
 
 ;; @desc Returns whether token transfers are enabled.
-;; @returns (ok bool) True if transfers are enabled, false otherwise.
+;; @returns `true` if transfers are enabled, `false` otherwise.
 (define-read-only (get-transfers-enabled)
   (ok (var-get transfers-enabled)))
