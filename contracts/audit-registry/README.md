@@ -1,5 +1,7 @@
 # Audit Registry System
 
+> **Note:** This `README.md` is auto-generated from the docstrings in the source code. To update this documentation, please edit the docstrings in the corresponding Clarity files.
+
 A decentralized, DAO-governed smart contract audit registry that issues verifiable NFT badges for audited contracts.
 
 ## Overview
@@ -63,12 +65,12 @@ The Audit Registry system consists of three main components:
 Contracts can check audit status using:
 
 ```clarity
-(use-trait audit-registry-trait 'STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ.interfaces.audit-registry-trait)
+(use-trait audit-registry-trait .audit-registry-trait.audit-registry-trait)
 
 ;; Check if a contract has a valid audit
 (define-read-only (is-audited (contract-address principal))
-  (match (contract-call? 'STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ.audit-registry get-audit-status contract-address)
-    status (ok (is-eq (get 'status status) "approved"))
+  (match (contract-call? .audit-registry get-audit-status contract-address)
+    status (ok (is-eq (get status status) "approved"))
     (ok false)
   )
 )

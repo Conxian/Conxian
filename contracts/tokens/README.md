@@ -1,5 +1,7 @@
 # Tokens Module
 
+> **Note:** This `README.md` is auto-generated from the docstrings in the source code. To update this documentation, please edit the docstrings in the corresponding Clarity files.
+
 Comprehensive token system for the Conxian Protocol implementing multiple token standards and economic models including SIP-010 fungible tokens, liquidity provider tokens, and governance tokens.
 
 ## Overview

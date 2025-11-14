@@ -1,48 +1,47 @@
 ;; ===========================================
 ;; FIXED POINT MATH TRAIT
 ;; ===========================================
-;; Interface for fixed-point arithmetic operations
-;;
+;; @desc Interface for fixed-point arithmetic operations.
 ;; This trait provides functions for precise mathematical calculations
 ;; using fixed-point numbers, avoiding floating-point inaccuracies.
 ;;
-;; Example usage:
-;;   (use-trait fixed-point-math .fixed-point-math-trait.fixed-point-math-trait)
+;; @example
+;; (use-trait fixed-point-math .fixed-point-math-trait.fixed-point-math-trait)
 (define-trait fixed-point-math-trait
   (
-    ;; Add two fixed-point numbers
-    ;; @param a: first number
-    ;; @param b: second number
-    ;; @return (response int uint): sum and error code
+    ;; @desc Add two fixed-point numbers.
+    ;; @param a: The first number.
+    ;; @param b: The second number.
+    ;; @returns (response int uint): The sum of the two numbers, or an error code.
     (add (int int) (response int uint))
 
-    ;; Subtract two fixed-point numbers
-    ;; @param a: first number
-    ;; @param b: second number
-    ;; @return (response int uint): difference and error code
+    ;; @desc Subtract two fixed-point numbers.
+    ;; @param a: The first number.
+    ;; @param b: The second number.
+    ;; @returns (response int uint): The difference of the two numbers, or an error code.
     (sub (int int) (response int uint))
 
-    ;; Multiply two fixed-point numbers
-    ;; @param a: first number
-    ;; @param b: second number
-    ;; @return (response int uint): product and error code
+    ;; @desc Multiply two fixed-point numbers.
+    ;; @param a: The first number.
+    ;; @param b: The second number.
+    ;; @returns (response int uint): The product of the two numbers, or an error code.
     (mul (int int) (response int uint))
 
-    ;; Divide two fixed-point numbers
-    ;; @param a: numerator
-    ;; @param b: denominator
-    ;; @return (response int uint): quotient and error code
+    ;; @desc Divide two fixed-point numbers.
+    ;; @param a: The numerator.
+    ;; @param b: The denominator.
+    ;; @returns (response int uint): The quotient of the two numbers, or an error code.
     (div (int int) (response int uint))
 
-    ;; Exponentiate a fixed-point number
-    ;; @param base: base number
-    ;; @param exp: exponent
-    ;; @return (response int uint): result and error code
+    ;; @desc Exponentiate a fixed-point number.
+    ;; @param base: The base number.
+    ;; @param exp: The exponent.
+    ;; @returns (response int uint): The result of the exponentiation, or an error code.
     (pow (int uint) (response int uint))
 
-    ;; Square root of a fixed-point number
-    ;; @param a: number
-    ;; @return (response int uint): square root and error code
+    ;; @desc Calculate the square root of a fixed-point number.
+    ;; @param a: The number to calculate the square root of.
+    ;; @returns (response int uint): The square root of the number, or an error code.
     (sqrt (int) (response int uint))
   )
 )

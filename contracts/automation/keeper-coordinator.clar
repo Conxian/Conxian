@@ -1,150 +1,203 @@
-;; keeper-coordinator.clar
-;; Central coordinator for automated keeper tasks across the Conxian protocol
-;; Manages automated interest accrual, liquidations, rebalancing, and fee distribution
+;; @desc Central coordinator for automated keeper tasks across the Conxian protocol.
+;; This contract manages automated interest accrual, liquidations, rebalancing, and fee distribution.
+
 (use-trait keeper_coordinator_trait .keeper-coordinator-trait.keeper-coordinator-trait)
 (use-trait rbac-trait .decentralized-trait-registry.decentralized-trait-registry)
 
-;; ===== Constants =====
-(define-constant ERR_UNAUTHORIZED (err u9001))
+;; @constants
+;; @var ERR_UNAUTHORIZED: The caller is not authorized to perform this action.
+(define-constant ERR_UNAUTHORIZED (err u1001))
+;; @var ERR_TASK_FAILED: The task failed to execute.
 (define-constant ERR_TASK_FAILED (err u9002))
+;; @var ERR_TASK_NOT_READY: The task is not ready to be executed.
 (define-constant ERR_TASK_NOT_READY (err u9003))
+;; @var ERR_INVALID_TASK: The specified task is invalid.
 (define-constant ERR_INVALID_TASK (err u9004))
-(define-constant ERR_KEEPER_PAUSED (err u9005))
+;; @var ERR_KEEPER_PAUSED: The keeper is currently paused.
+(define-constant ERR_KEEPER_PAUSED (err u1003))
 
-;; Task IDs
+;; @var TASK_INTEREST_ACCRUAL: The ID for the interest accrual task.
 (define-constant TASK_INTEREST_ACCRUAL u1)
+;; @var TASK_ORACLE_UPDATE: The ID for the oracle update task.
 (define-constant TASK_ORACLE_UPDATE u2)
+;; @var TASK_LIQUIDATION_CHECK: The ID for the liquidation check task.
 (define-constant TASK_LIQUIDATION_CHECK u3)
+;; @var TASK_REBALANCE_STRATEGIES: The ID for the rebalance strategies task.
 (define-constant TASK_REBALANCE_STRATEGIES u4)
+;; @var TASK_FEE_DISTRIBUTION: The ID for the fee distribution task.
 (define-constant TASK_FEE_DISTRIBUTION u5)
+;; @var TASK_BOND_COUPON_PROCESS: The ID for the bond coupon process task.
 (define-constant TASK_BOND_COUPON_PROCESS u6)
+;; @var TASK_METRICS_UPDATE: The ID for the metrics update task.
 (define-constant TASK_METRICS_UPDATE u7)
-(define-constant TASK_AUTOMATION_MANAGER u8) ;; Added
+;; @var TASK_AUTOMATION_MANAGER: The ID for the automation manager task.
+(define-constant TASK_AUTOMATION_MANAGER u8)
 
-;; ===== Data Variables =====
-
+;; @data-vars
+;; @var keeper-enabled: A boolean indicating if the keeper is enabled.
 (define-data-var keeper-enabled bool true)
+;; @var last-execution-block: The block height of the last execution.
 (define-data-var last-execution-block uint u0)
+;; @var execution-interval: The interval at which the keeper executes tasks.
 (define-data-var execution-interval uint u10) ;; Execute every 10 blocks (~10 minutes)
-
-;; Keeper whitelist
+;; @var authorized-keepers: A map of authorized keepers.
 (define-map authorized-keepers principal bool)
-
-;; Task configuration
-(define-map task-config uint {
-  enabled: bool,
-  interval: uint,
-  last-run: uint,
-  priority: uint,
-  gas-limit: uint
-})
-
-;; Task execution history
-(define-map task-history {task-id: uint, block: uint} {
-  success: bool,
-  gas-used: uint,
-  error-code: (optional uint)
-})
-
-;; Registered contracts for automation
+;; @var task-config: A map of task configurations.
+(define-map task-config uint {enabled: bool, interval: uint, last-run: uint, priority: uint, gas-limit: uint})
+;; @var task-history: A map of task execution history.
+(define-map task-history {task-id: uint, block: uint} {success: bool, gas-used: uint, error-code: (optional uint)})
+;; @var interest-rate-contract: The principal of the interest rate contract.
 (define-data-var interest-rate-contract (optional principal) none)
+;; @var oracle-contract: The principal of the oracle contract.
 (define-data-var oracle-contract (optional principal) none)
+;; @var liquidation-contract: The principal of the liquidation contract.
 (define-data-var liquidation-contract (optional principal) none)
+;; @var yield-optimizer-contract: The principal of the yield optimizer contract.
 (define-data-var yield-optimizer-contract (optional principal) none)
+;; @var revenue-distributor-contract: The principal of the revenue distributor contract.
 (define-data-var revenue-distributor-contract (optional principal) none)
+;; @var rbac-contract: The principal of the RBAC contract.
 (define-data-var rbac-contract (optional principal) none)
-(define-data-var automation-manager-contract (optional principal) none) ;; Added
-
-;; Performance metrics
+;; @var automation-manager-contract: The principal of the automation manager contract.
+(define-data-var automation-manager-contract (optional principal) none)
+;; @var total-tasks-executed: The total number of tasks executed.
 (define-data-var total-tasks-executed uint u0)
+;; @var total-tasks-failed: The total number of tasks failed.
 (define-data-var total-tasks-failed uint u0)
+;; @var total-gas-used: The total amount of gas used.
 (define-data-var total-gas-used uint u0)
 
-;; ===== Authorization =====
+;; --- Authorization ---
+;; @desc Check if the caller is the contract owner.
+;; @returns (response bool uint): An `ok` response with `true` if the caller is the owner, or an error code.
 (define-private (check-is-owner)
   (match (var-get rbac-contract)
     rbac-principal
     (ok (asserts! (is-ok (contract-call? rbac-principal has-role "contract-owner")) ERR_UNAUTHORIZED))
-    ERR_UNAUTHORIZED))
+    (err ERR_UNAUTHORIZED)))
 
+;; @desc Check if the caller is a keeper.
+;; @returns (response bool uint): An `ok` response with `true` if the caller is a keeper, or an error code.
 (define-private (check-is-keeper)
   (match (var-get rbac-contract)
     rbac-principal
     (ok (asserts! (or (is-ok (contract-call? rbac-principal has-role "contract-owner"))
                       (default-to false (map-get? authorized-keepers tx-sender)))
                   ERR_UNAUTHORIZED))
-    ERR_UNAUTHORIZED))
+    (err ERR_UNAUTHORIZED)))
 
+;; @desc Check if the keeper is enabled.
+;; @returns (response bool uint): An `ok` response with `true` if the keeper is enabled, or an error code.
 (define-private (check-keeper-enabled)
   (ok (asserts! (var-get keeper-enabled) ERR_KEEPER_PAUSED)))
 
-;; ===== Admin Functions =====
+;; --- Admin Functions ---
+;; @desc Set the keeper enabled status.
+;; @param enabled: A boolean indicating if the keeper is enabled.
+;; @returns (response bool uint): An `ok` response with `true` on success, or an error code.
 (define-public (set-keeper-enabled (enabled bool))
   (begin
     (try! (check-is-owner))
     (var-set keeper-enabled enabled)
     (ok true)))
 
+;; @desc Add a keeper to the whitelist.
+;; @param keeper: The principal of the keeper to add.
+;; @returns (response bool uint): An `ok` response with `true` on success, or an error code.
 (define-public (add-keeper (keeper principal))
   (begin
     (try! (check-is-owner))
     (map-set authorized-keepers keeper true)
     (ok true)))
 
+;; @desc Remove a keeper from the whitelist.
+;; @param keeper: The principal of the keeper to remove.
+;; @returns (response bool uint): An `ok` response with `true` on success, or an error code.
 (define-public (remove-keeper (keeper principal))
   (begin
     (try! (check-is-owner))
-    (map-set authorized-keepers keeper false)
+    (map-delete authorized-keepers keeper)
     (ok true)))
 
+;; @desc Set the execution interval.
+;; @param interval: The new execution interval in blocks.
+;; @returns (response bool uint): An `ok` response with `true` on success, or an error code.
 (define-public (set-execution-interval (interval uint))
   (begin
     (try! (check-is-owner))
     (var-set execution-interval interval)
     (ok true)))
 
+;; @desc Set the interest rate contract.
+;; @param contract: The principal of the interest rate contract.
+;; @returns (response bool uint): An `ok` response with `true` on success, or an error code.
 (define-public (set-interest-rate-contract (contract principal))
   (begin
     (try! (check-is-owner))
     (var-set interest-rate-contract (some contract))
     (ok true)))
 
+;; @desc Set the oracle contract.
+;; @param contract: The principal of the oracle contract.
+;; @returns (response bool uint): An `ok` response with `true` on success, or an error code.
 (define-public (set-oracle-contract (contract principal))
   (begin
     (try! (check-is-owner))
     (var-set oracle-contract (some contract))
     (ok true)))
 
+;; @desc Set the liquidation contract.
+;; @param contract: The principal of the liquidation contract.
+;; @returns (response bool uint): An `ok` response with `true` on success, or an error code.
 (define-public (set-liquidation-contract (contract principal))
   (begin
     (try! (check-is-owner))
     (var-set liquidation-contract (some contract))
     (ok true)))
 
+;; @desc Set the yield optimizer contract.
+;; @param contract: The principal of the yield optimizer contract.
+;; @returns (response bool uint): An `ok` response with `true` on success, or an error code.
 (define-public (set-yield-optimizer-contract (contract principal))
   (begin
     (try! (check-is-owner))
     (var-set yield-optimizer-contract (some contract))
     (ok true)))
 
+;; @desc Set the revenue distributor contract.
+;; @param contract: The principal of the revenue distributor contract.
+;; @returns (response bool uint): An `ok` response with `true` on success, or an error code.
 (define-public (set-revenue-distributor-contract (contract principal))
   (begin
     (try! (check-is-owner))
     (var-set revenue-distributor-contract (some contract))
     (ok true)))
 
+;; @desc Set the bond contract.
+;; @param contract: The principal of the bond contract.
+;; @returns (response bool uint): An `ok` response with `true` on success, or an error code.
 (define-public (set-bond-contract (contract principal))
   (begin
     (try! (check-is-owner))
     (var-set bond-contract (some contract))
     (ok true)))
 
+;; @desc Set the RBAC contract.
+;; @param contract: The principal of the RBAC contract.
+;; @returns (response bool uint): An `ok` response with `true` on success, or an error code.
 (define-public (set-rbac-contract (contract principal))
   (begin
     (try! (check-is-owner))
     (var-set rbac-contract (some contract))
     (ok true)))
 
+;; @desc Configure a task.
+;; @param task-id: The ID of the task.
+;; @param enabled: A boolean indicating if the task is enabled.
+;; @param interval: The execution interval for the task in blocks.
+;; @param priority: The priority of the task.
+;; @param gas-limit: The gas limit for the task.
+;; @returns (response bool uint): An `ok` response with `true` on success, or an error code.
 (define-public (configure-task (task-id uint) (enabled bool) (interval uint) (priority uint) (gas-limit uint))
   (begin
     (try! (check-is-owner))
@@ -157,9 +210,10 @@
     })
     (ok true)))
 
-;; ===== Core Keeper Functions =====
+;; --- Core Keeper Functions ---
 
-;; Main keeper execution function - executes all ready tasks
+;; @desc Execute all ready keeper tasks.
+;; @returns (response { ... } uint): A tuple containing the results of the execution, or an error code.
 (define-public (execute-keeper-tasks)
   (begin
     (try! (check-is-keeper))
@@ -177,7 +231,7 @@
       (execute-task-if-ready TASK_FEE_DISTRIBUTION)
       (execute-task-if-ready TASK_BOND_COUPON_PROCESS)
       (execute-task-if-ready TASK_METRICS_UPDATE)
-      (execute-task-if-ready TASK_AUTOMATION_MANAGER) ;; Added
+      (execute-task-if-ready TASK_AUTOMATION_MANAGER)
     )))
       (ok {
         tasks-attempted: u8,
@@ -185,7 +239,9 @@
         keeper: tx-sender
       }))))
 
-;; Execute specific task if ready
+;; @desc Execute a specific task if it is ready.
+;; @param task-id: The ID of the task.
+;; @returns (response bool uint): An `ok` response with `true` if the task was executed, `false` otherwise.
 (define-private (execute-task-if-ready (task-id uint))
   (match (map-get? task-config task-id)
     config
@@ -195,7 +251,10 @@
         (ok false))
     (ok false)))
 
-;; Execute a single task
+;; @desc Execute a single task.
+;; @param task-id: The ID of the task.
+;; @param config: The configuration for the task.
+;; @returns (response bool uint): An `ok` response with `true` on success, `false` on failure.
 (define-private (execute-single-task (task-id uint) (config {enabled: bool, interval: uint, last-run: uint, priority: uint, gas-limit: uint}))
   (let ((execution-result
     (if (is-eq task-id TASK_INTEREST_ACCRUAL)
@@ -212,7 +271,7 @@
                             (execute-bond-processing)
                             (if (is-eq task-id TASK_METRICS_UPDATE)
                                 (execute-metrics-update)
-                                (if (is-eq task-id TASK_AUTOMATION_MANAGER) ;; Added
+                                (if (is-eq task-id TASK_AUTOMATION_MANAGER)
                                     (execute-automation-manager)
                                     (err ERR_INVALID_TASK))))))))))
     
@@ -234,82 +293,76 @@
           (map-set task-history {task-id: task-id, block: block-height} {
             success: false,
             gas-used: u10000,
-            error-code: (some (unwrap-panic (unwrap-err-panic execution-result)))
+            error-code: (some (unwrap-err-panic execution-result))
           })
           (ok false)))))
 
-;; ===== Task Implementations =====
-
-;; Task 1: Interest Accrual
+;; --- Task Implementations ---
+;; @desc Execute the interest accrual task.
+;; @returns (response bool uint): An `ok` response with `true` on success, or an error code.
 (define-private (execute-interest-accrual)
   (match (var-get interest-rate-contract)
     contract-principal
-    ;; In production, call actual interest accrual function
-    ;; (contract-call? contract-principal accrue-all-markets)
-    (ok true)
-    ERR_TASK_FAILED))
+    (contract-call? contract-principal accrue-all-markets)
+    (err ERR_TASK_FAILED)))
 
-;; Task 2: Oracle Update
+;; @desc Execute the oracle update task.
+;; @returns (response bool uint): An `ok` response with `true` on success, or an error code.
 (define-private (execute-oracle-update)
   (match (var-get oracle-contract)
     contract-principal
-    ;; In production, call actual oracle update function
-    ;; (contract-call? contract-principal update-all-prices)
-    (ok true)
-    ERR_TASK_FAILED))
+    (contract-call? contract-principal update-all-prices)
+    (err ERR_TASK_FAILED)))
 
-;; Task 3: Liquidation Check
+;; @desc Execute the liquidation check task.
+;; @returns (response bool uint): An `ok` response with `true` on success, or an error code.
 (define-private (execute-liquidation-check)
   (match (var-get liquidation-contract)
     contract-principal
-    ;; In production, call actual liquidation check function
-    ;; (contract-call? contract-principal check-and-liquidate-undercollateralized)
-    (ok true)
-    ERR_TASK_FAILED))
+    (contract-call? contract-principal check-and-liquidate-undercollateralized)
+    (err ERR_TASK_FAILED)))
 
-;; Task 4: Rebalance Strategies
+;; @desc Execute the rebalance strategies task.
+;; @returns (response bool uint): An `ok` response with `true` on success, or an error code.
 (define-private (execute-rebalance-strategies)
   (match (var-get yield-optimizer-contract)
     contract-principal
-    ;; In production, call actual rebalance function
-    ;; (contract-call? contract-principal optimize-all-strategies)
-    (ok true)
-    ERR_TASK_FAILED))
+    (contract-call? contract-principal optimize-all-strategies)
+    (err ERR_TASK_FAILED)))
 
-;; Task 5: Fee Distribution
+;; @desc Execute the fee distribution task.
+;; @returns (response bool uint): An `ok` response with `true` on success, or an error code.
 (define-private (execute-fee-distribution)
   (match (var-get revenue-distributor-contract)
     contract-principal
-    ;; In production, call actual fee distribution function
-    ;; (contract-call? contract-principal distribute-fees)
-    (ok true)
-    ERR_TASK_FAILED))
+    (contract-call? contract-principal distribute-fees)
+    (err ERR_TASK_FAILED)))
 
-;; Task 6: Bond Coupon Processing
+;; @desc Execute the bond processing task.
+;; @returns (response bool uint): An `ok` response with `true` on success, or an error code.
 (define-private (execute-bond-processing)
   (match (var-get bond-contract)
     contract-principal
-    ;; In production, call actual bond processing function
-    ;; (contract-call? contract-principal process-matured-coupons)
-    (ok true)
-    ERR_TASK_FAILED))
+    (contract-call? contract-principal process-matured-coupons)
+    (err ERR_TASK_FAILED)))
 
-;; Task 7: Metrics Update
+;; @desc Execute the metrics update task.
+;; @returns (response bool uint): An `ok` response with `true` on success, or an error code.
 (define-private (execute-metrics-update)
-  ;; Update system-wide performance metrics
   (ok true))
 
-;; Task 8: Automation Manager
+;; @desc Execute the automation manager task.
+;; @returns (response bool uint): An `ok` response with `true` on success, or an error code.
 (define-private (execute-automation-manager)
   (match (var-get automation-manager-contract)
     contract-principal
-    ;; In production, call actual automation manager function
-    ;; (contract-call? contract-principal execute-automation)
-    (ok true)
-    ERR_TASK_FAILED))
+    (contract-call? contract-principal run-daily-automation)
+    (err ERR_TASK_FAILED)))
 
-;; ===== Read-Only Functions =====
+;; --- Read-Only Functions ---
 
+;; @desc Get the keeper status.
+;; @returns ({ ... }): A tuple containing the keeper status.
 (define-read-only (get-keeper-status)
   {
     enabled: (var-get keeper-enabled),
@@ -323,9 +376,15 @@
                       u0)
   })
 
+;; @desc Get the configuration for a task.
+;; @param task-id: The ID of the task.
+;; @returns (optional { ... }): A tuple containing the task configuration, or none if not found.
 (define-read-only (get-task-config (task-id uint))
   (map-get? task-config task-id))
 
+;; @desc Check if a task is ready to be executed.
+;; @param task-id: The ID of the task.
+;; @returns (bool): True if the task is ready, false otherwise.
 (define-read-only (is-task-ready (task-id uint))
   (match (map-get? task-config task-id)
     config
@@ -333,13 +392,22 @@
          (>= (- block-height (get last-run config)) (get interval config)))
     false))
 
+;; @desc Get the history for a task.
+;; @param task-id: The ID of the task.
+;; @param block: The block height.
+;; @returns (optional { ... }): A tuple containing the task history, or none if not found.
 (define-read-only (get-task-history (task-id uint) (block uint))
   (map-get? task-history {task-id: task-id, block: block}))
 
+;; @desc Check if a principal is an authorized keeper.
+;; @param keeper: The principal to check.
+;; @returns (bool): True if the principal is an authorized keeper, false otherwise.
 (define-read-only (is-authorized-keeper (keeper principal))
   (or (is-eq keeper (var-get contract-owner))
       (default-to false (map-get? authorized-keepers keeper))))
 
+;; @desc Get the configured contracts.
+;; @returns ({ ... }): A tuple containing the configured contracts.
 (define-read-only (get-configured-contracts)
   {
     interest-rate: (var-get interest-rate-contract),
@@ -348,16 +416,19 @@
     yield-optimizer: (var-get yield-optimizer-contract),
     revenue-distributor: (var-get revenue-distributor-contract),
     bond: (var-get bond-contract),
-    automation-manager: (var-get automation-manager-contract) ;; Added
+    automation-manager: (var-get automation-manager-contract)
   })
 
-;; Check if keeper should execute
+;; @desc Check if the keeper should execute now.
+;; @returns (bool): True if the keeper should execute now, false otherwise.
 (define-read-only (should-execute-now)
   (and (var-get keeper-enabled)
        (>= (- block-height (var-get last-execution-block)) (var-get execution-interval))))
 
+;; @data-vars
+;; @var tasks: A list of tasks.
 (define-data-var tasks (list 10 {name: (string-ascii 32), contract: principal, enabled: bool}) 
-  (
+  (list
     {name: "interest-accrual", contract: .interest-rate-model, enabled: true},
     {name: "oracle-update", contract: .oracle-aggregator-v2, enabled: true},
     {name: "liquidation", contract: .liquidation-engine, enabled: true},

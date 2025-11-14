@@ -1,28 +1,27 @@
 ;; ===========================================
 ;; FACTORY TRAIT
 ;; ===========================================
-;; Interface for creating and managing contract instances
-;;
+;; @desc Interface for creating and managing contract instances.
 ;; This trait provides functions to deploy new contract instances
 ;; and retrieve information about existing ones.
 ;;
-;; Example usage:
-;;   (use-trait factory .factory-trait.factory-trait)
+;; @example
+;; (use-trait factory .factory-trait.factory-trait)
 (define-trait factory-trait
   (
-    ;; Deploy a new contract instance
-    ;; @param contract-name: name of the contract to deploy
-    ;; @param deployer: principal of the deployer
-    ;; @return (response principal uint): principal of the new contract and error code
+    ;; @desc Deploy a new contract instance.
+    ;; @param contract-name: The name of the contract to deploy.
+    ;; @param deployer: The principal of the deployer.
+    ;; @returns (response principal uint): The principal of the newly deployed contract, or an error code.
     (deploy-contract ((string-ascii 32) principal) (response principal uint))
 
-    ;; Get contract instance by name
-    ;; @param contract-name: name of the contract
-    ;; @return (response (optional principal) uint): principal of the contract or none, and error code
+    ;; @desc Get a contract instance by its name.
+    ;; @param contract-name: The name of the contract.
+    ;; @returns (response (optional principal) uint): The principal of the contract, or none if it's not found.
     (get-contract-by-name ((string-ascii 32)) (response (optional principal) uint))
 
-    ;; Get all deployed contract instances
-    ;; @return (response (list 20 principal) uint): list of contract principals and error code
+    ;; @desc Get all deployed contract instances.
+    ;; @returns (response (list 20 principal) uint): A list of the principals of all deployed contracts, or an error code.
     (get-all-contracts () (response (list 20 principal) uint))
   )
 )

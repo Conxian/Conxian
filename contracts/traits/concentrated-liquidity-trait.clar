@@ -1,40 +1,39 @@
 ;; ===========================================
 ;; CONCENTRATED LIQUIDITY POOL TRAIT
 ;; ===========================================
-;; Interface for concentrated liquidity pools with tick-based pricing
-;;
+;; @desc Interface for concentrated liquidity pools with tick-based pricing.
 ;; This trait provides functions for concentrated liquidity management,
 ;; position NFT creation, and fee accumulation within price ranges.
 ;;
-;; Example usage:
-;;   (use-trait concentrated-liquidity .concentrated-liquidity-trait.concentrated-liquidity-trait)
+;; @example
+;; (use-trait concentrated-liquidity .concentrated-liquidity-trait.concentrated-liquidity-trait)
 (define-trait concentrated-liquidity-trait
   (
-    ;; Create a new concentrated liquidity position
-    ;; @param lower-tick: lower price tick boundary
-    ;; @param upper-tick: upper price tick boundary  
-    ;; @param amount-0: amount of token 0 to deposit
-    ;; @param amount-1: amount of token 1 to deposit
-    ;; @param recipient: position NFT recipient
-    ;; @return (response uint uint): position ID and error code
+    ;; @desc Create a new concentrated liquidity position.
+    ;; @param lower-tick: The lower price tick boundary.
+    ;; @param upper-tick: The upper price tick boundary.
+    ;; @param amount-0: The amount of token 0 to deposit.
+    ;; @param amount-1: The amount of token 1 to deposit.
+    ;; @param recipient: The recipient of the position NFT.
+    ;; @returns (response uint uint): The ID of the newly created position, or an error code.
     (create-position (int int uint uint principal) (response uint uint))
     
-    ;; Collect fees from a position
-    ;; @param position-id: position identifier
-    ;; @param recipient: fee recipient
-    ;; @return (response (tuple (amount-0 uint) (amount-1 uint)) uint): collected fees and error code
+    ;; @desc Collect fees from a position.
+    ;; @param position-id: The identifier of the position.
+    ;; @param recipient: The recipient of the collected fees.
+    ;; @returns (response (tuple (amount-0 uint) (amount-1 uint)) uint): A tuple containing the collected fees, or an error code.
     (collect-fees (uint principal) (response (tuple (amount-0 uint) (amount-1 uint)) uint))
     
-    ;; Remove liquidity from a position
-    ;; @param position-id: position identifier
-    ;; @param liquidity: amount of liquidity to remove
-    ;; @param recipient: token recipient
-    ;; @return (response (tuple (amount-0 uint) (amount-1 uint)) uint): withdrawn amounts and error code
+    ;; @desc Remove liquidity from a position.
+    ;; @param position-id: The identifier of the position.
+    ;; @param liquidity: The amount of liquidity to remove.
+    ;; @param recipient: The recipient of the withdrawn tokens.
+    ;; @returns (response (tuple (amount-0 uint) (amount-1 uint)) uint): A tuple containing the withdrawn amounts, or an error code.
     (remove-liquidity (uint uint principal) (response (tuple (amount-0 uint) (amount-1 uint)) uint))
     
-    ;; Get position information
-    ;; @param position-id: position identifier
-    ;; @return (response (tuple ...) uint): position details and error code
+    ;; @desc Get information about a specific position.
+    ;; @param position-id: The identifier of the position.
+    ;; @returns (response (tuple ...) uint): A tuple containing the position details, or an error code.
     (get-position (uint) (response (tuple 
       (owner principal) 
       (lower-tick int) 
@@ -46,13 +45,13 @@
       (tokens-owed-1 uint)
     ) uint))
     
-    ;; Get current price tick
-    ;; @return (response int uint): current price tick and error code
+    ;; @desc Get the current price tick of the pool.
+    ;; @returns (response int uint): The current price tick, or an error code.
     (get-current-tick () (response int uint))
     
-    ;; Get tick information
-    ;; @param tick: tick to query
-    ;; @return (response (tuple ...) uint): tick info and error code
+    ;; @desc Get information about a specific tick.
+    ;; @param tick: The tick to query.
+    ;; @returns (response (tuple ...) uint): A tuple containing the tick information, or an error code.
     (get-tick (int) (response (tuple 
       (liquidity-gross uint)
       (liquidity-net int)
@@ -60,12 +59,12 @@
       (fee-growth-outside-1 uint)
     ) uint))
     
-    ;; Swap tokens with concentrated liquidity
-    ;; @param zero-for-one: true if swapping token0 for token1
-    ;; @param amount-specified: amount to swap (positive for exact input, negative for exact output)
-    ;; @param sqrt-price-limit-x96: price limit for the swap
-    ;; @param recipient: token recipient
-    ;; @return (response (tuple ...) uint): swap result and error code
+    ;; @desc Swap tokens with concentrated liquidity.
+    ;; @param zero-for-one: True if swapping token0 for token1, false otherwise.
+    ;; @param amount-specified: The amount to swap (positive for exact input, negative for exact output).
+    ;; @param sqrt-price-limit-x96: The price limit for the swap.
+    ;; @param recipient: The recipient of the swapped tokens.
+    ;; @returns (response (tuple ...) uint): A tuple containing the swap result, or an error code.
     (swap (bool int uint principal) (response (tuple 
       (amount-0 int)
       (amount-1 int)

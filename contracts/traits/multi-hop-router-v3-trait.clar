@@ -1,31 +1,30 @@
 ;; ===========================================
 ;; MULTI-HOP ROUTER V3 TRAIT
 ;; ===========================================
-;; Interface for multi-hop routing across multiple DEX pools
-;;
+;; @desc Interface for multi-hop routing across multiple DEX pools.
 ;; This trait provides functions to compute and execute optimal
 ;; swap paths across multiple liquidity pools.
 ;;
-;; Example usage:
-;;   (use-trait router .multi-hop-router-v3-trait.multi-hop-router-v3-trait)
+;; @example
+;; (use-trait router .multi-hop-router-v3-trait.multi-hop-router-v3-trait)
 (define-trait multi-hop-router-v3-trait
   (
-    ;; Compute the best route for a token swap
-    ;; @param token-in: input token
-    ;; @param token-out: output token
-    ;; @param amount-in: amount of input token
-    ;; @return (response (tuple (route-id (buff 32)) (hops uint)) uint): route data and error code
+    ;; @desc Compute the best route for a token swap.
+    ;; @param token-in: The input token.
+    ;; @param token-out: The output token.
+    ;; @param amount-in: The amount of the input token.
+    ;; @returns (response (tuple (route-id (buff 32)) (hops uint)) uint): A tuple containing the route data, or an error code.
     (compute-best-route (principal principal uint) (response (tuple (route-id (buff 32)) (hops uint)) uint))
     
-    ;; Execute a pre-computed route
-    ;; @param route-id: route identifier
-    ;; @param recipient: recipient of output tokens
-    ;; @return (response uint uint): output amount and error code
+    ;; @desc Execute a pre-computed route.
+    ;; @param route-id: The route identifier.
+    ;; @param recipient: The recipient of the output tokens.
+    ;; @returns (response uint uint): The output amount, or an error code.
     (execute-route ((buff 32) principal) (response uint uint))
     
-    ;; Get statistics about a route
-    ;; @param route-id: route identifier
-    ;; @return (response (tuple (hops uint) (estimated-out uint) (expires-at uint)) uint): route stats and error code
+    ;; @desc Get statistics about a route.
+    ;; @param route-id: The route identifier.
+    ;; @returns (response (tuple (hops uint) (estimated-out uint) (expires-at uint)) uint): A tuple containing the route statistics, or an error code.
     (get-route-stats ((buff 32)) (response (tuple (hops uint) (estimated-out uint) (expires-at uint)) uint))
   )
 )

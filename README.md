@@ -2,121 +2,53 @@
 
 [![Tests](https://img.shields.io/badge/Tests-Comprehensive-green)](https://github.com/Anya-org/Conxian)
 [![Contracts](https://img.shields.io/badge/Contracts-255%2B-blue)](https://github.com/Anya-org/Conxian)
-[![Status](https://img.shields.io/badge/Status-Production%20Ready-blue)](https://github.com/Anya-org/Conxian)
-[![Network](https://img.shields.io/badge/Network-Mainnet%20Ready-9cf)](https://docs.hiro.so/)
+[![Status](https://img.shields.io/badge/Status-In%20Development-yellow)](https://github.com/Anya-org/Conxian)
+[![Network](https://img.shields.io/badge/Network-Nakamoto-9cf)](https://docs.hiro.so/)
 [![Traits](https://img.shields.io/badge/Traits-Modular%20Architecture-orange)](https://github.com/Anya-org/Conxian)
 
-## 🚀 Revolutionary Modular Trait Architecture
+## 🚀 A New Era of Decentralized Architecture
 
-**November 2025**: The Conxian Protocol introduces a **fully decentralized modular trait system** optimized for Nakamoto-speed compilation and sub-second block times.
+The Conxian Protocol has undergone a significant architectural overhaul to create a more modular, decentralized, and Nakamoto-compliant system. This new architecture is built on a foundation of specialized, single-responsibility contracts and a robust set of standardized traits.
 
 ### Key Innovations:
-- **70% Smaller Compilation Units** - From monolithic to 6 domain-specific modules
-- **Parallel Compilation Support** - Independent module processing for speed
-- **Selective Trait Loading** - Contracts import only needed functionality
-- **Domain Isolation** - Perfect separation for security and maintainability
-- **Enterprise Scalability** - Unlimited expansion capability
+- **Modular by Design**: The protocol is now architecturally divided into specialized, single-responsibility contracts, enhancing security, maintainability, and reusability.
+- **Trait-Driven Development**: A comprehensive set of standardized traits ensures that all components interact in a predictable and reliable manner.
+- **Nakamoto-Ready**: The new architecture is optimized for the sub-second block times and Bitcoin finality of the Stacks Nakamoto release.
 
-### Modular Trait System:
-```
-contracts/traits/
-├── base-traits.clar              # Core infrastructure (79 lines)
-├── dex-traits.clar               # DEX operations (63 lines)
-├── governance-traits.clar        # Voting systems (35 lines)
-├── dimensional-traits.clar       # Multi-dimensional DeFi (40 lines)
-├── oracle-risk-traits.clar       # Price feeds & risk (45 lines)
-└── monitoring-security-traits.clar # System safety (35 lines)
-```
+## 📊 Current Status - IN DEVELOPMENT
 
-## 📊 Current Status - PRODUCTION READY
+### ✅ Major Achievements
+- **Architectural Refactoring**: The `core`, `dex`, `sbtc-vaults`, and `governance` modules have been successfully refactored into a more modular and decentralized architecture.
+- **Comprehensive Documentation**: All new and modified contracts have been thoroughly documented with high-quality docstrings.
+- **Clear Roadmap**: A detailed roadmap has been created to guide future development.
+- **Updated Whitepaper**: The project whitepaper has been updated to reflect the new architecture and vision.
 
-### ✅ Major Achievements Completed
-- **Modular Trait System**: Complete migration to 6 domain-specific modules
-- **Compilation Fixes**: Systematic resolution of 68+ compilation errors
-- **Architecture Optimization**: Nakamoto-speed compilation achieved
-- **Documentation**: Comprehensive overhaul with modular details
-- **Infrastructure**: Enterprise-grade error handling and validation
-
-### 🔄 Final Phase - Deployment Preparation
-- **Compilation Validation**: Final verification of all contracts
-- **Integration Testing**: Cross-contract functionality validation
-- **Performance Benchmarking**: Nakamoto-speed optimization confirmation
-- **Deployment Configuration**: Production-ready settings
+### 🔄 Next Steps
+- **Lending Module Implementation**: The core lending functionality will be implemented from scratch, following the new modular architecture.
+- **Tokenomics and Governance Enhancement**: The tokenomics infrastructure and governance module will be completed.
+- **Dimensional Finance and Cross-Chain Integration**: The protocol's capabilities will be expanded with advanced DeFi and cross-chain features.
 
 ## Quick Start
 
 - Install dependencies: `npm install`
 - Run tests (Vitest + Clarinet SDK): `npm test`
 - Check manifests: `clarinet check`
-- Deploy: Ready for mainnet deployment
 
 ## Contract Modules
 
-### Core DEX
+The Conxian protocol is organized into a series of specialized modules, each with a well-defined responsibility.
 
-- **[DEX Module](./contracts/dex/README.md)**: Decentralized exchange functionality with concentrated liquidity, routing, and MEV protection
-
-### Governance & Security
-
-- **[Governance Module](./contracts/governance/README.md)**: Proposal and voting with upgrade management and emergency governance
-- **[Security Module](./contracts/security/README.md)**: Security controls and audit management
-
-### Multi-Dimensional DeFi
-
-- **[Dimensional Module](./contracts/dimensional/README.md)**: Multi-dimensional DeFi with spatial, temporal, risk, and cross-chain dimensions
-
-### Lending & Borrowing
-
-- **[Lending Module](./contracts/lending/README.md)**: Multi-asset lending and borrowing with enterprise integration
-
-### Token Economics
-
-- **[Tokens Module](./contracts/tokens/README.md)**: Token contracts and economic coordination
-
-### Infrastructure & Utilities
-
-- **[Traits Module](./contracts/traits/README.md)**: **Modular trait system** with domain-specific trait files for optimal compilation speed and Nakamoto performance:
-  - `base-traits.clar` - Core traits (ownable, pausable, rbac, math)
-  - `dex-traits.clar` - DEX-specific traits (SIP-010, pool, factory)
-  - `governance-traits.clar` - Voting and governance traits
-  - `dimensional-traits.clar` - Multi-dimensional DeFi traits
-  - `oracle-risk-traits.clar` - Price feeds and risk management
-  - `monitoring-security-traits.clar` - System monitoring and security
-  - `all-traits.clar` - Backward-compatible centralized imports
-
-## Single Source of Truth
-
-- Canonical manifest: `Clarinet.toml` at the repository root
-- Canonical contracts: `contracts/`
-- Deployment plans: `deployments/`
-- Tests: `tests/` using the root manifest by default
-- The `stacks/` directory is for test harnesses only and must reference root contracts (no production logic duplicates)
+- **[Core Module](./contracts/core/README.md)**: The core logic of the dimensional engine, now decentralized into specialized components.
+- **[DEX Module](./contracts/dex/README.md)**: Decentralized exchange functionality with a modular router and factory.
+- **[Governance Module](./contracts/governance/README.md)**: A modular proposal and voting system.
+- **[Lending Module](./contracts/lending/README.md)**: Multi-asset lending and borrowing (under development).
+- **[Tokens Module](./contracts/tokens/README.md)**: A comprehensive token ecosystem.
+- **[Vaults Module](./contracts/vaults/README.md)**: A decentralized sBTC vault.
 
 ## Documentation
 
-All documentation for the Conxian Protocol can be found in the [`documentation`](./documentation) directory.
-
-## Roadmap & Changelog
-
-- **[Implementation Roadmap](./PHASE_IMPLEMENTATION_ROADMAP.md)**: Detailed phase-based development plan
-- **[Changelog](./CHANGELOG.md)**: Complete history of architectural changes and fixes
-- **[Deployment Report](./DEPLOYMENT_READINESS_REPORT.md)**: Production readiness assessment
-
-## Performance Metrics
-
-| Metric | Status | Target | Achievement |
-|--------|--------|--------|-------------|
-| **Compilation Errors** | ✅ Resolved | 0 | 68+ → Significantly Reduced |
-| **Trait Architecture** | ✅ Modular | Decentralized | 6 Domain Modules |
-| **Build Speed** | ✅ Optimized | Parallel | Nakamoto Compatible |
-| **Memory Usage** | ✅ Reduced | ~60% | Selective Loading |
-| **Scalability** | ✅ Unlimited | Modular | Domain Expansion |
-| **Security** | ✅ Enterprise | Isolated | Domain Boundaries |
+All documentation for the Conxian Protocol can be found in the [`documentation`](./documentation) directory. The project's vision and future plans are outlined in the [`ROADMAP.md`](./ROADMAP.md) and the updated [`Conxian-Whitepaper.md`](./documentation/whitepaper/Conxian-Whitepaper.md).
 
 ## Contributing
 
 See `CONTRIBUTING.md` for contribution guidelines and policy checks.
-
----
-
-**The Conxian Protocol is now production-ready with a revolutionary modular trait architecture optimized for maximum performance and scalability.** 🚀
