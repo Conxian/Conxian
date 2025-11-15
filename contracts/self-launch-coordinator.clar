@@ -2,9 +2,9 @@
 ;; Coordinates autonomous contract deployment through funding curve mechanism
 ;; Implements self-funded launch system with progressive bootstrapping
 
-(use-trait token-trait .all-traits.sip-010-ft-trait)
-(use-trait governance-trait .all-traits.governance-token-trait)
-(use-trait oracle-trait .all-traits.oracle-trait)
+(use-trait token-trait .sip-010-trait-ft-standard.sip-010-trait)
+(use-trait governance-trait .governance.governance-token-trait)
+(use-trait oracle-trait .oracle.oracle-trait)
 
 ;; Constants
 (define-constant ERR_UNAUTHORIZED (err u8001))

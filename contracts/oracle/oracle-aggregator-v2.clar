@@ -1,14 +1,17 @@
 ;; Oracle Aggregator v2 - Weighted sources with TWAP and manipulation detection (minimal implementation)
 
-(use-trait oracle-trait .all-traits.oracle-trait)
+(use-trait oracle-trait .oracle.oracle-trait)
+(use-trait err-trait .errors.standard-errors.standard-errors)
 
-(define-constant ERR_UNAUTHORIZED (err u5001))
-(define-constant ERR_ASSET_NOT_FOUND (err u5002))
+(define-constant ERR_UNAUTHORIZED (err-trait err-unauthorized))
+(define-constant ERR_ASSET_NOT_FOUND (err-trait err-asset-not-found))
+(define-constant ERR_CIRCUIT_OPEN (err-trait err-circuit-open))
+(define-constant ERR_INVALID_PRICE (err-trait err-invalid-price))
 (define-constant BPS u10000)
-(define-constant ERR_CIRCUIT_OPEN (err u5004))
+(define-constant MIN_PRICE u100)  ;; $0.0000000000000001 (1e-16)
+(define-constant MAX_PRICE (* u1000000000000000000 u1000000))  ;; $1M with 18 decimals
 
 ;; Admin
-(define-data-var admin principal tx-sender)
 (define-data-var manipulation-threshold-bps uint u500) ;; 5% default
 (define-data-var twap-alpha-bps uint u1000) ;; 10% EMA weight for new observations
 (define-data-var circuit-breaker (optional principal) none)
@@ -24,6 +27,15 @@
   updated-at: uint
 })
 
+(define-private (get-block-height)
+  (unwrap! (get-block-info? block-height) (err u0))
+)
+
+(define-private (is-stale (updated-at uint))
+  (let ((current-height (get-block-height)))
+    (>= (- current-height updated-at) (var-get stale-threshold-blocks)))
+)
+
 (define-public (set-admin (new-admin principal))
   (begin
     (asserts! (is-eq tx-sender (var-get admin)) ERR_UNAUTHORIZED)
@@ -34,7 +46,7 @@
 
 (define-public (set-circuit-breaker (cb principal))
   (begin
-    (asserts! (is-eq tx-sender (var-get admin)) ERR_UNAUTHORIZED)
+    (asserts! (contract-call? .access-control.access-control-contract has-role "contract-owner" tx-sender) (err ERR_UNAUTHORIZED))
     (var-set circuit-breaker (some cb))
     (ok true)
   )
@@ -42,7 +54,7 @@
 
 (define-public (set-params (new-threshold-bps uint) (new-alpha-bps uint))
   (begin
-    (asserts! (is-eq tx-sender (var-get admin)) ERR_UNAUTHORIZED)
+    (asserts! (contract-call? .access-control.access-control-contract has-role "contract-owner" tx-sender) (err ERR_UNAUTHORIZED))
     (var-set manipulation-threshold-bps new-threshold-bps)
     (var-set twap-alpha-bps new-alpha-bps)
     (ok true)
@@ -51,7 +63,7 @@
 
 (define-public (set-stale-threshold (blocks uint))
   (begin
-    (asserts! (is-eq tx-sender (var-get admin)) ERR_UNAUTHORIZED)
+    (asserts! (contract-call? .access-control.access-control-contract has-role "contract-owner" tx-sender) (err ERR_UNAUTHORIZED))
     (var-set stale-threshold-blocks blocks)
     (ok true)
   )
@@ -60,24 +72,25 @@
 ;; Update price and twap (EMA)
 (define-public (set-source (asset principal) (price uint) (weight uint))
   (begin
-    (asserts! (is-eq tx-sender (var-get admin)) ERR_UNAUTHORIZED)
+    (asserts! (contract-call? .access-control.access-control-contract has-role "contract-owner" tx-sender) (err ERR_UNAUTHORIZED))
     (try! (check-circuit-breaker))
+    (asserts! (and (>= price MIN_PRICE) (<= price MAX_PRICE)) ERR_INVALID_PRICE)
     (let ((alpha (var-get twap-alpha-bps)))
       (match (map-get? asset-sources { asset: asset })
         entry
           (let ((prev-twap (get twap entry))
                 (prev-price (get price entry))
                 (prev-total (get total-weight entry))
-                (sum-weight (+ prev-total weight))
-                (agg-price (if (> sum-weight u0)
-                               (/ (+ (* prev-price prev-total) (* price weight)) sum-weight)
+                (new-total-weight (+ prev-total weight))
+                (agg-price (if (> new-total-weight u0)
+                               (/ (+ (* prev-price prev-total) (* price weight)) new-total-weight)
                                price)))
             (map-set asset-sources { asset: asset } {
               price: agg-price,
               twap: (/ (+ (* alpha price) (* (- BPS alpha) prev-twap)) BPS),
               weight: weight,
-              total-weight: sum-weight,
-              updated-at: block-height
+              total-weight: new-total-weight,
+              updated-at: (get-block-height)
             })
           )
         ;; Initialize TWAP on first set
@@ -86,7 +99,7 @@
           twap: price,
           weight: weight,
           total-weight: weight,
-          updated-at: block-height
+          updated-at: (get-block-height)
         })
       )
     )
@@ -117,7 +130,7 @@
       (let ((cb (check-circuit-breaker)))
         (match cb
           (ok okv)
-            (let ((age (- block-height (get updated-at entry)))
+            (let ((age (- (get-block-height) (get updated-at entry)))
                   (stale (>= age (var-get stale-threshold-blocks))))
               (if (or stale (is-manipulated asset))
                 (ok (get twap entry))

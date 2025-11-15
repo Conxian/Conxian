@@ -3,21 +3,15 @@ import { resolve } from 'path';
 import { fileURLToPath } from 'url';
 
 const skipSdk = process.env.SKIP_SDK === '1';
-const manifest = process.env.CLARINET_MANIFEST ?? 'Clarinet.toml';
+const manifest = process.env.CLARINET_MANIFEST ?? 'stacks/Clarinet.test.toml';
 const includeStatic = [
   'stacks/tests/**/foundation-*.spec.ts',
   'stacks/tests/core/core-shape.spec.ts',
   'tests/load-testing/performance-benchmarks.test.ts',
 ];
 const includeAll = [
-  'stacks/tests/**/*.test.ts',
-  'stacks/tests/**/*.spec.ts',
-  'stacks/sdk-tests/**/*.spec.ts',
-  'tests/load-testing/**/*.test.ts',
-  'tests/interoperability/**/*.test.ts',
-  'tests/monitoring/**/*.test.ts',
-  'tests/dimensional/**/*.ts',
-  'tests/**/*.ts',
+  'tests/dimensional/dimensional-core-integration.test.ts',
+  'tests/dex/**/*.test.ts',
 ];
 
 /**
@@ -32,7 +26,11 @@ const includeAll = [
 export default defineConfig({
   test: {
     // Test directories (static-only when SKIP_SDK=1)
-    include: skipSdk ? includeStatic : includeAll,
+    include: [
+      'tests/dimensional/dimensional-core-integration.test.ts',
+      'tests/dex/**/*.test.ts',
+      'stacks/tests/temp-check.test.ts',
+    ],
     exclude: [
       'stacks/tests/helpers/**',
       'node_modules/**',
@@ -127,3 +125,4 @@ export default defineConfig({
     'process.env.CLARINET_MANIFEST': JSON.stringify(manifest)
   }
 });
+

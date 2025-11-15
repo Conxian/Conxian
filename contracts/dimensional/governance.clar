@@ -2,9 +2,9 @@
 ;; Governance and parameter management for dimensional engine
 
 ;; Trait imports (ensure centralized traits are available; remove duplicates)
-(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
+(use-trait sip-010-ft-trait .traits.sip-010-ft-trait.sip-010-ft-trait)
 ;; (use-trait dimensional-core-trait .all-traits.dimensional-core-trait)
-;; (use-trait governance-token-trait .all-traits.governance-token-trait)
+;; (use-trait governance-token-trait .traits.governance-token-trait.governance-token-trait)
 ;; (use-trait governance-trait .all-traits.governance-trait)
 
 ;; ===== Constants =====

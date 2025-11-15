@@ -2,8 +2,8 @@
 ;; Implements optimal path finding for multi-hop swaps across all DEX operations
 ;; Integrates all routing functionality under dimensional architecture
 
-(use-trait advanced-router-dijkstra-trait .all-traits.advanced-router-dijkstra-trait)
-(impl-trait .all-traits.advanced-router-dijkstra-trait)
+(use-trait advanced-router-dijkstra-trait .advanced-router-dijkstra-trait.advanced-router-dijkstra-trait)
+(impl-trait .advanced-router-dijkstra-trait.advanced-router-dijkstra-trait)
 
 ;; === DIMENSIONAL INTEGRATION CONSTANTS ===
 (define-constant CONTRACT_OWNER tx-sender)

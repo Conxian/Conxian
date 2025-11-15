@@ -1,7 +1,7 @@
 ;; token-emission-controller.clar
 ;; Hard-coded emission rails with governance guards to prevent inflation abuse
 
-(use-trait sip-010-ft-mintable-trait .all-traits.sip-010-ft-mintable-trait)
+(use-trait sip-010-ft-mintable-trait .sip-010-trait-ft-mintable.sip-010-ft-mintable-trait)
 
 ;; --- Constants ---
 (define-constant CONTRACT_OWNER tx-sender)

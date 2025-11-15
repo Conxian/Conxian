@@ -1,5 +1,5 @@
-(use-trait cxlp-migration-queue-trait .all-traits.cxlp-migration-queue-trait)
-(use-trait sip-010-ft-mintable-trait .all-traits.sip-010-ft-mintable-trait)
+(use-trait cxlp-migration-queue-trait .traits.cxlp-migration-queue-trait.cxlp-migration-queue-trait)
+(use-trait sip-010-ft-mintable-trait .requirements.sip-010-ft-mintable-trait.sip-010-ft-mintable-trait)
 
 ;; cxlp-migration-queue.clar
 ;; Intent queue system for CXLP to CXD migration with pro-rata settlement

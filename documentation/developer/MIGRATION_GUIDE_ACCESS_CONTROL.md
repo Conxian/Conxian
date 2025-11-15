@@ -1,6 +1,6 @@
 # Migration Guide: Updating to New Access Control System
 
-This guide explains how to update your existing contracts to use the new AccessControl system implemented in AIP-7.
+This guide explains how to update your existing contracts to use the new AccessControl system implemented in CXIP-7.
 
 ## Overview
 

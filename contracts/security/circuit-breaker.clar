@@ -1,292 +1,394 @@
-;; circuit-breaker.clar
+;; ===========================================
+;; Circuit Breaker Contract
+;; ===========================================
 
-;; Implements the enhanced circuit breaker pattern
+;; This contract provides emergency circuit breaker functionality for the Conxian Protocol,
+;; allowing rapid response to critical issues while maintaining decentralized governance.
 
-;; ===== Traits =====
-(use-trait circuit-breaker-trait .all-traits.circuit-breaker-trait)
+;; Use centralized traits
+(use-trait rbac-trait .traits.rbac-trait.rbac-trait)
 
-;; ===== Constants =====
-(define-constant ERR_UNAUTHORIZED (err u1001))
-(define-constant ERR_CIRCUIT_OPEN (err u1002))
-(define-constant ERR_INVALID_OPERATION (err u1003))
-(define-constant ERR_INVALID_THRESHOLD (err u1004))
-(define-constant ERR_INVALID_TIMEOUT (err u1005))
-(define-constant ERR_EMERGENCY_SHUTDOWN (err u1006))
-(define-constant ERR_RATE_LIMIT_EXCEEDED (err u1007))
-(define-constant ERR_INVALID_RATE_LIMIT (err u1008))
-(define-constant ERR_INVALID_RATE_WINDOW (err u1009))
+;; ===========================================
+;; CONSTANTS
+;; ===========================================
 
-;; Default values
-(define-constant DEFAULT_THRESHOLD u5000) ;; 50% failure rate
-(define-constant DEFAULT_TIMEOUT u144) ;; ~24 hours at 1 block/10min
-(define-constant MAX_OPERATION_LENGTH u64)
-(define-constant MAX_RATE_WINDOW u10080) ;; ~10 days at 1 block/10min
-(define-constant MAX_THRESHOLD u10000) ;; 100% in basis points
+(define-constant ERR_UNAUTHORIZED (err u2001))
+(define-constant ERR_ALREADY_PAUSED (err u2002))
+(define-constant ERR_NOT_PAUSED (err u2003))
+(define-constant ERR_INVALID_DURATION (err u2004))
+(define-constant ERR_CIRCUIT_ALREADY_EXISTS (err u2005))
+(define-constant ERR_CIRCUIT_NOT_FOUND (err u2006))
+(define-constant ERR_EMERGENCY_ACTIVE (err u2007))
 
-;; ===== Data Structures =====
-(define-data-var admin principal tx-sender)
-(define-data-var global-failure-threshold uint u5000) ;; 50%
-(define-data-var global-reset-timeout uint u144) ;; ~24 hours
-(define-data-var emergency-shutdown-active bool false)
-(define-data-var circuit-mode (optional bool) none) ;; none = auto, some true = forced open, some false = forced closed
+;; Circuit breaker types
+(define-constant TYPE_TRADING u1)
+(define-constant TYPE_LENDING u2)
+(define-constant TYPE_ORACLE u3)
+(define-constant TYPE_GOVERNANCE u4)
+(define-constant TYPE_EMERGENCY u5)
 
-(define-map operation-stats
-  {operation: (string-ascii 64)}
+;; ===========================================
+;; DATA VARIABLES
+;; ===========================================
+
+;; Global emergency pause
+(define-data-var global-emergency-pause bool false)
+
+;; Emergency pause timestamp
+(define-data-var emergency-pause-time uint u0)
+
+;; Maximum pause duration (in blocks)
+(define-data-var max-pause-duration uint u10080) ;; ~1 week
+
+;; ===========================================
+;; DATA MAPS
+;; ===========================================
+
+;; Circuit breaker states
+(define-map circuit-breakers
+  { circuit-type: uint }
   {
-    success-count: uint,
-    failure-count: uint,
-    last-updated: uint,
-    is-open: bool,
-    last-state-change: uint,
-    rate-limit: uint,
-    rate-window: uint,
-    rate-count: uint,
-    rate-window-start: uint
-  })
+    paused: bool,
+    paused-at: uint,
+    pause-duration: uint,
+    triggered-by: principal,
+    reason: (string-ascii 256),
+    governance-approval: bool
+  }
+)
 
-;; ===== Helper Functions =====
-(define-private (check-is-admin)
-  (ok (asserts! (is-eq tx-sender (var-get admin)) ERR_UNAUTHORIZED)))
-
-(define-private (calculate-failure-rate (success-count uint) (failure-count uint))
-  (let ((total (+ success-count failure-count)))
-    (if (is-eq total u0)
-      u0
-      (/ (* failure-count u10000) total)))) ;; Return as basis points
-
-(define-private (should-circuit-open (stats {success-count: uint, failure-count: uint, last-updated: uint,
-                                            is-open: bool, last-state-change: uint, rate-limit: uint,
-                                            rate-window: uint, rate-count: uint, rate-window-start: uint}))
-  (let ((failure-rate (calculate-failure-rate (get success-count stats) (get failure-count stats)))
-        (threshold (var-get global-failure-threshold)))
-    (>= failure-rate threshold)))
-
-(define-private (should-circuit-close (stats {success-count: uint, failure-count: uint, last-updated: uint,
-                                             is-open: bool, last-state-change: uint, rate-limit: uint,
-                                             rate-window: uint, rate-count: uint, rate-window-start: uint}))
-  (let ((timeout (var-get global-reset-timeout))
-        (time-since-change (- block-height (get last-state-change stats))))
-    (>= time-since-change timeout)))
-
-(define-private (check-rate-limit (stats {success-count: uint, failure-count: uint, last-updated: uint,
-                                         is-open: bool, last-state-change: uint, rate-limit: uint,
-                                         rate-window: uint, rate-count: uint, rate-window-start: uint}))
-  (let ((current-time block-height)
-        (window-start (get rate-window-start stats))
-        (window (get rate-window stats))
-        (rate-limit (get rate-limit stats)))
-    (if (is-eq rate-limit u0)
-      true
-      (if (> (- current-time window-start) window)
-        true
-        (<= (+ (get rate-count stats) u1) rate-limit)))))
-
-(define-private (update-rate-window (stats {success-count: uint, failure-count: uint, last-updated: uint,
-                                           is-open: bool, last-state-change: uint, rate-limit: uint,
-                                           rate-window: uint, rate-count: uint, rate-window-start: uint}))
-  (let ((current-time block-height)
-        (window-start (get rate-window-start stats))
-        (window (get rate-window stats)))
-    (if (and (> window u0) (> (- current-time window-start) window))
-      (merge stats {rate-count: u0, rate-window-start: current-time})
-      stats)))
-
-(define-private (update-circuit-state (stats {success-count: uint, failure-count: uint, last-updated: uint,
-                                            is-open: bool, last-state-change: uint, rate-limit: uint,
-                                            rate-window: uint, rate-count: uint, rate-window-start: uint}))
-  (let ((current-open (get is-open stats)))
-    (if current-open
-      ;; Circuit is open, check if it should close
-      (if (should-circuit-close stats)
-        (merge stats {
-          is-open: false,
-          last-state-change: block-height,
-          success-count: u0,
-          failure-count: u0
-        })
-        stats)
-      ;; Circuit is closed, check if it should open
-      (if (should-circuit-open stats)
-        (merge stats {
-          is-open: true,
-          last-state-change: block-height
-        })
-        stats))))
-
-(define-private (get-default-stats (current-time uint))
+;; Pause event log
+(define-map pause-events
+  { event-id: uint }
   {
-    success-count: u0,
-    failure-count: u0,
-    last-updated: current-time,
-    is-open: false,
-    last-state-change: current-time,
-    rate-limit: u0,
-    rate-window: u0,
-    rate-count: u0,
-    rate-window-start: current-time
-  })
+    circuit-type: uint,
+    action: (string-ascii 20), ;; "pause" or "resume"
+    timestamp: uint,
+    actor: principal,
+    reason: (string-ascii 256)
+  }
+)
 
-;; ===== Core Circuit Breaker Functions =====
-(define-read-only (is-circuit-open)
-  (ok (var-get emergency-shutdown-active)))
+;; Emergency recovery proposals
+(define-map recovery-proposals
+  { proposal-id: uint }
+  {
+    circuit-type: uint,
+    proposed-by: principal,
+    proposed-at: uint,
+    execution-time: uint,
+    executed: bool,
+    description: (string-ascii 256)
+  }
+)
 
-(define-read-only (check-circuit-state (operation (string-ascii 64)))
-  (if (var-get emergency-shutdown-active)
+;; ===========================================
+;; PRIVATE FUNCTIONS
+;; ===========================================
+
+(define-private (is-authorized-breaker)
+  (or
+    (contract-call? .traits.rbac-trait.rbac-trait is-owner tx-sender)
+    (contract-call? .traits.rbac-trait.rbac-trait has-role tx-sender "emergency-breaker")
+  )
+)
+
+(define-private (is-governance-approved (circuit-type uint))
+  (default-to false (get governance-approval (map-get? circuit-breakers { circuit-type: circuit-type })))
+)
+
+(define-private (log-pause-event (circuit-type uint) (action (string-ascii 20)) (reason (string-ascii 256)))
+  (let ((event-id (+ u1 (var-get emergency-pause-time)))) ;; Simple counter
+    (map-set pause-events
+      { event-id: event-id }
+      {
+        circuit-type: circuit-type,
+        action: action,
+        timestamp: block-height,
+        actor: tx-sender,
+        reason: reason
+      }
+    )
+    (var-set emergency-pause-time event-id)
+    event-id
+  )
+)
+
+(define-private (circuit-exists (circuit-type uint))
+  (is-some (map-get? circuit-breakers { circuit-type: circuit-type }))
+)
+
+;; ===========================================
+;; PUBLIC FUNCTIONS
+;; ===========================================
+
+;; @desc Initialize a circuit breaker for a specific system
+;; @param circuit-type The type of circuit (trading, lending, etc.)
+;; @param pause-duration Maximum pause duration in blocks
+(define-public (initialize-circuit (circuit-type uint) (pause-duration uint))
+  (begin
+    (asserts! (is-authorized-breaker) ERR_UNAUTHORIZED)
+    (asserts! (<= pause-duration (var-get max-pause-duration)) ERR_INVALID_DURATION)
+    (asserts! (not (circuit-exists circuit-type)) ERR_CIRCUIT_ALREADY_EXISTS)
+
+    (map-set circuit-breakers
+      { circuit-type: circuit-type }
+      {
+        paused: false,
+        paused-at: u0,
+        pause-duration: pause-duration,
+        triggered-by: tx-sender,
+        reason: "",
+        governance-approval: false
+      }
+    )
+
+    (log-pause-event circuit-type "initialized" "circuit breaker initialized")
     (ok true)
-    (match (map-get? operation-stats {operation: operation})
-      stats (ok (get is-open stats))
-      (ok false))))
+  )
+)
 
-(define-public (record-success (operation (string-ascii 64)))
-  (let ((current-time block-height)
-        (stats (default-to (get-default-stats current-time)
-                          (map-get? operation-stats {operation: operation}))))
-    (asserts! (not (var-get emergency-shutdown-active)) ERR_EMERGENCY_SHUTDOWN)
-    (asserts! (check-rate-limit stats) ERR_RATE_LIMIT_EXCEEDED)
-    (let ((updated-stats (update-rate-window stats))
-          (new-stats (merge updated-stats {
-            success-count: (+ (get success-count updated-stats) u1),
-            rate-count: (+ (get rate-count updated-stats) u1),
-            last-updated: current-time
-          })))
-      (let ((final-stats (update-circuit-state new-stats)))
-        (map-set operation-stats {operation: operation} final-stats)
-        (ok true)))))
-
-(define-public (record-failure (operation (string-ascii 64)))
-  (let ((current-time block-height)
-        (stats (default-to (get-default-stats current-time)
-                          (map-get? operation-stats {operation: operation}))))
-    (asserts! (not (var-get emergency-shutdown-active)) ERR_EMERGENCY_SHUTDOWN)
-    (asserts! (check-rate-limit stats) ERR_RATE_LIMIT_EXCEEDED)
-    (let ((updated-stats (update-rate-window stats))
-          (new-stats (merge updated-stats {
-            failure-count: (+ (get failure-count updated-stats) u1),
-            rate-count: (+ (get rate-count updated-stats) u1),
-            last-updated: current-time
-          })))
-      (let ((final-stats (update-circuit-state new-stats)))
-        (map-set operation-stats {operation: operation} final-stats)
-        (ok true)))))
-
-;; ===== Read-Only Functions =====
-(define-read-only (get-failure-rate (operation (string-ascii 64)))
-  (match (map-get? operation-stats {operation: operation})
-    stats (ok (calculate-failure-rate (get success-count stats) (get failure-count stats)))
-    (ok u0)))
-
-(define-read-only (get-circuit-state (operation (string-ascii 64)))
-  (let ((stats (default-to (get-default-stats block-height)
-                          (map-get? operation-stats {operation: operation})))
-        (failure-rate (calculate-failure-rate (get success-count stats) (get failure-count stats))))
-    (ok {
-      state: (if (get is-open stats) u1 u0),
-      last-checked: (get last-updated stats),
-      failure-rate: failure-rate,
-      failure-count: (get failure-count stats),
-      success-count: (get success-count stats)
-    })))
-
-(define-read-only (get-rate-limit (operation (string-ascii 64)))
-  (let ((stats (default-to (get-default-stats block-height)
-                          (map-get? operation-stats {operation: operation})))
-        (window-end (+ (get rate-window-start stats) (get rate-window stats))))
-    (ok {
-      limit: (get rate-limit stats),
-      window: (get rate-window stats),
-      current: (get rate-count stats),
-      reset-time: window-end
-    })))
-
-(define-read-only (get-circuit-mode)
-  (ok (var-get circuit-mode)))
-
-(define-read-only (get-admin)
-  (ok (var-get admin)))
-
-(define-read-only (get-health-status)
-  (ok {
-    is_operational: (not (var-get emergency-shutdown-active)),
-    total_failure_rate: u0,
-    last_checked: block-height,
-    uptime: u100,
-    total_operations: u0,
-    failed_operations: u0
-  }))
-
-;; ===== Admin Functions =====
-(define-public (set-circuit-state (operation (string-ascii 64)) (state bool))
+;; @desc Trigger circuit breaker pause (emergency stop)
+;; @param circuit-type The circuit to pause
+;; @param reason Reason for the pause
+(define-public (pause-circuit (circuit-type uint) (reason (string-ascii 256)))
   (begin
-    (try! (check-is-admin))
-    (let ((stats (default-to (get-default-stats block-height)
-                            (map-get? operation-stats {operation: operation}))))
-      (map-set operation-stats {operation: operation}
-        (merge stats {
-          is-open: state,
-          last-state-change: block-height
-        }))
-      (ok true))))
+    (asserts! (is-authorized-breaker) ERR_UNAUTHORIZED)
+    (asserts! (circuit-exists circuit-type) ERR_CIRCUIT_NOT_FOUND)
+    (asserts! (not (var-get global-emergency-pause)) ERR_EMERGENCY_ACTIVE)
 
-(define-public (set-failure-threshold (threshold uint))
+    (let ((circuit (unwrap-panic (map-get? circuit-breakers { circuit-type: circuit-type }))))
+      (asserts! (not (get paused circuit)) ERR_ALREADY_PAUSED)
+
+      (map-set circuit-breakers
+        { circuit-type: circuit-type }
+        (merge circuit {
+          paused: true,
+          paused-at: block-height,
+          triggered-by: tx-sender,
+          reason: reason
+        })
+      )
+
+      (log-pause-event circuit-type "pause" reason)
+      (ok true)
+    )
+  )
+)
+
+;; @desc Resume circuit breaker (normal operation)
+;; @param circuit-type The circuit to resume
+(define-public (resume-circuit (circuit-type uint))
   (begin
-    (try! (check-is-admin))
-    (asserts! (<= threshold MAX_THRESHOLD) ERR_INVALID_THRESHOLD)
-    (var-set global-failure-threshold threshold)
-    (ok true)))
+    (asserts! (is-authorized-breaker) ERR_UNAUTHORIZED)
+    (asserts! (circuit-exists circuit-type) ERR_CIRCUIT_NOT_FOUND)
 
-(define-public (set-reset-timeout (timeout uint))
+    (let ((circuit (unwrap-panic (map-get? circuit-breakers { circuit-type: circuit-type }))))
+      (asserts! (get paused circuit) ERR_NOT_PAUSED)
+
+      ;; Check if pause duration has expired
+      (let ((pause-duration (get pause-duration circuit))
+            (paused-at (get paused-at circuit)))
+        (asserts! (< (- block-height paused-at) pause-duration) ERR_INVALID_DURATION)
+
+        (map-set circuit-breakers
+          { circuit-type: circuit-type }
+          (merge circuit { paused: false })
+        )
+
+        (log-pause-event circuit-type "resume" "circuit resumed")
+        (ok true)
+      )
+    )
+  )
+)
+
+;; @desc Global emergency pause (ultimate circuit breaker)
+;; @param reason Reason for emergency pause
+(define-public (global-emergency-pause (reason (string-ascii 256)))
   (begin
-    (try! (check-is-admin))
-    (asserts! (> timeout u0) ERR_INVALID_TIMEOUT)
-    (var-set global-reset-timeout timeout)
-    (ok true)))
+    (asserts! (is-authorized-breaker) ERR_UNAUTHORIZED)
+    (asserts! (not (var-get global-emergency-pause)) ERR_ALREADY_PAUSED)
 
-(define-public (set-rate-limit (operation (string-ascii 64)) (limit uint) (window uint))
+    (var-set global-emergency-pause true)
+    (var-set emergency-pause-time block-height)
+
+    (log-pause-event TYPE_EMERGENCY "global-pause" reason)
+    (ok true)
+  )
+)
+
+;; @desc Resume from global emergency pause
+(define-public (resume-global-emergency)
   (begin
-    (try! (check-is-admin))
-    (asserts! (> limit u0) ERR_INVALID_RATE_LIMIT)
-    (asserts! (and (> window u0) (<= window MAX_RATE_WINDOW)) ERR_INVALID_RATE_WINDOW)
-    (let ((stats (default-to (get-default-stats block-height)
-                            (map-get? operation-stats {operation: operation}))))
-      (map-set operation-stats {operation: operation}
-        (merge stats {
-          rate-limit: limit,
-          rate-window: window,
-          rate-count: u0,
-          rate-window-start: block-height
-        }))
-      (ok true))))
+    (asserts! (contract-call? .traits.rbac-trait.rbac-trait is-owner tx-sender) ERR_UNAUTHORIZED)
+    (asserts! (var-get global-emergency-pause) ERR_NOT_PAUSED)
 
-(define-public (set-circuit-mode (mode (optional bool)))
+    (var-set global-emergency-pause false)
+
+    (log-pause-event TYPE_EMERGENCY "global-resume" "emergency pause lifted")
+    (ok true)
+  )
+)
+
+;; @desc Propose circuit breaker recovery (governance)
+;; @param circuit-type The circuit to recover
+;; @param description Description of recovery plan
+;; @param execution-delay Delay before execution (blocks)
+(define-public (propose-recovery (circuit-type uint) (description (string-ascii 256)) (execution-delay uint))
   (begin
-    (try! (check-is-admin))
-    (var-set circuit-mode mode)
-    (ok true)))
+    (asserts! (contract-call? .traits.rbac-trait.rbac-trait has-role tx-sender "governance") ERR_UNAUTHORIZED)
 
-(define-public (emergency-shutdown)
+    (let ((proposal-id (+ u1 (var-get max-pause-duration)))) ;; Simple counter
+      (map-set recovery-proposals
+        { proposal-id: proposal-id }
+        {
+          circuit-type: circuit-type,
+          proposed-by: tx-sender,
+          proposed-at: block-height,
+          execution-time: (+ block-height execution-delay),
+          executed: false,
+          description: description
+        }
+      )
+
+      (log-pause-event circuit-type "recovery-proposed" description)
+      (ok proposal-id)
+    )
+  )
+)
+
+;; @desc Execute approved recovery proposal
+;; @param proposal-id The recovery proposal to execute
+(define-public (execute-recovery (proposal-id uint))
   (begin
-    (try! (check-is-admin))
-    (var-set emergency-shutdown-active true)
-    (ok true)))
+    (asserts! (contract-call? .traits.rbac-trait.rbac-trait has-role tx-sender "governance") ERR_UNAUTHORIZED)
 
-(define-public (recover-from-shutdown)
-  (begin
-    (try! (check-is-admin))
-    (var-set emergency-shutdown-active false)
-    (ok true)))
+    (let ((proposal (unwrap! (map-get? recovery-proposals { proposal-id: proposal-id }) ERR_CIRCUIT_NOT_FOUND)))
+      (asserts! (>= block-height (get execution-time proposal)) ERR_INVALID_DURATION)
+      (asserts! (not (get executed proposal)) ERR_ALREADY_PAUSED)
 
-;; ===== Ownable Trait Implementation =====
-(define-read-only (get-owner)
-  (ok (var-get admin)))
+      ;; Execute recovery by resuming the circuit
+      (try! (resume-circuit (get circuit-type proposal)))
 
-(define-public (set-admin (new-admin principal))
-  (begin
-    (try! (check-is-admin))
-    (var-set admin new-admin)
-    (ok true)))
+      ;; Mark proposal as executed
+      (map-set recovery-proposals
+        { proposal-id: proposal-id }
+        (merge proposal { executed: true })
+      )
 
-(define-public (renounce-ownership)
-  (begin
-    (try! (check-is-admin))
-    (var-set admin tx-sender)
-    (ok true)))
+      (log-pause-event (get circuit-type proposal) "recovery-executed" "governance-approved recovery")
+      (ok true)
+    )
+  )
+)
+
+;; ===========================================
+;; READ-ONLY FUNCTIONS
+;; ===========================================
+
+;; @desc Check if a circuit is currently paused
+;; @param circuit-type The circuit to check
+(define-read-only (is-circuit-paused (circuit-type uint))
+  (or
+    (var-get global-emergency-pause)
+    (default-to false (get paused (map-get? circuit-breakers { circuit-type: circuit-type })))
+  )
+)
+
+;; @desc Get circuit breaker details
+;; @param circuit-type The circuit to query
+(define-read-only (get-circuit-details (circuit-type uint))
+  (map-get? circuit-breakers { circuit-type: circuit-type })
+)
+
+;; @desc Get global emergency status
+(define-read-only (get-global-emergency-status)
+  {
+    active: (var-get global-emergency-pause),
+    activated-at: (var-get emergency-pause-time)
+  }
+)
+
+;; @desc Get pause event details
+;; @param event-id The event ID to retrieve
+(define-read-only (get-pause-event (event-id uint))
+  (map-get? pause-events { event-id: event-id })
+)
+
+;; @desc Get recovery proposal details
+;; @param proposal-id The proposal ID to retrieve
+(define-read-only (get-recovery-proposal (proposal-id uint))
+  (map-get? recovery-proposals { proposal-id: proposal-id })
+)
+
+;; @desc Check if recovery can be executed
+;; @param proposal-id The proposal to check
+(define-read-only (can-execute-recovery (proposal-id uint))
+  (match (map-get? recovery-proposals { proposal-id: proposal-id })
+    proposal (and
+               (>= block-height (get execution-time proposal))
+               (not (get executed proposal))
+             )
+    false
+  )
+)
+
+;; ===========================================
+;; CONTRACT INITIALIZATION
+;; ===========================================
+
+;; Initialize with default circuit breakers
+(begin
+  ;; Initialize core circuits
+  (map-set circuit-breakers
+    { circuit-type: TYPE_TRADING }
+    {
+      paused: false,
+      paused-at: u0,
+      pause-duration: u1440, ;; ~1 day
+      triggered-by: tx-sender,
+      reason: "",
+      governance-approval: false
+    }
+  )
+
+  (map-set circuit-breakers
+    { circuit-type: TYPE_LENDING }
+    {
+      paused: false,
+      paused-at: u0,
+      pause-duration: u2880, ;; ~2 days
+      triggered-by: tx-sender,
+      reason: "",
+      governance-approval: false
+    }
+  )
+
+  (map-set circuit-breakers
+    { circuit-type: TYPE_ORACLE }
+    {
+      paused: false,
+      paused-at: u0,
+      pause-duration: u720, ;; ~12 hours
+      triggered-by: tx-sender,
+      reason: "",
+      governance-approval: false
+    }
+  )
+
+  (map-set circuit-breakers
+    { circuit-type: TYPE_GOVERNANCE }
+    {
+      paused: false,
+      paused-at: u0,
+      pause-duration: u10080, ;; ~1 week
+      triggered-by: tx-sender,
+      reason: "",
+      governance-approval: false
+    }
+  )
+
+  ;; Log initialization
+  (log-pause-event TYPE_EMERGENCY "initialized" "circuit breaker system initialized")
+)

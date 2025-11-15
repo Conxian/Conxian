@@ -1,29 +1,41 @@
-;; audit-registry.clar
-;; DAO-based contract security audit registry
-;; Handles audit submissions, DAO voting, and NFT badge issuance
+;; @desc DAO-based contract security audit registry.
+;; This contract handles audit submissions, DAO voting, and NFT badge issuance.
 
 ;; --- Traits ---
-(use-trait dao-trait .all-traits.dao-trait)
+(use-trait dao-trait .traits.dao-trait.dao-trait)
 
-;; --- Constants ---
+;; @constants
+;; @var CONTRACT_OWNER: The principal of the contract owner.
 (define-constant CONTRACT_OWNER tx-sender)
+;; @var ERR_UNAUTHORIZED: The caller is not authorized to perform this action.
 (define-constant ERR_UNAUTHORIZED (err u1001))
-(define-constant ERR_AUDIT_NOT_FOUND (err u1002))
-(define-constant ERR_INVALID_STATUS (err u1003))
-(define-constant ERR_VOTING_CLOSED (err u1004))
-(define-constant ERR_ALREADY_VOTED (err u1005))
-(define-constant ERR_INSUFFICIENT_STAKE (err u1006))
-(define-constant ERR_INVALID_VOTE_WEIGHT (err u1007))
-(define-constant ERR_VOTING_ACTIVE (err u1008))
+;; @var ERR_AUDIT_NOT_FOUND: The specified audit was not found.
+(define-constant ERR_AUDIT_NOT_FOUND (err u4000))
+;; @var ERR_INVALID_STATUS: The specified status is invalid.
+(define-constant ERR_INVALID_STATUS (err u1005))
+;; @var ERR_VOTING_CLOSED: The voting period for the specified audit has closed.
+(define-constant ERR_VOTING_CLOSED (err u6002))
+;; @var ERR_ALREADY_VOTED: The caller has already voted on the specified audit.
+(define-constant ERR_ALREADY_VOTED (err u6001))
+;; @var ERR_INSUFFICIENT_STAKE: The caller has an insufficient stake to perform this action.
+(define-constant ERR_INSUFFICIENT_STAKE (err u6003))
+;; @var ERR_INVALID_VOTE_WEIGHT: The vote weight is invalid.
+(define-constant ERR_INVALID_VOTE_WEIGHT (err u6003))
+;; @var ERR_VOTING_ACTIVE: The voting period for the specified audit is still active.
+(define-constant ERR_VOTING_ACTIVE (err u6001))
 
-;; --- Data Storage ---
+;; @data-vars
+;; @var next-audit-id: The ID of the next audit to be submitted.
 (define-data-var next-audit-id uint u1)
+;; @var min-stake-amount: The minimum stake amount required to submit an audit.
 (define-data-var min-stake-amount uint u100000000) ;; 100 STX in microSTX
+;; @var voting-period: The length of the voting period in blocks.
 (define-data-var voting-period uint u10080) ;; ~7 days in blocks
+;; @var dao-contract: The principal of the DAO contract.
 (define-data-var dao-contract (optional principal) none)
+;; @var quorum-threshold: The quorum threshold for a vote to pass, in basis points.
 (define-data-var quorum-threshold uint u5000) ;; 50% in basis points
-
-;; Audit structure with enhanced voting
+;; @var audits: A map of audit IDs to their data.
 (define-map audits { id: uint } {
   contract-address: principal,
   audit-hash: (string-ascii 64),
@@ -42,19 +54,19 @@
   voting-ends: uint,
   finalized: bool
 })
-
-;; Track individual votes
+;; @var voter-records: A map that tracks the votes of each voter for each audit.
 (define-map voter-records 
   { audit-id: uint, voter: principal }
   { vote: bool, weight: uint, timestamp: uint })
-
-;; Stake tracking
+;; @var staked-amounts: A map that tracks the staked amounts of each staker.
 (define-map staked-amounts  
   { staker: principal }  
   { amount: uint, last-vote: uint })
 
 ;; --- Private Helper Functions ---
-
+;; @desc Get the voting weight of a voter.
+;; @param voter: The principal of the voter.
+;; @returns (response uint uint): The voting weight of the voter, or a default weight if the DAO contract is not configured or the call fails.
 (define-private (get-voting-weight (voter principal))
   (match (var-get dao-contract)
     dao 
@@ -63,9 +75,17 @@
         error (ok u1)) ;; Default weight if DAO call fails
     (ok u1))) ;; Default weight if no DAO configured
 
+;; @desc Check if a voter has already voted on an audit.
+;; @param audit-id: The ID of the audit.
+;; @param voter: The principal of the voter.
+;; @returns (bool): True if the voter has already voted, false otherwise.
 (define-private (has-voted (audit-id uint) (voter principal))
   (is-some (map-get? voter-records { audit-id: audit-id, voter: voter })))
 
+;; @desc Calculate if the quorum for an audit has been met.
+;; @param for-votes: The number of "for" votes.
+;; @param against-votes: The number of "against" votes.
+;; @returns (bool): True if the quorum has been met, false otherwise.
 (define-private (calculate-quorum-met (for-votes uint) (against-votes uint))
   (let ((total-votes (+ for-votes against-votes)))
     (and 
@@ -73,8 +93,11 @@
       (>= (* for-votes u10000) (* total-votes (var-get quorum-threshold))))))
 
 ;; --- Public Functions ---
-
-;; Submit a new audit with enhanced validation
+;; @desc Submit a new audit.
+;; @param contract-address: The address of the contract that was audited.
+;; @param audit-hash: The hash of the audit report.
+;; @param report-uri: The URI of the audit report.
+;; @returns (response uint uint): The ID of the new audit, or an error code.
 (define-public (submit-audit 
     (contract-address principal) 
     (audit-hash (string-ascii 64))
@@ -85,8 +108,8 @@
     
     ;; Validate DAO voting power if configured
     (match (var-get dao-contract)
-      dao (match (contract-call? dao has-voting-power caller)
-            has-power (asserts! has-power ERR_UNAUTHORIZED)
+      dao (match (contract-call? dao get-voting-power caller)
+            weight (asserts! (> weight u0) ERR_UNAUTHORIZED)
             error (err error))
       (ok true))
     
@@ -106,7 +129,10 @@
     (var-set next-audit-id (+ audit-id u1))
     (ok audit-id)))
 
-;; Enhanced voting with weight tracking
+;; @desc Vote on an audit.
+;; @param audit-id: The ID of the audit to vote on.
+;; @param approve: A boolean indicating whether to approve or reject the audit.
+;; @returns (response bool uint): An `ok` response with `true` on success, or an error code.
 (define-public (vote (audit-id uint) (approve bool))
   (let (
       (caller tx-sender)
@@ -135,7 +161,9 @@
     
     (ok true)))
 
-;; Finalize audit with quorum check
+;; @desc Finalize an audit.
+;; @param audit-id: The ID of the audit to finalize.
+;; @returns (response bool uint): An `ok` response with `true` on success, or an error code.
 (define-public (finalize-audit (audit-id uint))
   (let (
       (audit (unwrap! (map-get? audits { id: audit-id }) ERR_AUDIT_NOT_FOUND))
@@ -173,24 +201,40 @@
       (ok true))))
 
 ;; --- Read-only Functions ---
+;; @desc Get the data for an audit.
+;; @param audit-id: The ID of the audit.
+;; @returns (response { ... } uint): A tuple containing the audit data, or an error code.
 (define-read-only (get-audit (audit-id uint))
   (match (map-get? audits { id: audit-id })
     audit (ok audit)
     (err ERR_AUDIT_NOT_FOUND)))
 
+;; @desc Get the status of an audit.
+;; @param audit-id: The ID of the audit.
+;; @returns (response { ... } uint): A tuple containing the audit status, or an error code.
 (define-read-only (get-audit-status (audit-id uint))
   (match (map-get? audits { id: audit-id })
     audit (ok (get status audit))
     (err ERR_AUDIT_NOT_FOUND)))
 
+;; @desc Get the votes for an audit.
+;; @param audit-id: The ID of the audit.
+;; @returns (response { ... } uint): A tuple containing the audit votes, or an error code.
 (define-read-only (get-audit-votes (audit-id uint))
   (match (map-get? audits { id: audit-id })
     audit (ok (get votes audit))
     (err ERR_AUDIT_NOT_FOUND)))
 
+;; @desc Get the record of a voter for an audit.
+;; @param audit-id: The ID of the audit.
+;; @param voter: The principal of the voter.
+;; @returns (response (optional { ... }) uint): A tuple containing the voter record, or none if not found.
 (define-read-only (get-voter-record (audit-id uint) (voter principal))
   (ok (map-get? voter-records { audit-id: audit-id, voter: voter })))
 
+;; @desc Get the quorum status for an audit.
+;; @param audit-id: The ID of the audit.
+;; @returns (response { ... } uint): A tuple containing the quorum status, or an error code.
 (define-read-only (get-quorum-status (audit-id uint))
   (match (map-get? audits { id: audit-id })
     audit (let ((votes (get votes audit)))
@@ -203,12 +247,18 @@
     (err ERR_AUDIT_NOT_FOUND)))
 
 ;; --- Admin Functions ---
+;; @desc Set the voting period.
+;; @param blocks: The new voting period in blocks.
+;; @returns (response bool uint): An `ok` response with `true` on success, or an error code.
 (define-public (set-voting-period (blocks uint))
   (begin
     (asserts! (is-eq tx-sender CONTRACT_OWNER) ERR_UNAUTHORIZED)
     (var-set voting-period blocks)
     (ok true)))
 
+;; @desc Set the quorum threshold.
+;; @param threshold: The new quorum threshold in basis points.
+;; @returns (response bool uint): An `ok` response with `true` on success, or an error code.
 (define-public (set-quorum-threshold (threshold uint))
   (begin
     (asserts! (is-eq tx-sender CONTRACT_OWNER) ERR_UNAUTHORIZED)
@@ -216,6 +266,10 @@
     (var-set quorum-threshold threshold)
     (ok true)))
 
+;; @desc Pause an audit in an emergency.
+;; @param audit-id: The ID of the audit.
+;; @param reason: The reason for the pause.
+;; @returns (response bool uint): An `ok` response with `true` on success, or an error code.
 (define-public (emergency-pause-audit (audit-id uint) (reason (string-utf8 500)))
   (begin
     (asserts! (is-eq tx-sender CONTRACT_OWNER) ERR_UNAUTHORIZED)
@@ -230,7 +284,9 @@
           (ok true))
       (err ERR_AUDIT_NOT_FOUND))))
 
-;; Initialize the contract
+;; @desc Initialize the contract.
+;; @param maybe-dao: An optional principal of the DAO contract.
+;; @returns (response bool uint): An `ok` response with `true` on success, or an error code.
 (define-public (initialize (maybe-dao (optional principal)))
   (begin
     (asserts! (is-eq tx-sender CONTRACT_OWNER) ERR_UNAUTHORIZED)

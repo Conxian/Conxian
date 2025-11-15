@@ -3,7 +3,7 @@ import { Cl } from '@stacks/transactions';
 
 // Core simnet verification for registry and oracle using the core manifest
 
-describe('Core simnet: dim-registry + dimensional-oracle', () => {
+describe('Core simnet: dim-registry + dimensional-engine', () => {
   it('dim-registry registers a dimension and returns its weight', () => {
     // @ts-ignore provided by global-vitest.setup.ts
     const simnet = global.simnet;
@@ -17,17 +17,17 @@ describe('Core simnet: dim-registry + dimensional-oracle', () => {
     expect(weight).toBeDefined();
   });
 
-  it('dimensional-oracle updates and reads a price', () => {
+  it('dimensional-engine updates and reads a price', () => {
     // @ts-ignore provided by global-vitest.setup.ts
     const simnet = global.simnet;
     const accounts = simnet.getAccounts();
     const deployer = accounts.get('deployer');
 
     const asset = Cl.principal(deployer);
-    const set = simnet.callPublicFn('dimensional-oracle', 'update-price', [asset, Cl.uint(123456)], deployer);
+    const set = simnet.callPublicFn('dimensional-engine', 'update-price', [asset, Cl.uint(123456)], deployer);
     expect(set).toBeDefined();
 
-    const price = simnet.callReadOnlyFn('dimensional-oracle', 'get-price', [asset], deployer);
+    const price = simnet.callReadOnlyFn('dimensional-engine', 'get-price', [asset], deployer);
     expect(price).toBeDefined();
   });
 });

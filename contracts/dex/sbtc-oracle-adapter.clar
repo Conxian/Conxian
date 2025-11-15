@@ -22,10 +22,6 @@
 (define-constant MIN_ORACLES_REQUIRED u2) ;; Minimum oracles for consensus
 (define-constant PRICE_PRECISION u1000000) ;; 6 decimal places
 
-;; Circuit breaker thresholds
-(define-constant CIRCUIT_BREAKER_DEVIATION u200000) ;; 20% price movement
-(define-constant CIRCUIT_BREAKER_WINDOW u6) ;; 6 blocks window
-
 ;; =============================================================================
 ;; DATA STRUCTURES
 ;; =============================================================================
@@ -59,24 +55,11 @@
     last-update: uint,
     participating-oracles: uint,
     confidence-score: uint,
-    deviation: uint,
-    circuit-breaker-active: bool
-  }
-)
-
-(define-map circuit-breaker-state
-  { asset: principal }
-  {
-    is-triggered: bool,
-    trigger-block: uint,
-    trigger-price: uint,
-    recovery-threshold: uint,
-    manual-override: bool
+    deviation: uint
   }
 )
 
 (define-data-var oracle-count uint u0)
-(define-data-var emergency-pause bool false)
 (define-data-var circuit-breaker-contract principal .circuit-breaker)
 
 ;; =============================================================================
@@ -153,11 +136,10 @@
 ;; =============================================================================
 (define-public (update-price (asset principal) (price uint) (confidence uint) (volume uint))
   (let ((oracle tx-sender))
-    (try! (check-circuit-breaker-status))
+    (asserts! (not (check-circuit-breaker-status)) ERR_CIRCUIT_OPEN)
     (match (map-get? oracle-config { oracle: oracle })
       config (begin
         (asserts! (get is-active config) ERR_NOT_AUTHORIZED)
-        (asserts! (not (var-get emergency-pause)) ERR_CIRCUIT_BREAKER_TRIGGERED)
         
         ;; Validate price parameters
         (asserts! (> price u0) ERR_INVALID_ORACLE)
@@ -260,8 +242,8 @@
         (confidence-score (calculate-confidence-score valid-prices))
         (price-deviation (calculate-aggregation-deviation asset weighted-price))
       )
-        (if (> price-deviation CIRCUIT_BREAKER_DEVIATION)
-          (try! (trigger-circuit-breaker asset weighted-price price-deviation))
+        (if (> price-deviation (get-deviation-threshold (var-get circuit-breaker-contract)))
+          (try! (contract-call? (var-get circuit-breaker-contract) trip-circuit "sbtc-oracle-adapter" asset weighted-price price-deviation))
           true
         )
         
@@ -272,8 +254,7 @@
             last-update: block-height,
             participating-oracles: (len valid-prices),
             confidence-score: confidence-score,
-            deviation: price-deviation,
-            circuit-breaker-active: (is-circuit-breaker-active asset)
+            deviation: price-deviation
           }
         )
         
@@ -367,82 +348,22 @@
 ;; CIRCUIT BREAKER
 ;; =============================================================================
 (define-private (check-circuit-breaker-status)
-  (match (contract-call? (var-get circuit-breaker-contract) check-and-update-breaker "sbtc-oracle-adapter")
-    success (if success (ok true) ERR_CIRCUIT_OPEN)
-    error ERR_CIRCUIT_OPEN
-  )
-)
-
-(define-private (trigger-circuit-breaker (asset principal) (trigger-price uint) (deviation uint))
-  (begin
-    (map-set circuit-breaker-state
-      { asset: asset }
-      {
-        is-triggered: true,
-        trigger-block: block-height,
-        trigger-price: trigger-price,
-        recovery-threshold: (/ (* trigger-price (- PRICE_PRECISION (/ CIRCUIT_BREAKER_DEVIATION u2))) PRICE_PRECISION),
-        manual-override: false
-      }
-    )
-    
-    (print {
-      event: "circuit-breaker-triggered",
-      asset: asset,
-      price: trigger-price,
-      deviation: deviation
-    })
-    (ok true)
-  )
-)
-
-(define-public (reset-circuit-breaker (asset principal))
-  (begin
-    (asserts! (is-eq tx-sender CONTRACT_OWNER) ERR_NOT_AUTHORIZED)
-    (map-delete circuit-breaker-state { asset: asset })
-    (print { event: "circuit-breaker-reset", asset: asset })
-    (ok true)
-  )
-)
-
-(define-public (manual-price-override (asset principal) (price uint))
-  (begin
-    (asserts! (is-eq tx-sender CONTRACT_OWNER) ERR_NOT_AUTHORIZED)
-    (match (map-get? circuit-breaker-state { asset: asset })
-      cb-state (begin
-        (map-set aggregated-prices
-          { asset: asset }
-          {
-            price: price,
-            last-update: block-height,
-            participating-oracles: u0,
-            confidence-score: u500000,
-            deviation: u0,
-            circuit-breaker-active: true
-          }
-        )
-        
-        (map-set circuit-breaker-state
-          { asset: asset }
-          (merge cb-state { manual-override: true })
-        )
-        
-        (print { event: "manual-price-override", asset: asset, price: price })
-        (ok true)
-      )
-      (err ERR_CIRCUIT_BREAKER_TRIGGERED)
-    )
-  )
+  (contract-call? (var-get circuit-breaker-contract) is-circuit-open "sbtc-oracle-adapter")
 )
 
 ;; =============================================================================
 ;; READ-ONLY FUNCTIONS
-;; =============================================================================
 (define-read-only (get-price (asset principal))
   (match (map-get? aggregated-prices { asset: asset })
-    price-data (if (get circuit-breaker-active price-data)
+    price-data (if (contract-call? (var-get circuit-breaker-contract) is-circuit-open "sbtc-oracle-adapter" asset)
       (err ERR_CIRCUIT_BREAKER_TRIGGERED)
       (ok (get price price-data)))
     none (err ERR_PRICE_NOT_AVAILABLE)
   )
 )
+
+
+
+
+
+

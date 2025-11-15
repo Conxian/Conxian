@@ -1,44 +1,294 @@
-# Conxian Stacks DeFi — Architecture: The Multi-Dimensional System
+# Conxian Protocol Architecture
 
-This document outlines the Conxian on-chain DeFi framework architecture, which is centered around the "Multi-Dimensional System." This system is a graph-based model of the entire DeFi ecosystem, designed to facilitate highly efficient trade routing and provide a framework for analyzing risk and liquidity.
+This document outlines the current Conxian protocol architecture, a comprehensive multi-dimensional DeFi system deployed on Stacks blockchain with 255+ smart contracts implementing advanced DeFi functionality.
 
-## Principles
+## Current Implementation Status
 
-- **Unified Core:** A single, consolidated `dimensional-engine` contract serves as the central hub for all protocol functionality, including position management, risk assessment, lending, and DEX operations.
-- **Composable & Extensible:** The system is designed to be highly composable and extensible, with new functionalities and assets registered in the `dim-registry`.
-- **Safety-First:** Explicit invariants, post-conditions, and conservative fee/limit defaults are enforced by the `dimensional-engine`.
-- **Sustainable Economics:** Fee capture to the protocol reserve and transparent emissions are managed by the core system.
-- **BTC-Native Differentiation:** The system is designed to leverage Bitcoin anchoring and future BTC bridges (e.g., sBTC) for differentiation.
+**Last Updated**: November 13, 2025
+**Contract Count**: 255 smart contracts
+**Key Features**: DEX, Lending, Governance, Multi-Dimensional DeFi, Security, Monitoring
 
-## Core Contracts
+## Architecture Principles
 
-### The Multi-Dimensional System
+- **Modular Design**: Separate modules for DEX, lending, governance, dimensional DeFi, security, and monitoring.
+- **Modular Traits**: The protocol is transitioning to a modular trait system. The `.all-traits` contract is being phased out in favor of modular imports from the respective modules.
+- **Bitcoin-Native**: Leverages Stacks' Bitcoin anchoring for security and finality.
+- **Enterprise-Ready**: Institutional features with compliance integration.
+- **Multi-Dimensional**: Spatial, temporal, risk, cross-chain, and institutional dimensions.
 
-- **`dimensional-engine.clar`**: The heart of the protocol. This contract consolidates all core functionalities, including:
-    - **Position Management:** Creation, closing, and management of all position types.
-    - **Risk Management:** Leverage, margin, and liquidation checks.
-    - **Lending:** Supplying, borrowing, and interest rate calculations.
-    - **DEX Operations:** Core swap and liquidity provision logic.
-- **`dim-graph.clar`**: Manages the relationships and flow of value between different "dimensions" (i.e., system components).
-- **`dim-registry.clar`**: The central nervous system of the protocol. It registers and weights all components within the dimensional architecture, including tokens, pools, and oracles.
-- **`advanced-router-dijkstra.clar`**: A specialized routing engine that uses Dijkstra's algorithm to find the optimal path for any given swap, minimizing slippage and fees.
+## Core Contract Modules
 
-### Foundational Libraries
+### Access Control
+- `access/`
+- `access/roles.clar`
+- `access/traits/access-traits.clar`
 
-- `math-lib-advanced.clar` – Advanced mathematical functions (sqrt, pow, ln, exp) using Newton-Raphson and Taylor series
-- `fixed-point-math.clar` – Precise arithmetic operations with proper rounding modes for 18-decimal precision
-- `precision-calculator.clar` – Validation and benchmarking tools for mathematical operations
+### Audit Registry
+- `audit-registry/`
+- `audit-registry/audit-registry.clar`
 
-Traits & Interfaces are defined in `contracts/traits/all-traits.clar`.
+### Automation
+- `automation/`
+- `automation/keeper-coordinator.clar`
 
-## Roadmap
+### Base
+- `base/`
+- `base/base-contract.clar`
+- `base/ownable.clar`
+- `base/pausable.clar`
 
-With the successful consolidation of the core protocol into the Multi-Dimensional System, the roadmap is now focused on expanding the capabilities of the system and integrating new features.
+### Core
+- `core/`
+- `core/conxian-protocol.clar`
+- `core/dimensional-engine.clar`
 
-1. **Integrate DEX & Routing Logic:** Refactor the remaining DEX-related contracts, merging routing logic into the `advanced-router-dijkstra` and other core DEX functionalities into the `dimensional-engine`.
-2. **Incorporate Lending System:** Consolidate the remaining lending functionalities into the multi-dimensional framework, ensuring seamless interaction with the core trading and risk engine.
-3. **sBTC Integration**: BTC-native strategies and collateral support.
-4. **Advanced Risk Models**: VaR calculations and portfolio optimization using implemented math functions.
-5. **Cross-Chain Flash Loans**: Bridge integration for cross-chain arbitrage opportunities.
+### DEX
+- `dex/`
+- `dex/batch-auction.clar`
+- `dex/concentrated-liquidity-pool.clar`
+- `dex/dex-factory-v2.clar`
+- `dex/dex-factory.clar`
+- `dex/dimensional-advanced-router-dijkstra.clar`
+- `dex/interest-rate-model.clar`
+- `dex/liquidity-optimization-engine.clar`
+- `dex/manipulation-detector.clar`
+- `dex/mev-protector.clar`
+- `dex/multi-hop-router-v3.clar`
+- `dex/oracle-aggregator-v2.clar`
+- `dex/oracle.clar`
+- `dex/pool-template.clar`
+- `dex/rebalancing-rules.clar`
+- `dex/sbtc-integration.clar`
+- `dex/timelock-controller.clar`
 
-Updated: Nov 07, 2025
+### Dimensional
+- `dimensional/`
+- `dimensional/dim-graph.clar`
+- `dimensional/dim-metrics.clar`
+- `dimensional/dim-oracle-automation.clar`
+- `dimensional/dim-registry.clar`
+- `dimensional/dim-revenue-adapter.clar`
+- `dimensional/dim-yield-stake.clar`
+- `dimensional/dimensional-core.clar`
+- `dimensional/governance.clar`
+
+### Enterprise
+- `enterprise/`
+- `enterprise/enterprise-api.clar`
+- `enterprise/enterprise-loan-manager.clar`
+
+### Errors
+- `errors/`
+- `errors/standard-errors.clar`
+
+### Governance
+- `governance/`
+- `governance/lending-protocol-governance.clar`
+- `governance/proposal-engine.clar`
+- `governance/voting.clar`
+
+### Helpers
+- `helpers/`
+
+### Integrations
+- `integrations/`
+
+### Interfaces
+- `interfaces/`
+
+### Interoperability
+- `interoperability/`
+
+### Lending (Under Development)
+- `lending/`
+- `lending/lending-pool.clar`
+- `lending/lending-pool-core.clar`
+- `lending/lending-pool-rewards.clar`
+- `lending/lending-pool-v2.clar`
+
+### Lib
+- `lib/`
+- `lib/math-lib-advanced.clar`
+- `lib/precision-calculator.clar`
+
+### Libraries
+- `libraries/`
+
+### Math
+- `math/`
+- `math/fixed-point-math.clar`
+- `math/math-lib-concentrated.clar`
+
+### MEV
+- `mev/`
+- `mev/mev-protector-root.clar`
+
+### Mocks
+- `mocks/`
+- `mocks/mock-token.clar`
+
+### Monitoring
+- `monitoring/`
+
+### Oracle
+- `oracle/`
+- `oracle/dimensional-oracle.clar`
+- `oracle/external-oracle-adapter.clar`
+
+### Pools
+- `pools/`
+- `pools/pool-registry.clar`
+- `pools/tiered-pools.clar`
+
+### Requirements
+- `requirements/`
+- `requirements/sip-010-trait-ft-standard.clar`
+
+### Rewards
+- `rewards/`
+
+### Risk
+- `risk/`
+- `risk/funding-calculator.clar`
+- `risk/liquidation-engine.clar`
+- `risk/risk-manager.clar`
+
+### Router
+- `router/`
+
+### sBTC
+- `sbtc/`
+- `sbtc/btc-adapter.clar`
+
+### Security
+- `security/`
+- `security/circuit-breaker.clar`
+
+### Staking
+- `staking/`
+
+### Test
+- `test/`
+
+### Tokens
+- `tokens/`
+- `tokens/cxd-price-initializer.clar`
+- `tokens/cxd-token.clar`
+- `tokens/cxlp-token.clar`
+- `tokens/cxs-token.clar`
+- `tokens/cxtr-token.clar`
+- `tokens/cxvg-token.clar`
+- `tokens/token-system-coordinator.clar`
+
+### Traits
+- `traits/`
+- `traits/base-traits.clar`
+- `traits/batch-auction-trait.clar`
+- `traits/central-traits-registry.clar`
+- `traits/clp-pool-trait.clar`
+- `traits/dao-trait.clar`
+- `traits/dex-traits.clar`
+- `traits/dimensional-traits.clar`
+- `traits/errors.clar`
+- `traits/finance-metrics-trait.clar`
+- `traits/governance-traits.clar`
+- `traits/math-trait.clar`
+- `traits/monitoring-security-traits.clar`
+- `traits/oracle-aggregator-v2-trait.clar`
+- `traits/oracle-risk-traits.clar`
+- `traits/risk-trait.clar`
+- `traits/sip-010-ft-trait.clar`
+
+### Utils
+- `utils/`
+- `utils/block-utils.clar`
+- `utils/encoding.clar`
+- `utils/error-utils.clar`
+- `utils/migration-manager.clar`
+- `utils/rbac.clar`
+- `utils/utils.clar`
+- `utils/validation.clar`
+
+### Vaults
+- `vaults/`
+
+## Mathematical Foundation
+
+### Advanced Math Libraries
+
+- `math/fixed-point-math.clar`: 18-decimal precision arithmetic
+- `lib/math-lib-advanced.clar`
+- `math/math-lib-concentrated.clar`
+- `lib/precision-calculator.clar`
+
+## Integration Points
+
+### Cross-Chain
+
+- **sBTC Integration**: Native Bitcoin collateral and settlement
+- **Wormhole Bridge**: Cross-chain asset transfers
+- **Nakamoto Compatibility**: Sub-second finality integration
+
+### Enterprise Features
+
+- **Compliance Hooks**: KYC/AML integration points
+- **Institutional Accounts**: Tiered access and advanced orders
+- **Audit Trails**: Comprehensive transaction logging
+- **API Endpoints**: REST and contract-level APIs
+
+## Security Architecture
+
+### Multi-Layer Protection
+
+- **Circuit Breakers**: Emergency pause mechanisms
+- **MEV Protection**: Batch auctions and manipulation detection
+- **Access Controls**: Role-based permissions and governance
+- **Invariant Monitoring**: Protocol health checks
+
+### Audit & Compliance
+
+- **Error Code Standardization**: u1000+ error codes
+- **Post-Condition Checks**: Explicit state validation
+- **Conservative Defaults**: Safe parameter initialization
+
+## Deployment Architecture
+
+### Testnet Deployment
+
+- **GitHub Actions CI/CD**: Automated deployment pipeline
+- **Clarinet Integration**: Manifest-based deployments
+- **Multi-Environment**: Testnet and mainnet configurations
+
+### Production Considerations
+
+- **Multi-Sig Governance**: Secure upgrade management
+- **Emergency Controls**: Protocol-wide pause functionality
+- **Monitoring Integration**: Real-time health monitoring
+
+## Roadmap Status
+
+### Completed Phases
+
+- **Foundation**: Core contracts and trait standardization.
+- **DEX Implementation**: Complete decentralized exchange suite.
+- **Governance Framework**: Decentralized governance and upgrades.
+- **Security Infrastructure**: Circuit breakers and monitoring.
+- **Cross-Chain Integration**: sBTC and Wormhole support.
+
+### Current Phase (Phase 2)
+
+- **Lending Protocol**: Enterprise-grade lending system.
+- **Token Economics**: Advanced emission and reward systems.
+- **Oracle Enhancement**: Multi-source aggregation and automation.
+- **Dimensional DeFi**: Multi-dimensional financial operations.
+- **Enterprise Integration**: Institutional compliance and APIs.
+
+### Next Phase (Phase 3)
+
+- **Performance Optimization**: Gas optimization and scaling.
+- **Advanced Risk Models**: VaR calculations and portfolio optimization.
+- **Permissionless Deployment**: Third-party integration framework.
+- **Governance V2**: Enhanced on-chain governance.
+---
+
+**Implementation Note**: This architecture reflects the current state of the Conxian protocol as of November 2025.

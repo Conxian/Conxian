@@ -1,8 +1,8 @@
 ;; Liquidation Manager Contract
-(use-trait liquidation-trait .all-traits.liquidation-trait)
-(impl-trait .all-traits.liquidation-trait)
+(use-trait liquidation-trait .liquidation-trait.liquidation-trait)
+(impl-trait .liquidation-trait.liquidation-trait)
 ;; Lending system trait for underwater checks
-(use-trait lending-system-trait .all-traits.lending-system-trait)
+(use-trait lending-system-trait .lending-system-trait.lending-system-trait)
 
 ;; Constants
 (define-constant CONTRACT_OWNER tx-sender)

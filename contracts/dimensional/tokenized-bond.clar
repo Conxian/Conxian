@@ -1,18 +1,26 @@
-
+(use-trait sip-010-ft-trait .traits.sip-010-ft-trait.sip-010-ft-trait)
+(use-trait sip-000-governance-trait .all-traits.sip-000-governance-trait)
 
 ;; tokenized-bond.clar
-
-;;
-
-;; This contract implements a SIP-010 tokenized bond.
-
-;; It represents a single series of bonds with uniform characteristics.
+;; SIP-010 Tokenized Bond Contract
+;; This contract implements a tokenized bond with automated coupon payments and principal redemption.
+;; It adheres to SIP-010 for fungible tokens.
 
 ;; Import traits from the all-traits.clar file
 
 ;; Implement the traits for this contract
 
-;; Error codes(define-constant ERR_UNAUTHORIZED (err u100))
+;; ===== Constants =====
+(define-constant ERR_UNAUTHORIZED (err u100))
+(define-constant ERR_BOND_ALREADY_ISSUED (err u101))
+(define-constant ERR_INVALID_BOND_PARAMS (err u102))
+(define-constant ERR_BOND_NOT_MATURED (err u103))
+(define-constant ERR_NO_COUPONS_DUE (err u104))
+(define-constant ERR_INSUFFICIENT_FUNDS (err u105))
+(define-constant ERR_INVALID_AMOUNT (err u106))
+(define-constant ERR_BOND_MATURED (err u107))
+(define-constant ERR_GOVERNANCE_CALL (err u108))
+
 (define-constant ERR_INVALID_AMOUNT (err u101))
 (define-constant ERR_INSUFFICIENT_BALANCE (err u102))
 (define-constant ERR_BOND_NOT_ISSUED (err u104))
@@ -41,11 +49,63 @@
 (define-data-var coupon-frequency uint u0)
 (define-data-var face-value uint u0)
 (define-data-var payment-token-contract (optional principal) none)
-(define-data-var contract-owner principal tx-sender)
+(define-data-var governance-contract (optional principal) none)
 (define-data-var total-supply uint u0)
 (define-map last-claimed-coupon { user: principal } { period: uint })
 (define-private (is-valid-principal (who principal))  (is-eq (len (unwrap-panic (principal-destruct who))) 28))
-(define-public (issue-bond    (name (string-ascii 32))    (symbol (string-ascii 10))    (decimals uint)    (initial-supply uint)    (maturity-in-blocks uint)    (coupon-rate-scaled uint)    (frequency-in-blocks uint)    (bond-face-value uint)    (payment-token-address principal)  )  (begin    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)    (asserts! (not (var-get bond-issued)) ERR_ALREADY_ISSUED)    (asserts! (<= decimals MAX_DECIMALS) ERR_INVALID_DECIMALS)    (asserts! (>= (len name) 1) ERR_INVALID_AMOUNT)    (asserts! (>= (len symbol) 1) ERR_INVALID_AMOUNT)    (asserts! (> initial-supply u0) ERR_INVALID_AMOUNT)    (asserts! (>= maturity-in-blocks MIN_MATURITY_BLOCKS) ERR_INVALID_MATURITY)    (asserts! (<= coupon-rate-scaled MAX_COUPON_RATE) ERR_INVALID_COUPON_RATE)    (asserts! (>= frequency-in-blocks MIN_COUPON_FREQUENCY) ERR_INVALID_FREQUENCY)    (asserts! (> bond-face-value u0) ERR_INVALID_FACE_VALUE)    (asserts! (is-valid-principal payment-token-address) ERR_INVALID_AMOUNT)    (asserts! (<= (len (unwrap-panic (principal-destruct payment-token-address))) 28) ERR_INVALID_AMOUNT)    (var-set token-name name)    (var-set token-symbol symbol)    (var-set token-decimals decimals)    (var-set issue-block block-height)    (var-set maturity-block (safe-add block-height maturity-in-blocks))    (var-set coupon-rate coupon-rate-scaled)    (var-set coupon-frequency frequency-in-blocks)    (var-set face-value bond-face-value)    (var-set payment-token-contract (some payment-token-address))    (try! (mint-internal initial-supply (var-get contract-owner)))    (var-set total-supply initial-supply)    (var-set bond-issued true)        (print {      event: "bond-issued",      name: name,      symbol: symbol,      decimals: decimals,      initial-supply: initial-supply,      maturity-block: (var-get maturity-block),      coupon-rate: coupon-rate-scaled,      frequency: frequency-in-blocks,      face-value: bond-face-value,      payment-token: payment-token-address    })        (ok true)  ))
+
+;; @desc Issues a new tokenized bond with specified parameters.
+;; @param name The name of the bond token.
+;; @param symbol The symbol of the bond token.
+;; @param decimals The number of decimal places for the bond token.
+;; @param initial-supply The initial supply of the bond token.
+;; @param maturity-in-blocks The maturity period of the bond in blocks.
+;; @param coupon-rate-scaled The coupon rate scaled by 10^8.
+;; @param frequency-in-blocks The frequency of coupon payments in blocks.
+;; @param bond-face-value The face value of the bond.
+;; @param payment-token-address The principal of the payment token contract.
+;; @returns A response code indicating success or failure.
+;; @events bond-issued
+(define-public (issue-bond
+    (name (string-ascii 32))
+    (symbol (string-ascii 10))
+    (decimals uint)
+    (initial-supply uint)
+    (maturity-in-blocks uint)
+    (coupon-rate-scaled uint)
+    (frequency-in-blocks uint)
+    (bond-face-value uint)
+    (payment-token-address principal)
+  )
+  (begin
+    (asserts! (is-some (var-get governance-contract)) ERR_UNAUTHORIZED)
+    (asserts! (contract-call? (unwrap! (var-get governance-contract) ERR_UNAUTHORIZED) is-governance-caller) ERR_GOVERNANCE_CALL)
+    (asserts! (not (var-get bond-issued)) ERR_BOND_ALREADY_ISSUED)
+    (asserts! (<= decimals MAX_DECIMALS) ERR_INVALID_BOND_PARAMS)
+    (asserts! (>= (len name) u1) ERR_INVALID_BOND_PARAMS)
+    (asserts! (>= (len symbol) u1) ERR_INVALID_BOND_PARAMS)
+    (asserts! (> initial-supply u0) ERR_INVALID_BOND_PARAMS)
+    (asserts! (>= maturity-in-blocks MIN_MATURITY_BLOCKS) ERR_INVALID_BOND_PARAMS)
+    (asserts! (<= coupon-rate-scaled MAX_COUPON_RATE) ERR_INVALID_BOND_PARAMS)
+    (asserts! (>= frequency-in-blocks MIN_COUPON_FREQUENCY) ERR_INVALID_BOND_PARAMS)
+    (asserts! (> bond-face-value u0) ERR_INVALID_BOND_PARAMS)
+    (asserts! (is-valid-principal payment-token-address) ERR_INVALID_BOND_PARAMS)
+    (var-set token-name name)
+    (var-set token-symbol symbol)
+    (var-set token-decimals decimals)
+    (var-set issue-block block-height)
+    (var-set maturity-block (unwrap-panic (safe-add block-height maturity-in-blocks)))
+    (var-set coupon-rate coupon-rate-scaled)
+    (var-set coupon-frequency frequency-in-blocks)
+    (var-set face-value bond-face-value)
+    (var-set payment-token-contract (some payment-token-address))
+    (try! (mint-internal initial-supply tx-sender))
+    (var-set total-supply initial-supply)
+    (var-set bond-issued true)
+    (print { event: "bond-issued", name: name, symbol: symbol, decimals: decimals, initial-supply: initial-supply, maturity-block: (var-get maturity-block), coupon-rate: coupon-rate-scaled, frequency: frequency-in-blocks, face-value: bond-face-value, payment-token: payment-token-address })
+    (ok true)
+  )
+)
 (define-private (safe-add (a uint) (b uint))  (let ((sum (+ a b)))    (asserts! (>= sum a) (err ERR_INVALID_AMOUNT))    (ok sum)  ))
 (define-private (safe-mul (a uint) (b uint))  (let ((product (* a b)))    (asserts! (or (is-eq a (/ product b)) (is-eq b u0)) (err ERR_INVALID_AMOUNT))    (ok product)  ))
 (define-private (safe-sub (a uint) (b uint))  (asserts! (>= a b) (err ERR_INVALID_AMOUNT))  (ok (- a b)))
@@ -57,6 +117,31 @@
 (define-read-only (get-decimals)  (ok (var-get token-decimals)))
 (define-read-only (get-name)  (ok (var-get token-name)))
 (define-read-only (get-symbol)  (ok (var-get token-symbol)))
-(define-read-only (get-token-uri)  (ok (var-get token-uri)))
-(define-public (set-token-uri (value (optional (string-utf8 256))))  (begin    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)    (match value      (some uri) (asserts! (<= (len uri) 256) ERR_INVALID_TOKEN_URI)      none true    )    (var-set token-uri value)        (print {      event: "token-uri-updated",      by: tx-sender,      new-uri: value    })        (ok true)  ))
-(define-read-only (get-payment-token-contract)  (ok (var-get payment-token-contract)))
+
+;; @desc Returns the URI for the token metadata.
+;; @returns An optional string containing the token URI.
+(define-read-only (get-token-uri)
+  (ok (var-get token-uri)))
+
+;; @desc Sets the URI for the token metadata. Only callable by the governance contract.
+;; @param value An optional string containing the new token URI.
+;; @returns A response code indicating success or failure.
+;; @events token-uri-updated
+(define-public (set-token-uri (value (optional (string-utf8 256))))
+  (begin
+    (asserts! (is-some (var-get governance-contract)) ERR_UNAUTHORIZED)
+    (asserts! (contract-call? (unwrap! (var-get governance-contract) ERR_UNAUTHORIZED) is-governance-caller) ERR_GOVERNANCE_CALL)
+    (match value
+      (some uri) (asserts! (<= (len uri) 256) ERR_INVALID_TOKEN_URI)
+      none true
+    )
+    (var-set token-uri value)
+    (print { event: "token-uri-updated", by: tx-sender, new-uri: value })
+    (ok true)
+  )
+)
+
+;; @desc Returns the principal of the payment token contract.
+;; @returns An optional principal of the payment token contract.
+(define-read-only (get-payment-token-contract)
+  (ok (var-get payment-token-contract)))

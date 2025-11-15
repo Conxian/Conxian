@@ -1,10 +1,9 @@
 ;; cxd-bonding-curve-amm.clar
 ;; Minimal placeholder implementation for CXD bonding curve AMM
 
-(use-trait token-trait .all-traits.sip-010-ft-trait)
-(use-trait governance-token-trait .all-traits.governance-token-trait)
-;; TODO: price-initializer-trait not defined in all-traits.clar
-;; (use-trait price-initializer-trait .all-traits.price-initializer-trait)
+(use-trait token-trait .requirements.sip-010-trait-ft-standard.sip-010-trait-ft-standard)
+(use-trait governance-token-trait .traits.governance-token-trait.governance-token-trait)
+(use-trait price-initializer-trait .traits.price-initializer-trait.price-initializer-trait)
 
 (define-constant ERR_UNAUTHORIZED (err u1000))
 (define-constant ERR_INVALID_INPUT (err u1001))

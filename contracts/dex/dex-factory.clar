@@ -1,143 +1,166 @@
-;; Conxian DEX Factory V2 - DIMENSIONAL INTEGRATION
-;; Pool creation and registration through dimensional registry
-;; All pools registered as dimensional nodes for unified routing
+;; Conxian DEX Factory V2 - DIMENSIONAL INTEGRATION (Refactored)
+;; This contract acts as a facade, delegating logic to specialized registry contracts.
 
-(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
-(use-trait factory-trait .all-traits.factory-trait)
-(use-trait access-control-trait .all-traits.access-control-trait)
-(use-trait circuit-breaker-trait .all-traits.circuit-breaker-trait)
-(use-trait dim-registry-trait .all-traits.dim-registry-trait)
-
-;; --- Dimensional Integration ---
-(define-data-var dimensional-registry principal tx-sender) ;; Will be set to dim-registry.clar
+(use-trait "sip-010-ft-trait" .dex-traits.sip-010-ft-trait)
+(use-trait "factory-trait" .dex-traits.factory-trait)
+(use-trait "access-control-trait" .base-traits.rbac-trait)
+(use-trait "circuit-breaker-trait" .monitoring-security-traits.circuit-breaker-trait)
+(use-trait "dim-registry-trait" .dimensional-traits.dim-registry-trait)
+(use-trait "pool-type-registry-trait" .pool-type-registry.pool-type-registry-trait)
+(use-trait "pool-implementation-registry-trait" .pool-implementation-registry.pool-implementation-registry-trait)
+(use-trait "pool-registry-trait" .pool-registry.pool-registry-trait)
 
 ;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED (err u1003))
 (define-constant ERR_POOL_EXISTS (err u2001))
 (define-constant ERR_INVALID_TOKENS (err u2002))
-(define-constant ERR_POOL_NOT_FOUND (err u2003))
 (define-constant ERR_INVALID_FEE (err u2004))
 (define-constant ERR_INVALID_POOL_TYPE (err u2005))
 (define-constant ERR_IMPLEMENTATION_NOT_FOUND (err u2006))
 (define-constant ERR_SWAP_FAILED (err u2007))
 (define-constant ERR_CIRCUIT_OPEN (err u5000))
+
 ;; --- Data Variables ---
-(define-data-var contract-owner principal tx-sender)
+
+;; @desc Stores the principal of the access control contract.
 (define-data-var access-control-contract principal .access-control)
-(define-data-var pool-count uint u0)
+;; @desc Stores the principal of the circuit breaker contract.
 (define-data-var circuit-breaker principal .circuit-breaker)
-(define-data-var default-pool-type (string-ascii 64) POOL_TYPE_WEIGHTED)
+;; @desc Stores the principal of the dimensional registry contract for integrating pools as dimensional nodes.
+(define-data-var dimensional-registry principal .dim-registry)
+;; @desc Stores the principal of the pool type registry contract.
+(define-data-var pool-type-registry principal .pool-type-registry)
+;; @desc Stores the principal of the pool implementation registry contract.
+(define-data-var pool-implementation-registry principal .pool-implementation-registry)
+;; @desc Stores the principal of the pool registry contract.
+(define-data-var pool-registry principal .pool-registry)
+;; @desc Stores the default pool type used for new pool creations.
+(define-data-var default-pool-type (string-ascii 64) "weighted")
 
-;; --- Maps ---
-(define-map pools { token-a: principal, token-b: principal } principal)
-(define-map pool-info principal { token-a: principal, token-b: principal, fee-bps: uint, created-at: uint })
-(define-map pool-implementations (string-ascii 64) principal)
-(define-map pool-types principal (string-ascii 64))
-;; Deterministic ordering registry for principals (owner-managed)
-(define-map token-order principal uint)
+;; --- Private Functions ---
 
-;; Stores pool type metadata
-(define-map pool-type-info (string-ascii 64) {
-  name: (string-ascii 32),
-  description: (string-ascii 128),
-  is-active: bool
-})
-
-;; Pool Types
-(define-constant POOL_TYPE_WEIGHTED "weighted")
-(define-constant POOL_TYPE_CONCENTRATED_LIQUIDITY "concentrated-liquidity")
-(define-constant POOL_TYPE_LIQUIDITY_BOOTSTRAP "liquidity-bootstrap")
-
-(define-private (normalize-token-pair (token-a principal) (token-b principal))
-  (if (is-eq token-a token-b)
-    (err ERR_INVALID_TOKENS)
-    (let ((order-a (default-to u0 (map-get? token-order token-a)))
-          (order-b (default-to u0 (map-get? token-order token-b))))
-      (if (< order-a order-b)
-        (ok { token-a: token-a, token-b: token-b })
-        (ok { token-a: token-b, token-b: token-a })
-      )
-    )
-  )
-)
-
-
+;; @desc Checks if the transaction sender is the contract owner.
+;; @returns (response bool uint) A response indicating success or an unauthorized error.
 (define-private (check-is-owner)
-  (begin
-    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
-    (ok true)
-  )
-)
+  (contract-call? (var-get access-control-contract) has-role "contract-owner" tx-sender))
 
+;; @desc Checks if the transaction sender has the 'POOL_MANAGER' role.
+;; @returns (response bool uint) A response indicating success or an unauthorized error.
 (define-private (check-pool-manager)
-  (let ((has (unwrap! (contract-call? (var-get access-control-contract) has-role "POOL_MANAGER" tx-sender) ERR_UNAUTHORIZED)))
-      (asserts! has ERR_UNAUTHORIZED)
-      (ok true)
-    ))
-)
+  (contract-call? (var-get access-control-contract) has-role "POOL_MANAGER" tx-sender))
 
+;; @desc Checks if the circuit breaker is open.
+;; @returns (response bool uint) A response indicating if the circuit is open.
 (define-private (check-circuit-breaker)
-  (contract-call? .circuit-breaker is-circuit-open))
+  (contract-call? (var-get circuit-breaker) is-circuit-open))
 
+;; @desc Validates if a given pool type is registered and active by querying the pool type registry.
+;; @param pool-type (string-ascii 64) The string identifier of the pool type.
+;; @returns (response bool uint) A response indicating success or an invalid pool type error.
 (define-private (validate-pool-type (pool-type (string-ascii 64)))
-  (let ((pool-type-data (map-get? pool-type-info pool-type)))
-    (asserts! (is-some pool-type-data) (err ERR_INVALID_POOL_TYPE))
-    (asserts! (get is-active (unwrap-panic pool-type-data)) (err ERR_INVALID_POOL_TYPE))
-    (ok true)
-  )
-)
+  (let ((pool-type-info (unwrap! (contract-call? (var-get pool-type-registry) get-pool-type-info pool-type) (err ERR_INVALID_POOL_TYPE))))
+    (asserts! (get is-active pool-type-info) (err ERR_INVALID_POOL_TYPE))
+    (ok true)))
 
 ;; --- Public Functions ---
 
-(define-public (create-pool (token-a <sip-010-ft-trait>) (token-b <sip-010-ft-trait>) (pool-type (string-ascii 64)) (fee-bps uint))
+;; @desc Creates a new liquidity pool. This function validates inputs and then delegates the creation and registration process.
+;; @param token-a <sip-010-ft-trait> The trait of the first token in the pool.
+;; @param token-b <sip-010-ft-trait> The trait of the second token in the pool.
+;; @param pool-type (optional (string-ascii 64)) The string identifier of the pool type. If not provided, the default pool type is used.
+;; @param fee-bps uint The fee in basis points for the pool.
+;; @param additional-params (optional { tick-spacing: uint, initial-price: uint }) Optional parameters for specific pool types.
+;; @returns (response principal uint) The principal of the newly created pool or an error.
+(define-public (create-pool (token-a <sip-010-ft-trait>) (token-b <sip-010-ft-trait>) (pool-type (optional (string-ascii 64))) (fee-bps uint) (additional-params (optional { tick-spacing: uint, initial-price: uint })))
   (begin
     (try! (check-pool-manager))
     (asserts! (not (try! (check-circuit-breaker))) ERR_CIRCUIT_OPEN)
-    (try! (validate-pool-type pool-type))
-    (asserts! (>= fee-bps u0) (err ERR_INVALID_FEE))
-    (asserts! (<= fee-bps u10000) (err ERR_INVALID_FEE)) ;; Max 100% fee
-    (asserts! (is-ok (contract-call? token-a get-symbol)) (err ERR_INVALID_TOKENS))
-    (asserts! (is-ok (contract-call? token-b get-symbol)) (err ERR_INVALID_TOKENS))
-    (asserts! (not (is-eq (contract-of token-a) (contract-of token-b))) (err ERR_INVALID_TOKENS))
 
-    (let ((normalized-pair (unwrap! (normalize-token-pair (contract-of token-a) (contract-of token-b)) (err ERR_INVALID_TOKENS)))
-          (pool-impl (unwrap! (map-get? pool-implementations pool-type) (err ERR_IMPLEMENTATION_NOT_FOUND))))
-      
-      (asserts! (is-none (map-get? pools normalized-pair)) ERR_POOL_EXISTS)
+    (let ((selected-pool-type (default-to (var-get default-pool-type) pool-type)))
+      (try! (validate-pool-type selected-pool-type))
+      (asserts! (and (>= fee-bps u0) (<= fee-bps u10000)) (err ERR_INVALID_FEE))
+      (asserts! (not (is-eq (contract-of token-a) (contract-of token-b))) (err ERR_INVALID_TOKENS))
 
-      (let ((pool-principal (unwrap! (contract-call? pool-impl create-pool (get token-a normalized-pair) (get token-b normalized-pair) fee-bps) (err ERR_SWAP_FAILED))))
+      (let ((pool-impl (unwrap! (contract-call? (var-get pool-implementation-registry) get-pool-implementation selected-pool-type) (err ERR_IMPLEMENTATION_NOT_FOUND)))
+            (token-a-principal (contract-of token-a))
+            (token-b-principal (contract-of token-b)))
+        
+        (asserts! (is-none (unwrap! (contract-call? (var-get pool-registry) get-pool token-a-principal token-b-principal) (err u0))) ERR_POOL_EXISTS)
 
-        ;; Register pool component with dimensional registry (factory as caller)
-        (let ((registry (var-get dimensional-registry)))
-          (try! (as-contract (contract-call? registry register-component pool-principal u100))))
+        (let ((pool-principal (unwrap! (contract-call? pool-impl create-pool token-a-principal token-b-principal fee-bps additional-params) (err ERR_SWAP_FAILED))))
 
-        (map-set pools normalized-pair pool-principal)
-        (map-set pool-info pool-principal
-          {
-            token-a: (get token-a normalized-pair),
-            token-b: (get token-b normalized-pair),
-            fee-bps: fee-bps,
-            created-at: block-height
-          }
+          (try! (as-contract (contract-call? (var-get dimensional-registry) register-component pool-principal u100)))
+          (try! (as-contract (contract-call? (var-get pool-registry) add-pool pool-principal token-a-principal token-b-principal selected-pool-type fee-bps additional-params)))
+
+          (print {
+            event: "pool-created",
+            pool-address: pool-principal,
+            token-a: token-a-principal,
+            token-b: token-b-principal,
+            pool-type: selected-pool-type
+          })
+
+          (ok pool-principal)
         )
-        (map-set pool-types pool-principal pool-type)
-
-        (var-set pool-count (+ (var-get pool-count) u1))
-
-        (print {
-          event: "pool-created",
-          pool-address: pool-principal,
-          token-a: (get token-a normalized-pair),
-          token-b: (get token-b normalized-pair),
-          pool-type: pool-type
-        })
-
-        (ok pool-principal)
       )
     )
   )
 )
 
+;; --- Registry Management Functions ---
+
+;; @desc Registers a new pool type by calling the pool type registry.
+;; @param pool-type (string-ascii 64) The identifier for the new pool type.
+;; @param name (string-ascii 32) The human-readable name of the pool type.
+;; @param description (string-ascii 128) A description of the pool type.
+;; @param is-active bool Whether the pool type is active.
+;; @returns (response bool uint) The response from the pool type registry.
+(define-public (register-pool-type (pool-type (string-ascii 64)) (name (string-ascii 32)) (description (string-ascii 128)) (is-active bool))
+  (begin
+    (try! (check-is-owner))
+    (contract-call? (var-get pool-type-registry) register-pool-type pool-type name description is-active)
+  )
+)
+
+;; @desc Sets the active status of a pool type by calling the pool type registry.
+;; @param pool-type (string-ascii 64) The identifier of the pool type to update.
+;; @param is-active bool The new active status.
+;; @returns (response bool uint) The response from the pool type registry.
+(define-public (set-pool-type-active (pool-type (string-ascii 64)) (is-active bool))
+  (begin
+    (try! (check-is-owner))
+    (contract-call? (var-get pool-type-registry) set-pool-type-active pool-type is-active)
+  )
+)
+
+;; @desc Registers a pool implementation by calling the pool implementation registry.
+;; @param pool-type (string-ascii 64) The identifier of the pool type.
+;; @param implementation-contract principal The principal of the implementation contract.
+;; @returns (response bool uint) The response from the pool implementation registry.
+(define-public (register-pool-implementation (pool-type (string-ascii 64)) (implementation-contract principal))
+  (begin
+    (try! (check-is-owner))
+    (contract-call? (var-get pool-implementation-registry) register-pool-implementation pool-type implementation-contract)
+  )
+)
+
+;; --- Configuration Functions ---
+
+;; @desc Sets the default pool type for new pool creations.
+;; @param new-default-pool-type (string-ascii 64) The identifier of the new default pool type.
+;; @returns (response bool uint) `(ok true)` on success, or an error.
+(define-public (set-default-pool-type (new-default-pool-type (string-ascii 64)))
+  (begin
+    (try! (check-is-owner))
+    (try! (validate-pool-type new-default-pool-type))
+    (var-set default-pool-type new-default-pool-type)
+    (ok true)
+  )
+)
+
+;; @desc Sets the circuit breaker contract principal.
+;; @param new-circuit-breaker principal The principal of the new circuit breaker contract.
+;; @returns (response bool uint) `(ok true)` on success, or an error.
 (define-public (set-circuit-breaker (new-circuit-breaker principal))
   (begin
     (try! (check-is-owner))
@@ -146,7 +169,9 @@
   )
 )
 
-;; Owner-only: set dimensional registry contract
+;; @desc Sets the dimensional registry contract principal.
+;; @param new-registry principal The principal of the new dimensional registry contract.
+;; @returns (response bool uint) `(ok true)` on success, or an error.
 (define-public (set-dimensional-registry (new-registry principal))
   (begin
     (try! (check-is-owner))
@@ -155,6 +180,9 @@
   )
 )
 
+;; @desc Sets the access control contract principal.
+;; @param new-access-control principal The principal of the new access control contract.
+;; @returns (response bool uint) `(ok true)` on success, or an error.
 (define-public (set-access-control-contract (new-access-control principal))
   (begin
     (try! (check-is-owner))
@@ -163,136 +191,84 @@
   )
 )
 
-;; Owner-only: set deterministic order index for a token principal
-(define-public (set-token-order (token principal) (order uint))
+;; @desc Sets the pool type registry contract principal.
+;; @param new-registry principal The principal of the new pool type registry contract.
+;; @returns (response bool uint) `(ok true)` on success, or an error.
+(define-public (set-pool-type-registry (new-registry principal))
   (begin
     (try! (check-is-owner))
-    (map-set token-order token order)
+    (var-set pool-type-registry new-registry)
     (ok true)
   )
 )
 
-;; Register a pool implementation for a specific pool type
-(define-public (register-pool-implementation (pool-type (string-ascii 64)) (implementation-contract principal))
+;; @desc Sets the pool implementation registry contract principal.
+;; @param new-registry principal The principal of the new pool implementation registry contract.
+;; @returns (response bool uint) `(ok true)` on success, or an error.
+(define-public (set-pool-implementation-registry (new-registry principal))
   (begin
     (try! (check-is-owner))
-    (asserts! (is-some (map-get? pool-type-info pool-type)) (err ERR_INVALID_POOL_TYPE))
-    (map-set pool-implementations pool-type implementation-contract)
+    (var-set pool-implementation-registry new-registry)
     (ok true)
   )
 )
 
-;; Register a new pool type
-(define-public (register-pool-type (pool-type (string-ascii 64)) (name (string-ascii 32)) (description (string-ascii 128)) (is-active bool))
+;; @desc Sets the pool registry contract principal.
+;; @param new-registry principal The principal of the new pool registry contract.
+;; @returns (response bool uint) `(ok true)` on success, or an error.
+(define-public (set-pool-registry (new-registry principal))
   (begin
     (try! (check-is-owner))
-    (map-set pool-type-info pool-type {
-      name: name,
-      description: description,
-      is-active: is-active
-    })
+    (var-set pool-registry new-registry)
     (ok true)
   )
 )
 
-;; Set a pool type as active or inactive
-(define-public (set-pool-type-active (pool-type (string-ascii 64)) (is-active bool))
-  (begin
-    (try! (check-is-owner))
-    (asserts! (is-some (map-get? pool-type-info pool-type)) (err ERR_INVALID_POOL_TYPE))
-    (let ((pti (unwrap-panic (map-get? pool-type-info pool-type))))
-      (map-set pool-type-info pool-type {
-        name: (get name pti),
-        description: (get description pti),
-        is-active: is-active
-      })
-    )
-    (ok true)
-  )
+;; --- Read-Only Functions ---
+
+;; @desc Retrieves the pool principal for a given token pair by calling the pool registry.
+;; @param token-a principal The principal of the first token.
+;; @param token-b principal The principal of the second token.
+;; @returns (response (optional principal) uint) The response from the pool registry.
+(define-read-only (get-pool (token-a principal) (token-b principal))
+  (contract-call? (var-get pool-registry) get-pool token-a token-b)
 )
 
-;; Set the default pool type for new pool creations
-(define-public (set-default-pool-type (pool-type (string-ascii 64)))
-  (begin
-    (try! (check-is-owner))
-    (asserts! (is-some (map-get? pool-type-info pool-type)) (err ERR_INVALID_POOL_TYPE))
-    (var-set default-pool-type pool-type)
-    (ok true)
-  )
+;; @desc Retrieves the pool type for a given pool principal by calling the pool registry.
+;; @param pool-principal principal The principal of the pool.
+;; @returns (response (optional (string-ascii 64)) uint) The response from the pool registry.
+(define-read-only (get-pool-type (pool-principal principal))
+  (contract-call? (var-get pool-registry) get-pool-type pool-principal)
 )
 
-;; Update the pool type for an existing pool
-(define-public (set-pool-type (pool principal) (pool-type (string-ascii 64)))
-  (begin
-    (try! (check-is-owner))
-    (asserts! (is-some (map-get? pool-info pool)) (err ERR_POOL_NOT_FOUND))
-    (asserts! (is-some (map-get? pool-type-info pool-type)) (err ERR_INVALID_POOL_TYPE))
-    (map-set pool-types pool pool-type)
-    (ok true)
-  )
+;; @desc Retrieves the implementation contract for a given pool type by calling the pool implementation registry.
+;; @param pool-type (string-ascii 64) The identifier of the pool type.
+;; @returns (response (optional principal) uint) The response from the pool implementation registry.
+(define-read-only (get-pool-implementation (pool-type (string-ascii 64)))
+  (contract-call? (var-get pool-implementation-registry) get-pool-implementation pool-type)
 )
 
-;; Allows the contract owner to transfer ownership to a new principal.
-(define-public (transfer-ownership (new-owner principal))
-  (begin
-    (try! (check-is-owner))
-    (var-set contract-owner new-owner)
-    (ok true)
-  )
+;; @desc Retrieves information about a specific pool by calling the pool registry.
+;; @param pool-principal principal The principal of the pool.
+;; @returns (response (optional { ... }) uint) The response from the pool registry.
+(define-read-only (get-pool-info (pool-principal principal))
+  (contract-call? (var-get pool-registry) get-pool-info pool-principal)
 )
 
-;; Gets the pool principal for a given pair of tokens and pool type
-(define-read-only (get-pool-by-type (token-a principal) (token-b principal) (pool-type (string-ascii 64)) (fee-bps uint))
-  (let ((normalized-pair (unwrap-panic (normalize-token-pair token-a token-b))))
-    (map-get? pools { 
-      token-a: (get token-a normalized-pair), 
-      token-b: (get token-b normalized-pair)
-    })
-  )
-)
-
-;; Gets the default pool for a given pair of tokens
-(define-read-only (get-pool (token-a principal) (token-b principal) (fee-bps uint)) 
-  (get-pool-by-type token-a token-b (var-get default-pool-type) fee-bps)
-)
-
-;; Gets the information for a given pool principal.
-(define-read-only (get-pool-info (pool principal))
-  (map-get? pool-info pool)
-)
-
-;; Gets the pool type for a given pool principal
-(define-read-only (get-pool-type (pool principal))
-  (map-get? pool-types pool)
-)
-
-;; Gets the pool type information
-(define-read-only (get-pool-type-info (pool-type (string-ascii 64)))
-  (ok (map-get? pool-type-info pool-type))
-)
-
-;; Gets the implementation contract for a pool type
-(define-read-only (get-pool-implementation-contract (pool-type (string-ascii 64)))
-  (map-get? pool-implementations pool-type)
-)
-
+;; @desc Retrieves the total number of pools by calling the pool registry.
+;; @returns (response uint uint) The response from the pool registry.
 (define-read-only (get-pool-count)
-  (ok (var-get pool-count))
+  (contract-call? (var-get pool-registry) get-pool-count)
 )
 
-(define-read-only (get-owner)
-  (ok (var-get contract-owner))
-)
-
+;; @desc Retrieves the default pool type.
+;; @returns (response (string-ascii 64) uint) The default pool type identifier.
 (define-read-only (get-default-pool-type)
-  (var-get default-pool-type)
+  (ok (var-get default-pool-type))
 )
 
-(define-public (initialize-concentrated-liquidity-pool (pool-contract principal))
-  (begin
-    (try! (check-is-owner))
-    (try! (register-pool-type POOL_TYPE_CONCENTRATED_LIQUIDITY "Concentrated Liquidity Pool" "Pools with concentrated liquidity for enhanced capital efficiency" true))
-    (try! (register-pool-implementation POOL_TYPE_CONCENTRATED_LIQUIDITY pool-contract))
-    (ok true)
-  )
+;; @desc Retrieves all registered pool types by calling the pool type registry.
+;; @returns (response (list (string-ascii 64)) uint) The response from the pool type registry.
+(define-read-only (get-all-pool-types)
+  (contract-call? (var-get pool-type-registry) get-all-pool-types)
 )

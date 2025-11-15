@@ -1,6 +1,5 @@
 ;; ===== Imports =====
-;; TODO: cache-manager-trait not defined in all-traits.clar
-;; (use-trait cache-manager-trait .all-traits.cache-manager-trait)
+(use-trait cache-manager-trait .traits.cache-manager-trait.cache-manager-trait)
 
 ;; Distributed Cache Manager - Reduces latency by 60-80%
 ;; Implements multi-level caching with TTL and invalidation strategies

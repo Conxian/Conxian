@@ -7,8 +7,8 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  NODE_VERSION: '20'
-  CLARINET_VERSION: '3.8.1'
+  NODE_VERSION: "20"
+  CLARINET_VERSION: "3.8.1"
 
 permissions:
   contents: read
@@ -49,7 +49,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+          cache: "npm"
           cache-dependency-path: package-lock.json
       - name: Install Dependencies
         run: npm ci --no-audit --no-fund
@@ -73,7 +73,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     needs: prepare
-    environment: 
+    environment:
       name: testnet
       url: https://explorer.hiro.so/
     permissions:
@@ -84,7 +84,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+          cache: "npm"
           cache-dependency-path: package-lock.json
       - name: Configure Git
         run: |
@@ -115,10 +115,10 @@ jobs:
           STACKS_DEPLOYER_PRIVKEY: ${{ secrets.TESTNET_DEPLOYER_KEY }}
         run: |
           set -e
-          
+
           # Export deployer key for clarinet
           export STACKS_DEPLOYER_KEY=$(cat ~/.stacks/keys/testnet/testnet_deployer.key)
-          
+
           # Validate required secrets for live deployment
           if [ "${{ github.event.inputs.dry_run }}" = "false" ]; then
             if [ -z "$TESTNET_DEPLOYER_KEY" ]; then
@@ -130,7 +130,7 @@ jobs:
               exit 1
             fi
           fi
-          
+
           # Run deployment
           echo "Starting deployment to testnet..."
           clarinet deployments apply -p testnet
@@ -157,7 +157,7 @@ jobs:
             fi
             echo "✅ Required secrets validated"
           fi
-          
+
           if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
             echo "🧪 Dry run: Validating deployment configuration"
             echo "Checking deployment plan..."

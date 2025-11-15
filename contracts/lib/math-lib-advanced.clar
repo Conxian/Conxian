@@ -138,15 +138,7 @@
 (define-private (ln-taylor-internal (x uint) (result uint) (term uint) (n uint))
   (ok result))
 
-;; Base-2 logarithm
-(define-read-only (log2 (n uint))
-  (if (is-eq n u0)
-    ERR_DIVISION_BY_ZERO
-    (if (is-eq n PRECISION)
-      (ok u0) ;; log2(1) = 0
-      (let ((ln-n (unwrap! (ln n) ERR_DIVISION_BY_ZERO))
-            (ln-2 LN2_FIXED))
-        (div-down ln-n ln-2)))))
+
 
 ;; ===========================================
 ;; EXPONENTIAL FUNCTIONS

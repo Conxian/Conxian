@@ -1,15 +1,19 @@
 
 
-;; migration-manager.clar
+;; migration-manager
+;; This contract facilitates the migration of liquidity and positions between different versions of pools or protocols.
+;; It ensures a smooth transition for users and maintains data integrity during upgrades.
 
-;; This contract manages the migration of data from older protocol versions.
+(use-trait rbac-trait .traits.rbac-trait.rbac-trait)
+(use-trait ft-trait .sip-010-trait-ft-standard.sip-010-trait)
+(use-trait lp-token-trait .traits.lp-token-trait.lp-token-trait)
 
 
 (define-constant ERR_UNAUTHORIZED (err u9300))
 (define-constant ERR_MIGRATION_ALREADY_PERFORMED (err u9301))
 (define-constant ERR_INVALID_CONTRACT (err u9302))
 
-(define-data-var contract-owner principal tx-sender)
+
 (define-data-var old-dex-contract principal .dex-v1)
 (define-data-var new-dex-contract principal .dex-v2)
 
@@ -33,12 +37,11 @@
   ))
 
 (define-public (set-contracts (old-dex principal) (new-dex principal))
-  (begin
-    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
-    (var-set old-dex-contract old-dex)
-    (var-set new-dex-contract new-dex)
-    (ok true)
-  ))
+    (begin
+     (asserts! (is-ok (contract-call? .rbac-contract has-role "contract-owner")) (err ERR_UNAUTHORIZED))
+      (var-set old-dex-contract old-dex)
+      (var-set new-dex-contract new-dex)
+      (ok true)))
 
 (define-read-only (has-migrated (user principal))
   (default-to false (map-get? migrated-users user)))

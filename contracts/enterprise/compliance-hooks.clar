@@ -13,7 +13,7 @@
 (define-map enterprise-kyb principal bool)
 
 ;; KYC attestations for users (basic boolean; real systems can include versioned attestations)
-(define-map user-kyc principal bool)
+(define-map user-kyc principal { version: uint, attested-by: principal, timestamp: uint, status: bool })
 
 ;; Sanction screening flags
 (define-map sanctioned principal bool)
@@ -60,10 +60,10 @@
 )
 
 ;; User KYC
-(define-public (attest-kyc (user principal) (status bool))
+(define-public (attest-kyc (user principal) (version uint) (attested-by principal) (status bool))
   (begin
     (asserts! (is-eq tx-sender (var-get admin)) ERR_UNAUTHORIZED)
-    (map-set user-kyc user status)
+    (map-set user-kyc user { version: version, attested-by: attested-by, timestamp: block-height, status: status })
     (ok true)
   )
 )
@@ -86,7 +86,7 @@
 )
 
 (define-read-only (is-kyc (user principal))
-  (default-to false (map-get? user-kyc user))
+  (default-to false (get status (map-get? user-kyc user)))
 )
 
 (define-read-only (is-sanctioned (user principal))
@@ -105,7 +105,7 @@
 ;; Returns true if user passes KYC and is not sanctioned.
 ;; Whale detection prints an event for downstream gating; enterprise paths can require is-enterprise and is-kyc.
 (define-read-only (is-compliant-for-operation (user principal) (btc-equivalent uint))
-  (let ((kyc (default-to false (map-get? user-kyc user)))
+  (let ((kyc (is-kyc user))
         (san (default-to false (map-get? sanctioned user)))
         (whale (>= btc-equivalent (var-get whale-threshold-btc))))
     (begin

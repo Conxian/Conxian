@@ -1,4 +1,4 @@
-(use-trait sip-018-trait .all-traits.sip-018-trait)
+(use-trait sip-018-trait .sip-018-trait)
 
 ;; signed-data-base.clar
 ;; Base implementation of SIP-018 Signed Structured Data standard

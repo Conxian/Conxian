@@ -2,7 +2,9 @@
 ;; This contract acts as an adapter for integrating external oracle providers, allowing the system to fetch and use off-chain data.
 ;; It supports multiple oracle sources, manages their authorization, and aggregates price data to mitigate manipulation risks.
 
-(define-constant ERR_UNAUTHORIZED (err u1000))
+(use-trait rbac-trait .base-traits.rbac-trait)
+(use-trait oracle-trait .oracle-risk-traits.oracle-trait)
+(use-trait ft-trait .sip-010-ft-trait.sip-010-ft-trait)
 (define-constant ERR_INVALID_ORACLE_SOURCE (err u1001))
 (define-constant ERR_INVALID_PRICE_DATA (err u1002))
 (define-constant ERR_PRICE_TOO_OLD (err u1003))
@@ -62,7 +64,7 @@
 })
 
 ;; Data variables
-(define-data-var contract-owner principal tx-sender)
+
 (define-data-var initialized bool false)
 (define-data-var min-oracle-sources-for-quorum uint u3) ;; Minimum number of active oracle sources required for price aggregation
 (define-data-var quorum-percentage uint u6000) ;; 60% (6000 out of 10000)
@@ -130,7 +132,10 @@
     (begin
         (asserts! (is-owner) ERR_UNAUTHORIZED)
         (asserts! (var-get initialized) ERR_NOT_INITIALIZED)
-        (map-update oracle-sources { source-id: source-id } { is-active: active })
+        (let (
+            (current-source (unwrap! (map-get? oracle-sources { source-id: source-id }) ERR_ORACLE_SOURCE_NOT_FOUND))
+        )
+        (map-set oracle-sources { source-id: source-id } (merge current-source { is-active: active }))
         (ok true)
     )
 )
@@ -162,6 +167,13 @@
         (map-delete authorized-operators { source-id: source-id, operator-address: operator })
         (ok true)
     )
+)
+
+(define-public (set-contract-owner (new-owner principal))
+  (begin
+    (asserts! (is-ok (contract-call? .rbac-contract has-role "contract-owner")) (err ERR_UNAUTHORIZED))
+    (ok true)
+  )
 )
 
 ;; --- Price Feed functions ---
@@ -433,11 +445,7 @@
     (is-oracle-operator source-id operator)
 )
 
-;; @desc Get the current contract owner.
-;; @returns (principal) - The contract owner.
-(define-read-only (get-contract-owner)
-    (ok (var-get contract-owner))
-)
+
 
 ;; @desc Get initialization status.
 ;; @returns (bool) - True if initialized, false otherwise.

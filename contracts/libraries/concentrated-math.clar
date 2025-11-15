@@ -1,20 +1,32 @@
-;; Math utilities for concentrated liquidity
+;; @desc Math utilities for concentrated liquidity.
+;; This library provides functions for calculating square root prices from ticks and vice versa,
+;; as well as calculating liquidity amounts for given price ranges.
 
-;; Uses fixed-point arithmetic with Q64 precision
-(define-constant Q64 u18446744073709551616)  ;; 2^64
-(define-constant MAX_TICK 776363)  ;; Corresponds to sqrt(2^128)
+;; @uses .math-lib-advanced
+
+;; @constants
+;; @var Q64: 2^64, used for fixed-point arithmetic.
+(define-constant Q64 u18446744073709551616)
+;; @var MAX_TICK: Corresponds to sqrt(2^128).
+(define-constant MAX_TICK 776363)
+;; @var MIN_TICK: The minimum tick value.
 (define-constant MIN_TICK (- MAX_TICK))
-(define-constant TICK_BASE u10000)  ;; 1.0001 in fixed-point with 4 decimals
-
-;; Math library contract
+;; @var TICK_BASE: 1.0001 in fixed-point with 4 decimals.
+(define-constant TICK_BASE u10000)
+;; @var MATH_CONTRACT: The contract for the math library.
 (define-constant MATH_CONTRACT .math-lib-advanced)
 
-;; Error codes
+;; @errors
+;; @var ERR_INVALID_TICK: The provided tick is invalid.
 (define-constant ERR_INVALID_TICK (err u2001))
+;; @var ERR_INVALID_SQRT_PRICE: The provided square root price is invalid.
 (define-constant ERR_INVALID_SQRT_PRICE (err u2002))
+;; @var ERR_MATH_OVERFLOW: A math overflow occurred.
 (define-constant ERR_MATH_OVERFLOW (err u2003))
 
-;; Calculate sqrt price from tick using fixed-point arithmetic
+;; @desc Calculate the square root price from a tick using fixed-point arithmetic.
+;; @param tick: The tick to convert.
+;; @returns (response uint uint): The square root price, or an error code.
 (define-read-only (tick-to-sqrt-price (tick int))
   (begin
     (asserts! (and (>= tick MIN_TICK) (<= tick MAX_TICK)) ERR_INVALID_TICK)
@@ -28,7 +40,9 @@
   )
 )
 
-;; Calculate tick from sqrt price using fixed-point arithmetic
+;; @desc Calculate the tick from a square root price using fixed-point arithmetic.
+;; @param sqrt-price: The square root price to convert.
+;; @returns (response int uint): The tick, or an error code.
 (define-read-only (sqrt-price-to-tick (sqrt-price uint))
   (begin
     (asserts! (> sqrt-price u0) ERR_INVALID_SQRT_PRICE)
@@ -41,7 +55,13 @@
   )
 )
 
-;; Calculate liquidity amounts for given ticks
+;; @desc Calculate the liquidity for given amounts and price ranges.
+;; @param sqrt-price-current: The current square root price.
+;; @param sqrt-price-lower: The lower bound of the price range.
+;; @param sqrt-price-upper: The upper bound of the price range.
+;; @param amount-x: The amount of token X.
+;; @param amount-y: The amount of token Y.
+;; @returns (response uint uint): The liquidity, or an error code.
 (define-read-only (get-liquidity-for-amounts 
     (sqrt-price-current uint) 
     (sqrt-price-lower uint) 
@@ -68,7 +88,11 @@
   )
 )
 
-;; Fee calculation
+;; @desc Calculate the fee.
+;; @param liquidity: The liquidity.
+;; @param fee-rate: The fee rate.
+;; @param time-in-seconds: The time in seconds.
+;; @returns (response uint uint): The fee, or an error code.
 (define-read-only (calculate-fee (liquidity uint) (fee-rate uint) (time-in-seconds uint))
   (ok (/ (* (* liquidity fee-rate) time-in-seconds) u1000000))
 )

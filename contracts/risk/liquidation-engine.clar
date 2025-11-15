@@ -1,26 +1,31 @@
 ;; liquidation-engine.clar
 ;; Handles position liquidations in the dimensional engine
 
-(use-trait liquidation-trait .all-traits.liquidation-trait)
-(use-trait risk-trait .all-traits.risk-trait)
-(use-trait oracle-trait .all-traits.oracle-trait)
-(use-trait dimensional-trait .all-traits.dimensional-trait)
-(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
+(use-trait liquidation-trait .oracle-risk-traits.liquidation-trait)
+(use-trait risk-trait .oracle-risk-traits.risk-trait)
+(use-trait oracle-aggregator-v2-trait .oracle-risk-traits.oracle-aggregator-v2-trait)
+(use-trait dimensional-trait .dimensional-traits.dimensional-trait)
+(use-trait ft-trait .dex-traits.sip-010-ft-trait)
 
 ;; ===== Constants =====
 (define-constant ERR_UNAUTHORIZED (err u4000))
 (define-constant ERR_POSITION_SAFE (err u4001))
 (define-constant ERR_LIQUIDATION_FAILED (err u4002))
 (define-constant ERR_INSUFFICIENT_REWARD (err u4003))
-(define-constant ACTIVE "active")  ;; Active position status
+(define-constant ERR_INVALID_POSITION (err u4004))
+(define-constant ERR_ORACLE_FAILURE (err u4005))
+(define-constant ERR_RISK_MANAGER_FAILURE (err u4006))
+(define-constant ERR_POSITION_NOT_ACTIVE (err u4007))
+(define-constant ERR_INVALID_REWARD_RANGE (err u4008))
+(define-constant ACTIVE "active")
 
 ;; ===== Data Variables =====
 (define-data-var owner principal tx-sender)
-(define-data-var oracle-contract principal tx-sender)  ;; Oracle contract for price feeds
-(define-data-var risk-manager-contract principal tx-sender)  ;; Risk manager contract
-(define-data-var dimensional-engine-contract principal tx-sender)  ;; Dimensional engine contract
-(define-data-var min-liquidation-reward uint u100)  ;; 0.1%
-(define-data-var max-liquidation-reward uint u1000) ;; 1%
+(define-data-var oracle-contract principal tx-sender)
+(define-data-var risk-manager-contract principal tx-sender)
+(define-data-var dimensional-engine-contract principal tx-sender)
+(define-data-var min-liquidation-reward uint u100)
+(define-data-var max-liquidation-reward uint u1000)
 (define-data-var insurance-fund principal tx-sender)
 
 ;; Liquidation history
@@ -35,6 +40,25 @@
   pnl: int
 })
 
+;; ===== Initialization =====
+(define-public (initialize 
+    (owner principal) 
+    (oracle principal)
+    (risk-manager principal)
+    (dimensional-engine principal)
+    (insurance-fund principal)
+  )
+  (begin
+    (asserts! (is-eq tx-sender (as-contract tx-sender)) ERR_UNAUTHORIZED)
+    (var-set owner owner)
+    (var-set oracle-contract oracle)
+    (var-set risk-manager-contract risk-manager)
+    (var-set dimensional-engine-contract dimensional-engine)
+    (var-set insurance-fund insurance-fund)
+    (ok true)
+  )
+)
+
 ;; ===== Core Functions =====
 (define-private (liquidate-position-internal
     (position-owner principal)
@@ -44,12 +68,12 @@
   )
   (let (
     (current-block block-height)
-    (position (unwrap! (contract-call? (var-get dimensional-engine-contract) get-position position-owner position-id) (err u4004)))
+    (position (unwrap! (contract-call? (var-get dimensional-engine-contract) get-position position-owner position-id) ERR_INVALID_POSITION))
     (asset (get asset position))
-    (price (unwrap! (contract-call? (contract-of oracle-trait (unwrap-panic (var-get oracle-contract))) get-price asset) (err u4005)))
+    (price (unwrap! (contract-call? (contract-of oracle-aggregator-v2-trait (unwrap-panic (var-get oracle-contract))) get-price (get asset position)) ERR_ORACLE_FAILURE))
   )
     ;; Verify position can be liquidated
-    (asserts! (is-eq (get status position) ACTIVE) (err u4007))
+    (asserts! (is-eq (get status position) ACTIVE) ERR_POSITION_NOT_ACTIVE)
 
     ;; Check if position is underwater
     (let (
@@ -58,7 +82,7 @@
     )
       (asserts! (< margin-ratio maintenance-margin) ERR_POSITION_SAFE)
 
-      ;; Calculate liquidation reward (capped between min and max)
+      ;; Calculate liquidation reward
       (let* (
         (collateral-value (get collateral position))
         (reward-amount (min
@@ -70,11 +94,11 @@
         ))
         (remaining-collateral (- collateral-value reward-amount))
       )
-        ;; Transfer reward to liquidator via SIP-010
-        (try! (as-contract (contract-call? (contract-of sip-010-ft-trait asset) transfer reward-amount (as-contract tx-sender) caller none)))
+        ;; Transfer reward to liquidator
+        (try! (contract-call? asset transfer reward-amount tx-sender caller none))
 
-        ;; Transfer remaining collateral to insurance fund
-        (try! (as-contract (contract-call? (contract-of sip-010-ft-trait asset) transfer remaining-collateral (as-contract tx-sender) (var-get insurance-fund) none)))
+        ;; Transfer remaining to insurance fund
+        (try! (contract-call? asset transfer remaining-collateral tx-sender (var-get insurance-fund) none))
 
         ;; Close the position
         (try! (contract-call? (var-get dimensional-engine-contract) close-position position-owner position-id u0))
@@ -136,10 +160,10 @@
     (position-id uint)
   )
   (let (
-    (position (unwrap! (contract-call? (var-get dimensional-engine-contract) get-position position-owner position-id) (err u4004)))
-    (price (unwrap! (contract-call? (contract-of oracle-trait (unwrap-panic (var-get oracle-contract))) get-price (get asset position)) (err u4005)))
+    (position (unwrap! (contract-call? (var-get dimensional-engine-contract) get-position position-owner position-id) ERR_INVALID_POSITION))
+    (price (unwrap! (contract-call? (contract-of oracle-aggregator-v2-trait (unwrap-panic (var-get oracle-contract))) get-price (get asset position)) ERR_ORACLE_FAILURE))
     (margin-ratio (calculate-margin-ratio position price))
-    (liquidation-price (unwrap! (contract-call? (var-get risk-manager-contract) get-liquidation-price position price) (err u4006)))
+    (liquidation-price (unwrap! (contract-call? (var-get risk-manager-contract) get-liquidation-price position price) ERR_RISK_MANAGER_FAILURE))
   )
     (ok {
       margin-ratio: margin-ratio,
@@ -182,7 +206,7 @@
   )
   (begin
     (asserts! (is-eq tx-sender (var-get owner)) ERR_UNAUTHORIZED)
-    (asserts! (and (<= min-reward max-reward) (<= max-reward u5000)) (err u4008))  ;; Max 5%
+    (asserts! (and (<= min-reward max-reward) (<= max-reward u5000)) ERR_INVALID_REWARD_RANGE)
     (var-set min-liquidation-reward min-reward)
     (var-set max-liquidation-reward max-reward)
     (ok true)

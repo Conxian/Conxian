@@ -1,5 +1,5 @@
 ;; Timelock Controller
-;; Implements the time-delayed execution functionality specified in AIP-7
+;; Implements the time-delayed execution functionality specified in CXIP-7
 
 ;; Constants
 (define-constant MIN_DELAY u86400)  ;; 24 hours in seconds

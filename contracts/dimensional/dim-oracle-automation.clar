@@ -1,9 +1,9 @@
-(use-trait dimensional-oracle-trait .all-traits.dimensional-oracle-trait)
+(use-trait dimensional-oracle-trait .dimensional-oracle-trait.dimensional-oracle-trait)
 
 ;; Implement required traits
-(impl-trait .all-traits.dimensional-oracle-trait)
+(impl-trait .dimensional-oracle-trait.dimensional-oracle-trait)
 
-(define-constant ERR_UNAUTHORIZED u101)
+(define-constant ERR_UNAUTHORIZED u800)
 
 (define-data-var contract-owner principal tx-sender)
 (define-data-var keeper-principal principal tx-sender)
@@ -50,7 +50,6 @@
     (ok true)
   )
 )
-
 
 
 

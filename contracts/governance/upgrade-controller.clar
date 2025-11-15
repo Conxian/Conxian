@@ -3,8 +3,8 @@
 ;; Manages safe protocol upgrades with timelock and approval mechanisms
 
 ;; ===== Traits =====
-(use-trait upgrade-controller-trait .all-traits.upgrade-controller-trait)
-(use-trait upgrade_controller_trait .all-traits.upgrade-controller-trait)
+(use-trait upgrade-controller-trait .governance.upgrade-controller-trait)
+(use-trait upgrade_controller_trait .governance.upgrade-controller-trait)
 
 ;; ===== Error Codes =====
 (define-constant ERR_UNAUTHORIZED (err u4001))

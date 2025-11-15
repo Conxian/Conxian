@@ -1,63 +1,106 @@
 {
-  "concentrated-liquidity-pool": [
-    "concentrated-math",
-    "math-lib-concentrated"
-  ],
   "proposal-engine": [
-    "governance-token"
+    "governance-token",
+    "proposal-engine-trait"
+  ],
+  "governance-token": [
+    "sip-010-ft-trait"
+  ],
+  "self-launch-coordinator": [
+    "cxvg-token",
+    "enhanced_conxian_deployment"
   ],
   "mev-protector": [
-    "advanced-router-dijkstra"
+    "dimensional-advanced-router-dijkstra",
+    "utils-encoding"
   ],
   "tiered-pools": [
     "fee-manager"
   ],
-  "test-access": [
-    "access-control-trait"
+  "utils": [
+    "utils-trait"
   ],
   "fixed-point-math": [
     "math-lib-advanced"
   ],
-  "precision-calculator": [
-    "math-lib-advanced"
-  ],
-  "oracle-aggregator": [
-    "circuit-breaker"
-  ],
   "dimensional-oracle": [
+    "dimensional-oracle-trait",
     "system-monitor"
   ],
   "dim-oracle-automation": [
-    "dim-registry"
+    "dim-registry",
+    "dimensional-oracle-trait"
   ],
-  "concentrated-liquidity-pool-v2": [
-    "concentrated-math"
+  "concentrated-liquidity-pool": [
+    "all-traits",
+    "math-lib-concentrated",
+    "ownable-trait",
+    "pausable-trait",
+    "pool-trait"
   ],
-  "dim-yield-stake": [
-    "dim-metrics"
+  "dimensional-core": [
+    "dim-metrics",
+    "dimensional-oracle"
   ],
-  "performance-optimizer": [
-    "dex-pool"
+  "dim-registry": [
+    "dim-registry-trait"
   ],
-  "lending-protocol-governance": [
-    "access-control"
+  "advanced-router-dijkstra": [
+    "advanced-router-dijkstra-trait"
   ],
-  "access-control": [
-    "self"
+  "position-nft": [
+    "sip-009-nft-trait"
   ],
-  "token-system-coordinator": [
-    "protocol-invariant-monitor"
+  "all-traits": [
+    "flash-loan-receiver-trait",
+    "ownable-trait"
+  ],
+  "finance-metrics": [
+    "block-utils",
+    "finance-metrics-trait"
+  ],
+  "mock-token": [
+    "sip-010-ft-trait"
+  ],
+  "dual-stacking-orchestrator": [
+    "dual-stacking-trait"
+  ],
+  "cxd-price-initializer": [
+    "all-traits"
+  ],
+  "position-manager": [
+    "oracle-adapter",
+    "risk-manager"
+  ],
+  "dimensional-engine": [
+    "dimensional-core",
+    "oracle-adapter",
+    "risk-liquidation-engine"
   ],
   "audit-registry": [
     "audit-badge-nft"
   ],
   "rewards-distributor": [
+    "age000-governance-token",
     "circuit-breaker"
   ],
   "yield-optimizer": [
     "all-traits"
   ],
+  "default-strategy-engine": [
+    "all-traits"
+  ],
+  "role-manager": [
+    "access-control-trait"
+  ],
+  "Pausable": [
+    "pausable-trait"
+  ],
+  "role-nft": [
+    "sip-009-nft-trait"
+  ],
   "bond-factory": [
+    "bond-factory-trait",
     "token-soft-launch"
   ],
   "sbtc-bond-integration": [
@@ -66,10 +109,10 @@
     "sbtc-token"
   ],
   "dex-factory-v2": [
-    "circuit-breaker"
+    "dex-factory-v2-trait"
   ],
-  "sbtc-integration": [
-    "sbtc-token"
+  "yield-distribution-engine": [
+    "yield-distribution-trait"
   ],
   "sbtc-flash-loan-extension": [
     "bond-issuance-system"
@@ -77,8 +120,20 @@
   "auto-compounder": [
     "all-traits"
   ],
-  "cxvg-utility": [
-    "cxvg-token"
+  "liquidation-manager": [
+    "liquidation-trait"
+  ],
+  "sbtc-flash-loan-vault": [
+    "circuit-breaker"
+  ],
+  "comprehensive-lending-system": [
+    "dex-oracle"
+  ],
+  "multi-hop-router-v3": [
+    "utils-encoding"
+  ],
+  "bond-issuance-system": [
+    "circuit-breaker"
   ],
   "dex-factory": [
     "circuit-breaker"

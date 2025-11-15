@@ -150,9 +150,4 @@ if __name__ == "__main__":
     ROOT = Path(__file__).parent
     sg = SystemGraph(ROOT)
     graph = sg.get_graph()
-    print(json.dumps({
-        "nodes": graph["stats"]["nodes"],
-        "edges": graph["stats"]["edges"],
-        "traits": graph["stats"]["traits"],
-        "cycles": len(graph["cycles"]),
-    }, indent=2))
+    print(json.dumps(graph, indent=2))

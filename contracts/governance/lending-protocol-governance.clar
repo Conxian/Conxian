@@ -3,7 +3,7 @@
 ;; Integrates with AccessControl for role-based access
 
 ;; --- Traits ---
-(define-constant TRAIT_REGISTRY .trait-registry)
+(define-constant TRAIT_REGISTRY .central-traits-registry)
 (define-constant ERR_UNAUTHORIZED (err u8001))
 (define-constant ERR_PROPOSAL_NOT_FOUND (err u8002))
 (define-constant ERR_PROPOSAL_NOT_ACTIVE (err u8003))
@@ -31,7 +31,7 @@
 (define-constant ROLE_GUARDIAN 0x475541524449414e000000000000000000000000000000000000000000000000)  ;; GUARDIAN in hex
 
 ;; Protocol state
-(define-data-var governance-token principal tx-sender) ;; Should be set to CXS token
+(define-data-var governance-token principal (as-contract .cxvg-token)) ;; Should be set to CXS token
 (define-data-var timelock-address (optional principal) none) ;; Timelock contract address
 
 ;; Proposal tracking
@@ -125,7 +125,7 @@
   (parameters (optional (list 10 uint))))
   (let ((proposal-id (var-get next-proposal-id))
         (proposer tx-sender)
-        (voting-power (get-voting-power-at proposer (- block-height u1))))
+        (voting-power (unwrap! (contract-call? (var-get governance-token) get-voting-power-at proposer (- block-height u1)) ERR_INSUFFICIENT_VOTING_POWER)))
     (begin
       ;; Check proposal threshold
       (asserts! (>= voting-power (var-get proposal-threshold)) ERR_INSUFFICIENT_VOTING_POWER)
@@ -193,7 +193,7 @@
 ;; @param amount The amount of tokens to be transferred.
 ;; @param token The principal address of the token contract.
 ;; @param purpose A description of the purpose for the spending.
-;; @return (response uint uint) A response tuple indicating success or failure, with the proposal ID on success.
+;; @return response uint uint A response tuple indicating success or failure, with the proposal ID on success.
 (define-public (propose-treasury-spending
   (recipient principal)
   (amount uint)
@@ -217,7 +217,7 @@
 ;; @param proposal-id The ID of the proposal to vote on.
 ;; @param support A uint representing the vote: u1 for 'for', u0 for 'against', u2 for 'abstain'.
 ;; @param reason An optional string providing a reason for the vote.
-;; @return (response uint uint) A response tuple indicating success or failure, with the voting power used on success.
+;; @return response uint uint A response tuple indicating success or failure, with the voting power used on success.
 (define-public (vote (proposal-id uint) (support uint) (reason (optional (string-utf8 200))))
   (let ((proposal (unwrap! (map-get? proposals proposal-id) ERR_PROPOSAL_NOT_FOUND))
         (voter tx-sender)
@@ -232,7 +232,7 @@
       (asserts! (is-none (map-get? vote-receipts { proposal-id: proposal-id, voter: voter })) ERR_ALREADY_VOTED)
       
       ;; Get voting power at proposal start
-      (let ((voting-power (get-voting-power-at voter (get start-block proposal))))
+      (let ((voting-power (unwrap! (contract-call? (var-get governance-token) get-voting-power-at voter (get start-block proposal)) ERR_INSUFFICIENT_VOTING_POWER)))
         (asserts! (> voting-power u0) ERR_INSUFFICIENT_VOTING_POWER)
         
         ;; Record vote
@@ -264,7 +264,7 @@
 ;; Queue a successful proposal for execution
 ;; @desc Queues a successful proposal for execution after a defined timelock.
 ;; @param proposal-id The ID of the proposal to queue.
-;; @return (response uint uint) A response tuple indicating success or failure, with the block number when the proposal will be queued on success.
+;; @return response uint uint A response tuple indicating success or failure, with the block number when the proposal will be queued on success.
 (define-public (queue-proposal (proposal-id uint))
   (let ((proposal (unwrap! (map-get? proposals proposal-id) ERR_PROPOSAL_NOT_FOUND)))
     (begin
@@ -293,7 +293,7 @@
 ;; Execute a queued proposal
 ;; @desc Executes a queued proposal.
 ;; @param proposal-id The ID of the proposal to execute.
-;; @return (response bool uint) A response tuple indicating success or failure.
+;; @return response bool uint A response tuple indicating success or failure.
 (define-public (execute-proposal (proposal-id uint))
   (let ((proposal (unwrap! (map-get? proposals proposal-id) ERR_PROPOSAL_NOT_FOUND)))
     (begin
@@ -324,18 +324,25 @@
 ;; @desc Executes a parameter change proposal.
 ;; @param proposal-id The ID of the parameter change proposal.
 ;; @param proposal A tuple containing the details of the proposal.
-;; @return (response bool uint) A response tuple indicating success or failure.
+;; @return response bool uint A response tuple indicating success or failure.
 (define-private (execute-parameter-change (proposal-id uint) (proposal {
     proposer: principal, title: (string-ascii 100), description: (string-utf8 500),
     proposal-type: uint, target-contract: (optional principal), function-name: (optional (string-ascii 50)),
     parameters: (optional (list 10 uint)), for-votes: uint, against-votes: uint, abstain-votes: uint,
     start-block: uint, end-block: uint, queue-block: (optional uint), execution-block: (optional uint),
-    state: uint, created-at: uint}))
-  (let ((param-info (unwrap! (map-get? parameter-proposals proposal-id) ERR_INVALID_PARAMETERS)))
-    ;; This would call the target contract to update the parameter
-    ;; Implementation depends on target contract interface
-    (ok true)))
+    state: uint, created-at: uint})
+  (let ((param-info (unwrap! (map-get? parameter-proposals proposal-id) ERR_INVALID_PARAMETERS))
+        (target-contract (get target-contract param-info))
+        (param-name (get parameter-name param-info))
+        (new-value (get proposed-value param-info)))
+    (contract-call? target-contract update-parameter param-name new-value)))
 
 ;; @desc Executes a treasury spending proposal.
 ;; @param proposal-id The ID of the treasury spending proposal.
-;; @return (response bool uint) A response tuple indicating success
+;; @return response bool uint A response tuple indicating success or failure.
+(define-private (execute-treasury-proposal (proposal-id uint))
+  (let ((treasury-info (unwrap! (map-get? treasury-proposals proposal-id) ERR_INVALID_PARAMETERS))
+        (recipient (get recipient treasury-info))
+        (amount (get amount treasury-info))
+        (token (get token treasury-info)))
+    (contract-call? token transfer recipient amount)))

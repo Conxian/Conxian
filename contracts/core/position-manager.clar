@@ -1,241 +1,125 @@
-;; position-manager.clar
-;; Manages all position types in the dimensional engine
+;; @desc This contract is responsible for all aspects of position management,
+;; including opening, closing, and updating positions. It also handles the
+;; logic for calculating position value and P&L.
 
-(use-trait risk-trait .all-traits.risk-trait)
-(use-trait oracle-trait .all-traits.oracle-trait)
-(use-trait token-trait .all-traits.sip-010-ft-trait)
+(use-trait position-manager-trait .traits.position-manager-trait.position-manager-trait)
+(use-trait oracle-trait .oracle-aggregator-v2-trait.oracle-aggregator-v2-trait)
+(use-trait sip-010-ft-trait .sip-010-ft-trait.sip-010-ft-trait)
+(use-trait rbac-trait .base-traits.rbac-trait)
 
-;; ===== Constants =====
-(define-constant ERR-PAUSED u4000)
-(define-constant ERR-ORACLE-FAILURE u4001)
-(define-constant ERR-POSITION-NOT-FOUND u4002)
-(define-constant ERR-POSITION-NOT-ACTIVE u4003)
-(define-constant ERR-UNAUTHORIZED u4004)
-(define-constant ERR-INVALID-LEVERAGE u4005)
+(impl-trait .traits.position-manager-trait.position-manager-trait)
 
-(define-constant MAX-LEVERAGE u2000)
-(define-constant MAINTENANCE-MARGIN u500)
-(define-constant BASIS-POINTS u10000)
+;; @constants
+(define-constant ERR_UNAUTHORIZED (err u1001))
+(define-constant ERR_INVALID_AMOUNT (err u8001))
+(define-constant ERR_POSITION_NOT_FOUND (err u4000))
+(define-constant ERR_INVALID_LEVERAGE (err u4001))
+(define-constant ERR_INSUFFICIENT_COLLATERAL (err u4002))
+(define-constant ERR_POSITION_NOT_ACTIVE (err u4003))
 
-;; ===== Data Variables =====
-(define-data-var owner principal tx-sender)
+;; @data-vars
 (define-data-var next-position-id uint u0)
-(define-data-var is-paused bool false)
+(define-map positions {id: uint} {
+  owner: principal,
+  asset: principal,
+  collateral: uint,
+  size: uint,
+  entry-price: uint,
+  leverage: uint,
+  is-long: bool,
+  funding-rate: int,
+  last-updated: uint,
+  stop-loss: (optional uint),
+  take-profit: (optional uint),
+  is-active: bool
+})
+(define-map user-positions {user: principal, asset: principal, position-id: uint} bool)
+(define-map active-positions {asset: principal, is-long: bool, position-id: uint} bool)
 
-;; ===== Data Maps =====
-(define-map position-events 
-  {owner: principal, position-id: uint, timestamp: uint}
-  {action: (string-ascii 20), data: (string-utf8 1024), block-height: uint, tx-sender: principal}
-)
-
-(define-map positions 
-  {owner: principal, id: uint}
-  {
-    owner: principal,
-    id: uint,
-    collateral: uint,
-    size: int,
-    entry-price: uint,
-    entry-time: uint,
-    last-funding: uint,
-    last-updated: uint,
-    position-type: (string-ascii 20),
-    status: (string-ascii 20),
-    funding-interval: (string-ascii 20),
-    max-leverage: uint,
-    maintenance-margin: uint,
-    time-decay: (optional uint),
-    volatility: (optional uint),
-    is-hedged: bool,
-    tags: (list 10 (string-utf8 32)),
-    version: uint,
-    metadata: (optional (string-utf8 1024)),
-    token: principal
-  }
-)
-
-;; ===== Private Helper Functions =====
-(define-private (calculate-position-size (collateral uint) (leverage uint))
-  (begin
-    (/ (* collateral leverage) u100)
+;; --- Public Functions ---
+(define-public (open-position (asset principal) (collateral uint) (leverage uint) (is-long bool) (stop-loss (optional uint)) (take-profit (optional uint)))
+  (let (
+    (position-id (var-get next-position-id))
+    (current-time block-height)
+    (price (try! (get-price asset)))
+    (position-size (* collateral leverage))
+  )
+    (map-set positions {id: position-id} {
+      owner: tx-sender,
+      asset: asset,
+      collateral: collateral,
+      size: position-size,
+      entry-price: price,
+      leverage: leverage,
+      is-long: is-long,
+      funding-rate: 0,
+      last-updated: current-time,
+      stop-loss: stop-loss,
+      take-profit: take-profit,
+      is-active: true
+    })
+    (map-set user-positions {user: tx-sender, asset: asset, position-id: position-id} true)
+    (map-set active-positions {asset: asset, is-long: is-long, position-id: position-id} true)
+    (var-set next-position-id (+ position-id u1))
+    (ok position-id)
   )
 )
 
-(define-private (calculate-min-amount-out (price uint) (slippage-tolerance uint))
-  (begin
-    (/ (* price (- BASIS-POINTS slippage-tolerance)) BASIS-POINTS)
+(define-public (close-position (position-id uint) (slippage (optional uint)))
+  (let (
+    (position (try! (get-position position-id)))
+    (current-time block-height)
+    (price (try! (get-price (get position asset))))
+    (entry-price (get position entry-price))
+    (collateral (get position collateral))
+    (is-long (get position is-long))
+    (size (get position size))
+    (price-diff (if is-long
+      (- price entry-price)
+      (- entry-price price)
+    ))
+    (pnl (/ (* size price-diff) entry-price))
+    (total-returned (+ collateral pnl))
+  )
+    (asserts! (get position is-active) ERR_POSITION_NOT_ACTIVE)
+    (map-set positions {id: position-id} (merge position {is-active: false, last-updated: current-time}))
+    (map-delete active-positions {asset: (get position asset), is-long: is-long, position-id: position-id})
+    (ok {collateral-returned: total-returned, pnl: pnl})
   )
 )
 
-(define-private (calculate-pnl (position-size int) (entry-price uint) (current-price uint))
-  (begin
+(define-read-only (get-position (position-id uint))
+  (match (map-get? positions {id: position-id})
+    position (ok position)
+    (err ERR_POSITION_NOT_FOUND)
+  )
+)
+
+(define-public (update-position (position-id uint) (collateral (optional uint)) (leverage (optional uint)) (stop-loss (optional uint)) (take-profit (optional uint)))
     (let (
-      (price-diff (if (>= current-price entry-price)
-                      (- current-price entry-price)
-                      (- entry-price current-price)))
-      (is-profit (>= current-price entry-price))
-      (abs-size (if (>= position-size 0) position-size (- 0 position-size)))
-      (pnl-value (/ (* (to-uint abs-size) price-diff) entry-price))
+        (position (try! (get-position position-id)))
     )
-      (if (and is-profit (>= position-size 0))
-          (to-int pnl-value)
-          (if (and (not is-profit) (< position-size 0))
-              (to-int pnl-value)
-              (- 0 (to-int pnl-value))
-          )
-      )
+        (asserts! (is-eq tx-sender (get position owner)) ERR_UNAUTHORIZED)
+        (let (
+            (new-collateral (default-to (get position collateral) collateral))
+            (new-leverage (default-to (get position leverage) leverage))
+            (new-stop-loss (default-to (get position stop-loss) stop-loss))
+            (new-take-profit (default-to (get position take-profit) take-profit))
+        )
+            (map-set positions {id: position-id} (merge position {
+                collateral: new-collateral,
+                leverage: new-leverage,
+                stop-loss: new-stop-loss,
+                take-profit: new-take-profit,
+                last-updated: block-height
+            }))
+            (ok true)
+        )
     )
-  )
 )
 
-(define-private (emit-position-event 
-  (owner principal) 
-  (position-id uint) 
-  (action (string-ascii 20)) 
-  (data (string-utf8 1024))
-)
-  (begin
-    (map-set position-events
-      {owner: owner, position-id: position-id, timestamp: block-height}
-      {action: action, data: data, block-height: block-height, tx-sender: tx-sender}
-    )
-  )
-)
 
-;; ===== Core Public Functions =====
-(define-public (create-position
-    (position-owner principal)
-    (collateral-amount uint)
-    (leverage uint)
-    (pos-type (string-ascii 20))
-    (token <token-trait>)
-    (slippage-tolerance uint)
-    (funding-int (string-ascii 20))
-  )
-  (begin
-    (let (
-      (position-id (var-get next-position-id))
-      (current-block block-height)
-      (token-principal (contract-of token))
-      (price (unwrap! (contract-call? .oracle-adapter .oracle-trait.get-price token-principal) (err ERR-ORACLE-FAILURE)))
-      (position-size (calculate-position-size collateral-amount leverage))
-    )
-      ;; Validations
-      (asserts! (not (var-get is-paused)) (err ERR-PAUSED))
-      (asserts! (<= leverage MAX-LEVERAGE) (err ERR-INVALID-LEVERAGE))
-
-      ;; Transfer collateral from user
-      (try! (contract-call? token .token-trait.transfer collateral-amount position-owner (as-contract tx-sender) none))
-
-      ;; Create position tuple
-      (let (
-        (new-position {
-          owner: position-owner,
-          id: position-id,
-          collateral: collateral-amount,
-          size: (to-int position-size),
-          entry-price: price,
-          entry-time: current-block,
-          last-funding: current-block,
-          last-updated: current-block,
-          position-type: pos-type,
-          status: "ACTIVE",
-          funding-interval: funding-int,
-          max-leverage: MAX-LEVERAGE,
-          maintenance-margin: MAINTENANCE-MARGIN,
-          time-decay: none,
-          volatility: none,
-          is-hedged: false,
-          tags: (list ),
-          version: u1,
-          metadata: none,
-          token: token-principal
-        })
-      )
-        ;; Validate with risk manager
-        (try! (contract-call? .risk-manager .risk-trait.validate-position new-position price))
-
-        ;; Store position
-        (map-set positions {owner: position-owner, id: position-id} new-position)
-
-        ;; Emit event
-        (emit-position-event position-owner position-id "OPEN" u"Position opened")
-
-        ;; Increment position ID
-        (var-set next-position-id (+ position-id u1))
-
-        (ok position-id)
-      )
-    )
-  )
-)
-
-(define-public (close-position
-    (position-owner principal)
-    (position-id uint)
-    (slippage-tolerance uint)
-  )
-  (begin
-    (let (
-      (position (unwrap! (map-get? positions {owner: position-owner, id: position-id}) (err ERR-POSITION-NOT-FOUND)))
-      (current-block block-height)
-      (price (unwrap! (contract-call? .oracle-adapter .oracle-trait.get-price (get token position)) (err ERR-ORACLE-FAILURE)))
-      (pnl (calculate-pnl (get size position) (get entry-price position) price))
-      (final-amount (if (>= pnl 0)
-                        (+ (get collateral position) (to-uint pnl))
-                        (- (get collateral position) (to-uint (- 0 pnl)))))
-    )
-      ;; Validations
-      (asserts! (is-eq (get status position) "ACTIVE") (err ERR-POSITION-NOT-ACTIVE))
-      (asserts! (is-eq tx-sender position-owner) (err ERR-UNAUTHORIZED))
-
-      ;; Transfer funds back to user
-      (try! (as-contract (contract-call? (get token position) .token-trait.transfer final-amount tx-sender position-owner none)))
-
-      ;; Update position status
-      (map-set positions
-        {owner: position-owner, id: position-id}
-        (merge position {status: "CLOSED", last-updated: current-block})
-      )
-
-      ;; Emit event
-      (emit-position-event position-owner position-id "CLOSE" u"Position closed")
-
-      (ok true)
-    )
-  )
-)
-
-;; ===== Read-Only Functions =====
-(define-read-only (get-position (position-owner principal) (position-id uint))
-  (begin
-    (ok (map-get? positions {owner: position-owner, id: position-id}))
-  )
-)
-
-(define-read-only (get-position-events (position-owner principal) (position-id uint) (limit uint))
-  (begin
-    (ok (map-get? position-events {owner: position-owner, position-id: position-id, timestamp: block-height}))
-  )
-)
-
-(define-read-only (get-next-position-id)
-  (begin
-    (ok (var-get next-position-id))
-  )
-)
-
-(define-read-only (is-contract-paused)
-  (begin
-    (ok (var-get is-paused))
-  )
-)
-
-;; ===== Admin Functions =====
-(define-public (set-paused (paused bool))
-  (begin
-    (asserts! (is-eq tx-sender (var-get owner)) (err ERR-UNAUTHORIZED))
-    (var-set is-paused paused)
-    (ok true)
-  )
+;; --- Private Functions ---
+(define-private (get-price (asset principal))
+  (contract-call? .oracle-aggregator-v2-trait get-real-time-price asset)
 )

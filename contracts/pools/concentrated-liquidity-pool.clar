@@ -4,11 +4,36 @@
 
 ;; Implements a concentrated liquidity pool for the Conxian DEX.
 
-(use-trait sip-010-ft-trait .all-traits.sip-010-ft-trait)
-(use-trait pool-trait .all-traits.pool-trait)
-(use-trait math-trait .all-traits.math-trait)
-(use-trait error-codes-trait .all-traits.error-codes-trait)
-(use-trait sip-009-nft-trait .all-traits.sip-009-nft-trait)
+(use-trait sip-010-ft-trait .sip-010-ft-trait.sip-010-ft-trait)
+(use-trait pool-trait .dex-traits.pool-trait)
+(use-trait math-trait .math-trait.math-trait)
+
+;; Error Codes
+(define-constant ERR-NOT-AUTHORIZED u1000)
+(define-constant ERR-INVALID-POOL-ID u1001)
+(define-constant ERR-INVALID-POSITION-ID u1002)
+(define-constant ERR-INSUFFICIENT-AMOUNT-X u1003)
+(define-constant ERR-INSUFFICIENT-AMOUNT-Y u1004)
+(define-constant ERR-INVALID-TICK-RANGE u1005)
+(define-constant ERR-SWAP-FAILED u1006)
+(define-constant ERR-ZERO-AMOUNT u1007)
+(define-constant ERR-PRICE-LIMIT-EXCEEDED u1008)
+(define-constant ERR-MATH-ERROR u1009)
+(define-constant ERR-TOKEN-MISMATCH u1010)
+(define-constant ERR-POOL-ALREADY-EXISTS u1011)
+(define-constant ERR-POOL-DOES-NOT-EXIST u1012)
+(define-constant ERR-POSITION-DOES-NOT-EXIST u1013)
+(define-constant ERR-INVALID-LIQUIDITY u1014)
+(define-constant ERR-UNINITIALIZED-TICK u1015)
+(define-constant ERR-INVALID-FEE u1016)
+(define-constant ERR-INVALID-TICK-SPACING u1017)
+(define-constant ERR-INVALID-INITIAL-PRICE u1018)
+(define-constant ERR-UNAUTHORIZED-FACTORY u1019)
+(define-constant ERR-TRANSFER-FAILED u1020)
+(define-constant ERR-MINT-FAILED u1021)
+(define-constant ERR-BURN-FAILED u1022)
+(use-trait sip-009-nft-trait .base-traits.sip-009-nft-trait)
+(use-trait rbac-trait .base-traits.rbac-trait)
 
 ;; Constants
 (define-constant Q128 u340282366920938463463374607431768211455)
@@ -75,7 +100,7 @@
 (define-public (add-liquidity (pool-id uint) (amount-x-desired uint) (amount-y-desired uint)
                                (amount-x-min uint) (amount-y-min uint) (recipient principal)
                                (tick-lower int) (tick-upper int))
-  (let ((pool (unwrap! (map-get? pools { pool-id: pool-id }) (err u404)))
+  (let ((pool (unwrap! (map-get? pools { pool-id: pool-id }) (err ERR-POOL-DOES-NOT-EXIST))))
         (pos-id (var-get next-position-id))
         (liquidity u100)) 
 
@@ -96,8 +121,8 @@
           token-b-used: amount-y-desired, position-id: pos-id })))
 
 (define-public (remove-liquidity (position-id uint) (amount-x-min uint) (amount-y-min uint) (recipient principal))
-  (let ((pos (unwrap! (map-get? positions { position-id: position-id }) (err u404))))
-    (asserts! (is-eq tx-sender (get owner pos)) (err u403))
+  (let ((pos (unwrap! (map-get? positions { position-id: position-id }) (err ERR-POSITION-DOES-NOT-EXIST))))
+    (asserts! (is-eq tx-sender (get owner pos)) (err ERR-NOT-AUTHORIZED))
     (map-delete positions { position-id: position-id })
     (try! (burn-position tx-sender position-id))
     (let ((pool (unwrap! (map-get? pools { pool-id: (get pool-id pos) }) (err u404))))
@@ -111,22 +136,35 @@
 
 ;; placeholder
 
-;; @desc Retrieves the total liquidity supply for a given pool.
-;; @param pool-id The ID of the pool.
-;; @returns An `(ok uint)` result containing the total liquidity, or an error.
-(define-public (get-total-supply (pool-id uint))
-  (match (map-get? pools {pool-id: pool-id})
-    pool (ok (get liquidity pool))
-    (err u404) ;; Using u404 as a placeholder for ERR_POOL_NOT_FOUND
-  )
-)
+;; @desc Get the pool's token pair
+;; @returns (response (tuple (token-x principal) (token-y principal)) uint): token pair and error code
+(define-read-only (get-tokens (pool-id uint))
+  (let ((pool (unwrap! (map-get? pools { pool-id: pool-id }) (err ERR-POOL-DOES-NOT-EXIST))))
+    (ok { token-x: (get token-x pool), token-y: (get token-y pool) })))
+
+;; @desc Get the pool's fee tier
+;; @returns (response uint uint): fee in basis points and error code
+(define-read-only (get-fee (pool-id uint))
+  (let ((pool (unwrap! (map-get? pools { pool-id: pool-id }) (err ERR-POOL-DOES-NOT-EXIST))))
+    (ok (get fee-bps pool))))
+
+;; @desc Get pool liquidity for a token
+;; @param token: token to check liquidity for
+;; @returns (response uint uint): liquidity amount and error code
+(define-read-only (get-liquidity (pool-id uint) (token principal))
+  (let ((pool (unwrap! (map-get? pools { pool-id: pool-id }) (err ERR-POOL-DOES-NOT-EXIST))))
+    (if (is-eq token (get token-x pool))
+      (ok (get liquidity pool))
+      (if (is-eq token (get token-y pool))
+        (ok (get liquidity pool))
+        (err u404)))))
 
 ;; Swap
 
 ;; ---------------------------------------------------------------------------
 (define-public (swap (pool-id uint) (token-x <sip-010-ft-trait>) (token-y <sip-010-ft-trait>)
                      (zero-for-one bool) (amount-specified uint) (limit-sqrt-price uint))
-  (let ((pool (unwrap! (map-get? pools { pool-id: pool-id }) (err u404)))
+  (let ((pool (unwrap! (map-get? pools { pool-id: pool-id }) (err ERR-POOL-DOES-NOT-EXIST))))
         (token-x-principal (contract-of token-x))
         (token-y-principal (contract-of token-y))
         (fee-bps (get fee-bps pool))
@@ -135,12 +173,12 @@
         (liquidity (get liquidity pool))
         (fee-growth-global-x (get fee-growth-global-x pool))
         (fee-growth-global-y (get fee-growth-global-y pool)))
-    (asserts! (is-eq token-x-principal (get token-x pool)) (err u500))
-    (asserts! (is-eq token-y-principal (get token-y pool)) (err u500))
-    (asserts! (> amount-specified u0) (err u400))
+    (asserts! (is-eq token-x-principal (get token-x pool)) (err ERR-TOKEN-MISMATCH))
+    (asserts! (is-eq token-y-principal (get token-y pool)) (err ERR-TOKEN-MISMATCH))
+    (asserts! (> amount-specified u0) (err ERR-ZERO-AMOUNT))
     (if zero-for-one
-      (asserts! (> current-sqrt-price limit-sqrt-price) (err u600))
-      (asserts! (< current-sqrt-price limit-sqrt-price) (err u600)))
+      (asserts! (> current-sqrt-price limit-sqrt-price) (err ERR-PRICE-LIMIT-EXCEEDED))
+      (asserts! (< current-sqrt-price limit-sqrt-price) (err ERR-PRICE-LIMIT-EXCEEDED)))
     
 
 ;; placeholder swap logic
@@ -207,7 +245,7 @@
                             (factory-address principal) (fee-bps uint) (tick-spacing uint)
                             (start-tick int) (end-tick int) (initial-price uint))
   (let ((pool-id (var-get next-pool-id)))
-    (asserts! (is-eq tx-sender factory-address) (err u403))
+    (asserts! (is-eq tx-sender factory-address) (err ERR-UNAUTHORIZED-FACTORY))
     (map-set pools { pool-id: pool-id }
       { token-x: (contract-of token-a), token-y: (contract-of token-b),
         factory: factory-address, fee-bps: fee-bps, tick-spacing: tick-spacing,
