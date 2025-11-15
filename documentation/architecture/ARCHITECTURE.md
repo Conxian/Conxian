@@ -10,11 +10,11 @@ This document outlines the current Conxian protocol architecture, a comprehensiv
 
 ## Architecture Principles
 
-- **Modular Design**: Separate modules for DEX, lending, governance, dimensional DeFi, security, and monitoring
-- **Centralized Traits**: All contracts use `.all-traits.*` imports for consistency
-- **Bitcoin-Native**: Leverages Stacks' Bitcoin anchoring for security and finality
-- **Enterprise-Ready**: Institutional features with compliance integration
-- **Multi-Dimensional**: Spatial, temporal, risk, cross-chain, and institutional dimensions
+- **Modular Design**: Separate modules for DEX, lending, governance, dimensional DeFi, security, and monitoring.
+- **Modular Traits**: The protocol is transitioning to a modular trait system. The `.all-traits` contract is being phased out in favor of modular imports from the respective modules.
+- **Bitcoin-Native**: Leverages Stacks' Bitcoin anchoring for security and finality.
+- **Enterprise-Ready**: Institutional features with compliance integration.
+- **Multi-Dimensional**: Spatial, temporal, risk, cross-chain, and institutional dimensions.
 
 ## Core Contract Modules
 
@@ -99,7 +99,7 @@ This document outlines the current Conxian protocol architecture, a comprehensiv
 ### Interoperability
 - `interoperability/`
 
-### Lending
+### Lending (Under Development)
 - `lending/`
 - `lending/lending-pool.clar`
 - `lending/lending-pool-core.clar`
@@ -269,26 +269,26 @@ This document outlines the current Conxian protocol architecture, a comprehensiv
 
 ### Completed Phases
 
-- **Foundation**: Core contracts and trait standardization
-- **DEX Implementation**: Complete decentralized exchange suite
-- **Lending Protocol**: Enterprise-grade lending system
-- **Governance Framework**: Decentralized governance and upgrades
-- **Security Infrastructure**: Circuit breakers and monitoring
-- **Cross-Chain Integration**: sBTC and Wormhole support
+- **Foundation**: Core contracts and trait standardization.
+- **DEX Implementation**: Complete decentralized exchange suite.
+- **Governance Framework**: Decentralized governance and upgrades.
+- **Security Infrastructure**: Circuit breakers and monitoring.
+- **Cross-Chain Integration**: sBTC and Wormhole support.
 
 ### Current Phase (Phase 2)
 
-- **Token Economics**: Advanced emission and reward systems
-- **Oracle Enhancement**: Multi-source aggregation and automation
-- **Dimensional DeFi**: Multi-dimensional financial operations
-- **Enterprise Integration**: Institutional compliance and APIs
+- **Lending Protocol**: Enterprise-grade lending system.
+- **Token Economics**: Advanced emission and reward systems.
+- **Oracle Enhancement**: Multi-source aggregation and automation.
+- **Dimensional DeFi**: Multi-dimensional financial operations.
+- **Enterprise Integration**: Institutional compliance and APIs.
 
 ### Next Phase (Phase 3)
 
-- **Performance Optimization**: Gas optimization and scaling
-- **Advanced Risk Models**: VaR calculations and portfolio optimization
-- **Permissionless Deployment**: Third-party integration framework
-- **Governance V2**: Enhanced on-chain governance
+- **Performance Optimization**: Gas optimization and scaling.
+- **Advanced Risk Models**: VaR calculations and portfolio optimization.
+- **Permissionless Deployment**: Third-party integration framework.
+- **Governance V2**: Enhanced on-chain governance.
 ---
 
 **Implementation Note**: This architecture reflects the current state of the Conxian protocol as of November 2025.

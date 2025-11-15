@@ -17,16 +17,20 @@ The Conxian Protocol has undergone a significant architectural overhaul to creat
 
 ## 📊 Current Status - IN DEVELOPMENT
 
+See [`documentation/project-management/STATUS.md`](./documentation/project-management/STATUS.md) for a detailed breakdown of the project's current status.
+
 ### ✅ Major Achievements
-- **Architectural Refactoring**: The `core`, `dex`, `sbtc-vaults`, and `governance` modules have been successfully refactored into a more modular and decentralized architecture.
-- **Comprehensive Documentation**: All new and modified contracts have been thoroughly documented with high-quality docstrings.
-- **Clear Roadmap**: A detailed roadmap has been created to guide future development.
-- **Updated Whitepaper**: The project whitepaper has been updated to reflect the new architecture and vision.
+- **Phase 1 Foundation Completed**: The core infrastructure of the protocol has been completed, including the architectural refactoring of the `core`, `dex`, `sbtc-vaults`, and `governance` modules.
+- **Comprehensive Documentation**: All new and modified contracts have been thoroughly documented with high-quality docstrings, and a comprehensive set of user guides has been created.
+- **Enterprise Integration Framework**: A robust framework for enterprise and institutional integration has been established.
+- **Security Infrastructure**: The protocol's security has been enhanced with the implementation of circuit breakers and MEV protection.
+- **Cross-Chain sBTC Integration**: The protocol has been successfully integrated with the sBTC cross-chain bridge.
 
 ### 🔄 Next Steps
-- **Lending Module Implementation**: The core lending functionality will be implemented from scratch, following the new modular architecture.
-- **Tokenomics and Governance Enhancement**: The tokenomics infrastructure and governance module will be completed.
-- **Dimensional Finance and Cross-Chain Integration**: The protocol's capabilities will be expanded with advanced DeFi and cross-chain features.
+- **Complete Phase 2 Token Economics**: The token economics implementation will be completed, including the token emission controller enhancements.
+- **Finalize Cross-Chain Integrations**: The cross-chain integrations will be finalized, including the implementation of Wormhole message validation and the completion of cross-chain asset transfers.
+- **Update Contract Documentation**: The accuracy of the contract documentation will be improved, and any misalignments with the actual implementation will be corrected.
+- **Enhance Test Coverage**: The test coverage for newer contracts will be enhanced to ensure that all new features are thoroughly tested.
 
 ## Quick Start
 
