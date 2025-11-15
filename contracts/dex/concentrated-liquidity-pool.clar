@@ -160,8 +160,61 @@
 ;; @error u3011 If the tick range is invalid, a mathematical overflow occurs, or token transfers fail.
 (define-public (add-liquidity (lower-tick int) (upper-tick int) (amount0-desired uint) (amount1-desired uint))
   (begin
-    (asserts! (and (> upper-tick lower-tick) (>= lower-tick MIN_TICK) (<= upper-tick MAX_TICK)) u3011)
-    (ok { position-id: (var-get next-position-id), amount0-actual: u0, amount1-actual: u0, liquidity-added: u0 })
+    (asserts! (and (> upper-tick lower-tick) (>= lower-tick MIN_TICK) (<= upper-tick MAX_TICK)) ERR_INVALID_TICK_RANGE)
+
+    (let ((sqrt-price-lower (unwrap! (get-sqrt-price-from-tick lower-tick) ERR_INVALID_TICK))
+          (sqrt-price-upper (unwrap! (get-sqrt-price-from-tick upper-tick) ERR_INVALID_TICK))
+          (current-sqrt-price (var-get current-sqrt-price)))
+
+      (let ((liquidity (if (<= current-sqrt-price sqrt-price-lower)
+                         (unwrap! (get-liquidity-for-amount0 sqrt-price-lower sqrt-price-upper amount0-desired) ERR_OVERFLOW)
+                         (if (>= current-sqrt-price sqrt-price-upper)
+                           (unwrap! (get-liquidity-for-amount1 sqrt-price-lower sqrt-price-upper amount1-desired) ERR_OVERFLOW)
+                           (min (unwrap! (get-liquidity-for-amount0 current-sqrt-price sqrt-price-upper amount0-desired) ERR_OVERFLOW)
+                                (unwrap! (get-liquidity-for-amount1 sqrt-price-lower current-sqrt-price amount1-desired) ERR_OVERFLOW))))))
+
+        (let ((amounts (unwrap! (get-amounts-for-liquidity sqrt-price-lower sqrt-price-upper liquidity) ERR_OVERFLOW))
+              (amount0-actual (get amount0 amounts))
+              (amount1-actual (get amount1 amounts)))
+
+          (asserts! (and (>= amount0-desired amount0-actual) (>= amount1-desired amount1-actual)) ERR_INSUFFICIENT_LIQUIDITY)
+
+          (let ((position-id (unwrap! (mint-position-nft tx-sender lower-tick upper-tick liquidity) ERR_NFT_MINT_FAILED)))
+
+            (try! (update-tick-liquidity lower-tick liquidity true))
+            (try! (update-tick-liquidity upper-tick liquidity false))
+            (var-set total-liquidity (+ (var-get total-liquidity) liquidity))
+
+            (try! (contract-call? (var-get token0) transfer amount0-actual tx-sender (as-contract tx-sender) none))
+            (try! (contract-call? (var-get token1) transfer amount1-actual tx-sender (as-contract tx-sender) none))
+
+            (print {
+              event: "add-liquidity",
+              position-id: position-id,
+              lower-tick: lower-tick,
+              upper-tick: upper-tick,
+              amount0-actual: amount0-actual,
+              amount1-actual: amount1-actual,
+              liquidity-added: liquidity
+            })
+            (ok { position-id: position-id, amount0-actual: amount0-actual, amount1-actual: amount1-actual, liquidity-added: liquidity })
+          )
+        )
+      )
+    )
+  )
+)
+
+(define-private (update-tick-liquidity (tick int) (liquidity-delta uint) (is-add bool))
+  (let ((tick-data (default-to {liquidity-gross: u0, liquidity-net: i0, fee-growth-outside-0: u0, fee-growth-outside-1: u0} (map-get? ticks {tick-id: tick}))))
+    (map-set ticks {tick-id: tick} (merge tick-data {
+      liquidity-gross: (+ (get liquidity-gross tick-data) liquidity-delta),
+      liquidity-net: (if is-add
+        (+ (get liquidity-net tick-data) (to-int liquidity-delta))
+        (- (get liquidity-net tick-data) (to-int liquidity-delta))
+      )
+    }))
+    (ok true)
   )
 )
 
@@ -186,65 +239,167 @@
 ;; @returns (response { amount0-returned: uint, amount1-returned: uint, liquidity-removed: uint } (err u3012)) The amounts of token0 and token1 returned, and the liquidity removed, or an error.
 ;; @error u3012 If the position is not found, the caller is not authorized, or token transfers fail.
 (define-public (remove-liquidity (position-id uint))
-  (let (
-    (position (unwrap-panic (map-get? positions { position-id: position-id }) u3012))
-    (lower-tick (get lower position))
-    (upper-tick (get upper position))
-    (liquidity-removed (get liquidity position))
-    (amount0-to-return u0)
-    (amount1-to-return u0)
+  (let ((position (unwrap! (map-get? positions { position-id: position-id }) ERR_POSITION_NOT_FOUND))
+        (owner (unwrap! (nft-get-owner? position-nft position-id) ERR_UNAUTHORIZED)))
+    (asserts! (is-eq tx-sender owner) ERR_UNAUTHORIZED)
+
+    (let ((lower-tick (get lower position))
+          (upper-tick (get upper position))
+          (liquidity (get liquidity position)))
+
+      (let ((amounts (unwrap! (get-amounts-for-liquidity
+                              (unwrap! (get-sqrt-price-from-tick lower-tick) ERR_INVALID_TICK)
+                              (unwrap! (get-sqrt-price-from-tick upper-tick) ERR_INVALID_TICK)
+                              liquidity) ERR_OVERFLOW))
+            (amount0-returned (get amount0 amounts))
+            (amount1-returned (get amount1 amounts)))
+
+        (try! (update-tick-liquidity lower-tick liquidity false))
+        (try! (update-tick-liquidity upper-tick liquidity true))
+        (var-set total-liquidity (- (var-get total-liquidity) liquidity))
+
+        (try! (burn-position-nft position-id owner))
+
+        (try! (as-contract (contract-call? (var-get token0) transfer amount0-returned tx-sender none)))
+        (try! (as-contract (contract-call? (var-get token1) transfer amount1-returned tx-sender none)))
+
+        (print {
+          event: "remove-liquidity",
+          position-id: position-id,
+          amount0-returned: amount0-returned,
+          amount1-returned: amount1-returned,
+          liquidity-removed: liquidity
+        })
+        (ok { amount0-returned: amount0-returned, amount1-returned: amount1-returned, liquidity-removed: liquidity })
+      )
+    )
   )
-    (asserts! (is-eq tx-sender (nft-get-owner? position-nft position-id)) u3012)
-
-    ;; Calculate amounts of tokens to return
-    ;; This part needs to be implemented based on the current price and liquidity
-    ;; For now, we'll assume a simplified calculation or placeholder
-    (var-set amount0-to-return u0) ;; Placeholder
-    (var-set amount1-to-return u0) ;; Placeholder
-
-    ;; Burn position NFT
-    (unwrap-panic (burn-position-nft position-id) u3012)
-
-    ;; Transfer tokens back to sender
-    (try! (contract-call? (var-get token0) transfer amount0-to-return (as-contract tx-sender) tx-sender none))
-    (try! (contract-call? (var-get token1) transfer amount1-to-return (as-contract tx-sender) tx-sender none))
-
-    (ok { amount0-returned: amount0-to-return, amount1-returned: amount1-to-return, liquidity-removed: liquidity-removed })
-  ));; @desc Swaps token0 for token1 in the concentrated liquidity pool.
+));; @desc Swaps token0 for token1 in the concentrated liquidity pool.
 ;; @param amount-in (uint) The amount of token0 to swap.
 ;; @param min-amount-out (uint) The minimum amount of token1 to receive.
 ;; @returns (response uint (err u3013)) The amount of token1 received, or an error.
 ;; @error u3013 If amount-in is zero, there is insufficient liquidity, the price limit is exceeded, or a mathematical overflow occurs.
 (define-public (swap-x-for-y (amount-in uint) (min-amount-out uint))
-  (begin
-    (asserts! (> amount-in u0) u3013)
-    ;; TODO: Implement actual swap logic for concentrated liquidity pools.
-    ;; This will involve iterating through ticks, calculating amounts, and updating liquidity.
-    ;; For now, this is a placeholder.
-    (ok u0) ;; Return 0 for now, actual implementation will calculate and return the swapped amount
+  (let ((sqrt-price-limit (unwrap! (get-sqrt-price-from-tick MIN_TICK) ERR_INVALID_TICK)))
+    (swap amount-in min-amount-out sqrt-price-limit true)
   )
 )
 
-;; @desc Swaps token1 for token0.
-;; @param amount-in The amount of token1 to swap.
-;; @param min-amount-out The minimum amount of token0 to receive.
-;; @returns (response uint uint) The amount of token0 received or an error.
-;; @error ERR_ZERO_AMOUNT_IN if amount-in is zero.
-;; @error ERR_INSUFFICIENT_LIQUIDITY if there is not enough liquidity.
-;; @error ERR_PRICE_LIMIT_EXCEEDED if the price limit is exceeded.
-;; @error ERR_OVERFLOW if a mathematical overflow occurs during calculation.
-;; @desc Swaps token1 for token0 in the concentrated liquidity pool.
-;; @param amount-in (uint) The amount of token1 to swap.
-;; @param min-amount-out (uint) The minimum amount of token0 to receive.
-;; @returns (response uint (err u3014)) The amount of token0 received, or an error.
-;; @error u3014 If amount-in is zero, there is insufficient liquidity, the price limit is exceeded, or a mathematical overflow occurs.
 (define-public (swap-y-for-x (amount-in uint) (min-amount-out uint))
+  (let ((sqrt-price-limit (unwrap! (get-sqrt-price-from-tick MAX_TICK) ERR_INVALID_TICK)))
+    (swap amount-in min-amount-out sqrt-price-limit false)
+  )
+)
+
+(define-private (swap (amount-in uint) (min-amount-out uint) (sqrt-price-limit uint) (is-x-for-y bool))
   (begin
-    (asserts! (> amount-in u0) u3014)
-    ;; TODO: Implement actual swap logic for concentrated liquidity pools.
-    ;; This will involve iterating through ticks, calculating amounts, and updating liquidity.
-    ;; For now, this is a placeholder.
-    (ok u0) ;; Return 0 for now, actual implementation will calculate and return the swapped amount
+    (asserts! (> amount-in u0) ERR_ZERO_AMOUNT_IN)
+
+    (let ((token-in (if is-x-for-y (var-get token0) (var-get token1)))
+          (token-out (if is-x-for-y (var-get token1) (var-get token0))))
+
+      (try! (contract-call? token-in transfer amount-in tx-sender (as-contract tx-sender) none))
+
+      (let ((swap-result (unwrap! (compute-swap amount-in sqrt-price-limit is-x-for-y) ERR_SWAP_FAILED))
+            (amount-out (get amount-out swap-result)))
+
+        (asserts! (>= amount-out min-amount-out) ERR_INSUFFICIENT_LIQUIDITY)
+
+        (var-set current-sqrt-price (get new-sqrt-price swap-result))
+        (var-set current-tick (get new-tick swap-result))
+
+        (try! (as-contract (contract-call? token-out transfer amount-out tx-sender none)))
+
+        (print {
+          event: "swap",
+          token-in: token-in,
+          token-out: token-out,
+          amount-in: amount-in,
+          amount-out: amount-out
+        })
+        (ok amount-out)
+      )
+    )
+  )
+)
+
+(define-private (compute-swap (amount-remaining uint) (sqrt-price-limit uint) (is-x-for-y bool))
+  (let ((current-sqrt-price (var-get current-sqrt-price))
+        (current-liquidity (var-get total-liquidity))
+        (amount-out u0))
+
+    (while (> amount-remaining u0)
+      (let ((next-tick (unwrap! (get-next-initialized-tick (var-get current-tick) (not is-x-for-y)) (err u3031))))
+        (let ((next-sqrt-price (unwrap! (get-sqrt-price-from-tick next-tick) ERR_INVALID_TICK)))
+
+          (let ((sqrt-price-target (if (if is-x-for-y (< next-sqrt-price sqrt-price-limit) (> next-sqrt-price sqrt-price-limit))
+                                   sqrt-price-limit
+                                   next-sqrt-price)))
+
+            (let ((swap-step (unwrap! (compute-swap-step current-sqrt-price sqrt-price-target current-liquidity amount-remaining is-x-for-y) ERR_SWAP_FAILED)))
+              (var-set amount-remaining (- amount-remaining (get amount-in-step swap-step)))
+              (var-set amount-out (+ amount-out (get amount-out-step swap-step)))
+              (var-set current-sqrt-price (get new-sqrt-price-step swap-step))
+
+              (if (is-eq current-sqrt-price next-sqrt-price)
+                (let ((liquidity-net (get liquidity-net (unwrap! (map-get? ticks {tick-id: next-tick}) (err u3032)))))
+                  (var-set current-liquidity (if is-x-for-y
+                                               (- current-liquidity (to-uint liquidity-net))
+                                               (+ current-liquidity (to-uint liquidity-net))))
+                )
+                true
+              )
+            )
+          )
+        )
+      )
+    )
+    (ok { amount-out: amount-out, new-sqrt-price: current-sqrt-price, new-tick: (unwrap! (get-tick-from-price current-sqrt-price) ERR_INVALID_TICK) })
+  )
+)
+
+(define-private (compute-swap-step (current-sqrt-price uint) (target-sqrt-price uint) (liquidity uint) (amount-remaining uint) (is-x-for-y bool))
+  (let ((amount-in-step u0)
+        (amount-out-step u0)
+        (new-sqrt-price-step u0))
+    (if is-x-for-y
+      (let ((amount-in-max (unwrap! (get-amount0-delta target-sqrt-price current-sqrt-price liquidity) ERR_OVERFLOW)))
+        (if (>= amount-remaining amount-in-max)
+          (begin
+            (var-set amount-in-step amount-in-max)
+            (var-set amount-out-step (unwrap! (get-amount1-delta target-sqrt-price current-sqrt-price liquidity) ERR_OVERFLOW))
+            (var-set new-sqrt-price-step target-sqrt-price)
+          )
+          (begin
+            (var-set amount-in-step amount-remaining)
+            (var-set new-sqrt-price-step (unwrap! (get-next-sqrt-price-from-input amount-remaining liquidity current-sqrt-price true) ERR_OVERFLOW))
+            (var-set amount-out-step (unwrap! (get-amount1-delta new-sqrt-price-step current-sqrt-price liquidity) ERR_OVERFLOW))
+          )
+        )
+      )
+      (let ((amount-in-max (unwrap! (get-amount1-delta current-sqrt-price target-sqrt-price liquidity) ERR_OVERFLOW)))
+        (if (>= amount-remaining amount-in-max)
+          (begin
+            (var-set amount-in-step amount-in-max)
+            (var-set amount-out-step (unwrap! (get-amount0-delta current-sqrt-price target-sqrt-price liquidity) ERR_OVERFLOW))
+            (var-set new-sqrt-price-step target-sqrt-price)
+          )
+          (begin
+            (var-set amount-in-step amount-remaining)
+            (var-set new-sqrt-price-step (unwrap! (get-next-sqrt-price-from-input amount-remaining liquidity current-sqrt-price false) ERR_OVERFLOW))
+            (var-set amount-out-step (unwrap! (get-amount0-delta new-sqrt-price-step current-sqrt-price liquidity) ERR_OVERFLOW))
+          )
+        )
+      )
+    )
+    (ok { amount-in-step: amount-in-step, amount-out-step: amount-out-step, new-sqrt-price-step: new-sqrt-price-step })
+  )
+)
+
+(define-private (get-next-sqrt-price-from-input (amount-in uint) (liquidity uint) (current-sqrt-price uint) (is-x-for-y bool))
+  (if is-x-for-y
+    (ok (/ (* liquidity current-sqrt-price) (+ (* amount-in current-sqrt-price) liquidity)))
+    (ok (+ current-sqrt-price (/ amount-in liquidity)))
   )
 )
 
