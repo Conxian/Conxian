@@ -1,6 +1,6 @@
 # DEX Module
 
-Comprehensive decentralized exchange functionality for the Conxian Protocol implementing advanced DeFi features including concentrated liquidity, multi-hop routing, yield farming, lending, and cross-chain integration.
+Comprehensive decentralized exchange functionality for the Conxian Protocol implementing advanced DeFi features including concentrated liquidity, multi-hop routing, yield farming, and cross-chain integration.
 
 ## Overview
 
@@ -9,7 +9,6 @@ The DEX module contains a complete suite of decentralized exchange contracts sup
 - **Concentrated Liquidity Pools**: Tick-based pricing with sqrt-price-x96 calculations
 - **Advanced Routing**: Dijkstra's algorithm for optimal multi-hop pathfinding
 - **Yield Farming**: Auto-compounding, staking, and reward distribution
-- **Lending Protocols**: Enterprise-grade lending with collateral management
 - **Cross-Chain Integration**: sBTC integration
 - **MEV Protection**: Batch auctions and manipulation detection
 - **Oracle Systems**: Multi-source price feeds and aggregation
@@ -57,21 +56,6 @@ The DEX module contains a complete suite of decentralized exchange contracts sup
 - `enhanced-yield-strategy.clar`: Advanced yield farming strategies
 - `cxvg-utility.clar`: CXVG token utility and governance features
 - `cxlp-migration-queue.clar`: Migration system for LP token upgrades
-
-### Lending & Borrowing
-
-#### Enterprise Lending
-
-- `comprehensive-lending-system.clar`: Full-featured lending protocol with multiple asset support
-- `enterprise-loan-manager.clar`: Enterprise-grade loan management and risk assessment
-- `bond-issuance-system.clar`: Bond issuance and management system
-- `bond-factory.clar`: Factory for creating bond instruments
-
-#### Lending Infrastructure
-
-- `vault.clar`: Multi-asset vault for lending collateral
-- `interest-rate-model.clar`: Dynamic interest rate calculations
-- `liquidation-manager.clar`: Automated liquidation system for under-collateralized positions
 
 ### MEV Protection & Security
 
@@ -168,14 +152,6 @@ The DEX module contains a complete suite of decentralized exchange contracts sup
 (use-trait staking-trait .staking-traits.staking-trait)
 (contract-call? .auto-compounder stake-tokens
   pool-token amount lock-period)
-```
-
-### Lending Protocol
-
-```clarity
-(use-trait lending-trait .lending-traits.lending-trait)
-(contract-call? .comprehensive-lending-system borrow
-  asset amount collateral-asset collateral-amount)
 ```
 
 ## Security Features
