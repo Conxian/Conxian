@@ -17,34 +17,8 @@ The lending module provides comprehensive DeFi lending functionality including:
 
 ### Core Lending Infrastructure
 
-#### Enterprise Module (`enterprise-module.clar`)
-
-- **Institutional lending** with advanced risk assessment
-- **Custom loan structures** for enterprise borrowers
-- **Multi-asset collateral pools** with correlation analysis
-- **Regulatory compliance** features for institutional users
-- **API integration** for traditional finance systems
-
-#### Dimensional Vault (`dimensional-vault.clar`)
-
-- **Multi-dimensional asset management** across protocols
-- **Cross-chain collateral** support with unified valuation
-- **Dynamic rebalancing** based on yield optimization
-- **Risk-parity allocation** across different asset classes
-- **Automated yield harvesting** and compounding
-
-### Lending Pool System
-
-#### Core Pool Contracts
-
-- **Lending Pool (`lending-pool.clar`)**: The main lending pool contract.
-- **Lending Pool Core (`lending-pool-core.clar`)**: Central lending logic and state management
-- **Lending Pool V2 (`lending-pool-v2.clar`)**: Enhanced version with improved gas efficiency
-- **Lending Pool Rewards (`lending-pool-rewards.clar`)**: Incentive distribution for liquidity providers
-
-#### Pool Management
-
-- **Lending Registrar (`lending-registrar.clar`)**: Registration and management of lending pools
+- **Comprehensive Lending System (`comprehensive-lending-system.clar`)**: The all-in-one, production-ready lending protocol for the Conxian ecosystem.
+- **Interest Rate Model (`interest-rate-model.clar`)**: A contract for calculating interest rates based on utilization.
 
 ## Lending Mechanics
 
@@ -73,48 +47,16 @@ Where:
 
 ```clarity
 ;; Deposit collateral
-(contract-call? .lending-pool deposit collateral-asset amount recipient)
+(contract-call? .comprehensive-lending-system supply .mock-token-a u1000)
 
 ;; Borrow against collateral
-(contract-call? .lending-pool borrow borrow-asset amount recipient)
+(contract-call? .comprehensive-lending-system borrow .mock-token-b u500)
 
 ;; Repay loan
-(contract-call? .lending-pool repay borrow-asset amount on-behalf-of)
+(contract-call? .comprehensive-lending-system repay .mock-token-b u500)
 
 ;; Withdraw collateral
-(contract-call? .lending-pool withdraw collateral-asset amount recipient)
-```
-
-### Enterprise Lending
-
-```clarity
-;; Create enterprise loan application
-(contract-call? .enterprise-module submit-loan-application
-  borrower-details collateral-package loan-requirements)
-
-;; Underwrite enterprise loan
-(contract-call? .enterprise-module underwrite-loan
-  application-id risk-assessment terms)
-
-;; Fund enterprise loan
-(contract-call? .enterprise-module fund-enterprise-loan
-  loan-id funding-amount)
-```
-
-### Dimensional Vault Operations
-
-```clarity
-;; Create dimensional vault
-(contract-call? .dimensional-vault create-vault
-  vault-config initial-assets)
-
-;; Deposit to vault
-(contract-call? .dimensional-vault deposit
-  vault-id assets amounts)
-
-;; Execute yield strategy
-(contract-call? .dimensional-vault execute-strategy
-  vault-id strategy-id parameters)
+(contract-call? .comprehensive-lending-system withdraw .mock-token-a u1000)
 ```
 
 ## Risk Management

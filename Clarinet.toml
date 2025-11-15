@@ -266,27 +266,15 @@ path = "contracts/enterprise/enterprise-loan-manager.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
 [contracts.interest_rate_model]
-path = "contracts/dex/interest-rate-model.clar"
+path = "contracts/lending/interest-rate-model.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
 [contracts.liquidity_optimization_engine]
 path = "contracts/dex/liquidity-optimization-engine.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
-[contracts.lending_pool]
-path = "contracts/lending/lending-pool.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-
-[contracts.lending_pool_core]
-path = "contracts/lending/lending-pool-core.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-
-[contracts.lending_pool_rewards]
-path = "contracts/lending/lending-pool-rewards.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-
-[contracts.lending_pool_v2]
-path = "contracts/lending/lending-pool-v2.clar"
+[contracts.comprehensive-lending-system]
+path = "contracts/lending/comprehensive-lending-system.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
 [contracts.lending_protocol_governance]
@@ -394,7 +382,7 @@ address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 path = "contracts/utils/encoding.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
-[contracts.error_utils]
+[contracts.error-utils]
 path = "contracts/utils/error-utils.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
