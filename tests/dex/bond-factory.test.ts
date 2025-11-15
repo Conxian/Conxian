@@ -1,4 +1,4 @@
-import { Clarinet, Tx, Chain, Account, types } from '@stacks/clarinet';
+import { Clarinet, Tx, Chain, Account, types } from '@stacks/clarinet-sdk';
 import { assertEquals } from '@stacks/transactions';
 
 Clarinet.test({
