@@ -25,11 +25,11 @@
 (define-constant MAX_TICK i887272)
 (define-constant TICK_SPACING u10) ;; Example tick spacing, can be configured
 (define-constant MIN_SQRT_RATIO u4295048016) ;; sqrt(MIN_PRICE) * 1e9
-(define-constant MAX_SQRT_RATIO u340282366920938463463374607431768211455) ;; max Clarity uint as placeholder for sqrt(MAX_PRICE) * 1e9
+(define-constant MAX_SQRT_RATIO u1461446703485210103287273052203988822378723970342) ;; sqrt(MAX_PRICE) * 1e9
 
 ;; --- Data Variables ---
-(define-data-var token0 principal tx-sender)
-(define-data-var token1 principal tx-sender)
+(define-data-var token0 principal 'SP0000000000000000000000000000000000000000)
+(define-data-var token1 principal 'SP0000000000000000000000000000000000000000)
 (define-data-var fee uint u3000) ;; basis points (e.g., u3000 = 0.3%)
 (define-data-var current-tick int i0)
 (define-data-var current-sqrt-price uint u0) ;; Current sqrt(price) * 1e9
@@ -274,9 +274,7 @@
       )
     )
   )
-)
-
-;; @desc Swaps token0 for token1 in the concentrated liquidity pool.
+));; @desc Swaps token0 for token1 in the concentrated liquidity pool.
 ;; @param amount-in (uint) The amount of token0 to swap.
 ;; @param min-amount-out (uint) The minimum amount of token1 to receive.
 ;; @returns (response uint (err u3013)) The amount of token1 received, or an error.
@@ -470,12 +468,14 @@
 ;; @desc Gets the current price of the pool.
 ;; @returns (response uint uint) The current sqrt price scaled by 1e9 or an error.
 (define-read-only (get-current-price)
-  (ok (var-get current-sqrt-price)))
+  (ok (var-get current-sqrt-price))
+)
 
 ;; @desc Gets the total liquidity in the pool.
 ;; @returns (response uint uint) The total liquidity or an error.
 (define-read-only (get-total-liquidity)
-  (ok (var-get total-liquidity)))
+  (ok (var-get total-liquidity))
+)
 
 ;; @desc Gets the fee growth for a specific position.
 ;; @param position-id The ID of the position NFT.
@@ -492,29 +492,120 @@
 ;; @desc Gets the current tick of the pool.
 ;; @returns (response int uint) The current tick or an error.
 (define-read-only (get-current-tick)
-  (ok (var-get current-tick)))
+  (ok (var-get current-tick))
+)
 
 ;; @desc Gets the fee rate of the pool.
 ;; @returns (response uint uint) The fee rate in basis points or an error.
 (define-read-only (get-fee)
-  (ok (var-get fee)))
+  (ok (var-get fee))
+)
 
 ;; @desc Gets the token0 principal of the pool.
 ;; @returns (response principal uint) The principal of token0 or an error.
-(define-read-only (get-token0)
+(define-read-only (get-token0))
   (ok (var-get token0))
 )
 
 ;; @desc Gets the token1 principal of the pool.
 ;; @returns (response principal uint) The principal of token1 or an error.
-(define-read-only (get-token1)
+(define-read-only (get-token1))
   (ok (var-get token1))
 )
 
-;; NOTE: The legacy remove-liquidity and swap adapters that directly called
-;; .sip-010-ft-trait have been removed in v1 to avoid invalid principals and
-;; duplicated logic. The primary add/remove liquidity and swap paths above
-;; should be used instead.
+    ;; Calculate token amounts to return
+    (if (<= (var-get current-tick) lower-tick)
+      ;; Current price is below the range, only token0 is returned
+      (var-set amount0-to-return (unwrap! (contract-call? .math-lib-advanced get-amount0-for-liquidity (var-get current-sqrt-price) (unwrap! (get-sqrt-price-from-tick upper-tick) ERR_INVALID_TICK) liquidity-removed) ERR_OVERFLOW))
+      (if (>= (var-get current-tick) upper-tick)
+        ;; Current price is above the range, only token1 is returned
+        (var-set amount1-to-return (unwrap! (contract-call? .math-lib-advanced get-amount1-for-liquidity (unwrap! (get-sqrt-price-from-tick lower-tick) ERR_INVALID_TICK) (var-get current-sqrt-price) liquidity-removed) ERR_OVERFLOW))
+        ;; Current price is within the range, both tokens are returned
+        (begin
+          (var-set amount0-to-return (unwrap! (contract-call? .math-lib-advanced get-amount0-for-liquidity (var-get current-sqrt-price) (unwrap! (get-sqrt-price-from-tick upper-tick) ERR_INVALID_TICK) liquidity-removed) ERR_OVERFLOW))
+          (var-set amount1-to-return (unwrap! (contract-call? .math-lib-advanced get-amount1-for-liquidity (unwrap! (get-sqrt-price-from-tick lower-tick) ERR_INVALID_TICK) (var-get current-sqrt-price) liquidity-removed) ERR_OVERFLOW))
+        )
+      )
+    )
+
+    ;; Transfer tokens back
+    (try! (contract-call? .sip-010-ft-trait transfer (var-get token0) amount0-to-return (as-contract tx-sender) tx-sender))
+    (try! (contract-call? .sip-010-ft-trait transfer (var-get token1) amount1-to-return (as-contract tx-sender) tx-sender))
+
+    ;; Burn NFT and update total liquidity
+    (try! (burn-position-nft position-id tx-sender))
+    (var-set total-liquidity (- (var-get total-liquidity) liquidity-removed))
+
+    ;; Emit remove-liquidity event
+    (print {event: "remove-liquidity", sender: tx-sender, position-id: position-id, amount0: amount0-to-return, amount1: amount1-to-return, block-height: (get block-height)})
+
+    (ok true)
+  )
+)
+
+;; @desc Swaps tokens in the pool.
+;; @param token-in The principal of the token being sent in.
+;; @param amount-in The amount of the token being sent in.
+;; @param min-amount-out The minimum amount of the token to receive.
+;; @returns (response uint uint) The amount of token out received or an error.
+;; @error ERR_INVALID_AMOUNT if the token-in is not one of the pool's tokens.
+;; @error ERR_ZERO_AMOUNT_IN if the amount-in is zero.
+;; @error ERR_OVERFLOW if a mathematical overflow occurs during swap calculation.
+;; @error ERR_INSUFFICIENT_LIQUIDITY if the amount-out is less than min-amount-out.
+(define-public (swap (token-in principal) (amount-in uint) (min-amount-out uint))
+  (let (
+    (token-out (if (is-eq token-in (var-get token0)) (var-get token1) (var-get token0)))
+    (amount-out u0)
+    (new-sqrt-price u0)
+    (amount-in-remaining amount-in)
+    (current-sqrt-price-val (var-get current-sqrt-price))
+    (current-tick-val (var-get current-tick))
+  )
+    (asserts! (or (is-eq token-in (var-get token0)) (is-eq token-in (var-get token1))) ERR_INVALID_AMOUNT)
+    (asserts! (> amount-in u0) ERR_ZERO_AMOUNT_IN)
+
+    (if (is-eq token-in (var-get token0))
+      ;; Swapping token0 for token1
+      (begin
+        (try! (contract-call? .sip-010-ft-trait transfer (var-get token0) amount-in tx-sender (as-contract tx-sender)))
+        (let (
+          (swap-result (unwrap! (contract-call? .math-lib-advanced calculate-swap-amount-out-x-to-y current-sqrt-price-val (var-get total-liquidity) amount-in) ERR_OVERFLOW))
+        )
+          (var-set amount-out (get amount-out swap-result))
+          (var-set new-sqrt-price (get new-sqrt-price swap-result))
+        )
+      )
+      ;; Swapping token1 for token0
+      (begin
+        (try! (contract-call? .sip-010-ft-trait transfer (var-get token1) amount-in tx-sender (as-contract tx-sender)))
+        (let (
+          (swap-result (unwrap! (contract-call? .math-lib-advanced calculate-swap-amount-out-y-to-x current-sqrt-price-val (var-get total-liquidity) amount-in) ERR_OVERFLOW))
+        )
+          (var-set amount-out (get amount-out swap-result))
+          (var-set new-sqrt-price (get new-sqrt-price swap-result))
+        )
+      )
+    )
+
+    (asserts! (>= amount-out min-amount-out) ERR_INSUFFICIENT_LIQUIDITY)
+
+    ;; Update current sqrt price and tick
+    (var-set current-sqrt-price new-sqrt-price)
+    (var-set current-tick (unwrap! (get-tick-from-price new-sqrt-price) ERR_OVERFLOW))
+    (var-set total-liquidity (unwrap! (contract-call? .math-lib-advanced calculate-new-total-liquidity (var-get total-liquidity) amount-in amount-out) ERR_OVERFLOW))
+    ;; Update fee-growth-global
+    (var-set fee-growth-global-0 (+ (var-get fee-growth-global-0) (get fee0 swap-result)))
+    (var-set fee-growth-global-1 (+ (var-get fee-growth-global-1) (get fee1 swap-result)))
+
+    ;; Transfer token out
+    (try! (contract-call? .sip-010-ft-trait transfer token-out amount-out (as-contract tx-sender) tx-sender))
+
+    ;; Emit swap event
+    (print {event: "swap", sender: tx-sender, amount-in: amount-in, amount-out: amount-out, token-in: token-in, token-out: token-out, block-height: (get block-height)})
+
+    (ok amount-out)
+  )
+)
 
 ;; @desc Returns the details of a specific liquidity position.
 ;; @param position-id (uint) The ID of the position NFT.
@@ -582,8 +673,23 @@
 ;; @returns (response { fee-growth-outside-0: uint, fee-growth-outside-1: uint } (err u3019)) The fee growth outside the range or an error.
 ;; @error u3019 If a mathematical overflow occurs.
 (define-private (get-fee-growth-outside (lower-tick int) (upper-tick int))
-  (ok {
-    (fee-growth-global-0 (var-get fee-growth-global-0))(fee-growth-global-1 (var-get fee-growth-global-1))
+  (let (
+    (fee-growth-global-0 (var-get fee-growth-global-0))
+    (fee-growth-global-1 (var-get fee-growth-global-1))
+    (fee-growth-lower-0 (unwrap-panic (map-get? tick-data { tick: lower-tick }) u3019)).fee-growth-0
+    (fee-growth-lower-1 (unwrap-panic (map-get? tick-data { tick: lower-tick }) u3019)).fee-growth-1
+    (fee-growth-upper-0 (unwrap-panic (map-get? tick-data { tick: upper-tick }) u3019)).fee-growth-0
+    (fee-growth-upper-1 (unwrap-panic (map-get? tick-data { tick: upper-tick }) u3019)).fee-growth-1
+  )
+    (ok {
+      fee-growth-outside-0: (if (>= (var-get current-tick) upper-tick)
+                                fee-growth-global-0
+                                (- fee-growth-global-0 fee-growth-upper-0))
+      fee-growth-outside-1: (if (>= (var-get current-tick) upper-tick)
+                                fee-growth-global-1
+                                (- fee-growth-global-1 fee-growth-upper-1))
+    })
+  )
 )
 
 ;; @desc Calculates the tick for a given price.

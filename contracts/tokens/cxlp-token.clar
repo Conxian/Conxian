@@ -118,7 +118,14 @@
 ;; @desc Checks if the system is paused.
 ;; @returns A boolean indicating if the system is paused.
 (define-private (check-system-pause)
-  false)
+    (if (var-get system-integration-enabled)
+        (match (var-get protocol-monitor)
+            monitor (unwrap! (contract-call? monitor is-paused) false)
+            false
+        )
+        false
+    )
+)
 
 ;; @desc Performs a mid-year auto-adjustment of the epoch cap.
 ;; @returns A boolean indicating if an adjustment was made.
@@ -342,14 +349,10 @@
     
     (let ((sender-bal (default-to u0 (map-get? balances sender))))
       (asserts! (>= sender-bal amount) (err ERR_NOT_ENOUGH_BALANCE))
-      (map-set balances sender
-        (unwrap! (safe-sub sender-bal amount) (err ERR_SUB_UNDERFLOW))
-      )
+      (try! (map-set balances sender (unwrap! (safe-sub sender-bal amount) (err ERR_SUB_UNDERFLOW))))
       
       (let ((rec-bal (default-to u0 (map-get? balances recipient))))
-        (map-set balances recipient
-          (unwrap! (safe-add rec-bal amount) (err ERR_OVERFLOW))
-        )
+        (try! (map-set balances recipient (unwrap! (safe-add rec-bal amount) (err ERR_OVERFLOW))))
         (map-set balance-since recipient block-height)
       )
     )

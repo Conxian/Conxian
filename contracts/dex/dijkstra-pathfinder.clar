@@ -1,11 +1,11 @@
 ;; @desc This contract encapsulates all the logic for the Dijkstra's algorithm,
 ;; including initializing the data structures, finding the shortest path, and reconstructing the path.
 
-(use-trait dijkstra-pathfinder-trait .dijkstra-pathfinder-trait.dijkstra-pathfinder-trait)
+(use-trait dijkstra-pathfinder-trait .traits.dijkstra-pathfinder-trait.dijkstra-pathfinder-trait)
 (use-trait dim-registry-trait .dim-registry-trait.dim-registry-trait)
 (use-trait pool-trait .dex-traits.pool-trait)
 
-(impl-trait .dijkstra-pathfinder-trait.dijkstra-pathfinder-trait)
+(impl-trait .traits.dijkstra-pathfinder-trait.dijkstra-pathfinder-trait)
 
 ;; @constants
 (define-constant ERR_NO_PATH_FOUND (err u1407))

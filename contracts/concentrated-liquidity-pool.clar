@@ -1,7 +1,7 @@
 ;; concentrated-liquidity-pool
 ;; This contract implements a concentrated liquidity pool, allowing liquidity providers to allocate capital within specific price ranges.
 
-(use-trait sip-010-ft-trait .dex-traits.sip-010-ft-trait)
+(use-trait sip-010-ft-trait .sip-010-trait-ft-standard.sip-010-trait)
 (use-trait position-nft-trait .position-nft.position-nft-trait) ;; Assuming a position NFT trait exists or will be created
 
 ;; Constants

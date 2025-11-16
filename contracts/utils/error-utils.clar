@@ -20,7 +20,13 @@
     (code uint)
     (context (optional (string-utf8 256)))
   )
-  (err code)
+  (let ((base-err (err code)))
+    (match context
+      some-context (err (concat "[ERR] " some-context))
+      none
+      base-err
+    )
+  )
 )
 
 ;; ======================
@@ -54,20 +60,58 @@
 ;; ======================
 ;; COMMON ERROR RESPONSES
 ;; ======================
-;; For Phase 0 we only expose simple constants above and a basic logging helper.
+
+(define-constant ERR_OWNER_ONLY (err-with-context ERR_NOT_OWNER
+  (some (as-max-len? u"Caller is not the owner" u100))
+))
+(define-constant ERR_PAUSED (err-with-context ERR_CONTRACT_PAUSED
+  (some (as-max-len? u"Contract is paused" u100))
+))
+(define-constant ERR_ZERO_AMOUNT (err-with-context ERR_ZERO_AMOUNT
+  (some (as-max-len? u"Amount must be greater than zero" u100))
+))
+(define-constant ERR_INVALID_INPUT (err-with-context ERR_INVALID_INPUT
+  (some (as-max-len? u"Invalid input parameters" u100))
+))
 
 ;; ======================
 ;; ERROR LOGGING
 ;; ======================
 
-;; For Phase 0 we only expose simple constants above and a basic logging helper.
+;; Log an error event (emits an event that can be indexed)
+
+;; Log an error with context
+(define-private (log-error
+    (code uint)
+    (message (optional (string-utf8 256)))
+  )
+  (print {
+    code: code,
+    caller: tx-sender,
+    message: message,
+  })
+  (err code)
+)
 
 ;; ======================
-;; ERROR LOGGING
+;; ERROR RECOVERY HELPERS
 ;; ======================
 
-      message: message
-    })
+;; Execute a function with error recovery
+(define-private (with-error-recovery (fn (function () (response AnyType uint))))
+  (try! (fn))
+  (try! (check-continue (err u0)))
+)
+
+;; Check if operation should continue after error
+(define-private (check-continue (result (response AnyType uint)))
+  (match result
+    (ok value)
+    (ok value)
     (err code)
+    (if (>= code u4000) ;; Critical errors (4000+)
+      (err code)
+      (ok (some code)) ;; Non-critical, can continue
+    )
   )
 )

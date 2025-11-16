@@ -6,9 +6,9 @@
 ;; representation of a user's stake.
 
 ;; --- Traits ---
-(use-trait protocol-monitor-trait .monitoring-security-traits.protocol-monitor-trait)
+(use-trait protocol-monitor-trait .protocol-monitor-trait.protocol-monitor-trait)
 (use-trait sip-010-ft-trait .dex-traits.sip-010-ft-trait)
-(use-trait rbac-trait .base-traits.rbac-trait)
+(use-trait rbac-trait .rbac-trait.rbac-trait)
 
 ;; --- Constants ---
 
@@ -31,9 +31,6 @@
 
 ;; --- Data Variables and Maps ---
 
-;; @var contract-owner The principal of the contract owner.
-(define-data-var contract-owner principal tx-sender)
-;; @var last-token-id The ID of the last token minted.
 ;; @var last-token-id The ID of the last token minted.
 (define-data-var last-token-id uint u0)
 ;; @var transfers-enabled A boolean indicating if token transfers are enabled.
@@ -52,7 +49,11 @@
 ;; @desc Checks if the system is paused.
 ;; @returns A boolean indicating if the system is paused.
 (define-private (check-system-pause)
-  false)
+    (if (is-some (var-get protocol-monitor))
+        (unwrap! (contract-call? (unwrap-panic (var-get protocol-monitor)) is-paused) false)
+        false
+    )
+)
 
 ;; --- Read-Only Functions ---
 
@@ -75,9 +76,7 @@
 ;; @returns A response indicating success or failure.
 (define-public (set-staking-contract (contract-address principal))
   (begin
-    (asserts! (is-ok (contract-call? .rbac has-role "contract-owner"))
-      (err ERR_UNAUTHORIZED)
-    )
+    (asserts! (is-ok (contract-call? .rbac-trait has-role "contract-owner")) (err ERR_UNAUTHORIZED))
     (var-set staking-contract (some contract-address))
     (print {event: "staking-contract-set", sender: tx-sender, contract-address: contract-address, block-height: block-height})
     (ok true)))
@@ -87,7 +86,7 @@
 ;; @returns A response indicating success or failure.
 (define-public (set-protocol-monitor (monitor principal))
   (begin
-    (asserts! (is-ok (contract-call? .rbac has-role "contract-owner")) (err ERR_UNAUTHORIZED))
+    (asserts! (is-ok (contract-call? .rbac-trait has-role "contract-owner")) (err ERR_UNAUTHORIZED))
     (var-set protocol-monitor (some monitor))
     (print {event: "protocol-monitor-set", sender: tx-sender, monitor: monitor, block-height: block-height})
     (ok true)))

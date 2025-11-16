@@ -79,7 +79,7 @@ path = "contracts/risk/liquidation-engine.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
 [contracts.oracle-adapter]
-path = "contracts/oracle/oracle-adapter-stub.clar"
+path = "contracts/oracle/external-oracle-adapter.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
 [accounts.deployer]
@@ -314,10 +314,6 @@ address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 path = "contracts/governance/proposal-engine.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
-[contracts.proposal-registry]
-path = "contracts/governance/proposal-registry.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-
 [contracts.funding_calculator]
 path = "contracts/risk/funding-calculator.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
@@ -402,8 +398,8 @@ address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 path = "contracts/utils/utils.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
-[contracts.access-traits]
-path = "contracts/traits/access-traits.clar"
+[contracts.rbac_trait]
+path = "contracts/access/traits/access-traits.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
 [contracts.decentralized_trait_registry]
@@ -472,22 +468,6 @@ address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 path = "contracts/traits/central-traits-registry.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
-[contracts.traits]
-path = "contracts/traits/oracle-trait.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-
-[contracts.advanced-router-dijkstra-trait]
-path = "contracts/traits/advanced-router-dijkstra-trait.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-
-[contracts.upgrade-controller-trait]
-path = "contracts/traits/upgrade-controller-trait.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-
-[contracts.governance-token-trait]
-path = "contracts/traits/governance-token-trait.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-
 [contracts.governance-voting]
 path = "contracts/governance/voting.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
@@ -502,7 +482,7 @@ path = "contracts/security/circuit-breaker.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
 [contracts.dimensional-advanced-router-dijkstra]
-path = "contracts/dimensional/advanced-router-dijkstra.clar"
+path = "contracts/dex/dimensional-advanced-router-dijkstra.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
 [contracts.dim-registry]

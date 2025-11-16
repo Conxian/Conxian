@@ -133,17 +133,6 @@
 ;; @param who The principal to check.
 ;; @returns A boolean indicating if the principal is the owner.
 (define-read-only (is-owner (who principal))
-  (is-eq who (var-get contract-owner))
-)
-
-;; @desc Checks if a principal is a minter.
-
-;; --- Read-Only Functions ---
-
-;; @desc Checks if a principal is the contract owner.
-;; @param who The principal to check.
-;; @returns A boolean indicating if the principal is the owner.
-(define-read-only (is-owner (who principal))
   (is-eq who (var-get contract-owner)))
 
 ;; @desc Checks if a principal is a minter.
@@ -368,7 +357,15 @@
   (begin
     (asserts! (is-owner tx-sender) ERR_UNAUTHORIZED)
     (asserts! (is-eq (len recipients) (len amounts)) ERR_LENGTH_MISMATCH)
-      (asserts! (check-emission-allowed total-bonus) ERR_EMISSION_DENIED)
+    (let ((result (fold (define-private (distribute-bonus-iter (recipient principal) (state {amounts: (list 100 uint), index: uint, total: uint}))
+                          (let ((amounts-list (get amounts state))
+                                (idx (get index state))
+                                (amount (unwrap! (element-at amounts-list idx) state)))
+                            (let ((current-bal (get bal (default-to {bal: u0} (map-get? balances {who: recipient})))))
+                              (try! (map-set balances {who: recipient} {bal: (+ current-bal amount)}))
+                              (map-set seasonal-bonuses recipient amount))
+                            {amounts: amounts-list, index: (+ idx u1), total: (+ (get total state) amount)}))
+                        recipients {amounts: amounts, index: u0, total: u0}))
           (total-bonus (get total result)))
       (asserts! (check-emission-allowed total-bonus) ERR_EMISSION_DENIED)
       (try! (var-set total-supply (+ (var-get total-supply) total-bonus)))

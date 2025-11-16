@@ -1,11 +1,11 @@
 ;; @desc This contract is responsible for managing routes,
 ;; including proposing, executing, and getting statistics for routes.
 
-(use-trait route-manager-trait .route-manager-trait.route-manager-trait)
-(use-trait dijkstra-pathfinder-trait .dijkstra-pathfinder-trait.dijkstra-pathfinder-trait)
+(use-trait route-manager-trait .traits.route-manager-trait.route-manager-trait)
+(use-trait dijkstra-pathfinder-trait .traits.dijkstra-pathfinder-trait.dijkstra-pathfinder-trait)
 (use-trait rbac-trait .base-traits.rbac-trait)
 
-(impl-trait .route-manager-trait.route-manager-trait)
+(impl-trait .traits.route-manager-trait.route-manager-trait)
 
 ;; @constants
 (define-constant ERR_INVALID_ROUTE (err u1400))

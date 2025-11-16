@@ -34,9 +34,12 @@
 ;; Stores all registered implementations for a given trait interface
 ;; Key: {trait-name: (string-ascii 64), implementation-principal: principal}
 ;; Value: {version: uint, status: (string-ascii 16)} ;; status: "pending", "active", "deprecated"
-(define-map trait-implementations {trait-name: (string-ascii 64), implementation-principal: principal} {
-  version: uint,
-  status: (string-ascii 16)
+(define-map trait-implementations {
+  "trait-name": (string-ascii 64),
+  "implementation-principal": principal
+} {
+  "version": uint,
+  "status": (string-ascii 16)
 })
 
 ;; Stores the currently active implementation for each trait interface
@@ -52,9 +55,9 @@
 ;;   new-version: uint
 ;; }
 (define-map pending-trait-upgrades uint {
-  trait-name: (string-ascii 64),
-  new-implementation-principal: principal,
-  new-version: uint
+  "trait-name": (string-ascii 64),
+  "new-implementation-principal": principal,
+  "new-version": uint
 })
 
 ;; --- Private Helper Functions ---
@@ -86,20 +89,17 @@
   (begin
     (asserts! (is-eq tx-sender (var-get contract-owner)) (err ERR_UNAUTHORIZED))
     (asserts! (is-some (map-get? trait-interfaces trait-name)) (err ERR_TRAIT_NOT_FOUND))
-    (asserts!
-      (not (is-some (map-get? trait-implementations {
-        trait-name: trait-name,
-        implementation-principal: implementation-principal,
-      })))
-      (err ERR_IMPLEMENTATION_ALREADY_REGISTERED)
-    )
+    (asserts! (not (is-some (map-get? trait-implementations {
+      "trait-name": trait-name,
+      "implementation-principal": implementation-principal
+    }))) (err ERR_IMPLEMENTATION_ALREADY_REGISTERED))
 
     (map-set trait-implementations {
-      trait-name: trait-name,
-      implementation-principal: implementation-principal,
+      "trait-name": trait-name,
+      "implementation-principal": implementation-principal
     } {
-      version: version,
-      status: "pending",
+      "version": version,
+      "status": "pending"
     })
     (ok true)
   )
@@ -113,31 +113,34 @@
   (begin
     (asserts! (is-eq tx-sender (var-get governance-contract)) (err ERR_NOT_GOVERNANCE_CONTRACT))
     (asserts! (is-some (map-get? trait-interfaces trait-name)) (err ERR_TRAIT_NOT_FOUND))
-    (let ((impl-data (map-get? trait-implementations {trait-name: trait-name, implementation-principal: implementation-principal})))
+    (let
+      ((impl-data (map-get? trait-implementations {
+        "trait-name": trait-name,
+        "implementation-principal": implementation-principal
+      })))
       (asserts! (is-some impl-data) (err ERR_IMPLEMENTATION_NOT_FOUND))
       (asserts! (is-eq (get status (unwrap-panic impl-data)) "pending") (err ERR_ALREADY_ACTIVE))
 
       ;; Deactivate current active implementation if exists
       (if (is-some (map-get? active-trait-implementations trait-name))
-        (let ((current-active-impl (unwrap-panic (map-get? active-trait-implementations trait-name))))
-          (map-set trait-implementations
-            {trait-name: trait-name, implementation-principal: current-active-impl}
-            (merge
-              (unwrap-panic (map-get? trait-implementations {trait-name: trait-name, implementation-principal: current-active-impl}))
-              {status: "deprecated"}
-            )
-          )
+        (let
+          ((current-active-impl (unwrap-panic (map-get? active-trait-implementations trait-name))))
+          (map-set trait-implementations {
+            "trait-name": trait-name,
+            "implementation-principal": current-active-impl
+          } (merge (unwrap-panic (map-get? trait-implementations {
+            "trait-name": trait-name,
+            "implementation-principal": current-active-impl
+          })) {status: "deprecated"}))
         )
         true
       )
 
       (map-set active-trait-implementations trait-name implementation-principal)
       (map-set trait-implementations {
-        trait-name: trait-name,
-        implementation-principal: implementation-principal,
-      }
-        (merge (unwrap-panic impl-data) { status: "active" })
-      )
+        "trait-name": trait-name,
+        "implementation-principal": implementation-principal
+      } (merge (unwrap-panic impl-data) {status: "active"}))
       (ok true)
     )
   )
@@ -152,14 +155,15 @@
     (asserts! (is-some (map-get? trait-interfaces trait-name)) (err ERR_TRAIT_NOT_FOUND))
     (asserts! (is-some (map-get? active-trait-implementations trait-name)) (err ERR_NOT_ACTIVE))
 
-    (let ((current-active-impl (unwrap-panic (map-get? active-trait-implementations trait-name))))
-      (map-set trait-implementations
-        {trait-name: trait-name, implementation-principal: current-active-impl}
-        (merge
-          (unwrap-panic (map-get? trait-implementations {trait-name: trait-name, implementation-principal: current-active-impl}))
-          {status: "deprecated"}
-        )
-      )
+    (let
+      ((current-active-impl (unwrap-panic (map-get? active-trait-implementations trait-name))))
+      (map-set trait-implementations {
+        "trait-name": trait-name,
+        "implementation-principal": current-active-impl
+      } (merge (unwrap-panic (map-get? trait-implementations {
+        "trait-name": trait-name,
+        "implementation-principal": current-active-impl
+      })) {status: "deprecated"}))
       (map-delete active-trait-implementations trait-name)
       (ok true)
     )
@@ -177,15 +181,19 @@
     (asserts! (is-eq tx-sender (var-get governance-contract)) (err ERR_NOT_GOVERNANCE_CONTRACT))
     (asserts! (is-some (map-get? trait-interfaces trait-name)) (err ERR_TRAIT_NOT_FOUND))
     ;; Check if the new implementation is already registered and pending or active
-    (let ((new-impl-data (map-get? trait-implementations {trait-name: trait-name, implementation-principal: new-implementation-principal})))
+    (let
+      ((new-impl-data (map-get? trait-implementations {
+        "trait-name": trait-name,
+        "implementation-principal": new-implementation-principal
+      })))
       (asserts! (is-some new-impl-data) (err ERR_IMPLEMENTATION_NOT_FOUND))
       (asserts! (is-eq (get status (unwrap-panic new-impl-data)) "pending") (err ERR_ALREADY_ACTIVE)) ;; Should be pending to be proposed for upgrade
     )
 
     (map-set pending-trait-upgrades proposal-id {
-      trait-name: trait-name,
-      new-implementation-principal: new-implementation-principal,
-      new-version: new-version
+      "trait-name": trait-name,
+      "new-implementation-principal": new-implementation-principal,
+      "new-version": new-version
     })
     (ok true)
   )
@@ -197,40 +205,38 @@
 (define-public (finalize-trait-upgrade (proposal-id uint))
   (begin
     (asserts! (is-eq tx-sender (var-get governance-contract)) (err ERR_NOT_GOVERNANCE_CONTRACT))
-    (let ((proposal-data (map-get? pending-trait-upgrades proposal-id)))
+    (let
+      ((proposal-data (map-get? pending-trait-upgrades proposal-id)))
       (asserts! (is-some proposal-data) (err ERR_IMPLEMENTATION_NOT_FOUND)) ;; Using this error for now, can define a specific one
 
-      (let (
-        (trait-name (get trait-name (unwrap-panic proposal-data)))
-        (new-implementation-principal (get new-implementation-principal (unwrap-panic proposal-data)))
-        (new-version (get new-version (unwrap-panic proposal-data)))
-      )
+      (let
+        ((trait-name (get "trait-name" (unwrap-panic proposal-data)))
+         (new-implementation-principal (get "new-implementation-principal" (unwrap-panic proposal-data)))
+         (new-version (get "new-version" (unwrap-panic proposal-data))))
 
         ;; Deactivate current active implementation if exists
         (if (is-some (map-get? active-trait-implementations trait-name))
-          (let ((current-active-impl (unwrap-panic (map-get? active-trait-implementations trait-name))))
-            (map-set trait-implementations
-              {trait-name: trait-name, implementation-principal: current-active-impl}
-              (merge
-                (unwrap-panic (map-get? trait-implementations {trait-name: trait-name, implementation-principal: current-active-impl}))
-                {status: "deprecated"}
-              )
-            )
+          (let
+            ((current-active-impl (unwrap-panic (map-get? active-trait-implementations trait-name))))
+            (map-set trait-implementations {
+              "trait-name": trait-name,
+              "implementation-principal": current-active-impl
+            } (merge (unwrap-panic (map-get? trait-implementations {
+              "trait-name": trait-name,
+              "implementation-principal": current-active-impl
+            })) {status: "deprecated"}))
           )
           true
         )
 
         (map-set active-trait-implementations trait-name new-implementation-principal)
         (map-set trait-implementations {
-          trait-name: trait-name,
-          implementation-principal: new-implementation-principal,
-        }
-          (merge
-            (unwrap-panic (map-get? trait-implementations {
-              trait-name: trait-name,
-              implementation-principal: new-implementation-principal,
-            })) { status: "active" }
-          ))
+          "trait-name": trait-name,
+          "implementation-principal": new-implementation-principal
+        } (merge (unwrap-panic (map-get? trait-implementations {
+          "trait-name": trait-name,
+          "implementation-principal": new-implementation-principal
+        })) {status: "active"}))
         (map-delete pending-trait-upgrades proposal-id)
         (ok true)
       )

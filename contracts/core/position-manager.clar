@@ -2,12 +2,12 @@
 ;; including opening, closing, and updating positions. It also handles the
 ;; logic for calculating position value and P&L.
 
-(use-trait position-manager-trait .position-manager-trait.position-manager-trait)
+(use-trait position-manager-trait .traits.position-manager-trait.position-manager-trait)
 (use-trait oracle-trait .oracle-aggregator-v2-trait.oracle-aggregator-v2-trait)
 (use-trait sip-010-ft-trait .sip-010-ft-trait.sip-010-ft-trait)
 (use-trait rbac-trait .base-traits.rbac-trait)
 
-(impl-trait .position-manager-trait.position-manager-trait)
+(impl-trait .traits.position-manager-trait.position-manager-trait)
 
 ;; @constants
 (define-constant ERR_UNAUTHORIZED (err u1001))

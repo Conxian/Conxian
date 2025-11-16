@@ -114,28 +114,18 @@
 
 ;; @desc Assert that the system is not paused.
 (define-private (when-not-paused)
-  (if (var-get paused)
-    (err ERR_SYSTEM_PAUSED)
-    (ok true)
-  )
+  (asserts! (not (var-get paused)) ERR_SYSTEM_PAUSED)
 )
 
 ;; @desc Assert that the system is not in emergency mode.
 (define-private (when-not-emergency)
-  (if (var-get emergency-mode)
-    (err ERR_COORDINATOR_ERROR)
-    (ok true)
-  )
+  (asserts! (not (var-get emergency-mode)) ERR_COORDINATOR_ERROR)
 )
 
 ;; @desc Validate that a token is registered.
 ;; @param token: The principal of the token.
-;; @returns (response bool uint): An `ok` response with `true` on success, or an error code.
 (define-private (validate-token (token principal))
-  (if (default-to false (map-get? registered-tokens token))
-    (ok true)
-    (err ERR_INVALID_TOKEN)
-  )
+  (asserts! (default-to false (map-get? registered-tokens token)) ERR_INVALID_TOKEN)
 )
 
 ;; @desc Update the activity for a user.
@@ -166,23 +156,20 @@
 ;; @param decimals: The number of decimals for the token.
 ;; @returns (response bool uint): An `ok` response with `true` on success, or an error code.
 (define-public (register-token (token principal) (symbol (string-ascii 10)) (decimals uint))
-  (begin
-    (asserts! (is-contract-owner) ERR_UNAUTHORIZED)
+  (let (
+    (is-owner (is-contract-owner))
+  )
+    (asserts! is-owner ERR_UNAUTHORIZED)
+    (try! (when-not-paused))
     (if (is-none (map-get? registered-tokens token))
-      (begin
-        (var-set total-registered-tokens (+ (var-get total-registered-tokens) u1))
-        (map-set registered-tokens token true)
-(map-set token-metadata token {
-          symbol: symbol,
-          decimals: decimals,
-          total-supply: u0,
-          is-active: true,
-          last-activity: block-height,
-        })
-(ok true)
-      )
-      (ok true)
+      (var-set total-registered-tokens (+ (var-get total-registered-tokens) u1))
+      true
     )
+    (map-set registered-tokens token true)
+    (map-set token-metadata token
+      {symbol: symbol, decimals: decimals, total-supply: u0, is-active: true, last-activity: block-height}
+    )
+    (ok true)
   )
 )
 
@@ -252,7 +239,12 @@
   (begin
     (try! (when-not-paused))
     (try! (validate-token token))
-    ;; Phase 0 stub: skip external revenue-distributor call to avoid dynamic contract-call.
+
+    ;; Call revenue distributor
+    (try! (contract-call? (var-get revenue-distributor) distribute-revenue token amount))
+
+    ;; Update token activity
+    (try! (update-token-activity token amount))
     (ok true)
   )
 )
