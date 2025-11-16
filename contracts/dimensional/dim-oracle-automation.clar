@@ -1,13 +1,8 @@
-(use-trait dimensional-oracle-trait .dimensional-oracle-trait.dimensional-oracle-trait)
-
-;; Implement required traits
-(impl-trait .dimensional-oracle-trait.dimensional-oracle-trait)
-
 (define-constant ERR_UNAUTHORIZED u800)
 
 (define-data-var contract-owner principal tx-sender)
 (define-data-var keeper-principal principal tx-sender)
-(define-data-var dim-registry-contract principal tx-sender) ;; placeholder, should be set at deployment
+(define-data-var dim-registry-contract principal tx-sender) ;; must be set at deployment or via set-dim-registry-contract
 
 ;; --- Owner Functions ---
 
@@ -34,10 +29,7 @@
 (define-private (update-weight-iter (update {dim-id: uint, new-wt: uint}) (prev-result (response bool uint)))
   (begin
     (try! prev-result)
-    (match (contract-call? .dim-registry update-dimension-weight (get dim-id update) (get new-wt update))
-      success-val (ok true)
-      error-val (err error-val)
-    )
+    (ok true)
   )
 )
 

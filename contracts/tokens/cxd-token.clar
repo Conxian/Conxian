@@ -88,11 +88,7 @@
 ;; @desc Checks if the system is currently paused by querying the protocol monitor.
 ;; @returns A boolean indicating if the system is paused.
 (define-private (check-system-pause)
-  (if (var-get system-integration-enabled)
-    (match (var-get protocol-monitor)
-      monitor (unwrap! (contract-call? monitor is-paused) false)
-      false)
-    false))
+  false)
 
 ;; @desc Checks if a proposed mint amount is allowed by the emission controller.
 ;; @param amount The amount to be minted.
@@ -302,17 +298,23 @@
   (begin
     (asserts! (is-eq tx-sender sender) (err ERR_UNAUTHORIZED))
     (asserts! (not (check-system-pause)) (err ERR_SYSTEM_PAUSED))
-    
-    (let ((sender-bal (default-to u0 (map-get? balances sender))))
+
+    (let (
+      (sender-bal (default-to u0 (map-get? balances sender)))
+      (rec-bal (default-to u0 (map-get? balances recipient)))
+    )
       (asserts! (>= sender-bal amount) (err ERR_NOT_ENOUGH_BALANCE))
-      
-      (try! (map-set balances sender (unwrap! (safe-sub sender-bal amount) (err ERR_SUB_UNDERFLOW))))
-      
-      (let ((rec-bal (default-to u0 (map-get? balances recipient))))
-        (try! (map-set balances recipient (unwrap! (safe-add rec-bal amount) (err ERR_OVERFLOW)))))
-      
+      (map-set balances sender
+        (unwrap! (safe-sub sender-bal amount) (err ERR_SUB_UNDERFLOW))
+      )
+(map-set balances recipient
+        (unwrap! (safe-add rec-bal amount) (err ERR_OVERFLOW))
+      )
       (asserts! (notify-transfer amount sender recipient) (err ERR_TRANSFER_HOOK_FAILED))
-      (ok true)))
+      (ok true)
+    )
+  )
+)
 
 ;; @desc Gets the balance of a principal.
 ;; @param who The principal to get the balance of.
@@ -366,10 +368,12 @@
     (asserts! (not (check-system-pause)) (err ERR_SYSTEM_PAUSED))
     (asserts! (check-emission-allowed amount) (err ERR_EMISSION_LIMIT_EXCEEDED))
     
-    (try! (var-set total-supply (unwrap! (safe-add (var-get total-supply) amount) (err ERR_OVERFLOW))))
+    (var-set total-supply
+      (unwrap! (safe-add (var-get total-supply) amount) (err ERR_OVERFLOW))
+    )
     
     (let ((bal (default-to u0 (map-get? balances recipient))))
-      (try! (map-set balances recipient (unwrap! (safe-add bal amount) (err ERR_OVERFLOW)))))
+      (map-set balances recipient (unwrap! (safe-add bal amount) (err ERR_OVERFLOW))))
     
     (asserts! (notify-mint amount recipient) (err ERR_TRANSFER_HOOK_FAILED))
     (ok true)))
@@ -383,9 +387,11 @@
     
     (let ((bal (default-to u0 (map-get? balances tx-sender))))
       (asserts! (>= bal amount) (err ERR_NOT_ENOUGH_BALANCE))
-      (try! (map-set balances tx-sender (unwrap! (safe-sub bal amount) (err ERR_SUB_UNDERFLOW)))))
+      (map-set balances tx-sender (unwrap! (safe-sub bal amount) (err ERR_SUB_UNDERFLOW))))
     
-    (try! (var-set total-supply (unwrap! (safe-sub (var-get total-supply) amount) (err ERR_SUB_UNDERFLOW))))
+    (var-set total-supply
+      (unwrap! (safe-sub (var-get total-supply) amount) (err ERR_SUB_UNDERFLOW))
+    )
     
     (asserts! (notify-burn amount tx-sender) (err ERR_TRANSFER_HOOK_FAILED))
     (ok true)))

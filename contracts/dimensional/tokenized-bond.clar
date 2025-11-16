@@ -1,5 +1,4 @@
 (use-trait sip-010-ft-trait .traits.sip-010-ft-trait.sip-010-ft-trait)
-(use-trait sip-000-governance-trait .all-traits.sip-000-governance-trait)
 
 ;; tokenized-bond.clar
 ;; SIP-010 Tokenized Bond Contract

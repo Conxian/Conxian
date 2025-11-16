@@ -1,5 +1,4 @@
 ;; ===== Traits =====
-(use-trait analytics-aggregator-trait .all-traits.analytics-aggregator-trait)
 
 ;; analytics-aggregator.clar
 ;; COMPREHENSIVE FINANCIAL ANALYTICS SYSTEM

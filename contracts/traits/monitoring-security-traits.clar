@@ -26,6 +26,10 @@
     ;; @param reason: The reason for the emergency pause.
     ;; @returns (response bool uint): A boolean indicating success or failure, or an error code.
     (trigger-emergency-pause ((string-ascii 256)) (response bool uint))
+
+    ;; @desc Check if the protocol is currently paused.
+    ;; @returns (response bool uint): True if paused, false otherwise, or an error code.
+    (is-paused () (response bool uint))
   )
 )
 

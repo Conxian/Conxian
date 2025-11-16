@@ -110,7 +110,7 @@
         ERR_INSUFFICIENT_COLLATERAL (some (as-max-len? u"Insufficient collateral for operation" u100))
         ERR_POR_MISSING (some (as-max-len? u"Proof of Reserves attestation missing" u100))
         ERR_POR_STALE (some (as-max-len? u"Proof of Reserves attestation stale" u100))
-        _ none
+        other-code none
       )))
 
 

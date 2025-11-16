@@ -2,7 +2,7 @@
 ;; This contract provides a simple implementation of ownership management,
 ;; allowing the contract owner to transfer ownership to another principal.
 
-(use-trait ownable-trait .traits.ownable-trait.ownable-trait)
+(use-trait ownable-trait .base-traits.ownable-trait)
 
 ;; @constants
 ;; @var ERR_NOT_OWNER: The caller is not the owner of the contract.

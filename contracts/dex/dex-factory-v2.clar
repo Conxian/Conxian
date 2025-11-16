@@ -67,7 +67,10 @@
   )
   (let (
     (type-entry (map-get? pool-types { type-id: type-id }))
-    (sorted-tokens (if (> token-a token-b) { t1: token-b, t2: token-a } { t1: token-a, t2: token-b }))
+    (sorted-tokens {
+      t1: token-a,
+      t2: token-b,
+    })
   )
     (asserts! (is-some type-entry) (err ERR_TYPE_NOT_FOUND))
     (asserts! (is-none (map-get? pools { token-a: (get t1 sorted-tokens), token-b: (get t2 sorted-tokens) })) (err ERR_POOL_ALREADY_EXISTS))
@@ -102,7 +105,10 @@
     (token-b principal)
   )
   (let (
-    (sorted-tokens (if (> token-a token-b) { t1: token-b, t2: token-a } { t1: token-a, t2: token-b }))
+    (sorted-tokens {
+      t1: token-a,
+      t2: token-b,
+    })
     (entry (map-get? pools {
       token-a: (get t1 sorted-tokens),
       token-b: (get t2 sorted-tokens),

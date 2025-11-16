@@ -9,129 +9,251 @@ plan:
     - id: 0
       transactions:
         - contract-publish:
+            contract-name: access-traits
+            expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            cost: 10700
+            path: "contracts\\traits\\access-traits.clar"
+            anchor-block-only: true
+            clarity-version: 1
+        - contract-publish:
+            contract-name: advanced-router-dijkstra-trait
+            expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            cost: 17420
+            path: "contracts\\traits\\advanced-router-dijkstra-trait.clar"
+            anchor-block-only: true
+            clarity-version: 1
+        - contract-publish:
             contract-name: audit_registry
             expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            cost: 79670
+            cost: 120500
             path: "contracts\\audit-registry\\audit-registry.clar"
+            anchor-block-only: true
+            clarity-version: 1
+        - contract-publish:
+            contract-name: base-traits
+            expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            cost: 57900
+            path: "contracts\\traits\\base-traits.clar"
             anchor-block-only: true
             clarity-version: 1
         - contract-publish:
             contract-name: base_contract
             expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            cost: 53290
+            cost: 52220
             path: "contracts\\base\\base-contract.clar"
+            anchor-block-only: true
+            clarity-version: 1
+        - contract-publish:
+            contract-name: batch-auction-trait
+            expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            cost: 17970
+            path: "contracts\\traits\\batch-auction-trait.clar"
             anchor-block-only: true
             clarity-version: 1
         - contract-publish:
             contract-name: batch_auction
             expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            cost: 35740
+            cost: 34940
             path: "contracts\\dex\\batch-auction.clar"
             anchor-block-only: true
             clarity-version: 1
         - contract-publish:
             contract-name: block_utils
             expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            cost: 5660
+            cost: 5900
             path: "contracts\\utils\\block-utils.clar"
             anchor-block-only: true
             clarity-version: 1
         - contract-publish:
             contract-name: btc_adapter
             expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            cost: 350
+            cost: 360
             path: "contracts\\sbtc\\btc-adapter.clar"
             anchor-block-only: true
             clarity-version: 1
         - contract-publish:
             contract-name: budget_manager
             expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            cost: 20850
+            cost: 20130
             path: "contracts\\budget-manager.clar"
+            anchor-block-only: true
+            clarity-version: 1
+        - contract-publish:
+            contract-name: dex-traits
+            expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            cost: 68210
+            path: "contracts\\traits\\dex-traits.clar"
+            anchor-block-only: true
+            clarity-version: 1
+        - contract-publish:
+            contract-name: dimensional-traits
+            expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            cost: 28210
+            path: "contracts\\traits\\dimensional-traits.clar"
+            anchor-block-only: true
+            clarity-version: 1
+        - contract-publish:
+            contract-name: governance-traits
+            expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            cost: 32200
+            path: "contracts\\traits\\governance-traits.clar"
+            anchor-block-only: true
+            clarity-version: 1
+        - contract-publish:
+            contract-name: monitoring-security-traits
+            expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            cost: 27860
+            path: "contracts\\traits\\monitoring-security-traits.clar"
+            anchor-block-only: true
+            clarity-version: 1
+        - contract-publish:
+            contract-name: oracle-risk-traits
+            expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            cost: 41200
+            path: "contracts\\traits\\oracle-risk-traits.clar"
+            anchor-block-only: true
+            clarity-version: 1
+        - contract-publish:
+            contract-name: central-traits-registry
+            expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            cost: 20980
+            path: "contracts\\traits\\central-traits-registry.clar"
+            anchor-block-only: true
+            clarity-version: 1
+        - contract-publish:
+            contract-name: clp-pool-trait
+            expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            cost: 24130
+            path: "contracts\\traits\\clp-pool-trait.clar"
+            anchor-block-only: true
+            clarity-version: 1
+        - contract-publish:
+            contract-name: comprehensive-lending-system
+            expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            cost: 282320
+            path: "contracts\\lending\\comprehensive-lending-system.clar"
             anchor-block-only: true
             clarity-version: 1
         - contract-publish:
             contract-name: concentrated_liquidity_pool
             expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            cost: 400450
+            cost: 372000
             path: "contracts\\dex\\concentrated-liquidity-pool.clar"
             anchor-block-only: true
             clarity-version: 1
         - contract-publish:
             contract-name: conxian_protocol
             expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            cost: 400
+            cost: 81630
             path: "contracts\\core\\conxian-protocol.clar"
             anchor-block-only: true
             clarity-version: 1
         - contract-publish:
             contract-name: cxd_price_initializer
             expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            cost: 85750
+            cost: 96440
             path: "contracts\\tokens\\cxd-price-initializer.clar"
             anchor-block-only: true
             clarity-version: 1
         - contract-publish:
             contract-name: cxd_token
             expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            cost: 103090
+            cost: 166270
             path: "contracts\\tokens\\cxd-token.clar"
             anchor-block-only: true
             clarity-version: 1
         - contract-publish:
             contract-name: cxlp_token
             expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            cost: 136880
+            cost: 192140
             path: "contracts\\tokens\\cxlp-token.clar"
+            anchor-block-only: true
+            clarity-version: 1
+        - contract-publish:
+            contract-name: rbac
+            expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            cost: 31010
+            path: "contracts\\utils\\rbac.clar"
             anchor-block-only: true
             clarity-version: 1
         - contract-publish:
             contract-name: cxs_token
             expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            cost: 74200
+            cost: 81980
             path: "contracts\\tokens\\cxs-token.clar"
             anchor-block-only: true
             clarity-version: 1
+      epoch: "2.05"
+    - id: 1
+      transactions:
         - contract-publish:
             contract-name: cxtr_token
             expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            cost: 119170
+            cost: 196550
             path: "contracts\\tokens\\cxtr-token.clar"
             anchor-block-only: true
             clarity-version: 1
         - contract-publish:
             contract-name: cxvg_token
             expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            cost: 34020
+            cost: 43950
             path: "contracts\\tokens\\cxvg-token.clar"
+            anchor-block-only: true
+            clarity-version: 1
+        - contract-publish:
+            contract-name: dao-trait
+            expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            cost: 20260
+            path: "contracts\\traits\\dao-trait.clar"
+            anchor-block-only: true
+            clarity-version: 1
+        - contract-publish:
+            contract-name: governance-token-trait
+            expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            cost: 13900
+            path: "contracts\\traits\\governance-token-trait.clar"
+            anchor-block-only: true
+            clarity-version: 1
+        - contract-publish:
+            contract-name: upgrade-controller-trait
+            expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            cost: 9240
+            path: "contracts\\traits\\upgrade-controller-trait.clar"
             anchor-block-only: true
             clarity-version: 1
         - contract-publish:
             contract-name: decentralized_trait_registry
             expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            cost: 130780
+            cost: 127970
             path: "contracts\\decentralized-trait-registry.clar"
             anchor-block-only: true
             clarity-version: 1
         - contract-publish:
             contract-name: dex_factory
             expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            cost: 296640
+            cost: 132760
             path: "contracts\\dex\\dex-factory.clar"
             anchor-block-only: true
             clarity-version: 1
         - contract-publish:
             contract-name: dex_factory_v2
             expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            cost: 54250
+            cost: 47080
             path: "contracts\\dex\\dex-factory-v2.clar"
             anchor-block-only: true
             clarity-version: 1
         - contract-publish:
             contract-name: dim-metrics
             expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            cost: 43910
+            cost: 43280
             path: "contracts\\dimensional\\dim-metrics.clar"
+            anchor-block-only: true
+            clarity-version: 1
+        - contract-publish:
+            contract-name: dim-registry
+            expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            cost: 66180
+            path: "contracts\\dimensional\\dim-registry.clar"
             anchor-block-only: true
             clarity-version: 1
         - contract-publish:
@@ -144,21 +266,21 @@ plan:
         - contract-publish:
             contract-name: dim_oracle_automation
             expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            cost: 17360
+            cost: 14410
             path: "contracts\\dimensional\\dim-oracle-automation.clar"
             anchor-block-only: true
             clarity-version: 1
         - contract-publish:
             contract-name: dim_registry
             expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            cost: 53680
+            cost: 66180
             path: "contracts\\dimensional\\dim-registry.clar"
             anchor-block-only: true
             clarity-version: 1
         - contract-publish:
             contract-name: dim_revenue_adapter
             expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            cost: 111690
+            cost: 109180
             path: "contracts\\dimensional\\dim-revenue-adapter.clar"
             anchor-block-only: true
             clarity-version: 1
@@ -170,26 +292,30 @@ plan:
             anchor-block-only: true
             clarity-version: 1
         - contract-publish:
+            contract-name: dimensional-advanced-router-dijkstra
+            expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            cost: 75240
+            path: "contracts\\dimensional\\advanced-router-dijkstra.clar"
+            anchor-block-only: true
+            clarity-version: 1
+        - contract-publish:
             contract-name: dimensional-core
             expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            cost: 156650
+            cost: 151020
             path: "contracts\\dimensional\\dimensional-core.clar"
             anchor-block-only: true
             clarity-version: 1
         - contract-publish:
             contract-name: dimensional-engine
             expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            cost: 270120
+            cost: 33680
             path: "contracts\\core\\dimensional-engine.clar"
             anchor-block-only: true
             clarity-version: 1
-      epoch: "2.05"
-    - id: 1
-      transactions:
         - contract-publish:
             contract-name: dimensional-oracle
             expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            cost: 82910
+            cost: 80630
             path: "contracts\\oracle\\dimensional-oracle.clar"
             anchor-block-only: true
             clarity-version: 1
@@ -203,290 +329,314 @@ plan:
         - contract-publish:
             contract-name: enterprise_api
             expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            cost: 237540
+            cost: 232690
             path: "contracts\\enterprise\\enterprise-api.clar"
             anchor-block-only: true
             clarity-version: 1
         - contract-publish:
             contract-name: enterprise_loan_manager
             expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            cost: 470
+            cost: 480
             path: "contracts\\enterprise\\enterprise-loan-manager.clar"
             anchor-block-only: true
             clarity-version: 1
         - contract-publish:
-            contract-name: error_utils
+            contract-name: error-utils
             expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            cost: 38650
+            cost: 18350
             path: "contracts\\utils\\error-utils.clar"
             anchor-block-only: true
             clarity-version: 1
         - contract-publish:
             contract-name: errors_trait
             expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            cost: 83850
+            cost: 106180
             path: "contracts\\traits\\errors.clar"
             anchor-block-only: true
             clarity-version: 1
         - contract-publish:
-            contract-name: fixed_point_math
+            contract-name: finance-metrics-trait
             expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            cost: 400
-            path: "contracts\\math\\fixed-point-math.clar"
-            anchor-block-only: true
-            clarity-version: 1
-        - contract-publish:
-            contract-name: funding_calculator
-            expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            cost: 77000
-            path: "contracts\\risk\\funding-calculator.clar"
-            anchor-block-only: true
-            clarity-version: 1
-        - contract-publish:
-            contract-name: governance
-            expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            cost: 54440
-            path: "contracts\\dimensional\\governance.clar"
-            anchor-block-only: true
-            clarity-version: 1
-        - contract-publish:
-            contract-name: governance_token_root
-            expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            cost: 70660
-            path: "contracts\\governance-token.clar"
-            anchor-block-only: true
-            clarity-version: 1
-        - contract-publish:
-            contract-name: interest_rate_model
-            expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            cost: 69340
-            path: "contracts\\dex\\interest-rate-model.clar"
-            anchor-block-only: true
-            clarity-version: 1
-        - contract-publish:
-            contract-name: keeper_coordinator
-            expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            cost: 112150
-            path: "contracts\\automation\\keeper-coordinator.clar"
-            anchor-block-only: true
-            clarity-version: 1
-        - contract-publish:
-            contract-name: lending_pool
-            expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            cost: 750
-            path: "contracts\\lending\\lending-pool.clar"
-            anchor-block-only: true
-            clarity-version: 1
-        - contract-publish:
-            contract-name: lending_pool_core
-            expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            cost: 810
-            path: "contracts\\lending\\lending-pool-core.clar"
-            anchor-block-only: true
-            clarity-version: 1
-        - contract-publish:
-            contract-name: lending_pool_rewards
-            expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            cost: 870
-            path: "contracts\\lending\\lending-pool-rewards.clar"
-            anchor-block-only: true
-            clarity-version: 1
-        - contract-publish:
-            contract-name: lending_pool_v2
-            expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            cost: 770
-            path: "contracts\\lending\\lending-pool-v2.clar"
-            anchor-block-only: true
-            clarity-version: 1
-        - contract-publish:
-            contract-name: lending_protocol_governance
-            expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            cost: 138550
-            path: "contracts\\governance\\lending-protocol-governance.clar"
-            anchor-block-only: true
-            clarity-version: 1
-        - contract-publish:
-            contract-name: liquidation_engine
-            expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            cost: 75920
-            path: "contracts\\risk\\liquidation-engine.clar"
-            anchor-block-only: true
-            clarity-version: 1
-        - contract-publish:
-            contract-name: liquidity_optimization_engine
-            expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            cost: 128780
-            path: "contracts\\dex\\liquidity-optimization-engine.clar"
-            anchor-block-only: true
-            clarity-version: 1
-        - contract-publish:
-            contract-name: manipulation_detector
-            expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            cost: 74940
-            path: "contracts\\dex\\manipulation-detector.clar"
-            anchor-block-only: true
-            clarity-version: 1
-        - contract-publish:
-            contract-name: math_lib_advanced
-            expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            cost: 78130
-            path: "contracts\\lib\\math-lib-advanced.clar"
-            anchor-block-only: true
-            clarity-version: 1
-        - contract-publish:
-            contract-name: math_lib_concentrated
-            expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            cost: 850
-            path: "contracts\\math\\math-lib-concentrated.clar"
-            anchor-block-only: true
-            clarity-version: 1
-        - contract-publish:
-            contract-name: mev_protector
-            expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            cost: 169500
-            path: "contracts\\dex\\mev-protector.clar"
-            anchor-block-only: true
-            clarity-version: 1
-        - contract-publish:
-            contract-name: mev_protector_root
-            expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            cost: 790
-            path: "contracts\\mev\\mev-protector-root.clar"
-            anchor-block-only: true
-            clarity-version: 1
-        - contract-publish:
-            contract-name: migration_manager
-            expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            cost: 31510
-            path: "contracts\\utils\\migration-manager.clar"
+            cost: 23060
+            path: "contracts\\traits\\finance-metrics-trait.clar"
             anchor-block-only: true
             clarity-version: 1
       epoch: "2.05"
     - id: 2
       transactions:
         - contract-publish:
+            contract-name: fixed_point_math
+            expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            cost: 1440
+            path: "contracts\\math\\fixed-point-math.clar"
+            anchor-block-only: true
+            clarity-version: 1
+        - contract-publish:
+            contract-name: funding_calculator
+            expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            cost: 75920
+            path: "contracts\\risk\\funding-calculator.clar"
+            anchor-block-only: true
+            clarity-version: 1
+        - contract-publish:
+            contract-name: governance
+            expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            cost: 54760
+            path: "contracts\\dimensional\\governance.clar"
+            anchor-block-only: true
+            clarity-version: 1
+        - contract-publish:
+            contract-name: governance-voting
+            expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            cost: 24290
+            path: "contracts\\governance\\voting.clar"
+            anchor-block-only: true
+            clarity-version: 1
+        - contract-publish:
+            contract-name: sip-010-ft-trait
+            expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            cost: 12870
+            path: "contracts\\traits\\sip-010-ft-trait.clar"
+            anchor-block-only: true
+            clarity-version: 1
+        - contract-publish:
+            contract-name: governance_token_root
+            expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            cost: 70790
+            path: "contracts\\governance-token.clar"
+            anchor-block-only: true
+            clarity-version: 1
+        - contract-publish:
+            contract-name: interest_rate_model
+            expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            cost: 68390
+            path: "contracts\\lending\\interest-rate-model.clar"
+            anchor-block-only: true
+            clarity-version: 1
+        - contract-publish:
+            contract-name: keeper_coordinator
+            expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            cost: 192530
+            path: "contracts\\automation\\keeper-coordinator.clar"
+            anchor-block-only: true
+            clarity-version: 1
+        - contract-publish:
+            contract-name: lending_protocol_governance
+            expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            cost: 139840
+            path: "contracts\\governance\\lending-protocol-governance.clar"
+            anchor-block-only: true
+            clarity-version: 1
+        - contract-publish:
+            contract-name: liquidation_engine
+            expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            cost: 81000
+            path: "contracts\\risk\\liquidation-engine.clar"
+            anchor-block-only: true
+            clarity-version: 1
+        - contract-publish:
+            contract-name: liquidity_optimization_engine
+            expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            cost: 128790
+            path: "contracts\\dex\\liquidity-optimization-engine.clar"
+            anchor-block-only: true
+            clarity-version: 1
+        - contract-publish:
+            contract-name: manipulation_detector
+            expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            cost: 57540
+            path: "contracts\\dex\\manipulation-detector.clar"
+            anchor-block-only: true
+            clarity-version: 1
+        - contract-publish:
+            contract-name: math-trait
+            expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            cost: 16450
+            path: "contracts\\traits\\math-trait.clar"
+            anchor-block-only: true
+            clarity-version: 1
+        - contract-publish:
+            contract-name: math_lib_advanced
+            expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            cost: 75400
+            path: "contracts\\lib\\math-lib-advanced.clar"
+            anchor-block-only: true
+            clarity-version: 1
+        - contract-publish:
+            contract-name: math_lib_concentrated
+            expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            cost: 3970
+            path: "contracts\\math\\math-lib-concentrated.clar"
+            anchor-block-only: true
+            clarity-version: 1
+        - contract-publish:
+            contract-name: mev_protector
+            expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            cost: 165700
+            path: "contracts\\dex\\mev-protector.clar"
+            anchor-block-only: true
+            clarity-version: 1
+        - contract-publish:
+            contract-name: mev_protector_root
+            expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            cost: 800
+            path: "contracts\\mev\\mev-protector-root.clar"
+            anchor-block-only: true
+            clarity-version: 1
+        - contract-publish:
+            contract-name: migration_manager
+            expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            cost: 31160
+            path: "contracts\\utils\\migration-manager.clar"
+            anchor-block-only: true
+            clarity-version: 1
+        - contract-publish:
             contract-name: mock-token
             expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            cost: 51200
+            cost: 51130
             path: "contracts\\mocks\\mock-token.clar"
             anchor-block-only: true
             clarity-version: 1
         - contract-publish:
             contract-name: multi_hop_router_v3
             expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            cost: 442390
+            cost: 17990
             path: "contracts\\dex\\multi-hop-router-v3.clar"
             anchor-block-only: true
             clarity-version: 1
         - contract-publish:
             contract-name: oracle
             expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            cost: 33310
+            cost: 32830
             path: "contracts\\dex\\oracle.clar"
+            anchor-block-only: true
+            clarity-version: 1
+        - contract-publish:
+            contract-name: oracle-adapter
+            expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            cost: 2560
+            path: "contracts\\oracle\\oracle-adapter-stub.clar"
+            anchor-block-only: true
+            clarity-version: 1
+        - contract-publish:
+            contract-name: oracle-aggregator-v2-trait
+            expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            cost: 23740
+            path: "contracts\\traits\\oracle-aggregator-v2-trait.clar"
             anchor-block-only: true
             clarity-version: 1
         - contract-publish:
             contract-name: oracle_aggregator_v2
             expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            cost: 98000
+            cost: 90810
             path: "contracts\\dex\\oracle-aggregator-v2.clar"
             anchor-block-only: true
             clarity-version: 1
         - contract-publish:
             contract-name: ownable
             expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            cost: 16410
+            cost: 25060
             path: "contracts\\base\\ownable.clar"
             anchor-block-only: true
             clarity-version: 1
+      epoch: "2.05"
+    - id: 3
+      transactions:
         - contract-publish:
             contract-name: pausable
             expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            cost: 19660
+            cost: 26290
             path: "contracts\\base\\pausable.clar"
+            anchor-block-only: true
+            clarity-version: 1
+        - contract-publish:
+            contract-name: pool-registry
+            expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            cost: 16260
+            path: "contracts\\pools\\pool-registry.clar"
             anchor-block-only: true
             clarity-version: 1
         - contract-publish:
             contract-name: pool_template
             expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            cost: 690
+            cost: 700
             path: "contracts\\dex\\pool-template.clar"
             anchor-block-only: true
             clarity-version: 1
         - contract-publish:
             contract-name: position_factory
             expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            cost: 46840
+            cost: 46850
             path: "contracts\\position-factory.clar"
-            anchor-block-only: true
-            clarity-version: 1
-        - contract-publish:
-            contract-name: position_factory_root
-            expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            cost: 850
-            path: "contracts\\mev\\position-factory-root.clar"
             anchor-block-only: true
             clarity-version: 1
         - contract-publish:
             contract-name: precision_calculator
             expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            cost: 22420
+            cost: 22430
             path: "contracts\\lib\\precision-calculator.clar"
+            anchor-block-only: true
+            clarity-version: 1
+        - contract-publish:
+            contract-name: proposal-registry
+            expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            cost: 53740
+            path: "contracts\\governance\\proposal-registry.clar"
             anchor-block-only: true
             clarity-version: 1
         - contract-publish:
             contract-name: proposal_engine
             expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            cost: 66040
+            cost: 74470
             path: "contracts\\governance\\proposal-engine.clar"
-            anchor-block-only: true
-            clarity-version: 1
-        - contract-publish:
-            contract-name: rbac
-            expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            cost: 31010
-            path: "contracts\\utils\\rbac.clar"
-            anchor-block-only: true
-            clarity-version: 1
-        - contract-publish:
-            contract-name: rbac_trait
-            expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            cost: 5600
-            path: "contracts\\access\\traits\\access-traits.clar"
             anchor-block-only: true
             clarity-version: 1
         - contract-publish:
             contract-name: rebalancing_rules
             expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            cost: 17890
+            cost: 18200
             path: "contracts\\dex\\rebalancing-rules.clar"
+            anchor-block-only: true
+            clarity-version: 1
+        - contract-publish:
+            contract-name: risk-liquidation-engine
+            expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            cost: 81000
+            path: "contracts\\risk\\liquidation-engine.clar"
+            anchor-block-only: true
+            clarity-version: 1
+        - contract-publish:
+            contract-name: risk-trait
+            expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            cost: 17050
+            path: "contracts\\traits\\risk-trait.clar"
             anchor-block-only: true
             clarity-version: 1
         - contract-publish:
             contract-name: risk_manager
             expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            cost: 35020
+            cost: 25730
             path: "contracts\\risk\\risk-manager.clar"
             anchor-block-only: true
             clarity-version: 1
         - contract-publish:
             contract-name: roles
             expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            cost: 26020
+            cost: 46880
             path: "contracts\\access\\roles.clar"
             anchor-block-only: true
             clarity-version: 1
         - contract-publish:
             contract-name: sbtc_integration
             expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            cost: 76270
+            cost: 76580
             path: "contracts\\dex\\sbtc-integration.clar"
             anchor-block-only: true
             clarity-version: 1
         - contract-publish:
             contract-name: sip_010_ft_standard
             expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            cost: 18060
+            cost: 17740
             path: "contracts\\requirements\\sip-010-trait-ft-standard.clar"
             anchor-block-only: true
             clarity-version: 1
@@ -500,35 +650,42 @@ plan:
         - contract-publish:
             contract-name: tiered_pools
             expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            cost: 46930
+            cost: 39140
             path: "contracts\\pools\\tiered-pools.clar"
             anchor-block-only: true
             clarity-version: 1
         - contract-publish:
             contract-name: timelock_controller
             expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            cost: 57850
+            cost: 57870
             path: "contracts\\dex\\timelock-controller.clar"
             anchor-block-only: true
             clarity-version: 1
         - contract-publish:
             contract-name: token_system_coordinator
             expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            cost: 77930
+            cost: 117880
             path: "contracts\\tokens\\token-system-coordinator.clar"
+            anchor-block-only: true
+            clarity-version: 1
+        - contract-publish:
+            contract-name: traits
+            expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            cost: 2490
+            path: "contracts\\traits\\oracle-trait.clar"
             anchor-block-only: true
             clarity-version: 1
         - contract-publish:
             contract-name: utils
             expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            cost: 17870
+            cost: 11400
             path: "contracts\\utils\\utils.clar"
             anchor-block-only: true
             clarity-version: 1
         - contract-publish:
             contract-name: validation
             expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            cost: 20520
+            cost: 18670
             path: "contracts\\utils\\validation.clar"
             anchor-block-only: true
             clarity-version: 1

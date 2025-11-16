@@ -36,21 +36,26 @@ The Conxian protocol is organized into a series of specialized modules, each wit
 ### Module Architecture
 
 #### Core DEX Infrastructure
+
 - **Decentralized Routing & Swaps**: The `multi-hop-router-v3` has been refactored into a facade that delegates to specialized contracts for pathfinding (`dijkstra-pathfinder`) and route management (`route-manager`).
 - **Modular Pool Management**: The `dex-factory` has been decentralized into a facade that interacts with specialized registries for pool types (`pool-type-registry`), implementations (`pool-implementation-registry`), and pool data (`pool-registry`).
 
 #### Governance & Security
+
 - **Modular Governance**: The `proposal-engine` has been refactored into a facade that delegates to a `proposal-registry` for data storage and a `voting` contract for vote management.
 - **MEV Protection**: The protocol will include a dedicated MEV protection layer with commit-reveal schemes and batch auctions.
 
 #### sBTC Vaults
+
 - **Decentralized Vault**: The monolithic `sbtc-vault` has been broken down into four specialized contracts: `custody` for deposits and withdrawals, `yield-aggregator` for yield strategies, `btc-bridge` for wrapping/unwrapping, and `fee-manager` for fee handling.
 
 #### Lending & Borrowing
+
 - **Modular Lending**: The lending module is being built from the ground up with a modular architecture, including a `lending-pool-core` for central logic, a user-facing `lending-pool`, and a `lending-pool-rewards` contract.
 - **Dimensional Vault**: The `dimensional-vault` has been refactored to use a separate `interest-rate-model` contract.
 
 #### Token Economics
+
 - **Comprehensive Token System**: The protocol features a comprehensive token system with a primary token (CXD), a treasury token (CXTR), a liquidity provider token (CXLP), a governance token (CXVG), and a stability token (CXS).
 
 ## 4. Roadmap & Implementation Status
@@ -58,10 +63,12 @@ The Conxian protocol is organized into a series of specialized modules, each wit
 The Conxian Protocol is currently undergoing a significant architectural refactoring. The following provides a high-level overview of the work completed and the roadmap for future development. For a more detailed breakdown, please refer to the `ROADMAP.md` file in the root directory.
 
 ### Completed Work
+
 - **Architectural Refactoring**: The `core`, `dex`, `sbtc-vaults`, and `governance` modules have been successfully refactored into a more modular and decentralized architecture.
 - **Comprehensive Documentation**: All new and modified contracts have been thoroughly documented with high-quality docstrings.
 
 ### Future Work
+
 - **Lending Module Implementation**: The core lending functionality will be implemented from scratch, following the new modular architecture.
 - **Tokenomics and Governance Enhancement**: The tokenomics infrastructure and governance module will be completed.
 - **Dimensional Finance and Cross-Chain Integration**: The protocol's capabilities will be expanded with advanced DeFi and cross-chain features.

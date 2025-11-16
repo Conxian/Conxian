@@ -16,7 +16,7 @@
     ;; @desc Returns the balance of a principal.
     ;; @param owner: The principal to query the balance for.
     ;; @returns (response uint uint): The balance of the principal.
-    (get-balance (owner principal)) (response uint uint))
+    (get-balance (principal) (response uint uint))
 
     ;; @desc Transfers tokens from the sender to a recipient.
     ;; @param amount: The amount of tokens to transfer.
@@ -24,6 +24,6 @@
     ;; @param recipient: The principal receiving the tokens.
     ;; @param memo: An optional memo to include with the transfer.
     ;; @returns (response bool uint): True if successful, otherwise an error.
-    (transfer (amount uint) (sender principal) (recipient principal) (memo (optional (buff 34))) ) (response bool uint))
+    (transfer (uint principal principal (optional (buff 34))) (response bool uint))
   )
 )

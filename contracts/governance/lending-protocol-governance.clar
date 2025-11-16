@@ -304,7 +304,7 @@
       ;; Execute based on proposal type
       (let ((execution-result
               (if (is-eq (get proposal-type proposal) PROPOSAL_TYPE_PARAMETER)
-                (execute-parameter-change proposal-id proposal)
+                (execute-parameter-change proposal-id)
                 (if (is-eq (get proposal-type proposal) PROPOSAL_TYPE_TREASURY)
                   (execute-treasury-proposal proposal-id)
                   (ok true))))) ;; Generic execution
@@ -323,15 +323,10 @@
 
 ;; @desc Executes a parameter change proposal.
 ;; @param proposal-id The ID of the parameter change proposal.
-;; @param proposal A tuple containing the details of the proposal.
 ;; @return response bool uint A response tuple indicating success or failure.
-(define-private (execute-parameter-change (proposal-id uint) (proposal {
-    proposer: principal, title: (string-ascii 100), description: (string-utf8 500),
-    proposal-type: uint, target-contract: (optional principal), function-name: (optional (string-ascii 50)),
-    parameters: (optional (list 10 uint)), for-votes: uint, against-votes: uint, abstain-votes: uint,
-    start-block: uint, end-block: uint, queue-block: (optional uint), execution-block: (optional uint),
-    state: uint, created-at: uint})
-  (let ((param-info (unwrap! (map-get? parameter-proposals proposal-id) ERR_INVALID_PARAMETERS))
+(define-private (execute-parameter-change (proposal-id uint))
+  (let (
+        (param-info (unwrap! (map-get? parameter-proposals proposal-id) ERR_INVALID_PARAMETERS))
         (target-contract (get target-contract param-info))
         (param-name (get parameter-name param-info))
         (new-value (get proposed-value param-info)))
