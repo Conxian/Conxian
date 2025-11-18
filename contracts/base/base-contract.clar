@@ -24,7 +24,7 @@
 ;; @param inner: The function to be executed.
 ;; @returns (response uint uint): The result of the inner function, or an error code.
 (define-public (with-reentrancy-guard (inner (response uint uint)))
-  (let 
+  (let
     (
       (check (try! (non-reentrant)))
     )

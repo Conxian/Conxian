@@ -42,7 +42,7 @@
     (asserts! (is-ok (contract-call? .rbac-trait has-role "contract-owner")) (err ERR_NOT_OWNER))
     ;; Ensure contract is not already paused
     (asserts! (not (var-get is-paused)) ERR_ALREADY_PAUSED)
-    
+
     ;; Update state
     (var-set is-paused true)
     (ok true)
@@ -56,7 +56,7 @@
     (asserts! (is-ok (contract-call? .rbac-trait has-role "contract-owner")) (err ERR_NOT_OWNER))
     ;; Ensure contract is currently paused
     (asserts! (var-get is-paused) ERR_ALREADY_UNPAUSED)
-    
+
     ;; Update state
     (var-set is-paused false)
     (ok true)

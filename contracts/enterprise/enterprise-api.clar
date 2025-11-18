@@ -1,7 +1,7 @@
 ;; Conxian Enterprise API - Institutional features
 
 ;; Traits - using modular decentralized system
-(use-trait access-control-trait .base-traits.rbac-trait)
+(use-trait rbac-trait .base-traits.rbac-trait)
 (use-trait circuit-breaker-trait .monitoring-security-traits.circuit-breaker-trait)
 (use-trait governance-trait .governance-traits.governance-token-trait)
 ;; Note: enterprise-api-trait needs to be created or mapped
@@ -86,9 +86,9 @@
 ;; ;; @return (response bool) An (ok true) response if the DEX router was successfully set, or an error if unauthorized.
 ;; (define-public (set-dex-router (new-router principal))
 ;;   (begin
-;;     (asserts! (contract-call? .access-control-contract has-role "contract-owner" tx-sender) (err-trait err-unauthorized))
+;;     (asserts! (contract-call? .access-control-contract has-role "contract-owner" tx-sender) ERR_UNAUTHORIZED)
 ;;     (asserts! (is-contract? new-router) (err-trait err-invalid-contract))
-;;     (data-var-set dex-router (some new-router))
+;;     (var-set dex-router (some new-router))
 ;;     (ok true)
 ;;   )
 ;; )
@@ -98,9 +98,9 @@
 ;; @return (response bool) An (ok true) response if the compliance hook was successfully set, or an error if unauthorized.
 ;; (define-public (set-compliance-hook (new-hook principal))
 ;;   (begin
-;;     (asserts! (contract-call? .access-control-contract has-role "contract-owner" tx-sender) (err-trait err-unauthorized))
+;;     (asserts! (contract-call? .access-control-contract has-role "contract-owner" tx-sender) ERR_UNAUTHORIZED)
 ;;     (asserts! (is-contract? new-hook) (err-trait err-invalid-contract))
-;;     (data-var-set compliance-hook (some new-hook))
+;;     (var-set compliance-hook (some new-hook))
 ;;     (ok true)
 ;;   )
 ;; )
@@ -204,12 +204,12 @@
 ;; @return (response uint) An (ok order-id) response if the TWAP order was successfully created, or an error if a circuit breaker is open, the account is not found, unauthorized, not verified, invalid privilege, or invalid order times.
 ;; (define-public (create-twap-order (account-id uint) (token-in principal) (token-out principal) (amount uint) (duration uint))
 ;;   (begin
-;;     (asserts! (map-has? institutional-accounts account-id) (err-trait err-account-not-found))
-;;     (asserts! (has-privilege (get trading-privileges (unwrap! (map-get? institutional-accounts account-id) (err-trait err-account-not-found))) PRIVILEGE_TWAP_ORDER) (err-trait err-invalid-privilege))
-;;     (asserts! (> duration u0) (err-trait err-invalid-order))
+;;     (asserts! (map-has? institutional-accounts account-id) ERR_ACCOUNT_NOT_FOUND)
+;;     (asserts! (has-privilege (get trading-privileges (unwrap! (map-get? institutional-accounts account-id) ERR_ACCOUNT_NOT_FOUND)) PRIVILEGE_TWAP_ORDER) ERR_INVALID_PRIVILEGE)
+;;     (asserts! (> duration u0) ERR_INVALID_ORDER)
 ;;     (let (
-;;       (order-id (data-var-get twap-order-counter))
-;;       (dex-router-contract (unwrap! (data-var-get dex-router) (err-trait err-dex-router-not-set)))
+;;       (order-id (var-get twap-order-counter))
+;;       (dex-router-contract (unwrap! (var-get dex-router) ERR_DEX_ROUTER_NOT_SET))
 ;;     )
 ;;     (map-set twap-orders order-id {
 ;;       account-id: account-id,
@@ -221,7 +221,7 @@
 ;;       executed: false,
 ;;       expiry: (+ (get-block-height) duration)
 ;;     })
-;;     (data-var-set twap-order-counter (+ order-id u1))
+;;     (var-set twap-order-counter (+ order-id u1))
 ;;     (log-audit-event "create-twap-order" order-id "TWAP order created")
 ;;     (ok order-id)
 ;;     )
@@ -240,13 +240,13 @@
 ;; (define-public (create-vwap-order (account-id uint) (token-in principal) (token-out principal) (amount-in uint) (min-amount-out uint) (start-time uint) (end-time uint))
 ;;   (begin
 ;;     (unwrap-panic (check-circuit-breaker))
-;;     (let ((account (unwrap! (map-get? institutional-accounts account-id) (err-trait err-account-not-found))))
-;;       (asserts! (is-eq tx-sender (get owner account)) (err-trait err-unauthorized))
+;;     (let ((account (unwrap! (map-get? institutional-accounts account-id) ERR_ACCOUNT_NOT_FOUND)))
+;;       (asserts! (is-eq tx-sender (get owner account)) ERR_UNAUTHORIZED)
 ;;       (unwrap-panic (check-verification (get owner account)))
-;;       (asserts! (has-privilege (get trading-privileges account) PRIVILEGE_VWAP_ORDER) (err-trait err-invalid-privilege))
-;;       (asserts! (> end-time start-time) (err-trait err-invalid-order))
-;;       (asserts! (>= start-time block-height) (err-trait err-invalid-order))
-;;       (let ((order-id (+ u1 (data-var-get vwap-order-counter))))
+;;       (asserts! (has-privilege (get trading-privileges account) PRIVILEGE_VWAP_ORDER) ERR_INVALID_PRIVILEGE)
+;;       (asserts! (> end-time start-time) ERR_INVALID_ORDER)
+;;       (asserts! (>= start-time block-height) ERR_INVALID_ORDER)
+;;       (let ((order-id (+ u1 (var-get vwap-order-counter))))
 ;;         (map-set vwap-orders order-id {
 ;;           account-id: account-id,
 ;;           token-in: token-in,
@@ -258,7 +258,7 @@
 ;;           executed: false,
 ;;           filled-amount: u0
 ;;         })
-;;         (data-var-set vwap-order-counter order-id)
+;;         (var-set vwap-order-counter order-id)
 ;;         (log-audit-event "create-vwap-order" order-id "VWAP order created")
 ;;         (ok order-id)))))
 
@@ -275,14 +275,14 @@
 ;; (define-public (create-iceberg-order (account-id uint) (token-in principal) (token-out principal) (total-amount uint) (min-amount-out uint) (start-time uint) (end-time uint) (chunk-size uint))
 ;;   (begin
 ;;     (unwrap-panic (check-circuit-breaker))
-;;     (let ((account (unwrap! (map-get? institutional-accounts account-id) (err-trait err-account-not-found))))
-;;       (asserts! (is-eq tx-sender (get owner account)) (err-trait err-unauthorized))
+;;     (let ((account (unwrap! (map-get? institutional-accounts account-id) ERR_ACCOUNT_NOT_FOUND)))
+;;       (asserts! (is-eq tx-sender (get owner account)) ERR_UNAUTHORIZED)
 ;;       (unwrap-panic (check-verification (get owner account)))
-;;       (asserts! (has-privilege (get trading-privileges account) PRIVILEGE_ADVANCED_ORDERS) (err-trait err-invalid-privilege))
-;;       (asserts! (> end-time start-time) (err-trait err-invalid-order))
-;;       (asserts! (>= start-time block-height) (err-trait err-invalid-order))
-;;       (asserts! (> chunk-size u0) (err-trait err-invalid-order))
-;;       (let ((order-id (+ u1 (data-var-get vwap-order-counter))))
+;;       (asserts! (has-privilege (get trading-privileges account) PRIVILEGE_ADVANCED_ORDERS) ERR_INVALID_PRIVILEGE)
+;;       (asserts! (> end-time start-time) ERR_INVALID_ORDER)
+;;       (asserts! (>= start-time block-height) ERR_INVALID_ORDER)
+;;       (asserts! (> chunk-size u0) ERR_INVALID_ORDER)
+;;       (let ((order-id (+ u1 (var-get vwap-order-counter))))
 ;;         (map-set vwap-orders order-id {
 ;;           account-id: account-id,
 ;;           token-in: token-in,
@@ -294,7 +294,7 @@
 ;;           executed: false,
 ;;           filled-amount: u0
 ;;         })
-;;         (data-var-set vwap-order-counter order-id)
+;;         (var-set vwap-order-counter order-id)
 ;;         (log-audit-event "create-iceberg-order" order-id "Iceberg order created")
 ;;         (ok order-id)))))
 
@@ -303,16 +303,16 @@
 ;; @desc Checks if the circuit breaker is closed.
 ;; @return (response bool) An (ok true) response if the circuit breaker is closed, or an error if open.
 (define-private (check-circuit-breaker)
-  (let ((breaker-contract (unwrap! (data-var-get circuit-breaker) (err-trait err-dex-router-not-set))))
-    (asserts! (not (contract-call? breaker-contract is-circuit-open)) (err-trait err-circuit-open))
+  (let ((breaker-contract (unwrap! (var-get circuit-breaker) ERR_DEX_ROUTER_NOT_SET)))
+    (asserts! (not (contract-call? breaker-contract is-circuit-open)) ERR_CIRCUIT_OPEN)
     (ok true)))
 
 ;; @desc Checks if an account is verified.
 ;; @param account (principal) The account to check.
 ;; @return (response bool) An (ok true) response if the account is verified, or an error if not verified.
 (define-private (check-verification (account principal))
-  (let ((hook-contract (unwrap! (data-var-get compliance-hook) (err-trait err-dex-router-not-set))))
-    (asserts! (contract-call? hook-contract is-kyc account) (err-trait err-account-not-verified))
+  (let ((hook-contract (unwrap! (var-get compliance-hook) ERR_DEX_ROUTER_NOT_SET)))
+    (asserts! (contract-call? hook-contract is-kyc account) ERR_ACCOUNT_NOT_VERIFIED)
     (ok true)))
 
 ;; @desc Checks if an account has a specific privilege bit (privilege is assumed power-of-two).
@@ -325,14 +325,16 @@
 ;; @param account-id (uint) The ID of the account involved.
 ;; @param details (string-ascii 256) Additional details about the event.
 (define-private (log-audit-event (action (string-ascii 64)) (account-id uint) (details (string-ascii 256)))
-  (let ((event-id (+ u1 (data-var-get audit-event-counter))))
-    (map-set audit-trail event-id {
-      timestamp: block-height,
-      action: action,
-      account-id: account-id,
-      details: details
-    })
-    (data-var-set audit-event-counter event-id))))
+  (let ((event-id (+ u1 (var-get audit-event-counter))))
+    (begin
+      (map-set audit-trail event-id {
+        timestamp: block-height,
+        action: action,
+        account-id: account-id,
+        details: details
+      })
+      (var-set audit-event-counter event-id)
+      (ok true))))
 
 ;; @desc Executes a portion of a Time-Weighted Average Price (TWAP) order.
 ;; @param order-id (uint) The ID of the TWAP order to execute.
@@ -341,11 +343,11 @@
 ;;   (begin
 ;;     (unwrap-panic (check-circuit-breaker))
 ;;     (let (
-;;       (order (unwrap! (map-get? twap-orders order-id) (err-trait err-order-not-found)))
-;;       (dex-router-contract (unwrap! (data-var-get dex-router) (err-trait err-dex-router-not-set)))
+;;       (order (unwrap! (map-get? twap-orders order-id) ERR_ORDER_NOT_FOUND))
+;;       (dex-router-contract (unwrap! (var-get dex-router) ERR_DEX_ROUTER_NOT_SET))
 ;;     )
-;;       (asserts! (not (get executed order)) (err-trait err-order-already-executed))
-;;       (asserts! (>= (get expiry order) block-height) (err-trait err-order-expired))
+;;       (asserts! (not (get executed order)) (err u2010))
+;;       (asserts! (>= (get expiry order) block-height) (err u2011))
 
 ;;       ;; Calculate amount to swap for this interval
 ;;       (let (
@@ -354,7 +356,7 @@
 ;;         (amount-per-block (/ (get amount order) total-duration))
 ;;         (current-block-amount (if (> blocks-remaining u0) amount-per-block (get amount order)))
 ;;       )
-;;         (asserts! (> current-block-amount u0) (err-trait err-invalid-order))
+;;         (asserts! (> current-block-amount u0) ERR_INVALID_ORDER)
 
 ;;         ;; Perform the swap
 ;;         (unwrap-panic (contract-call? dex-router-contract swap-exact-in
@@ -379,11 +381,11 @@
 ;;   (begin
 ;;     (unwrap-panic (check-circuit-breaker))
 ;;     (let (
-;;       (order (unwrap! (map-get? vwap-orders order-id) (err-trait err-order-not-found))))
-;;       (dex-router-contract (unwrap! (data-var-get dex-router) (err-trait err-dex-router-not-set))))
+;;       (order (unwrap! (map-get? vwap-orders order-id) ERR_ORDER_NOT_FOUND)))
+;;       (dex-router-contract (unwrap! (var-get dex-router) ERR_DEX_ROUTER_NOT_SET)))
 ;;
-;;       (asserts! (not (get executed order)) (err-trait err-order-already-executed))
-;;       (asserts! (>= (get end-time order) block-height) (err-trait err-order-expired))
+;;       (asserts! (not (get executed order)) (err u2010))
+;;       (asserts! (>= (get end-time order) block-height) (err u2011))
 ;;
 ;;       ;; Calculate amount to swap for this interval (simplified for now)
 ;;       (let (
@@ -392,7 +394,7 @@
 ;;         (amount-per-block (/ (get amount-in order) total-duration))
 ;;         (current-block-amount (if (> blocks-remaining u0) amount-per-block (get amount-in order))))
 ;;
-;;         (asserts! (> current-block-amount u0) (err-trait err-invalid-order))
+;;         (asserts! (> current-block-amount u0) ERR_INVALID_ORDER)
 ;;
 ;;         ;; Perform the swap
 ;;         (unwrap-panic (contract-call? dex-router-contract swap-exact-in
@@ -442,13 +444,3 @@
 ;; @return (response (optional {timestamp: uint, action: (string-ascii 64), account-id: uint, details: (string-ascii 256)})) The audit event details or none if not found.
 (define-read-only (get-audit-event (event-id uint))
   (ok (map-get? audit-trail event-id)))
-(define-private (log-audit-event (action (string-ascii 64)) (id uint) (details (string-ascii 256)))
-  (let (
-    (ts block-height)
-    (next (var-get audit-event-counter))
-  )
-    (var-set audit-event-counter (+ next u1))
-    (map-set audit-trail next { timestamp: ts, action: action, account-id: id, details: details })
-    (ok true)
-  )
-)
