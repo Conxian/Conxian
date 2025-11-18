@@ -60,7 +60,7 @@
 (define-read-only (get-vault-cap (asset principal)) (ok (default-to u0 (map-get? vault-caps asset))))
 (define-read-only (is-asset-supported (asset principal)) (default-to false (map-get? supported-assets asset)))
 (define-read-only (get-strategy (token-contract principal)) (ok (map-get? asset-strategies token-contract)))
-(define-read-only (get-apy (token-contract principal)) (ok u800)) ;; 8% APY
+(define-read-only (get-apy (token-contract principal)) (ok u800)) ;; 8% APY placeholder
 (define-read-only (get-tvl (token-contract principal)) (ok (default-to u0 (map-get? vault-balances token-contract))))
 
 ;; Private functions
@@ -116,9 +116,7 @@
     (if (> fee u0)
         (begin
           (map-set collected-fees asset (+ (default-to u0 (map-get? collected-fees asset)) fee))
-          (if (var-get emission-enabled)
-            (try! (contract-call? (var-get token-system-coordinator) trigger-revenue-distribution asset fee))
-            true)
+          (try! (contract-call? (var-get token-system-coordinator) trigger-revenue-distribution))
           true)
         true)
     
@@ -173,9 +171,7 @@
     (if (> fee u0)
         (begin
           (map-set collected-fees asset (+ (default-to u0 (map-get? collected-fees asset)) fee))
-          (if (var-get emission-enabled)
-            (try! (contract-call? (var-get token-system-coordinator) trigger-revenue-distribution asset fee))
-            true)
+          (try! (contract-call? (var-get token-system-coordinator) trigger-revenue-distribution asset fee))
           true)
         true)
     
@@ -209,9 +205,7 @@
     (map-set collected-fees asset u0)
     
     ;; Notify revenue distributor
-    (if (var-get emission-enabled)
-      (try! (contract-call? (var-get token-system-coordinator) trigger-revenue-distribution asset collected))
-      true)
+    (try! (contract-call? (var-get token-system-coordinator) trigger-revenue-distribution))
     
     (ok collected)))
 

@@ -1,6 +1,8 @@
 ;; funding-calculator.clar
 ;; Handles funding rate calculations for perpetual contracts
 
+(use-trait funding-trait .all-traits.funding-trait)
+(use-trait oracle-trait .all-traits.oracle-trait)
 (use-trait dimensional-trait .traits.dimensional-trait.dimensional-trait)
 
 

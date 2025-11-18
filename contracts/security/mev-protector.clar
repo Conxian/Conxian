@@ -3,6 +3,8 @@
 ;;
 ;; @author Conxian
 ;; @version 1.0.0
+
+(use-trait mev-protector-trait .monitoring-security-traits.mev-protector-trait)
 (use-trait ft-trait .sip-010-ft-trait.sip-010-ft-trait)
 (use-trait rbac-trait .base-traits.rbac-trait)
 (use-trait err-trait .standard-errors.err-trait)
@@ -83,11 +85,7 @@
 ;; @param protection-level The protection level to validate.
 ;; @returns A response indicating success or an error.
 (define-private (validate-protection-level (protection-level uint))
-  (if (or (is-eq protection-level u0)
-          (is-eq protection-level u1)
-          (is-eq protection-level u2))
-    (ok true)
-    ERR_INVALID_PROTECTION_LEVEL)
+  (ok (assert (or (is-eq protection-level u0) (is-eq protection-level u1) (is-eq protection-level u2)) ERR_INVALID_PROTECTION_LEVEL))
 )
 
 ;; --- Public Functions ---
@@ -98,7 +96,7 @@
 ;; @returns A response indicating success or an error.
 (define-public (commit-order (commit-hash (buff 32)) (protection-level uint))
   (begin
-    (try! (validate-protection-level protection-level))
+    (asserts! (is-ok (validate-protection-level protection-level)) (unwrap! (validate-protection-level protection-level)))
     (asserts! (not (map-contains? commitments { sender: tx-sender })) ERR_COMMIT_EXISTS)
     (map-set commitments
       { sender: tx-sender }
@@ -187,8 +185,10 @@
     (asserts! (not (is-auction-bid-window-open auction-id)) ERR_AUCTION_NOT_ACTIVE)
     (asserts! (map-contains? auctions { auction-id: auction-id }) ERR_INVALID_AUCTION_ID)
 
-    ;; v1: winning bid selection and underlying swap execution are handled
-    ;; off-chain. This implementation only clears auction state.
+    ;; TODO: Implement logic to determine winning bids and execute orders
+    ;; This would involve sorting bids, matching them with revealed orders,
+    ;; and executing the underlying swaps/transactions.
+    ;; For now, we'll just clear the auction data.
 
     (map-delete auctions { auction-id: auction-id })
     ;; Delete all bids for this auction
@@ -207,10 +207,8 @@
     ;; This is a simplified example. A real implementation would involve
     ;; a queue of delayed transactions and a mechanism to execute them
     ;; after a certain block height.
-    ;; v1: enforce a simple global delay based on the configured buffer.
-    (asserts! (>= block-height (var-get delayed-execution-buffer)) ERR_DELAYED_EXECUTION_NOT_MET)
-    ;; v1: no queued execution; the actual target call is expected to be
-    ;; orchestrated off-chain once the delay condition is satisfied.
+    (asserts! (>= block-height (+ tx-sender (var-get delayed-execution-buffer))) ERR_DELAYED_EXECUTION_NOT_MET)
+    ;; TODO: Implement actual contract call with parameters
     (ok true)
   )
 )
@@ -243,9 +241,9 @@
 ;; @param transaction-details The details of the transaction to check.
 ;; @returns True if MEV is detected, false otherwise.
 (define-read-only (is-mev-detected (transaction-details (buff 100)))
-  ;; v1: on-chain MEV pattern analysis is not implemented; detection is
-  ;; performed off-chain using transaction and mempool data. This helper
-  ;; currently always returns false.
+  ;; TODO: Implement actual MEV detection logic
+  ;; This would involve analyzing transaction details against known MEV patterns
+  ;; and potentially external oracle data.
   false
 )
 

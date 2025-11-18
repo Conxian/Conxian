@@ -2,8 +2,8 @@
 ;; This contract provides a simple implementation of role-based access control (RBAC),
 ;; allowing the contract owner to grant and revoke roles to other principals.
 
-(use-trait access-control-trait .access-traits.access-control-trait)
-(impl-trait .access-traits.access-control-trait)
+(use-trait access-control-trait .access-traits.access-traits)
+(impl-trait .central-traits-registry.access-control-trait)
 
 ;; @data-vars
 ;; @var contract-owner: The principal of the contract owner.

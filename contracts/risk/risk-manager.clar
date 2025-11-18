@@ -1,11 +1,15 @@
 ;; @desc This contract is responsible for all risk management functions,
 ;; including setting risk parameters, calculating liquidation prices, and checking position health.
 
+(use-trait risk-manager-trait .traits.risk-manager-trait.risk-manager-trait)
+(use-trait rbac-trait .base-traits.rbac-trait)
+
+(impl-trait .traits.risk-manager-trait.risk-manager-trait)
+
 ;; @constants
 (define-constant ERR_UNAUTHORIZED (err u1001))
 (define-constant ERR_INVALID_PARAMETERS (err u1005))
 (define-constant MIN_LEVERAGE u100)
-(define-constant ROLE_ADMIN "admin")
 
 ;; @data-vars
 (define-data-var max-leverage uint u2000) ;; 20x
@@ -67,5 +71,5 @@
 
 ;; --- Private Functions ---
 (define-private (check-role (role (string-ascii 32)))
-  (contract-call? .rbac has-role role)
+  (contract-call? .rbac-trait has-role tx-sender role)
 )

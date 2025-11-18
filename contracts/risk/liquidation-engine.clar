@@ -70,10 +70,7 @@
     (current-block block-height)
     (position (unwrap! (contract-call? (var-get dimensional-engine-contract) get-position position-owner position-id) ERR_INVALID_POSITION))
     (asset (get asset position))
-    (price (unwrap!
-      (contract-call? (var-get oracle-contract) get-price (get asset position))
-      ERR_ORACLE_FAILURE
-    ))
+    (price (unwrap! (contract-call? (contract-of oracle-aggregator-v2-trait (unwrap-panic (var-get oracle-contract))) get-price (get asset position)) ERR_ORACLE_FAILURE))
   )
     ;; Verify position can be liquidated
     (asserts! (is-eq (get status position) ACTIVE) ERR_POSITION_NOT_ACTIVE)
@@ -164,11 +161,9 @@
   )
   (let (
     (position (unwrap! (contract-call? (var-get dimensional-engine-contract) get-position position-owner position-id) ERR_INVALID_POSITION))
-    (asset (get asset position))(price (unwrap! (contract-call? .oracle_aggregator_v2 get-twap asset)
-      ERR_ORACLE_FAILURE
-    ))
+    (price (unwrap! (contract-call? (contract-of oracle-aggregator-v2-trait (unwrap-panic (var-get oracle-contract))) get-price (get asset position)) ERR_ORACLE_FAILURE))
     (margin-ratio (calculate-margin-ratio position price))
-    (liquidation-price u0)
+    (liquidation-price (unwrap! (contract-call? (var-get risk-manager-contract) get-liquidation-price position price) ERR_RISK_MANAGER_FAILURE))
   )
     (ok {
       margin-ratio: margin-ratio,
