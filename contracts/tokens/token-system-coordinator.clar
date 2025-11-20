@@ -52,13 +52,43 @@
 ;; @var total-users: The total number of users.
 (define-data-var total-users uint u0)
 ;; @var registered-tokens: A map of registered tokens.
-(define-map registered-tokens principal bool)
+(define-map registered-tokens
+  principal
+  bool
+)
 ;; @var token-metadata: A map of token metadata.
-(define-map token-metadata principal {symbol: (string-ascii 10), decimals: uint, total-supply: uint, is-active: bool, last-activity: uint})
+(define-map token-metadata
+  principal
+  {
+    symbol: (string-ascii 10),
+    decimals: uint,
+    total-supply: uint,
+    is-active: bool,
+    last-activity: uint,
+  }
+)
 ;; @var user-activity: A map of user activity.
-(define-map user-activity principal {last-interaction: uint, total-volume: uint, token-count: uint, reputation-score: uint})
+(define-map user-activity
+  principal
+  {
+    last-interaction: uint,
+    total-volume: uint,
+    token-count: uint,
+    reputation-score: uint,
+  }
+)
 ;; @var cross-token-operations: A map of cross-token operations.
-(define-map cross-token-operations uint {user: principal, tokens: (list 5 principal), operation-type: (string-ascii 32), timestamp: uint, total-value: uint, status: (string-ascii 16)})
+(define-map cross-token-operations
+  uint
+  {
+    user: principal,
+    tokens: (list 5 principal),
+    operation-type: (string-ascii 32),
+    timestamp: uint,
+    total-value: uint,
+    status: (string-ascii 16),
+  }
+)
 
 ;; @desc Get the contract owner.
 ;; @returns (principal): The principal of the contract owner.
@@ -102,7 +132,13 @@
 ;; @desc Get the health of the system.
 ;; @returns ({ ... }): A tuple containing the system health.
 (define-read-only (get-system-health)
-  {is-paused: (var-get paused), emergency-mode: (var-get emergency-mode), total-registered-tokens: (var-get total-registered-tokens), total-users: (var-get total-users), coordinator-version: COORDINATOR_VERSION}
+  {
+    is-paused: (var-get paused),
+    emergency-mode: (var-get emergency-mode),
+    total-registered-tokens: (var-get total-registered-tokens),
+    total-users: (var-get total-users),
+    coordinator-version: COORDINATOR_VERSION,
+  }
 )
 
 ;; --- Private functions ---
@@ -142,20 +178,28 @@
 ;; @param user: The principal of the user.
 ;; @param volume: The volume of the user's activity.
 ;; @returns (response bool uint): An `ok` response with `true` on success, or an error code.
-(define-private (update-user-activity (user principal) (volume uint))
-  (let (
-    (current-activity (default-to
-      {last-interaction: block-height, total-volume: u0, token-count: u0, reputation-score: u1000}
-      (map-get? user-activity user)
-    ))
+(define-private (update-user-activity
+    (user principal)
+    (volume uint)
   )
+  (let ((current-activity (default-to {
+      last-interaction: block-height,
+      total-volume: u0,
+      token-count: u0,
+      reputation-score: u1000,
+    }
+      (map-get? user-activity user)
+    )))
     (if (is-none (map-get? user-activity user))
       (var-set total-users (+ (var-get total-users) u1))
       true
     )
-    (map-set user-activity user
-      {last-interaction: block-height, total-volume: (+ (get total-volume current-activity) volume), token-count: (get token-count current-activity), reputation-score: (get reputation-score current-activity)}
-    )
+    (map-set user-activity user {
+      last-interaction: block-height,
+      total-volume: (+ (get total-volume current-activity) volume),
+      token-count: (get token-count current-activity),
+      reputation-score: (get reputation-score current-activity),
+    })
     (ok true)
   )
 )
@@ -165,21 +209,25 @@
 ;; @param symbol: The symbol of the token.
 ;; @param decimals: The number of decimals for the token.
 ;; @returns (response bool uint): An `ok` response with `true` on success, or an error code.
-(define-public (register-token (token principal) (symbol (string-ascii 10)) (decimals uint))
+(define-public (register-token
+    (token principal)
+    (symbol (string-ascii 10))
+    (decimals uint)
+  )
   (begin
     (asserts! (is-contract-owner) ERR_UNAUTHORIZED)
     (if (is-none (map-get? registered-tokens token))
       (begin
         (var-set total-registered-tokens (+ (var-get total-registered-tokens) u1))
         (map-set registered-tokens token true)
-(map-set token-metadata token {
+        (map-set token-metadata token {
           symbol: symbol,
           decimals: decimals,
           total-supply: u0,
           is-active: true,
           last-activity: block-height,
         })
-(ok true)
+        (ok true)
       )
       (ok true)
     )
@@ -190,15 +238,18 @@
 ;; @param token: The principal of the token.
 ;; @param supply: The new total supply of the token.
 ;; @returns (response bool uint): An `ok` response with `true` on success, or an error code.
-(define-public (update-token-activity (token principal) (supply uint))
+(define-public (update-token-activity
+    (token principal)
+    (supply uint)
+  )
   (begin
     (try! (when-not-paused))
     (try! (validate-token token))
     (map-set token-metadata token
-      (merge
-        (unwrap-panic (map-get? token-metadata token))
-        {total-supply: supply, last-activity: block-height}
-      )
+      (merge (unwrap-panic (map-get? token-metadata token)) {
+        total-supply: supply,
+        last-activity: block-height,
+      })
     )
     (ok true)
   )
@@ -216,28 +267,33 @@
     (operation-type (string-ascii 32))
     (total-value uint)
   )
-  (let (
-    (new-op-id (+ (var-get last-operation-id) u1))
-  )
+  (let ((new-op-id (+ (var-get last-operation-id) u1)))
     (try! (when-not-paused))
     (try! (when-not-emergency))
-    
+
     ;; Validate all tokens are registered
     (asserts! (>= (len tokens) u1) ERR_INVALID_AMOUNT)
     (asserts! (<= (len tokens) MAX_TOKENS) ERR_INVALID_AMOUNT)
-    
+
     ;; Record the operation
-    (map-set cross-token-operations new-op-id
-      {user: user, tokens: tokens, operation-type: operation-type, timestamp: block-height, total-value: total-value, status: "initiated"}
-    )
+    (map-set cross-token-operations new-op-id {
+      user: user,
+      tokens: tokens,
+      operation-type: operation-type,
+      timestamp: block-height,
+      total-value: total-value,
+      status: "initiated",
+    })
     (var-set last-operation-id new-op-id)
-    
+
     ;; Update user activity
     (try! (update-user-activity user total-value))
-    
+
     ;; Trigger revenue distribution if applicable
     (if (is-eq operation-type "yield-claim")
-      (try! (trigger-revenue-distribution (unwrap-panic (element-at tokens u0)) total-value))
+      (try! (trigger-revenue-distribution (unwrap-panic (element-at tokens u0))
+        total-value
+      ))
       true
     )
     (ok new-op-id)
@@ -248,7 +304,10 @@
 ;; @param token: The principal of the token.
 ;; @param amount: The amount of revenue to distribute.
 ;; @returns (response bool uint): An `ok` response with `true` on success, or an error code.
-(define-public (trigger-revenue-distribution (token principal) (amount uint))
+(define-public (trigger-revenue-distribution
+    (token principal)
+    (amount uint)
+  )
   (begin
     (try! (when-not-paused))
     (try! (validate-token token))
@@ -300,12 +359,10 @@
 ;; @desc Initialize the system with the core tokens.
 ;; @returns (response (string-ascii) uint): An `ok` response with a success message, or an error code.
 (define-public (initialize-system)
-  (let (
-    (is-owner (is-contract-owner))
-  )
+  (let ((is-owner (is-contract-owner)))
     (asserts! is-owner ERR_UNAUTHORIZED)
     (try! (when-not-paused))
-    
+
     ;; Register core tokens
     (try! (register-token CXD_TOKEN "CXD" u6))
     (try! (register-token CXVG_TOKEN "CXVG" u6))

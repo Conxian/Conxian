@@ -2,6 +2,7 @@
 
 (use-trait oracle-trait .oracle.oracle-trait)
 (use-trait err-trait .errors.standard-errors.standard-errors)
+(use-trait math-trait .math-trait.math-trait)
 
 (define-constant ERR_UNAUTHORIZED (err-trait err-unauthorized))
 (define-constant ERR_ASSET_NOT_FOUND (err-trait err-asset-not-found))
@@ -27,6 +28,17 @@
   updated-at: uint
 })
 
+(define-map asset-twap-data { asset: principal } {
+  price-cumulative: uint,
+  last-timestamp: uint
+})
+
+(define-map asset-volatility-data { asset: principal } {
+  mean: uint,
+  variance: uint,
+  count: uint
+})
+
 (define-private (get-block-height)
   (unwrap! (get-block-info? block-height) (err u0))
 )
@@ -34,6 +46,10 @@
 (define-private (is-stale (updated-at uint))
   (let ((current-height (get-block-height)))
     (>= (- current-height updated-at) (var-get stale-threshold-blocks)))
+)
+
+(define-private (abs (n int))
+  (if (< n i0) (- i0 n) n)
 )
 
 (define-public (set-admin (new-admin principal))
@@ -70,12 +86,28 @@
 )
 
 ;; Update price and twap (EMA)
+(define-private (update-volatility (asset principal) (price uint))
+  (let ((data (default-to { mean: u0, variance: u0, count: u0 } (map-get? asset-volatility-data { asset: asset })))
+        (new-count (+ (get count data) u1)))
+    (if (is-eq new-count u1)
+      (map-set asset-volatility-data { asset: asset } { mean: price, variance: u0, count: new-count })
+      (let ((old-mean (get mean data))
+            (new-mean (/ (+ (* old-mean (get count data)) price) new-count))
+            (old-variance (get variance data))
+            (new-variance (/ (+ (* old-variance (get count data)) (* (- price old-mean) (- price new-mean))) new-count)))
+        (map-set asset-volatility-data { asset: asset } { mean: new-mean, variance: new-variance, count: new-count })
+      )
+    )
+    (ok true)
+  )
+)
 (define-public (set-source (asset principal) (price uint) (weight uint))
   (begin
     (asserts! (contract-call? .access-control.access-control-contract has-role "contract-owner" tx-sender) (err ERR_UNAUTHORIZED))
     (try! (check-circuit-breaker))
     (asserts! (and (>= price MIN_PRICE) (<= price MAX_PRICE)) ERR_INVALID_PRICE)
-    (let ((alpha (var-get twap-alpha-bps)))
+    (let ((alpha (var-get twap-alpha-bps))
+          (current-timestamp (get-block-height)))
       (match (map-get? asset-sources { asset: asset })
         entry
           (let ((prev-twap (get twap entry))
@@ -90,7 +122,7 @@
               twap: (/ (+ (* alpha price) (* (- BPS alpha) prev-twap)) BPS),
               weight: weight,
               total-weight: new-total-weight,
-              updated-at: (get-block-height)
+              updated-at: current-timestamp
             })
           )
         ;; Initialize TWAP on first set
@@ -99,9 +131,24 @@
           twap: price,
           weight: weight,
           total-weight: weight,
-          updated-at: (get-block-height)
+          updated-at: current-timestamp
         })
       )
+      (match (map-get? asset-twap-data { asset: asset })
+        twap-data
+          (let ((time-diff (- current-timestamp (get last-timestamp twap-data)))
+                (last-price (get price (unwrap-panic (map-get? asset-sources { asset: asset })))))
+            (map-set asset-twap-data { asset: asset } {
+              price-cumulative: (+ (get price-cumulative twap-data) (* last-price time-diff)),
+              last-timestamp: current-timestamp
+            })
+          )
+        (map-set asset-twap-data { asset: asset } {
+          price-cumulative: u0,
+          last-timestamp: current-timestamp
+        })
+      )
+      (try! (update-volatility asset price))
     )
     (ok true)
   )
@@ -109,7 +156,7 @@
 
 ;; Basic manipulation detection: deviation of latest price vs TWAP exceeds threshold
 (define-read-only (is-manipulated (asset principal))
-  (match (map-get? asset-sources { asset: asset })
+  (let ((deviation-check (match (map-get? asset-sources { asset: asset })
     entry
       (let ((p (get price entry)) (t (get twap entry)) (thr (var-get manipulation-threshold-bps)))
         (if (or (is-eq t u0) (is-eq p u0))
@@ -120,7 +167,20 @@
         )
       )
     false
-  )
+  ))
+  (volatility-check (match (map-get? asset-volatility-data { asset: asset })
+    volatility-data
+      (let ((latest-price (get price (unwrap-panic (map-get? asset-sources { asset: asset }))))
+            (mean (get mean volatility-data))
+            (std-dev (unwrap-panic (contract-call? .math-lib sqrt (get variance volatility-data)))))
+        (if (is-eq std-dev u0)
+          false
+          (> (if (> latest-price mean) (- latest-price mean) (- mean latest-price)) (* u3 std-dev))
+        )
+      )
+    false
+  )))
+  (or deviation-check volatility-check)
 )
 
 ;; Minimal aggregator: return latest price when not manipulated; otherwise return TWAP (degraded mode)
@@ -148,8 +208,15 @@
 
 ;; Get TWAP explicitly
 (define-read-only (get-twap (asset principal))
-  (match (map-get? asset-sources { asset: asset })
-    entry (ok (get twap entry))
+  (match (map-get? asset-twap-data { asset: asset })
+    twap-data
+      (let ((time-diff (- (get-block-height) (get last-timestamp twap-data)))
+            (last-price (get price (unwrap-panic (map-get? asset-sources { asset: asset })))))
+        (if (is-eq time-diff u0)
+          (ok last-price)
+          (ok (/ (+ (get price-cumulative twap-data) (* last-price time-diff)) time-diff))
+        )
+      )
     ERR_ASSET_NOT_FOUND
   )
 )

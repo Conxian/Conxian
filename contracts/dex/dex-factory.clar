@@ -224,6 +224,14 @@
   )
 )
 
+(define-public (set-circuit-breaker (new-circuit-breaker principal))
+  (begin
+    (try! (check-is-owner))
+    (var-set circuit-breaker new-circuit-breaker)
+    (ok true)
+  )
+)
+
 ;; --- Read-Only Functions ---
 
 ;; @desc Retrieves the pool principal for a given token pair by calling the pool registry.
