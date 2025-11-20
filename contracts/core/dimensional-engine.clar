@@ -3,7 +3,7 @@
 ;; specialized contracts for position management, funding rate calculation,
 ;; collateral management, and risk management.
 
-(use-trait position-manager-trait .traits.position-manager-trait.position-manager-trait)
+(use-trait position-manager-trait .position-manager-trait.position-manager-trait)
 (use-trait funding-rate-calculator-trait .traits.funding-rate-calculator-trait.funding-rate-calculator-trait)
 (use-trait collateral-manager-trait .traits.collateral-manager-trait.collateral-manager-trait)
 (use-trait risk-manager-trait .traits.risk-manager-trait.risk-manager-trait)

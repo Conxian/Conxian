@@ -4,7 +4,7 @@
 ;; - Manage staking and lockups for different dimensions.
 ;; - Calculate and distribute yield based on dimension-specific metrics.
 
-(use-trait sip-010-ft-trait .sip-010-trait)
+(use-trait sip-010-ft-trait .dex-traits.sip-010-ft-trait)
 
 ;; ===== Constants =====
 ;; Standardized Conxian error codes (800-range for dimensional modules)

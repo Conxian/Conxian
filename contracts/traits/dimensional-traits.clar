@@ -39,32 +39,3 @@
   )
 )
 
-;; ===========================================
-;; DIMENSIONAL REGISTRY TRAIT
-;; ===========================================
-;; @desc Interface for a dimensional registry.
-(define-trait dim-registry-trait
-  (
-    ;; @desc Registers a new node in the registry.
-    ;; @param principal: The principal of the node to register.
-    ;; @param data: A tuple containing the node's type and metadata.
-    ;; @returns (response uint uint): The ID of the newly registered node, or an error code.
-    (register-node (principal {type: (string-ascii 32), metadata: (optional (string-utf8 256))}) (response uint uint))
-
-    ;; @desc Gets the details of a specific node.
-    ;; @param node-id: The ID of the node to retrieve.
-    ;; @returns (response (optional { ... }) uint): A tuple containing the node details, or none if the node is not found.
-    (get-node (uint) (response (optional {
-      principal: principal,
-      type: (string-ascii 32),
-      metadata: (optional (string-utf8 256)),
-      active: bool
-    }) uint))
-
-    ;; @desc Updates the status of a node.
-    ;; @param node-id: The ID of the node to update.
-    ;; @param active: A boolean indicating the new status of the node.
-    ;; @returns (response bool uint): A boolean indicating success or failure, or an error code.
-    (update-node-status (uint bool) (response bool uint))
-  )
-)

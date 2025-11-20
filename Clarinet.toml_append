@@ -1,0 +1,3 @@
+[contracts.dim-registry-trait]
+path = "contracts/traits/dim-registry-trait.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"

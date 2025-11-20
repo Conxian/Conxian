@@ -3,8 +3,8 @@
 ;; Registry for ALL system components under dimensional architecture
 ;; Manages DEX pools, vaults, lending systems, and cross-protocol integrations
 
-(use-trait dim-registry-trait .dimensional-traits.dim-registry-trait)
-(impl-trait .dimensional-traits.dim-registry-trait)
+(use-trait dim-registry-trait .dim-registry-trait.dim-registry-trait)
+(impl-trait .dim-registry-trait.dim-registry-trait)
 
 ;; Constants
 (define-constant TRAIT_REGISTRY .trait-registry)

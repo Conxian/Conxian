@@ -1,8 +1,8 @@
 ;; @desc Advanced routing engine for optimal path finding across multiple DEX pools.
 ;; This contract acts as a facade, delegating calls to the dijkstra-pathfinder and route-manager contracts.
 
-(use-trait dijkstra-pathfinder-trait .traits.dijkstra-pathfinder-trait.dijkstra-pathfinder-trait)
-(use-trait route-manager-trait .traits.route-manager-trait.route-manager-trait)
+(use-trait dijkstra-pathfinder-trait .dijkstra-pathfinder-trait.dijkstra-pathfinder-trait)
+(use-trait route-manager-trait .route-manager-trait.route-manager-trait)
 (use-trait rbac-trait .base-traits.rbac-trait)
 
 ;; @data-vars

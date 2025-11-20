@@ -7,7 +7,7 @@
 ;;; Conforms to: Clarinet SDK 3.9+, Nakamoto Standard
 
 ;; Standard traits
-(use-trait sip-010-ft-trait .sip-010-ft-trait.sip-010-ft-trait)
+(use-trait sip-010-ft-trait .dex-traits.sip-010-ft-trait)
 (use-trait finance-metrics-trait .finance-metrics-trait.finance-metrics-trait)
 (use-trait pausable-trait .base-traits.pausable-trait)
 (use-trait access-control-trait .base-traits.rbac-trait)
@@ -63,23 +63,23 @@
 (define-data-var positions-version uint u1)
 
 (define-map positions {owner: principal, id: uint} {
-  collateral: uint,                ; Collateral amount in base token
-  size: int,                      ; Position size (positive for long, negative for short)
-  entry-price: uint,              ; Entry price with oracle precision
-  entry-time: uint,               ; Block height when position was opened
-  last-funding: uint,             ; Last funding payment block
-  last-updated: uint,             ; Last update block
-  position-type: (string-ascii 20), ; "LONG" | "SHORT" | "PERPETUAL"
-  status: (string-ascii 20),      ; "ACTIVE" | "CLOSED" | "LIQUIDATED"
-  funding-interval: (string-ascii 20),  ; "HOURLY" | "DAILY" | "WEEKLY"
-  max-leverage: uint,             ; Maximum allowed leverage (1-100x)
-  maintenance-margin: uint,       ; Maintenance margin in basis points
-  time-decay: (optional uint),    ; Time decay factor if applicable
-  volatility: (optional uint),    ; Volatility factor if applicable
+  collateral: uint,                ;; Collateral amount in base token
+  size: int,                      ;; Position size (positive for long, negative for short)
+  entry-price: uint,              ;; Entry price with oracle precision
+  entry-time: uint,               ;; Block height when position was opened
+  last-funding: uint,             ;; Last funding payment block
+  last-updated: uint,             ;; Last update block
+  position-type: (string-ascii 20), ;; "LONG" | "SHORT" | "PERPETUAL"
+  status: (string-ascii 20),      ;; "ACTIVE" | "CLOSED" | "LIQUIDATED"
+  funding-interval: (string-ascii 20),  ;; "HOURLY" | "DAILY" | "WEEKLY"
+  max-leverage: uint,             ;; Maximum allowed leverage (1-100x)
+  maintenance-margin: uint,       ;; Maintenance margin in basis points
+  time-decay: (optional uint),    ;; Time decay factor if applicable
+  volatility: (optional uint),    ;; Volatility factor if applicable
   is-hedged: bool,               ;; If position is hedged against other positions
-  tags: (list 10 (string-utf8 32)), // Position tags for categorization
-  version: uint,                  // Schema version for future upgrades
-  metadata: (optional (string-utf8 1024)) // Additional metadata
+  tags: (list 10 (string-utf8 32)), ;; Position tags for categorization
+  version: uint,                  ;; Schema version for future upgrades
+  metadata: (optional (string-utf8 1024)) ;; Additional metadata
 })
 
 ;; Track position IDs by owner for efficient lookup
@@ -133,7 +133,7 @@
   "@doc Update the protocol fee rate (in basis points)"
   (begin
     (asserts! (is-eq tx-sender (var-get owner)) ERR_UNAUTHORIZED)
-    (asserts! (<= fee-rate u1000) (err u2016)) ; Max 10% fee
+    (asserts! (<= fee-rate u1000) (err u2016)) ;; Max 10% fee
     (var-set protocol-fee-rate fee-rate)
     (ok true)
   )

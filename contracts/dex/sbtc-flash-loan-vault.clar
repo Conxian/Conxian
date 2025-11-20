@@ -3,7 +3,7 @@
 ;; Implements secure flash loans with sBTC collateral and risk management
 
 ;; ===== Traits =====
-(use-trait ft-trait .sip-010-trait-ft-standard.sip-010-trait)
+(use-trait sip-010-ft-trait .dex-traits.sip-010-ft-trait)
 (use-trait flash-loan-receiver-trait .flash-loan-receiver-trait.flash-loan-receiver-trait)
 
 ;; =============================================================================
@@ -100,7 +100,7 @@
 ;; =============================================================================
 ;; CORE FLASH LOAN FUNCTIONS
 ;; =============================================================================
-(define-public (flash-loan (asset <ft-trait>)
+(define-public (flash-loan (asset <sip-010-ft-trait>)
                           (amount uint)
                           (receiver <flash-loan-receiver-trait>)
                           (params (buff 1024)))
@@ -172,7 +172,7 @@
     
     (ok nonce)))
 
-(define-private (complete-flash-loan (asset <ft-trait>)
+(define-private (complete-flash-loan (asset <sip-010-ft-trait>)
                                     (amount uint)
                                     (fee uint)
                                     (nonce uint))
@@ -246,7 +246,7 @@
 ;; =============================================================================
 ;; LIQUIDITY MANAGEMENT
 ;; =============================================================================
-(define-public (add-liquidity (asset <ft-trait>) (amount uint))
+(define-public (add-liquidity (asset <sip-010-ft-trait>) (amount uint))
   (let ((asset-contract (contract-of asset)))
     (asserts! (not (var-get vault-paused)) ERR_ASSET_PAUSED)
     (asserts! (> amount u0) ERR_INVALID_AMOUNT)
@@ -284,7 +284,7 @@
     
     (ok amount)))
 
-(define-public (remove-liquidity (asset <ft-trait>) (amount uint))
+(define-public (remove-liquidity (asset <sip-010-ft-trait>) (amount uint))
   (let ((asset-contract (contract-of asset)))
     (match (map-get? liquidity-pools { asset: asset-contract })
       pool (begin

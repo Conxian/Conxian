@@ -94,8 +94,8 @@
 
 (define-read-only (is-pool-active (pool-id principal))
   (match (map-get? pools {pool-id: pool-id})
-    pool-data (ok (get active pool-data))
-    (ok false)))
+    pool-data (get active pool-data)
+    false))
 
 (define-private (validate-fee-tier (fee-tier uint))
   (ok true))

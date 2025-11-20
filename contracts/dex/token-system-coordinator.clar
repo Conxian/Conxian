@@ -5,10 +5,10 @@
 ;; Central coordination contract for the enhanced Conxian token system
 ;; Provides unified interface and orchestrates interactions between all token subsystems
 
-(use-trait rbac-trait .rbac-trait.rbac-trait)
+(use-trait rbac-trait .base-traits.rbac-trait)
 
 ;; --- Traits ---
-(use-trait ft-trait .sip-010-trait-ft-standard.sip-010-trait-ft-standard)
+(use-trait sip-010-ft-trait .dex-traits.sip-010-ft-trait)
 (use-trait lp-token-trait .lp-token.lp-token)
 
 ;; --- Constants ---
@@ -48,8 +48,6 @@
 (define-constant ERR_COORDINATION_FAILED u1005)
 (define-constant ERR_COMPONENT_UPDATE_FAILED u1006)
 
-;; --- Storage ---
-(use-trait rbac-trait .rbac-trait.rbac-trait)
 
 ;; --- Data Variables ---
 (define-data-var system-initialized bool false)

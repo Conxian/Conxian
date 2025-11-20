@@ -2,7 +2,7 @@
 ;; Advanced Multi-Hop Routing Engine
 
 ;; Traits
-(use-trait ft-trait .sip-010-trait-ft-standard.ft-trait)
+(use-trait sip-010-ft-trait .dex-traits.sip-010-ft-trait)
 (use-trait pool-trait .pool-trait.pool-trait)
 
 ;; Constants

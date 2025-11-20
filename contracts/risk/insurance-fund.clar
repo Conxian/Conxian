@@ -2,7 +2,7 @@
 ;; Manages an insurance fund for covering potential losses within the dimensional system.
 
 ;; SIP-010: Fungible Token Standard
-(use-trait ft-trait .traits.sip-010-ft-trait.sip-010-ft-trait)
+(use-trait sip-010-ft-trait .dex-traits.sip-010-ft-trait)
 
 ;; Constants
 ;; Error codes
@@ -71,7 +71,7 @@
 ;; @param token The principal of the fungible token to deposit.
 ;; @param amount The amount of tokens to deposit.
 ;; @returns A response with ok on success, or an error.
-(define-public (deposit-fund (token <ft-trait>) (amount uint))
+(define-public (deposit-fund (token <sip-010-ft-trait>) (amount uint))
   (begin
     (asserts! (> amount u0) ERR-INVALID-AMOUNT)
     (let
@@ -89,7 +89,7 @@
 ;; @param amount The amount of tokens to withdraw.
 ;; @param recipient The principal of the recipient.
 ;; @returns A response with ok on success, or an error.
-(define-public (withdraw-fund (token <ft-trait>) (amount uint) (recipient principal))
+(define-public (withdraw-fund (token <sip-010-ft-trait>) (amount uint) (recipient principal))
   (begin
     (asserts! (or (is-governance) (is-emergency-multisig)) ERR-NOT-AUTHORIZED)
     (asserts! (> amount u0) ERR-INVALID-AMOUNT)

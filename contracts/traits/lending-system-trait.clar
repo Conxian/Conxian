@@ -29,7 +29,7 @@
 
     ;; @desc Liquidate an unhealthy loan.
     ;; @param borrower: The principal of the borrower with the unhealthy loan.
-    //; @param collateral-token: The principal of the collateral token.
+    ;; @param collateral-token: The principal of the collateral token.
     ;; @param debt-token: The principal of the debt token.
     ;; @returns (response bool uint): A boolean indicating success or failure, or an error code.
     (liquidate (principal principal principal) (response bool uint))

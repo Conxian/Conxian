@@ -8,7 +8,7 @@
 ;; functionality for the Conxian DEX protocol.
 
 ;; Use centralized traits
-(use-trait sip-010-ft-trait .sip-010-ft-trait.sip-010-ft-trait)
+(use-trait sip-010-ft-trait .dex-traits.sip-010-ft-trait)
 (use-trait ownable-trait .access-control-trait.access-control-trait)
 (use-trait pausable-trait .pausable-trait.pausable-trait)
 (use-trait pool-trait .pool-trait.pool-trait)

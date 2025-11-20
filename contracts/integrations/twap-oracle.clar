@@ -2,7 +2,7 @@
 ;; Provides Time-Weighted Average Price (TWAP) data for assets.
 
 ;; SIP-010: Fungible Token Standard
-(use-trait ft-trait .traits.sip-010-ft-trait.sip-010-ft-trait)
+(use-trait sip-010-ft-trait .dex-traits.sip-010-ft-trait)
 
 ;; Constants
 ;; Error codes

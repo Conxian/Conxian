@@ -148,7 +148,7 @@
           queue-block: none,
           execution-block: none,
           state: PROPOSAL_PENDING,
-          created-at: (unwrap-panic (get-block-info? time block-height))
+          created-at: (default-to u0 (get-block-info? time block-height))
         })
       
       ;; Update counters

@@ -2,7 +2,7 @@
 ;; Factory contract for creating and managing position NFTs.
 
 ;; SIP-010: Fungible Token Standard
-(use-trait ft-trait .sip-010-trait)
+(use-trait sip-010-ft-trait .dex-traits.sip-010-ft-trait)
 ;; SIP-011: Non-Fungible Token Standard
 (use-trait nft-trait .sip-009-nft-trait)
 
@@ -62,7 +62,7 @@
 ;; @param debt-token The principal of the debt fungible token.
 ;; @param debt-amount The amount of debt incurred.
 ;; @returns A response with the new position ID on success, or an error.
-(define-public (create-position (collateral-token <ft-trait>) (collateral-amount uint) (debt-token <ft-trait>) (debt-amount uint))
+(define-public (create-position (collateral-token <sip-010-ft-trait>) (collateral-amount uint) (debt-token <sip-010-ft-trait>) (debt-amount uint))
   (begin
     (asserts! (> collateral-amount u0) ERR-INVALID-INPUT)
     (asserts! (> debt-amount u0) ERR-INVALID-INPUT)

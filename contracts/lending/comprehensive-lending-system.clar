@@ -2,10 +2,8 @@
 ;; Refactored for clarity, security, and correctness.
 
 ;; --- Traits ---
-(use-trait sip-010-ft-trait .sip-010-ft-trait.sip-010-ft-trait)
-(use-trait lending-system-trait .traits.lending-system-trait.lending-system-trait)
-(use-trait rbac-trait .decentralized-trait-registry.decentralized-trait-registry)
-(use-trait err-trait .traits.error-codes-trait.error-codes-trait)
+(use-trait sip-010-ft-trait .dex-traits.sip-010-ft-trait)
+(use-trait rbac-trait .base-traits.rbac-trait)
 
 ;; --- Constants ---
 (define-constant LENDING_SERVICE "lending-service")
@@ -53,7 +51,7 @@
 ;; @returns A response tuple with `(ok true)` if successful, `(err ERR_UNAUTHORIZED)` otherwise.
 (define-public (set-owner (new-owner principal))
   (begin
-    (asserts! (contract-call? (var-get access-control-contract) has-role "contract-owner" tx-sender) ERR_UNAUTHORIZED)
+    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
     (var-set contract-owner new-owner)
     (ok true)
   )
@@ -352,7 +350,7 @@
         asset-info
           (let ((balance (default-to u0 (get balance (map-get? user-supply-balances { user: user, asset: asset }))))
                 (price (get-asset-price-safe asset))
-                (collateral-value (/ (* balance (get collateral-factor asset-info) price) PRECISION))
+                (collateral-value (/ (* balance (get collateral-factor asset-info) price) PRECISION)))
             { 
               total-collateral-value: (+ (get total-collateral-value accumulator) collateral-value),
               total-threshold-value: (+ (get total-threshold-value accumulator) 
@@ -405,7 +403,11 @@
       (let ((current-balance (default-to u0 (get balance (map-get? user-supply-balances { user: tx-sender, asset: asset-principal })))))
         (map-set user-supply-balances { user: tx-sender, asset: asset-principal } { balance: (+ current-balance amount) })
         (map-set user-collateral-assets { user: tx-sender, asset: asset-principal } true)
-        (ok true)))))
+        (ok true)
+      )
+    )
+  )
+)
 
 ;; @notice Withdraws an asset from the lending pool.
 ;; @param asset The trait of the asset to withdraw.
@@ -422,24 +424,93 @@
     (try! (check-circuit-breaker))
     (asserts! (> amount u0) ERR_ZERO_AMOUNT)
     (let ((asset-principal (contract-of asset)))
-      ;; Optional PoR enforcement: require attestation exists and is not stale
-      (match (var-get por-contract)
-        por-addr (if (var-get enforce-por-borrow)
-                      (begin
-                        (asserts! (is-some (contract-call? por-addr get-attestation asset-principal)) ERR_POR_MISSING)
-                        (asserts! (not (contract-call? por-addr is-stale asset-principal)) ERR_POR_STALE)
-                        true)
-                      true)
-        true)
       (try! (accrue-interest asset-principal))
       (let ((current-balance (default-to u0 (get balance (map-get? user-supply-balances { user: tx-sender, asset: asset-principal })))))
-        (asserts! (>= current-balance amount) ERR_INSUFFICIENT_LIQUIDITY)
-        (map-set user-supply-balances { user: tx-sender, asset: asset-principal } { balance: (- current-balance amount) })
-        (let ((health (try! (get-health-factor tx-sender))))
-          (asserts! (>= health (var-get min-health-factor-precision)) ERR_INSUFFICIENT_COLLATERAL)
-          (try! (as-contract (contract-call? asset transfer amount (as-contract tx-sender) tx-sender none)))
-          (record-user-metrics tx-sender)
-          (ok true))))))
+        (asserts! (>= current-balance amount) ERR_INSUFFICIENT_COLLATERAL)
+        (let ((new-balance (- current-balance amount)))
+          (map-set user-supply-balances { user: tx-sender, asset: asset-principal } { balance: new-balance })
+          (if (is-eq new-balance u0)
+            (map-delete user-collateral-assets { user: tx-sender, asset: asset-principal })
+            true
+          )
+          (let ((health-factor (try! (get-health-factor tx-sender))))
+            (asserts! (>= health-factor (var-get min-health-factor-precision)) ERR_HEALTH_CHECK_FAILED)
+            (try! (as-contract (contract-call? asset transfer amount tx-sender tx-sender none)))
+            (ok true)
+          )
+        )
+      )
+    )
+  )
+)
+
+(define-private (borrow-internal (asset <sip-010-ft-trait>) (amount uint))
+  (begin
+    (try! (check-not-paused))
+    (try! (check-circuit-breaker))
+    (asserts! (> amount u0) ERR_ZERO_AMOUNT)
+    (let ((asset-principal (contract-of asset)))
+      (asserts! (is-some (map-get? supported-assets { asset: asset-principal })) ERR_INVALID_ASSET)
+      (try! (accrue-interest asset-principal))
+      (let ((health-factor (try! (get-health-factor tx-sender))))
+        (asserts! (>= health-factor (var-get min-health-factor-precision)) ERR_HEALTH_CHECK_FAILED)
+        (let ((available-liquidity (get-balance (as-contract tx-sender) asset-principal)))
+          (asserts! (>= available-liquidity amount) ERR_INSUFFICIENT_LIQUIDITY)
+          (let ((current-borrow-balance (default-to u0 (get balance (map-get? user-borrow-balances { user: tx-sender, asset: asset-principal })))))
+            (map-set user-borrow-balances { user: tx-sender, asset: asset-principal } { balance: (+ current-borrow-balance amount) })
+            (try! (as-contract (contract-call? asset transfer amount tx-sender tx-sender none)))
+            (ok true)
+          )
+        )
+      )
+    )
+  )
+)
+
+(define-private (repay-internal (asset <sip-010-ft-trait>) (amount uint))
+  (begin
+    (try! (check-not-paused))
+    (asserts! (> amount u0) ERR_ZERO_AMOUNT)
+    (let ((asset-principal (contract-of asset)))
+      (try! (accrue-interest asset-principal))
+      (let ((current-borrow-balance (default-to u0 (get balance (map-get? user-borrow-balances { user: tx-sender, asset: asset-principal })))))
+        (asserts! (>= current-borrow-balance amount) ERR_INSUFFICIENT_COLLATERAL)
+        (try! (contract-call? asset transfer amount tx-sender (as-contract tx-sender) none))
+        (map-set user-borrow-balances { user: tx-sender, asset: asset-principal } { balance: (- current-borrow-balance amount) })
+        (ok true)
+      )
+    )
+  )
+)
+
+(define-private (liquidate-internal (borrower principal) (collateral-asset <sip-010-ft-trait>) (borrowed-asset <sip-010-ft-trait>) (amount uint))
+  (begin
+    (try! (check-not-paused))
+    (let ((health-factor (try! (get-health-factor borrower))))
+      (asserts! (< health-factor (var-get min-health-factor-precision)) ERR_POSITION_HEALTHY)
+      (let ((borrowed-asset-principal (contract-of borrowed-asset))
+            (collateral-asset-principal (contract-of collateral-asset))
+            (borrowed-asset-info (unwrap! (map-get? supported-assets { asset: borrowed-asset-principal }) ERR_INVALID_ASSET))
+            (collateral-asset-info (unwrap! (map-get? supported-assets { asset: collateral-asset-principal }) ERR_INVALID_ASSET)))
+        (let ((borrowed-price (get-asset-price-safe borrowed-asset-principal))
+              (collateral-price (get-asset-price-safe collateral-asset-principal))
+              (liquidation-bonus (get liquidation-bonus collateral-asset-info))
+              (amount-to-seize (/ (* (/ (* amount borrowed-price) PRECISION) (+ BPS liquidation-bonus)) collateral-price)))
+          (let ((borrower-collateral (default-to u0 (get balance (map-get? user-supply-balances { user: borrower, asset: collateral-asset-principal })))))
+            (asserts! (>= borrower-collateral amount-to-seize) ERR_INSUFFICIENT_COLLATERAL)
+            (try! (contract-call? borrowed-asset transfer amount tx-sender (as-contract tx-sender) none))
+            (let ((borrower-borrow-balance (default-to u0 (get balance (map-get? user-borrow-balances { user: borrower, asset: borrowed-asset-principal })))))
+              (map-set user-borrow-balances { user: borrower, asset: borrowed-asset-principal } { balance: (- borrower-borrow-balance amount) })
+              (map-set user-supply-balances { user: borrower, asset: collateral-asset-principal } { balance: (- borrower-collateral amount-to-seize) })
+              (try! (as-contract (contract-call? collateral-asset transfer amount-to-seize tx-sender tx-sender none)))
+              (ok true)
+            )
+          )
+        )
+      )
+    )
+  )
+)
 
 ;; @notice Borrows an asset from the lending pool.
 ;; @param asset The trait of the asset to borrow.
@@ -571,4 +642,11 @@
     (var-set paused false)
     (ok true)
   )
+)
+
+;; @notice Records user metrics for lending activity.
+;; @param user The principal of the user.
+;; @returns A response tuple with `(ok true)`.
+(define-private (record-user-metrics (user principal))
+  (ok true)
 )

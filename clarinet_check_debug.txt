@@ -1,0 +1,602 @@
+error: Expected whitespace or a close parens. Found: '('
+error: Misplaced comma.
+error: (use-trait ...) expects a trait name and a trait identifier
+error: use of undeclared trait <ft-trait>
+error: Misplaced colon.
+error: Failed to lex input remainder: ''time-since-epoch block-height)
+        })
+      
+      ;; Update counters
+      (var-set next-proposal-id (+ proposal-id u1))
+      (var-set total-proposals (+ (var-get total-proposals) u1))
+      
+      ;; Take snapshot of proposer's voting power
+      (snapshot-voting-power proposer block-height)
+      
+      ;; Emit proposal event
+      (print (tuple
+        (event "proposal-created")
+        (proposal-id proposal-id)
+        (proposer proposer)
+        (title title)
+        (start-block (+ block-height (var-get voting-delay)))
+        (end-block (+ block-height (var-get voting-delay) (var-get voting-period)))))
+      
+      (ok proposal-id))))
+
+;; Specialized parameter change proposal
+(define-public (propose-parameter-change
+  (parameter-name (string-ascii 50))
+  (target-contract principal)
+  (new-value uint)
+  (title (string-ascii 100))
+  (description (string-utf8 500)))
+  (let ((proposal-id (try! (propose title description PROPOSAL_TYPE_PARAMETER (some target-contract) none (some (list new-value))))))
+    ;; Store parameter details
+    (map-set parameter-proposals proposal-id
+      {
+        parameter-name: parameter-name,
+        current-value: u0, ;; Would fetch from target contract
+        proposed-value: new-value,
+        target-contract: target-contract
+      })
+    (ok proposal-id)))
+
+;; Treasury spending proposal
+;; @desc Proposes a treasury spending action.
+;; @param recipient The principal address to receive the funds.
+;; @param amount The amount of tokens to be transferred.
+;; @param token The principal address of the token contract.
+;; @param purpose A description of the purpose for the spending.
+;; @return response uint uint A response tuple indicating success or failure, with the proposal ID on success.
+(define-public (propose-treasury-spending
+  (recipient principal)
+  (amount uint)
+  (token principal)
+  (purpose (string-utf8 200)))
+  (let ((title "Treasury Spending Proposal")
+        (description u"Transfer funds from treasury"))
+    (let ((proposal-id (try! (propose title description PROPOSAL_TYPE_TREASURY none none none))))
+      ;; Store treasury details
+      (map-set treasury-proposals proposal-id
+        {
+          recipient: recipient,
+          amount: amount,
+          token: token,
+          purpose: purpose
+        })
+      (ok proposal-id))))
+
+;; Vote on a proposal
+;; @desc Allows a user to cast a vote on an active proposal.
+;; @param proposal-id The ID of the proposal to vote on.
+;; @param support A uint representing the vote: u1 for 'for', u0 for 'against', u2 for 'abstain'.
+;; @param reason An optional string providing a reason for the vote.
+;; @return response uint uint A response tuple indicating success or failure, with the voting power used on success.
+(define-public (vote (proposal-id uint) (support uint) (reason (optional (string-utf8 200))))
+  (let ((proposal (unwrap! (map-get? proposals proposal-id) ERR_PROPOSAL_NOT_FOUND))
+        (voter tx-sender)
+        (current-block block-height))
+    (begin
+      ;; Check proposal is active
+      (asserts! (>= current-block (get start-block proposal)) ERR_PROPOSAL_NOT_ACTIVE)
+      (asserts! (<= current-block (get end-block proposal)) ERR_PROPOSAL_NOT_ACTIVE)
+      (asserts! (is-eq (get state proposal) PROPOSAL_ACTIVE) ERR_PROPOSAL_NOT_ACTIVE)
+      
+      ;; Check hasn't already voted
+      (asserts! (is-none (map-get? vote-receipts { proposal-id: proposal-id, voter: voter })) ERR_ALREADY_VOTED)
+      
+      ;; Get voting power at proposal start
+      (let ((voting-power (unwrap! (contract-call? (var-get governance-token) get-voting-power-at voter (get start-block proposal)) ERR_INSUFFICIENT_VOTING_POWER)))
+        (asserts! (> voting-power u0) ERR_INSUFFICIENT_VOTING_POWER)
+        
+        ;; Record vote
+        (map-set vote-receipts
+          { proposal-id: proposal-id, voter: voter }
+          { support: support, votes: voting-power, reason: reason })
+        
+        ;; Update vote tallies
+        (let ((updated-proposal
+                (if (is-eq support u1) ;; FOR
+                  (merge proposal { for-votes: (+ (get for-votes proposal) voting-power) })
+                  (if (is-eq support u0) ;; AGAINST
+                    (merge proposal { against-votes: (+ (get against-votes proposal) voting-power) })
+                    ;; ABSTAIN
+                    (merge proposal { abstain-votes: (+ (get abstain-votes proposal) voting-power) })))))
+          (map-set proposals proposal-id updated-proposal)
+          
+          ;; Emit vote event
+          (print (tuple
+            (event "vote-cast")
+            (proposal-id proposal-id)
+            (voter voter)
+            (support support)
+            (votes voting-power)
+            (reason reason)))
+          
+          (ok voting-power))))))
+
+;; Queue a successful proposal for execution
+;; @desc Queues a successful proposal for execution after a defined timelock.
+;; @param proposal-id The ID of the proposal to queue.
+;; @return response uint uint A response tuple indicating success or failure, with the block number when the proposal will be queued on success.
+(define-public (queue-proposal (proposal-id uint))
+  (let ((proposal (unwrap! (map-get? proposals proposal-id) ERR_PROPOSAL_NOT_FOUND)))
+    (begin
+      ;; Check proposal has ended and succeeded
+      (asserts! (> block-height (get end-block proposal)) ERR_PROPOSAL_NOT_ACTIVE)
+      
+      ;; Check if proposal passed
+      (let ((total-votes (+ (+ (get for-votes proposal) (get against-votes proposal)) (get abstain-votes proposal)))
+            (quorum-met (>= total-votes (var-get quorum-threshold)))
+            (majority-for (> (get for-votes proposal) (get against-votes proposal))))
+        (asserts! (and quorum-met majority-for) ERR_PROPOSAL_NOT_PASSED)
+        
+        ;; Queue proposal
+        (let ((queue-block (+ block-height (var-get execution-delay))))
+          (map-set proposals proposal-id
+            (merge proposal
+              { state: PROPOSAL_QUEUED, queue-block: (some queue-block) }))
+          
+          (print (tuple
+            (event "proposal-queued")
+            (proposal-id proposal-id)
+            (queue-block queue-block)))
+          
+          (ok queue-block))))))
+
+;; Execute a queued proposal
+;; @desc Executes a queued proposal.
+;; @param proposal-id The ID of the proposal to execute.
+;; @return response bool uint A response tuple indicating success or failure.
+(define-public (execute-proposal (proposal-id uint))
+  (let ((proposal (unwrap! (map-get? proposals proposal-id) ERR_PROPOSAL_NOT_FOUND)))
+    (begin
+      ;; Check proposal is queued and ready
+      (asserts! (is-eq (get state proposal) PROPOSAL_QUEUED) ERR_PROPOSAL_NOT_ACTIVE)
+      (asserts! (>= block-height (unwrap! (get queue-block proposal) ERR_PROPOSAL_NOT_ACTIVE)) ERR_PROPOSAL_NOT_ACTIVE)
+      
+      ;; Execute based on proposal type
+      (let ((execution-result
+              (if (is-eq (get proposal-type proposal) PROPOSAL_TYPE_PARAMETER)
+                (execute-parameter-change proposal-id)
+                (if (is-eq (get proposal-type proposal) PROPOSAL_TYPE_TREASURY)
+                  (execute-treasury-proposal proposal-id)
+                  (ok true))))) ;; Generic execution
+        
+        ;; Unwrap result or fail
+        (let ((executed (unwrap! execution-result ERR_EXECUTION_FAILED)))
+          (map-set proposals proposal-id
+            (merge proposal { state: PROPOSAL_EXECUTED, execution-block: (some block-height) }))
+          
+          (print (tuple
+            (event "proposal-executed")
+            (proposal-id proposal-id)
+            (execution-block block-height)))
+          
+          (ok true))))))
+
+;; @desc Executes a parameter change proposal.
+;; @param proposal-id The ID of the parameter change proposal.
+;; @return response bool uint A response tuple indicating success or failure.
+(define-private (execute-parameter-change (proposal-id uint))
+  (let (
+        (param-info (unwrap! (map-get? parameter-proposals proposal-id) ERR_INVALID_PARAMETERS))
+        (target-contract (get target-contract param-info))
+        (param-name (get parameter-name param-info))
+        (new-value (get proposed-value param-info)))
+    (contract-call? target-contract update-parameter param-name new-value)))
+
+;; @desc Executes a treasury spending proposal.
+;; @param proposal-id The ID of the treasury spending proposal.
+;; @return response bool uint A response tuple indicating success or failure.
+(define-private (execute-treasury-proposal (proposal-id uint))
+  (let ((treasury-info (unwrap! (map-get? treasury-proposals proposal-id) ERR_INVALID_PARAMETERS))
+        (recipient (get recipient treasury-info))
+        (amount (get amount treasury-info))
+        (token (get token treasury-info)))
+    (contract-call? token transfer recipient amount)))
+'
+error: Expected whitespace or a close parens. Found: '.dimensional-trait'
+error: Expected whitespace or a close parens. Found: '.dao-trait'
+error: Tried to close list which isn't open.
+error: Expected whitespace or a close parens. Found: '('
+error: Failed to lex input remainder: '; Collateral amount in base token
+  size: int,                      ; Position size (positive for long, negative for short)
+  entry-price: uint,              ; Entry price with oracle precision
+  entry-time: uint,               ; Block height when position was opened
+  last-funding: uint,             ; Last funding payment block
+  last-updated: uint,             ; Last update block
+  position-type: (string-ascii 20), ; "LONG" | "SHORT" | "PERPETUAL"
+  status: (string-ascii 20),      ; "ACTIVE" | "CLOSED" | "LIQUIDATED"
+  funding-interval: (string-ascii 20),  ; "HOURLY" | "DAILY" | "WEEKLY"
+  max-leverage: uint,             ; Maximum allowed leverage (1-100x)
+  maintenance-margin: uint,       ; Maintenance margin in basis points
+  time-decay: (optional uint),    ; Time decay factor if applicable
+  volatility: (optional uint),    ; Volatility factor if applicable
+  is-hedged: bool,               ;; If position is hedged against other positions
+  tags: (list 10 (string-utf8 32)), ;; Position tags for categorization
+  version: uint,                  ;; Schema version for future upgrades
+  metadata: (optional (string-utf8 1024)) ;; Additional metadata
+})
+
+;; Track position IDs by owner for efficient lookup
+(define-map position-ids principal (list 1000 uint))
+
+;; Track open positions by token for risk management
+(define-map token-positions principal {long: uint, short: uint})
+
+;; ===== Access Control & System Settings =====
+(define-read-only (get-owner)
+  "@doc Returns the current contract owner"
+  (ok (var-get owner)))
+
+(define-read-only (get-protocol-fee-rate)
+  "@doc Returns the current protocol fee rate in basis points"
+  (ok (var-get protocol-fee-rate)))
+
+(define-read-only (get-oracle-contract)
+  "@doc Returns the current oracle contract principal"
+  (ok (var-get oracle-contract)))
+
+(define-read-only (get-total-positions)
+  "@doc Returns total positions statistics"
+  (ok {
+    total-opened: (var-get total-positions-opened),
+    total-closed: (var-get total-positions-closed),
+    active: (- (var-get total-positions-opened) (var-get total-positions-closed))
+  }))
+
+(define-public (set-owner (new-owner principal))
+  "@doc Transfer contract ownership to a new principal"
+  (begin
+    (asserts! (is-eq tx-sender (var-get owner)) ERR_UNAUTHORIZED)
+    (asserts! (is-standard-principal new-owner) (err u2014))
+    (var-set owner new-owner)
+    (ok true)
+  ))
+
+
+(define-public (set-oracle-contract (oracle principal))
+  "@doc Set the oracle contract address"
+  (begin
+    (asserts! (is-eq tx-sender (var-get owner)) ERR_UNAUTHORIZED)
+    (asserts! (is-standard-principal oracle) (err u2015))
+    (var-set oracle-contract oracle)
+    (ok true)
+  )
+)
+
+(define-public (set-protocol-fee-rate (fee-rate uint))
+  "@doc Update the protocol fee rate (in basis points)"
+  (begin
+    (asserts! (is-eq tx-sender (var-get owner)) ERR_UNAUTHORIZED)
+    (asserts! (<= fee-rate u1000) (err u2016)) ; Max 10% fee
+    (var-set protocol-fee-rate fee-rate)
+    (ok true)
+  )
+)
+
+(define-public (set-dimensional-token (token principal))
+  "@doc Set the dimensional token contract address"
+  (begin
+    (asserts! (is-eq tx-sender (var-get owner)) ERR_UNAUTHORIZED)
+    (asserts! (is-standard-principal token) (err u2017))
+    (var-set dimensional-token token)
+    (ok true)
+  )
+)
+
+(define-read-only (get-position (owner principal) (position-id uint))
+  "@doc Get position details by ID"
+  (match (map-get? positions {owner: owner, id: position-id})
+    position (ok (some position))
+    (ok none)
+  )
+)
+
+(define-private (get-oracle-price (token principal))
+  "@private Get price from oracle with error handling"
+  (match (contract-call? (var-get oracle-contract) get-price token)
+    price (ok price)
+    (err ERR_ORACLE_ERROR)
+  )
+)
+
+(define-public (get-dimensional-state)
+  (ok {
+    total-positions: (var-get next-position-id),
+    active-positions: (unwrap! (count-active-positions) ERR_UNWRAP_FAILED),
+    total-value-locked: (unwrap! (calculate-tvl) ERR_UNWRAP_FAILED),
+    system-health: "operational"
+  }))
+
+(define-public (open-position
+    (collateral-amount uint)
+    (leverage uint)
+    (position-type (string-ascii 20))
+    (slippage-tolerance uint)
+    (token principal)
+    (funding-interval (string-ascii 20))
+    (tags (list 10 (string-utf8 32)))
+    (metadata (optional (string-utf8 1024)))
+  )
+  (let (
+    (position-id (var-get next-position-id))
+    (current-block block-height)
+    (price (try! (get-oracle-price token)))
+    (is-long (or (is-eq position-type "LONG") (is-eq position-type "PERPETUAL")))
+    (size (* collateral-amount leverage))
+    (min-amount-out (/ (* price (- u10000 slippage-tolerance)) u10000))
+  )
+    ;; Input validation
+    (asserts! (> collateral-amount MIN_COLLATERAL) (err ERR_INVALID_AMOUNT))
+    (asserts! (and (>= leverage u1) (<= leverage MAX_LEVERAGE)) ERR_INVALID_LEVERAGE)
+    (asserts! (or 
+      (is-eq position-type "LONG") 
+      (is-eq position-type "SHORT")
+      (is-eq position-type "PERPETUAL")
+    ) ERR_INVALID_POSITION_TYPE)
+    
+    ;; Transfer collateral from user
+    (try! (contract-call? 
+      (as-contract (contract-call? 
+        token 
+        transfer 
+        collateral-amount 
+        tx-sender 
+        (as-contract tx-sender)
+        none
+      )))
+    )
+    
+    ;; Create position
+    (map-set positions 
+      {owner: tx-sender, id: position-id}
+      {
+        collateral: collateral-amount,
+        size: (if is-long size (* size -1)),
+        entry-price: price,
+        entry-time: current-block,
+        last-funding: current-block,
+        last-updated: current-block,
+        position-type: position-type,
+        status: "ACTIVE",
+        funding-interval: funding-interval,
+        max-leverage: leverage,
+        maintenance-margin: u500,  ;; 5% maintenance margin
+        time-decay: none,
+        volatility: none,
+        is-hedged: false,
+        tags: tags,
+        version: (var-get positions-version),
+        metadata: metadata
+      }
+    )
+    
+    ;; Update position tracking
+    (var-set next-position-id (+ position-id u1))
+    (var-set total-positions-opened (+ (var-get total-positions-opened) u1))
+    (var-set total-value-locked (+ (var-get total-value-locked) collateral-amount))
+    
+    (ok position-id)
+  )
+)
+
+(define-public (close-position 
+    (position-id uint) 
+    (slippage-tolerance uint)
+  )
+  (let (
+    (position (unwrap! (get-position tx-sender position-id) (err ERR_INVALID_POSITION)))
+    (current-price (try! (get-oracle-price tx-sender)))
+    (pnl (calculate-pnl position current-price))
+    (fees (calculate-fees position))
+    (total-amount (- pnl fees))
+    (min-amount-out (/ (* total-amount (- u10000 slippage-tolerance)) u10000))
+  )
+    (asserts! (is-eq (get status position) "ACTIVE") ERR_POSITION_NOT_ACTIVE)
+    
+    ;; Update position status
+    (map-set positions 
+      {owner: tx-sender, id: position-id}
+      (merge position {
+        status: "CLOSED",
+        last-updated: block-height
+      })
+    )
+    
+    ;; Transfer funds to user
+    (try! (contract-call? 
+      (as-contract (contract-call? 
+        (var-get dimensional-token)
+        transfer
+        total-amount
+        (as-contract tx-sender)
+        tx-sender
+        none
+      )))
+    )
+    
+    ;; Update TVL and position counts
+    (var-set total-value-locked (- (var-get total-value-locked) (get collateral position)))
+    (var-set total-positions-closed (+ (var-get total-positions-closed) u1))
+    
+    (ok true)
+  )
+)
+
+(define-private (calculate-pnl (position {collateral: uint, size: int, entry-price: uint}) (current-price uint))
+  (let (
+    (size (get size position))
+    (is-long (> size 0))
+    (price-diff (if is-long 
+      (- current-price (get entry-price position))
+      (- (get entry-price position) current-price)
+    ))
+    (pnl-amount (/ (* (abs size) price-diff) (get entry-price position)))
+  )
+    (if is-long 
+      (+ (get collateral position) pnl-amount)
+      (max 0 (- (get collateral position) pnl-amount))
+    )
+  )
+)
+
+(define-private (calculate-fees (position {collateral: uint, size: int, entry-time: uint}))
+  (let (
+    (position-duration (- block-height (get entry-time position)))
+    (fee-rate (var-get protocol-fee-rate))
+    (size-abs (abs (get size position)))
+  )
+    (/ (* size-abs fee-rate position-duration) u10000)
+  )
+)
+
+(define-private (calculate-liquidation-price (position {entry-price: uint, leverage: uint, is-long: bool}))
+  "@dev Calculates the liquidation price for a given position"
+  (let (
+    (entry-price (get position entry-price))
+    (leverage (get position leverage))
+    (is-long (get position is-long))
+    (m-margin (get position maintenance-margin))
+  )
+    (if is-long
+      ;; Long position: liq_price = entry_price * (1 - 1/leverage + maintenance_margin)
+      (* entry-price
+        (/
+          (+
+            (- (* leverage u10000) u10000)
+            m-margin
+          )
+          (* leverage u10000)
+        )
+      )
+      ;; Short position: liq_price = entry_price * (1 + 1/leverage - maintenance_margin)
+      (* entry-price
+        (/
+          (-
+            (+ (* leverage u10000) u10000)
+            m-margin
+          )
+          (* leverage u10000)
+        )
+      )
+    )
+  )
+)
+
+(define-public (liquidate-position (owner principal) (position-id uint))
+  "@dev Liquidate an undercollateralized position"
+  (let (
+    (position (unwrap! (get-position owner position-id) (err ERR_INVALID_POSITION)))
+    (current-price (try! (get-oracle-price owner)))
+    (collateral-value (get collateral position))
+    (maintenance-margin (/ (* collateral-value (get maintenance-margin position)) u10000))
+    (pnl (calculate-pnl position current-price))
+  )
+    (asserts! (is-eq (get status position) "ACTIVE") ERR_POSITION_NOT_ACTIVE)
+    (asserts! (< pnl maintenance-margin) (err ERR_INSUFFICIENT_COLLATERAL))
+
+    ;; Update position status to liquidated
+    (map-set positions
+      {owner: owner, id: position-id}
+      (merge position {
+        status: "LIQUIDATED",
+        last-updated: block-height
+      })
+    )
+
+    ;; Update TVL and position counts
+    (var-set total-value-locked (- (var-get total-value-locked) collateral-value))
+    (var-set total-positions-closed (+ (var-get total-positions-closed) u1))
+
+    (ok true)
+  )
+)
+
+(define-read-only (get-position-health (owner principal) (position-id uint))
+  "@dev Returns the health factor of a position (0-10000, where < 10000 means liquidatable)"
+  (let (
+    (position (unwrap! (get-position owner position-id) (err ERR_INVALID_POSITION)))
+    (current-price (try! (get-oracle-price owner)))
+    (collateral-value (get collateral position))
+    (pnl (calculate-pnl position current-price))
+    (maintenance-margin (/ (* collateral-value (get maintenance-margin position)) u10000))
+  )
+    (if (is-eq (get status position) "ACTIVE")
+      (ok (/ (* pnl u100) maintenance-margin))
+      (ok u0)
+    )
+  )
+)
+
+(define-read-only (calculate-tvl)
+  "@dev Returns the total value locked in the contract"
+  (ok (var-get total-value-locked)))
+
+(define-read-only (count-active-positions)
+  "@dev Returns the count of currently active positions"
+  (ok (- (var-get total-positions-opened) (var-get total-positions-closed))))
+
+;; ===== Circuit Breaker Implementation =====
+(define-read-only (circuit-breaker-status)
+  "@dev Returns the circuit breaker status"
+  (ok {
+    is-open: false,
+    reason: "",
+    last-updated: block-height
+  }))
+
+;; ===== Pausable Implementation =====
+(define-data-var pausable-contract principal tx-sender)
+
+(define-public (check-not-paused)
+  "@dev Check if the contract is not paused"
+  (match (contract-call? (var-get pausable-contract) is-paused)
+    is-paused? (if is-paused? (err u3001) (ok true))
+    (err u3002)
+  ))
+
+;; ===== Initialization =====
+(define-public (initialize (new-owner principal) (oracle principal))
+  "@dev Initialize the contract (can only be called once)"
+  (begin
+    (asserts! (is-eq tx-sender (as-contract tx-sender)) ERR_UNAUTHORIZED)
+    
+    (var-set owner new-owner)
+    (var-set oracle-contract oracle)
+    (var-set protocol-fee-rate u30)  ;; 0.3%
+    
+    (ok true)
+  )
+)
+'
+error: Expected whitespace or a close parens. Found: '.rbac-trait'
+error: Expected whitespace or a close parens. Found: '('
+error: (use-trait ...) expects a trait name and a trait identifier
+error: use of undeclared trait <sip-010-ft-trait>
+error: Tried to close list which isn't open.
+error: Misplaced comma.
+error: Expected whitespace or a close parens. Found: '.position-manager-trait'
+error: (use-trait ...) expects a trait name and a trait identifier
+error: use of undeclared trait <sip-010-ft-trait>
+error: Tried to close list which isn't open.
+error: Misplaced comma.
+error: Expected whitespace or a close parens. Found: '.sip-010-ft-trait'
+error: Tried to close list which isn't open.
+error: Expected whitespace or a close parens. Found: '.dijkstra-pathfinder-trait'
+x 25 errors detected
+
+----------------------------
+Hint: what's next?
+Once you are ready to write TypeScript unit tests for your contract, run the following command:
+
+  $ npm install
+  $ npm test
+    Run all run tests in the ./tests folder.
+
+Find more information on testing with Clarinet here: https://docs.hiro.so/stacks/clarinet-js-sdk
+These hints can be disabled in the ~/.clarinet/clarinetrc.toml file.
+  $ mkdir -p ~/.clarinet; echo "enable_hints = false" >> ~/.clarinet/clarinetrc.toml
+----------------------------

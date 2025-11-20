@@ -5,7 +5,7 @@
 ;; It ensures a smooth transition for users and maintains data integrity during upgrades.
 
 (use-trait rbac-trait .traits.rbac-trait.rbac-trait)
-(use-trait ft-trait .sip-010-trait-ft-standard.sip-010-trait)
+(use-trait sip-010-ft-trait .dex-traits.sip-010-ft-trait)
 (use-trait lp-token-trait .traits.lp-token-trait.lp-token-trait)
 
 
