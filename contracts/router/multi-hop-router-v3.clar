@@ -28,6 +28,10 @@
 
 (define-data-var circuit-breaker principal .circuit-breaker)
 (define-data-var admin principal tx-sender)
+(define-public err-circuit-open (err u106))
+
+(define-data-var circuit-breaker principal .circuit-breaker)
+(define-data-var admin principal tx-sender)
 
 ;; Data maps
 (define-map routes
@@ -40,6 +44,26 @@
     path: (list 10 {pool: principal, token-in: principal, token-out: principal}),
     amount-out: uint
   }
+)
+
+(define-private (check-circuit-breaker)
+  (contract-call? (var-get circuit-breaker) is-circuit-open)
+)
+
+(define-public (set-admin (new-admin principal))
+  (begin
+    (asserts! (is-eq tx-sender (var-get admin)) err-unauthorized)
+    (var-set admin new-admin)
+    (ok true)
+  )
+)
+
+(define-public (set-circuit-breaker (new-circuit-breaker principal))
+  (begin
+    (asserts! (is-eq tx-sender (var-get admin)) err-unauthorized)
+    (var-set circuit-breaker new-circuit-breaker)
+    (ok true)
+  )
 )
 
 (define-private (check-circuit-breaker)
@@ -75,6 +99,13 @@
       (err e) (err e)
     )
   )
+  (let ((factory <dex-factory-v2-trait> 'SP3FBR2AGK5H9QBDV3K5SK2TKAH8Q6H5X2F8X5PJK.dex-factory-v2))
+    (match (contract-call? factory get-pool token-in token-out)
+      (ok (some pool)) (ok {path: (list {pool: pool, token-in: token-in, token-out: token-out}), amount-out: u0})
+      (ok none) (err err-no-route-found)
+      (err e) (err e)
+    )
+  )
 )
 
 ;; @desc Executes a token swap along a given route.
@@ -83,6 +114,20 @@
 ;; @param min-amount-out (uint) The minimum acceptable amount of the output token.
 ;; @returns (response uint (err uint)) The actual amount of the output token received, or an error.
 (define-public (execute-swap (path (list 10 {pool: principal, token-in: principal, token-out: principal})) (amount-in uint) (min-amount-out uint))
+  (begin
+    (asserts! (not (try! (check-circuit-breaker))) err-circuit-open)
+    (fold
+      (lambda (hop prev-amount-out)
+        (let ((pool <pool-trait> (get pool hop))
+              (token-in-trait (contract-of (get token-in hop)))
+              (token-out-trait (contract-of (get token-out hop))))
+          (unwrap-panic (contract-call? pool swap-trait-adapter token-in-trait token-out-trait prev-amount-out min-amount-out tx-sender))
+        )
+      )
+      path
+      amount-in
+    )
+  )
   (begin
     (asserts! (not (try! (check-circuit-breaker))) err-circuit-open)
     (fold

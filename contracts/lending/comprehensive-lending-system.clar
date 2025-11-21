@@ -2,8 +2,10 @@
 ;; Refactored for clarity, security, and correctness.
 
 ;; --- Traits ---
-(use-trait sip-010-ft-trait .dex-traits.sip-010-ft-trait)
-(use-trait rbac-trait .base-traits.rbac-trait)
+(use-trait sip-010-ft-trait .sip-010-ft-trait.sip-010-ft-trait)
+(use-trait lending-system-trait .lending-system-trait.lending-system-trait)
+(use-trait rbac-trait .decentralized-trait-registry.decentralized-trait-registry)
+(use-trait err-trait  .error-codes-trait.error-codes-trait)
 
 ;; --- Constants ---
 (define-constant LENDING_SERVICE "lending-service")
@@ -511,6 +513,14 @@
     )
   )
 )
+      (let ((current-balance (default-to u0 (get balance (map-get? user-supply-balances { user: tx-sender, asset: asset-principal })))))
+        (asserts! (>= current-balance amount) ERR_INSUFFICIENT_LIQUIDITY)
+        (map-set user-supply-balances { user: tx-sender, asset: asset-principal } { balance: (- current-balance amount) })
+        (let ((health (try! (get-health-factor tx-sender))))
+          (asserts! (>= health (var-get min-health-factor-precision)) ERR_INSUFFICIENT_COLLATERAL)
+          (try! (as-contract (contract-call? asset transfer amount (as-contract tx-sender) tx-sender none)))
+          (record-user-metrics tx-sender)
+          (ok true))))
 
 ;; @notice Borrows an asset from the lending pool.
 ;; @param asset The trait of the asset to borrow.

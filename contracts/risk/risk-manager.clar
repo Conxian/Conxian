@@ -47,7 +47,7 @@
   )
 )
 
-(define-public (set-insurance-fund (fund principal))
+(define-public (update-position-value (user principal) (new-value uint))
   (begin
     (try! (check-role "ROLE_ADMIN"))
     (var-set insurance-fund fund)
