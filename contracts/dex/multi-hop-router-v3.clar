@@ -11,25 +11,33 @@
 
 ;; --- Public Functions ---
 (define-public (compute-best-route (token-in principal) (token-out principal) (amount-in uint))
-  (contract-call? .dijkstra-pathfinder-trait compute-best-route token-in token-out amount-in)
+  (contract-call? (var-get dijkstra-pathfinder) compute-best-route token-in
+    token-out amount-in
+  )
 )
 
 (define-public (propose-route (token-in principal) (token-out principal) (amount-in uint) (min-amount-out uint) (route-timeout uint))
-  (contract-call? .route-manager-trait propose-route token-in token-out amount-in min-amount-out route-timeout)
+  (contract-call? (var-get route-manager) propose-route token-in token-out
+    amount-in min-amount-out route-timeout
+  )
 )
 
 (define-public (execute-route (route-id uint) (min-amount-out uint) (recipient principal))
-  (contract-call? .route-manager-trait execute-route route-id min-amount-out recipient)
+  (contract-call? (var-get route-manager) execute-route route-id min-amount-out
+    recipient
+  )
 )
 
 (define-read-only (get-route-stats (route-id uint))
-  (contract-call? .route-manager-trait get-route-stats route-id)
+  (contract-call? (var-get route-manager) get-route-stats route-id)
 )
 
 ;; --- Admin Functions ---
 (define-public (set-dijkstra-pathfinder (pathfinder principal))
   (begin
-    (asserts! (is-ok (contract-call? .rbac-trait has-role "contract-owner")) (err u1001))
+    (asserts! (is-ok (contract-call? .rbac has-role "contract-owner"))
+      (err u1001)
+    )
     (var-set dijkstra-pathfinder pathfinder)
     (ok true)
   )
@@ -37,7 +45,9 @@
 
 (define-public (set-route-manager (manager principal))
   (begin
-    (asserts! (is-ok (contract-call? .rbac-trait has-role "contract-owner")) (err u1001))
+    (asserts! (is-ok (contract-call? .rbac has-role "contract-owner"))
+      (err u1001)
+    )
     (var-set route-manager manager)
     (ok true)
   )

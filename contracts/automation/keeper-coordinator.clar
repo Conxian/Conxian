@@ -48,6 +48,8 @@
 (define-map task-history {task-id: uint, block: uint} {success: bool, gas-used: uint, error-code: (optional uint)})
 ;; @var interest-rate-contract: The principal of the interest rate contract.
 (define-data-var interest-rate-contract (optional principal) none)
+;; @var interest-rate-assets: The list of assets that require periodic interest accrual.
+(define-data-var interest-rate-assets (list 10 principal) (list))
 ;; @var oracle-contract: The principal of the oracle contract.
 (define-data-var oracle-contract (optional principal) none)
 ;; @var liquidation-contract: The principal of the liquidation contract.
@@ -136,6 +138,17 @@
     (try! (check-is-owner))
     (var-set interest-rate-contract (some contract))
     (ok true)))
+
+;; @desc Configure the assets that require periodic interest accrual.
+;; @param assets: A list of asset principals to accrue interest for.
+;; @returns (response bool uint)
+(define-public (set-interest-rate-assets (assets (list 10 principal)))
+  (begin
+    (try! (check-is-owner))
+    (var-set interest-rate-assets assets)
+    (ok true)
+  )
+)
 
 ;; @desc Set the oracle contract.
 ;; @param contract: The principal of the oracle contract.
@@ -251,33 +264,25 @@
         (ok false))
     (ok false)))
 
-;; @desc Execute a single task.
-;; @param task-id: The ID of the task.
-;; @param config: The configuration for the task.
-;; @returns (response bool uint): An `ok` response with `true` on success, `false` on failure.
 (define-private (execute-single-task (task-id uint) (config {enabled: bool, interval: uint, last-run: uint, priority: uint, gas-limit: uint}))
-  (let ((execution-result
-    (if (is-eq task-id TASK_INTEREST_ACCRUAL)
-        (execute-interest-accrual)
-        (if (is-eq task-id TASK_ORACLE_UPDATE)
-            (execute-oracle-update)
-            (if (is-eq task-id TASK_LIQUIDATION_CHECK)
-                (execute-liquidation-check)
-                (if (is-eq task-id TASK_REBALANCE_STRATEGIES)
-                    (execute-rebalance-strategies)
-                    (if (is-eq task-id TASK_FEE_DISTRIBUTION)
-                        (execute-fee-distribution)
-                        (if (is-eq task-id TASK_BOND_COUPON_PROCESS)
-                            (execute-bond-processing)
-                            (if (is-eq task-id TASK_METRICS_UPDATE)
-                                (execute-metrics-update)
-                                (if (is-eq task-id TASK_AUTOMATION_MANAGER)
-                                    (execute-automation-manager)
-                                    (err ERR_INVALID_TASK))))))))))
-    
+  (let (
+    (execution-result
+      (match task-id
+        TASK_INTEREST_ACCRUAL (execute-interest-accrual)
+        TASK_ORACLE_UPDATE (execute-oracle-update)
+        TASK_LIQUIDATION_CHECK (execute-liquidation-check)
+        TASK_REBALANCE_STRATEGIES (execute-rebalance-strategies)
+        TASK_FEE_DISTRIBUTION (execute-fee-distribution)
+        TASK_BOND_COUPON_PROCESS (execute-bond-processing)
+        TASK_METRICS_UPDATE (execute-metrics-update)
+        TASK_AUTOMATION_MANAGER (execute-automation-manager)
+        (err ERR_INVALID_TASK)
+      )
+    )
+  )
     ;; Update task config with last run time
     (map-set task-config task-id (merge config {last-run: block-height}))
-    
+
     ;; Record task history
     (if (is-ok execution-result)
         (begin
@@ -296,15 +301,6 @@
             error-code: (some (unwrap-err-panic execution-result))
           })
           (ok false)))))
-
-;; --- Task Implementations ---
-;; @desc Execute the interest accrual task.
-;; @returns (response bool uint): An `ok` response with `true` on success, or an error code.
-(define-private (execute-interest-accrual)
-  (match (var-get interest-rate-contract)
-    contract-principal
-    (contract-call? contract-principal accrue-all-markets)
-    (err ERR_TASK_FAILED)))
 
 ;; @desc Execute the oracle update task.
 ;; @returns (response bool uint): An `ok` response with `true` on success, or an error code.
@@ -358,6 +354,41 @@
     contract-principal
     (contract-call? contract-principal run-daily-automation)
     (err ERR_TASK_FAILED)))
+
+;; @desc Execute the interest accrual task across configured assets.
+;; @returns (response bool uint): `(ok true)` on success, or an error code if the interest rate contract is not set.
+(define-private (execute-interest-accrual)
+  (match (var-get interest-rate-contract)
+    contract-principal (let ((assets (var-get interest-rate-assets)))
+      (if (is-eq (len assets) u0)
+        (err ERR_TASK_FAILED)
+        (let ((result (fold execute-interest-accrual-for-asset assets {
+            status: (ok true),
+            contract: contract-principal,
+          })))
+          (get status result)
+        )
+      )
+    )
+    (err ERR_TASK_FAILED)
+  )
+)
+
+(define-private (execute-interest-accrual-for-asset
+    (asset principal)
+    (state {
+      status: (response bool uint),
+      contract: principal,
+    })
+  )
+  (if (is-err (get status state))
+    state
+    {
+      status: (contract-call? (get contract state) accrue-interest asset),
+      contract: (get contract state),
+    }
+  )
+)
 
 ;; --- Read-Only Functions ---
 
@@ -426,13 +457,5 @@
        (>= (- block-height (var-get last-execution-block)) (var-get execution-interval))))
 
 ;; @data-vars
-;; @var tasks: A list of tasks.
-(define-data-var tasks (list 10 {name: (string-ascii 32), contract: principal, enabled: bool}) 
-  (list
-    {name: "interest-accrual", contract: .interest-rate-model, enabled: true},
-    {name: "oracle-update", contract: .oracle-aggregator-v2, enabled: true},
-    {name: "liquidation", contract: .liquidation-engine, enabled: true},
-    {name: "fee-distribution", contract: .fee-distributor, enabled: true},
-    {name: "automation-manager", contract: .automation-manager, enabled: true}  
-  )
-)
+;; @var tasks: A list of tasks. Initialized empty; can be configured via admin functions.
+(define-data-var tasks (list 10 {name: (string-ascii 32), contract: principal, enabled: bool}) (list))

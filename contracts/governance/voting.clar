@@ -10,15 +10,25 @@
     ;; @param votes uint The number of votes to cast.
     ;; @param voter principal The address of the voter.
     ;; @returns (response bool uint) `(ok true)` on success.
-    (vote (uint, bool, uint, principal) (response bool uint))
+    (vote (uint bool uint principal) (response bool uint))
 
     ;; @desc Retrieves a vote on a proposal by a specific voter.
     ;; @param proposal-id uint The ID of the proposal.
     ;; @param voter principal The address of the voter.
     ;; @returns (response (optional { ... }) uint) The vote details.
-    (get-vote (uint, principal) (response (optional { support: bool, votes: uint }) (err uint)))
+    (get-vote (uint principal)
+      (response (optional {
+        support: bool,
+        votes: uint,
+      })
+        uint
+      ))
   )
 )
+
+;; --- Constants ---
+(define-constant ERR_UNAUTHORIZED u100)
+(define-constant ERR_ALREADY_VOTED u105)
 
 ;; --- Data Storage ---
 
@@ -33,7 +43,19 @@
     votes: uint
   })
 
+;; Contract references
+(define-data-var proposal-engine-contract (optional principal) none)
+(define-data-var contract-owner principal tx-sender)
+
 ;; --- Public Functions ---
+
+(define-public (set-proposal-engine-contract (contract principal))
+  (begin
+    (asserts! (is-eq tx-sender (var-get contract-owner)) (err ERR_UNAUTHORIZED))
+    (var-set proposal-engine-contract (some contract))
+    (ok true)
+  )
+)
 
 ;; @desc Casts a vote on a proposal. Can only be called by the proposal engine.
 ;; @param proposal-id uint The ID of the proposal being voted on.
@@ -43,8 +65,19 @@
 ;; @returns (response bool uint) `(ok true)` if the vote is successfully cast, otherwise an error.
 (define-public (vote (proposal-id uint) (support bool) (votes-cast uint) (voter principal))
   (begin
-    (asserts! (is-eq tx-sender .proposal-engine) (err u100))
-    (asserts! (is-none (map-get? votes { proposal-id: proposal-id, voter: voter })) (err u105))
+    (asserts!
+      (is-eq tx-sender
+        (unwrap! (var-get proposal-engine-contract) (err ERR_UNAUTHORIZED))
+      )
+      (err ERR_UNAUTHORIZED)
+    )
+(asserts!
+      (is-none (map-get? votes {
+        proposal-id: proposal-id,
+        voter: voter,
+      }))
+      (err ERR_ALREADY_VOTED)
+    )
 
     (map-set votes { proposal-id: proposal-id, voter: voter } {
       support: support,

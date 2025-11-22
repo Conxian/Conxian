@@ -3,8 +3,7 @@
 ;; Consolidates ALL revenue flows: DEX fees, vault performance, lending interest, migration fees
 ;; Replaces separate revenue-distributor.clar with dimensional architecture
 
-(use-trait sip-010-ft-trait .sip-010-trait)
-(use-trait sip-000-governance-trait .sip-000-governance-trait)
+(use-trait sip-010-ft-trait .sip-010-ft-trait.sip-010-ft-trait)
 
 ;; --- Constants ---
 (define-constant PRECISION u100000000)

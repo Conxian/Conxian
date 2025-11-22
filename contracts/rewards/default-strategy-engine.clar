@@ -4,7 +4,7 @@
 ;; Applies defaults to vault assets based on metrics and optimization params
 
 ;; Traits
-(use-trait sip-010-ft-trait .traits.sip-010-ft-trait.sip-010-ft-trait)
+(use-trait sip-010-ft-trait .sip-010-ft-trait.sip-010-ft-trait)
 (use-trait strategy-trait .all-traits.strategy-trait)
 
 ;; Error codes

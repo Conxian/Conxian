@@ -6,13 +6,13 @@
     ;; @param amount: The amount to deposit.
     ;; @param token: The token to deposit.
     ;; @returns (response bool uint): An `ok` response with `true` on success, or an error code.
-    (deposit-funds (uint <sip-010-ft-trait>) (response bool uint))
+    ;; @param token: The token to deposit.
 
     ;; @desc Withdraw funds from the internal ledger.
     ;; @param amount: The amount to withdraw.
     ;; @param token: The token to withdraw.
     ;; @returns (response bool uint): An `ok` response with `true` on success, or an error code.
-    (withdraw-funds (uint <sip-010-ft-trait>) (response bool uint))
+    ;; @param token: The token to withdraw.
 
     ;; @desc Get the internal balance of a user.
     ;; @param user: The principal of the user.

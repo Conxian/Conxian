@@ -78,7 +78,7 @@
       (impl (get impl (unwrap-panic type-entry)))
       (new-pool-principal (contract-call? impl deploy-and-initialize token-a token-b))
     )
-      (asserts! (is-ok new-pool-principal) (err (unwrap-err new-pool-principal)))
+      (asserts! (is-ok new-pool-principal) ERR_TYPE_NOT_FOUND)
       (map-set pools {
         token-a: (get t1 sorted-tokens),
         token-b: (get t2 sorted-tokens),

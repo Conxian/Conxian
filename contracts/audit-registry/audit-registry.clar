@@ -2,7 +2,7 @@
 ;; This contract handles audit submissions, DAO voting, and NFT badge issuance.
 
 ;; --- Traits ---
-(use-trait dao-trait .governance-traits.dao-trait)
+(use-trait dao .governance-traits.dao-trait)
 
 ;; @constants
 ;; @var CONTRACT_OWNER: The principal of the contract owner.

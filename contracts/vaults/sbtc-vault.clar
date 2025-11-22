@@ -2,7 +2,6 @@
 ;; This contract acts as a facade, delegating logic to specialized contracts for custody,
 ;; yield aggregation, BTC bridging, and fee management.
 
-(use-trait sip-010-ft-trait .sip-010-trait)
 (use-trait vault-trait .vault-trait)
 (use-trait custody-trait .custody.custody-trait)
 (use-trait yield-aggregator-trait .yield-aggregator.yield-aggregator-trait)
@@ -91,27 +90,27 @@
 ;; --- Core Vault Functions ---
 
 ;; @desc Deposits sBTC into the vault.
-;; @param token-contract <sip-010-ft-trait> The sBTC token contract.
+;; @param token-contract principal The sBTC token contract.
 ;; @param amount uint The amount of sBTC to deposit.
 ;; @returns (response uint uint) The number of shares minted.
-(define-public (deposit (token-contract <sip-010-ft-trait>) (amount uint))
+(define-public (deposit (token-contract principal) (amount uint))
   (begin
     (try! (check-not-paused))
     (contract-call? (var-get custody-contract) deposit token-contract amount tx-sender)))
 
 ;; @desc Initiates a withdrawal from the vault.
-;; @param token-contract <sip-010-ft-trait> The sBTC token contract.
+;; @param token-contract principal The sBTC token contract.
 ;; @param shares uint The number of shares to burn.
 ;; @returns (response uint uint) The amount of sBTC to be withdrawn.
-(define-public (withdraw (token-contract <sip-010-ft-trait>) (shares uint))
+(define-public (withdraw (token-contract principal) (shares uint))
   (begin
     (try! (check-not-paused))
     (contract-call? (var-get custody-contract) withdraw token-contract shares tx-sender)))
 
 ;; @desc Completes a withdrawal from the vault.
-;; @param token-contract <sip-010-ft-trait> The sBTC token contract.
+;; @param token-contract principal The sBTC token contract.
 ;; @returns (response uint uint) The amount of sBTC withdrawn.
-(define-public (complete-withdrawal (token-contract <sip-010-ft-trait>))
+(define-public (complete-withdrawal (token-contract principal))
   (contract-call? (var-get custody-contract) complete-withdrawal token-contract tx-sender))
 
 ;; --- Bitcoin Wrapping/Unwrapping ---

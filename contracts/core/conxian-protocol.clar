@@ -2,8 +2,6 @@
 ;; This contract serves as the central coordination point for the Conxian Protocol,
 ;; managing protocol-wide configuration, authorized contracts, and emergency controls.
 
-(use-trait rbac-trait .traits.rbac-trait.rbac-trait)
-
 ;; @constants
 ;; @var ERR_UNAUTHORIZED: The caller is not authorized to perform this action.
 (define-constant ERR_UNAUTHORIZED (err u1001))

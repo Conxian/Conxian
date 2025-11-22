@@ -1,14 +1,14 @@
 ;; Conxian DEX Factory V2 - DIMENSIONAL INTEGRATION (Refactored)
 ;; This contract acts as a facade, delegating logic to specialized registry contracts.
 
-(use-trait "sip-010-ft-trait" .dex-traits.sip-010-ft-trait)
-(use-trait "factory-trait" .dex-traits.factory-trait)
-(use-trait "access-control-trait" .base-traits.rbac-trait)
-(use-trait "circuit-breaker-trait" .monitoring-security-traits.circuit-breaker-trait)
-(use-trait "dim-registry-trait" .dimensional-traits.dim-registry-trait)
-(use-trait "pool-type-registry-trait" .pool-type-registry.pool-type-registry-trait)
-(use-trait "pool-implementation-registry-trait" .pool-implementation-registry.pool-implementation-registry-trait)
-(use-trait "pool-registry-trait" .pool-registry.pool-registry-trait)
+(use-trait sip-010-ft-trait .dex-traits.sip-010-ft-trait)
+(use-trait factory-trait .dex-traits.factory-trait)
+(use-trait access-control-trait .base-traits.rbac-trait)
+(use-trait circuit-breaker-trait .monitoring-security-traits.circuit-breaker-trait)
+(use-trait dim-registry-trait .dimensional-traits.dim-registry-trait)
+(use-trait pool-type-registry-trait .pool-type-registry.pool-type-registry-trait)
+(use-trait pool-implementation-registry-trait .pool-implementation-registry.pool-implementation-registry-trait)
+(use-trait pool-registry-trait .pool-registry.pool-registry-trait)
 
 ;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED (err u1003))
@@ -220,14 +220,6 @@
   (begin
     (try! (check-is-owner))
     (var-set pool-registry new-registry)
-    (ok true)
-  )
-)
-
-(define-public (set-circuit-breaker (new-circuit-breaker principal))
-  (begin
-    (try! (check-is-owner))
-    (var-set circuit-breaker new-circuit-breaker)
     (ok true)
   )
 )

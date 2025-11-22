@@ -423,12 +423,17 @@ address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 path = "contracts/budget-manager.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
-[contracts.governance_token_root]
+[contracts.governance-token]
 path = "contracts/governance-token.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+depends_on = ["sip-010-ft-trait"]
 
 [contracts.mev_protector_root]
 path = "contracts/mev/mev-protector-root.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+
+[contracts.audit-badge-nft]
+path = "contracts/audit-registry/audit-badge-nft.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
 [contracts.batch-auction-trait]
@@ -523,4 +528,24 @@ address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
 [contracts.risk-manager-trait]
 path = "contracts/traits/risk-manager-trait.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+[contracts.dlc-manager-trait]
+path = "contracts/traits/dlc-manager-trait.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+
+[contracts.dlc-manager]
+path = "contracts/sbtc/dlc-manager.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+depends_on = ["dlc-manager-trait"]
+
+[contracts.collateral-manager-trait]
+path = "contracts/traits/collateral-manager-trait.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+
+[contracts.funding-rate-calculator-trait]
+path = "contracts/traits/funding-rate-calculator-trait.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+
+[contracts.position-manager-trait]
+path = "contracts/traits/position-manager-trait.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"

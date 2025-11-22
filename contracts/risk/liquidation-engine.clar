@@ -5,7 +5,7 @@
 (use-trait risk-trait .oracle-risk-traits.risk-trait)
 (use-trait oracle-aggregator-v2-trait .oracle-risk-traits.oracle-aggregator-v2-trait)
 (use-trait dimensional-trait .dimensional-traits.dimensional-trait)
-(use-trait ft-trait .dex-traits.sip-010-ft-trait)
+(use-trait ft-trait .sip-010-ft-trait.sip-010-ft-trait)
 
 ;; ===== Constants =====
 (define-constant ERR_UNAUTHORIZED (err u4000))
@@ -164,7 +164,8 @@
   )
   (let (
     (position (unwrap! (contract-call? (var-get dimensional-engine-contract) get-position position-owner position-id) ERR_INVALID_POSITION))
-    (asset (get asset position))(price (unwrap! (contract-call? .oracle_aggregator_v2 get-twap asset)
+    (asset (get asset position))
+    (price (unwrap! (contract-call? .oracle_aggregator_v2 get-twap asset)
       ERR_ORACLE_FAILURE
     ))
     (margin-ratio (calculate-margin-ratio position price))

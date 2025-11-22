@@ -18,7 +18,7 @@
 ;; @desc The principal of the proposal registry contract.
 (define-data-var proposal-registry principal .proposal-registry)
 ;; @desc The principal of the voting contract.
-(define-data-var voting principal .voting)
+(define-data-var voting principal .governance-voting)
 ;; @desc The principal of the governance token contract.
 (define-data-var governance-token principal .governance-token)
 ;; @desc The duration of the voting period in blocks.
@@ -66,7 +66,9 @@
     (asserts! (>= block-height (get start-block proposal)) ERR_PROPOSAL_NOT_ACTIVE)
     (asserts! (<= block-height (get end-block proposal)) ERR_VOTING_CLOSED)
     (asserts! (unwrap! (contract-call? .governance-token has-voting-power tx-sender) (err ERR_UNAUTHORIZED)) ERR_UNAUTHORIZED)
-    (try! (contract-call? .voting vote proposal-id support votes-cast tx-sender))
+    (try! (contract-call? .governance-voting vote proposal-id support votes-cast
+      tx-sender
+    ))
     (print {
       event: "vote-cast",
       proposal-id: proposal-id,
@@ -128,7 +130,7 @@
 ;; @param voter principal The address of the voter.
 ;; @returns (response (optional { ... }) (err uint)) The vote details.
 (define-read-only (get-vote (proposal-id uint) (voter principal))
-  (contract-call? .voting get-vote proposal-id voter))
+  (contract-call? .governance-voting get-vote proposal-id voter))
 
 ;; --- Admin Functions ---
 

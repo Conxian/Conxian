@@ -127,6 +127,37 @@
       true)
     true))
 
+;; @desc Helper to sum uint values when folding lists.
+(define-private (sum-uint
+    (value uint)
+    (acc uint)
+  )
+  (+ acc value)
+)
+
+;; @desc Applies a seasonal bonus to a single recipient while iterating through the list.
+(define-private (apply-seasonal-bonus
+    (recipient principal)
+    (state {
+      amounts: (list 100 uint),
+      index: uint,
+    })
+  )
+  (let (
+      (bonus (unwrap! (element-at (get amounts state) (get index state))
+        ERR_INVALID_PARAMETERS
+      ))
+      (current-bal (get bal (default-to { bal: u0 } (map-get? balances { who: recipient }))))
+    )
+    (map-set balances { who: recipient } { bal: (+ current-bal bonus) })
+    (map-set seasonal-bonuses recipient bonus)
+    {
+      amounts: (get amounts state),
+      index: (+ (get index state) u1),
+    }
+  )
+)
+
 ;; --- Read-Only Functions ---
 
 ;; @desc Checks if a principal is the contract owner.
@@ -368,10 +399,13 @@
   (begin
     (asserts! (is-owner tx-sender) ERR_UNAUTHORIZED)
     (asserts! (is-eq (len recipients) (len amounts)) ERR_LENGTH_MISMATCH)
+    (let ((total-bonus (fold sum-uint amounts u0)))
       (asserts! (check-emission-allowed total-bonus) ERR_EMISSION_DENIED)
-          (total-bonus (get total result)))
-      (asserts! (check-emission-allowed total-bonus) ERR_EMISSION_DENIED)
-      (try! (var-set total-supply (+ (var-get total-supply) total-bonus)))
+      (fold apply-seasonal-bonus recipients {
+        amounts: amounts,
+        index: u0,
+      })
+(var-set total-supply (+ (var-get total-supply) total-bonus))
       (ok total-bonus))))
 
 ;; @desc Gets information about a creator.

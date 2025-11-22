@@ -1,7 +1,8 @@
 ;; funding-calculator.clar
 ;; Handles funding rate calculations for perpetual contracts
 
-(use-trait dimensional-trait .traits.dimensional-trait.dimensional-trait)
+;; Optional: dimensional position trait (not strictly required for current logic)
+(use-trait dimensional-trait .dimensional-traits.dimensional-trait)
 
 
 ;; ===== Constants =====

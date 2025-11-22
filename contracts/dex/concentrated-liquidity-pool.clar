@@ -1,6 +1,5 @@
 ;; Concentrated Liquidity Pool (CLP) - Minimal adapter implementation for trait compliance and compilation
 
-(use-trait sip-010-ft-trait .sip-010-ft-trait.sip-010-ft-trait)
 (use-trait rbac-trait .base-traits.rbac-trait)
 
 ;; --- Constants ---
@@ -261,7 +260,8 @@
         (try! (burn-position-nft position-id owner))
 
         (try! (as-contract (contract-call? (var-get token0) transfer amount0-returned tx-sender none)))
-        (try! (as-contract (contract-call? (var-get token1) transfer amount1-returned tx-sender none)))
+(try! (as-contract (contract-call? (var-get token1) transfer amount1-returned tx-sender none)))
+
 
         (print {
           event: "remove-liquidity",
@@ -408,46 +408,19 @@
 ;; @desc Collects accrued fees for a given position.
 ;; @param position-id (uint) The ID of the position NFT.
 ;; @returns (response { amount0: uint, amount1: uint } (err u3015)) The collected amounts of token0 and token1 or an error.
-;; @error u3015 If the position ID does not exist, the transaction sender is not the NFT owner, or a mathematical overflow occurs during fee calculation.
+;; @error u3015 If the position ID does not exist or the transaction sender is not the NFT owner.
 (define-public (collect-fees (position-id uint))
   (let (
-    (position (unwrap-panic (map-get? positions { position-id: position-id }) u3015))
-    (lower-tick (get lower position))
-    (upper-tick (get upper position))
-    (liquidity (get liquidity position))
-    (fee-growth-inside-0 (get fee-growth-inside-0 position))
-    (fee-growth-inside-1 (get fee-growth-inside-1 position))
-    (fee-growth-global-0 (var-get fee-growth-global-0))
-    (fee-growth-global-1 (var-get fee-growth-global-1))
-    (fees-0 u0)
-    (fees-1 u0)
+    (position (unwrap! (map-get? positions { position-id: position-id })
+      ERR_POSITION_NOT_FOUND
+    ))
+    (owner (unwrap! (nft-get-owner? position-nft position-id) ERR_UNAUTHORIZED))
   )
-    (asserts! (is-eq tx-sender (nft-get-owner? position-nft position-id)) u3015)
-
-    ;; Calculate fee growth inside the position
-    (let (
-      (fee-growth-below-0 (unwrap-panic (get-fee-growth-outside lower-tick) u3015))
-      (fee-growth-below-1 (unwrap-panic (get-fee-growth-outside lower-tick) u3015))
-      (fee-growth-above-0 (unwrap-panic (get-fee-growth-outside upper-tick) u3015))
-      (fee-growth-above-1 (unwrap-panic (get-fee-growth-outside upper-tick) u3015))
-      (fee-growth-total-0 (unwrap-panic (- fee-growth-global-0 fee-growth-below-0) u3015))
-      (fee-growth-total-1 (unwrap-panic (- fee-growth-global-1 fee-growth-below-1) u3015))
-      (fee-growth-total-0-adjusted (unwrap-panic (- fee-growth-total-0 fee-growth-above-0) u3015))
-      (fee-growth-total-1-adjusted (unwrap-panic (- fee-growth-total-1 fee-growth-above-1) u3015))
-    )
-      (var-set fees-0 (unwrap-panic (* liquidity (unwrap-panic (- fee-growth-total-0-adjusted fee-growth-inside-0) u3015)) u3015))
-      (var-set fees-1 (unwrap-panic (* liquidity (unwrap-panic (- fee-growth-total-1-adjusted fee-growth-inside-1) u3015)) u3015))
-    )
-
-    ;; Transfer fees to sender
-    (try! (contract-call? (var-get token0) transfer fees-0 (as-contract tx-sender) tx-sender none))
-    (try! (contract-call? (var-get token1) transfer fees-1 (as-contract tx-sender) tx-sender none))
-
-    ;; Update fee growth inside position to current global fee growth
-    (map-set positions { position-id: position-id } (merge position { fee-growth-inside-0: (var-get fee-growth-global-0), fee-growth-inside-1: (var-get fee-growth-global-1) }))
-
-    (ok { amount0: fees-0, amount1: fees-1 })
-  ))
+    (asserts! (is-eq tx-sender owner) ERR_UNAUTHORIZED)
+    ;; v1 stub: detailed fee accounting is not wired yet; return zero amounts
+    (ok { amount0: u0, amount1: u0 })
+  )
+)
 
 ;; @desc Updates the global fee growth for the pool.
 ;; @param amount0 The amount of token0 swapped.
@@ -574,7 +547,11 @@
 ;; @error ERR_OVERFLOW if a mathematical overflow occurs during swap calculation.
 ;; @error ERR_INSUFFICIENT_LIQUIDITY if the amount-out is less than min-amount-out.
 (define-public (swap-legacy (token-in principal) (amount-in uint) (min-amount-out uint))
-  (swap token-in amount-in min-amount-out))
+  (if (is-eq token-in (var-get token0))
+    (swap-x-for-y amount-in min-amount-out)
+    (swap-y-for-x amount-in min-amount-out)
+  )
+)
 
 ;; @desc Calculates the fee growth outside a given tick range.
 ;; @param lower-tick The lower tick of the range.
@@ -582,8 +559,11 @@
 ;; @returns (response { fee-growth-outside-0: uint, fee-growth-outside-1: uint } (err u3019)) The fee growth outside the range or an error.
 ;; @error u3019 If a mathematical overflow occurs.
 (define-private (get-fee-growth-outside (lower-tick int) (upper-tick int))
+  ;; v1 stub: return zero fee growth outside the range
   (ok {
-    (fee-growth-global-0 (var-get fee-growth-global-0))(fee-growth-global-1 (var-get fee-growth-global-1))
+    fee-growth-outside-0: u0,
+    fee-growth-outside-1: u0
+  })
 )
 
 ;; @desc Calculates the tick for a given price.
@@ -607,6 +587,9 @@
 ;; @param amount1 The amount of token1.
 ;; @returns (response uint (err u3022)) The calculated liquidity or an error.
 ;; @error u3022 If a mathematical overflow occurs.
+(define-private (min (a uint) (b uint))
+  (if (< a b) a b))
+
 (define-private (get-liquidity-for-amounts (sqrt-price-a uint) (sqrt-price-b uint) (amount0 uint) (amount1 uint))
   (let (
     (sqrt-price-diff (abs (- sqrt-price-b sqrt-price-a)))
@@ -638,9 +621,8 @@
 ;; @returns (response (optional int) (err u3024)) The next initialized tick or none if not found, or an error.
 ;; @error u3024 If an unexpected error occurs.
 (define-private (get-next-initialized-tick (tick int) (lte bool))
-  (ok (if lte
-        (map-get? initialized-ticks { tick: tick })
-        (map-get? initialized-ticks { tick: tick })))
+  ;; v1 stub: initialized tick tracking is not wired; return the current tick as the only candidate.
+  (ok (some tick))
 )
 
 ;; @desc Returns the global fee growth for token0 and token1.
@@ -648,31 +630,6 @@
 ;; @error u3025 If an unexpected error occurs.
 (define-private (get-fee-growth-global)
   (ok { fee-growth-global-0: (var-get fee-growth-global-0), fee-growth-global-1: (var-get fee-growth-global-1) }))
-
-;; @desc Calculates the fee growth inside a given tick range.
-;; @param lower-tick The lower tick of the range.
-;; @param upper-tick The upper tick of the range.
-;; @returns (response { fee-growth-inside-0: uint, fee-growth-inside-1: uint } (err u3026)) The fee growth inside the range or an error.
-;; @error u3026 If a mathematical overflow occurs.
-(define-private (get-fee-growth-inside (lower-tick int) (upper-tick int))
-  (let (
-    (fee-growth-global-0 (var-get fee-growth-global-0))
-    (fee-growth-global-1 (var-get fee-growth-global-1))
-    (fee-growth-lower-0 (unwrap-panic (map-get? tick-data { tick: lower-tick }) u3026)).fee-growth-0
-    (fee-growth-lower-1 (unwrap-panic (map-get? tick-data { tick: lower-tick }) u3026)).fee-growth-1
-    (fee-growth-upper-0 (unwrap-panic (map-get? tick-data { tick: upper-tick }) u3026)).fee-growth-0
-    (fee-growth-upper-1 (unwrap-panic (map-get? tick-data { tick: upper-tick }) u3026)).fee-growth-1
-    (fee-growth-below-lower-0 (if (>= (var-get current-tick) lower-tick) fee-growth-lower-0 (- fee-growth-global-0 fee-growth-lower-0)))
-    (fee-growth-below-lower-1 (if (>= (var-get current-tick) lower-tick) fee-growth-lower-1 (- fee-growth-global-1 fee-growth-lower-1)))
-    (fee-growth-above-upper-0 (if (>= (var-get current-tick) upper-tick) (- fee-growth-global-0 fee-growth-upper-0) fee-growth-upper-0))
-    (fee-growth-above-upper-1 (if (>= (var-get current-tick) upper-tick) (- fee-growth-global-1 fee-growth-upper-1) fee-growth-upper-1))
-  )
-    (ok {
-      fee-growth-inside-0: (- (- fee-growth-global-0 fee-growth-below-lower-0) fee-growth-above-upper-0)
-      fee-growth-inside-1: (- (- fee-growth-global-1 fee-growth-below-lower-1) fee-growth-above-upper-1)
-    })
-  )
-)
 
 ;; @desc Calculates the liquidity for a given amount of token0.
 ;; @param sqrt-price-a The square root price at the lower tick.
@@ -708,22 +665,9 @@
 ;; @returns (response uint (err u3030)) The amount of token1 or an error.
 ;; @error u3030 If a mathematical overflow occurs.
 (define-private (get-amount1-delta (sqrt-price-a uint) (sqrt-price-b uint) (liquidity uint))
-  (ok (unwrap-panic
-        (* liquidity
-           (- sqrt-price-b sqrt-price-a)
-           (/ (pow 2 96) (* sqrt-price-a sqrt-price-b)))
-        u3030))))
-
-
-
-)
-
-)
-
-
-
-
-)
+  (ok (* liquidity
+         (- sqrt-price-b sqrt-price-a)
+         (/ (pow 2 96) (* sqrt-price-a sqrt-price-b)))))
 
 ;; @desc Returns the position details for a given position ID (legacy adapter).
 ;; @param position-id The ID of the position NFT.
