@@ -3,7 +3,7 @@
 
 (use-trait route-manager-trait .route-manager-trait.route-manager-trait)
 (use-trait dijkstra-pathfinder-trait .dijkstra-pathfinder-trait.dijkstra-pathfinder-trait)
-(use-trait rbac-trait .core-protocol.02-core-protocol.rbac-trait-trait)
+(use-trait rbac-trait .core-protocol.rbac-trait)
 
 ;; (impl-trait .defi-primitives.router-trait) ;; TODO: Verify router trait compatibility
 

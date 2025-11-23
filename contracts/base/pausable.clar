@@ -3,9 +3,9 @@
 ;; Only the contract owner can pause or unpause the contract.
 
 ;; --- Traits ---
-(use-trait pausable-trait .base-traits.pausable-trait)
-(use-trait ownable-trait .base-traits.ownable-trait)
-(use-trait rbac-trait .core-protocol.rbac-trait-trait)
+(use-trait pausable-trait .core-protocol.pausable-trait)
+(use-trait ownable-trait .core-protocol.ownable-trait)
+(use-trait rbac-trait .core-protocol.rbac-trait)
 
 ;; @constants
 ;; @var ERR_CONTRACT_PAUSED: The contract is currently paused.

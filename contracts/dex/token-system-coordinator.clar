@@ -5,7 +5,7 @@
 ;; Central coordination contract for the enhanced Conxian token system
 ;; Provides unified interface and orchestrates interactions between all token subsystems
 
-(use-trait rbac-trait .core-protocol.02-core-protocol.rbac-trait-trait)
+(use-trait rbac-trait .core-protocol.rbac-trait)
 
 ;; --- Traits ---
 (use-trait sip-010-ft-trait .sip-standards.sip-010-ft-trait)

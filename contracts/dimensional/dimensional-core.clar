@@ -9,8 +9,8 @@
 ;; Standard traits
 (use-trait sip-010-ft-trait .sip-standards.sip-010-ft-trait)
 (use-trait finance-metrics-trait .math-utilities.finance-metrics-trait)
-(use-trait pausable-trait .base-traits.pausable-trait)
-(use-trait access-control-trait .core-protocol.02-core-protocol.rbac-trait-trait)
+(use-trait pausable-trait .core-protocol.pausable-trait)
+(use-trait access-control-trait .core-protocol.rbac-trait)
 (use-trait circuit-breaker-trait .monitoring-security-traits.circuit-breaker-trait)
 
 ;; ===== Constants =====

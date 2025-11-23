@@ -2,7 +2,7 @@
 ;; This contract serves as a foundational building block for other contracts in the Conxian ecosystem.
 ;; It provides common functionalities such as contract ownership, pausing mechanisms, and basic error handling.
 
-(use-trait pausable-trait .base-traits.pausable-trait)
+(use-trait pausable-trait .core-protocol.pausable-trait)
 
 ;; @data-vars
 ;; @var reentrancy-guard: A boolean to prevent reentrancy attacks.

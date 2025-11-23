@@ -3,7 +3,7 @@
 (use-trait funding-rate-calculator-trait .dimensional.funding-rate-calculator-trait)
 (use-trait oracle-trait .oracle-pricing.oracle-aggregator-v2-trait)
 (use-trait position-manager-trait .dimensional.position-manager-trait)
-(use-trait rbac-trait .core-protocol.02-core-protocol.rbac-trait-trait)
+(use-trait rbac-trait .core-protocol.rbac-trait)
 
 (impl-trait .dimensional.funding-rate-calculator-trait)
 
@@ -74,7 +74,7 @@
 
 ;; --- Private Functions ---
 (define-private (check-role (role (string-ascii 32)))
-  (contract-call? .core-protocol.rbac-trait-trait has-role tx-sender role)
+  (contract-call? .core-protocol.rbac-trait has-role tx-sender role)
 )
 
 (define-private (get-open-interest (asset principal))

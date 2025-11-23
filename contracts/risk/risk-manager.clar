@@ -2,7 +2,7 @@
 ;; including setting risk parameters, calculating liquidation prices, and checking position health.
 
 (use-trait risk-manager-trait .risk-management.risk-manager-trait)
-(use-trait rbac-trait .core-protocol.02-core-protocol.rbac-trait-trait)
+(use-trait rbac-trait .core-protocol.rbac-trait)
 
 (impl-trait .risk-management.risk-manager-trait)
 
@@ -71,5 +71,5 @@
 
 ;; --- Private Functions ---
 (define-private (check-role (role (string-ascii 32)))
-  (contract-call? .core-protocol.rbac-trait-trait has-role tx-sender role)
+  (contract-call? .core-protocol.rbac-trait has-role tx-sender role)
 )
