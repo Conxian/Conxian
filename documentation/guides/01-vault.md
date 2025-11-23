@@ -4,77 +4,35 @@
 
 ## 1. Introduction
 
-The `sbtc-vault.clar` contract is a secure ledger for managing user deposits and shares of sBTC. It is designed to be controlled by an external `yield-optimizer` contract, which is responsible for executing investment strategies. The vault itself does not contain complex logic for yield generation; instead, it focuses on the core accounting of deposits, withdrawals, and shares.
+The `sbtc-vault.clar` contract serves as the main entry point for the Conxian Protocol's sBTC vault. It acts as a facade, delegating all core logic to a set of specialized, single-responsibility contracts. This modular design enhances security and maintainability.
 
-## 2. Key Concepts
+## 2. Core Architecture
 
-### sBTC-Only Ledger
+The `sbtc-vault` contract does not manage user funds or complex logic directly. Instead, it delegates calls to the following specialized contracts:
 
-The vault is designed to support only sBTC, with a deposit cap set by the admin.
+-   **`custody.clar`**: Manages the deposit, withdrawal, and accounting of user funds (sBTC).
+-   **`yield-aggregator.clar`**: Handles the allocation of funds to various yield-generating strategies.
+-   **`btc-bridge.clar`**: Manages the wrapping and unwrapping of BTC to and from sBTC.
+-   **`fee-manager.clar`**: Calculates and applies fees for various vault operations.
 
-### Share-Based Accounting
+This architecture separates the core accounting of the vault from the more complex logic of yield generation and cross-chain operations.
 
-The vault uses a share-based accounting system:
+## 3. Key Functions
 
--   **Shares:** When a user deposits sBTC, they receive shares that represent their proportional ownership of the total sBTC balance within the vault.
--   **Share Price:** The value of each share is calculated as `(Total sBTC Balance) / (Total Shares)`.
+### User-Facing Functions
 
-### Yield Optimizer Integration
+-   **`deposit`**: Deposits sBTC into the vault. This call is delegated to the `custody.clar` contract.
+-   **`withdraw`**: Initiates a withdrawal of sBTC from the vault. This call is also delegated to `custody.clar`.
+-   **`wrap-btc`**: Wraps BTC into sBTC. This call is delegated to the `btc-bridge.clar` contract.
+-   **`unwrap-to-btc`**: Unwraps sBTC back into BTC. This call is also delegated to `btc-bridge.clar`.
 
-The vault is designed to be managed by a `yield-optimizer` contract. This contract has the authority to move funds from the vault to various investment strategies. This separation of concerns allows the vault to remain simple and secure, while the optimizer handles the complexities of yield generation.
+### Admin and Owner Functions
 
-## 3. State Variables
+-   **`set-custody-contract`**, **`set-yield-aggregator-contract`**, **`set-btc-bridge-contract`**, **`set-fee-manager-contract`**: These functions allow the contract owner to set the addresses of the specialized contracts.
+-   **`allocate-to-strategy`**: Allows the contract owner to allocate funds to a yield strategy, via the `yield-aggregator.clar` contract.
+-   **`harvest-yield`**: Allows the contract owner to harvest yield from a strategy, also via the `yield-aggregator.clar` contract.
+-   **`set-vault-paused`**: Allows the contract owner to pause or unpause the vault.
 
-| Variable Name                | Type          | Description                                                                 |
-| ---------------------------- | ------------- | --------------------------------------------------------------------------- |
-| `admin`                      | `principal`   | The address of the admin, who can manage the vault's settings.              |
-| `paused`                     | `bool`        | If `true`, all deposits and withdrawals are disabled.                       |
-| `yield-optimizer-contract`   | `principal`   | The address of the contract that can move funds to strategies.              |
-| `total-balance`              | `uint`        | The total balance of sBTC in the vault.                                     |
-| `vault-shares`               | `uint`        | The total number of shares issued.                                          |
-| `user-shares`                | `map`         | Maps a user's principal to their share balance.                             |
-| `asset-cap`                  | `uint`        | The maximum deposit cap for sBTC.                                           |
+## 4. Read-Only Functions
 
-## 4. User Functions
-
-### `deposit`
-
-Deposits a specified amount of sBTC and mints shares for the user.
-
--   **Parameters:**
-    -   `asset <sip-010-ft-trait>`: The contract of the sBTC token.
-    -   `amount uint`: The amount of sBTC to deposit.
--   **Returns:** The number of shares minted for the user.
-
-### `withdraw`
-
-Burns a specified number of shares to withdraw the corresponding amount of sBTC.
-
--   **Parameters:**
-    -   `asset <sip-010-ft-trait>`: The contract of the sBTC token.
-    -   `shares uint`: The number of shares to burn.
--   **Returns:** The amount of sBTC withdrawn.
-
-## 5. Admin Functions
-
-| Function Name         | Parameters                | Description                                               |
-| --------------------- | ------------------------- | --------------------------------------------------------- |
-| `set-admin`           | `new-admin principal`     | Sets a new admin address.                                 |
-| `set-paused`          | `pause bool`              | Pauses or unpauses the vault's core functions.            |
-| `set-yield-optimizer` | `optimizer principal`     | Sets the address of the yield optimizer contract.         |
-| `set-asset-cap`       | `cap uint`                | Sets the maximum deposit cap for sBTC.                    |
-
-## 6. Optimizer-Only Functions
-
-These functions can only be called by the `yield-optimizer-contract`.
-
-| Function Name            | Parameters                                                      | Description                                                         |
-| ------------------------ | --------------------------------------------------------------- | ------------------------------------------------------------------- |
-| `deposit-to-strategy`    | `asset <sip-010-ft-trait>`, `amount uint`, `strategy <strategy-trait>` | Deposits a specified amount of sBTC into a strategy contract.   |
-| `withdraw-from-strategy` | `asset <sip-010-ft-trait>`, `amount uint`, `strategy <strategy-trait>` | Withdraws a specified amount of sBTC from a strategy contract. |
-
-## 7. Read-Only Functions
-
-| Function Name       | Parameters      | Returns      | Description                                           |
-| ------------------- | --------------- | ------------ | ----------------------------------------------------- |
-| `get-total-balance` | `none`          | `(ok uint)`  | Returns the total balance of sBTC in the vault.       |
+-   **`get-vault-stats`**: A placeholder function that will be updated to aggregate data from the various specialized contracts to provide a comprehensive overview of the vault's status.
