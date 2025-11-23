@@ -2,6 +2,10 @@
 
 Comprehensive decentralized exchange functionality for the Conxian Protocol implementing advanced DeFi features including concentrated liquidity, multi-hop routing, yield farming, and cross-chain integration.
 
+## Status
+
+**Migration In Progress**: The contracts in this module have not yet been migrated to the new modular trait system. They still use the legacy, individual trait files, and some are in a transitional state with trait imports temporarily commented out. The code examples below reflect the *target* architecture, not the current implementation.
+
 ## Overview
 
 The DEX module contains a complete suite of decentralized exchange contracts supporting:
@@ -120,7 +124,7 @@ The DEX module contains a complete suite of decentralized exchange contracts sup
 ### Creating a Concentrated Liquidity Position
 
 ```clarity
-(use-trait pool-trait .03-defi-primitives.pool-trait)
+;; Note: The following use-trait line is part of the target architecture and is not yet implemented.
 (contract-call? .concentrated-liquidity-pool create-position
   { token-0: token-a, token-1: token-b }
   tick-lower
@@ -136,7 +140,7 @@ The DEX module contains a complete suite of decentralized exchange contracts sup
 ### Multi-Hop Token Swap
 
 ```clarity
-(use-trait router-trait .03-defi-primitives.router-trait)
+;; Note: The following use-trait line is part of the target architecture and is not yet implemented.
 ;; Propose route first
 (contract-call? .multi-hop-router-v3 propose-route
   token-in token-out amount-in min-amount-out route-timeout)
@@ -149,7 +153,7 @@ The DEX module contains a complete suite of decentralized exchange contracts sup
 ### Staking LP Tokens
 
 ```clarity
-(use-trait staking-trait .03-defi-primitives.staking-trait)
+;; Note: The following use-trait line is part of the target architecture and is not yet implemented.
 (contract-call? .auto-compounder stake-tokens
   pool-token amount lock-period)
 ```

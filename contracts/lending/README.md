@@ -2,6 +2,10 @@
 
 Decentralized lending and borrowing infrastructure for the Conxian Protocol supporting multi-asset collateral, algorithmic interest rates, and enterprise-grade lending operations.
 
+## Status
+
+**Migration In Progress**: The contracts in this module are in a transitional state. While they use traits for some interactions, they still rely on the legacy, non-modular trait system. A full migration to the new 10-module trait system is required to align this module with the target architecture.
+
 ## Overview
 
 The lending module provides the foundational infrastructure for DeFi lending and borrowing within the Conxian ecosystem. It is a robust, secure, and feature-rich system designed for integration with other protocol components.
@@ -49,17 +53,20 @@ Interest Rate = f(Utilization Rate)
 ### Basic Lending Operations
 
 ```clarity
+;; Note: The following examples illustrate the function calls, but the exact trait usage
+;; is subject to change pending the completion of the trait migration.
+
 ;; Deposit collateral
-(contract-call? .comprehensive-lending-system supply .mock-token-a u1000)
+(contract-call? .comprehensive-lending-system supply .ft-token u1000)
 
 ;; Borrow against collateral
-(contract-call? .comprehensive-lending-system borrow .mock-token-b u500)
+(contract-call? .comprehensive-lending-system borrow .ft-token u500)
 
 ;; Repay loan
-(contract-call? .comprehensive-lending-system repay .mock-token-b u500)
+(contract-call? .comprehensive-lending-system repay .ft-token u500)
 
 ;; Withdraw collateral
-(contract-call? .comprehensive-lending-system withdraw .mock-token-a u1000)
+(contract-call? .comprehensive-lending-system withdraw .ft-token u1000)
 ```
 
 ## Risk Management
