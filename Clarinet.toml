@@ -45,7 +45,7 @@ depends_on = [
     "risk-trait",
     "finance-metrics-trait",
     "math-trait",
-    "risk-liquidation-engine",
+    "liquidation-engine",
     "oracle-adapter",
 ]
 
@@ -118,10 +118,6 @@ address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 path = "contracts/traits/dao-trait.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
-[contracts.risk-liquidation-engine]
-path = "contracts/risk/liquidation-engine.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-
 [contracts.oracle-adapter]
 path = "contracts/oracle/oracle-adapter-stub.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
@@ -164,38 +160,38 @@ address = "ST2REHHS5J3CERCRBEPMGH7921Q6PYKAADT7JP2VB"
 # Missing contracts referenced in tests
 access-control = ".access-traits"
 mock-dao = ".mock-token"
-audit-registry = ".audit_registry"
-btc-adapter = ".btc_adapter"
-chainlink-adapter = ".btc_adapter"
+audit-registry = ".audit-registry"
+btc-adapter = ".btc-adapter"
+chainlink-adapter = ".btc-adapter"
 enhanced-circuit-breaker = ".security.circuit-breaker"
-token-a = ".token_system_coordinator"
-token-b = ".token_system_coordinator"
-decentralized-trait-registry = ".decentralized_trait_registry"
+token-a = ".token-system-coordinator"
+token-b = ".token-system-coordinator"
+decentralized-trait-registry = ".decentralized-trait-registry"
 test-token-a = ".mock-token"
 test-token-b = ".mock-token"
-dex-factory = ".dex_factory"
+dex-factory = ".dex-factory"
 finance-metrics = ".finance-metrics-trait"
-flash-loan-vault = ".lending_protocol_governance"
-insurance-fund = ".audit_registry"
-bond-factory = ".dex_factory"
-dex-router = ".dex_factory"
-interop-wormhole-outbox = ".btc_adapter"
-oracle-aggregator-v2 = ".finance-metrics-trait"
-liquidity-provider = ".dex_factory"
-token-system-coordinator = ".token_system_coordinator"
-mev-protector = ".audit_registry"
-proof-of-reserves = ".audit_registry"
-position-factory = ".position_factory"
-price-impact-calculator = ".dex_factory"
+flash-loan-vault = ".lending-protocol-governance"
+insurance-fund = ".audit-registry"
+bond-factory = ".dex-factory"
+dex-router = ".dex-factory"
+interop-wormhole-outbox = ".btc-adapter"
+oracle-aggregator-v2 = ".oracle-aggregator-v2"
+liquidity-provider = ".dex-factory"
+token-system-coordinator = ".token-system-coordinator"
+mev-protector = ".mev-protector"
+proof-of-reserves = ".audit-registry"
+position-factory = ".position-factory"
+price-impact-calculator = ".dex-factory"
 advanced-router-dijkstra = ".dimensional-advanced-router-dijkstra"
-multi-hop-router-v3 = ".dex_factory"
-sbtc-integration = ".sbtc_integration"
-sbtc-flash-loan-vault = ".lending_protocol_governance"
-sbtc-lending-system = ".lending_protocol_governance"
-token = ".token_system_coordinator"
-signed-data-base = ".audit_registry"
-cxd-token = ".cxd_token"
-cxlp-token = ".cxlp_token"
+multi-hop-router-v3 = ".multi-hop-router-v3"
+sbtc-integration = ".sbtc-integration"
+sbtc-flash-loan-vault = ".lending-protocol-governance"
+sbtc-lending-system = ".lending-protocol-governance"
+token = ".token-system-coordinator"
+signed-data-base = ".audit-registry"
+cxd-token = ".cxd-token"
+cxlp-token = ".cxlp-token"
 cxvg-token = ".cxvg-token"
 cxtr-token = ".cxtr-token"
 cxs-token = ".cxs-token"
@@ -208,7 +204,7 @@ dimensional-engine = ".dimensional-engine"
 
 # Tokens
 cxvg-token = ".cxvg-token"
-cxlp-token = ".cxlp_token"
+cxlp-token = ".cxlp-token"
 cxtr-token = ".cxtr-token"
 cxs-token = ".cxs-token"
 cxd-price-initializer = ".cxd-price-initializer"
@@ -216,18 +212,17 @@ cxd-price-initializer = ".cxd-price-initializer"
 # DEX
 dex-router = ".dimensional-advanced-router-dijkstra"
 pool-template = ".pool-template"
-concentrated-liquidity-pool = ".concentrated_liquidity_pool"
+concentrated-liquidity-pool = ".concentrated-liquidity-pool"
 
 # Oracle
-oracle-adapter = ".core-oracle-oracle-adapter"
+oracle-adapter = ".oracle-adapter"
 sbtc-oracle-adapter = ".sbtc-oracle-adapter"
 twap-oracle = ".twap-oracle"
 
 # Risk
-risk-manager = ".risk-risk-manager"
-liquidation-engine = ".risk-liquidation-engine"
-loan-liquidation-manager = ".risk-liquidation-engine"
-funding-calculator = ".risk-funding-calculator"
+risk-manager = ".risk-manager"
+liquidation-engine = ".liquidation-engine"
+funding-calculator = ".funding-calculator"
 
 # Enterprise
 enterprise-loan-manager = ".enterprise-loan-manager"
@@ -256,9 +251,9 @@ sbtc-bond-integration = ".sbtc-bond-integration"
 
 # Math
 math-lib-advanced = ".math-lib-advanced"
-concentrated-math = ".concentrated-math"
-fixed-point-math = ".math-lib-advanced"
-precision-calculator = ".math-lib-advanced"
+concentrated-math = ".math-lib-concentrated"
+fixed-point-math = ".fixed-point-math"
+precision-calculator = ".precision-calculator"
 
 # Governance
 governance-token = ".governance-token"
@@ -270,52 +265,52 @@ governance-signature-verifier = ".governance-signature-verifier"
 path = "contracts/dimensional/governance.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
-[contracts.audit_registry]
+[contracts.audit-registry]
 path = "contracts/audit-registry/audit-registry.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
-[contracts.keeper_coordinator]
+[contracts.keeper-coordinator]
 path = "contracts/automation/keeper-coordinator.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
-[contracts.timelock_controller]
+[contracts.timelock-controller]
 path = "contracts/dex/timelock-controller.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
-[contracts.base_contract]
+[contracts.base-contract]
 path = "contracts/base/base-contract.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
-[contracts.conxian_protocol]
+[contracts.conxian-protocol]
 path = "contracts/core/conxian-protocol.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
-[contracts.concentrated_liquidity_pool]
+[contracts.concentrated-liquidity-pool]
 path = "contracts/dex/concentrated-liquidity-pool.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
-[contracts.dex_factory_v2]
+[contracts.dex-factory-v2]
 path = "contracts/dex/dex-factory-v2.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 depends_on = ["error-handling-trait", "auth-trait", "common-utils-trait"]
 
-[contracts.dex_factory]
+[contracts.dex-factory]
 path = "contracts/dex/dex-factory.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
-[contracts.manipulation_detector]
+[contracts.manipulation-detector]
 path = "contracts/dex/manipulation-detector.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
-[contracts.mev_protector]
+[contracts.mev-protector]
 path = "contracts/dex/mev-protector.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
-[contracts.multi_hop_router_v3]
+[contracts.multi-hop-router-v3]
 path = "contracts/dex/multi-hop-router-v3.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
-[contracts.oracle_aggregator_v2]
+[contracts.oracle-aggregator-v2]
 path = "contracts/dex/oracle-aggregator-v2.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
@@ -323,27 +318,27 @@ address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 path = "contracts/dex/oracle.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
-[contracts.pool_template]
+[contracts.pool-template]
 path = "contracts/dex/pool-template.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
-[contracts.dim_graph]
+[contracts.dim-graph]
 path = "contracts/dimensional/dim-graph.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
-[contracts.dim_oracle_automation]
+[contracts.dim-oracle-automation]
 path = "contracts/dimensional/dim-oracle-automation.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
-[contracts.dim_registry]
+[contracts.dim-registry]
 path = "contracts/dimensional/dim-registry.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
-[contracts.dim_revenue_adapter]
+[contracts.dim-revenue-adapter]
 path = "contracts/dimensional/dim-revenue-adapter.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
-[contracts.dim_yield_stake]
+[contracts.dim-yield-stake]
 path = "contracts/dimensional/dim-yield-stake.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 depends_on = ["sip-010-ft-trait", "error-handling-trait", "auth-trait", "common-utils-trait"]
@@ -356,19 +351,19 @@ address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 path = "contracts/mocks/mock-token.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
-[contracts.enterprise_api]
+[contracts.enterprise-api]
 path = "contracts/enterprise/enterprise-api.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
-[contracts.enterprise_loan_manager]
+[contracts.enterprise-loan-manager]
 path = "contracts/enterprise/enterprise-loan-manager.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
-[contracts.interest_rate_model]
+[contracts.interest-rate-model]
 path = "contracts/lending/interest-rate-model.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
-[contracts.liquidity_optimization_engine]
+[contracts.liquidity-optimization-engine]
 path = "contracts/dex/liquidity-optimization-engine.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
@@ -376,39 +371,43 @@ address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 path = "contracts/lending/comprehensive-lending-system.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
-[contracts.lending_protocol_governance]
+[contracts.liquidation-manager]
+path = "contracts/lending/liquidation-manager.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+
+[contracts.lending-protocol-governance]
 path = "contracts/governance/lending-protocol-governance.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
-[contracts.fixed_point_math]
+[contracts.fixed-point-math]
 path = "contracts/math/fixed-point-math.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
-[contracts.math_lib_advanced]
+[contracts.math-lib-advanced]
 path = "contracts/lib/math-lib-advanced.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
-[contracts.math_lib_concentrated]
+[contracts.math-lib-concentrated]
 path = "contracts/math/math-lib-concentrated.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
-[contracts.precision_calculator]
+[contracts.precision-calculator]
 path = "contracts/lib/precision-calculator.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
-[contracts.position_factory]
+[contracts.position-factory]
 path = "contracts/position-factory.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
-[contracts.rebalancing_rules]
+[contracts.rebalancing-rules]
 path = "contracts/dex/rebalancing-rules.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
-[contracts.tiered_pools]
+[contracts.tiered-pools]
 path = "contracts/pools/tiered-pools.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
-[contracts.proposal_engine]
+[contracts.proposal-engine]
 path = "contracts/governance/proposal-engine.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
@@ -416,63 +415,63 @@ address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 path = "contracts/governance/proposal-registry.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
-[contracts.funding_calculator]
+[contracts.funding-calculator]
 path = "contracts/risk/funding-calculator.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
-[contracts.liquidation_engine]
+[contracts.liquidation-engine]
 path = "contracts/risk/liquidation-engine.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
-[contracts.risk_manager]
+[contracts.risk-manager]
 path = "contracts/risk/risk-manager.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
-[contracts.sbtc_integration]
+[contracts.sbtc-integration]
 path = "contracts/dex/sbtc-integration.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
-[contracts.btc_adapter]
+[contracts.btc-adapter]
 path = "contracts/sbtc/btc-adapter.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
-[contracts.sip_010_ft_standard]
+[contracts.sip-010-ft-standard]
 path = "contracts/requirements/sip-010-trait-ft-standard.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
-[contracts.cxd_price_initializer]
+[contracts.cxd-price-initializer]
 path = "contracts/tokens/cxd-price-initializer.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
-[contracts.cxd_token]
+[contracts.cxd-token]
 path = "contracts/tokens/cxd-token.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
-[contracts.cxlp_token]
+[contracts.cxlp-token]
 path = "contracts/tokens/cxlp-token.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
-[contracts.cxs_token]
+[contracts.cxs-token]
 path = "contracts/tokens/cxs-token.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
-[contracts.cxtr_token]
+[contracts.cxtr-token]
 path = "contracts/tokens/cxtr-token.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
-[contracts.cxvg_token]
+[contracts.cxvg-token]
 path = "contracts/tokens/cxvg-token.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
-[contracts.token_system_coordinator]
+[contracts.token-system-coordinator]
 path = "contracts/tokens/token-system-coordinator.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
-[contracts.errors_trait]
+[contracts.errors-trait]
 path = "contracts/traits/errors.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
-[contracts.block_utils]
+[contracts.block-utils]
 path = "contracts/utils/block-utils.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
@@ -484,7 +483,7 @@ address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 path = "contracts/utils/error-utils.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
-[contracts.migration_manager]
+[contracts.migration-manager]
 path = "contracts/utils/migration-manager.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
@@ -500,7 +499,7 @@ address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 path = "contracts/traits/access-traits.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
-[contracts.decentralized_trait_registry]
+[contracts.decentralized-trait-registry]
 path = "contracts/decentralized-trait-registry.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
@@ -508,11 +507,11 @@ address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 path = "contracts/utils/validation.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
-[contracts.batch_auction]
+[contracts.batch-auction]
 path = "contracts/dex/batch-auction.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
-[contracts.budget_manager]
+[contracts.budget-manager]
 path = "contracts/budget-manager.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
@@ -521,7 +520,7 @@ path = "contracts/governance-token.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 depends_on = ["sip-010-ft-trait"]
 
-[contracts.mev_protector_root]
+[contracts.mev-protector-root]
 path = "contracts/mev/mev-protector-root.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 

@@ -45,7 +45,7 @@ The primary tokens are:
   - **Migration to CXD:** `CXLP` tokens can be converted into `CXD` tokens across 4 epoch bands (1.0x → up to 2.0x), bounded and timelocked. Requires `CXLP-token` configuration and authorizing the `CXLP-token` contract as a minter in `cxd-token`.
   - **Yield Farming:** `CXLP` can be staked in yield farms to earn additional rewards.
 - **How to Acquire:**
-  - Automatically earned by depositing assets into the `vault.clar` contract.
+  - Automatically earned by depositing assets into the `sbtc-vault.clar` contract.
   - Earned by providing liquidity to pools in the Conxian DEX.
 
 #### Migration Liquidity Controls (Epoch-Based)
@@ -100,7 +100,7 @@ The primary tokens are:
 
 The tokens are designed to work together to create a balanced and sustainable economic system.
 
-1. **Users provide liquidity** (to the vault or DEX) and receive **`CXLP`** tokens as a reward.
+1. **Users provide liquidity** (to the sBTC vault or DEX) and receive **`CXLP`** tokens as a reward.
 2. **`CXLP` holders can choose to migrate** their tokens to **`CXD`** tokens to gain revenue exposure; governance rights are via **`CXVG`**.
 3. **`CXVG` holders vote** on DAO proposals (optionally via derived `CXVG` if adopted).
 4. **Contributors perform work**, complete bounties, and are rewarded with **`CXTR`**; the DAO may also issue **`CXS`** soulbound badges to recognize reputation.

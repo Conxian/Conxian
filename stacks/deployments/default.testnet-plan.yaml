@@ -396,7 +396,7 @@ plan:
             contract-name: lending-system-trait
             expected-sender: STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ
             cost: 8050
-            path: "contracts\\traits\\defi\\lending-system-trait.clar"
+            path: "contracts/traits/lending-system-trait.clar"
             anchor-block-only: true
             clarity-version: 3
         - contract-publish:

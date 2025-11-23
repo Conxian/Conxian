@@ -120,7 +120,7 @@ The DEX module contains a complete suite of decentralized exchange contracts sup
 ### Creating a Concentrated Liquidity Position
 
 ```clarity
-(use-trait pool-trait .dex-traits.pool-trait)
+(use-trait pool-trait .03-defi-primitives.pool-trait)
 (contract-call? .concentrated-liquidity-pool create-position
   { token-0: token-a, token-1: token-b }
   tick-lower
@@ -136,7 +136,7 @@ The DEX module contains a complete suite of decentralized exchange contracts sup
 ### Multi-Hop Token Swap
 
 ```clarity
-(use-trait router-trait .dex-traits.router-trait)
+(use-trait router-trait .03-defi-primitives.router-trait)
 ;; Propose route first
 (contract-call? .multi-hop-router-v3 propose-route
   token-in token-out amount-in min-amount-out route-timeout)
@@ -149,7 +149,7 @@ The DEX module contains a complete suite of decentralized exchange contracts sup
 ### Staking LP Tokens
 
 ```clarity
-(use-trait staking-trait .staking-traits.staking-trait)
+(use-trait staking-trait .03-defi-primitives.staking-trait)
 (contract-call? .auto-compounder stake-tokens
   pool-token amount lock-period)
 ```
