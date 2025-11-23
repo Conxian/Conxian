@@ -8,13 +8,13 @@
     ;; @param operation (string-ascii 64) The operation for which to calculate the fee.
     ;; @param amount uint The amount on which the fee is calculated.
     ;; @returns (response uint uint) A response containing the calculated fee or an error.
-    (calculate-fee ((string-ascii 64), uint) (response uint uint))
+    (calculate-fee ((string-ascii 64) uint) (response uint uint))
 
     ;; @desc Sets the fee for a given operation.
     ;; @param operation (string-ascii 64) The operation for which to set the fee.
     ;; @param fee-bps uint The new fee in basis points.
     ;; @returns (response bool uint) A response indicating success or an error.
-    (set-fee ((string-ascii 64), uint) (response bool uint))
+    (set-fee ((string-ascii 64) uint) (response bool uint))
   )
 )
 

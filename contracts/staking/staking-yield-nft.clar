@@ -1038,4 +1038,4 @@
   (let ((position (unwrap-panic (map-get? staking-positions { token-id: token-id }))))
     (let ((rate-per-block (/ (get yield-rate position) u10000))
           (total-rewards (* (get stake-amount position) blocks-to-add rate-per-block)))
-      (ok total-rewards)
+      (ok total-rewards))))

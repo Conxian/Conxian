@@ -804,7 +804,43 @@
 (define-private (find-bridge-receipt-by-bridge (bridge-id uint))
   (fold find-bridge-receipt-by-bridge-helper (map-bridge-receipts) none))
 
-(define-private (find-bridge-receipt-by-bridge-helper (receipt { receipt-id: uint, transaction-hash: (string-ascii 64), bridge-id: uint, sender: principal, recipient: principal, source-chain: uint, target-chain: uint, asset-contract: principal, asset-amount: uint, bridge-fee: uint, status: uint, confirmation-block: uint, completion-block: (optional uint), error-reason: (optional (string-ascii 256)), nft-token-id: uint, created-at: uint }) (result (optional { receipt-id: uint, transaction-hash: (string-ascii 64), bridge-id: uint, sender: principal, recipient: principal, source-chain: uint, target-chain: uint, asset-contract: principal, asset-amount: uint, bridge-fee: uint, status: uint, confirmation-block: uint, completion-block: (optional uint), error-reason: (optional (string-ascii 256)), nft-token-id: uint, created-at: uint }))
+(define-private (find-bridge-receipt-by-bridge-helper 
+    (receipt { 
+      receipt-id: uint, 
+      transaction-hash: (string-ascii 64), 
+      bridge-id: uint, 
+      sender: principal, 
+      recipient: principal, 
+      source-chain: uint, 
+      target-chain: uint, 
+      asset-contract: principal, 
+      asset-amount: uint, 
+      bridge-fee: uint, 
+      status: uint, 
+      confirmation-block: uint, 
+      completion-block: (optional uint), 
+      error-reason: (optional (string-ascii 256)), 
+      nft-token-id: uint, 
+      created-at: uint 
+    }) 
+    (result (optional { 
+      receipt-id: uint, 
+      transaction-hash: (string-ascii 64), 
+      bridge-id: uint, 
+      sender: principal, 
+      recipient: principal, 
+      source-chain: uint, 
+      target-chain: uint, 
+      asset-contract: principal, 
+      asset-amount: uint, 
+      bridge-fee: uint, 
+      status: uint, 
+      confirmation-block: uint, 
+      completion-block: (optional uint), 
+      error-reason: (optional (string-ascii 256)), 
+      nft-token-id: uint, 
+      created-at: uint 
+    }))
   (match result
     found
       found

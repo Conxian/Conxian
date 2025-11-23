@@ -9,14 +9,14 @@
     ;; @param btc-txid (buff 32) The transaction ID of the BTC deposit.
     ;; @param recipient principal The principal to receive the minted sBTC.
     ;; @returns (response uint uint) A response containing the amount of sBTC minted or an error.
-    (wrap-btc (uint, (buff 32), principal) (response uint uint))
+    (wrap-btc (uint (buff 32) principal) (response uint uint))
 
     ;; @desc Initiates the unwrapping of sBTC to BTC.
     ;; @param sbtc-amount uint The amount of sBTC to unwrap.
     ;; @param btc-address (buff 64) The destination BTC address.
     ;; @param sender principal The principal unwrapping the sBTC.
     ;; @returns (response uint uint) A response containing the amount of BTC to be sent or an error.
-    (unwrap-to-btc (uint, (buff 64), principal) (response uint uint))
+    (unwrap-to-btc (uint (buff 64) principal) (response uint uint))
   )
 )
 
