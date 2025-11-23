@@ -2,6 +2,10 @@
 
 > **Note:** This `README.md` is auto-generated from the docstrings in the source code. To update this documentation, please edit the docstrings in the corresponding Clarity files.
 
+## Status
+
+**Migration In Progress**: The contracts in this module are in a transitional state. They use the legacy, non-modular trait system for some interactions. A full migration to the new 10-module trait system is required to align this module with the target architecture.
+
 Comprehensive token system for the Conxian Protocol implementing multiple token standards and economic models including SIP-010 fungible tokens, liquidity provider tokens, and governance tokens.
 
 ## Overview
@@ -93,6 +97,8 @@ All tokens implement the Stacks Improvement Proposal 010 (SIP-010) standard:
 ```
 
 ## Usage Examples
+
+*Note: The following examples illustrate the function calls, but the exact trait usage is subject to change pending the completion of the trait migration.*
 
 ### Token Transfers
 
