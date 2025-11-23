@@ -44,21 +44,40 @@ The Conxian protocol is organized into a series of specialized modules, each wit
 - **MEV Protection**: The protocol will include a dedicated MEV protection layer with commit-reveal schemes and batch auctions.
 
 #### sBTC Vaults
-- **Decentralized Vault**: The monolithic `sbtc-vault` has been broken down into four specialized contracts: `custody` for deposits and withdrawals, `yield-aggregator` for yield strategies, `btc-bridge` for wrapping/unwrapping, and `fee-manager` for fee handling.
+- **Decentralized Vault**: The monolithic `sbtc-vault` is being refactored into a modular system of four specialized contracts: `custody` for deposits and withdrawals, `yield-aggregator` for yield strategies, `btc-bridge` for wrapping/unwrapping, and `fee-manager` for fee handling. This transition is in progress.
 
 #### Lending & Borrowing
-- **Modular Lending**: The lending module is being built from the ground up with a modular architecture, including a `lending-pool-core` for central logic, a user-facing `lending-pool`, and a `lending-pool-rewards` contract.
-- **Dimensional Vault**: The `dimensional-vault` has been refactored to use a separate `interest-rate-model` contract.
+- **Comprehensive Lending System**: The lending module is built around the `comprehensive-lending-system.clar`, a production-ready, all-in-one contract that provides a full suite of lending and borrowing features.
+- **Interest Rate Model**: The lending system uses a separate `interest-rate-model` contract to dynamically calculate interest rates based on utilization.
 
 #### Token Economics
-- **Comprehensive Token System**: The protocol features a comprehensive token system with a primary token (CXD), a treasury token (CXTR), a liquidity provider token (CXLP), a governance token (CXVG), and a stability token (CXS).
 
-## 4. Roadmap & Implementation Status
+The Conxian Protocol features a comprehensive, multi-token system designed to incentivize participation, facilitate governance, and ensure the long-term sustainability of the ecosystem.
+
+| Token | Symbol | Role |
+| :--- | :--- | :--- |
+| **Conxian Token** | CXD | The primary utility token of the protocol, used for staking, fee reductions, and as a medium of exchange. |
+| **Conxian Treasury** | CXTR | A treasury token used to fund the ongoing development and growth of the protocol. |
+| **Conxian LP** | CXLP | A liquidity provider token that represents a user's share of a liquidity pool. |
+| **Conxian Governance** | CXVG | The governance token of the protocol, used to vote on proposals and participate in the decision-making process. |
+| **Conxian Stability** | CXS | A stability token that is algorithmically pegged to the US dollar and is used to provide a stable medium of exchange within the protocol. |
+
+## 4. Security
+
+The Conxian Protocol is designed with a security-first mindset, incorporating a multi-layered approach to protect user funds and ensure the long-term stability of the ecosystem.
+
+- **Audits & Formal Verification**: All smart contracts will undergo rigorous security audits by reputable third-party firms before being deployed to mainnet. We will also leverage formal verification techniques to mathematically prove the correctness of our most critical components.
+- **MEV Protection**: The protocol includes a dedicated MEV protection layer with commit-reveal schemes and batch auctions to minimize the impact of front-running and other forms of MEV exploitation.
+- **Circuit Breakers**: The system incorporates circuit breakers that can be triggered in the event of a black swan event or other unforeseen market conditions. These circuit breakers can pause critical functions of the protocol to protect user funds.
+- **Rate Limiting**: To prevent market manipulation and other forms of abuse, the protocol includes rate-limiting mechanisms on key functions.
+- **Role-Based Access Control**: The protocol uses a robust role-based access control (RBAC) system to ensure that only authorized addresses can perform critical administrative functions.
+
+## 5. Roadmap & Implementation Status
 
 The Conxian Protocol is currently undergoing a significant architectural refactoring. The following provides a high-level overview of the work completed and the roadmap for future development. For a more detailed breakdown, please refer to the `ROADMAP.md` file in the root directory.
 
 ### Completed Work
-- **Architectural Refactoring**: The `core`, `dex`, `sbtc-vaults`, and `governance` modules have been successfully refactored into a more modular and decentralized architecture.
+- **Architectural Refactoring**: The `core`, `dex`, and `governance` modules have been successfully refactored into a more modular and decentralized architecture. The `sbtc-vaults` module is currently in the process of being refactored.
 - **Comprehensive Documentation**: All new and modified contracts have been thoroughly documented with high-quality docstrings.
 
 ### Future Work
