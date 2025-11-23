@@ -27,7 +27,7 @@
 (define-data-var authorized-issuers (list 10 principal) (list tx-sender))
 (define-data-var enterprise-loan-manager (optional principal) none)
 (define-data-var yield-distribution-engine (optional principal) none)
-(define-data-var circuit-breaker principal .traits.09-security-monitoring.circuit-breaker-trait)
+(define-data-var circuit-breaker principal .traits.security-monitoring.circuit-breaker-trait)
 
 ;; ===== Data Maps =====
 (define-map bond-series uint {

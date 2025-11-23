@@ -7,10 +7,10 @@
 ;;; Conforms to: Clarinet SDK 3.9+, Nakamoto Standard
 
 ;; Standard traits
-(use-trait sip-010-ft-trait .01-sip-standards.sip-010-ft-trait)
-(use-trait finance-metrics-trait .10-math-utilities.finance-metrics-trait)
+(use-trait sip-010-ft-trait .sip-standards.sip-010-ft-trait)
+(use-trait finance-metrics-trait .math-utilities.finance-metrics-trait)
 (use-trait pausable-trait .base-traits.pausable-trait)
-(use-trait access-control-trait .02-core-protocol.02-core-protocol.rbac-trait-trait)
+(use-trait access-control-trait .core-protocol.02-core-protocol.rbac-trait-trait)
 (use-trait circuit-breaker-trait .monitoring-security-traits.circuit-breaker-trait)
 
 ;; ===== Constants =====

@@ -4,10 +4,10 @@
 
 ;; Implements a concentrated liquidity pool for the Conxian DEX.
 
-(use-trait sip-010-ft-trait .01-sip-standards.sip-010-ft-trait)
-(use-trait pool-trait .03-defi-primitives.pool-trait)
-(use-trait math-trait .10-math-utilities.math-trait)
-(use-trait circuit-breaker-trait .09-security-monitoring.circuit-breaker-trait)
+(use-trait sip-010-ft-trait .sip-standards.sip-010-ft-trait)
+(use-trait pool-trait .defi-primitives.pool-trait)
+(use-trait math-trait .math-utilities.math-trait)
+(use-trait circuit-breaker-trait .security-monitoring.circuit-breaker-trait)
 
 ;; Error Codes
 (define-constant ERR-NOT-AUTHORIZED u1000)
@@ -37,8 +37,8 @@
 
 (define-data-var circuit-breaker principal .circuit-breaker)
 (define-data-var admin principal tx-sender)
-(use-trait sip-009-nft-trait .01-sip-standards.sip-009-nft-trait)
-(use-trait rbac-trait .02-core-protocol.rbac-trait)
+(use-trait sip-009-nft-trait .sip-standards.sip-009-nft-trait)
+(use-trait rbac-trait .core-protocol.rbac-trait)
 
 ;; Constants
 (define-constant Q128 u340282366920938463463374607431768211455)

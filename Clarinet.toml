@@ -160,13 +160,6 @@ dim-metrics = ".dim-metrics"
 dimensional-core = ".dimensional-core"
 dimensional-engine = ".dimensional-engine"
 
-# Tokens
-cxvg-token = ".cxvg-token"
-cxlp-token = ".cxlp-token"
-cxtr-token = ".cxtr-token"
-cxs-token = ".cxs-token"
-cxd-price-initializer = ".cxd-price-initializer"
-
 # DEX
 dex-router = ".dimensional-advanced-router-dijkstra"
 pool-template = ".pool-template"

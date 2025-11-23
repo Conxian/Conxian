@@ -5,7 +5,7 @@
 ;; --- Traits ---
 (use-trait pausable-trait .base-traits.pausable-trait)
 (use-trait ownable-trait .base-traits.ownable-trait)
-(use-trait rbac-trait .02-core-protocol.02-core-protocol.rbac-trait-trait)
+(use-trait rbac-trait .core-protocol.rbac-trait-trait)
 
 ;; @constants
 ;; @var ERR_CONTRACT_PAUSED: The contract is currently paused.

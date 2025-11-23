@@ -1,11 +1,11 @@
 ;; liquidation-engine.clar
 ;; Handles position liquidations in the dimensional engine
 
-(use-trait liquidation-trait .06-risk-management.liquidation-trait)
-(use-trait risk-trait .06-risk-management.risk-manager-trait)
-(use-trait oracle-aggregator-v2-trait .05-oracle-pricing.oracle-aggregator-v2-trait)
+(use-trait liquidation-trait .risk-management.liquidation-trait)
+(use-trait risk-trait .risk-management.risk-manager-trait)
+(use-trait oracle-aggregator-v2-trait .oracle-pricing.oracle-aggregator-v2-trait)
 (use-trait dimensional-trait .dimensional-traits.dimensional-trait)
-(use-trait ft-trait .01-sip-standards.sip-010-ft-trait)
+(use-trait ft-trait .sip-standards.sip-010-ft-trait)
 
 ;; ===== Constants =====
 (define-constant ERR_UNAUTHORIZED (err u4000))

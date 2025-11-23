@@ -2,7 +2,7 @@
 ;; Manages Discreet Log Contracts for Native Bitcoin Lending
 ;; Implements dlc-manager-trait
 
-(use-trait dlc-manager-trait .07-cross-chain.dlc-manager-trait)
+(use-trait dlc-manager-trait .cross-chain.dlc-manager-trait)
 
 ;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED (err u6000))

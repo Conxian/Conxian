@@ -1,4 +1,4 @@
-(use-trait sip-010-ft-trait .01-sip-standards.sip-010-ft-trait)
+(use-trait sip-010-ft-trait .sip-standards.sip-010-ft-trait)
 (use-trait sip-000-governance-trait .traits folder.sip-000-governance-trait)
 ;; tokenized-bond-adapter.clar
 ;; Integration adapter for tokenized bonds to connect with enhanced tokenomics system

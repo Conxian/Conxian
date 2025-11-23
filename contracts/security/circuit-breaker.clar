@@ -1,6 +1,6 @@
 ;; circuit-breaker.clar
 
-(use-trait circuit-breaker-trait .09-security-monitoring.circuit-breaker-trait)
+(use-trait circuit-breaker-trait .security-monitoring.circuit-breaker-trait)
 
 (define-constant ERR_UNAUTHORIZED (err u5000))
 

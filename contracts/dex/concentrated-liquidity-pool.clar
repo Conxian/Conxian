@@ -1,6 +1,6 @@
 ;; Concentrated Liquidity Pool (CLP) - Minimal adapter implementation for trait compliance and compilation
 
-(use-trait rbac-trait .02-core-protocol.02-core-protocol.rbac-trait-trait)
+(use-trait rbac-trait .core-protocol.02-core-protocol.rbac-trait-trait)
 
 ;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED (err u1100))

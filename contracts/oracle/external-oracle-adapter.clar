@@ -2,9 +2,9 @@
 ;; This contract acts as an adapter for integrating external oracle providers, allowing the system to fetch and use off-chain data.
 ;; It supports multiple oracle sources, manages their authorization, and aggregates price data to mitigate manipulation risks.
 
-(use-trait rbac-trait .02-core-protocol.02-core-protocol.rbac-trait-trait)
+(use-trait rbac-trait .core-protocol.02-core-protocol.rbac-trait-trait)
 (use-trait oracle-trait .oracle-risk-traits.oracle-trait)
-(use-trait sip-010-ft-trait .01-sip-standards.sip-010-ft-trait)
+(use-trait sip-010-ft-trait .sip-standards.sip-010-ft-trait)
 (define-constant ERR_INVALID_ORACLE_SOURCE (err u1001))
 (define-constant ERR_INVALID_PRICE_DATA (err u1002))
 (define-constant ERR_PRICE_TOO_OLD (err u1003))
@@ -171,7 +171,7 @@
 
 (define-public (set-contract-owner (new-owner principal))
   (begin
-    (asserts! (is-ok (contract-call? .02-core-protocol.rbac-trait-contract has-role "contract-owner")) (err ERR_UNAUTHORIZED))
+    (asserts! (is-ok (contract-call? .core-protocol.rbac-trait-contract has-role "contract-owner")) (err ERR_UNAUTHORIZED))
     (ok true)
   )
 )

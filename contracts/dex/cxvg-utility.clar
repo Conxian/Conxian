@@ -2,8 +2,8 @@
 ;; CXVG Utility System - Fee discounts, proposal bonding, governance boosts
 ;; Addresses governance token utility sinks and voting power concentration risks
 
-(use-trait token-trait .01-sip-standards.sip-010-ft-trait)
-(use-trait governance-token-trait .08-governance.governance-token-trait)
+(use-trait token-trait .sip-standards.sip-010-ft-trait)
+(use-trait governance-token-trait .governance.governance-token-trait)
 
 ;; --- Constants ---
 (define-constant CONTRACT_OWNER tx-sender)

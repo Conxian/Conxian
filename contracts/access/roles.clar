@@ -41,7 +41,7 @@
 ;; @param who: The principal to grant the role to.
 ;; @param role: The role to grant.
 ;; @returns (response bool uint): An `ok` response with `true` on success, or an error code.
-(define-public (grant-role (who principal) (role (string-ascii 32)))
+(define-public (grant-role (role (string-ascii 32)) (who principal))
   (begin
     ;; Only the contract owner can grant roles
     (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_NOT_OWNER)
@@ -57,7 +57,7 @@
 ;; @param who: The principal to revoke the role from.
 ;; @param role: The role to revoke.
 ;; @returns (response bool uint): An `ok` response with `true` on success, or an error code.
-(define-public (revoke-role (who principal) (role (string-ascii 32)))
+(define-public (revoke-role (role (string-ascii 32)) (who principal))
   (begin
     ;; Only the contract owner can revoke roles
     (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_NOT_OWNER)
@@ -73,7 +73,7 @@
 ;; @param who: The principal to check.
 ;; @param role: The role to check for.
 ;; @returns (response bool uint): An `ok` response with `true` if the principal has the role, `false` otherwise.
-(define-public (has-role (who principal) (role (string-ascii 32)))
+(define-public (has-role (role (string-ascii 32)) (who principal))
   (ok (default-to false (map-get? roles { who: who, role: role })))
 )
 

@@ -4,7 +4,7 @@
 ;; - Manage staking and lockups for different dimensions.
 ;; - Calculate and distribute yield based on dimension-specific metrics.
 
-(use-trait sip-010-ft-trait .01-sip-standards.sip-010-ft-trait)
+(use-trait sip-010-ft-trait .sip-standards.sip-010-ft-trait)
 (use-trait common-utils-trait .common-utils-trait.common-utils-trait)
 
 ;; ===== Constants =====

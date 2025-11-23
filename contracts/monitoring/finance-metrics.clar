@@ -1,8 +1,8 @@
 ;; finance-metrics.clar
 ;; Unified financial metrics (EBITDA, CAPEX, OPEX) tracking and reporting
 
-(use-trait finance-metrics-trait .10-math-utilities.finance-metrics-trait)
-(impl-trait .10-math-utilities.finance-metrics-trait)
+(use-trait finance-metrics-trait .math-utilities.finance-metrics-trait)
+(impl-trait .math-utilities.finance-metrics-trait)
 
 ;; ===== Constants =====
 (define-constant ERR_UNAUTHORIZED (err u900))

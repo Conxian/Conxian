@@ -3,7 +3,7 @@
 ;; and provides functions for updating the price through governance or in an emergency.
 
 ;; The governance token contract is expected to implement governance-token-trait.
-(use-trait governance-trait .08-governance.governance-token-trait)
+(use-trait governance-trait .governance.governance-token-trait)
 
 ;; @constants
 ;; @var ERR_UNAUTHORIZED: The caller is not authorized to perform this action.

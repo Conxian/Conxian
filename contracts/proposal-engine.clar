@@ -3,9 +3,9 @@
 ;; Manages DAO-based voting and proposal execution
 
 ;; Traits
-(use-trait proposal-engine-trait .08-governance.proposal-engine-trait)
+(use-trait proposal-engine-trait .governance.proposal-engine-trait)
 ;; TODO: proposal-engine-trait not defined in traits folder.clar
-;; (impl-trait .08-governance.proposal-engine-trait)
+;; (impl-trait .governance.proposal-engine-trait)
 
 ;; Constants
 (define-constant ERR_UNAUTHORIZED (err u100))

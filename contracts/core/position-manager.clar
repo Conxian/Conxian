@@ -5,7 +5,7 @@
 (use-trait position-manager-trait .trait-dimensional.position-manager-trait)
 (use-trait oracle-trait .trait-oracle-pricing.oracle-aggregator-v2-trait)
 (use-trait sip-010-ft-trait .trait-sip-standards.sip-010-ft-trait)
-(use-trait rbac-trait .trait-core-protocol.02-core-protocol.rbac-trait-trait)
+(use-trait rbac-trait .trait-core-protocol.rbac-trait)
 
 (impl-trait .dimensional-traits.position-manager-trait)
 

@@ -5,10 +5,10 @@
 ;; Central coordination contract for the enhanced Conxian token system
 ;; Provides unified interface and orchestrates interactions between all token subsystems
 
-(use-trait rbac-trait .02-core-protocol.02-core-protocol.rbac-trait-trait)
+(use-trait rbac-trait .core-protocol.02-core-protocol.rbac-trait-trait)
 
 ;; --- Traits ---
-(use-trait sip-010-ft-trait .01-sip-standards.sip-010-ft-trait)
+(use-trait sip-010-ft-trait .sip-standards.sip-010-ft-trait)
 (use-trait lp-token-trait .lp-token.lp-token)
 
 ;; --- Constants ---
@@ -86,7 +86,7 @@
 
 (define-public (initialize-system)
   (begin
-    (asserts! (is-ok (contract-call? .02-core-protocol.rbac-trait-contract has-role "contract-owner")) (err ERR_UNAUTHORIZED))
+    (asserts! (is-ok (contract-call? .core-protocol.rbac-trait-contract has-role "contract-owner")) (err ERR_UNAUTHORIZED))
     (asserts! (not (var-get system-initialized)) (err ERR_INITIALIZATION_FAILED))
     
     ;; Initialize component status tracking
@@ -112,7 +112,7 @@
 
 (define-public (set-cxd-staking-contract (contract-address principal))
   (begin
-    (asserts! (is-ok (contract-call? .02-core-protocol.rbac-trait-contract has-role "contract-owner")) (err ERR_UNAUTHORIZED))
+    (asserts! (is-ok (contract-call? .core-protocol.rbac-trait-contract has-role "contract-owner")) (err ERR_UNAUTHORIZED))
     (var-set cxd-staking-contract (some contract-address))
     (ok true)
   )
@@ -120,7 +120,7 @@
 
 (define-public (set-migration-queue-contract (contract-address principal))
   (begin
-    (asserts! (is-ok (contract-call? .02-core-protocol.rbac-trait-contract has-role "contract-owner")) (err ERR_UNAUTHORIZED))
+    (asserts! (is-ok (contract-call? .core-protocol.rbac-trait-contract has-role "contract-owner")) (err ERR_UNAUTHORIZED))
     (var-set migration-queue-contract (some contract-address))
     (ok true)
   )
@@ -128,7 +128,7 @@
 
 (define-public (set-cxvg-utility-contract (contract-address principal))
   (begin
-    (asserts! (is-ok (contract-call? .02-core-protocol.rbac-trait-contract has-role "contract-owner")) (err ERR_UNAUTHORIZED))
+    (asserts! (is-ok (contract-call? .core-protocol.rbac-trait-contract has-role "contract-owner")) (err ERR_UNAUTHORIZED))
     (var-set cxvg-utility-contract (some contract-address))
     (ok true)
   )
@@ -136,7 +136,7 @@
 
 (define-public (set-emission-controller-contract (contract-address principal))
   (begin
-    (asserts! (is-ok (contract-call? .02-core-protocol.rbac-trait-contract has-role "contract-owner")) (err ERR_UNAUTHORIZED))
+    (asserts! (is-ok (contract-call? .core-protocol.rbac-trait-contract has-role "contract-owner")) (err ERR_UNAUTHORIZED))
     (var-set emission-controller-contract (some contract-address))
     (ok true)
   )
@@ -144,7 +144,7 @@
 
 (define-public (set-revenue-distributor-contract (contract-address principal))
   (begin
-    (asserts! (is-ok (contract-call? .02-core-protocol.rbac-trait-contract has-role "contract-owner")) (err ERR_UNAUTHORIZED))
+    (asserts! (is-ok (contract-call? .core-protocol.rbac-trait-contract has-role "contract-owner")) (err ERR_UNAUTHORIZED))
     (var-set revenue-distributor-contract (some contract-address))
     (ok true)
   )
@@ -152,7 +152,7 @@
 
 (define-public (set-invariant-monitor-contract (contract-address principal))
   (begin
-    (asserts! (is-ok (contract-call? .02-core-protocol.rbac-trait-contract has-role "contract-owner")) (err ERR_UNAUTHORIZED))
+    (asserts! (is-ok (contract-call? .core-protocol.rbac-trait-contract has-role "contract-owner")) (err ERR_UNAUTHORIZED))
     (var-set invariant-monitor-contract (some contract-address))
     (ok true)
   )

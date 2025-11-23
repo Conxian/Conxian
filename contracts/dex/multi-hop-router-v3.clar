@@ -4,7 +4,7 @@
 ;; Temporarily remove traits until available
 ;; (use-trait dijkstra-pathfinder-trait .dijkstra-pathfinder-trait.dijkstra-pathfinder-trait)
 ;; (use-trait route-manager-trait .route-manager-trait.route-manager-trait)
-;; (use-trait rbac-trait .02-core-protocol.02-core-protocol.rbac-trait-trait)
+;; (use-trait rbac-trait .core-protocol.02-core-protocol.rbac-trait-trait)
 
 
 ;; @data-vars
@@ -37,7 +37,7 @@
 ;; --- Admin Functions ---
 (define-public (set-dijkstra-pathfinder (pathfinder principal))
   (begin
-    (asserts! (is-ok (contract-call? .02-core-protocol.rbac-trait has-role "contract-owner"))
+    (asserts! (is-ok (contract-call? .core-protocol.rbac-trait has-role "contract-owner"))
       (err u1001)
     )
     (var-set dijkstra-pathfinder pathfinder)
@@ -47,7 +47,7 @@
 
 (define-public (set-route-manager (manager principal))
   (begin
-    (asserts! (is-ok (contract-call? .02-core-protocol.rbac-trait has-role "contract-owner"))
+    (asserts! (is-ok (contract-call? .core-protocol.rbac-trait has-role "contract-owner"))
       (err u1001)
     )
     (var-set route-manager manager)

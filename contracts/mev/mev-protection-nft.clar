@@ -2,10 +2,10 @@
 ;; Comprehensive MEV (Maximum Extractable Value) protection NFT system
 ;; Provides front-running protection, sandwich attack prevention, and fair transaction ordering
 
-(use-trait sip-009-nft-trait .01-sip-standards.sip-009-nft-trait)
-(use-trait sip-010-ft-trait .01-sip-standards.sip-010-ft-trait)
+(use-trait sip-009-nft-trait .sip-standards.sip-009-nft-trait)
+(use-trait sip-010-ft-trait .sip-standards.sip-010-ft-trait)
 
-(impl-trait .01-sip-standards.sip-009-nft-trait)
+(impl-trait .sip-standards.sip-009-nft-trait)
 
 ;; ===== Constants =====
 (define-constant ERR_UNAUTHORIZED (err u13000))
