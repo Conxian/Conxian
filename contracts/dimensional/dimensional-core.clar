@@ -7,6 +7,7 @@
 ;;; Conforms to: Clarinet SDK 3.9+, Nakamoto Standard
 
 ;; Standard traits
+(use-trait oracle-trait .oracle-pricing.oracle-trait)
 (use-trait sip-010-ft-trait .sip-standards.sip-010-ft-trait)
 (use-trait finance-metrics-trait .math-utilities.finance-metrics-trait)
 (use-trait pausable-trait .core-protocol.pausable-trait)
@@ -153,11 +154,14 @@
   )
 )
 
-(define-private (get-oracle-price (token principal))
   "@private Get price from oracle with error handling"
-  (match (contract-call? (var-get oracle-contract) get-price token)
-    price (ok price)
-    (err ERR_ORACLE_ERROR)
+  "@private Get price from oracle with error handling"
+  (begin
+    (asserts! (is-eq (contract-of oracle-trait) (var-get oracle-contract)) (err ERR_UNAUTHORIZED))
+    (match (contract-call? oracle-trait get-price token)
+      price (ok price)
+      (err ERR_ORACLE_ERROR)
+    )
   )
 )
 
@@ -178,11 +182,13 @@
     (funding-interval (string-ascii 20))
     (tags (list 10 (string-utf8 32)))
     (metadata (optional (string-utf8 1024)))
+    (token-trait <sip-010-ft-trait>)
+    (oracle-trait <oracle-trait>)
   )
   (let (
     (position-id (var-get next-position-id))
     (current-block block-height)
-    (price (try! (get-oracle-price token)))
+    (price (try! (get-oracle-price token oracle-trait)))
     (is-long (or (is-eq position-type "LONG") (is-eq position-type "PERPETUAL")))
     (size (* collateral-amount leverage))
     (min-amount-out (/ (* price (- u10000 slippage-tolerance)) u10000))
@@ -195,18 +201,10 @@
       (is-eq position-type "SHORT")
       (is-eq position-type "PERPETUAL")
     ) ERR_INVALID_POSITION_TYPE)
+        collateral-amount
     
     ;; Transfer collateral from user
-    (try! (contract-call? 
-      (as-contract (contract-call? 
-        token 
-        transfer 
-        collateral-amount 
-        tx-sender 
-        (as-contract tx-sender)
         none
-      )))
-    )
     
     ;; Create position
     (map-set positions 
@@ -244,6 +242,7 @@
 (define-public (close-position 
     (position-id uint) 
     (slippage-tolerance uint)
+    (position-id uint)(slippage-tolerance uint)
   )
   (let (
     (position (unwrap! (get-position tx-sender position-id) (err ERR_INVALID_POSITION)))
@@ -265,16 +264,9 @@
     )
     
     ;; Transfer funds to user
-    (try! (contract-call? 
-      (as-contract (contract-call? 
-        (var-get dimensional-token)
-        transfer
-        total-amount
-        (as-contract tx-sender)
-        tx-sender
-        none
-      )))
-    )
+    ;; Transfer funds to user
+    (asserts! (is-eq (contract-of token-trait) (var-get dimensional-token)) (err ERR_UNAUTHORIZED))
+    (try! (as-contract (contract-call? token-trait transfer total-amount tx-sender none)))
     
     ;; Update TVL and position counts
     (var-set total-value-locked (- (var-get total-value-locked) (get collateral position)))
@@ -344,11 +336,11 @@
   )
 )
 
-(define-public (liquidate-position (owner principal) (position-id uint))
+          (* leverage u10000)
   "@dev Liquidate an undercollateralized position"
   (let (
     (position (unwrap! (get-position owner position-id) (err ERR_INVALID_POSITION)))
-    (current-price (try! (get-oracle-price owner)))
+    (current-price (try! (get-oracle-price owner oracle-trait)))
     (collateral-value (get collateral position))
     (maintenance-margin (/ (* collateral-value (get maintenance-margin position)) u10000))
     (pnl (calculate-pnl position current-price))
@@ -373,11 +365,11 @@
   )
 )
 
-(define-read-only (get-position-health (owner principal) (position-id uint))
+    (var-set total-value-locked (- (var-get total-value-locked) collateral-value))
   "@dev Returns the health factor of a position (0-10000, where < 10000 means liquidatable)"
   (let (
     (position (unwrap! (get-position owner position-id) (err ERR_INVALID_POSITION)))
-    (current-price (try! (get-oracle-price owner)))
+    (current-price (try! (get-oracle-price owner oracle-trait)))
     (collateral-value (get collateral position))
     (pnl (calculate-pnl position current-price))
     (maintenance-margin (/ (* collateral-value (get maintenance-margin position)) u10000))
@@ -409,12 +401,16 @@
 ;; ===== Pausable Implementation =====
 (define-data-var pausable-contract principal tx-sender)
 
-(define-public (check-not-paused)
+(define-public (check-not-paused (pausable <pausable-trait>))
   "@dev Check if the contract is not paused"
-  (match (contract-call? (var-get pausable-contract) is-paused)
-    is-paused? (if is-paused? (err u3001) (ok true))
-    (err u3002)
-  ))
+  (begin
+    (asserts! (is-eq (contract-of pausable) (var-get pausable-contract)) (err u3001))
+    (match (contract-call? pausable is-paused)
+      is-paused? (if is-paused? (err u3001) (ok true))
+      (err u3002)
+    )
+  )
+)
 
 ;; ===== Initialization =====
 (define-public (initialize (new-owner principal) (oracle principal))

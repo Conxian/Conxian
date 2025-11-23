@@ -95,7 +95,7 @@
 ;; @param price uint - The price reported by the oracle.
 ;; @param total-supply uint - The total supply of the asset.
 ;; @returns (response bool uint) - (ok true) on success, or an error if unauthorized, oracle not found, or manipulation detected.
-(define-public (update-price (oracle principal) (asset principal) (price uint) (total-supply uint))
+(define-public (update-price (oracle principal) (asset principal) (price uint) (total-supply uint) (circuit-breaker <circuit-breaker-trait>))
   (begin
     (asserts! (is-some (map-get? registered-oracles { oracle-principal: oracle })) ERR_INVALID_ORACLE)
     (try! (check-manipulation asset price))
@@ -156,16 +156,20 @@
 
 ;; @desc Checks the circuit breaker status.
 ;; @returns (response bool uint) - (ok true) if circuit breaker is not tripped, (err ERR_CIRCUIT_BREAKER_TRIPPED) if tripped.
-(define-private (check-circuit-breaker)
+(define-private (check-circuit-breaker (circuit-breaker <circuit-breaker-trait>))
   ;; v1: if a circuit-breaker contract is configured, consult its is-circuit-open
   ;; method; otherwise treat the circuit as open.
   (match (var-get circuit-breaker-contract)
-    (some breaker)
-      (match (contract-call? breaker is-circuit-open)
-        true (ok true)
-false ERR_CIRCUIT_BREAKER_TRIPPED
-        (err code) ERR_CIRCUIT_BREAKER_TRIPPED)
-    (none none-configured) (ok true))
+    breaker
+      (begin
+        (asserts! (is-eq (contract-of circuit-breaker) breaker) ERR_UNAUTHORIZED)
+        (match (contract-call? circuit-breaker is-circuit-open)
+          is-open (if is-open (ok true) ERR_CIRCUIT_BREAKER_TRIPPED)
+          err ERR_CIRCUIT_BREAKER_TRIPPED
+        )
+      )
+    (ok true)
+  )
 )
 
 ;; @desc Calculates the time-weighted average price (TWAP) for an asset over a specified look-back window.

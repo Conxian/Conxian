@@ -1,11 +1,11 @@
 ;; @desc This contract is responsible for calculating and updating funding rates.
 
-(use-trait funding-rate-calculator-trait .dimensional.funding-rate-calculator-trait)
+(use-trait funding-rate-calculator-trait .dimensional-traits.funding-rate-calculator-trait)
 (use-trait oracle-trait .oracle-pricing.oracle-aggregator-v2-trait)
 (use-trait position-manager-trait .dimensional.position-manager-trait)
 (use-trait rbac-trait .core-protocol.rbac-trait)
 
-(impl-trait .dimensional.funding-rate-calculator-trait)
+(impl-trait .dimensional-traits.funding-rate-calculator-trait)
 
 ;; @constants
 (define-constant ERR_UNAUTHORIZED (err u1001))

@@ -157,7 +157,7 @@
         (map-set stakes
           {staker: staker, dim-id: dim-id}
           {
-            amount: (safe-add (get amount stake) amount),
+            amount: (+ (get amount stake) amount),
             unlock-height: (max unlock-height (get unlock-height stake)),
             lock-period: (max lock-period (get lock-period stake)),
             stake-height: (get stake-height stake),
@@ -207,10 +207,10 @@
       (rewards (try! (calculate-rewards-for-stake stake-info dim-id)))
     )
       ;; Transfer rewards from contract to the staker
-      (try! (safe-token-transfer token rewards (as-contract tx-sender) staker none))
+      (try! (contract-call? token transfer rewards (as-contract tx-sender) staker none))
       
       ;; Return principal to the staker from contract
-      (try! (safe-token-transfer token staked-amount (as-contract tx-sender) staker
+      (try! (contract-call? token transfer staked-amount (as-contract tx-sender) staker
         none
       ))
       
@@ -220,7 +220,7 @@
       )
         (map-set dimension-totals
           {dim-id: dim-id}
-          { total-staked: (safe-sub (get total-staked totals) staked-amount) }
+          { total-staked: (- (get total-staked totals) staked-amount) }
         )
       )
       
@@ -243,7 +243,7 @@
       (rewards (try! (calculate-rewards-for-stake stake-info dim-id)))
     )
       ;; Transfer rewards
-      (try! (safe-token-transfer token rewards (as-contract tx-sender) staker none))
+      (try! (contract-call? token transfer rewards (as-contract tx-sender) staker none))
       
       ;; Update last claim height
       (map-set stakes
@@ -273,8 +273,8 @@
     (base-rate (get base-rate params))
     (k (get k params))
   )
-    (contract-call? (var-get dim-metrics-contract) get-dimension-metrics dim-id)
-    (ok reward)
+    ;; (contract-call? (var-get dim-metrics-contract) get-dimension-metrics dim-id)
+(ok u0) ;; Stubbed reward calculation
   )
 )
 

@@ -3,11 +3,11 @@
 ;; specialized contracts for position management, funding rate calculation,
 ;; collateral management, and risk management.
 
-(use-trait dimensional-trait .trait-dimensional.dimensional-trait)
-(use-trait funding-rate-calculator-trait .trait-dimensional.funding-rate-calculator-trait)
-(use-trait collateral-manager-trait .trait-dimensional.collateral-manager-trait)
-(use-trait risk-manager-trait .trait-risk-management.risk-manager-trait)
-(use-trait rbac-trait .trait-core-protocol.rbac-trait)
+(use-trait dimensional-trait .dimensional-traits.dimensional-trait)
+(use-trait funding-rate-calculator-trait .dimensional-traits.funding-rate-calculator-trait)
+(use-trait collateral-manager-trait .dimensional-traits.collateral-manager-trait)
+(use-trait risk-manager-trait .risk-management.risk-manager-trait)
+(use-trait rbac-trait .core-protocol.rbac-trait)
 
 ;; @data-vars
 (define-data-var position-manager principal .position-manager)
@@ -19,7 +19,7 @@
 (define-public (open-position (asset principal) (collateral uint) (leverage uint) (is-long bool) (stop-loss (optional uint)) (take-profit (optional uint)))
   (let (
     (collateral-balance (try! (contract-call? .collateral-manager get-balance tx-sender)))
-    (fee-rate (try! (contract-call? (var-get collateral-manager) get-protocol-fee-rate)))(fee (* collateral fee-rate))
+    (fee-rate (try! (contract-call? .collateral-manager get-protocol-fee-rate)))(fee (* collateral fee-rate))
     (total-cost (+ collateral fee))
   )
     (asserts! (>= collateral-balance total-cost) (err u2003))

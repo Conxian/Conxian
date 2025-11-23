@@ -41,3 +41,21 @@
     (get-implementation () (response principal uint))
   )
 )
+
+;; ===========================================
+;; REVENUE DISTRIBUTOR TRAIT
+;; ===========================================
+(define-trait revenue-distributor-trait
+  (
+    (report-revenue (principal uint .sip-010-ft-trait) (response bool uint))
+  )
+)
+
+;; ===========================================
+;; TOKEN COORDINATOR TRAIT
+;; ===========================================
+(define-trait token-coordinator-trait
+  (
+    (on-dimensional-yield (uint uint uint) (response bool uint))
+  )
+)

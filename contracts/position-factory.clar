@@ -391,37 +391,33 @@
 (define-private (calculate-visual-tier (amount uint) (nft-type uint))
   (match nft-type
     NFT_TYPE_LAUNCH_LP
-      (cond
-        ((>= amount u50000000) u5)    ;; Legendary - golden border
-        ((>= amount u10000000) u4)    ;; Epic - silver border
-        ((>= amount u1000000) u3)     ;; Rare - bronze border
-        (true u2))                    ;; Common - standard border
+      (if (>= amount u50000000) u5
+        (if (>= amount u10000000) u4
+          (if (>= amount u1000000) u3
+            u2)))
     NFT_TYPE_NORMAL_LP
-      (cond
-        ((>= amount u10000000) u3)    ;; Rare
-        ((>= amount u1000000) u2)     ;; Uncommon
-        (true u1))                    ;; Common
+      (if (>= amount u10000000) u3
+        (if (>= amount u1000000) u2
+          u1))
     else u2))                             ;; Default visual tier
 
 ;; Calculate bounty rarity based on achievement score and difficulty
 (define-private (calculate-bounty-rarity (achievement-score uint) (difficulty uint))
   (let ((base-score (* achievement-score difficulty)))
-    (cond
-      ((>= base-score u20) u1000)     ;; Legendary bounty hunter
-      ((>= base-score u15) u800)      ;; Epic bounty hunter
-      ((>= base-score u10) u600)      ;; Rare bounty hunter
-      ((>= base-score u5) u400)       ;; Uncommon bounty hunter
-      (true u200))))                   ;; Common bounty hunter
+    (if (>= base-score u20) u1000
+      (if (>= base-score u15) u800
+        (if (>= base-score u10) u600
+          (if (>= base-score u5) u400
+            u200))))))
 
 ;; Calculate bounty visual tier based on achievement score and difficulty
 (define-private (calculate-bounty-visual-tier (achievement-score uint) (difficulty uint))
   (let ((base-score (* achievement-score difficulty)))
-    (cond
-      ((>= base-score u20) u5)        ;; Legendary - animated border
-      ((>= base-score u15) u4)        ;; Epic - glowing border
-      ((>= base-score u10) u3)        ;; Rare - special border
-      ((>= base-score u5) u2)         ;; Uncommon - enhanced border
-      (true u1))))                     ;; Common - standard border
+    (if (>= base-score u20) u5
+      (if (>= base-score u15) u4
+        (if (>= base-score u10) u3
+          (if (>= base-score u5) u2
+            u1))))))
 
 ;; Calculate competition rarity based on rank and participants
 (define-private (calculate-competition-rarity (prize-rank uint) (max-participants uint))

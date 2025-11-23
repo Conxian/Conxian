@@ -26,7 +26,14 @@
 ;; @var authorized-contracts: A map of authorized contracts.
 (define-map authorized-contracts principal { authorized: bool, authorized-at: uint, authorized-by: principal })
 ;; @var protocol-events: A map of protocol events.
-(define-map protocol-events { event-id: uint } { event-type: (string-ascii 32), data: (buff 256), timestamp: uint })
+(define-map protocol-events
+  { event-id: uint }
+  {
+    event-type: (string-ascii 32),
+    data: (buff 256),
+    timestamp: uint,
+  }
+)
 
 ;; --- Private Functions ---
 ;; @desc Check if the caller is the protocol owner.
@@ -46,7 +53,7 @@
 ;; @param event-type: The type of the event.
 ;; @param data: The data associated with the event.
 ;; @returns (uint): The ID of the new event.
-(define-private (log-protocol-event (event-type (string-ascii 32)) (data (buff 256)))
+(define-private (log-protocol-event (event-type (string-ascii 32)) (data (string-ascii 256)))
   (let ((event-id (+ (var-get protocol-version) u1)))
     (map-set protocol-events
       { event-id: event-id }
@@ -69,7 +76,7 @@
       { value: value, updated-at: block-height }
     )
     (log-protocol-event "config-updated"
-      (concat key (string-to-ascii " updated"))
+      (concat key " updated")
     )
     (ok true)
   )
@@ -109,10 +116,10 @@
     (var-set emergency-paused pause)
     (if pause
       (log-protocol-event "protocol-paused"
-        (string-to-ascii? "emergency pause activated")
+        "emergency pause activated"
       )
       (log-protocol-event "protocol-unpaused"
-        (string-to-ascii? "emergency pause deactivated")
+        "emergency pause deactivated"
       )
     )
     (ok true)

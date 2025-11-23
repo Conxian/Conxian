@@ -50,3 +50,13 @@
     (swap (principal bool uint uint uint principal)  (response (tuple (amount0 int) (amount1 int)) uint))
   )
 )
+
+;; ===========================================
+;; POOL DEPLOYER TRAIT
+;; ===========================================
+(define-trait pool-deployer-trait (
+  (deploy-and-initialize
+    (principal principal)
+    (response principal uint)
+  )
+))

@@ -79,7 +79,12 @@ def validate_trait_implementations():
             
             # Check if contract exists in Clarinet.toml
             if contract_name in contract_map:
-                trait_file_path = os.path.join(contracts_dir.replace('/contracts', ''), contract_map[contract_name])
+                contract_path = contract_map[contract_name]
+                # Handle both relative and absolute paths in Clarinet.toml
+                if contract_path.startswith('contracts/'):
+                    trait_file_path = os.path.join(script_dir, '..', contract_path)
+                else:
+                    trait_file_path = os.path.join(contracts_dir, contract_path)
                 if not os.path.exists(trait_file_path):
                     failures.append({
                         'file': file_path,
@@ -101,7 +106,7 @@ def validate_trait_implementations():
             print(line)
         sys.exit(1)
     else:
-        print("✅ All trait implementations adhere to modular trait policy (Clarinet.toml-based)")
+        print("All trait implementations adhere to modular trait policy (Clarinet.toml-based)")
         sys.exit(0)
 
 if __name__ == '__main__':

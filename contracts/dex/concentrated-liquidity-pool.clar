@@ -1,6 +1,7 @@
 ;; Concentrated Liquidity Pool (CLP) - Minimal adapter implementation for trait compliance and compilation
 
 (use-trait rbac-trait .core-protocol.rbac-trait)
+(use-trait sip-010-ft-trait .sip-standards.sip-010-ft-trait)
 
 ;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED (err u1100))
@@ -157,9 +158,15 @@
 ;; @param amount1-desired (uint) The desired amount of token1 to add.
 ;; @returns (response { position-id: uint, amount0-actual: uint, amount1-actual: uint, liquidity-added: uint } (err u3011)) The details of the added liquidity, or an error.
 ;; @error u3011 If the tick range is invalid, a mathematical overflow occurs, or token transfers fail.
-(define-public (add-liquidity (lower-tick int) (upper-tick int) (amount0-desired uint) (amount1-desired uint))
+(define-public (add-liquidity (lower-tick int) (upper-tick int) (amount0-desired uint) (amount1-desired uint) (token0-trait <sip-010-ft-trait>) (token1-trait <sip-010-ft-trait>))
   (begin
     (asserts! (and (> upper-tick lower-tick) (>= lower-tick MIN_TICK) (<= upper-tick MAX_TICK)) ERR_INVALID_TICK_RANGE)
+    (asserts! (is-eq (contract-of token0-trait) (var-get token0))
+      ERR_UNAUTHORIZED
+    )
+(asserts! (is-eq (contract-of token1-trait) (var-get token1))
+      ERR_UNAUTHORIZED
+    )
 
     (let ((sqrt-price-lower (unwrap! (get-sqrt-price-from-tick lower-tick) ERR_INVALID_TICK))
           (sqrt-price-upper (unwrap! (get-sqrt-price-from-tick upper-tick) ERR_INVALID_TICK))
@@ -184,8 +191,12 @@
             (try! (update-tick-liquidity upper-tick liquidity false))
             (var-set total-liquidity (+ (var-get total-liquidity) liquidity))
 
-            (try! (contract-call? (var-get token0) transfer amount0-actual tx-sender (as-contract tx-sender) none))
-            (try! (contract-call? (var-get token1) transfer amount1-actual tx-sender (as-contract tx-sender) none))
+            (try! (contract-call? token0-trait transfer amount0-actual tx-sender
+              (as-contract tx-sender) none
+            ))
+(try! (contract-call? token1-trait transfer amount1-actual tx-sender
+              (as-contract tx-sender) none
+            ))
 
             (print {
               event: "add-liquidity",
@@ -237,10 +248,16 @@
 ;; @param position-id (uint) The ID of the position NFT to remove liquidity from.
 ;; @returns (response { amount0-returned: uint, amount1-returned: uint, liquidity-removed: uint } (err u3012)) The amounts of token0 and token1 returned, and the liquidity removed, or an error.
 ;; @error u3012 If the position is not found, the caller is not authorized, or token transfers fail.
-(define-public (remove-liquidity (position-id uint))
+(define-public (remove-liquidity (position-id uint) (token0-trait <sip-010-ft-trait>) (token1-trait <sip-010-ft-trait>))
   (let ((position (unwrap! (map-get? positions { position-id: position-id }) ERR_POSITION_NOT_FOUND))
         (owner (unwrap! (nft-get-owner? position-nft position-id) ERR_UNAUTHORIZED)))
     (asserts! (is-eq tx-sender owner) ERR_UNAUTHORIZED)
+    (asserts! (is-eq (contract-of token0-trait) (var-get token0))
+      ERR_UNAUTHORIZED
+    )
+(asserts! (is-eq (contract-of token1-trait) (var-get token1))
+      ERR_UNAUTHORIZED
+    )
 
     (let ((lower-tick (get lower position))
           (upper-tick (get upper position))
@@ -259,8 +276,8 @@
 
         (try! (burn-position-nft position-id owner))
 
-        (try! (as-contract (contract-call? (var-get token0) transfer amount0-returned tx-sender none)))
-(try! (as-contract (contract-call? (var-get token1) transfer amount1-returned tx-sender none)))
+        (try! (as-contract (contract-call? token0-trait transfer amount0-returned tx-sender none)))
+(try! (as-contract (contract-call? token1-trait transfer amount1-returned tx-sender none)))
 
 
         (print {
@@ -281,24 +298,34 @@
 ;; @param min-amount-out (uint) The minimum amount of token1 to receive.
 ;; @returns (response uint (err u3013)) The amount of token1 received, or an error.
 ;; @error u3013 If amount-in is zero, there is insufficient liquidity, the price limit is exceeded, or a mathematical overflow occurs.
-(define-public (swap-x-for-y (amount-in uint) (min-amount-out uint))
+(define-public (swap-x-for-y (amount-in uint) (min-amount-out uint) (token0-trait <sip-010-ft-trait>) (token1-trait <sip-010-ft-trait>))
   (let ((sqrt-price-limit (unwrap! (get-sqrt-price-from-tick MIN_TICK) ERR_INVALID_TICK)))
-    (swap amount-in min-amount-out sqrt-price-limit true)
+    (swap amount-in min-amount-out sqrt-price-limit true token0-trait
+      token1-trait
+    )
   )
 )
 
-(define-public (swap-y-for-x (amount-in uint) (min-amount-out uint))
+(define-public (swap-y-for-x (amount-in uint) (min-amount-out uint) (token0-trait <sip-010-ft-trait>) (token1-trait <sip-010-ft-trait>))
   (let ((sqrt-price-limit (unwrap! (get-sqrt-price-from-tick MAX_TICK) ERR_INVALID_TICK)))
-    (swap amount-in min-amount-out sqrt-price-limit false)
+    (swap amount-in min-amount-out sqrt-price-limit false token0-trait
+      token1-trait
+    )
   )
 )
 
-(define-private (swap (amount-in uint) (min-amount-out uint) (sqrt-price-limit uint) (is-x-for-y bool))
+(define-private (swap (amount-in uint) (min-amount-out uint) (sqrt-price-limit uint) (is-x-for-y bool) (token0-trait <sip-010-ft-trait>) (token1-trait <sip-010-ft-trait>))
   (begin
     (asserts! (> amount-in u0) ERR_ZERO_AMOUNT_IN)
+    (asserts! (is-eq (contract-of token0-trait) (var-get token0))
+      ERR_UNAUTHORIZED
+    )
+(asserts! (is-eq (contract-of token1-trait) (var-get token1))
+      ERR_UNAUTHORIZED
+    )
 
-    (let ((token-in (if is-x-for-y (var-get token0) (var-get token1)))
-          (token-out (if is-x-for-y (var-get token1) (var-get token0))))
+    (let ((token-in (if is-x-for-y token0-trait token1-trait))
+          (token-out (if is-x-for-y token1-trait token0-trait)))
 
       (try! (contract-call? token-in transfer amount-in tx-sender (as-contract tx-sender) none))
 
@@ -314,8 +341,8 @@
 
         (print {
           event: "swap",
-          token-in: token-in,
-          token-out: token-out,
+          token-in: (contract-of token-in),
+          token-out: (contract-of token-out),
           amount-in: amount-in,
           amount-out: amount-out
         })
@@ -534,8 +561,18 @@
 ;; @error ERR_INVALID_TICK_RANGE if the tick range is invalid.
 ;; @error ERR_OVERFLOW if a mathematical overflow occurs during liquidity calculation.
 ;; @error ERR_NFT_MINT_FAILED if the NFT minting fails.
-(define-public (add-liquidity-legacy (lower-tick int) (upper-tick int) (amount0-desired uint) (amount1-desired uint))
-  (add-liquidity lower-tick upper-tick amount0-desired amount1-desired))
+(define-public (add-liquidity-legacy
+    (lower-tick int)
+    (upper-tick int)
+    (amount0-desired uint)
+    (amount1-desired uint)
+    (token0-trait <sip-010-ft-trait>)
+    (token1-trait <sip-010-ft-trait>)
+  )
+  (add-liquidity lower-tick upper-tick amount0-desired amount1-desired
+    token0-trait token1-trait
+  )
+)
 
 ;; @desc Swaps tokens in the pool (legacy adapter).
 ;; @param token-in The principal of the token being sent in.
@@ -546,10 +583,9 @@
 ;; @error ERR_ZERO_AMOUNT_IN if the amount-in is zero.
 ;; @error ERR_OVERFLOW if a mathematical overflow occurs during swap calculation.
 ;; @error ERR_INSUFFICIENT_LIQUIDITY if the amount-out is less than min-amount-out.
-(define-public (swap-legacy (token-in principal) (amount-in uint) (min-amount-out uint))
+(define-public (swap-legacy (token-in principal) (amount-in uint) (min-amount-out uint) (token0-trait <sip-010-ft-trait>) (token1-trait <sip-010-ft-trait>))
   (if (is-eq token-in (var-get token0))
-    (swap-x-for-y amount-in min-amount-out)
-    (swap-y-for-x amount-in min-amount-out)
+    (swap-x-for-y amount-in min-amount-out token0-trait token1-trait)(swap-y-for-x amount-in min-amount-out token0-trait token1-trait)
   )
 )
 
