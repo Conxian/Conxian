@@ -59,7 +59,8 @@
     (let (
       (index-price (unwrap! (contract-call? .oracle.oracle-aggregator-v2 get-price asset)
         (err u5003)
-      ))(twap (unwrap!
+      ))
+      (twap (unwrap!
         (contract-call? .oracle.oracle-aggregator-v2 get-twap asset
           (var-get funding-interval)
         )

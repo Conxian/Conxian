@@ -52,7 +52,7 @@
 ;; ===========================================
 (define-trait encoding-trait
   (
-    (encode-tuple ((tuple)) (response (buff 1024) uint))
+    (encode-tuple ((tuple (dummy: bool))) (response (buff 1024) uint))
     (hash-data ((buff 1024)) (response (buff 32) uint))
   )
 )
