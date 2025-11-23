@@ -6,13 +6,13 @@
     ;; @param amount: The amount to deposit.
     ;; @param token: The token to deposit.
     ;; @returns (response bool uint): An `ok` response with `true` on success, or an error code.
-    ;; @param token: The token to deposit.
+    (deposit-funds (uint principal) (response bool uint))
 
     ;; @desc Withdraw funds from the internal ledger.
     ;; @param amount: The amount to withdraw.
     ;; @param token: The token to withdraw.
     ;; @returns (response bool uint): An `ok` response with `true` on success, or an error code.
-    ;; @param token: The token to withdraw.
+    (withdraw-funds (uint principal) (response bool uint))
 
     ;; @desc Get the internal balance of a user.
     ;; @param user: The principal of the user.

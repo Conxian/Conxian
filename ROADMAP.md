@@ -1,11 +1,11 @@
 # Conxian Protocol Roadmap
 
-## Phase 1: Foundation & Core Dimensions (Current)
-- [x] **Spatial Dimension**: Concentrated Liquidity Pool (CLP) Core Logic
-- [x] **Risk Dimension**: Liquidation Engine & Oracle Aggregator V2
-- [x] **Cross-Chain Dimension**: Bitcoin Adapter with Finality Verification
-- [x] **DLC Integration**: DLC Manager & Traits for Native BTC Lending
-- [ ] **Testing**: Comprehensive Unit Tests for all new modules
+## Phase 1: Foundation & Core Dimensions (90% Complete)
+- [x] **Spatial Dimension**: Concentrated Liquidity Pool (CLP) Core Logic ✅
+- [x] **Risk Dimension**: Liquidation Engine & Oracle Aggregator V2 ✅
+- [🟡] **Cross-Chain Dimension**: Bitcoin Adapter with Finality Verification (stub requires expansion)
+- [x] **DLC Integration**: DLC Manager & Traits for Native BTC Lending ✅ (trait + implementation exist)
+- [🔴] **Testing**: Comprehensive Unit Tests for all new modules (coverage unverified)
 
 ## Phase 2: Institutional & Governance
 - [ ] **Institutional Dimension**: Enterprise API & Compliance Hooks

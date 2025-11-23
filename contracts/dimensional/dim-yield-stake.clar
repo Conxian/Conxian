@@ -22,10 +22,11 @@
 (define-constant MIN_LOCK_PERIOD u144) ;; ~1 day
 (define-constant MAX_LOCK_PERIOD u262800) ;; ~5 years
 
-;; ===== Data Variables =====
+;; ===== Utility Functions =====
 (define-read-only (max (a uint) (b uint))
   (if (> a b) a b))
 
+;; ===== Contract State =====
 (define-data-var contract-owner principal tx-sender)
 (define-data-var dim-metrics-contract principal tx-sender)
 (define-data-var token-contract principal tx-sender)
@@ -61,16 +62,14 @@
   {total-staked: uint}
 )
 
-;; ===== Guards =====
+;; ===== Access Control =====
 (define-private (is-owner)
-  (is-eq tx-sender (var-get contract-owner))
-)
+  (is-eq tx-sender (var-get contract-owner)))
 
 (define-private (is-not-paused)
-  (not (var-get paused))
-)
+  (not (var-get paused)))
 
-;; ===== Owner Functions =====
+;; ===== Administration Functions =====
 (define-public (set-contract-owner (new-owner principal))
   (begin
     (asserts! (is-owner) (err ERR_UNAUTHORIZED))
@@ -131,7 +130,7 @@
   )
 )
 
-;; ===== Staking Functions =====
+;; ===== Staking Core Functions =====
 (define-public (stake-dimension (dim-id uint) (amount uint) (lock-period uint) (token <sip-010-ft-trait>))
   (begin
     (asserts! (is-not-paused) (err ERR_UNAUTHORIZED))
@@ -157,7 +156,7 @@
         (map-set stakes
           {staker: staker, dim-id: dim-id}
           {
-            amount: (+ (get amount stake) amount),
+            amount: (safe-add (get amount stake) amount),
             unlock-height: (max unlock-height (get unlock-height stake)),
             lock-period: (max lock-period (get lock-period stake)),
             stake-height: (get stake-height stake),
@@ -183,7 +182,7 @@
       )
         (map-set dimension-totals
           {dim-id: dim-id}
-          {total-staked: (+ (get total-staked totals) amount)}
+          { total-staked: (+ (get total-staked totals) amount) }
         )
       )
       
@@ -192,7 +191,7 @@
   )
 )
 
-;; ===== Claiming Functions =====
+;; ===== Reward Distribution Functions =====
 (define-public (claim-rewards (dim-id uint) (token <sip-010-ft-trait>))
   (let (
     (staker tx-sender)
@@ -207,10 +206,12 @@
       (rewards (try! (calculate-rewards-for-stake stake-info dim-id)))
     )
       ;; Transfer rewards from contract to the staker
-      (try! (as-contract (contract-call? token transfer rewards tx-sender staker none)))
+      (try! (safe-token-transfer token rewards (as-contract tx-sender) staker none))
       
       ;; Return principal to the staker from contract
-      (try! (as-contract (contract-call? token transfer staked-amount tx-sender staker none)))
+      (try! (safe-token-transfer token staked-amount (as-contract tx-sender) staker
+        none
+      ))
       
       ;; Update dimension totals
       (let (
@@ -218,7 +219,7 @@
       )
         (map-set dimension-totals
           {dim-id: dim-id}
-          {total-staked: (- (get total-staked totals) staked-amount)}
+          { total-staked: (safe-sub (get total-staked totals) staked-amount) }
         )
       )
       
@@ -241,7 +242,7 @@
       (rewards (try! (calculate-rewards-for-stake stake-info dim-id)))
     )
       ;; Transfer rewards
-      (try! (as-contract (contract-call? token transfer rewards tx-sender staker none)))
+      (try! (safe-token-transfer token rewards (as-contract tx-sender) staker none))
       
       ;; Update last claim height
       (map-set stakes
@@ -254,7 +255,7 @@
   )
 )
 
-;; ===== Private Functions =====
+;; ===== Internal Calculations =====
 (define-read-only (calculate-rewards-for-stake 
   (stake-info {amount: uint, unlock-height: uint, lock-period: uint, stake-height: uint, last-claim-height: uint}) 
   (dim-id uint)
@@ -265,28 +266,18 @@
     (last-claim (get last-claim-height stake-info))
     (current-height block-height)
     (blocks-staked (- current-height last-claim))
-    (params (unwrap! (map-get? dimension-params {dim-id: dim-id}) ERR_DIMENSION_NOT_CONFIGURED))
+    (params (unwrap! (map-get? dimension-params { dim-id: dim-id })
+      (err ERR_DIMENSION_NOT_CONFIGURED)
+    ))
     (base-rate (get base-rate params))
     (k (get k params))
   )
-    (match (var-get dim-metrics-contract)
-      metrics-contract
-        (match (contract-call? metrics-contract get-metric dim-id u1)
-          utilization-metric
-            (let (
-              (utilization (get value utilization-metric))
-              (apr (+ base-rate (/ (* k utilization) PRECISION)))
-              (reward (/ (* staked-amount (* apr blocks-staked)) (* PRECISION BLOCKS_PER_YEAR)))
-            )
-              (ok reward)
-            )
-          (err ERR_METRIC_NOT_FOUND))
-      (err ERR_DIMENSION_NOT_CONFIGURED)
-    )
+    (contract-call? (var-get dim-metrics-contract) get-dimension-metrics dim-id)
+    (ok reward)
   )
 )
 
-;; ===== Read-Only Functions =====
+;; ===== Query Functions =====
 (define-read-only (get-stake-info (staker principal) (dim-id uint))
   (map-get? stakes {staker: staker, dim-id: dim-id})
 )

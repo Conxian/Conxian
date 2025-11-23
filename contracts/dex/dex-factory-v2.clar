@@ -1,6 +1,8 @@
 ;; DEX Factory v2 - Minimal trait-compliant implementation
 
 ;; Implement centralized factory v2 trait
+;; Temporarily remove trait until available
+;; (impl-trait .pool-factory-v2.pool-factory-v2-trait)
  
 
 (define-constant ERR_UNAUTHORIZED (err u1000))
@@ -75,8 +77,7 @@
     (asserts! (is-some type-entry) (err ERR_TYPE_NOT_FOUND))
     (asserts! (is-none (map-get? pools { token-a: (get t1 sorted-tokens), token-b: (get t2 sorted-tokens) })) (err ERR_POOL_ALREADY_EXISTS))
     (let (
-      (impl (get impl (unwrap-panic type-entry)))
-      (new-pool-principal (contract-call? impl deploy-and-initialize token-a token-b))
+      (new-pool-principal (contract-call? (get impl (unwrap-panic type-entry)) deploy-and-initialize token-a token-b))
     )
       (asserts! (is-ok new-pool-principal) ERR_TYPE_NOT_FOUND)
       (map-set pools {

@@ -3,7 +3,10 @@
 ;; ============================================================
 ;; Standardized error handling utilities for the Conxian protocol
 
-;; Error constants
+;; ============================================================
+;; ERROR CONSTANTS
+;; ============================================================
+
 (define-constant ERR_NOT_OWNER (err u1001))
 (define-constant ERR_CONTRACT_PAUSED (err u1005))
 (define-constant ERR_ZERO_AMOUNT (err u1006))
@@ -11,63 +14,80 @@
 (define-constant ERR_INVALID_ADDRESS (err u1008))
 (define-constant ERR_INVALID_INPUT (err u1009))
 
-;; Data variables
+;; ============================================================
+;; DATA VARIABLES
+;; ============================================================
+
 (define-data-var owner principal tx-sender)
 (define-data-var is-paused bool false)
 
-;; Helper function to create error responses with consistent format
-(define-private (err-with-context
-    (code uint)
-    (context (optional (string-utf8 256)))
-  )
-  (err code)
-)
-
-;; ======================
+;; ============================================================
 ;; ERROR VALIDATION HELPERS
-;; ======================
+;; ============================================================
 
 ;; Check if caller is contract owner
-(define-private (check-owner (caller principal))
+(define-read-only (check-owner (caller principal))
   (if (is-eq caller (var-get owner))
     (ok true)
-    (err ERR_NOT_OWNER)
+    ERR_NOT_OWNER
   )
 )
 
 ;; Check if contract is not paused
-(define-private (check-not-paused)
+(define-read-only (check-not-paused)
   (if (var-get is-paused)
-    (err ERR_CONTRACT_PAUSED)
+    ERR_CONTRACT_PAUSED
     (ok true)
   )
 )
 
 ;; Validate input amount is positive
-(define-private (validate-positive-amount (amount uint))
+(define-read-only (validate-positive-amount (amount uint))
   (if (<= amount u0)
-    (err ERR_ZERO_AMOUNT)
+    ERR_ZERO_AMOUNT
     (ok true)
   )
 )
 
-;; ======================
-;; COMMON ERROR RESPONSES
-;; ======================
-;; For Phase 0 we only expose simple constants above and a basic logging helper.
-
-;; ======================
-;; ERROR LOGGING
-;; ======================
-
-;; For Phase 0 we only expose simple constants above and a basic logging helper.
-
-;; ======================
-;; ERROR LOGGING
-;; ======================
-
-      message: message
-    })
-    (err code)
+;; Validate address is not zero address
+(define-read-only (validate-address (addr principal))
+  (if (is-eq addr tx-sender)
+    (ok true)
+    ERR_INVALID_ADDRESS
   )
+)
+
+;; ============================================================
+;; ADMIN FUNCTIONS
+;; ============================================================
+
+;; Set contract pause state
+(define-public (set-paused (paused bool))
+  (begin
+    (try! (check-owner tx-sender))
+    (var-set is-paused paused)
+    (ok true)
+  )
+)
+
+;; Transfer ownership
+(define-public (transfer-ownership (new-owner principal))
+  (begin
+    (try! (check-owner tx-sender))
+    (try! (validate-address new-owner))
+    (var-set owner new-owner)
+    (ok true)
+  )
+)
+
+;; ============================================================
+;; READ-ONLY FUNCTIONS
+;; ============================================================
+
+(define-read-only (get-owner)
+  (var-get owner)
+)
+
+(define-read-only (get-paused)
+  (var-get is-paused)
 )

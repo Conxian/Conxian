@@ -112,7 +112,7 @@
 ;; @param rbac-contract (<rbac-trait>) The RBAC trait contract.
 ;; @returns (response bool (err u3008)) True if successful, or an error.
 ;; @error u3008 If the caller is not authorized or an overflow occurs during price calculation.
-(define-public (initialize (t0 principal) (t1 principal) (initial-tick int) (rbac-contract <rbac-trait>))
+(define-public (initialize (t0 principal) (t1 principal) (initial-tick int) (rbac-contract principal))
   (begin
     (asserts! (contract-call? rbac-contract has-role "contract-owner") u3008)
     (var-set token0 t0)

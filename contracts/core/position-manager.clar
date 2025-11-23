@@ -2,12 +2,12 @@
 ;; including opening, closing, and updating positions. It also handles the
 ;; logic for calculating position value and P&L.
 
-(use-trait position-manager-trait .position-manager-trait.position-manager-trait)
-(use-trait oracle-trait .oracle-aggregator-v2-trait.oracle-aggregator-v2-trait)
-(use-trait sip-010-ft-trait .sip-010-ft-trait.sip-010-ft-trait)
-(use-trait rbac-trait .base-traits.rbac-trait)
+(use-trait position-manager-trait .trait-dimensional.position-manager-trait)
+(use-trait oracle-trait .trait-oracle-pricing.oracle-aggregator-v2-trait)
+(use-trait sip-010-ft-trait .trait-sip-standards.sip-010-ft-trait)
+(use-trait rbac-trait .trait-core-protocol.rbac-trait)
 
-(impl-trait .position-manager-trait.position-manager-trait)
+(impl-trait .trait-dimensional.position-manager-trait)
 
 ;; @constants
 (define-constant ERR_UNAUTHORIZED (err u1001))
@@ -69,11 +69,11 @@
   (let (
     (position (try! (get-position position-id)))
     (current-time block-height)
-    (price (try! (get-price (get position asset))))
-    (entry-price (get position entry-price))
-    (collateral (get position collateral))
-    (is-long (get position is-long))
-    (size (get position size))
+    (price (try! (get-price (get asset position))))
+    (entry-price (get entry-price position))
+    (collateral (get collateral position))
+    (is-long (get is-long position))
+    (size (get size position))
     (price-diff (if is-long
       (- price entry-price)
       (- entry-price price)
@@ -81,9 +81,9 @@
     (pnl (/ (* size price-diff) entry-price))
     (total-returned (+ collateral pnl))
   )
-    (asserts! (get position is-active) ERR_POSITION_NOT_ACTIVE)
+    (asserts! (get is-active position) ERR_POSITION_NOT_ACTIVE)
     (map-set positions {id: position-id} (merge position {is-active: false, last-updated: current-time}))
-    (map-delete active-positions {asset: (get position asset), is-long: is-long, position-id: position-id})
+    (map-delete active-positions {asset: (get asset position), is-long: is-long, position-id: position-id})
     (ok {collateral-returned: total-returned, pnl: pnl})
   )
 )
@@ -99,12 +99,12 @@
     (let (
         (position (try! (get-position position-id)))
     )
-        (asserts! (is-eq tx-sender (get position owner)) ERR_UNAUTHORIZED)
+        (asserts! (is-eq tx-sender (get owner position)) ERR_UNAUTHORIZED)
         (let (
-            (new-collateral (default-to (get position collateral) collateral))
-            (new-leverage (default-to (get position leverage) leverage))
-            (new-stop-loss (default-to (get position stop-loss) stop-loss))
-            (new-take-profit (default-to (get position take-profit) take-profit))
+            (new-collateral (default-to (get collateral position) collateral))
+            (new-leverage (default-to (get leverage position) leverage))
+            (new-stop-loss (default-to (get stop-loss position) stop-loss))
+            (new-take-profit (default-to (get take-profit position) take-profit))
         )
             (map-set positions {id: position-id} (merge position {
                 collateral: new-collateral,

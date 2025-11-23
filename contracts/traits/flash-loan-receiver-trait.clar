@@ -15,6 +15,6 @@
     ;; @param premium: The fee to be paid.
     ;; @param initiator: The address that initiated the flash loan.
     ;; @returns (response bool uint): True if successful, otherwise an error.
-    (execute-operation (asset principal) (amount uint) (premium uint) (initiator principal)) (response bool uint))
+    (execute-operation (asset principal) (amount uint) (premium uint) (initiator principal)) (response bool uint)
   )
 )

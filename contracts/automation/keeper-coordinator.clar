@@ -384,7 +384,7 @@
   (if (is-err (get status state))
     state
     {
-      status: (contract-call? (get contract state) accrue-interest asset),
+      status: (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.lending-system accrue-interest asset),
       contract: (get contract state),
     }
   )

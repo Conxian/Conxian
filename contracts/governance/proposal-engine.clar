@@ -65,8 +65,13 @@
     (asserts! (not (get canceled proposal)) ERR_VOTING_CLOSED)
     (asserts! (>= block-height (get start-block proposal)) ERR_PROPOSAL_NOT_ACTIVE)
     (asserts! (<= block-height (get end-block proposal)) ERR_VOTING_CLOSED)
-    (asserts! (unwrap! (contract-call? .governance-token has-voting-power tx-sender) (err ERR_UNAUTHORIZED)) ERR_UNAUTHORIZED)
-    (try! (contract-call? .governance-voting vote proposal-id support votes-cast
+    (asserts!
+      (unwrap-panic (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.governance-token
+        has-voting-power tx-sender
+      ))
+      ERR_UNAUTHORIZED
+    )
+    (try! (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.governance-voting vote proposal-id support votes-cast
       tx-sender
     ))
     (print {
@@ -82,9 +87,15 @@
 ;; @param proposal-id uint The ID of the proposal.
 ;; @returns (response bool uint) `(ok true)` on success.
 (define-public (execute (proposal-id uint))
-  (let ((proposal (unwrap! (contract-call? .proposal-registry get-proposal proposal-id) (err ERR_PROPOSAL_NOT_FOUND)))
+  (let ((proposal (unwrap! (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.proposal-registry get-proposal proposal-id) (err ERR_PROPOSAL_NOT_FOUND)))
         (total-votes (+ (get for-votes proposal) (get against-votes proposal)))
-        (governance-token-supply (unwrap! (contract-call? .governance-token get-total-supply) (err u0)))
+        (governance-token-supply (unwrap!
+          (contract-call?
+            'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.governance-token
+            get-total-supply
+          )
+          (err u0)
+        ))
         (quorum (/ (* total-votes u10000) governance-token-supply)))
     (asserts! (is-eq tx-sender (get proposer proposal)) ERR_UNAUTHORIZED)
     (asserts! (>= block-height (get end-block proposal)) ERR_PROPOSAL_NOT_ACTIVE)
@@ -92,7 +103,9 @@
     (asserts! (not (get canceled proposal)) ERR_VOTING_CLOSED)
     (asserts! (> (get for-votes proposal) (get against-votes proposal)) ERR_PROPOSAL_FAILED)
     (asserts! (>= quorum (var-get quorum-percentage)) ERR_QUORUM_NOT_REACHED)
-    (try! (contract-call? .proposal-registry set-executed proposal-id))
+    (try! (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.proposal-registry
+      set-executed proposal-id
+    ))
     (print {
       event: "proposal-executed",
       proposal-id: proposal-id,
@@ -105,11 +118,13 @@
 ;; @param proposal-id uint The ID of the proposal.
 ;; @returns (response bool uint) `(ok true)` on success.
 (define-public (cancel (proposal-id uint))
-  (let ((proposal (unwrap! (contract-call? .proposal-registry get-proposal proposal-id) (err ERR_PROPOSAL_NOT_FOUND))))
+  (let ((proposal (unwrap! (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.proposal-registry get-proposal proposal-id) (err ERR_PROPOSAL_NOT_FOUND))))
     (asserts! (or (is-eq tx-sender (get proposer proposal)) (is-contract-owner)) ERR_UNAUTHORIZED)
     (asserts! (not (get executed proposal)) ERR_VOTING_CLOSED)
     (asserts! (not (get canceled proposal)) ERR_VOTING_CLOSED)
-    (try! (contract-call? .proposal-registry set-canceled proposal-id))
+    (try! (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.proposal-registry
+      set-canceled proposal-id
+    ))
     (print {
       event: "proposal-canceled",
       proposal-id: proposal-id,
@@ -123,14 +138,14 @@
 ;; @param proposal-id uint The ID of the proposal.
 ;; @returns (response (optional { ... }) (err uint)) The proposal details.
 (define-read-only (get-proposal (proposal-id uint))
-  (contract-call? .proposal-registry get-proposal proposal-id))
+  (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.proposal-registry get-proposal proposal-id))
 
 ;; @desc Gets a vote on a proposal by a voter.
 ;; @param proposal-id uint The ID of the proposal.
 ;; @param voter principal The address of the voter.
 ;; @returns (response (optional { ... }) (err uint)) The vote details.
 (define-read-only (get-vote (proposal-id uint) (voter principal))
-  (contract-call? .governance-voting get-vote proposal-id voter))
+  (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.governance-voting get-vote proposal-id voter))
 
 ;; --- Admin Functions ---
 

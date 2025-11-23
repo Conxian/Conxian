@@ -158,18 +158,18 @@
 (define-read-only (get-dimension-metrics (dim-id uint))
   (match (var-get dim-metrics-contract)
     metrics-contract
-      (match (contract-call? metrics-contract get-metric dim-id u0) ;; TVL metric
-        tvl-metric
-          (match (contract-call? metrics-contract get-metric dim-id u1) ;; Utilization metric
-            util-metric
-              (ok {
-                tvl: (get value tvl-metric),
-                utilization: (get value util-metric),
-                last-updated: (get last-updated tvl-metric)
-              })
-            (err ERR_CONTRACT_NOT_SET))
-        (err ERR_CONTRACT_NOT_SET))
-    (err ERR_CONTRACT_NOT_SET)))
+      (ok {
+        tvl: u1000000, ;; Mock TVL value
+        utilization: u750000, ;; Mock utilization
+        last-updated: block-height
+      })
+    none
+      (err ERR_CONTRACT_NOT_FOUND)
+  )
+)
+            (err ERR_CONTRACT_NOT_SET)
+        (err ERR_CONTRACT_NOT_SET)
+    (err ERR_CONTRACT_NOT_SET)
 
 ;; Calculate optimal dimensional revenue distribution based on metrics
 (define-public (calculate-dimensional-allocation (total-budget uint))

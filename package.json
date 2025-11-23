@@ -25,7 +25,8 @@
     "check": "clarinet check",
     "clarinet:console": "clarinet console",
     "validate:docs": "node ./scripts/validate-docs.js",
-    "ci": "node ./scripts/ensure-deps.js && node ./scripts/validate-docs.js && npx vitest run",
+    "verify:contracts": "node ./scripts/verify-contracts.cjs",
+    "ci": "node ./scripts/ensure-deps.js && node ./scripts/validate-docs.js && node ./scripts/verify-contracts.cjs && npx vitest run",
     "coverage": "vitest run --coverage",
     "update-autonomics": "tsx scripts/sdk_update_autonomics.ts",
     "load-test": "artillery run load-test.yml",
@@ -54,7 +55,7 @@
     "tsx": "^4.7.1",
     "typescript": "^5.4.5",
     "vitest": "latest",
-    "vitest-environment-clarinet": "latest"
+    "vitest-environment-clarinet": "^3.0.2"
   },
   "private": true
 }

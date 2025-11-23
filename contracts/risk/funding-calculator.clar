@@ -57,8 +57,14 @@
 
     ;; Get current index price and TWAP
     (let (
-      (index-price (unwrap! (contract-call? (var-get oracle-contract) get-price asset) (err u5003)))
-      (twap (unwrap! (contract-call? (var-get oracle-contract) get-twap asset (var-get funding-interval)) (err u5004)))
+      (index-price (unwrap! (contract-call? .oracle.oracle-aggregator-v2 get-price asset)
+        (err u5003)
+      ))(twap (unwrap!
+        (contract-call? .oracle.oracle-aggregator-v2 get-twap asset
+          (var-get funding-interval)
+        )
+        (err u5004)
+      ))
 
       ;; Get open interest (simplified - in a real implementation, this would query position data)
       (open-interest (get-open-interest asset))

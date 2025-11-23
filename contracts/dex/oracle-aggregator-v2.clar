@@ -158,13 +158,14 @@
 ;; @returns (response bool uint) - (ok true) if circuit breaker is not tripped, (err ERR_CIRCUIT_BREAKER_TRIPPED) if tripped.
 (define-private (check-circuit-breaker)
   ;; v1: if a circuit-breaker contract is configured, consult its is-circuit-open
-;; method; otherwise treat the circuit as open.
+  ;; method; otherwise treat the circuit as open.
   (match (var-get circuit-breaker-contract)
-    breaker
+    (some breaker)
       (match (contract-call? breaker is-circuit-open)
-        is-open (if is-open (ok true) ERR_CIRCUIT_BREAKER_TRIPPED)
-        err-code ERR_CIRCUIT_BREAKER_TRIPPED)
-    none-configured (ok true))
+        (true is-open) (ok true)
+        (false is-open) ERR_CIRCUIT_BREAKER_TRIPPED
+        (err code) ERR_CIRCUIT_BREAKER_TRIPPED)
+    (none none-configured) (ok true))
 )
 
 ;; @desc Calculates the time-weighted average price (TWAP) for an asset over a specified look-back window.

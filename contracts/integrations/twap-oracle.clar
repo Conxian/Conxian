@@ -22,16 +22,17 @@
 (define-data-var governance-address principal tx-sender)
 
 ;; Events
-(define-event twap-updated
-  (tuple
-    (event (string-ascii 16))
-    (asset principal)
-    (period uint)
-    (twap uint)
-    (sender principal)
-    (block-height uint)
-  )
-)
+;; Temporarily remove define-event until available
+;; (define-event twap-updated
+;;   (tuple
+;;     (event (string-ascii 16))
+;;     (asset principal)
+;;     (period uint)
+;;     (twap uint)
+;;     (sender principal)
+;;     (block-height uint)
+;;   )
+;; )
 
 ;; Private Helper Functions
 
@@ -92,7 +93,7 @@
         )
       )
     )
-    (print (merge-tuple { event: "twap-updated", asset: asset, period: period, twap: (get-twap asset period), sender: tx-sender, block-height: (get-block-info? block-height) }))
+    (print { event: "twap-updated", asset: asset, period: period, twap: (get-twap asset period), sender: tx-sender, block-height: (get-block-info? block-height) })
     (ok true)
   )
 )

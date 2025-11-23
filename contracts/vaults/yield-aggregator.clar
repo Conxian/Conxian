@@ -8,7 +8,7 @@
     ;; @param strategy principal The principal of the strategy contract.
     ;; @param amount uint The amount of sBTC to allocate.
     ;; @returns (response bool uint) A response indicating success or an error.
-    (allocate-to-strategy (principal, uint) (response bool uint))
+    (allocate-to-strategy (principal uint) (response bool uint))
 
     ;; @desc Harvests yield from a strategy.
     ;; @param strategy principal The principal of the strategy contract.

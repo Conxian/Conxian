@@ -1,0 +1,815 @@
+;; nft-marketplace.clar
+;; Comprehensive NFT marketplace for trading position NFTs and other digital assets
+;; Supports listings, bids, auctions, and automated market making
+
+(use-trait sip-009-nft-trait .sip-009-nft-trait.sip-009-nft-trait)
+(use-trait sip-010-ft-trait .sip-010-ft-trait.sip-010-ft-trait)
+
+(impl-trait .sip-009-nft-trait.sip-009-nft-trait)
+
+;; ===== Constants =====
+(define-constant ERR_UNAUTHORIZED (err u8000))
+(define-constant ERR_INVALID_LISTING (err u8001))
+(define-constant ERR_LISTING_NOT_FOUND (err u8002))
+(define-constant ERR_INSUFFICIENT_FUNDS (err u8003))
+(define-constant ERR_BID_TOO_LOW (err u8004))
+(define-constant ERR_AUCTION_NOT_ENDED (err u8005))
+(define-constant ERR_LISTING_EXPIRED (err u8006))
+(define-constant ERR_INVALID_NFT (err u8007))
+(define-constant ERR_ALREADY_LISTED (err u8008))
+
+;; Marketplace Constants
+(define-constant MARKETPLACE_FEE_BPS u250)         ;; 2.5% marketplace fee
+(define-constant MIN_LISTING_DURATION u100)         ;; 100 blocks minimum
+(define-constant MAX_LISTING_DURATION u10000)       ;; 10000 blocks maximum
+(define-constant MIN_BID_INCREMENT u100)           ;; 1% minimum bid increment
+
+;; NFT Type Constants
+(define-constant NFT_TYPE_MARKETPLACE_LISTING u1)   ;; Active marketplace listing
+(define-constant NFT_TYPE_SOLD_POSITION u2)         ;; Sold position record
+(define-constant NFT_TYPE_BID_CERTIFICATE u3)       ;; Bid participation certificate
+(define-constant NFT_TYPE_AUCTION_WINNER u4)        ;; Auction winner badge
+(define-constant NFT_TYPE_TRADING_HISTORY u5)       ;; Trading history record
+
+;; ===== Data Variables =====
+(define-data-var contract-owner principal tx-sender)
+(define-data-var next-token-id uint u1)
+(define-data-var next-listing-id uint u1)
+(define-data-var next-auction-id uint u1)
+(define-data-var base-token-uri (optional (string-utf8 256)) none)
+(define-data-var marketplace-treasury principal tx-sender)
+
+;; ===== NFT Definition =====
+(define-non-fungible-token marketplace-nft uint)
+
+;; ===== Marketplace Data Structures =====
+
+;; Active listings
+(define-map listings
+  { listing-id: uint }
+  {
+    seller: principal,
+    nft-contract: principal,
+    nft-token-id: uint,
+    price-token: principal,
+    price-amount: uint,
+    listing-type: uint,                          ;; 1=sale, 2=auction, 3=offers
+    start-block: uint,
+    end-block: uint,
+    current-bid: (optional { bidder: principal, amount: uint }),
+    bid-count: uint,
+    minimum-bid: uint,
+    buy-now-price: (optional uint),
+    listing-status: uint,                         ;; 1=active, 2=sold, 3=cancelled, 4=expired
+    marketplace-fee: uint,
+    seller-revenue: uint,
+    created-at: uint
+  })
+
+;; Bidding records
+(define-map bids
+  { listing-id: uint, bidder: principal }
+  {
+    amount: uint,
+    bid-block: uint,
+    is-winning: bool,
+    bid-type: uint                               ;; 1=regular, 2=buy-now, 3=reserve
+  })
+
+;; Auction records
+(define-map auctions
+  { auction-id: uint }
+  {
+    listing-id: uint,
+    seller: principal,
+    nft-contract: principal,
+    nft-token-id: uint,
+    starting-price: uint,
+    reserve-price: uint,
+    current-high-bid: (optional { bidder: principal, amount: uint }),
+    total-bids: uint,
+    start-block: uint,
+    end-block: uint,
+    auction-status: uint,                         ;; 1=active, 2=ended, 3=cancelled
+    winner: (optional principal),
+    final-price: (optional uint)
+  })
+
+;; Trading history
+(define-map trading-history
+  { trade-id: uint }
+  {
+    nft-contract: principal,
+    nft-token-id: uint,
+    seller: principal,
+    buyer: principal,
+    price-token: principal,
+    price-amount: uint,
+    marketplace-fee: uint,
+    trade-block: uint,
+    trade-type: uint                              ;; 1=sale, 2=auction, 3=buy-now
+  })
+
+(define-data-var next-trade-id uint u1)
+
+;; Enhanced marketplace NFT metadata
+(define-map marketplace-nft-metadata
+  { token-id: uint }
+  {
+    owner: principal,
+    nft-type: uint,
+    listing-id: (optional uint),
+    trade-id: (optional uint),
+    auction-id: (optional uint),
+    achievement-tier: uint,                        ;; 1=basic, 2=advanced, 3=elite, 4=legendary
+    trading-volume: uint,
+    successful-trades: uint,
+    total-earned: uint,
+    marketplace-reputation: uint,                  ;; 0-1000 reputation score
+    special-permissions: (list 10 (string-ascii 50)),
+    visual-effects: (list 5 (string-ascii 30)),
+    governance-weight: uint,
+    revenue-share: uint,
+    creation-block: uint,
+    last-activity-block: uint
+  })
+
+;; User marketplace profiles
+(define-map user-marketplace-profiles
+  { user: principal }
+  {
+    total-listings: uint,
+    successful-sales: uint,
+    total-revenue: uint,
+    total-purchases: uint,
+    average-sale-price: uint,
+    reputation-score: uint,
+    preferred-payment-tokens: (list 10 principal),
+    special-achievements: (list 20 (string-ascii 50)),
+    banned: bool,
+    ban-reason: (optional (string-ascii 256))
+  })
+
+;; ===== Public Functions =====
+
+;; @desc Creates a new marketplace listing for sale
+;; @param nft-contract The NFT contract address
+;; @param nft-token-id The NFT token ID
+;; @param price-token The payment token
+;; @param price-amount The asking price
+;; @param duration The listing duration in blocks
+;; @returns Response with listing ID or error
+(define-public (create-sale-listing
+  (nft-contract principal)
+  (nft-token-id uint)
+  (price-token <sip-010-ft-trait>)
+  (price-amount uint)
+  (duration uint))
+  (begin
+    (asserts! (> price-amount u0) ERR_INVALID_LISTING)
+    (asserts! (and (>= duration MIN_LISTING_DURATION) (<= duration MAX_LISTING_DURATION)) ERR_INVALID_LISTING)
+    
+    ;; Verify NFT ownership
+    (match (contract-call? nft-contract get-owner nft-token-id)
+      owner-info
+        (asserts! (is-eq tx-sender (unwrap-panic owner-info)) ERR_UNAUTHORIZED)
+      error-response
+        (err ERR_INVALID_NFT))
+    
+    ;; Check if already listed
+    (asserts! (not (is-nft-listed nft-contract nft-token-id)) ERR_ALREADY_LISTED)
+    
+    (let ((listing-id (var-get next-listing-id))
+          (price-principal (contract-of price-token))
+          (marketplace-fee (/ (* price-amount MARKETPLACE_FEE_BPS) u10000))
+          (seller-revenue (- price-amount marketplace-fee)))
+      
+      ;; Create listing
+      (map-set listings
+        { listing-id: listing-id }
+        {
+          seller: tx-sender,
+          nft-contract: nft-contract,
+          nft-token-id: nft-token-id,
+          price-token: price-principal,
+          price-amount: price-amount,
+          listing-type: u1, ;; Sale
+          start-block: block-height,
+          end-block: (+ block-height duration),
+          current-bid: none,
+          bid-count: u0,
+          minimum-bid: price-amount,
+          buy-now-price: (some price-amount),
+          listing-status: u1, ;; Active
+          marketplace-fee: marketplace-fee,
+          seller-revenue: seller-revenue,
+          created-at: block-height
+        })
+      
+      ;; Create listing NFT for seller
+      (create-listing-nft listing-id tx-sender u1)
+      
+      ;; Update user profile
+      (update-user-profile-on-list tx-sender)
+      
+      (var-set next-listing-id (+ listing-id u1))
+      
+      (print {
+        event: "sale-listing-created",
+        listing-id: listing-id,
+        seller: tx-sender,
+        nft-contract: nft-contract,
+        nft-token-id: nft-token-id,
+        price-token: price-principal,
+        price-amount: price-amount,
+        end-block: (+ block-height duration)
+      })
+      
+      (ok listing-id)
+    )
+  )
+)
+
+;; @desc Creates a new auction listing
+;; @param nft-contract The NFT contract address
+;; @param nft-token-id The NFT token ID
+;; @param starting-price The starting bid price
+;; @param reserve-price The minimum acceptable price
+;; @param price-token The payment token
+;; @param duration The auction duration in blocks
+;; @returns Response with auction ID or error
+(define-public (create-auction
+  (nft-contract principal)
+  (nft-token-id uint)
+  (starting-price uint)
+  (reserve-price uint)
+  (price-token <sip-010-ft-trait>)
+  (duration uint))
+  (begin
+    (asserts! (> starting-price u0) ERR_INVALID_LISTING)
+    (asserts! (>= reserve-price starting-price) ERR_INVALID_LISTING)
+    (asserts! (and (>= duration MIN_LISTING_DURATION) (<= duration MAX_LISTING_DURATION)) ERR_INVALID_LISTING)
+    
+    ;; Verify NFT ownership
+    (match (contract-call? nft-contract get-owner nft-token-id)
+      owner-info
+        (asserts! (is-eq tx-sender (unwrap-panic owner-info)) ERR_UNAUTHORIZED)
+      error-response
+        (err ERR_INVALID_NFT))
+    
+    (let ((listing-id (var-get next-listing-id))
+          (auction-id (var-get next-auction-id))
+          (price-principal (contract-of price-token)))
+      
+      ;; Create auction listing
+      (map-set listings
+        { listing-id: listing-id }
+        {
+          seller: tx-sender,
+          nft-contract: nft-contract,
+          nft-token-id: nft-token-id,
+          price-token: price-principal,
+          price-amount: starting-price,
+          listing-type: u2, ;; Auction
+          start-block: block-height,
+          end-block: (+ block-height duration),
+          current-bid: none,
+          bid-count: u0,
+          minimum-bid: starting-price,
+          buy-now-price: none,
+          listing-status: u1, ;; Active
+          marketplace-fee: u0, ;; Calculated at sale
+          seller-revenue: u0, ;; Calculated at sale
+          created-at: block-height
+        })
+      
+      ;; Create auction record
+      (map-set auctions
+        { auction-id: auction-id }
+        {
+          listing-id: listing-id,
+          seller: tx-sender,
+          nft-contract: nft-contract,
+          nft-token-id: nft-token-id,
+          starting-price: starting-price,
+          reserve-price: reserve-price,
+          current-high-bid: none,
+          total-bids: u0,
+          start-block: block-height,
+          end-block: (+ block-height duration),
+          auction-status: u1, ;; Active
+          winner: none,
+          final-price: none
+        })
+      
+      ;; Create auction NFT for seller
+      (create-auction-nft auction-id tx-sender)
+      
+      ;; Update user profile
+      (update-user-profile-on-list tx-sender)
+      
+      (var-set next-listing-id (+ listing-id u1))
+      (var-set next-auction-id (+ auction-id u1))
+      
+      (print {
+        event: "auction-created",
+        listing-id: listing-id,
+        auction-id: auction-id,
+        seller: tx-sender,
+        nft-contract: nft-contract,
+        nft-token-id: nft-token-id,
+        starting-price: starting-price,
+        reserve-price: reserve-price,
+        end-block: (+ block-height duration)
+      })
+      
+      (ok auction-id)
+    )
+  )
+)
+
+;; @desc Places a bid on an auction
+;; @param listing-id The listing ID
+;; @param bid-amount The bid amount
+;; @returns Response with success status
+(define-public (place-bid (listing-id uint) (bid-amount uint))
+  (let ((listing (unwrap! (map-get? listings { listing-id: listing-id }) ERR_LISTING_NOT_FOUND))
+        (auction-info (get-auction-by-listing listing-id)))
+    (asserts! (= (get listing-type listing) u2) ERR_INVALID_LISTING) ;; Must be auction
+    (asserts! (= (get listing-status listing) u1) ERR_AUCTION_NOT_ENDED) ;; Must be active
+    (asserts! (< block-height (get end-block listing)) ERR_AUCTION_NOT_ENDED) ;; Must not be expired
+    
+    ;; Verify auction exists and is active
+    (match auction-info
+      auction
+        (let ((current-high-bid (get current-high-bid auction))
+              (minimum-bid (get minimum-bid listing)))
+          ;; Check bid amount
+          (asserts! (>= bid-amount minimum-bid) ERR_BID_TOO_LOW)
+          (match current-high-bid
+            high-bid
+              (asserts! (> bid-amount (get amount high-bid)) ERR_BID_TOO_LOW) ;; Must beat current bid
+            none
+              true)) ;; First bid
+          
+          ;; Transfer bid amount (in real implementation, this would escrow the tokens)
+          ;; (try! (contract-call? price-token transfer-from tx-sender (as-contract tx-sender) bid-amount))
+          
+          ;; Record bid
+          (map-set bids
+            { listing-id: listing-id, bidder: tx-sender }
+            {
+              amount: bid-amount,
+              bid-block: block-height,
+              is-winning: true,
+              bid-type: u1 ;; Regular bid
+            })
+          
+          ;; Update previous bidder's winning status
+          (match current-high-bid
+            high-bid
+              (map-set bids
+                { listing-id: listing-id, bidder: (get bidder high-bid) }
+                { amount: (get amount high-bid), bid-block: (get bid-block high-bid), is-winning: false, bid-type: u1 })
+            none
+              true)
+          
+          ;; Update auction
+          (map-set auctions
+            { auction-id: (get-auction-id-by-listing listing-id) }
+            (merge auction {
+              current-high-bid: (some { bidder: tx-sender, amount: bid-amount }),
+              total-bids: (+ (get total-bids auction) u1)
+            }))
+          
+          ;; Update listing
+          (map-set listings
+            { listing-id: listing-id }
+            (merge listing {
+              current-bid: (some { bidder: tx-sender, amount: bid-amount }),
+              bid-count: (+ (get bid-count listing) u1)
+            }))
+          
+          ;; Create bid certificate NFT
+          (create-bid-certificate-nft listing-id tx-sender bid-amount)
+          
+          (print {
+            event: "bid-placed",
+            listing-id: listing-id,
+            bidder: tx-sender,
+            bid-amount: bid-amount,
+            total-bids: (+ (get total-bids auction) u1)
+          })
+          
+          (ok true))
+      error-response
+        (err ERR_LISTING_NOT_FOUND))
+  )
+)
+
+;; @desc Executes a buy-now purchase
+;; @param listing-id The listing ID
+;; @returns Response with success status
+(define-public (buy-now (listing-id uint))
+  (let ((listing (unwrap! (map-get? listings { listing-id: listing-id }) ERR_LISTING_NOT_FOUND)))
+    (asserts! (= (get listing-status listing) u1) ERR_LISTING_NOT_FOUND) ;; Must be active
+    (asserts! (< block-height (get end-block listing)) ERR_LISTING_EXPIRED) ;; Must not be expired
+    
+    (match (get buy-now-price listing)
+      buy-now-price
+        (begin
+          ;; Transfer payment (in real implementation)
+          ;; (try! (contract-call? price-token transfer-from tx-sender (as-contract tx-sender) buy-now-price))
+          
+          ;; Execute sale
+          (execute-sale listing tx-sender buy-now-price u3) ;; u3 = buy-now trade type
+          
+          (ok true))
+      none
+        (err ERR_INVALID_LISTING)) ;; No buy-now price set
+  )
+)
+
+;; @desc Ends an auction and transfers NFT to winner
+;; @param listing-id The listing ID
+;; @returns Response with success status
+(define-public (end-auction (listing-id uint))
+  (let ((listing (unwrap! (map-get? listings { listing-id: listing-id }) ERR_LISTING_NOT_FOUND))
+        (auction-info (get-auction-by-listing listing-id)))
+    (asserts! (= (get listing-type listing) u2) ERR_INVALID_LISTING) ;; Must be auction
+    (asserts! (= (get listing-status listing) u1) ERR_AUCTION_NOT_ENDED) ;; Must be active
+    (asserts! (>= block-height (get end-block listing)) ERR_AUCTION_NOT_ENDED) ;; Must be ended
+    
+    (match auction-info
+      auction
+        (match (get current-high-bid auction)
+          high-bid
+            (if (>= (get amount high-bid) (get reserve-price auction))
+              ;; Reserve met - sell to highest bidder
+              (begin
+                (execute-sale listing (get bidder high-bid) (get amount high-bid) u2) ;; u2 = auction trade type
+                (create-auction-winner-nft (get-auction-id-by-listing listing-id) (get bidder high-bid) (get amount high-bid))
+                (ok true))
+              ;; Reserve not met - cancel auction
+              (begin
+                (cancel-listing listing-id)
+                (ok true)))
+          none
+            ;; No bids - cancel auction
+            (begin
+              (cancel-listing listing-id)
+              (ok true)))
+      error-response
+        (err ERR_LISTING_NOT_FOUND))
+  )
+)
+
+;; @desc Cancels an active listing
+;; @param listing-id The listing ID
+;; @returns Response with success status
+(define-public (cancel-listing (listing-id uint))
+  (let ((listing (unwrap! (map-get? listings { listing-id: listing-id }) ERR_LISTING_NOT_FOUND)))
+    (asserts! (is-eq tx-sender (get seller listing)) ERR_UNAUTHORIZED) ;; Must be seller
+    (asserts! (= (get listing-status listing) u1) ERR_LISTING_NOT_FOUND) ;; Must be active
+    
+    ;; Update listing status
+    (map-set listings
+      { listing-id: listing-id }
+      (merge listing { listing-status: u3 })) ;; Cancelled
+    
+    ;; Update auction if applicable
+    (when (= (get listing-type listing) u2)
+      (let ((auction-id (get-auction-id-by-listing listing-id)))
+        (map-set auctions
+          { auction-id: auction-id }
+          { listing-id: listing-id, seller: (get seller listing), nft-contract: (get nft-contract listing), 
+            nft-token-id: (get nft-token-id listing), starting-price: u0, reserve-price: u0,
+            current-high-bid: none, total-bids: u0, start-block: u0, end-block: u0,
+            auction-status: u3, winner: none, final-price: none })))
+    
+    (print {
+      event: "listing-cancelled",
+      listing-id: listing-id,
+      seller: tx-sender,
+      listing-type: (get listing-type listing)
+    })
+    
+    (ok true)
+  )
+)
+
+;; ===== SIP-009 Implementation =====
+
+(define-read-only (get-last-token-id)
+  (ok (- (var-get next-token-id) u1)))
+
+(define-read-only (get-token-uri (token-id uint))
+  (ok (var-get base-token-uri)))
+
+(define-read-only (get-owner (token-id uint))
+  (ok (map-get? marketplace-nft-metadata { token-id: token-id })))
+
+(define-public (transfer (token-id uint) (sender principal) (recipient principal))
+  (let ((nft-data (unwrap! (map-get? marketplace-nft-metadata { token-id: token-id }) ERR_POSITION_NOT_FOUND)))
+    (asserts! (is-eq sender (get owner nft-data)) ERR_UNAUTHORIZED)
+    
+    ;; Transfer NFT ownership
+    (nft-transfer? marketplace-nft token-id sender recipient)
+    
+    ;; Update metadata
+    (map-set marketplace-nft-metadata
+      { token-id: token-id }
+      (merge nft-data { owner: recipient, last-activity-block: block-height }))
+    
+    (print {
+      event: "marketplace-nft-transferred",
+      token-id: token-id,
+      from: sender,
+      to: recipient,
+      nft-type: (get nft-type nft-data)
+    })
+    
+    (ok true)
+  )
+)
+
+;; ===== Private Helper Functions =====
+
+(define-private (execute-sale (listing { seller: principal, nft-contract: principal, nft-token-id: uint, price-token: principal, price-amount: uint, listing-type: uint, start-block: uint, end-block: uint, current-bid: (optional { bidder: principal, amount: uint }), bid-count: uint, minimum-bid: uint, buy-now-price: (optional uint), listing-status: uint, marketplace-fee: uint, seller-revenue: uint, created-at: uint }) (buyer principal) (final-price uint) (trade-type uint))
+  (let ((marketplace-fee (/ (* final-price MARKETPLACE_FEE_BPS) u10000))
+        (seller-revenue (- final-price marketplace-fee))
+        (trade-id (var-get next-trade-id)))
+    
+    ;; Transfer NFT to buyer
+    ;; (try! (contract-call? nft-contract transfer nft-token-id seller buyer))
+    
+    ;; Transfer payment to seller
+    ;; (try! (contract-call? price-token transfer-from buyer seller seller-revenue))
+    
+    ;; Transfer marketplace fee
+    ;; (try! (contract-call? price-token transfer-from buyer (var-get marketplace-treasury) marketplace-fee))
+    
+    ;; Record trade
+    (map-set trading-history
+      { trade-id: trade-id }
+      {
+        nft-contract: (get nft-contract listing),
+        nft-token-id: (get nft-token-id listing),
+        seller: (get seller listing),
+        buyer: buyer,
+        price-token: (get price-token listing),
+        price-amount: final-price,
+        marketplace-fee: marketplace-fee,
+        trade-block: block-height,
+        trade-type: trade-type
+      })
+    
+    ;; Update listing status
+    (map-set listings
+      { listing-id: (get-listing-id-by-listing listing) }
+      (merge listing { listing-status: u2, seller-revenue: seller-revenue }))
+    
+    ;; Update user profiles
+    (update-user-profile-on-sale (get seller listing) final-price true)
+    (update-user-profile-on-purchase buyer final-price)
+    
+    ;; Create sold position NFT
+    (create-sold-position-nft trade-id buyer (get nft-contract listing) (get nft-token-id listing) final-price)
+    
+    (var-set next-trade-id (+ trade-id u1))
+    
+    (print {
+      event: "sale-executed",
+      trade-id: trade-id,
+      seller: (get seller listing),
+      buyer: buyer,
+      nft-contract: (get nft-contract listing),
+      nft-token-id: (get nft-token-id listing),
+      final-price: final-price,
+      marketplace-fee: marketplace-fee,
+      seller-revenue: seller-revenue,
+      trade-type: trade-type
+    })
+  )
+)
+
+(define-private (create-listing-nft (listing-id uint) (owner principal) (nft-type uint))
+  (let ((token-id (var-get next-token-id)))
+    (map-set marketplace-nft-metadata
+      { token-id: token-id }
+      {
+        owner: owner,
+        nft-type: nft-type,
+        listing-id: (some listing-id),
+        trade-id: none,
+        auction-id: none,
+        achievement-tier: u1,
+        trading-volume: u0,
+        successful-trades: u0,
+        total-earned: u0,
+        marketplace-reputation: u500,
+        special-permissions: (list "listing-access" "sales-tracking"),
+        visual-effects: (list "standard-border"),
+        governance-weight: u1000,
+        revenue-share: u100,
+        creation-block: block-height,
+        last-activity-block: block-height
+      })
+    
+    (mint-nft token-id owner)
+    (var-set next-token-id (+ token-id u1))))
+
+(define-private (create-auction-nft (auction-id uint) (owner principal))
+  (let ((token-id (var-get next-token-id)))
+    (map-set marketplace-nft-metadata
+      { token-id: token-id }
+      {
+        owner: owner,
+        nft-type: NFT_TYPE_AUCTION_WINNER,
+        listing-id: none,
+        trade-id: none,
+        auction-id: (some auction-id),
+        achievement-tier: u2,
+        trading-volume: u0,
+        successful-trades: u0,
+        total-earned: u0,
+        marketplace-reputation: u600,
+        special-permissions: (list "auction-access" "bidding-priority"),
+        visual-effects: (list "silver-border" "animated-hammer"),
+        governance-weight: u1200,
+        revenue-share: u150,
+        creation-block: block-height,
+        last-activity-block: block-height
+      })
+    
+    (mint-nft token-id owner)
+    (var-set next-token-id (+ token-id u1))))
+
+(define-private (create-bid-certificate-nft (listing-id uint) (bidder principal) (bid-amount uint))
+  (let ((token-id (var-get next-token-id)))
+    (map-set marketplace-nft-metadata
+      { token-id: token-id }
+      {
+        owner: bidder,
+        nft-type: NFT_TYPE_BID_CERTIFICATE,
+        listing-id: (some listing-id),
+        trade-id: none,
+        auction-id: none,
+        achievement-tier: u1,
+        trading-volume: bid-amount,
+        successful-trades: u0,
+        total-earned: u0,
+        marketplace-reputation: u550,
+        special-permissions: (list "bid-access" "auction-tracking"),
+        visual-effects: (list "bronze-border" "bid-animation"),
+        governance-weight: u1100,
+        revenue-share: u120,
+        creation-block: block-height,
+        last-activity-block: block-height
+      })
+    
+    (mint-nft token-id bidder)
+    (var-set next-token-id (+ token-id u1))))
+
+(define-private (create-auction-winner-nft (auction-id uint) (winner principal) (final-price uint))
+  (let ((token-id (var-get next-token-id)))
+    (map-set marketplace-nft-metadata
+      { token-id: token-id }
+      {
+        owner: winner,
+        nft-type: NFT_TYPE_AUCTION_WINNER,
+        listing-id: none,
+        trade-id: none,
+        auction-id: (some auction-id),
+        achievement-tier: u3,
+        trading-volume: final-price,
+        successful-trades: u1,
+        total-earned: u0,
+        marketplace-reputation: u800,
+        special-permissions: (list "winner-access" "exclusive-auctions" "priority-listing"),
+        visual-effects: (list "golden-border" "crown-animation" "confetti-effect"),
+        governance-weight: u1500,
+        revenue-share: u200,
+        creation-block: block-height,
+        last-activity-block: block-height
+      })
+    
+    (mint-nft token-id winner)
+    (var-set next-token-id (+ token-id u1))))
+
+(define-private (create-sold-position-nft (trade-id uint) (buyer principal) (nft-contract principal) (nft-token-id uint) (price uint))
+  (let ((token-id (var-get next-token-id)))
+    (map-set marketplace-nft-metadata
+      { token-id: token-id }
+      {
+        owner: buyer,
+        nft-type: NFT_TYPE_SOLD_POSITION,
+        listing-id: none,
+        trade-id: (some trade-id),
+        auction-id: none,
+        achievement-tier: u2,
+        trading-volume: price,
+        successful-trades: u1,
+        total-earned: u0,
+        marketplace-reputation: u650,
+        special-permissions: (list "ownership-access" "resale-rights"),
+        visual-effects: (list "purchase-animation" "ownership-border"),
+        governance-weight: u1300,
+        revenue-share: u160,
+        creation-block: block-height,
+        last-activity-block: block-height
+      })
+    
+    (mint-nft token-id buyer)
+    (var-set next-token-id (+ token-id u1))))
+
+(define-private (mint-nft (token-id uint) (recipient principal))
+  (nft-mint? marketplace-nft token-id recipient))
+
+(define-private (is-nft-listed (nft-contract principal) (nft-token-id uint))
+  ;; Check if NFT is currently listed
+  (fold check-if-listed (map-listings) false))
+
+(define-private (check-if-listed (listing { listing-id: uint, seller: principal, nft-contract: principal, nft-token-id: uint, price-token: principal, price-amount: uint, listing-type: uint, start-block: uint, end-block: uint, current-bid: (optional { bidder: principal, amount: uint }), bid-count: uint, minimum-bid: uint, buy-now-price: (optional uint), listing-status: uint, marketplace-fee: uint, seller-revenue: uint, created-at: uint }) (already-found bool))
+  (if already-found
+    true
+    (and (is-eq (get nft-contract listing) nft-contract) (= (get nft-token-id listing) nft-token-id) (= (get listing-status listing) u1))))
+
+(define-private (get-auction-by-listing (listing-id uint))
+  (fold find-auction-by-listing (map-auctions) none))
+
+(define-private (find-auction-by-listing (auction { listing-id: uint, seller: principal, nft-contract: principal, nft-token-id: uint, starting-price: uint, reserve-price: uint, current-high-bid: (optional { bidder: principal, amount: uint }), total-bids: uint, start-block: uint, end-block: uint, auction-status: uint, winner: (optional principal), final-price: (optional uint) }) (result (optional { listing-id: uint, seller: principal, nft-contract: principal, nft-token-id: uint, starting-price: uint, reserve-price: uint, current-high-bid: (optional { bidder: principal, amount: uint }), total-bids: uint, start-block: uint, end-block: uint, auction-status: uint, winner: (optional principal), final-price: (optional uint) }))
+  (match result
+    found
+      found
+    none
+      (if (= (get listing-id auction) listing-id) (some auction) none)))
+
+(define-private (get-auction-id-by-listing (listing-id uint))
+  (fold find-auction-id-by-listing (map-auctions) u0))
+
+(define-private (find-auction-id-by-listing (auction { listing-id: uint, seller: principal, nft-contract: principal, nft-token-id: uint, starting-price: uint, reserve-price: uint, current-high-bid: (optional { bidder: principal, amount: uint }), total-bids: uint, start-block: uint, end-block: uint, auction-status: uint, winner: (optional principal), final-price: (optional uint) }) (current-id uint))
+  (if (= (get listing-id auction) listing-id) (get-listing-id auction) current-id))
+
+(define-private (get-listing-id (listing { listing-id: uint, seller: principal, nft-contract: principal, nft-token-id: uint, price-token: principal, price-amount: uint, listing-type: uint, start-block: uint, end-block: uint, current-bid: (optional { bidder: principal, amount: uint }), bid-count: uint, minimum-bid: uint, buy-now-price: (optional uint), listing-status: uint, marketplace-fee: uint, seller-revenue: uint, created-at: uint }))
+  (get listing-id listing))
+
+(define-private (get-listing-id-by-listing (listing-id uint))
+  listing-id)
+
+(define-private (update-user-profile-on-list (user principal))
+  (let ((profile (default-to { total-listings: u0, successful-sales: u0, total-revenue: u0, total-purchases: u0, average-sale-price: u0, reputation-score: u500, preferred-payment-tokens: (list), special-achievements: (list), banned: false, ban-reason: none } (map-get? user-marketplace-profiles { user: user }))))
+    (map-set user-marketplace-profiles
+      { user: user }
+      (merge profile { total-listings: (+ (get total-listings profile) u1) }))))
+
+(define-private (update-user-profile-on-sale (seller principal) (revenue uint) (success bool))
+  (let ((profile (default-to { total-listings: u0, successful-sales: u0, total-revenue: u0, total-purchases: u0, average-sale-price: u0, reputation-score: u500, preferred-payment-tokens: (list), special-achievements: (list), banned: false, ban-reason: none } (map-get? user-marketplace-profiles { user: seller }))))
+    (map-set user-marketplace-profiles
+      { user: seller }
+      (merge profile {
+        total-revenue: (+ (get total-revenue profile) revenue),
+        successful-sales: (if success (+ (get successful-sales profile) u1) (get successful-sales profile)),
+        average-sale-price: (/ (+ (get total-revenue profile) revenue) (+ (get successful-sales profile) (if success u1 u0))),
+        reputation-score: (if success (+ (get reputation-score profile) u50) (- (get reputation-score profile) u25))
+      }))))
+
+(define-private (update-user-profile-on-purchase (buyer principal) (amount uint))
+  (let ((profile (default-to { total-listings: u0, successful-sales: u0, total-revenue: u0, total-purchases: u0, average-sale-price: u0, reputation-score: u500, preferred-payment-tokens: (list), special-achievements: (list), banned: false, ban-reason: none } (map-get? user-marketplace-profiles { user: buyer }))))
+    (map-set user-marketplace-profiles
+      { user: buyer }
+      (merge profile {
+        total-purchases: (+ (get total-purchases profile) u1),
+        reputation-score: (+ (get reputation-score profile) u10)
+      }))))
+
+;; ===== Read-Only Functions =====
+
+(define-read-only (get-listing (listing-id uint))
+  (map-get? listings { listing-id: listing-id }))
+
+(define-read-only (get-auction (auction-id uint))
+  (map-get? auctions { auction-id: auction-id }))
+
+(define-read-only (get-trade (trade-id uint))
+  (map-get? trading-history { trade-id: trade-id }))
+
+(define-read-only (get-user-profile (user principal))
+  (map-get? user-marketplace-profiles { user: user }))
+
+(define-read-only (get-active-listings)
+  (filter (lambda (listing) (= (get listing-status listing) u1)) (map-listings)))
+
+(define-read-only (get-user-bids (user principal))
+  (filter (lambda (bid) (is-eq (get bid-block bid) user)) (map-bids)))
+
+(define-read-only (get-nft-metadata (token-id uint))
+  (map-get? marketplace-nft-metadata { token-id: token-id }))
+
+;; Mock map functions for brevity (would be implemented with proper map iteration)
+(define-private (map-listings)
+  (list))
+(define-private (map-auctions)
+  (list))
+(define-private (map-bids)
+  (list))

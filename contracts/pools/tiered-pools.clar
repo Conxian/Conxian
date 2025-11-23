@@ -18,7 +18,7 @@
   {token-x: principal, token-y: principal, fee-tier: uint, active: bool})
 
 (define-private (check-owner)
-  (asserts! (is-eq tx-sender (var-get owner)) ERR_UNAUTHORIZED))
+  (ok (asserts! (is-eq tx-sender (var-get owner)) ERR_UNAUTHORIZED)))
 
 (define-public (set-fee-manager-contract (new-fee-manager principal))
   (begin

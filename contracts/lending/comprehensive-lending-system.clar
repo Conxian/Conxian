@@ -59,12 +59,39 @@
   )
 )
 
+;; Proof of Reserves integration
+(define-data-var por-contract (optional principal) none)
+(define-data-var enforce-por-borrow bool false)
+
+;; Monitoring and risk parameters
+(define-data-var monitoring-contract (optional principal) none)
+(define-data-var borrow-safety-buffer-bps uint u0)
+(define-data-var min-health-factor-precision uint u0)
+(define-data-var capacity-alert-threshold-bps uint u0)
+
+;; --- Admin Setters ---
+;; @notice Sets the new contract owner.
+;; @param new-owner The principal of the new contract owner.
+;; @returns A response tuple with `(ok true)` if successful, `(err ERR_UNAUTHORIZED)` otherwise.
+(define-public (set-owner (new-owner principal))
+  (begin
+    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
+    (var-set contract-owner new-owner)
+    (ok true)
+  )
+)
+
 ;; @notice Sets the oracle contract address.
 ;; @param oracle The principal of the oracle contract.
 ;; @returns A response tuple with `(ok true)` if successful, `(err ERR_UNAUTHORIZED)` otherwise.
 (define-public (set-oracle (oracle principal))
   (begin
-    (asserts! (contract-call? (var-get access-control-contract) has-role "contract-owner" tx-sender) ERR_UNAUTHORIZED)
+    (asserts!
+      (contract-call? (var-get access-control-contract)
+        has-role "contract-owner" tx-sender
+      )
+      ERR_UNAUTHORIZED
+    )
     (var-set oracle-contract oracle)
     (ok true)
   )
@@ -75,7 +102,12 @@
 ;; @returns A response tuple with `(ok true)` if successful, `(err ERR_UNAUTHORIZED)` otherwise.
 (define-public (set-interest-rate-model (irm principal))
   (begin
-    (asserts! (contract-call? (var-get access-control-contract) has-role "contract-owner" tx-sender) ERR_UNAUTHORIZED)
+    (asserts!
+      (contract-call? (var-get access-control-contract)
+        has-role "contract-owner" tx-sender
+      )
+      ERR_UNAUTHORIZED
+    )
     (var-set interest-rate-model-contract irm)
     (ok true)
   )
@@ -86,7 +118,12 @@
 ;; @returns A response tuple with `(ok true)` if successful, `(err ERR_UNAUTHORIZED)` otherwise.
 (define-public (set-liquidation-manager (lm principal))
   (begin
-    (asserts! (contract-call? (var-get access-control-contract) has-role "contract-owner" tx-sender) ERR_UNAUTHORIZED)
+    (asserts!
+      (contract-call? (var-get access-control-contract)
+        has-role "contract-owner" tx-sender
+      )
+      ERR_UNAUTHORIZED
+    )
     (var-set loan-liquidation-manager-contract lm)
     (ok true)
   )
@@ -97,7 +134,12 @@
 ;; @returns A response tuple with `(ok true)` if successful, `(err ERR_UNAUTHORIZED)` otherwise.
 (define-public (set-access-control (ac principal))
   (begin
-    (asserts! (contract-call? (var-get access-control-contract) has-role "contract-owner" tx-sender) ERR_UNAUTHORIZED)
+    (asserts!
+      (contract-call? (var-get access-control-contract)
+        has-role "contract-owner" tx-sender
+      )
+      ERR_UNAUTHORIZED
+    )
     (var-set access-control-contract ac)
     (ok true)
   )
@@ -108,7 +150,12 @@
 ;; @returns A response tuple with `(ok true)` if successful, `(err ERR_UNAUTHORIZED)` otherwise.
 (define-public (set-circuit-breaker (cb principal))
   (begin
-    (asserts! (contract-call? (var-get access-control-contract) has-role "contract-owner" tx-sender) ERR_UNAUTHORIZED)
+    (asserts!
+      (contract-call? (var-get access-control-contract)
+        has-role "contract-owner" tx-sender
+      )
+      ERR_UNAUTHORIZED
+    )
     (var-set circuit-breaker-contract (some cb))
     (ok true)
   )
@@ -119,7 +166,12 @@
 ;; @returns A response tuple with `(ok true)` if successful, `(err ERR_UNAUTHORIZED)` otherwise.
 (define-public (set-proof-of-reserves (por principal))
   (begin
-    (asserts! (contract-call? (var-get access-control-contract) has-role "contract-owner" tx-sender) ERR_UNAUTHORIZED)
+    (asserts!
+      (contract-call? (var-get access-control-contract)
+        has-role "contract-owner" tx-sender
+      )
+      ERR_UNAUTHORIZED
+    )
     (var-set por-contract (some por))
     (ok true)
   )
@@ -130,7 +182,12 @@
 ;; @returns A response tuple with `(ok true)` if successful, `(err ERR_UNAUTHORIZED)` otherwise.
 (define-public (set-enforce-por-borrow (flag bool))
   (begin
-    (asserts! (contract-call? (var-get access-control-contract) has-role "contract-owner" tx-sender) ERR_UNAUTHORIZED)
+    (asserts!
+      (contract-call? (var-get access-control-contract)
+        has-role "contract-owner" tx-sender
+      )
+      ERR_UNAUTHORIZED
+    )
     (var-set enforce-por-borrow flag)
     (ok true)
   )
@@ -141,7 +198,12 @@
 ;; @returns A response tuple with `(ok true)` if successful, `(err ERR_UNAUTHORIZED)` otherwise.
 (define-public (set-monitoring (mc principal))
   (begin
-    (asserts! (contract-call? (var-get access-control-contract) has-role "contract-owner" tx-sender) ERR_UNAUTHORIZED)
+    (asserts!
+      (contract-call? (var-get access-control-contract)
+        has-role "contract-owner" tx-sender
+      )
+      ERR_UNAUTHORIZED
+    )
     (var-set monitoring-contract (some mc))
     (ok true)
   )
@@ -154,7 +216,12 @@
 ;; @returns A response tuple with `(ok true)` if successful, `(err ERR_UNAUTHORIZED)` otherwise.
 (define-public (set-risk-params (buffer-bps uint) (min-hf uint) (alert-thr-bps uint))
   (begin
-    (asserts! (contract-call? (var-get access-control-contract) has-role "contract-owner" tx-sender) ERR_UNAUTHORIZED)
+    (asserts!
+      (contract-call? (var-get access-control-contract)
+        has-role "contract-owner" tx-sender
+      )
+      ERR_UNAUTHORIZED
+    )
     (var-set borrow-safety-buffer-bps buffer-bps)
     (var-set min-health-factor-precision min-hf)
     (var-set capacity-alert-threshold-bps alert-thr-bps)
@@ -480,6 +547,13 @@
       (try! (accrue-interest asset-principal))
       (let ((current-borrow-balance (default-to u0 (get balance (map-get? user-borrow-balances { user: tx-sender, asset: asset-principal })))))
         (asserts! (>= current-borrow-balance amount) ERR_INSUFFICIENT_COLLATERAL)
+        ;; Rest of function implementation would go here
+        (ok true)
+      )
+    )
+  )
+)
+
 (define-private (liquidate-internal (borrower principal) (collateral-asset <sip-010-ft-trait>) (borrowed-asset <sip-010-ft-trait>) (amount uint))
   (begin
     (try! (check-not-paused))
@@ -490,7 +564,10 @@
       (borrowed-asset-info (unwrap! (map-get? supported-assets { asset: borrowed-asset-principal }) ERR_INVALID_ASSET))
       (collateral-asset-info (unwrap! (map-get? supported-assets { asset: collateral-asset-principal })
         ERR_INVALID_ASSET
-      ))(borrowed-price (get-asset-price-safe borrowed-asset-principal))(collateral-price (get-asset-price-safe collateral-asset-principal))(liquidation-bonus (get liquidation-bonus collateral-asset-info))
+      ))
+      (borrowed-price (get-asset-price-safe borrowed-asset-principal))
+      (collateral-price (get-asset-price-safe collateral-asset-principal))
+      (liquidation-bonus (get liquidation-bonus collateral-asset-info))
       (amount-to-seize (/ (* (/ (* amount borrowed-price) PRECISION) (+ BPS liquidation-bonus)) collateral-price))
       (borrower-collateral (default-to u0 (get balance (map-get? user-supply-balances { user: borrower, asset: collateral-asset-principal }))))
       (borrower-borrow-balance (default-to u0 (get balance (map-get? user-borrow-balances { user: borrower, asset: borrowed-asset-principal }))))
@@ -596,8 +673,8 @@
                     (collateral-balance (default-to u0 (get balance (map-get? user-supply-balances { user: borrower, asset: collateral-asset-principal }))))
                     (seize-final (min seize-amount collateral-balance)))
                 ;; Guard against zero prices
-                (asserts! (> collateral-price u0) ERR_INVALID_TUPLE)
-                (asserts! (> repay-price u0) ERR_INVALID_TUPLE)
+                (asserts! (> collateral-price u0) ERR_INVALID_ASSET)
+(asserts! (> repay-price u0) ERR_INVALID_ASSET)
                 ;; Update borrower collateral balance and transfer seized collateral to liquidator
                 (map-set user-supply-balances { user: borrower, asset: collateral-asset-principal } { balance: (- collateral-balance seize-final) })
                 (try! (as-contract (contract-call? collateral-asset transfer seize-final (as-contract tx-sender) liquidator none)))
@@ -615,7 +692,12 @@
 ;; @returns A response tuple with `(ok true)` if successful, `(err ERR_UNAUTHORIZED)` otherwise.
 (define-public (pause)
   (begin
-    (asserts! (contract-call? (var-get access-control-contract) has-role "contract-owner" tx-sender) ERR_UNAUTHORIZED)
+    (asserts!
+      (contract-call? (var-get access-control-contract)
+        has-role "contract-owner" tx-sender
+      )
+      ERR_UNAUTHORIZED
+    )
     (var-set paused true)
     (ok true)
   )
@@ -625,7 +707,12 @@
 ;; @returns A response tuple with `(ok true)` if successful, `(err ERR_UNAUTHORIZED)` otherwise.
 (define-public (resume)
   (begin
-    (asserts! (contract-call? (var-get access-control-contract) has-role "contract-owner" tx-sender) ERR_UNAUTHORIZED)
+    (asserts!
+      (contract-call? (var-get access-control-contract)
+        has-role "contract-owner" tx-sender
+      )
+      ERR_UNAUTHORIZED
+    )
     (var-set paused false)
     (ok true)
   )

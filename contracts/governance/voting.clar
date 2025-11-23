@@ -71,19 +71,24 @@
       )
       (err ERR_UNAUTHORIZED)
     )
-(asserts!
-      (is-none (map-get? votes {
+    (begin
+      (asserts!
+        (is-none (map-get? votes {
+          proposal-id: proposal-id,
+          voter: voter,
+        }))
+        (err ERR_ALREADY_VOTED)
+      )
+
+      (map-set votes {
         proposal-id: proposal-id,
         voter: voter,
-      }))
-      (err ERR_ALREADY_VOTED)
-    )
-
-    (map-set votes { proposal-id: proposal-id, voter: voter } {
-      support: support,
-      votes: votes-cast
-    })
-    (ok true)))
+      } {
+        support: support,
+        votes: votes-cast,
+      })
+      (ok true)
+    )))
 
 ;; --- Read-Only Functions ---
 

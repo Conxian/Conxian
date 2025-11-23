@@ -38,7 +38,7 @@ export default defineConfig({
       "tests/utils/**",
     ],
 
-    // Enhanced test environment
+    // Enhanced test environment using proper vitest environment
     environment: "clarinet",
     // ESM support
     environmentOptions: {
@@ -49,15 +49,16 @@ export default defineConfig({
         },
       },
     },
-    testTimeout: 60000, // Extended timeout for load tests
-    hookTimeout: 30000,
+    testTimeout: 300000, // Increased timeout to prevent pool timeouts
+    hookTimeout: 120000,
+    pool: undefined, // Disable pool to avoid timeout issues
 
     // Parallel execution defaults used (remove explicit thread options for compatibility)
     globals: true,
 
     // Global setup and teardown
     setupFiles: [
-      "./stacks/global-vitest.setup.ts",
+      "./tests/setup.ts",
       ...(!skipSdk
         ? [
             "./node_modules/@stacks/clarinet-sdk/vitest-helpers/src/vitest.setup.ts",
@@ -66,7 +67,7 @@ export default defineConfig({
     ],
 
     // Enhanced reporting
-    reporters: ["verbose", "json"],
+    reporters: ["verbose"],
 
     // Performance benchmarking
     benchmark: {

@@ -13,12 +13,12 @@
     ;; @param recipient: The principal to receive the minted tokens.
     ;; @param amount: The number of tokens to mint.
     ;; @returns (response bool uint): True if successful, otherwise an error.
-    (mint (recipient principal) (amount uint)) (response bool uint))
+    (mint (recipient principal) (amount uint)) (response bool uint)
 
     ;; @desc Burns tokens from a principal's balance.
     ;; @param owner: The principal whose tokens will be burned.
     ;; @param amount: The number of tokens to burn.
     ;; @returns (response bool uint): True if successful, otherwise an error.
-    (burn (owner principal) (amount uint)) (response bool uint))
+    (burn (owner principal) (amount uint)) (response bool uint)
   )
 )
