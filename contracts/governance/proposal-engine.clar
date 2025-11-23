@@ -61,8 +61,8 @@
 ;; @returns (response bool uint) `(ok true)` on success.
 (define-public (vote (proposal-id uint) (support bool) (votes-cast uint))
   (let ((proposal (unwrap! (contract-call? .proposal-registry get-proposal proposal-id) (err ERR_PROPOSAL_NOT_FOUND))))
-    (asserts! (not (get executed proposal)) ERR_VOTING_CLOSED)
-    (asserts! (not (get canceled proposal)) ERR_VOTING_CLOSED)
+    (asserts! (is-eq (get executed proposal) false) ERR_VOTING_CLOSED)
+(asserts! (is-eq (get canceled proposal) false) ERR_VOTING_CLOSED)
     (asserts! (>= block-height (get start-block proposal)) ERR_PROPOSAL_NOT_ACTIVE)
     (asserts! (<= block-height (get end-block proposal)) ERR_VOTING_CLOSED)
     (asserts!

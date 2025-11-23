@@ -101,9 +101,8 @@
       (rcpt-index (principal->index recipient))
     )
       ;; Use canonical encoding utility contract to compute commitment
-      (unwrap-panic (contract-call? .utils.encoding
-        encode-commitment path-indices amount-in min-amount-out rcpt-index
-        salt
+      (unwrap-panic (contract-call? .encoding encode-commitment path-indices amount-in
+        min-amount-out rcpt-index salt
       ))
     )
   )

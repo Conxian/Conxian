@@ -136,7 +136,7 @@
        (last-timestamp (get last-timestamp data))
        (cumulative-price (get cumulative-price data))
        (samples (get samples data))
-       (current-block-height (get-block-info? block-height))
+       (current-block-height (get-block-info? block-height block-height))
        (time-elapsed (- current-block-height last-timestamp))
       )
       (if (> samples u0)

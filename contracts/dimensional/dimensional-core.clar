@@ -90,19 +90,15 @@
 
 ;; ===== Access Control & System Settings =====
 (define-read-only (get-owner)
-  "@doc Returns the current contract owner"
   (ok (var-get owner)))
 
 (define-read-only (get-protocol-fee-rate)
-  "@doc Returns the current protocol fee rate in basis points"
   (ok (var-get protocol-fee-rate)))
 
 (define-read-only (get-oracle-contract)
-  "@doc Returns the current oracle contract principal"
   (ok (var-get oracle-contract)))
 
 (define-read-only (get-total-positions)
-  "@doc Returns total positions statistics"
   (ok {
     total-opened: (var-get total-positions-opened),
     total-closed: (var-get total-positions-closed),

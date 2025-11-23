@@ -98,10 +98,11 @@
     
     ;; Check system operational status
     (match (var-get protocol-monitor)
-      monitor-contract
+      (some monitor-contract)
         (let ((paused (unwrap! (contract-call? monitor-contract is-paused) (err ERR_SYSTEM_PAUSED))))
           (asserts! (not paused) (err ERR_SYSTEM_PAUSED)))
-      true)
+      (none)
+        (ok true))
     
     ;; Calculate revenue splits
     (let ((token-holder-portion (/ (* total-yield (var-get dimensional-revenue-share)) u10000))

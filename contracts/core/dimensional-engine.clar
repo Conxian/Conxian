@@ -19,11 +19,7 @@
 (define-public (open-position (asset principal) (collateral uint) (leverage uint) (is-long bool) (stop-loss (optional uint)) (take-profit (optional uint)))
   (let (
     (collateral-balance (try! (contract-call? .collateral-manager get-balance tx-sender)))
-    (fee (* collateral
-      (try! (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dimensional-core
-        get-protocol-fee-rate
-      ))
-    ))
+    (fee-rate (try! (contract-call? (var-get collateral-manager) get-protocol-fee-rate)))(fee (* collateral fee-rate))
     (total-cost (+ collateral fee))
   )
     (asserts! (>= collateral-balance total-cost) (err u2003))

@@ -107,8 +107,10 @@
       (caller tx-sender))
     
     ;; Validate DAO voting power if configured
-    (match (var-get dao-contract)
-      dao (ok true) ;; Simplified - skip dao call for now
+    (begin
+      (match (var-get dao-contract)
+        dao (ok true) ;; Simplified - skip dao call for now
+        (ok true))
       (ok true))
     
     (map-set audits { id: audit-id }

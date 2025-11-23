@@ -162,8 +162,8 @@
   (match (var-get circuit-breaker-contract)
     (some breaker)
       (match (contract-call? breaker is-circuit-open)
-        (true is-open) (ok true)
-        (false is-open) ERR_CIRCUIT_BREAKER_TRIPPED
+        true (ok true)
+false ERR_CIRCUIT_BREAKER_TRIPPED
         (err code) ERR_CIRCUIT_BREAKER_TRIPPED)
     (none none-configured) (ok true))
 )

@@ -160,14 +160,10 @@
 
 ;; Add missing calculate-path-price function to match trait
 (define-read-only (calculate-path-price
-    (path (list 20 principal))
+    (path (list 10 principal))
     (amount-in uint)
   )
-  (ok {
-    amount-out: amount-in, ;; Simplified - would calculate actual output
-    price-impact: u1000, ;; Mock price impact
-    gas-estimate: u50000, ;; Mock gas estimate
-  })
+  (ok amount-in) ;; Simplified - would calculate actual output
 )
 
 (define-public (swap-optimal-path (token-in principal) (token-out principal) (amount-in uint) (min-amount-out uint))

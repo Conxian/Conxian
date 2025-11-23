@@ -69,7 +69,7 @@
       { value: value, updated-at: block-height }
     )
     (log-protocol-event "config-updated"
-      (concat key (string-to-ascii? " updated"))
+      (concat key (string-to-ascii " updated"))
     )
     (ok true)
   )

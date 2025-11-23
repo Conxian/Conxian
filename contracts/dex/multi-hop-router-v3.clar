@@ -8,8 +8,8 @@
 
 
 ;; @data-vars
-(define-data-var dijkstra-pathfinder principal 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dijkstra-pathfinder)
-(define-data-var route-manager principal 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.route-manager)
+(define-data-var dijkstra-pathfinder principal .dijkstra-pathfinder)
+(define-data-var route-manager principal .route-manager)
 
 ;; --- Public Functions ---
 (define-public (compute-best-route (token-in principal) (token-out principal) (amount-in uint))
