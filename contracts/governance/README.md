@@ -21,10 +21,13 @@ This module provides comprehensive governance functionality including:
 ### Core Governance
 
 - `proposal-engine.clar`: Core proposal and voting system with token-weighted voting
+- `proposal-engine-trait.clar`: The trait for the proposal engine.
+- `proposal-registry.clar`: A registry for governance proposals.
 - `upgrade-controller.clar`: Manages protocol upgrades with timelocks and multi-signature requirements
 - `emergency-governance.clar`: Emergency governance for critical protocol issues
 - `timelock.clar`: A timelock contract for governance actions.
 - `voting.clar`: A contract for voting on proposals.
+- `enhanced-governance-nft.clar`: An NFT for enhanced governance features.
 
 ### Supporting Infrastructure
 

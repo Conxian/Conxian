@@ -26,7 +26,7 @@ The `comprehensive-lending-system.clar` contract is the central component of the
 - **`comprehensive-lending-system.clar`**: The main contract containing the core logic for supply, borrow, repay, and liquidation operations.
 - **`interest-rate-model.clar`**: A separate contract that calculates interest rates based on utilization and other factors. This contract is a dependency and must be set by the admin.
 - **Oracle Contract**: A dependency that provides price feeds for all supported assets. This is essential for calculating collateral value and health factors.
-- **`loan-liquidation-manager.clar`**: A specialized contract responsible for managing the liquidation process. Liquidations are initiated through this contract, not directly on the core lending contract.
+- **`liquidation-manager.clar`**: A specialized contract responsible for managing the liquidation process. Liquidations are initiated through this contract, not directly on the core lending contract.
 - **`access-control.clar`**: A role-based access control contract that manages permissions for administrative functions like setting contract dependencies and pausing the protocol.
 - **`circuit-breaker.clar` (Optional)**: An optional dependency that can halt protocol operations under extreme market conditions to protect user funds.
 - **Proof of Reserves Contract (Optional)**: An optional dependency to verify the reserves of underlying assets, adding an extra layer of security.
@@ -73,7 +73,7 @@ Interest Rate = f(Utilization Rate)
 
 ### Liquidation System
 - **Health Factor Monitoring**: The contract provides a public `get-health-factor` function for monitoring position health.
-- **Managed Liquidation**: Liquidations are handled by the `loan-liquidation-manager` contract, which provides a structured environment for this critical process.
+- **Managed Liquidation**: Liquidations are handled by the `liquidation-manager` contract, which provides a structured environment for this critical process.
 - **Liquidation Incentives**: The system includes a liquidation bonus to incentivize third parties to liquidate unhealthy positions promptly.
 
 ### Protocol-Level Safeguards

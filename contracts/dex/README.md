@@ -24,7 +24,8 @@ The DEX module contains a complete suite of decentralized exchange contracts sup
 
 #### Routing & Swaps
 
-- `multi-hop-router-v3.clar`: Advanced routing engine with Dijkstra's algorithm for optimal pathfinding across multiple pool types (concentrated, stable, weighted)
+- `multi-hop-router-v3.clar`: Advanced routing engine for optimal pathfinding across multiple pool types (concentrated, stable, weighted)
+- `dijkstra-pathfinder.clar`: Implements Dijkstra's algorithm for optimal trade routing.
 - `dex-factory.clar`: Factory contract for creating and managing liquidity pools with comprehensive pool management
 - `dex-factory-v2.clar`: Enhanced factory with improved gas optimization and pool parameter validation
 - `dex-registrar.clar`: Registry for DEX components and protocol integration points
@@ -110,6 +111,8 @@ The DEX module contains a complete suite of decentralized exchange contracts sup
 #### Utilities
 
 - `distributed-cache-manager.clar`: Distributed caching for performance optimization
+- `cross-protocol-integrator.clar`: Integrates with other DeFi protocols.
+- `price-impact-calculator.clar`: Calculates the price impact of trades.
 - `nakamoto-compatibility.clar`: Stacks 2.1 Nakamoto upgrade compatibility layer
 
 ### Legacy & Migration
