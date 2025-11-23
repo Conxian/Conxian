@@ -1,11 +1,11 @@
-(use-trait sip-010-ft-trait .dex-traits.sip-010-ft-trait)
+(use-trait sip-010-ft-trait .01-sip-standards.sip-010-ft-trait)
 
 ;; tokenized-bond.clar
 ;; SIP-010 Tokenized Bond Contract
 ;; This contract implements a tokenized bond with automated coupon payments and principal redemption.
 ;; It adheres to SIP-010 for fungible tokens.
 
-;; Import traits from the all-traits.clar file
+;; Import traits from the traits folder.clar file
 
 ;; Implement the traits for this contract
 

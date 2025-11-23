@@ -52,19 +52,23 @@ Conxian/
 
 ### 1. Modular Trait Integration
 
-When developing new contracts, follow these patterns for trait integration:
+When developing new contracts, follow these patterns for trait integration per **official Stacks standards**:
 
 1. **Import Modular Traits**
 
    ```clarity
-   (use-trait sip-010-ft-trait .01-sip-standards.sip-010-ft-trait)
+   (use-trait sip-010-ft-trait .sip-standards.sip-010-ft-trait)
+   (use-trait pool-trait .defi-primitives.pool-trait)
+   (use-trait rbac-trait .core-protocol.rbac-trait)
    ```
 
 2. **Implement Traits**
 
    ```clarity
-   (impl-trait .01-sip-standards.sip-010-ft-trait)
+   (impl-trait .sip-standards.sip-010-ft-trait)
    ```
+
+3. **Trait Pattern**: Always use `.contract-name.trait-name` format per official Stacks documentation
 
 ### 2. Smart Contract Development
 

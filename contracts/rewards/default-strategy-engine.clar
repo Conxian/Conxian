@@ -4,8 +4,8 @@
 ;; Applies defaults to vault assets based on metrics and optimization params
 
 ;; Traits
-(use-trait sip-010-ft-trait .sip-010-ft-trait.sip-010-ft-trait)
-(use-trait strategy-trait .all-traits.strategy-trait)
+(use-trait sip-010-ft-trait .01-sip-standards.sip-010-ft-trait)
+(use-trait strategy-trait .traits folder.strategy-trait)
 
 ;; Error codes
 (define-constant ERR_UNAUTHORIZED (err u9501))

@@ -2,7 +2,7 @@
 
 ;; enterprise-loan-manager.clar
 
-(use-trait sip-010-ft-trait .requirements.sip-010-trait-ft-standard.sip-010-trait-ft-standard)
+(use-trait sip-010-ft-trait .01-sip-standards.sip-010-ft-trait)
 ;; Dynamic dispatch for yield distribution
 (use-trait yield-distribution-trait .traits.yield-distribution-trait.yield-distribution-trait)
 

@@ -1,8 +1,8 @@
 ;; risk-oracle.clar
 ;; Centralized risk parameter management and calculation
 
-(use-trait risk-oracle .risk-oracle-trait.risk-oracle-trait)
-(use-trait oracle .oracle-trait.oracle-trait)
+(use-trait risk-oracle .06-risk-management.risk-oracle-trait)
+(use-trait oracle .05-oracle-pricing.oracle-trait)
 
 ;; ===== Constants =====
 (define-constant ERR_UNAUTHORIZED (err u8000))

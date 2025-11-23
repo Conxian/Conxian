@@ -2,9 +2,9 @@
 ;; Decentralized Trait Registry for Conxian Protocol
 
 ;; --- Trait Imports ---
-(use-trait dao-trait .dao-trait.dao-trait)
-(use-trait upgrade-controller-trait .upgrade-controller-trait.upgrade-controller-trait)
-(use-trait governance-token-trait .governance-token-trait.governance-token-trait)
+(use-trait dao-trait .08-governance.dao-trait)
+(use-trait upgrade-controller-trait .02-core-protocol.upgradeable-trait)
+(use-trait governance-token-trait .08-governance.governance-token-trait)
 
 ;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED u100)
@@ -275,8 +275,8 @@
 (define-public (initialize)
   (begin
     (try! (register-trait-interface "rbac-trait" "Role-Based Access Control Trait"))
-    (try! (register-trait-implementation "rbac-trait" .rbac u1))
-    (try! (activate-trait-implementation "rbac-trait" .rbac))
+    (try! (register-trait-implementation "rbac-trait" .02-core-protocol.rbac-trait u1))
+    (try! (activate-trait-implementation "rbac-trait" .02-core-protocol.rbac-trait))
     (ok true)
   )
 )

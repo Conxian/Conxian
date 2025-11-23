@@ -2,7 +2,7 @@
 
 (use-trait oracle-trait .oracle.oracle-trait)
 (use-trait err-trait .errors.standard-errors.standard-errors)
-(use-trait math-trait .math-trait.math-trait)
+(use-trait math-trait .10-math-utilities.math-trait)
 
 (define-constant ERR_UNAUTHORIZED (err-trait err-unauthorized))
 (define-constant ERR_ASSET_NOT_FOUND (err-trait err-asset-not-found))

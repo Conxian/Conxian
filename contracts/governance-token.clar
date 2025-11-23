@@ -4,8 +4,8 @@
 ;; Implements a SIP-010 fungible token for governance purposes with voting power
 
 ;; Traits
-(use-trait sip-010-ft-trait .sip-010-ft-trait.sip-010-ft-trait)
-(impl-trait .sip-010-ft-trait.sip-010-ft-trait)
+(use-trait sip-010-ft-trait .01-sip-standards.sip-010-ft-trait)
+(impl-trait .01-sip-standards.sip-010-ft-trait)
 
 ;; Constants
 (define-constant ERR_UNAUTHORIZED (err u100))

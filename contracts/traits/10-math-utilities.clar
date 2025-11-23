@@ -9,6 +9,8 @@
     (safe-sub (uint uint) (response uint uint))
     (safe-mul (uint uint) (response uint uint))
     (safe-div (uint uint) (response uint uint))
+    (safe-mod (uint uint) (response uint uint))
+    (safe-pow (uint uint) (response uint uint))
   )
 )
 
@@ -21,6 +23,9 @@
     (from-fixed (uint) (response uint uint))
     (mul-fixed (uint uint) (response uint uint))
     (div-fixed (uint uint) (response uint uint))
+    (add-fixed (uint uint) (response uint uint))
+    (sub-fixed (uint uint) (response uint uint))
+    (sqrt-fixed (uint) (response uint uint))
   )
 )
 
@@ -32,6 +37,8 @@
     (calculate-apy (uint uint uint) (response uint uint))
     (calculate-apr (uint uint) (response uint uint))
     (calculate-sharpe-ratio (uint uint uint) (response int uint))
+    (calculate-volatility (uint uint) (response uint uint))
+    (calculate-compound-interest (uint uint uint) (response uint uint))
   )
 )
 
@@ -44,6 +51,9 @@
     (get-block-height () (response uint uint))
     (uint-to-string (uint) (response (string-ascii 20) uint))
     (principal-to-string (principal) (response (string-ascii 41) uint))
+    (validate-address (principal) (response bool uint))
+    (min (uint uint) (response uint uint))
+    (max (uint uint) (response uint uint))
   )
 )
 
@@ -52,7 +62,9 @@
 ;; ===========================================
 (define-trait encoding-trait
   (
-    (encode-tuple ((tuple (dummy: bool))) (response (buff 1024) uint))
+    (encode-tuple ((tuple (dummy bool))) (response (buff 1024) uint))
     (hash-data ((buff 1024)) (response (buff 32) uint))
+    (encode-uint (uint) (response (buff 16) uint))
+    (encode-principal (principal) (response (buff 64) uint))
   )
 )

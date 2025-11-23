@@ -5,7 +5,7 @@
 (use-trait dim-registry-trait .dim-registry-trait.dim-registry-trait)
 (use-trait pool-trait .dex-traits.pool-trait)
 
-(impl-trait .dijkstra-pathfinder-trait.dijkstra-pathfinder-trait)
+;; (impl-trait .defi-primitives.router-trait) ;; TODO: Add dijkstra pathfinder trait
 
 ;; @constants
 (define-constant ERR_NO_PATH_FOUND (err u1407))

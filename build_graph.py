@@ -7,7 +7,7 @@ from typing import Dict, List, Set, Tuple, Optional, Any
 ROOT_DIR = Path(__file__).parent
 CONTRACTS_DIR = ROOT_DIR / "contracts"
 TESTS_DIR = ROOT_DIR / "tests"
-TRAITS_FILE = CONTRACTS_DIR / "traits" / "all-traits.clar"
+TRAITS_FILE = CONTRACTS_DIR / "traits" / "traits folder.clar"
 
 USE_TRAIT_RE = re.compile(r"\(use-trait\s+([^\s]+)\s+([^\s\)]+)\)")
 IMPL_TRAIT_RE = re.compile(r"\(impl-trait\s+([^\s\)]+)\)")
@@ -24,7 +24,7 @@ class SystemGraph:
         self.root_dir = root_dir
         self.contracts_dir = root_dir / "contracts"
         self.tests_dir = root_dir / "tests"
-        self.traits_file = self.contracts_dir / "traits" / "all-traits.clar"
+        self.traits_file = self.contracts_dir / "traits" / "traits folder.clar"
         self._graph: Optional[Dict[str, Any]] = None
 
     def _index_contracts(self) -> Dict[str, Path]:
@@ -71,14 +71,14 @@ class SystemGraph:
             # use-trait
             for m in USE_TRAIT_RE.finditer(content):
                 trait_ref = m.group(2)
-                base = trait_ref.split(".")[-1] if trait_ref.startswith('.all-traits.') else trait_ref
+                base = trait_ref.split(".")[-1] if trait_ref.startswith('.traits folder.') else trait_ref
                 tid = f"trait:{base}"
                 edges.append({"from": nid, "to": tid, "type": "use-trait"})
 
             # impl-trait
             for m in IMPL_TRAIT_RE.finditer(content):
                 trait_ref = m.group(1)
-                base = trait_ref.split(".")[-1] if trait_ref.startswith('.all-traits.') else trait_ref
+                base = trait_ref.split(".")[-1] if trait_ref.startswith('.traits folder.') else trait_ref
                 tid = f"trait:{base}"
                 edges.append({"from": nid, "to": tid, "type": "impl-trait"})
 

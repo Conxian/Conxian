@@ -2,10 +2,10 @@
 ;; Comprehensive insurance protection NFT system for the Conxian ecosystem
 ;; Provides coverage for smart contract failures, liquidation events, and systemic risks
 
-(use-trait sip-009-nft-trait .sip-009-nft-trait.sip-009-nft-trait)
-(use-trait sip-010-ft-trait .sip-010-ft-trait.sip-010-ft-trait)
+(use-trait sip-009-nft-trait .01-sip-standards.sip-009-nft-trait)
+(use-trait sip-010-ft-trait .01-sip-standards.sip-010-ft-trait)
 
-(impl-trait .sip-009-nft-trait.sip-009-nft-trait)
+(impl-trait .01-sip-standards.sip-009-nft-trait)
 
 ;; ===== Constants =====
 (define-constant ERR_UNAUTHORIZED (err u12000))

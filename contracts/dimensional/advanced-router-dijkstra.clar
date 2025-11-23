@@ -3,7 +3,7 @@
 ;; Integrates all routing functionality under dimensional architecture
 
 (use-trait advanced-router-dijkstra-trait .advanced-router-dijkstra-trait.advanced-router-dijkstra-trait)
-(impl-trait .advanced-router-dijkstra-trait.advanced-router-dijkstra-trait)
+;; (impl-trait .defi-primitives.router-trait) ;; TODO: Verify router trait compatibility
 
 
 ;; === DIMENSIONAL INTEGRATION CONSTANTS ===

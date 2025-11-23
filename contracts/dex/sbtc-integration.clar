@@ -1,6 +1,6 @@
 ;; ===== Traits =====
-(use-trait sip-010-ft-trait .dex-traits.sip-010-ft-trait)
-(use-trait oracle-aggregator-v2-trait .oracle-risk-traits.oracle-aggregator-v2-trait)
+(use-trait sip-010-ft-trait .01-sip-standards.sip-010-ft-trait)
+(use-trait oracle-aggregator-v2-trait .05-oracle-pricing.oracle-aggregator-v2-trait)
 ;; sbtc-integration.clar
 ;; sBTC Integration Module for Conxian Protocol
 ;; Provides sBTC asset management, risk parameters, and oracle integration

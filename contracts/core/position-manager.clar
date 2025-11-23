@@ -5,9 +5,9 @@
 (use-trait position-manager-trait .trait-dimensional.position-manager-trait)
 (use-trait oracle-trait .trait-oracle-pricing.oracle-aggregator-v2-trait)
 (use-trait sip-010-ft-trait .trait-sip-standards.sip-010-ft-trait)
-(use-trait rbac-trait .trait-core-protocol.rbac-trait)
+(use-trait rbac-trait .trait-core-protocol.02-core-protocol.rbac-trait-trait)
 
-(impl-trait .trait-dimensional.position-manager-trait)
+(impl-trait .dimensional-traits.position-manager-trait)
 
 ;; @constants
 (define-constant ERR_UNAUTHORIZED (err u1001))

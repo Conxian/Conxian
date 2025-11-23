@@ -13,7 +13,7 @@
   - `pausable-trait` → `.base-traits.pausable-trait`
   - `circuit-breaker-trait` → `.monitoring-security-traits.circuit-breaker-trait`
   - `oracle-aggregator-v2-trait` → `.oracle-aggregator-v2-trait.oracle-aggregator-v2-trait`
-- Remove `.all-traits.*` and `.traits.*` references that are not registered
+- Remove `.traits folder.*` and `.traits.*` references that are not registered
 - Normalize token/governance traits across `contracts/tokens/**` and gov modules
 - Ensure non-interactive `clarinet check` by pre-populating deployment plan or using the `--manifest-path` with scoped manifests
 
@@ -34,7 +34,7 @@
   - Fix `match` arm type mismatch so both branches return the same `(response ...)` type
 - `access/traits/access-traits.clar`:
   - Correct type spec parse errors (e.g., `initial-owner`), validate trait methods and signatures
-- Modules referencing `.all-traits` (e.g., `budget-manager.clar`, `pools/tiered-pools.clar`):
+- Modules referencing `.traits folder` (e.g., `budget-manager.clar`, `pools/tiered-pools.clar`):
   - Replace with canonical trait paths and register contracts if missing
 - Governance (proposal/voting):
   - Replace event macros with `print`; ensure `has-voting-power` returns expected type; verify `asserts!` sequences and state updates conform to Clarity

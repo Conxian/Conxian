@@ -3,9 +3,9 @@
 
 (use-trait route-manager-trait .route-manager-trait.route-manager-trait)
 (use-trait dijkstra-pathfinder-trait .dijkstra-pathfinder-trait.dijkstra-pathfinder-trait)
-(use-trait rbac-trait .base-traits.rbac-trait)
+(use-trait rbac-trait .02-core-protocol.02-core-protocol.rbac-trait-trait)
 
-(impl-trait .route-manager-trait.route-manager-trait)
+;; (impl-trait .defi-primitives.router-trait) ;; TODO: Verify router trait compatibility
 
 ;; @constants
 (define-constant ERR_INVALID_ROUTE (err u1400))

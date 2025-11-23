@@ -6,7 +6,7 @@
 ;; participate in protocol decisions.
 
 ;; --- Traits ---
-(use-trait sip-010-ft-trait .dex-traits.sip-010-ft-trait)
+(use-trait sip-010-ft-trait .01-sip-standards.sip-010-ft-trait)
 
 ;; --- Constants ---
 

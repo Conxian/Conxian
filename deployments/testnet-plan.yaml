@@ -8,10 +8,10 @@ plan:
     - id: 0
       transactions:
         - contract-publish:
-            contract-name: all-traits
+            contract-name: traits folder
             expected-sender: STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ
             cost: 5000
-            path: "contracts/traits/all-traits.clar"
+            path: "contracts/traits/traits folder.clar"
             anchor-block-only: true
             clarity-version: 3
             epoch: "3.0"

@@ -40,105 +40,63 @@ path = "contracts/core/dimensional-engine.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 depends_on = [
     "dimensional-core",
-    "sip-010-ft-trait",
-    "oracle-aggregator-v2-trait",
-    "risk-trait",
-    "finance-metrics-trait",
-    "math-trait",
     "liquidation-engine",
-    "oracle-adapter",
-]
+    "oracle-adapter"]
 
 # ---------- Traits ----------
 # Modular Trait Architecture
 
-[contracts.trait-sip-standards]
+[contracts.sip-standards]
 path = "contracts/traits/01-sip-standards.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
-[contracts.trait-core-protocol]
+[contracts.core-protocol]
 path = "contracts/traits/02-core-protocol.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
-[contracts.trait-defi-primitives]
+[contracts.defi-primitives]
 path = "contracts/traits/03-defi-primitives.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
-[contracts.trait-dimensional]
+[contracts.dimensional-traits]
 path = "contracts/traits/04-dimensional.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
-[contracts.trait-oracle-pricing]
+[contracts.oracle-pricing]
 path = "contracts/traits/05-oracle-pricing.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
-[contracts.trait-risk-management]
+[contracts.risk-management]
 path = "contracts/traits/06-risk-management.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
-[contracts.trait-cross-chain]
+[contracts.cross-chain-traits]
 path = "contracts/traits/07-cross-chain.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
-[contracts.trait-governance]
+[contracts.governance-traits]
 path = "contracts/traits/08-governance.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
-[contracts.trait-security-monitoring]
+[contracts.security-monitoring]
 path = "contracts/traits/09-security-monitoring.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
-[contracts.trait-math-utilities]
+[contracts.math-utilities]
 path = "contracts/traits/10-math-utilities.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
+[contracts.trait-errors]
+path = "contracts/traits/errors.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+
 # Legacy Traits (for compatibility)
-
-[contracts.sip-010-ft-trait]
-path = "contracts/traits/sip-010-ft-trait.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-
-[contracts.oracle-aggregator-v2-trait]
-path = "contracts/traits/oracle-aggregator-v2-trait.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-
-[contracts.risk-trait]
-path = "contracts/traits/risk-trait.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-
-[contracts.finance-metrics-trait]
-path = "contracts/traits/finance-metrics-trait.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-
-[contracts.math-trait]
-path = "contracts/traits/math-trait.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-
-[contracts.dao-trait]
-path = "contracts/traits/dao-trait.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
 [contracts.oracle-adapter]
 path = "contracts/oracle/oracle-adapter-stub.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
 # ---------- Shared Traits (Refactored) ----------
-
-[contracts.error-handling-trait]
-path = "contracts/traits/error-handling-trait.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-
-[contracts.auth-trait]
-path = "contracts/traits/auth-trait.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["error-handling-trait"]
-
-[contracts.common-utils-trait]
-path = "contracts/traits/common-utils-trait.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["error-handling-trait"]
-
-# Accounts
 
 [contracts.accounts.deployer]
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
@@ -292,7 +250,6 @@ address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 [contracts.dex-factory-v2]
 path = "contracts/dex/dex-factory-v2.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["error-handling-trait", "auth-trait", "common-utils-trait"]
 
 [contracts.dex-factory]
 path = "contracts/dex/dex-factory.clar"
@@ -341,7 +298,6 @@ address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 [contracts.dim-yield-stake]
 path = "contracts/dimensional/dim-yield-stake.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["sip-010-ft-trait", "error-handling-trait", "auth-trait", "common-utils-trait"]
 
 [contracts.dimensional-oracle]
 path = "contracts/oracle/dimensional-oracle.clar"
@@ -495,10 +451,6 @@ address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 path = "contracts/utils/utils.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
-[contracts.access-traits]
-path = "contracts/traits/access-traits.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-
 [contracts.decentralized-trait-registry]
 path = "contracts/decentralized-trait-registry.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
@@ -518,7 +470,6 @@ address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 [contracts.governance-token]
 path = "contracts/governance-token.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["sip-010-ft-trait"]
 
 [contracts.mev-protector-root]
 path = "contracts/mev/mev-protector-root.clar"
@@ -528,69 +479,14 @@ address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 path = "contracts/audit-registry/audit-badge-nft.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
-[contracts.batch-auction-trait]
-path = "contracts/traits/batch-auction-trait.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-
-[contracts.clp-pool-trait]
-path = "contracts/traits/clp-pool-trait.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-
 [contracts.pool-registry]
 path = "contracts/pools/pool-registry.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
 # ---------- Modular Trait System ----------
-[contracts.base-traits]
-path = "contracts/traits/base-traits.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-
-[contracts.dex-traits]
-path = "contracts/traits/dex-traits.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-
-[contracts.governance-traits]
-path = "contracts/traits/governance-traits.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-
-[contracts.dimensional-traits]
-path = "contracts/traits/dimensional-traits.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-
-[contracts.dim-registry-trait]
-path = "contracts/traits/dim-registry-trait.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
 [contracts.dimensional-advanced-router-dijkstra]
 path = "contracts/dimensional/advanced-router-dijkstra.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-
-[contracts.oracle-risk-traits]
-path = "contracts/traits/oracle-risk-traits.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-
-[contracts.monitoring-security-traits]
-path = "contracts/traits/monitoring-security-traits.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-
-[contracts.central-traits-registry]
-path = "contracts/traits/central-traits-registry.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-
-[contracts.traits]
-path = "contracts/traits/oracle-trait.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-
-[contracts.advanced-router-dijkstra-trait]
-path = "contracts/traits/advanced-router-dijkstra-trait.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-
-[contracts.upgrade-controller-trait]
-path = "contracts/traits/upgrade-controller-trait.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-
-[contracts.governance-token-trait]
-path = "contracts/traits/governance-token-trait.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
 [contracts.governance-voting]
@@ -602,40 +498,9 @@ depends_on = ["governance-token"]
 path = "contracts/security/circuit-breaker.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
-[contracts.dijkstra-pathfinder-trait]
-path = "contracts/traits/dijkstra-pathfinder-trait.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-
-[contracts.route-manager-trait]
-path = "contracts/traits/route-manager-trait.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-
-[contracts.risk-manager-trait]
-path = "contracts/traits/risk-manager-trait.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-
-[contracts.dlc-manager-trait]
-path = "contracts/traits/dlc-manager-trait.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-
 [contracts.dlc-manager]
 path = "contracts/sbtc/dlc-manager.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["dlc-manager-trait"]
-
-[contracts.collateral-manager-trait]
-path = "contracts/traits/collateral-manager-trait.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-
-[contracts.funding-rate-calculator-trait]
-path = "contracts/traits/funding-rate-calculator-trait.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-
-[contracts.position-manager-trait]
-path = "contracts/traits/position-manager-trait.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-
-# ---------- Integration Contracts ----------
 
 [contracts.twap-oracle]
 path = "contracts/integrations/twap-oracle.clar"

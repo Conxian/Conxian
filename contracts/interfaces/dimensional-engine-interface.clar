@@ -4,8 +4,8 @@
 ;; Interface for the Dimensional Engine that handles multi-dimensional positions
 
 (use-trait base-contract .base-contract.base-contract-trait)
-(use-trait oracle .oracle-aggregator-v2-trait.oracle-aggregator-v2-trait)
-(use-trait token .sip-010-ft-trait.sip-010-ft-trait)
+(use-trait oracle .05-oracle-pricing.oracle-aggregator-v2-trait)
+(use-trait token .01-sip-standards.sip-010-ft-trait)
 (use-trait risk .risk-trait.risk-trait)
 
 (define-trait dimensional-engine-trait

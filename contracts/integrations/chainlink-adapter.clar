@@ -2,7 +2,7 @@
 ;; Adapts Chainlink oracle data for use within the Clarity ecosystem.
 
 ;; SIP-010: Fungible Token Standard
-(use-trait sip-010-ft-trait .dex-traits.sip-010-ft-trait)
+(use-trait sip-010-ft-trait .01-sip-standards.sip-010-ft-trait)
 
 ;; Constants
 ;; Error codes

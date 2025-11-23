@@ -2,8 +2,8 @@
 ;; Conxian Multi-Hop Routing Engine V3
 
 ;; SIP-010: Fungible Token Standard
-(use-trait sip-010-ft-trait .dex-traits.sip-010-ft-trait)
-(use-trait circuit-breaker-trait .circuit-breaker-trait.circuit-breaker-trait)
+(use-trait sip-010-ft-trait .01-sip-standards.sip-010-ft-trait)
+(use-trait circuit-breaker-trait .09-security-monitoring.circuit-breaker-trait)
 
 (define-trait dex-factory-v2-trait
   (

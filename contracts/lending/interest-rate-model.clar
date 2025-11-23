@@ -201,10 +201,10 @@
         (let (
           (delta-cash (if (>= cash-change 0)
             (to-uint cash-change)
-            (to-uint (- cash-change))))
+            (to-uint (- 0 cash-change))))
           (delta-borrows (if (>= borrows-change 0)
             (to-uint borrows-change)
-            (to-uint (- borrows-change))))
+            (to-uint (- 0 borrows-change))))
           (new-total-cash (if (>= cash-change 0)
             (+ (get total-cash market) delta-cash)
             (- (get total-cash market) delta-cash)))

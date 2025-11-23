@@ -1,7 +1,7 @@
 ;; price-impact-calculator.clar
 ;; Calculates price impact for trades in DEX liquidity pools
 
-(use-trait sip-010-ft-trait .dex-traits.sip-010-ft-trait)
+(use-trait sip-010-ft-trait .01-sip-standards.sip-010-ft-trait)
 
 ;; Error codes
 (define-constant ERR-POOL-NOT-FOUND (err u2000))

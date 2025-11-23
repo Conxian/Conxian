@@ -3,8 +3,8 @@
 ;; This contract facilitates cross-protocol integration for maximum yield opportunities.
 
 (use-trait yield-optimizer-trait .traits.yield-optimizer-trait.yield-optimizer-trait)
-(use-trait sip-010-ft-trait .requirements.sip-010-trait-ft-standard.sip-010-trait-ft-standard)
-(use-trait circuit-breaker-trait .traits.circuit-breaker-trait.circuit-breaker-trait)
+(use-trait sip-010-ft-trait .01-sip-standards.sip-010-ft-trait)
+(use-trait circuit-breaker-trait .traits.09-security-monitoring.circuit-breaker-trait)
 (use-trait rbac-trait .decentralized-trait-registry.decentralized-trait-registry)
 
 ;; Error constants
@@ -47,7 +47,7 @@
 ;; @returns An `ok` response with the new strategy ID or an error.
 (define-public (register-strategy (strategy-principal principal) (token principal) (protocol-id uint))
   (begin
-    (asserts! (is-ok (contract-call? .rbac-contract has-role "contract-owner")) ERR_UNAUTHORIZED)
+    (asserts! (is-ok (contract-call? .02-core-protocol.rbac-trait-contract has-role "contract-owner")) ERR_UNAUTHORIZED)
     (let ((new-strategy-id (+ (var-get strategy-counter) u1)))
       (map-set strategies new-strategy-id {
           strategy-principal: strategy-principal,
@@ -124,7 +124,7 @@
 ;; @returns An `ok` response or an error.
 (define-public (set-yield-optimizer-contract (optimizer (contract-of yield-optimizer-trait)))
   (begin
-    (asserts! (is-ok (contract-call? .rbac-contract has-role "contract-owner")) ERR_UNAUTHORIZED)
+    (asserts! (is-ok (contract-call? .02-core-protocol.rbac-trait-contract has-role "contract-owner")) ERR_UNAUTHORIZED)
     (var-set yield-optimizer optimizer)
     (ok true)
   )
@@ -135,7 +135,7 @@
 ;; @returns An `ok` response or an error.
 (define-public (set-circuit-breaker (cb <circuit-breaker-trait>))
   (begin
-    (asserts! (is-ok (contract-call? .rbac-contract has-role "contract-owner")) ERR_UNAUTHORIZED)
+    (asserts! (is-ok (contract-call? .02-core-protocol.rbac-trait-contract has-role "contract-owner")) ERR_UNAUTHORIZED)
     (var-set circuit-breaker-contract (some cb))
     (ok true)
   )
@@ -146,7 +146,7 @@
 ;; @returns An `ok` response or an error.
 (define-public (transfer-ownership (new-owner principal))
   (begin
-    (asserts! (is-ok (contract-call? .rbac-contract has-role "contract-owner")) ERR_UNAUTHORIZED)
+    (asserts! (is-ok (contract-call? .02-core-protocol.rbac-trait-contract has-role "contract-owner")) ERR_UNAUTHORIZED)
     (var-set contract-owner new-owner)
     (ok true)
   )

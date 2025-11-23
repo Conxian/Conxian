@@ -6,7 +6,7 @@
 ;; and a migration mechanism to convert CXLP tokens to the primary CXD token.
 
 ;; --- Traits ---
-(use-trait sip-010-ft-trait .dex-traits.sip-010-ft-trait)
+(use-trait sip-010-ft-trait .01-sip-standards.sip-010-ft-trait)
 
 ;; --- Constants ---
 
