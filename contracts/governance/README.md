@@ -33,21 +33,21 @@ This module provides comprehensive governance functionality including:
 ### Creating a Proposal
 
 ```clarity
-(use-trait proposal-engine-trait .governance-traits.proposal-engine-trait)
+(use-trait proposal-engine-trait .08-governance.proposal-engine-trait)
 (contract-call? .proposal-engine propose description targets values signatures calldatas start-block end-block)
 ```
 
 ### Voting on Proposals
 
 ```clarity
-(use-trait proposal-engine-trait .governance-traits.proposal-engine-trait)
+(use-trait proposal-engine-trait .08-governance.proposal-engine-trait)
 (contract-call? .proposal-engine vote proposal-id support votes)
 ```
 
 ### Proposing Contract Upgrades
 
 ```clarity
-(use-trait upgrade-controller-trait .governance-traits.upgrade-controller-trait)
+(use-trait upgrade-controller-trait .02-core-protocol.upgradeable-trait)
 (contract-call? .upgrade-controller propose-contract-upgrade target-contract new-implementation description)
 ```
 
