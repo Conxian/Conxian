@@ -47,47 +47,47 @@ depends_on = [
 # Modular Trait Architecture
 
 [contracts.sip-standards]
-path = "contracts/traits/01-sip-standards.clar"
+path = "contracts/traits/sip-standards.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
 [contracts.core-protocol]
-path = "contracts/traits/02-core-protocol.clar"
+path = "contracts/traits/core-protocol.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
 [contracts.defi-primitives]
-path = "contracts/traits/03-defi-primitives.clar"
+path = "contracts/traits/defi-primitives.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
 [contracts.dimensional-traits]
-path = "contracts/traits/04-dimensional.clar"
+path = "contracts/traits/dimensional-traits.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
 [contracts.oracle-pricing]
-path = "contracts/traits/05-oracle-pricing.clar"
+path = "contracts/traits/oracle-pricing.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
 [contracts.risk-management]
-path = "contracts/traits/06-risk-management.clar"
+path = "contracts/traits/risk-management.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
 [contracts.cross-chain-traits]
-path = "contracts/traits/07-cross-chain.clar"
+path = "contracts/traits/cross-chain-traits.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
 [contracts.governance-traits]
-path = "contracts/traits/08-governance.clar"
+path = "contracts/traits/governance-traits.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
 [contracts.security-monitoring]
-path = "contracts/traits/09-security-monitoring.clar"
+path = "contracts/traits/security-monitoring.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
 [contracts.math-utilities]
-path = "contracts/traits/10-math-utilities.clar"
+path = "contracts/traits/math-utilities.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
 [contracts.trait-errors]
-path = "contracts/traits/errors.clar"
+path = "contracts/traits/trait-errors.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
 # Legacy Traits (for compatibility)
@@ -417,7 +417,7 @@ path = "contracts/tokens/token-system-coordinator.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
 [contracts.errors-trait]
-path = "contracts/traits/errors.clar"
+path = "contracts/traits/trait-errors.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
 [contracts.block-utils]
