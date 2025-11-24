@@ -63,7 +63,9 @@
 ;; @return (response bool) An (ok true) response if the circuit breaker was successfully set, or an error if unauthorized.
 (define-public (set-circuit-breaker (breaker principal))
   (begin
-    (asserts! (contract-call? .access-control-contract has-role "contract-owner" tx-sender) ERR_UNAUTHORIZED)
+    (asserts! (contract-call? .roles has-role "contract-owner" tx-sender)
+      ERR_UNAUTHORIZED
+    )
     (var-set circuit-breaker (some breaker))
     (ok true)))
 
@@ -75,7 +77,7 @@
 ;; @return (response uint) An (ok account-id) response if the account was successfully created, or an error if unauthorized or the tier is invalid.
 (define-public (create-institutional-account (owner principal) (tier-id uint))
   (begin
-    (asserts! (contract-call? .access-control-contract has-role "enterprise-admin" tx-sender) ERR_UNAUTHORIZED)
+    (asserts! (contract-call? .roles has-role "enterprise-admin" tx-sender) ERR_UNAUTHORIZED)
     (unwrap! (map-get? tier-configurations tier-id) ERR_INVALID_TIER)
     (let ((account-id (+ u1 (var-get account-counter))))
       (map-set institutional-accounts account-id {
@@ -102,7 +104,7 @@
 
 (define-public (set-kyc-status (user principal) (status bool))
   (begin
-    (asserts! (contract-call? .access-control-contract has-role "enterprise-admin" tx-sender) ERR_UNAUTHORIZED)
+    (asserts! (contract-call? .roles has-role "enterprise-admin" tx-sender) ERR_UNAUTHORIZED)
     (map-set tier-configurations tier-id {
       name: name,
       fee-discount-rate: fee-discount-rate,

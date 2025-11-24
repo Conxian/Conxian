@@ -45,7 +45,7 @@
   timestamp: uint,
   status: {
     status: (string-ascii 22),
-    reason: (optional (string-ascii 22))
+    reason: (optional (string-utf8 500))
   },
   votes: {
     for: uint,
@@ -183,14 +183,15 @@
           (try! (contract-call? .audit-badge-nft mint 
             audit-id
             (get report-uri audit)
-            (get auditor audit))))
+            (get auditor audit)))
+          true)
         (map-set audits { id: audit-id }
           (merge audit {
             status: { 
               status: "rejected", 
               reason: (some (if quorum-met 
-                "Majority voted against" 
-                "Quorum not met"))
+                u"Majority voted against" 
+                u"Quorum not met"))
             },
             finalized: true
           })))
@@ -270,16 +271,13 @@
 (define-public (emergency-pause-audit (audit-id uint) (reason (string-utf8 500)))
   (begin
     (asserts! (is-eq tx-sender CONTRACT_OWNER) ERR_UNAUTHORIZED)
-    (match (map-get? audits { id: audit-id })
-      audit
-        (begin
-          (map-set audits { id: audit-id }
-            (merge audit {
-              status: { status: "paused", reason: (some reason) },
-              finalized: true
-            }))
-          (ok true))
-      (err ERR_AUDIT_NOT_FOUND))))
+    (let ((audit (unwrap! (map-get? audits { id: audit-id }) ERR_AUDIT_NOT_FOUND)))
+      (map-set audits { id: audit-id }
+        (merge audit {
+          status: { status: "paused", reason: (some reason) },
+          finalized: true
+        }))
+      (ok true))))
 
 ;; @desc Initialize the contract.
 ;; @param maybe-dao: An optional principal of the DAO contract.

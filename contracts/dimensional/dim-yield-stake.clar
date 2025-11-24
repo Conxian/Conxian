@@ -5,7 +5,7 @@
 ;; - Calculate and distribute yield based on dimension-specific metrics.
 
 (use-trait sip-010-ft-trait .sip-standards.sip-010-ft-trait)
-(use-trait common-utils-trait .common-utils-trait.common-utils-trait)
+(use-trait common-utils-trait .math-utilities.utils-trait)
 
 ;; ===== Constants =====
 ;; Standardized Conxian error codes (800-range for dimensional modules)

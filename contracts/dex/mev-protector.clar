@@ -128,7 +128,7 @@
 (define-private (check-circuit-breaker)
   (match (var-get circuit-breaker)
     breaker
-      (let ((is-tripped (try! (contract-call? .security.circuit-breaker is-circuit-open))))
+      (let ((is-tripped (try! (contract-call? .circuit-breaker is-circuit-open))))
         (if is-tripped (err ERR_CIRCUIT_OPEN) (ok true)))
     (ok true))
 )
@@ -278,15 +278,17 @@
 ;; @desc Extracts the first and last principals from a given path.
 ;; @param path (list 20 principal) - The path of principals.
 ;; @returns (response { first: principal, last: principal } uint) - A tuple containing the first and last principals.
-(define-private (path-ends (path (list 20 principal)))
-  (let ((ends (fold path { first: none, last: none }
-                (lambda (p acc)
-                  (merge acc {
-                    first: (match (get first acc) f (some f) (some p)),
-                    last: (some p)
-                  })
-                ))))
-    (ok (tuple (first (unwrap-panic (get first ends))) (last (unwrap-panic (get last ends)))))
+(define-private (path-ends (swap-path (list 20 principal)))
+  (let ((ends (fold (lambda (swap-path-principal acc)
+                      (merge acc {
+                        first: (match (get first acc) f (some f) (some swap-path-principal)),
+                        last: (some swap-path-principal)
+                      })
+                    )
+                    swap-path
+                    { first: none, last: none }
+                  )))
+    (ok { first: (unwrap-panic (get first ends)), last: (unwrap-panic (get last ends)) })
   )
 )
 

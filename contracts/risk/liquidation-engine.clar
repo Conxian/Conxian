@@ -68,10 +68,10 @@
   )
   (let (
     (current-block block-height)
-    (position (unwrap! (contract-call? (var-get dimensional-engine-contract) get-position position-owner position-id) ERR_INVALID_POSITION))
+    (position (unwrap! (contract-call? .dimensional-engine get-position position-owner position-id) ERR_INVALID_POSITION))
     (asset (get asset position))
     (price (unwrap!
-      (contract-call? (var-get oracle-contract) get-price (get asset position))
+      (contract-call? .oracle-aggregator-v2 get-price (get asset position))
       ERR_ORACLE_FAILURE
     ))
   )

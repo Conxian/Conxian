@@ -14,21 +14,7 @@
   (ok (asserts! (not (var-get reentrancy-guard)) ERR_REENTRANCY))
 )
 
-;; @desc A public function to wrap a function call with a reentrancy guard.
-;; @param inner: The function to be executed.
-;; @returns (response uint uint): The result of the inner function, or an error code.
-(define-public (with-reentrancy-guard (inner (response uint uint)))
-  (let
-    (
-      (check (try! (non-reentrant)))
-    )
-    (var-set reentrancy-guard true)
-    (let ((result (inner)))
-      (var-set reentrancy-guard false)
-      result
-    )
-  )
-)
+
 
 ;; @data-vars
 ;; @var circuit-breaker-contract: The principal of the circuit breaker contract.

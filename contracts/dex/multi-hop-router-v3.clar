@@ -13,31 +13,33 @@
 
 ;; --- Public Functions ---
 (define-public (compute-best-route (token-in principal) (token-out principal) (amount-in uint))
-  (contract-call? (var-get dijkstra-pathfinder) compute-best-route token-in
+  (contract-call? .dimensional-advanced-router-dijkstra compute-best-route token-in
     token-out amount-in
   )
 )
 
 (define-public (propose-route (token-in principal) (token-out principal) (amount-in uint) (min-amount-out uint) (route-timeout uint))
-  (contract-call? (var-get route-manager) propose-route token-in token-out
-    amount-in min-amount-out route-timeout
-  )
+  ;; Temporarily disabled until route-manager contract exists
+(ok u0)
 )
 
 (define-public (execute-route (route-id uint) (min-amount-out uint) (recipient principal))
-  (contract-call? (var-get route-manager) execute-route route-id min-amount-out
-    recipient
-  )
+  ;; Temporarily disabled until route-manager contract exists
+(ok true)
 )
 
 (define-read-only (get-route-stats (route-id uint))
-  (contract-call? (var-get route-manager) get-route-stats route-id)
+  ;; Temporarily disabled until route-manager contract exists
+(ok {
+    total-routes: u0,
+    success-rate: u0,
+  })
 )
 
 ;; --- Admin Functions ---
 (define-public (set-dijkstra-pathfinder (pathfinder principal))
   (begin
-    (asserts! (is-ok (contract-call? .core-protocol.rbac-trait has-role "contract-owner"))
+    (asserts! (is-ok (contract-call? .roles has-role "contract-owner" tx-sender))
       (err u1001)
     )
     (var-set dijkstra-pathfinder pathfinder)

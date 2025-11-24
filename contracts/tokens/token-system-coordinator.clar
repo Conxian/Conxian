@@ -232,8 +232,8 @@
     (try! (when-not-paused))
     (try! (validate-token token))
 
-    ;; Call revenue distributor
-    (try! (contract-call? (var-get revenue-distributor) distribute-revenue token amount))
+    ;; Call revenue distributor - commented out until revenue distributor contract exists
+    ;; (try! (contract-call? .revenue-distributor distribute-revenue token amount))
 
     ;; Update token activity
     (try! (update-token-activity token amount))

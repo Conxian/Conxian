@@ -1,8 +1,8 @@
 ;; @desc This contract manages the internal ledger of user balances and handles all deposits and withdrawals.
 
-(use-trait collateral-manager-trait .trait-dimensional.collateral-manager-trait)
-(use-trait sip-010-ft-trait .trait-sip-standards.sip-010-ft-trait)
-(use-trait rbac-trait .trait-core-protocol.rbac-trait)
+(use-trait collateral-manager-trait .dimensional-traits.collateral-manager-trait)
+(use-trait sip-010-ft-trait .sip-standards.sip-010-ft-trait)
+(use-trait rbac-trait .core-protocol.rbac-trait)
 
 (impl-trait .dimensional-traits.collateral-manager-trait)
 
@@ -51,4 +51,9 @@
 
 (define-read-only (get-balance (user principal))
   (ok (default-to u0 (map-get? internal-balances user)))
+)
+
+(define-read-only (get-protocol-fee-rate)
+  (ok u30)
+  ;; 0.3% fee rate
 )

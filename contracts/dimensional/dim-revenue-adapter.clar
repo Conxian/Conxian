@@ -8,8 +8,7 @@
 ;; --- Constants ---
 (define-constant PRECISION u100000000)
 
-;; --- Constants ---
-(define-constant PRECISION u100000000)
+
 
 ;; --- Errors ---
 (define-constant ERR_UNAUTHORIZED u800)

@@ -71,5 +71,5 @@
 
 ;; --- Private Functions ---
 (define-private (check-role (role (string-ascii 32)))
-  (contract-call? .core-protocol.rbac-trait has-role tx-sender role)
+  (contract-call? .roles has-role tx-sender role)
 )

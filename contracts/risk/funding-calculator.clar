@@ -57,11 +57,11 @@
 
     ;; Get current index price and TWAP
     (let (
-      (index-price (unwrap! (contract-call? .oracle.oracle-aggregator-v2 get-price asset)
+      (index-price (unwrap! (contract-call? .oracle-aggregator-v2 get-price asset)
         (err u5003)
       ))
       (twap (unwrap!
-        (contract-call? .oracle.oracle-aggregator-v2 get-twap asset
+        (contract-call? .oracle-aggregator-v2 get-twap-with-window asset
           (var-get funding-interval)
         )
         (err u5004)
@@ -115,7 +115,10 @@
     (position-id uint)
   )
   (let (
-    (position (unwrap! (contract-call? (var-get dimensional-engine-contract) get-position position-owner position-id) (err u5005)))
+    (position (unwrap!
+      (contract-call? .dimensional-engine get-position position-owner position-id)
+      (err u5005)
+    ))
     (current-time block-height)
     (asset (get asset position))
     (last-update (unwrap! (map-get? last-funding-update {asset: asset}) (err u5006)))

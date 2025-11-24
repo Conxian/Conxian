@@ -380,26 +380,24 @@
 
 ;; Calculate rarity score based on contribution amount and NFT type
 (define-private (calculate-rarity-score (amount uint) (nft-type uint))
-  (match nft-type
-    NFT_TYPE_LAUNCH_LP 
-      (if (>= amount u10000000) u1000 u500) ;; High rarity for large launch contributions
-    NFT_TYPE_NORMAL_LP
-      (if (>= amount u5000000) u600 u300)   ;; Medium rarity for normal contributions
-    else u400))                                   ;; Default rarity
+  (if (is-eq nft-type NFT_TYPE_LAUNCH_LP)
+    (if (>= amount u10000000) u1000 u500)
+    (if (is-eq nft-type NFT_TYPE_NORMAL_LP)
+      (if (>= amount u5000000) u600 u300)
+      u400)))
 
 ;; Calculate visual tier based on contribution amount and NFT type
 (define-private (calculate-visual-tier (amount uint) (nft-type uint))
-  (match nft-type
-    NFT_TYPE_LAUNCH_LP
-      (if (>= amount u50000000) u5
-        (if (>= amount u10000000) u4
-          (if (>= amount u1000000) u3
-            u2)))
-    NFT_TYPE_NORMAL_LP
+  (if (is-eq nft-type NFT_TYPE_LAUNCH_LP)
+    (if (>= amount u50000000) u5
+      (if (>= amount u10000000) u4
+        (if (>= amount u1000000) u3
+          u2)))
+    (if (is-eq nft-type NFT_TYPE_NORMAL_LP)
       (if (>= amount u10000000) u3
         (if (>= amount u1000000) u2
           u1))
-    else u2))                             ;; Default visual tier
+      u2)))
 
 ;; Calculate bounty rarity based on achievement score and difficulty
 (define-private (calculate-bounty-rarity (achievement-score uint) (difficulty uint))
@@ -422,19 +420,17 @@
 ;; Calculate competition rarity based on rank and participants
 (define-private (calculate-competition-rarity (prize-rank uint) (max-participants uint))
   (let ((participant-multiplier (/ max-participants u10)))
-    (match prize-rank
-      u1 (* participant-multiplier u1000)     ;; 1st place - highest rarity
-      u2 (* participant-multiplier u800)      ;; 2nd place
-      u3 (* participant-multiplier u600)      ;; 3rd place
-      else (* participant-multiplier u400))))    ;; Other places
+    (if (is-eq prize-rank u1) (* participant-multiplier u1000)
+      (if (is-eq prize-rank u2) (* participant-multiplier u800)
+        (if (is-eq prize-rank u3) (* participant-multiplier u600)
+          (* participant-multiplier u400))))))
 
 ;; Calculate competition visual tier based on rank
 (define-private (calculate-competition-visual-tier (prize-rank uint))
-  (match prize-rank
-    u1 u5      ;; 1st place - legendary animated
-    u2 u4      ;; 2nd place - epic glowing
-    u3 u3      ;; 3rd place - rare special
-    else u2))     ;; Other places - uncommon enhanced
+  (if (is-eq prize-rank u1) u5
+    (if (is-eq prize-rank u2) u4
+      (if (is-eq prize-rank u3) u3
+        u2))))
 
 ;; ===== Bounty Management Functions =====
 

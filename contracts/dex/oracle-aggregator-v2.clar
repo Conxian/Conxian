@@ -2,8 +2,8 @@
 ;; Enhanced Oracle System with TWAP and Manipulation Detection
 
 ;; --- Traits ---
-(use-trait oracle-trait .traits.oracle-trait)
-(use-trait circuit-breaker-trait .monitoring-security-traits.circuit-breaker-trait)
+(use-trait oracle-trait .oracle-pricing.oracle-trait)
+(use-trait circuit-breaker-trait .security-monitoring.circuit-breaker-trait)
 
 ;; --- Constants ---
 ;; @constant ERR_UNAUTHORIZED (err u100) - Returned when the caller is not authorized to perform the action.
@@ -131,6 +131,32 @@
       (ok (get price (unwrap-panic twap-entry)))
     )
   )
+)
+
+;; @desc Retrieves the time-weighted average price (TWAP) for an asset with custom look-back window.
+;; @param asset principal - The principal of the asset.
+;; @param look-back-window uint - The number of blocks to look back.
+;; @returns (response uint uint) - (ok price) on success, (err ERR_STALE_PRICE) if price is stale, (err ERR_NO_ORACLES) if no oracles are registered.
+(define-read-only (get-twap-with-window
+    (asset principal)
+    (look-back-window uint)
+  )
+  (let ((twap-entry (map-get? asset-twap { asset: asset })))
+    (asserts! (is-some twap-entry) ERR_NO_ORACLES)
+    (let ((last-updated (get last-updated (unwrap-panic twap-entry))))
+      (asserts! (<= (- block-height last-updated) look-back-window)
+        ERR_STALE_PRICE
+      )
+      (ok (get price (unwrap-panic twap-entry)))
+    )
+  )
+)
+
+;; @desc Checks if an oracle is registered.
+;; @param oracle principal - The principal of the oracle contract.
+;; @returns bool - True if registered, false otherwise.
+(define-read-only (is-oracle-registered (oracle principal))
+  (is-some (map-get? registered-oracles { oracle-principal: oracle }))
 )
 
 ;; @desc Checks if an oracle is registered.

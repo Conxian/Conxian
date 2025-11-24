@@ -47,7 +47,7 @@
 ;; ===========================================
 (define-trait revenue-distributor-trait
   (
-    (report-revenue (principal uint .sip-010-ft-trait) (response bool uint))
+    (report-revenue (principal uint principal) (response bool uint))
   )
 )
 

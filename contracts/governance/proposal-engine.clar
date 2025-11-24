@@ -60,7 +60,7 @@
 ;; @param votes-cast uint The number of votes to cast.
 ;; @returns (response bool uint) `(ok true)` on success.
 (define-public (vote (proposal-id uint) (support bool) (votes-cast uint))
-  (let ((proposal (unwrap! (contract-call? .proposal-registry get-proposal proposal-id) (err ERR_PROPOSAL_NOT_FOUND))))
+  (let ((proposal (unwrap! (unwrap! (contract-call? .proposal-registry get-proposal proposal-id) (err ERR_PROPOSAL_NOT_FOUND)) (err ERR_PROPOSAL_NOT_FOUND))))
     (asserts! (is-eq (get executed proposal) false) ERR_VOTING_CLOSED)
 (asserts! (is-eq (get canceled proposal) false) ERR_VOTING_CLOSED)
     (asserts! (>= block-height (get start-block proposal)) ERR_PROPOSAL_NOT_ACTIVE)
@@ -87,7 +87,7 @@
 ;; @param proposal-id uint The ID of the proposal.
 ;; @returns (response bool uint) `(ok true)` on success.
 (define-public (execute (proposal-id uint))
-  (let ((proposal (unwrap! (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.proposal-registry get-proposal proposal-id) (err ERR_PROPOSAL_NOT_FOUND)))
+  (let ((proposal (unwrap! (unwrap! (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.proposal-registry get-proposal proposal-id) (err ERR_PROPOSAL_NOT_FOUND)) (err ERR_PROPOSAL_NOT_FOUND)))
         (total-votes (+ (get for-votes proposal) (get against-votes proposal)))
         (governance-token-supply (unwrap!
           (contract-call?
@@ -118,7 +118,7 @@
 ;; @param proposal-id uint The ID of the proposal.
 ;; @returns (response bool uint) `(ok true)` on success.
 (define-public (cancel (proposal-id uint))
-  (let ((proposal (unwrap! (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.proposal-registry get-proposal proposal-id) (err ERR_PROPOSAL_NOT_FOUND))))
+  (let ((proposal (unwrap! (unwrap! (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.proposal-registry get-proposal proposal-id) (err ERR_PROPOSAL_NOT_FOUND)) (err ERR_PROPOSAL_NOT_FOUND))))
     (asserts! (or (is-eq tx-sender (get proposer proposal)) (is-contract-owner)) ERR_UNAUTHORIZED)
     (asserts! (not (get executed proposal)) ERR_VOTING_CLOSED)
     (asserts! (not (get canceled proposal)) ERR_VOTING_CLOSED)

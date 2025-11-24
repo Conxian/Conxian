@@ -12,6 +12,8 @@
 (define-constant ERR_DIM_ORACLE_MISSING (err u1002))
 
 (define-data-var owner principal tx-sender)
+(define-data-var fee-manager-contract (optional principal) none)
+(define-data-var pool-factory-contract (optional principal) none)
 
 (define-map pools
   {pool-id: principal}

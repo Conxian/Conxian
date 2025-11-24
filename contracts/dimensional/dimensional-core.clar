@@ -103,8 +103,9 @@
   (ok {
     total-opened: (var-get total-positions-opened),
     total-closed: (var-get total-positions-closed),
-    active: (- (var-get total-positions-opened) (var-get total-positions-closed))
-  }))
+    active: (- (var-get total-positions-opened) (var-get total-positions-closed)),
+  })
+)
 
 (define-public (set-owner (new-owner principal))
   "@doc Transfer contract ownership to a new principal"

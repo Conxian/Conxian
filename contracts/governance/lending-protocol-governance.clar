@@ -232,7 +232,7 @@
       (asserts! (is-none (map-get? vote-receipts { proposal-id: proposal-id, voter: voter })) ERR_ALREADY_VOTED)
       
       ;; Get voting power at proposal start
-      (let ((voting-power (unwrap! (contract-call? (var-get governance-token) get-voting-power-at voter (get start-block proposal)) ERR_INSUFFICIENT_VOTING_POWER)))
+      (let ((voting-power (unwrap! (contract-call? .governance-token get-voting-power-at voter (get start-block proposal)) ERR_INSUFFICIENT_VOTING_POWER)))
         (asserts! (> voting-power u0) ERR_INSUFFICIENT_VOTING_POWER)
         
         ;; Record vote

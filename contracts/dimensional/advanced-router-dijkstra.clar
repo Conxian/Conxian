@@ -2,7 +2,7 @@
 ;; Implements optimal path finding for multi-hop swaps across all DEX operations
 ;; Integrates all routing functionality under dimensional architecture
 
-(use-trait advanced-router-dijkstra-trait .advanced-router-dijkstra-trait.advanced-router-dijkstra-trait)
+
 ;; (impl-trait .defi-primitives.router-trait) ;; TODO: Verify router trait compatibility
 
 

@@ -1,8 +1,8 @@
 ;; @desc Central coordinator for automated keeper tasks across the Conxian protocol.
 ;; This contract manages automated interest accrual, liquidations, rebalancing, and fee distribution.
 
-(use-trait keeper_coordinator_trait .keeper-coordinator-trait.keeper-coordinator-trait)
-(use-trait rbac-trait .decentralized-trait-registry.decentralized-trait-registry)
+
+(use-trait rbac-trait .core-protocol.rbac-trait)
 
 ;; @constants
 ;; @var ERR_UNAUTHORIZED: The caller is not authorized to perform this action.
@@ -73,10 +73,7 @@
 ;; @desc Check if the caller is the contract owner.
 ;; @returns (response bool uint): An `ok` response with `true` if the caller is the owner, or an error code.
 (define-private (check-is-owner)
-  (match (var-get rbac-contract)
-    rbac-principal
-    (ok (asserts! (is-ok (contract-call? rbac-principal has-role "contract-owner")) ERR_UNAUTHORIZED))
-    (err ERR_UNAUTHORIZED)))
+  (contract-call? .roles has-role "contract-owner" tx-sender))
 
 ;; @desc Check if the caller is a keeper.
 ;; @returns (response bool uint): An `ok` response with `true` if the caller is a keeper, or an error code.
