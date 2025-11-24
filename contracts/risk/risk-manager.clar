@@ -71,5 +71,5 @@
 
 ;; --- Private Functions ---
 (define-private (check-role (role (string-ascii 32)))
-  (contract-call? .roles has-role tx-sender role)
+  (contract-call? .roles has-role role tx-sender)
 )

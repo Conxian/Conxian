@@ -103,7 +103,7 @@
 (define-public (set-interest-rate-model (irm principal))
   (begin
     (asserts!
-      (contract-call? (var-get access-control-contract)
+      (contract-call? .roles
         has-role "contract-owner" tx-sender
       )
       ERR_UNAUTHORIZED

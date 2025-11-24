@@ -78,12 +78,9 @@
 ;; @desc Check if the caller is a keeper.
 ;; @returns (response bool uint): An `ok` response with `true` if the caller is a keeper, or an error code.
 (define-private (check-is-keeper)
-  (match (var-get rbac-contract)
-    rbac-principal
-    (ok (asserts! (or (is-ok (contract-call? rbac-principal has-role "contract-owner"))
-                      (default-to false (map-get? authorized-keepers tx-sender)))
-                  ERR_UNAUTHORIZED))
-    (err ERR_UNAUTHORIZED)))
+  (ok (asserts! (or (is-ok (contract-call? .roles has-role "contract-owner" tx-sender))
+                    (default-to false (map-get? authorized-keepers tx-sender)))
+                ERR_UNAUTHORIZED)))
 
 ;; @desc Check if the keeper is enabled.
 ;; @returns (response bool uint): An `ok` response with `true` if the keeper is enabled, or an error code.

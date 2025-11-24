@@ -49,7 +49,7 @@
 
 (define-public (set-route-manager (manager principal))
   (begin
-    (asserts! (is-ok (contract-call? .core-protocol.rbac-trait has-role "contract-owner"))
+    (asserts! (is-ok (contract-call? .roles has-role "contract-owner" tx-sender))
       (err u1001)
     )
     (var-set route-manager manager)

@@ -2,8 +2,8 @@
 ;; Provides enterprise-grade features for the Conxian DEX.
 
 ;; Traits - using modular decentralized system
-(use-trait rbac-trait .base-traits.rbac-trait)
-(use-trait circuit-breaker-trait .monitoring-security-traits.circuit-breaker-trait)
+(use-trait rbac-trait .core-protocol.rbac-trait)
+(use-trait circuit-breaker-trait .security-monitoring.circuit-breaker-trait)
 (use-trait governance-trait .governance-traits.governance-token-trait)
 ;; Note: enterprise-api-trait needs to be created or mapped
 ;; (use-trait enterprise-api-trait .base-traits.enterprise-api-trait)

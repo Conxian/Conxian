@@ -4,6 +4,9 @@
 ;; Replaces separate revenue-distributor.clar with dimensional architecture
 
 (use-trait sip-010-ft-trait .sip-standards.sip-010-ft-trait)
+(use-trait pausable-trait .core-protocol.pausable-trait)
+(use-trait revenue-distributor-trait .core-protocol.revenue-distributor-trait)
+(use-trait token-coordinator-trait .core-protocol.token-coordinator-trait)
 
 ;; --- Constants ---
 (define-constant PRECISION u100000000)
@@ -91,10 +94,10 @@
 (define-public (report-dimensional-yield 
     (dim-id uint)
     (total-yield uint)
-    (reward-token .sip-010-ft-trait)
-    (monitor-trait .pausable-trait)
-    (distributor-trait .revenue-distributor-trait)
-    (coordinator-trait .token-coordinator-trait))
+    (reward-token <sip-010-ft-trait>)
+    (monitor-trait <pausable-trait>)
+    (distributor-trait <revenue-distributor-trait>)
+    (coordinator-trait <token-coordinator-trait>))
   (begin
     ;; Only dimensional yield contract can call this
     (asserts! (is-some (var-get dim-yield-contract)) (err ERR_CONTRACT_NOT_SET))
