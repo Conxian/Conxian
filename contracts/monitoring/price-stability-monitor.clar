@@ -1,10 +1,6 @@
 ;; price-stability-monitor.clar
 ;; Monitors price stability and suggests parameter adjustments
 
-(use-trait price-initializer-trait .all-traits.price-initializer-trait)
-(use-trait amm-trait .all-traits.amm-trait)
-(use-trait governance-trait .traits.governance-token-trait.governance-token-trait)
-
 ;; Constants
 (define-constant ERR_UNAUTHORIZED (err u1000))
 (define-constant ERR_INVALID_INTERVAL (err u1001))

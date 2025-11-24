@@ -6,7 +6,7 @@
 ;; community initiatives, and other ecosystem-building activities.
 
 ;; --- Traits ---
-(use-trait sip-010-ft-trait .dex-traits.sip-010-ft-trait)
+(use-trait sip-010-ft-trait .sip-standards.sip-010-ft-trait)
 
 ;; --- Constants ---
 
@@ -126,6 +126,48 @@
       coordinator-contract (unwrap! (contract-call? coordinator-contract on-burn amount burner) true)
       true)
     true))
+
+;; @desc Helper to sum uint values when folding lists.
+(define-private (sum-uint
+    (value uint)
+    (acc uint)
+  )
+  (+ acc value)
+)
+
+;; @desc Applies a seasonal bonus to a single recipient while iterating through the list.
+(define-private (apply-seasonal-bonus
+    (recipient principal)
+    (state {
+      amounts: (list 100 uint),
+      index: uint,
+    })
+  )
+  (let (
+      (bonus (unwrap! (element-at (get amounts state) (get index state))
+        ERR_INVALID_PARAMETERS
+      ))
+      (current-bal (get bal (default-to { bal: u0 } (map-get? balances { who: recipient }))))
+    )
+    (map-set balances { who: recipient } { bal: (+ current-bal bonus) })
+    (map-set seasonal-bonuses recipient bonus)
+    {
+      amounts: (get amounts state),
+      index: (+ (get index state) u1),
+    }
+  )
+)
+
+;; --- Read-Only Functions ---
+
+;; @desc Checks if a principal is the contract owner.
+;; @param who The principal to check.
+;; @returns A boolean indicating if the principal is the owner.
+(define-read-only (is-owner (who principal))
+  (is-eq who (var-get contract-owner))
+)
+
+;; @desc Checks if a principal is a minter.
 
 ;; --- Read-Only Functions ---
 
@@ -357,18 +399,13 @@
   (begin
     (asserts! (is-owner tx-sender) ERR_UNAUTHORIZED)
     (asserts! (is-eq (len recipients) (len amounts)) ERR_LENGTH_MISMATCH)
-    (let ((result (fold (define-private (distribute-bonus-iter (recipient principal) (state {amounts: (list 100 uint), index: uint, total: uint}))
-                          (let ((amounts-list (get amounts state))
-                                (idx (get index state))
-                                (amount (unwrap! (element-at amounts-list idx) state)))
-                            (let ((current-bal (get bal (default-to {bal: u0} (map-get? balances {who: recipient})))))
-                              (try! (map-set balances {who: recipient} {bal: (+ current-bal amount)}))
-                              (map-set seasonal-bonuses recipient amount))
-                            {amounts: amounts-list, index: (+ idx u1), total: (+ (get total state) amount)}))
-                        recipients {amounts: amounts, index: u0, total: u0}))
-          (total-bonus (get total result)))
+    (let ((total-bonus (fold sum-uint amounts u0)))
       (asserts! (check-emission-allowed total-bonus) ERR_EMISSION_DENIED)
-      (try! (var-set total-supply (+ (var-get total-supply) total-bonus)))
+      (fold apply-seasonal-bonus recipients {
+        amounts: amounts,
+        index: u0,
+      })
+(var-set total-supply (+ (var-get total-supply) total-bonus))
       (ok total-bonus))))
 
 ;; @desc Gets information about a creator.

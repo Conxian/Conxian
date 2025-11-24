@@ -125,7 +125,7 @@
   (parameters (optional (list 10 uint))))
   (let ((proposal-id (var-get next-proposal-id))
         (proposer tx-sender)
-        (voting-power (unwrap! (contract-call? (var-get governance-token) get-voting-power-at proposer (- block-height u1)) ERR_INSUFFICIENT_VOTING_POWER)))
+        (voting-power (unwrap! (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.governance-token get-voting-power-at proposer (- block-height u1)) ERR_INSUFFICIENT_VOTING_POWER)))
     (begin
       ;; Check proposal threshold
       (asserts! (>= voting-power (var-get proposal-threshold)) ERR_INSUFFICIENT_VOTING_POWER)
@@ -148,7 +148,7 @@
           queue-block: none,
           execution-block: none,
           state: PROPOSAL_PENDING,
-          created-at: (unwrap-panic (get-block-info? time block-height))
+          created-at: (default-to u0 (get-block-info? time block-height))
         })
       
       ;; Update counters
@@ -304,7 +304,7 @@
       ;; Execute based on proposal type
       (let ((execution-result
               (if (is-eq (get proposal-type proposal) PROPOSAL_TYPE_PARAMETER)
-                (execute-parameter-change proposal-id proposal)
+                (execute-parameter-change proposal-id)
                 (if (is-eq (get proposal-type proposal) PROPOSAL_TYPE_TREASURY)
                   (execute-treasury-proposal proposal-id)
                   (ok true))))) ;; Generic execution
@@ -323,15 +323,10 @@
 
 ;; @desc Executes a parameter change proposal.
 ;; @param proposal-id The ID of the parameter change proposal.
-;; @param proposal A tuple containing the details of the proposal.
 ;; @return response bool uint A response tuple indicating success or failure.
-(define-private (execute-parameter-change (proposal-id uint) (proposal {
-    proposer: principal, title: (string-ascii 100), description: (string-utf8 500),
-    proposal-type: uint, target-contract: (optional principal), function-name: (optional (string-ascii 50)),
-    parameters: (optional (list 10 uint)), for-votes: uint, against-votes: uint, abstain-votes: uint,
-    start-block: uint, end-block: uint, queue-block: (optional uint), execution-block: (optional uint),
-    state: uint, created-at: uint})
-  (let ((param-info (unwrap! (map-get? parameter-proposals proposal-id) ERR_INVALID_PARAMETERS))
+(define-private (execute-parameter-change (proposal-id uint))
+  (let (
+        (param-info (unwrap! (map-get? parameter-proposals proposal-id) ERR_INVALID_PARAMETERS))
         (target-contract (get target-contract param-info))
         (param-name (get parameter-name param-info))
         (new-value (get proposed-value param-info)))

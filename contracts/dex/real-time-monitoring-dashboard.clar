@@ -1,7 +1,6 @@
 ;; ===== Traits =====
-;; TODO: monitoring-dashboard-trait not defined in all-traits.clar
-;; (use-trait monitoring-dashboard-trait .all-traits.monitoring-dashboard-trait)
-
+;; TODO: monitoring-dashboard-trait not defined in traits folder.clar
+;; (use-trait monitoring-dashboard-trait .traits folder.monitoring-dash
 
 ;; Real-Time Monitoring Dashboard Contract
 ;; Provides comprehensive system monitoring, alerting, and metrics collection

@@ -100,7 +100,7 @@
               current-value: capped-value
             })))
           (ok true)
-        )
+        ))
       )
     )
     (err ERR_PARAM_NOT_CONFIGURED)

@@ -1,9 +1,8 @@
 ;; funding-calculator.clar
 ;; Handles funding rate calculations for perpetual contracts
 
-(use-trait funding-trait .all-traits.funding-trait)
-(use-trait oracle-trait .all-traits.oracle-trait)
-(use-trait dimensional-trait .traits.dimensional-trait.dimensional-trait)
+;; Optional: dimensional position trait (not strictly required for current logic)
+(use-trait dimensional-trait .dimensional-traits.dimensional-trait)
 
 
 ;; ===== Constants =====
@@ -58,8 +57,15 @@
 
     ;; Get current index price and TWAP
     (let (
-      (index-price (unwrap! (contract-call? (var-get oracle-contract) get-price asset) (err u5003)))
-      (twap (unwrap! (contract-call? (var-get oracle-contract) get-twap asset (var-get funding-interval)) (err u5004)))
+      (index-price (unwrap! (contract-call? .oracle.oracle-aggregator-v2 get-price asset)
+        (err u5003)
+      ))
+      (twap (unwrap!
+        (contract-call? .oracle.oracle-aggregator-v2 get-twap asset
+          (var-get funding-interval)
+        )
+        (err u5004)
+      ))
 
       ;; Get open interest (simplified - in a real implementation, this would query position data)
       (open-interest (get-open-interest asset))

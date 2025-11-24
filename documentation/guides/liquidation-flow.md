@@ -2,91 +2,53 @@
 
 ## Overview
 
-This document outlines the liquidation process in the Conxian protocol, including the interactions between different components and the sequence of operations.
+This document outlines the liquidation process in the Conxian protocol, including the interactions between the `comprehensive-lending-system` and `liquidation-manager` contracts.
 
 ## Key Components
 
-### 1. Liquidation Manager
+### 1. `comprehensive-lending-system`
 
-- Main contract handling liquidation logic
-- Implements `liquidation-trait`
-- Manages whitelisted assets and keepers
-- Handles emergency liquidations
+-   The main contract for the lending protocol.
+-   Manages user positions, collateral, and debt.
+-   Contains the core `liquidate` function, which is called by the `liquidation-manager`.
 
-### 2. Lending System
+### 2. `liquidation-manager`
 
-- Manages user positions and collateral
-- Implements position health checks
-- Handles debt and collateral adjustments
+-   A specialized contract that manages the liquidation process.
+-   Provides a public `liquidate-position` function that can be called by any user.
+-   Verifies that a position is eligible for liquidation before calling the `liquidate` function on the `comprehensive-lending-system`.
+-   Manages whitelisted assets for liquidation and a liquidation incentive.
 
 ## Liquidation Process
 
 ### Standard Liquidation
 
-1. **Initiation**:
-   - Any user can call `liquidate-position`
-   - System checks if position is underwater
-   - Validates liquidation parameters
-
-2. **Execution**:
-   - Transfers debt tokens from liquidator
-   - Updates borrower's debt and collateral
-   - Transfers collateral to liquidator
-   - Applies liquidation incentive
-
-3. **Completion**:
-   - Updates system state
-   - Emits liquidation event
-   - Updates global statistics
+1.  **Initiation:** Any user can call the `liquidate-position` function on the `liquidation-manager` contract.
+2.  **Verification:** The `liquidation-manager` checks if the position is underwater by calling the `is-position-underwater` function on the `comprehensive-lending-system`.
+3.  **Execution:** If the position is underwater, the `liquidation-manager` calls the `liquidate` function on the `comprehensive-lending-system`.
+4.  **Completion:** The `comprehensive-lending-system` updates the borrower's debt and collateral, transfers the collateral to the liquidator, and emits a liquidation event.
 
 ### Emergency Liquidation (Admin-Only)
 
-1. **Initiation**:
-   - Only callable by admin
-   - Bypasses some checks for emergency situations
-   - Can liquidate up to 100% of position
+-   The `liquidation-manager` has an `emergency-liquidate` function that can only be called by the admin.
+-   This function bypasses some of the standard checks and can liquidate up to 100% of a position.
 
-2. **Execution**:
-   - Similar to standard liquidation
-   - Additional access control checks
-   - Special event logging
+## Key Functions
 
-## Interfaces
+### `liquidation-manager.clar`
 
-### Liquidation Trait
+-   **`liquidate-position`**: The main entry point for liquidations. Can be called by any user.
+-   **`can-liquidate-position`**: A read-only function that checks if a position is eligible for liquidation.
+-   **`calculate-liquidation-amounts`**: A read-only function that calculates the amount of collateral to be seized and the liquidation incentive.
+-   **`emergency-liquidate`**: An admin-only function for emergency liquidations.
 
-```clarity
-(define-trait liquidation-trait
-  (
-    ;; Check if position can be liquidated
-    (can-liquidate-position 
-      (borrower principal) 
-      (debt-asset principal) 
-      (collateral-asset principal)
-    ) (response bool uint)
-    
-    ;; Liquidate a position
-    (liquidate-position
-      (borrower principal)
-      (debt-asset principal)
-      (collateral-asset principal)
-      (debt-amount uint)
-      (max-collateral-amount uint)
-    ) (response (tuple (debt-repaid uint) (collateral-seized uint)) uint)
-    
-    ;; Other functions...
-  )
-)
-```
+### `comprehensive-lending-system.clar`
 
-## Error Codes
-
-See `error-codes.md` for a complete list of error codes and their meanings.
+-   **`liquidate`**: The core liquidation function. Can only be called by the `liquidation-manager`.
+-   **`is-position-underwater`**: A read-only function that checks if a position's health factor is below the liquidation threshold.
 
 ## Security Considerations
 
-- Always validate input parameters
-- Use reentrancy guards where appropriate
-- Implement proper access control
-- Emit events for important state changes
-- Consider front-running risks
+-   All liquidation parameters are validated by the `liquidation-manager` before the `liquidate` function is called.
+-   The `comprehensive-lending-system` contract includes reentrancy guards to prevent reentrancy attacks.
+-   The `liquidation-manager` contract has a `set-paused` function that allows the admin to pause liquidations in case of an emergency.

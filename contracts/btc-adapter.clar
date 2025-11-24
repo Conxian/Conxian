@@ -1,5 +1,3 @@
-(use-trait btc-adapter-trait .traits.all-traits.btc-adapter-trait)
-
 (define-constant ERR_UNAUTHORIZED (err u100))
 (define-constant ERR_INVALID_BTC_ADDRESS (err u101))
 (define-constant ERR_INVALID_AMOUNT (err u102))

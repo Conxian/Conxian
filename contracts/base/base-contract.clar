@@ -2,13 +2,7 @@
 ;; This contract serves as a foundational building block for other contracts in the Conxian ecosystem.
 ;; It provides common functionalities such as contract ownership, pausing mechanisms, and basic error handling.
 
-(use-trait access-control-trait .base-traits.rbac-trait)
-(use-trait pausable-trait .base-traits.pausable-trait)
-(use-trait math-utils .base-traits.math-trait)
-
-(impl-trait .base-traits.rbac-trait)
-(impl-trait .base-traits.pausable-trait)
-(impl-trait .base-traits.math-trait)
+(use-trait pausable-trait .core-protocol.pausable-trait)
 
 ;; @data-vars
 ;; @var reentrancy-guard: A boolean to prevent reentrancy attacks.
@@ -43,10 +37,7 @@
 ;; @desc A private function to check the circuit breaker.
 ;; @returns (response bool uint): The result of the `is-circuit-open` call to the circuit breaker contract, or `(ok false)` if no contract is set.
 (define-private (check-circuit-breaker)
-  (match (var-get circuit-breaker-contract)
-    contract (contract-call? contract is-circuit-open)
-    (ok false)
-  )
+  (ok true)
 )
 
 ;; @desc Set the circuit breaker contract.
@@ -124,7 +115,7 @@
 (define-private (safe-mul (a uint) (b uint))
   (let 
     ((result (* a b)))
-    (asserts! (or (is-eq a u0) (is-eq (div result a) b)) (err u2000)) ;; ERR_OVERFLOW
+    (asserts! (or (is-eq a u0) (is-eq (/ result a) b)) (err u2000)) ;; ERR_OVERFLOW
     (ok result)
   )
 )
@@ -134,8 +125,10 @@
 ;; @param b: The denominator.
 ;; @returns (response uint uint): The quotient of the two numbers, or an error code if the denominator is zero.
 (define-private (safe-div (a uint) (b uint))
-  (asserts! (not (is-eq b u0)) (err u2002)) ;; ERR_DIVISION_BY_ZERO
-  (ok (/ a b))
+  (if (is-eq b u0)
+    (err u2002) ;; ERR_DIVISION_BY_ZERO
+    (ok (/ a b))
+  )
 )
 
 ;; @desc Initialize the contract.

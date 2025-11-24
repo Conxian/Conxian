@@ -11,13 +11,10 @@ This is the central documentation hub for the Conxian DeFi platform. All documen
 - [`guides/02-governance.md`](./guides/02-governance.md) - **Governance participation guide**
 - [`guides/03-dex.md`](./guides/03-dex.md) - **DEX trading guide**
 - [`guides/04-tokens.md`](./guides/04-tokens.md) - **Token management guide**
-- [`guides/05-revenue-distributor.md`](./guides/05-revenue-distributor.md) - **Revenue distribution guide**
 
 ### 🏢 For Enterprise & Institutions
 
 - [`enterprise/ONBOARDING.md`](./enterprise/ONBOARDING.md) - **Technical guide for developers and institutions**
-- [`enterprise/API_REFERENCE.md`](./enterprise/API_REFERENCE.md) - **Enterprise API and contract functions**
-- [`enterprise/INTEGRATION_GUIDE.md`](./enterprise/INTEGRATION_GUIDE.md) - **Integration guides and code samples**
 - [`enterprise/BUSINESS_VALUE_ROI.md`](./enterprise/BUSINESS_VALUE_ROI.md) - **Business value analysis and ROI**
 - [`enterprise/COMPLIANCE_SECURITY.md`](./enterprise/COMPLIANCE_SECURITY.md) - **Compliance and security framework**
 
@@ -47,9 +44,6 @@ This is the central documentation hub for the Conxian DeFi platform. All documen
 
 ### 📊 Project Management
 
-- [`project-management/STATUS.md`](./project-management/STATUS.md) - **Current project status**
-- [`project-management/ROADMAP.md`](./project-management/ROADMAP.md) - **Future development plans**
-- [`project-management/CHANGELOG.md`](./project-management/CHANGELOG.md) - **Version history and changes**
 
 ## 🎯 Quick Navigation
 
@@ -70,8 +64,6 @@ documentation/
 │   └── USER_GUIDE.md        # Complete user guide and onboarding
 ├── enterprise/              # Enterprise & institutional documentation
 │   ├── ONBOARDING.md        # Technical guide for institutions
-│   ├── API_REFERENCE.md     # Enterprise API functions
-│   ├── INTEGRATION_GUIDE.md # Integration guides and samples
 │   ├── BUSINESS_VALUE_ROI.md # Business value analysis
 │   └── COMPLIANCE_SECURITY.md # Compliance framework
 ├── developer/               # Developer guides and standards
@@ -87,13 +79,9 @@ documentation/
 │   ├── 02-governance.md    # Governance guide
 │   ├── 03-dex.md           # DEX trading guide
 │   ├── 04-tokens.md        # Token management
-│   ├── 05-revenue-distributor.md # Revenue distribution
 │   ├── liquidation-flow.md  # Liquidation process
 │   └── oracle-integration.md # Oracle integration
 ├── project-management/      # Status, roadmap, and planning
-│   ├── STATUS.md           # Current project status
-│   ├── ROADMAP.md          # Development plans
-│   └── CHANGELOG.md        # Version history
 ├── whitepaper/             # Technical whitepaper
 └── [additional files]      # Analytics, metrics, strategies
 ```

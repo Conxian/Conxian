@@ -17,7 +17,7 @@ This document codifies standards for Conxian’s Stacks DeFi system to ensure se
 
 ## Vault Interface Standard (ERC‑4626 inspired)
 
-Introduce a standard vault trait for cross-system composability. This trait will be centralized in `contracts/traits/all-traits.clar` as `vault-trait` (planned).
+Standard vault trait for cross-system composability, centralized in `contracts/traits/defi-primitives.clar` following official Stacks patterns:
 
 ```clarity
 (define-trait vault-trait
@@ -37,10 +37,10 @@ Introduce a standard vault trait for cross-system composability. This trait will
 ```
 
 Notes:
-- Current `vault.clar` retains the existing method signatures for backwards compatibility with tests and integrations.
-- A migration path will be planned to either:
-  - Add wrapper entrypoints that conform to `vault-trait`, or
-  - Introduce `v2` vault that implements the trait directly.
+- Trait follows official Stacks `.contract-name.trait-name` pattern
+- All cross-contract calls use modular trait references
+- Current `vault.clar` retains existing signatures for backwards compatibility
+- Migration path via wrapper entrypoints or `v2` vault implementation
 
 ## Strategy and Oracle Adapters
 
@@ -87,6 +87,8 @@ Notes:
 
 ## Status
 
-- Implemented: dynamic SIP-010 token usage in `vault.clar`.
-- Planned: `vault-trait` centralized in `contracts/traits/all-traits.clar` (not yet present).
-- Next: add wrappers or a `v2` vault to implement `vault-trait`, and standardize strategy/oracle traits.
+- ✅ **Completed**: Modular trait system with 11 trait files per official Stacks standards
+- ✅ **Completed**: Dynamic SIP-010 token usage in `vault.clar`
+- ✅ **Completed**: 84 contracts updated to use `.contract-name.trait-name` pattern
+- 🔄 **In Progress**: Add wrappers or `v2` vault to implement `vault-trait`
+- 📋 **Planned**: Standardize strategy/oracle traits following same modular pattern

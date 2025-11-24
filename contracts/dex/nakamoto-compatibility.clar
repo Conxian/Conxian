@@ -188,9 +188,6 @@
 ;; =============================================================================
 (define-private (generate-tx-hash (caller principal) (function-name (string-ascii 50)))
   "Generate deterministic transaction hash for MEV protection"
-;; Using standard Clarity hash160 function - compatible with Clarity 3.0+
-;; Note: keccak256 is not available in standard Clarity 3.0, using hash160 as alternative
-;; TODO: Review hash function choice for MEV protection security requirements
   (let ((caller-str (unwrap! (as-max-len? (to-string caller) u42) (err ERR_NOT_AUTHORIZED)))
         (fn-buff (unwrap! (string-to-utf8 function-name) (err ERR_NOT_AUTHORIZED)))
         (height-buff (unwrap! (int-to-utf8 block-height) (err ERR_NOT_AUTHORIZED))))

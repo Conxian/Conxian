@@ -1,14 +1,14 @@
 ;; Conxian DEX Factory V2 - DIMENSIONAL INTEGRATION (Refactored)
 ;; This contract acts as a facade, delegating logic to specialized registry contracts.
 
-(use-trait "sip-010-ft-trait" .dex-traits.sip-010-ft-trait)
-(use-trait "factory-trait" .dex-traits.factory-trait)
-(use-trait "access-control-trait" .base-traits.rbac-trait)
-(use-trait "circuit-breaker-trait" .monitoring-security-traits.circuit-breaker-trait)
-(use-trait "dim-registry-trait" .dimensional-traits.dim-registry-trait)
-(use-trait "pool-type-registry-trait" .pool-type-registry.pool-type-registry-trait)
-(use-trait "pool-implementation-registry-trait" .pool-implementation-registry.pool-implementation-registry-trait)
-(use-trait "pool-registry-trait" .pool-registry.pool-registry-trait)
+(use-trait sip-010-ft-trait .sip-standards.sip-010-ft-trait)
+;; (use-trait factory-trait .dex-traits.factory-trait) ;; Removed: Unused and invalid path
+(use-trait access-control-trait .core-protocol.rbac-trait)
+(use-trait circuit-breaker-trait .security-monitoring.circuit-breaker-trait)
+;; (use-trait dim-registry-trait .dimensional-traits.dim-registry-trait) ;; Removed: Unused and invalid path
+(use-trait pool-type-registry-trait .pool-type-registry.pool-type-registry-trait)
+(use-trait pool-implementation-registry-trait .pool-implementation-registry.pool-implementation-registry-trait)
+(use-trait pool-registry-trait .pool-registry.pool-registry-trait)
 
 ;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED (err u1003))
@@ -42,17 +42,17 @@
 ;; @desc Checks if the transaction sender is the contract owner.
 ;; @returns (response bool uint) A response indicating success or an unauthorized error.
 (define-private (check-is-owner)
-  (contract-call? (var-get access-control-contract) has-role "contract-owner" tx-sender))
+  (contract-call? .access.roles has-role "contract-owner" tx-sender))
 
 ;; @desc Checks if the transaction sender has the 'POOL_MANAGER' role.
 ;; @returns (response bool uint) A response indicating success or an unauthorized error.
 (define-private (check-pool-manager)
-  (contract-call? (var-get access-control-contract) has-role "POOL_MANAGER" tx-sender))
+  (contract-call? .access.roles has-role "POOL_MANAGER" tx-sender))
 
 ;; @desc Checks if the circuit breaker is open.
 ;; @returns (response bool uint) A response indicating if the circuit is open.
 (define-private (check-circuit-breaker)
-  (contract-call? (var-get circuit-breaker) is-circuit-open))
+  (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.circuit-breaker is-circuit-open))
 
 ;; @desc Validates if a given pool type is registered and active by querying the pool type registry.
 ;; @param pool-type (string-ascii 64) The string identifier of the pool type.

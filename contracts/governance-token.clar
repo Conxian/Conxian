@@ -4,8 +4,8 @@
 ;; Implements a SIP-010 fungible token for governance purposes with voting power
 
 ;; Traits
-(use-trait sip-010-ft-trait .sip-010-ft-trait.sip-010-ft-trait)
-(impl-trait .sip-010-ft-trait.sip-010-ft-trait)
+(use-trait sip-010-ft-trait .sip-standards.sip-010-ft-trait)
+(impl-trait .sip-standards.sip-010-ft-trait)
 
 ;; Constants
 (define-constant ERR_UNAUTHORIZED (err u100))
@@ -93,10 +93,8 @@
   )
     (ok (+ balance delegated-to-me))))
 
-(define-read-only (has-voting-power (account principal))
-  (let (
-    (power (unwrap! (get-voting-power account) ERR_UNAUTHORIZED))
-  )
+(define-public (has-voting-power (account principal))
+  (let ((power (unwrap! (get-voting-power account) ERR_UNAUTHORIZED)))
     (ok (> power u0))))
 
 (define-read-only (get-total-voting-power)

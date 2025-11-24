@@ -2,8 +2,8 @@
 ;; Advanced Multi-Hop Routing Engine
 
 ;; Traits
-(use-trait ft-trait .sip-010-trait-ft-standard.ft-trait)
-(use-trait pool-trait .pool-trait.pool-trait)
+(use-trait sip-010-ft-trait .sip-standards.sip-010-ft-trait)
+(use-trait pool-trait .defi-primitives.pool-trait)
 
 ;; Constants
 (define-constant ERR-UNAUTHORIZED u1000)

@@ -23,7 +23,7 @@
 ;; @desc Error: Circuit breaker is open, preventing transactions.
 (define-constant ERR_CIRCUIT_OPEN (err u6008))
 ;; @desc The principal of the router contract.
-(define-constant ROUTER_CONTRACT principal '.dimensional-advanced-router-dijkstra)
+(define-constant ROUTER_CONTRACT .dimensional-advanced-router-dijkstra)
 
 ;; --- Data Variables ---
 ;; @desc The principal of the contract owner.
@@ -101,7 +101,9 @@
       (rcpt-index (principal->index recipient))
     )
       ;; Use canonical encoding utility contract to compute commitment
-      (unwrap-panic (contract-call? .utils.encoding encode-commitment path-indices amount-in min-amount-out rcpt-index salt))
+      (unwrap-panic (contract-call? .encoding encode-commitment path-indices amount-in
+        min-amount-out rcpt-index salt
+      ))
     )
   )
 

@@ -3,7 +3,8 @@
 ;; Integrates all routing functionality under dimensional architecture
 
 (use-trait advanced-router-dijkstra-trait .advanced-router-dijkstra-trait.advanced-router-dijkstra-trait)
-(impl-trait .advanced-router-dijkstra-trait.advanced-router-dijkstra-trait)
+;; (impl-trait .defi-primitives.router-trait) ;; TODO: Verify router trait compatibility
+
 
 ;; === DIMENSIONAL INTEGRATION CONSTANTS ===
 (define-constant CONTRACT_OWNER tx-sender)
@@ -156,6 +157,14 @@
         hops: u1
       })
       (err ERR_NO_PATH))))
+
+;; Add missing calculate-path-price function to match trait
+(define-read-only (calculate-path-price
+    (path (list 10 principal))
+    (amount-in uint)
+  )
+  (ok amount-in) ;; Simplified - would calculate actual output
+)
 
 (define-public (swap-optimal-path (token-in principal) (token-out principal) (amount-in uint) (min-amount-out uint))
   (let ((path-result (try! (find-optimal-path token-in token-out amount-in))))

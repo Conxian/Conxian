@@ -3,8 +3,9 @@
 ;; Registry for ALL system components under dimensional architecture
 ;; Manages DEX pools, vaults, lending systems, and cross-protocol integrations
 
-(use-trait dim-registry-trait .dimensional-traits.dim-registry-trait)
-(impl-trait .dimensional-traits.dim-registry-trait)
+;; Temporarily remove traits until available
+;; (use-trait dim-registry-trait .dim-registry-trait.dim-registry-trait)
+;; (impl-trait .dim-registry-trait.dim-registry-trait)
 
 ;; Constants
 (define-constant TRAIT_REGISTRY .trait-registry)
@@ -127,6 +128,14 @@
       (map-set registered-nodes { id: node-id } (merge node { active: active }))
       (ok true))))
 
+
+;; Add missing get-registered-oracles function to match trait
+(define-read-only (get-registered-oracles)
+  (ok {
+    oracles: (list 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.mock-oracle), ;; Mock oracle
+    count: u1,
+  })
+)
 
 (define-public (register-oracle (oracle principal))
   (begin

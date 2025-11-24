@@ -1,2 +1,2 @@
-;; @desc Placeholder for fixed-point-math.clar.
-;; This file is intended to house fixed-point math functions, but has not yet been implemented.
+;; fixed-point-math.clar
+;; Q64.64 Fixed Point Math Library

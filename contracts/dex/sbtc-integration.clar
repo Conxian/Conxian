@@ -1,6 +1,6 @@
 ;; ===== Traits =====
-(use-trait sip-010-ft-trait .dex-traits.sip-010-ft-trait)
-(use-trait oracle-aggregator-v2-trait .oracle-risk-traits.oracle-aggregator-v2-trait)
+(use-trait sip-010-ft-trait .sip-standards.sip-010-ft-trait)
+(use-trait oracle-aggregator-v2-trait .oracle-pricing.oracle-aggregator-v2-trait)
 ;; sbtc-integration.clar
 ;; sBTC Integration Module for Conxian Protocol
 ;; Provides sBTC asset management, risk parameters, and oracle integration
@@ -173,7 +173,7 @@
   (match (get-asset-config token)
     config (match (get-asset-price token)
       price (ok (/ (* (* amount price) (get ltv config)) WAD))
-      error error
+      error (err error)
     )
     ERR-ASSET-NOT-FOUND
   )
@@ -183,7 +183,7 @@
   (match (get-asset-config token)
     config (match (get-asset-price token)
       price (ok (/ (* (* amount price) (get liquidation-threshold config)) WAD))
-      error error
+      error (err error)
     )
     ERR-ASSET-NOT-FOUND
   )
@@ -207,36 +207,35 @@
 (define-read-only (calculate-interest-rates (asset principal))
   (match (get-interest-rate-config asset)
     rate-cfg
-      (match (get-utilization-rate asset)
-        utilization
-          (let (
-            (base (get base-rate rate-cfg))
-            (s1 (get slope1 rate-cfg))
-            (s2 (get slope2 rate-cfg))
-            (jump (get jump-multiplier rate-cfg))
-            (k1 (get kink1 rate-cfg))
-            (k2 (get kink2 rate-cfg))
-          )
-            (let (
-              (borrow-rate
-                (if (<= utilization k1)
-                  (+ base (/ (* utilization s1) WAD))
-                  (if (<= utilization k2)
-                    (+ base (+ (/ (* k1 s1) WAD)
-                               (/ (* (- utilization k1) s2) WAD)))
-                    (+ base
-                       (+ (/ (* k1 s1) WAD)
-                          (+ (/ (* (- k2 k1) s2) WAD)
-                             (/ (* (- utilization k2) jump) WAD))))))
-              )
-              (reserve-factor (match (get-asset-config asset)
-                                cfg (get reserve-factor cfg)
-                                u0))
-            )
-              (ok { borrow-rate: borrow-rate, reserve-factor: reserve-factor })
-            )
-          )
-        )
-        ERR-ASSET-NOT-FOUND
+      (let (
+        (utilization (unwrap! (get-utilization-rate asset) ERR-ASSET-NOT-FOUND))
+        (base (get base-rate rate-cfg))
+        (s1 (get slope1 rate-cfg))
+        (s2 (get slope2 rate-cfg))
+        (jump (get jump-multiplier rate-cfg))
+        (k1 (get kink1 rate-cfg))
+        (k2 (get kink2 rate-cfg))
       )
+        (let (
+          (borrow-rate
+            (if (<= utilization k1)
+              (+ base (/ (* utilization s1) WAD))
+              (if (<= utilization k2)
+                (+ base (+ (/ (* k1 s1) WAD)
+                           (/ (* (- utilization k1) s2) WAD)))
+                (+ base
+                   (+ (/ (* k1 s1) WAD)
+                      (+ (/ (* (- k2 k1) s2) WAD)
+                         (/ (* (- utilization k2) jump) WAD))))))
+          )
+          (reserve-factor
+            (match (get-asset-config asset)
+              cfg (get reserve-factor cfg)
+              u0))
+        )
+          (ok { borrow-rate: borrow-rate, reserve-factor: reserve-factor })
+        )
+      )
+    ERR-ASSET-NOT-FOUND
   )
+)

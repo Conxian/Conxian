@@ -2,7 +2,7 @@
 
 ## Executive Summary
 
-This report provides an up-to-date, comprehensive analysis of the Conxian DeFi protocol repository. It validates the findings of the previous `CONXIAN_COMPREHENSIVE_ANALYSIS_REPORT.md`, identifies new gaps and misalignments, and proposes a refined roadmap for improvement.
+This report provides an up-to-date, comprehensive analysis of the Conxian DeFi protocol repository. It validates the findings of the previous `CONXian_COMPREHENSIVE_ANALYSIS_REPORT.md`, identifies new gaps and misalignments, and proposes a refined roadmap for improvement.
 
 ## Analysis of the Lending Module
 

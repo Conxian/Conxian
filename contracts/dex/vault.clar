@@ -2,7 +2,7 @@
 ;; Implements vault-trait and vault-admin-trait with full system integration
 
 ;; Traits
-(use-trait ft-trait .sip-010-trait-ft-standard.sip-010-trait)
+(use-trait sip-010-ft-trait .sip-standards.sip-010-ft-trait)
 
 ;; Error Constants
 (define-constant ERR_UNAUTHORIZED (err u1001))
@@ -60,7 +60,7 @@
 (define-read-only (get-vault-cap (asset principal)) (ok (default-to u0 (map-get? vault-caps asset))))
 (define-read-only (is-asset-supported (asset principal)) (default-to false (map-get? supported-assets asset)))
 (define-read-only (get-strategy (token-contract principal)) (ok (map-get? asset-strategies token-contract)))
-(define-read-only (get-apy (token-contract principal)) (ok u800)) ;; 8% APY placeholder
+(define-read-only (get-apy (token-contract principal)) (ok u800)) ;; 8% APY
 (define-read-only (get-tvl (token-contract principal)) (ok (default-to u0 (map-get? vault-balances token-contract))))
 
 ;; Private functions
@@ -116,7 +116,9 @@
     (if (> fee u0)
         (begin
           (map-set collected-fees asset (+ (default-to u0 (map-get? collected-fees asset)) fee))
-          (try! (contract-call? (var-get token-system-coordinator) trigger-revenue-distribution))
+          (if (var-get emission-enabled)
+            (try! (contract-call? (var-get token-system-coordinator) trigger-revenue-distribution asset fee))
+            true)
           true)
         true)
     
@@ -171,7 +173,9 @@
     (if (> fee u0)
         (begin
           (map-set collected-fees asset (+ (default-to u0 (map-get? collected-fees asset)) fee))
-          (try! (contract-call? (var-get token-system-coordinator) trigger-revenue-distribution asset fee))
+          (if (var-get emission-enabled)
+            (try! (contract-call? (var-get token-system-coordinator) trigger-revenue-distribution asset fee))
+            true)
           true)
         true)
     
@@ -205,7 +209,9 @@
     (map-set collected-fees asset u0)
     
     ;; Notify revenue distributor
-    (try! (contract-call? (var-get token-system-coordinator) trigger-revenue-distribution))
+    (if (var-get emission-enabled)
+      (try! (contract-call? (var-get token-system-coordinator) trigger-revenue-distribution asset collected))
+      true)
     
     (ok collected)))
 

@@ -2,8 +2,6 @@
 ;; This contract serves as the central coordination point for the Conxian Protocol,
 ;; managing protocol-wide configuration, authorized contracts, and emergency controls.
 
-(use-trait rbac-trait .traits.rbac-trait.rbac-trait)
-
 ;; @constants
 ;; @var ERR_UNAUTHORIZED: The caller is not authorized to perform this action.
 (define-constant ERR_UNAUTHORIZED (err u1001))
@@ -28,7 +26,14 @@
 ;; @var authorized-contracts: A map of authorized contracts.
 (define-map authorized-contracts principal { authorized: bool, authorized-at: uint, authorized-by: principal })
 ;; @var protocol-events: A map of protocol events.
-(define-map protocol-events { event-id: uint } { event-type: (string-ascii 32), data: (buff 256), timestamp: uint })
+(define-map protocol-events
+  { event-id: uint }
+  {
+    event-type: (string-ascii 32),
+    data: (buff 256),
+    timestamp: uint,
+  }
+)
 
 ;; --- Private Functions ---
 ;; @desc Check if the caller is the protocol owner.
@@ -48,7 +53,7 @@
 ;; @param event-type: The type of the event.
 ;; @param data: The data associated with the event.
 ;; @returns (uint): The ID of the new event.
-(define-private (log-protocol-event (event-type (string-ascii 32)) (data (buff 256)))
+(define-private (log-protocol-event (event-type (string-ascii 32)) (data (string-ascii 256)))
   (let ((event-id (+ (var-get protocol-version) u1)))
     (map-set protocol-events
       { event-id: event-id }
@@ -70,7 +75,9 @@
       { key: key }
       { value: value, updated-at: block-height }
     )
-    (log-protocol-event "config-updated" (unwrap-panic (to-consensus-buff? (concat key " updated"))))
+    (log-protocol-event "config-updated"
+      (concat key " updated")
+    )
     (ok true)
   )
 )
@@ -88,12 +95,12 @@
         (map-set authorized-contracts contract-principal
           { authorized: true, authorized-at: block-height, authorized-by: tx-sender }
         )
-        (log-protocol-event "contract-authorized" (unwrap-panic (to-consensus-buff? "contract authorized")))
+        (log-protocol-event "contract-authorized" "contract authorized")
       )
       (begin
         (asserts! (is-authorized-contract contract-principal) ERR_CONTRACT_NOT_AUTHORIZED)
         (map-delete authorized-contracts contract-principal)
-        (log-protocol-event "contract-revoked" (unwrap-panic (to-consensus-buff? "contract authorization revoked")))
+        (log-protocol-event "contract-revoked" "contract authorization revoked")
       )
     )
     (ok true)
@@ -108,8 +115,12 @@
     (asserts! (is-protocol-owner) ERR_UNAUTHORIZED)
     (var-set emergency-paused pause)
     (if pause
-      (log-protocol-event "protocol-paused" (unwrap-panic (to-consensus-buff? "emergency pause activated")))
-      (log-protocol-event "protocol-unpaused" (unwrap-panic (to-consensus-buff? "emergency pause deactivated")))
+      (log-protocol-event "protocol-paused"
+        "emergency pause activated"
+      )
+      (log-protocol-event "protocol-unpaused"
+        "emergency pause deactivated"
+      )
     )
     (ok true)
   )
@@ -122,7 +133,7 @@
   (begin
     (asserts! (is-protocol-owner) ERR_UNAUTHORIZED)
     (var-set protocol-owner new-owner)
-    (log-protocol-event "ownership-transferred" (unwrap-panic (to-consensus-buff? "protocol ownership updated")))
+    (log-protocol-event "ownership-transferred" "protocol ownership updated")
     (ok true)
   )
 )
@@ -185,5 +196,5 @@
   (map-set protocol-config { key: "emergency-delay" } { value: u1008, updated-at: block-height }) ;; ~1 week in blocks
 
   ;; Log initialization
-  (log-protocol-event "protocol-initialized" (unwrap-panic (to-consensus-buff? "Conxian Protocol v1 initialized")))
+  (log-protocol-event "protocol-initialized" "Conxian Protocol v1 initialized")
 )

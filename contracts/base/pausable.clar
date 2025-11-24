@@ -3,9 +3,9 @@
 ;; Only the contract owner can pause or unpause the contract.
 
 ;; --- Traits ---
-(use-trait pausable-trait .traits.pausable-trait.pausable-trait)
-(use-trait ownable-trait .traits.ownable-trait.ownable-trait)
-(use-trait rbac-trait .traits.rbac-trait.rbac-trait)
+(use-trait pausable-trait .core-protocol.pausable-trait)
+(use-trait ownable-trait .core-protocol.ownable-trait)
+(use-trait rbac-trait .core-protocol.rbac-trait)
 
 ;; @constants
 ;; @var ERR_CONTRACT_PAUSED: The contract is currently paused.
@@ -22,8 +22,8 @@
 (define-constant ERR_PAUSED (err u1003))
 
 ;; @data-vars
-;; @var is-paused: A boolean indicating if the contract is paused.
-(define-data-var is-paused bool false)
+;; @var paused-flag: A boolean indicating if the contract is paused.
+(define-data-var paused-flag bool false)
 
 ;; ===========================================
 ;; Public functions
@@ -32,7 +32,7 @@
 ;; @desc Check if the contract is paused.
 ;; @returns (response bool uint): An `ok` response with a boolean indicating if the contract is paused.
 (define-read-only (is-paused)
-  (ok (var-get is-paused))
+  (ok (var-get paused-flag))
 )
 
 ;; @desc Pause the contract (only callable by owner).
@@ -67,7 +67,7 @@
 ;; @returns (response bool uint): An `ok` response with `true` if the contract is not paused, or an error code.
 (define-public (check-not-paused)
   (begin
-    (asserts! (not (var-get is-paused)) ERR_ALREADY_PAUSED)
+    (asserts! (not (var-get paused-flag)) ERR_ALREADY_PAUSED)
     (ok true)
   )
 )

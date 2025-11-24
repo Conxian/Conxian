@@ -2,9 +2,8 @@
 ;; This contract is responsible for initializing the price of the CXD token,
 ;; and provides functions for updating the price through governance or in an emergency.
 
-(use-trait token-trait .traits.sip-010-ft-trait.sip-010-ft-trait)
-(use-trait governance-trait .traits.governance-token-trait.governance-token-trait)
-(use-trait oracle-trait .traits.oracle-aggregator-v2-trait.oracle-aggregator-v2-trait)
+;; The governance token contract is expected to implement governance-token-trait.
+(use-trait governance-trait .governance.governance-token-trait)
 
 ;; @constants
 ;; @var ERR_UNAUTHORIZED: The caller is not authorized to perform this action.
