@@ -100,7 +100,7 @@
     ;; ERR_ASSET_NOT_WHITELISTED
 
     ;; Delegate to lending system to check if position is underwater
-    (match (contract-call? .comprehensive-lending-system
+    (match (contract-call? (var-get lending-system)
       is-position-underwater borrower debt-asset collateral-asset
     )
       result (ok result)

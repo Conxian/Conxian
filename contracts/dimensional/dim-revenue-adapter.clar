@@ -110,7 +110,8 @@
         (begin
           (asserts! (is-eq (contract-of monitor-trait) monitor-contract) (err ERR_UNAUTHORIZED))
           (let ((paused (unwrap! (contract-call? monitor-trait is-paused) (err ERR_SYSTEM_PAUSED))))
-            (asserts! (not paused) (err ERR_SYSTEM_PAUSED))))
+            (asserts! (not paused) (err ERR_SYSTEM_PAUSED)))
+          (ok true))
       (ok true))
     
     ;; Calculate revenue splits
@@ -139,7 +140,9 @@
                 (err ERR_UNAUTHORIZED)
               )
               ;; Transfer tokens to revenue distributor
-              (try! (contract-call? reward-token transfer token-holder-portion tx-sender distributor-contract none))
+              (try! (contract-call? reward-token transfer token-holder-portion
+                tx-sender distributor-contract none
+              ))
               ;; Report revenue for distribution
               (try! (contract-call? distributor-trait report-revenue 
                      (as-contract tx-sender) 
@@ -168,7 +171,9 @@
         (match (var-get treasury-contract)
           treasury-address
             (begin
-              (try! (contract-call? reward-token transfer reserve-portion tx-sender treasury-address none))
+              (try! (contract-call? reward-token transfer reserve-portion tx-sender
+                treasury-address none
+              ))
               true)
           false)
         true)
@@ -225,7 +230,9 @@
                 (is-eq (contract-of distributor-trait) distributor-contract)
                 (err ERR_UNAUTHORIZED)
               )
-              (try! (contract-call? payment-token transfer token-holder-portion tx-sender distributor-contract none))
+              (try! (contract-call? payment-token transfer token-holder-portion
+                tx-sender distributor-contract none
+              ))
               (try! (contract-call? distributor-trait report-revenue 
                      (as-contract tx-sender)
                      token-holder-portion

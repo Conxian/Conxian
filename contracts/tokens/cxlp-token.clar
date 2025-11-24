@@ -7,6 +7,7 @@
 
 ;; --- Traits ---
 (use-trait sip-010-ft-trait .sip-standards.sip-010-ft-trait)
+(use-trait queue-contract .queue-traits.queue-contract)
 
 ;; --- Constants ---
 

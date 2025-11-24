@@ -15,7 +15,7 @@
 (define-map internal-balances principal uint)
 
 ;; --- Public Functions ---
-(define-public (deposit-funds (amount uint) (token <sip-010-ft-trait>))
+(define-public (deposit-funds (amount uint) (token principal))
   (begin
     (asserts! (> amount u0) ERR_INVALID_AMOUNT)
     (let ((user tx-sender))
@@ -28,7 +28,7 @@
   )
 )
 
-(define-public (withdraw-funds (amount uint) (token <sip-010-ft-trait>))
+(define-public (withdraw-funds (amount uint) (token principal))
   (begin
     (asserts! (> amount u0) ERR_INVALID_AMOUNT)
     (let ((user tx-sender)

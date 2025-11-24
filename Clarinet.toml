@@ -38,10 +38,6 @@ depends_on = ["dim-metrics", "pausable"]
 [contracts.dimensional-engine]
 path = "contracts/core/dimensional-engine.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = [
-    "dimensional-core",
-    "liquidation-engine",
-    "oracle-adapter"]
 
 # ---------- Traits ----------
 # Modular Trait Architecture
@@ -83,7 +79,15 @@ path = "contracts/traits/security-monitoring.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
 [contracts.math-utilities]
-path = "contracts/traits/math-utilities.clar"
+path = "contracts/math/math-utilities.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+
+[contracts.queue-traits]
+path = "contracts/traits/queue-traits.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+
+[contracts.controller-traits]
+path = "contracts/traits/controller-traits.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
 [contracts.trait-errors]
@@ -204,6 +208,7 @@ math-lib-advanced = ".math-lib-advanced"
 concentrated-math = ".math-lib-concentrated"
 fixed-point-math = ".fixed-point-math"
 precision-calculator = ".precision-calculator"
+math-utilities = ".math-utilities"
 
 # Governance
 governance-token = ".governance-token"

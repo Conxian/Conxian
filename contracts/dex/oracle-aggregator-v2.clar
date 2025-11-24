@@ -95,11 +95,11 @@
 ;; @param price uint - The price reported by the oracle.
 ;; @param total-supply uint - The total supply of the asset.
 ;; @returns (response bool uint) - (ok true) on success, or an error if unauthorized, oracle not found, or manipulation detected.
-(define-public (update-price (oracle principal) (asset principal) (price uint) (total-supply uint) (circuit-breaker <circuit-breaker-trait>))
+(define-public (update-price (oracle principal) (asset principal) (price uint) (total-supply uint) (circuit-breaker principal))
   (begin
     (asserts! (is-some (map-get? registered-oracles { oracle-principal: oracle })) ERR_INVALID_ORACLE)
     (try! (check-manipulation asset price))
-    (try! (check-circuit-breaker))
+    (try! (check-circuit-breaker circuit-breaker))
     
     ;; Store the current observation with tenure awareness
     ;; Note: In Stacks 2.5, we use get-tenure-info? to get the current tenure ID.
@@ -159,13 +159,6 @@
   (is-some (map-get? registered-oracles { oracle-principal: oracle }))
 )
 
-;; @desc Checks if an oracle is registered.
-;; @param oracle principal - The principal of the oracle contract.
-;; @returns bool - True if registered, false otherwise.
-(define-read-only (is-oracle-registered (oracle principal))
-  (is-some (map-get? registered-oracles { oracle-principal: oracle }))
-)
-
 ;; --- Private Functions ---
 
 ;; @desc Checks for price manipulation using the registered manipulation detector.
@@ -182,13 +175,13 @@
 
 ;; @desc Checks the circuit breaker status.
 ;; @returns (response bool uint) - (ok true) if circuit breaker is not tripped, (err ERR_CIRCUIT_BREAKER_TRIPPED) if tripped.
-(define-private (check-circuit-breaker (circuit-breaker <circuit-breaker-trait>))
+(define-private (check-circuit-breaker (circuit-breaker principal))
   ;; v1: if a circuit-breaker contract is configured, consult its is-circuit-open
   ;; method; otherwise treat the circuit as open.
   (match (var-get circuit-breaker-contract)
     breaker
       (begin
-        (asserts! (is-eq (contract-of circuit-breaker) breaker) ERR_UNAUTHORIZED)
+        (asserts! (is-eq circuit-breaker breaker) ERR_UNAUTHORIZED)
         (match (contract-call? circuit-breaker is-circuit-open)
           is-open (if is-open (ok true) ERR_CIRCUIT_BREAKER_TRIPPED)
           err ERR_CIRCUIT_BREAKER_TRIPPED

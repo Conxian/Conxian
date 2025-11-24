@@ -8,6 +8,7 @@
     (trigger-circuit-breaker ((string-utf8 200)) (response bool uint))
     (reset-circuit-breaker () (response bool uint))
     (is-circuit-broken () (response bool uint))
+    (is-circuit-open () (response bool uint))
     (assert-operational () (response bool uint))
   )
 )
@@ -34,7 +35,7 @@
       circuit-breaker-status: bool,
       last-updated: uint
     } uint))
-    
+    (is-paused () (response bool uint))
     (record-anomaly ((string-ascii 64) uint) (response bool uint))
     (get-recent-anomalies () (response (list 100 (string-ascii 64)) uint))
   )

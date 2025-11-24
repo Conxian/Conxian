@@ -15,6 +15,32 @@
 )
 
 ;; ===========================================
+;; FIXED POINT MATH V2 TRAIT (Advanced Q96/Q128 for Concentrated Liquidity)
+;; ===========================================
+(define-trait math-fixed-point-v2-trait (
+  (fixed-point-pow-rational-i
+    (uint uint int uint)
+    (response uint uint)
+  )
+  (fixed-point-log-rational-i
+    (uint uint (response uint uint) uint)
+    (response int uint)
+  )
+  (fixed-point-sqrt
+    (uint)
+    (response uint uint)
+  )
+  (fixed-point-exp
+    (uint)
+    (response uint uint)
+  )
+  (fixed-point-ln
+    (uint)
+    (response uint uint)
+  )
+))
+
+;; ===========================================
 ;; FIXED POINT MATH TRAIT (Q64.64 Precision)
 ;; ===========================================
 (define-trait fixed-point-math-trait

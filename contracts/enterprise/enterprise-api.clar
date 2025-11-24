@@ -5,6 +5,13 @@
 (use-trait rbac-trait .core-protocol.rbac-trait)
 (use-trait circuit-breaker-trait .security-monitoring.circuit-breaker-trait)
 (use-trait governance-trait .governance-traits.governance-token-trait)
+
+;; Local error constants for this module
+(define-constant ERR_UNAUTHORIZED (err u8000))
+(define-constant ERR_INVALID_TIER (err u8001))
+(define-constant ERR_DEX_ROUTER_NOT_SET (err u8002))
+(define-constant ERR_CIRCUIT_OPEN (err u8003))
+(define-constant ERR_ACCOUNT_NOT_VERIFIED (err u8004))
 ;; Note: enterprise-api-trait needs to be created or mapped
 ;; (use-trait enterprise-api-trait .base-traits.enterprise-api-trait)
 
@@ -31,6 +38,10 @@
   account-id: uint,
   details: (string-ascii 256)
 })
+
+;; Persisted configuration for enterprise integrations
+(define-data-var circuit-breaker (optional principal) none)
+(define-data-var compliance-hook (optional principal) none)
 
 ;; --- Admin Functions ---
 
@@ -63,7 +74,8 @@
 ;; @return (response bool) An (ok true) response if the circuit breaker was successfully set, or an error if unauthorized.
 (define-public (set-circuit-breaker (breaker principal))
   (begin
-    (asserts! (contract-call? .roles has-role "contract-owner" tx-sender)
+    ;; Authorize via RBAC: require the role check call to succeed.
+(asserts! (is-ok (contract-call? .roles has-role "contract-owner" tx-sender))
       ERR_UNAUTHORIZED
     )
     (var-set circuit-breaker (some breaker))
@@ -225,16 +237,18 @@
 ;; @return (response bool) An (ok true) response if the circuit breaker is closed, or an error if open.
 (define-private (check-circuit-breaker)
   (let ((breaker-contract (unwrap! (var-get circuit-breaker) ERR_DEX_ROUTER_NOT_SET)))
-    (asserts! (not (contract-call? breaker-contract is-circuit-open)) ERR_CIRCUIT_OPEN)
-    (ok true)))
+    (let ((is-open (unwrap! (contract-call? breaker-contract is-circuit-open) ERR_CIRCUIT_OPEN)))
+      (asserts! (not is-open) ERR_CIRCUIT_OPEN)
+      (ok true))))
 
 ;; @desc Checks if an account is verified.
 ;; @param account (principal) The account to check.
 ;; @return (response bool) An (ok true) response if the account is verified, or an error if not verified.
 (define-private (check-verification (account principal))
   (let ((hook-contract (unwrap! (var-get compliance-hook) ERR_DEX_ROUTER_NOT_SET)))
-    (asserts! (contract-call? hook-contract is-kyc account) ERR_ACCOUNT_NOT_VERIFIED)
-    (ok true)))
+    (let ((kyc-ok (unwrap! (contract-call? hook-contract is-kyc account) ERR_ACCOUNT_NOT_VERIFIED)))
+      (asserts! kyc-ok ERR_ACCOUNT_NOT_VERIFIED)
+      (ok true))))
 
 ;; @desc Checks if an account has a specific privilege bit (privilege is assumed power-of-two).
 ;; Uses arithmetic to avoid recursion: ((privileges / privilege) % 2) == 1

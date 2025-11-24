@@ -85,6 +85,19 @@
   { user: principal, block-height: uint }
   uint)
 
+;; === INTERNAL HELPERS ===
+
+(define-private (snapshot-voting-power (user principal) (height uint))
+  (let ((power (unwrap!
+                 (contract-call?
+                   'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.governance-token
+                   get-voting-power-at
+                   user
+                   height)
+                 u0)))
+    (map-set voting-power-snapshots { user: user, block-height: height } power)
+    power))
+
 ;; Parameter change proposals
 (define-map parameter-proposals
   uint ;; proposal-id

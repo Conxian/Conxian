@@ -60,6 +60,8 @@
 (define-data-var revenue-distributor-contract (optional principal) none)
 ;; @var rbac-contract: The principal of the RBAC contract.
 (define-data-var rbac-contract (optional principal) none)
+;; @var rbac-contract: The principal of the RBAC contract.
+(define-data-var rbac-contract (optional principal) none)
 ;; @var automation-manager-contract: The principal of the automation manager contract.
 (define-data-var automation-manager-contract (optional principal) none)
 ;; @var total-tasks-executed: The total number of tasks executed.
@@ -71,7 +73,7 @@
 
 ;; --- Authorization ---
 ;; @desc Check if the caller is the contract owner.
-;; @returns (response bool uint): An `ok` response with `true` if the caller is the owner, or an error code.
+;; @returns (response bool uint): Delegates to the RBAC has-role check.
 (define-private (check-is-owner)
   (contract-call? .roles has-role "contract-owner" tx-sender))
 
@@ -270,7 +272,7 @@
         TASK_BOND_COUPON_PROCESS (execute-bond-processing)
         TASK_METRICS_UPDATE (execute-metrics-update)
         TASK_AUTOMATION_MANAGER (execute-automation-manager)
-        (err ERR_INVALID_TASK)
+        ERR_INVALID_TASK
       )
     )
   )
@@ -292,7 +294,9 @@
           (map-set task-history {task-id: task-id, block: block-height} {
             success: false,
             gas-used: u10000,
-            error-code: (some (unwrap-err-panic execution-result))
+            ;; Use the generic task-failed code; underlying err payload type
+            ;; may vary per task, so we avoid unwrapping it here.
+            error-code: (some u9002)
           })
           (ok false)))))
 
@@ -302,7 +306,7 @@
   (match (var-get oracle-contract)
     contract-principal
     (contract-call? contract-principal update-all-prices)
-    (err ERR_TASK_FAILED)))
+    ERR_TASK_FAILED))
 
 ;; @desc Execute the liquidation check task.
 ;; @returns (response bool uint): An `ok` response with `true` on success, or an error code.
@@ -310,7 +314,7 @@
   (match (var-get liquidation-contract)
     contract-principal
     (contract-call? contract-principal check-and-liquidate-undercollateralized)
-    (err ERR_TASK_FAILED)))
+    ERR_TASK_FAILED))
 
 ;; @desc Execute the rebalance strategies task.
 ;; @returns (response bool uint): An `ok` response with `true` on success, or an error code.
@@ -318,7 +322,7 @@
   (match (var-get yield-optimizer-contract)
     contract-principal
     (contract-call? contract-principal optimize-all-strategies)
-    (err ERR_TASK_FAILED)))
+    ERR_TASK_FAILED))
 
 ;; @desc Execute the fee distribution task.
 ;; @returns (response bool uint): An `ok` response with `true` on success, or an error code.
@@ -326,7 +330,7 @@
   (match (var-get revenue-distributor-contract)
     contract-principal
     (contract-call? contract-principal distribute-fees)
-    (err ERR_TASK_FAILED)))
+    ERR_TASK_FAILED))
 
 ;; @desc Execute the bond processing task.
 ;; @returns (response bool uint): An `ok` response with `true` on success, or an error code.
@@ -334,7 +338,7 @@
   (match (var-get bond-contract)
     contract-principal
     (contract-call? contract-principal process-matured-coupons)
-    (err ERR_TASK_FAILED)))
+    ERR_TASK_FAILED))
 
 ;; @desc Execute the metrics update task.
 ;; @returns (response bool uint): An `ok` response with `true` on success, or an error code.
@@ -355,7 +359,7 @@
   (match (var-get interest-rate-contract)
     contract-principal (let ((assets (var-get interest-rate-assets)))
       (if (is-eq (len assets) u0)
-        (err ERR_TASK_FAILED)
+        ERR_TASK_FAILED
         (let ((result (fold execute-interest-accrual-for-asset assets {
             status: (ok true),
             contract: contract-principal,
@@ -364,7 +368,7 @@
         )
       )
     )
-    (err ERR_TASK_FAILED)
+    ERR_TASK_FAILED
   )
 )
 
@@ -380,7 +384,7 @@
     {
       status: (match (var-get interest-rate-contract)
         contract (contract-call? contract accrue-interest asset)
-        none (err ERR_TASK_FAILED)),
+        none ERR_TASK_FAILED),
       contract: (get contract state),
     }
   )

@@ -7,6 +7,7 @@
 
 ;; --- Traits ---
 (use-trait sip-010-ft-trait .sip-standards.sip-010-ft-trait)
+(use-trait protocol-monitor-trait .security-monitoring.protocol-monitor-trait)
 
 ;; --- Constants ---
 
@@ -157,17 +158,6 @@
     }
   )
 )
-
-;; --- Read-Only Functions ---
-
-;; @desc Checks if a principal is the contract owner.
-;; @param who The principal to check.
-;; @returns A boolean indicating if the principal is the owner.
-(define-read-only (is-owner (who principal))
-  (is-eq who (var-get contract-owner))
-)
-
-;; @desc Checks if a principal is a minter.
 
 ;; --- Read-Only Functions ---
 

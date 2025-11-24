@@ -9,6 +9,7 @@
 ;; --- Traits ---
 (use-trait sip-010-ft-trait .sip-standards.sip-010-ft-trait)
 (use-trait protocol-monitor-trait .security-monitoring.protocol-monitor-trait)
+(use-trait controller .controller-traits.controller)
 
 ;; --- Constants ---
 

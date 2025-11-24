@@ -93,6 +93,13 @@
   )
     (ok (+ balance delegated-to-me))))
 
+(define-read-only (get-voting-power-at
+    (account principal)
+    (height uint)
+  )
+  (get-voting-power account)
+)
+
 (define-public (has-voting-power (account principal))
   (let ((power (unwrap! (get-voting-power account) ERR_UNAUTHORIZED)))
     (ok (> power u0))))

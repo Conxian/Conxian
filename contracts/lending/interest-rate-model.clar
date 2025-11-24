@@ -41,12 +41,20 @@
 )
 
 ;; ===== Private Functions =====
-(define-private (check-is-owner) 
-  (ok (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED))
+;; Ownership and caller checks return a standard response type so they can be
+;; composed with try! from public entrypoints.
+(define-private (check-is-owner)
+  (begin
+    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
+    (ok true)
+  )
 )
 
-(define-private (check-is-lending-system) 
-  (ok (asserts! (is-eq tx-sender (unwrap! (var-get lending-system-contract) ERR_LENDING_SYSTEM_NOT_SET)) ERR_UNAUTHORIZED))
+(define-private (check-is-lending-system)
+  (begin
+    (asserts! (is-eq tx-sender (unwrap! (var-get lending-system-contract) ERR_LENDING_SYSTEM_NOT_SET)) ERR_UNAUTHORIZED)
+    (ok true)
+  )
 )
 
 ;; ===== Admin Functions =====
@@ -169,7 +177,7 @@
           )
         )
       )
-    (err ERR_INVALID_PARAMETER)
+    ERR_INVALID_PARAMETER
   )
 )
 
@@ -224,7 +232,7 @@
             (ok true)
           )
         )
-      (err ERR_INVALID_PARAMETER)
+      ERR_INVALID_PARAMETER
     )
   )
 )

@@ -154,7 +154,7 @@
       token-count: (get token-count current-activity),
       reputation-score: (get reputation-score current-activity)
     })
-    (ok true)
+    true
   )
 )
 
@@ -217,7 +217,7 @@
     })
     (var-set last-operation-id new-op-id)
 
-    (try! (update-user-activity user total-value))
+    (update-user-activity user total-value)
 
     (if (is-eq operation-type "yield-claim")
       (try! (trigger-revenue-distribution (unwrap-panic (element-at tokens u0)) total-value))

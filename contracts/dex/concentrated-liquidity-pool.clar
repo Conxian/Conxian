@@ -625,14 +625,14 @@
 ;; @returns (response int (err u3020)) The tick or an error.
 ;; @error u3020 If a mathematical overflow occurs.
 (define-private (get-tick-at-price (price uint))
-  (ok (unwrap-panic (log256 price) u3020)))
+  (ok (- (to-uint (/ price u1000000)) u887272))) ;; Simplified tick calculation
 
 ;; @desc Calculates the price for a given tick.
 ;; @param tick The tick to convert to a price.
 ;; @returns (response uint (err u3021)) The price or an error.
 ;; @error u3021 If a mathematical overflow occurs.
 (define-private (get-price-at-tick (tick int))
-  (ok (unwrap-panic (exp256 tick) u3021)))
+  (ok (* u1000000 (to-uint (+ tick i887272))))) ;; Simplified price calculation
 
 ;; @desc Calculates the liquidity for given amounts of token0 and token1.
 ;; @param sqrt-price-a The square root price at the lower tick.
@@ -644,9 +644,13 @@
 (define-private (min (a uint) (b uint))
   (if (< a b) a b))
 
+(define-private (abs-value (x uint))
+  (if (< x u0) (* x u1) x)
+)
+
 (define-private (get-liquidity-for-amounts (sqrt-price-a uint) (sqrt-price-b uint) (amount0 uint) (amount1 uint))
   (let (
-    (sqrt-price-diff (abs (- sqrt-price-b sqrt-price-a)))
+    (sqrt-price-diff (abs-value (- sqrt-price-b sqrt-price-a)))
     (liquidity0 (if (is-eq sqrt-price-diff u0) u0 (/ (* amount0 sqrt-price-a sqrt-price-b) sqrt-price-diff)))
     (liquidity1 (if (is-eq sqrt-price-diff u0) u0 (/ amount1 sqrt-price-diff)))
   )

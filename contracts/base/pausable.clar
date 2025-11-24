@@ -40,7 +40,7 @@
 (define-public (pause)
   (begin
     (asserts! (is-ok (contract-call? .roles has-role "contract-owner" tx-sender))
-      (err ERR_NOT_OWNER)
+      ERR_NOT_OWNER
     )
     ;; Ensure contract is not already paused
     (asserts! (not (var-get paused-flag)) ERR_ALREADY_PAUSED)
@@ -55,7 +55,7 @@
 ;; @returns (response bool uint): An `ok` response with `true` on success, or an error code.
 (define-public (unpause)
   (begin
-    (asserts! (is-ok (contract-call? .roles has-role "contract-owner" tx-sender)) (err ERR_NOT_OWNER))
+    (asserts! (is-ok (contract-call? .roles has-role "contract-owner" tx-sender)) ERR_NOT_OWNER)
     ;; Ensure contract is currently paused
     (asserts! (var-get paused-flag) ERR_ALREADY_UNPAUSED)
 

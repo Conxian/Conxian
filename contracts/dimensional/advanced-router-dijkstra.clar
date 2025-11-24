@@ -158,6 +158,9 @@
       })
       (err ERR_NO_PATH))))
 
+(define-read-only (compute-best-route (token-in principal) (token-out principal) (amount-in uint))
+  (find-optimal-path token-in token-out amount-in))
+
 ;; Add missing calculate-path-price function to match trait
 (define-read-only (calculate-path-price
     (path (list 10 principal))

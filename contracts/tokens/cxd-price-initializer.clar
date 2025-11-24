@@ -37,11 +37,11 @@
 
 ;; @events
 ;; @var PriceInitialized: Emitted when the price is initialized.
-(define-event PriceInitialized { price: uint, min-price: uint, block: uint })
+(define-constant PriceInitialized (err u1001))
 ;; @var PriceUpdated: Emitted when the price is updated.
-(define-event PriceUpdated { old-price: uint, new-price: uint, block: uint, emergency: bool })
+(define-constant PriceUpdated (err u1002))
 ;; @var MinPriceUpdated: Emitted when the minimum price is updated.
-(define-event MinPriceUpdated { old-min-price: uint, new-min-price: uint, block: uint })
+(define-constant MinPriceUpdated (err u1003))
 
 ;; @desc Initializes the CXD price initializer contract with an initial price, minimum price, and timelock.
 ;; @param cxd-token-principal: The principal of the CXD token contract.
