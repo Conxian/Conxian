@@ -585,7 +585,8 @@
 ;; @error ERR_INSUFFICIENT_LIQUIDITY if the amount-out is less than min-amount-out.
 (define-public (swap-legacy (token-in principal) (amount-in uint) (min-amount-out uint) (token0-trait <sip-010-ft-trait>) (token1-trait <sip-010-ft-trait>))
   (if (is-eq token-in (var-get token0))
-    (swap-x-for-y amount-in min-amount-out token0-trait token1-trait)(swap-y-for-x amount-in min-amount-out token0-trait token1-trait)
+    (swap-x-for-y amount-in min-amount-out token0-trait token1-trait)
+    (swap-y-for-x amount-in min-amount-out token0-trait token1-trait)
   )
 )
 

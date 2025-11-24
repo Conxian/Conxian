@@ -44,8 +44,8 @@
   report-uri: (string-utf8 256),
   timestamp: uint,
   status: {
-    status: (string-ascii 20),
-    reason: (optional (string-utf8 500))
+    status: (string-ascii 22),
+    reason: (optional (string-ascii 22))
   },
   votes: {
     for: uint,
