@@ -18,10 +18,15 @@
 ;; @param inner: The function to be executed.
 ;; @returns (response uint uint): The result of the inner function, or an error code.
 (define-public (with-reentrancy-guard (inner (response uint uint)))
-  (begin
-    ;; Phase 0 stub: enforce non-reentrancy check but do not execute inner function.
-    (try! (non-reentrant))
-    (ok u0)
+  (let
+    (
+      (check (try! (non-reentrant)))
+    )
+    (var-set reentrancy-guard true)
+    (let ((result (inner)))
+      (var-set reentrancy-guard false)
+      result
+    )
   )
 )
 

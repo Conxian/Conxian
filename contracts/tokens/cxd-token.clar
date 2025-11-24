@@ -299,17 +299,14 @@
     (asserts! (is-eq tx-sender sender) (err ERR_UNAUTHORIZED))
     (asserts! (not (check-system-pause)) (err ERR_SYSTEM_PAUSED))
 
-    (let (
-      (sender-bal (default-to u0 (map-get? balances sender)))
-      (rec-bal (default-to u0 (map-get? balances recipient)))
-    )
+    (let ((sender-bal (default-to u0 (map-get? balances sender))))
       (asserts! (>= sender-bal amount) (err ERR_NOT_ENOUGH_BALANCE))
-      (map-set balances sender
-        (unwrap! (safe-sub sender-bal amount) (err ERR_SUB_UNDERFLOW))
-      )
-(map-set balances recipient
-        (unwrap! (safe-add rec-bal amount) (err ERR_OVERFLOW))
-      )
+
+      (try! (map-set balances sender (unwrap! (safe-sub sender-bal amount) (err ERR_SUB_UNDERFLOW))))
+
+      (let ((rec-bal (default-to u0 (map-get? balances recipient))))
+        (try! (map-set balances recipient (unwrap! (safe-add rec-bal amount) (err ERR_OVERFLOW)))))
+
       (asserts! (notify-transfer amount sender recipient) (err ERR_TRANSFER_HOOK_FAILED))
       (ok true)
     )

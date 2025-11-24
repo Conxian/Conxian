@@ -39,9 +39,12 @@
 ;; @returns (response bool uint): An `ok` response with `true` on success, or an error code.
 (define-public (pause)
   (begin
-    ;; Phase 0: skip RBAC check and rely on direct state.
-(asserts! (not (var-get paused-flag)) ERR_ALREADY_PAUSED)
-(var-set paused-flag true)
+    (asserts! (is-ok (contract-call? .rbac-trait has-role "contract-owner")) (err ERR_NOT_OWNER))
+    ;; Ensure contract is not already paused
+    (asserts! (not (var-get is-paused)) ERR_ALREADY_PAUSED)
+
+    ;; Update state
+    (var-set is-paused true)
     (ok true)
   )
 )
@@ -50,9 +53,12 @@
 ;; @returns (response bool uint): An `ok` response with `true` on success, or an error code.
 (define-public (unpause)
   (begin
-    ;; Phase 0: skip RBAC check and rely on direct state.
-(asserts! (var-get paused-flag) ERR_ALREADY_UNPAUSED)
-(var-set paused-flag false)
+    (asserts! (is-ok (contract-call? .rbac-trait has-role "contract-owner")) (err ERR_NOT_OWNER))
+    ;; Ensure contract is currently paused
+    (asserts! (var-get is-paused) ERR_ALREADY_UNPAUSED)
+
+    ;; Update state
+    (var-set is-paused false)
     (ok true)
   )
 )
