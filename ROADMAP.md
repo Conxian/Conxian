@@ -1,23 +1,28 @@
-# Conxian Protocol Roadmap
+# Roadmap
 
-## Phase 1: Foundation & Core Dimensions (90% Complete)
-- [x] **Spatial Dimension**: Concentrated Liquidity Pool (CLP) Core Logic ✅
-- [x] **Risk Dimension**: Liquidation Engine & Oracle Aggregator V2 ✅
-- [🟡] **Cross-Chain Dimension**: Bitcoin Adapter with Finality Verification (stub requires expansion)
-- [x] **DLC Integration**: DLC Manager & Traits for Native BTC Lending ✅ (trait + implementation exist)
-- [🔴] **Testing**: Comprehensive Unit Tests for all new modules (coverage unverified)
+This document outlines the future development plans for the Conxian Protocol.
 
-## Phase 2: Institutional & Governance
-- [ ] **Institutional Dimension**: Enterprise API & Compliance Hooks
-- [ ] **Governance Dimension**: Fast-Track Proposal Lane for Risk Council
-- [ ] **Audit**: Internal Security Review of all contracts
+## Phase 1: Mainnet Launch (Q1 2026)
 
-## Phase 3: Mainnet Launch & Expansion
-- [ ] **Mainnet Deployment**: Deploy to Stacks Mainnet
-- [ ] **Integration**: Partner with Oracle Providers (Pyth/RedStone)
-- [ ] **Expansion**: Launch "Conxian Pro" Interface for Institutional Traders
+- **Goal**: Launch the Conxian Protocol on the Stacks Mainnet.
+- **Key Tasks**:
+  - Complete the migration to the new modular trait system.
+  - Stabilize the test suite and achieve >90% code coverage.
+  - Align all documentation with the final implementation.
+  - Conduct an external security audit.
 
-## Phase 4: Advanced Features
-- [ ] **Options**: Physical Settlement Options via DLCs
-- [ ] **Insurance**: Native BTC Insurance Fund via DLCs
-- [ ] **Cross-Chain**: Expansion to other Bitcoin L2s (if applicable)
+## Phase 2: Advanced Features (Q2 2026)
+
+- **Goal**: Begin to implement the next generation of advanced DeFi features.
+- **Key Tasks**:
+  - Implement a standalone oracle module.
+  - Build out the enterprise module.
+  - Develop the dimensional vaults.
+
+## Phase 3: Ecosystem Expansion (Q3 2026)
+
+- **Goal**: Expand the Conxian ecosystem and integrate with other DeFi protocols.
+- **Key Tasks**:
+  - Partner with oracle providers (e.g., Pyth, RedStone).
+  - Launch a "Conxian Pro" interface for institutional traders.
+  - Expand to other Bitcoin L2s.

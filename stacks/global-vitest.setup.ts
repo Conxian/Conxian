@@ -1,10 +1,10 @@
 // global-vitest.setup.ts
 import { getSDK } from '@stacks/clarinet-sdk';
 
-// Default to the minimal foundation manifest, but allow callers to override
+// Default to the test manifest, but allow callers to override
 // This compiles only the validated foundation layer unless CLARINET_MANIFEST is provided
 if (!process.env.CLARINET_MANIFEST) {
-  process.env.CLARINET_MANIFEST = 'stacks/Clarinet.foundation.toml';
+  process.env.CLARINET_MANIFEST = 'stacks/Clarinet.test.toml';
 }
 
 // Use a minimal test manifest to avoid loading optional/missing contracts

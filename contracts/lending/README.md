@@ -27,6 +27,7 @@ The `comprehensive-lending-system.clar` contract is the central component of the
 - **`interest-rate-model.clar`**: A separate contract that calculates interest rates based on utilization and other factors. This contract is a dependency and must be set by the admin.
 - **Oracle Contract**: A dependency that provides price feeds for all supported assets. This is essential for calculating collateral value and health factors.
 - **`liquidation-manager.clar`**: A specialized contract responsible for managing the liquidation process. Liquidations are initiated through this contract, not directly on the core lending contract.
+- **`lending-position-nft.clar`**: A comprehensive NFT system for lending protocol positions, representing borrower positions, lender positions, and liquidation events.
 - **`access-control.clar`**: A role-based access control contract that manages permissions for administrative functions like setting contract dependencies and pausing the protocol.
 - **`circuit-breaker.clar` (Optional)**: An optional dependency that can halt protocol operations under extreme market conditions to protect user funds.
 - **Proof of Reserves Contract (Optional)**: An optional dependency to verify the reserves of underlying assets, adding an extra layer of security.

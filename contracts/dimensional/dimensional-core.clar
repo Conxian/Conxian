@@ -154,7 +154,7 @@
   )
 )
 
-  "@private Get price from oracle with error handling"
+(define-private (get-oracle-price (token principal) (oracle-trait <oracle-trait>))
   "@private Get price from oracle with error handling"
   (begin
     (asserts! (is-eq (contract-of oracle-trait) (var-get oracle-contract)) (err ERR_UNAUTHORIZED))
@@ -239,10 +239,9 @@
   )
 )
 
-(define-public (close-position 
-    (position-id uint) 
+(define-public (close-position
+    (position-id uint)
     (slippage-tolerance uint)
-    (position-id uint)(slippage-tolerance uint)
   )
   (let (
     (position (unwrap! (get-position tx-sender position-id) (err ERR_INVALID_POSITION)))
@@ -336,7 +335,7 @@
   )
 )
 
-          (* leverage u10000)
+(define-public (liquidate-position (owner principal) (position-id uint) (oracle-trait <oracle-trait>))
   "@dev Liquidate an undercollateralized position"
   (let (
     (position (unwrap! (get-position owner position-id) (err ERR_INVALID_POSITION)))
@@ -365,7 +364,7 @@
   )
 )
 
-    (var-set total-value-locked (- (var-get total-value-locked) collateral-value))
+(define-read-only (get-health-factor (owner principal) (position-id uint) (oracle-trait <oracle-trait>))
   "@dev Returns the health factor of a position (0-10000, where < 10000 means liquidatable)"
   (let (
     (position (unwrap! (get-position owner position-id) (err ERR_INVALID_POSITION)))
