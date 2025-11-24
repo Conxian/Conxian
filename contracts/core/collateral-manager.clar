@@ -15,35 +15,27 @@
 (define-map internal-balances principal uint)
 
 ;; --- Public Functions ---
-(define-public (deposit-funds (amount uint) (token principal))
+(define-public (deposit-funds (amount uint) (token <sip-010-ft-trait>))
   (begin
     (asserts! (> amount u0) ERR_INVALID_AMOUNT)
-
     (let ((user tx-sender))
       (try! (contract-call? token transfer amount user (as-contract tx-sender) none))
-
       (let ((current-balance (default-to u0 (map-get? internal-balances user))))
         (map-set internal-balances user (+ current-balance amount))
       )
-
       (ok true)
     )
   )
 )
 
-(define-public (withdraw-funds (amount uint) (token principal))
+(define-public (withdraw-funds (amount uint) (token <sip-010-ft-trait>))
   (begin
     (asserts! (> amount u0) ERR_INVALID_AMOUNT)
-
     (let ((user tx-sender)
           (current-balance (default-to u0 (map-get? internal-balances user))))
-
-      (asserts! (>= current-balance amount) ERR_INSUFFICIENT_BALANCE)
-
+    (asserts! (> amount u0) ERR_INVALID_AMOUNT)
       (map-set internal-balances user (- current-balance amount))
-
-      (try! (as-contract (contract-call? token transfer amount tx-sender user none)))
-
+      (try! (contract-call? token transfer amount tx-sender user none))
       (ok true)
     )
   )

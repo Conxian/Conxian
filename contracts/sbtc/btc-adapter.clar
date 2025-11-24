@@ -1,7 +1,7 @@
 ;; btc-adapter.clar
 ;; Bitcoin integration layer with finality verification
 ;; Implements the Cross-Chain Dimension requirements
-
+(use-trait sip-010-ft-trait .requirements.sip-010-trait-ft-standard)
 ;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED (err u5000))
 (define-constant ERR_INVALID_TX (err u5001))
@@ -67,7 +67,7 @@
         (tx-id (buff 32))
         (amount uint)
         (recipient principal)
-        (token principal)
+        (token <sip-010-ft-trait>)
     )
     (begin
         ;; 1. Verify Finality
@@ -112,7 +112,7 @@
 (define-public (withdraw
         (amount uint)
         (btc-address (buff 128))
-        (token principal)
+        (token <sip-010-ft-trait>)
     )
     (begin
         (asserts! (> amount u0) ERR_INVALID_AMOUNT)
