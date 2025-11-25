@@ -538,7 +538,7 @@
         (map-set proposal-voting-nfts
           { token-id: token-id }
           (merge (unwrap-panic (map-get? proposal-voting-nfts { token-id: token-id })) { owner: to }))
-    else true)) ;; Other types transfer normally
+    else true ;; Other types transfer normally
 
 ;; ===== Read-Only Functions =====
 

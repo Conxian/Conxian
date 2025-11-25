@@ -19,7 +19,7 @@ improvements.
 - [x] **Fixed missing functions** - Simplified exp256/log256 in
   concentrated-liquidity-pool.clar
 
-### 🔄 In Progress (29 compilation errors remaining)
+### 🔄 In Progress (remaining compilation errors)
 
 - [ ] **Cross-contract references** - Fix .dimensional-engine,
   .oracle-aggregator-v2 references
@@ -38,6 +38,10 @@ improvements.
   references
 - [x] **Security Review Process** - Comprehensive security standards
   and procedures
+- [x] **Identity & Enterprise Compliance Design** - Defined a principal-based
+  enterprise identity and metadata model aligned with the NFT system and
+  optional BNS integration, and planned dimensional KYB/KYC and external
+  integration test coverage.
 
 ---
 
@@ -95,7 +99,8 @@ improvements.
 - [ ] **Contract optimization** - Gas efficiency improvements
 - [ ] **Upgrade patterns** - Contract evolution mechanisms
 - [ ] **Cross-chain bridges** - Bitcoin L2 implementations
-- [ ] **Institutional compliance** - Enterprise frameworks
+- [ ] **Institutional compliance** - Enterprise frameworks and KYB/KYC
+  test coverage
 
 ### 📋 Long-term Architecture
 
@@ -111,9 +116,9 @@ improvements.
 ### Compilation Status
 
 - **Start**: 30+ errors
-- **Current**: 29 errors  
+- **Current**: remaining errors  
 - **Target**: 0 errors
-- **Progress**: 3.3% reduction
+- **Progress**: In progress
 
 ### Documentation Coverage
 
@@ -197,6 +202,8 @@ improvements.
 - End-to-end transaction flows
 - Error handling and edge cases
 - Performance under load
+- Dimensional lifecycle coverage (deploy, init, upgrade, operations,
+  governance, incident) across core protocol and external integrations
 
 #### 2. Performance benchmarking
 
