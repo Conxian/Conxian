@@ -126,6 +126,7 @@ improvements.
 
 - **Security Review Process**: ✅ Implemented
 - **Automated Scanning**: ✅ Configured
+- **Internal Audit Suite**: 📋 Planned  automated checks mapped to OWASP ASVS, CIS Controls v8, NIST CSF, ISO 27001, and SOC 2-style controls.
 - **Bug Bounty Program**: 📋 Planned
 - **External Audit**: 📋 Pending
 
