@@ -170,7 +170,8 @@
   (let (
     (position (unwrap! (contract-call? (var-get dimensional-engine-contract) get-position position-owner position-id) ERR_INVALID_POSITION))
     (asset (get asset position))
-    (price (unwrap! (contract-call? .oracle_aggregator_v2 get-twap asset)
+    (price (unwrap!
+      (contract-call? (var-get oracle-contract) get-twap asset)
       ERR_ORACLE_FAILURE
     ))
     (margin-ratio (calculate-margin-ratio position price))

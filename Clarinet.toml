@@ -453,6 +453,10 @@ address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 path = "contracts/utils/utils.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
+[contracts.comparison-helpers]
+path = "contracts/utils/comparison-helpers.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+
 [contracts.decentralized-trait-registry]
 path = "contracts/decentralized-trait-registry.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"

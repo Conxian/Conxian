@@ -55,13 +55,13 @@
       ERR_INVALID_INTERVAL
     )
 
-    ;; Get current index price and TWAP
+    ;; Get current index price and TWAP via the configured oracle contract
     (let (
-      (index-price (unwrap! (contract-call? .oracle-aggregator-v2 get-price asset)
+      (index-price (unwrap! (contract-call? (var-get oracle-contract) get-price asset)
         (err u5003)
       ))
       (twap (unwrap!
-        (contract-call? .oracle-aggregator-v2 get-twap-with-window asset
+        (contract-call? (var-get oracle-contract) get-twap-with-window asset
           (var-get funding-interval)
         )
         (err u5004)
@@ -232,8 +232,8 @@
 ;; @param x (int) The integer.
 ;; @returns (uint) The absolute value.
 (define-private (abs-int (x int))
-  (if (< x i0)
-    (- u0 x) ;; Negate the integer to get its absolute value
+  (if (< x 0)
+    (to-uint (- 0 x)) ;; Negate the integer to get its absolute value
     (to-uint x)
   )
 )
@@ -255,7 +255,7 @@
       )
         funding-rate
       )
-      i0 ;; Return i0 for consistency with int type
+      0 ;; Neutral funding rate when there is no open interest
     )
   )
 )

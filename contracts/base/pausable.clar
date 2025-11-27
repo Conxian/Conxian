@@ -60,7 +60,7 @@
     (asserts! (var-get paused-flag) ERR_ALREADY_UNPAUSED)
 
     ;; Update state
-    (var-set is-paused false)
+    (var-set paused-flag false)
     (ok true)
   )
 )

@@ -60,8 +60,8 @@
 (define-data-var revenue-distributor-contract (optional principal) none)
 ;; @var rbac-contract: The principal of the RBAC contract.
 (define-data-var rbac-contract (optional principal) none)
-;; @var rbac-contract: The principal of the RBAC contract.
-(define-data-var rbac-contract (optional principal) none)
+;; @var rbac-contract-backup: The principal of the RBAC contract backup.
+(define-data-var rbac-contract-backup (optional principal) none)
 ;; @var automation-manager-contract: The principal of the automation manager contract.
 (define-data-var automation-manager-contract (optional principal) none)
 ;; @var total-tasks-executed: The total number of tasks executed.
@@ -73,9 +73,12 @@
 
 ;; --- Authorization ---
 ;; @desc Check if the caller is the contract owner.
-;; @returns (response bool uint): Delegates to the RBAC has-role check.
+;; @returns (response bool uint): (ok true) if the caller has the role, or ERR_UNAUTHORIZED.
 (define-private (check-is-owner)
-  (contract-call? .roles has-role "contract-owner" tx-sender))
+  (begin
+    (asserts! (is-ok (contract-call? .roles has-role "contract-owner" tx-sender))
+              ERR_UNAUTHORIZED)
+    (ok true)))
 
 ;; @desc Check if the caller is a keeper.
 ;; @returns (response bool uint): An `ok` response with `true` if the caller is a keeper, or an error code.

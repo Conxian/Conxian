@@ -131,9 +131,46 @@ improvements.
 
 - **Security Review Process**: ✅ Implemented
 - **Automated Scanning**: ✅ Configured
-- **Internal Audit Suite**: 📋 Planned  automated checks mapped to OWASP ASVS, CIS Controls v8, NIST CSF, ISO 27001, and SOC 2-style controls.
+- **Internal Audit Suite**: 📋 Planned ႑ automated checks mapped to OWASP ASVS, CIS Controls v8, NIST CSF, ISO 27001, and SOC 2-style controls.
 - **Bug Bounty Program**: 📋 Planned
 - **External Audit**: 📋 Pending
+
+---
+
+## ✅ Per-Batch Verification & Deployment Pipeline
+
+To keep each batch of changes deployment-ready and compatible with StacksOrbit-driven deployments, the following pipeline must be followed for all Tier 1 (mainnet v1) contract changes:
+
+1. **Local compile & targeted tests**
+
+- Run `clarinet check` on the root `Clarinet.toml` and, if needed, contract-specific checks.
+- Run focused Vitest suites for the affected module (DEX, lending, governance, oracle, traits).
+
+2. **CI gating (GitHub Actions)**
+
+- Ensure CI jobs for Clarinet compilation, trait policy checks, and core Vitest suites pass on every PR.
+- Block merges to `develop`/`main` when any Tier 1 contract or test fails.
+
+3. **StacksOrbit dry-run deployment**
+
+- From the StacksOrbit repo, run a dry-run deployment against the updated Conxian contracts:
+  - `python stacksorbit_cli.py deploy --dry-run --network testnet`
+- Treat a green dry-run as a prerequisite for tagging a release candidate.
+
+4. **Testnet deployment via StacksOrbit**
+
+- Deploy the current release candidate to Stacks testnet using StacksOrbit:
+  - `python stacksorbit_cli.py deploy --network testnet`
+- Run end-to-end integration and monitoring checks against the deployed contracts.
+
+5. **Mainnet deployment gating**
+
+- Only after:
+  - `clarinet check` is clean for the mainnet v1 contract set,
+  - CI coverage/validation thresholds are met, and
+  - StacksOrbit testnet deployment is stable,
+- proceed with StacksOrbit mainnet deployment:
+  - `python stacksorbit_cli.py deploy --network mainnet` (subject to external audit sign-off).
 
 ---
 
@@ -341,3 +378,40 @@ improvements.
 
 *This roadmap is updated weekly to reflect current progress and
 priorities. For real-time updates, see the project board on GitHub.*
+
+
+---
+# Strategic Addendum: Censorship Resistance & Alternative Liquidity Pathways
+
+## Objective
+Enhance Conxian's resilience against institutional gatekeeping and censorship while ensuring robust, crypto-native liquidity solutions.
+
+## Guiding Principles
+- Minimize reliance on fiat on/off ramps
+- Strengthen protocol-level decentralization
+- Build privacy-preserving infrastructure
+- Diversify liquidity sources beyond traditional banking
+
+## Phased Action Plan
+
+### Phase 2 (Q2 2026): Advanced Features
+- [ ] **Peer-to-Peer Fiat Alternatives**: Integrate decentralized P2P exchange interfaces (Bisq-like) for BTC and sBTC swaps.
+- [ ] **Stablecoin Liquidity Pools**: Launch pools for DAI, USDC, and wrapped BTC to reduce fiat dependency.
+- [ ] **MEV Protection Enhancements**: Implement zero-knowledge-based anti-front-running mechanisms.
+
+### Phase 3 (Q3 2026): Ecosystem Expansion
+- [ ] **Cross-Chain Bridges**: Deploy bridges to Bitcoin L2s and other EVM chains for diversified liquidity.
+- [ ] **Privacy Layers**: Integrate zk-SNARKs for transaction confidentiality and decentralized identity solutions.
+- [ ] **Community Legal Defense Fund**: Establish a DAO-managed fund to challenge discriminatory banking practices.
+
+## Success Metrics
+- **Liquidity Diversity**: >40% of total liquidity sourced from crypto-native pools by Q3 2026.
+- **Decentralization Score**: Achieve >80% governance token distribution across 10,000+ wallets.
+- **Privacy Adoption**: >25% of transactions routed through privacy-preserving layers by Q4 2026.
+
+## Risks & Mitigation
+- **Regulatory Pushback**: Mitigate via modular compliance frameworks without centralization.
+- **Liquidity Fragmentation**: Address through cross-chain bridges and dimensional vaults.
+- **User Adoption**: Improve UX for P2P ramps and privacy features.
+
+---

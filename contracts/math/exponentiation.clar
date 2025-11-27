@@ -10,8 +10,8 @@
 (define-constant ERR_INVALID_INPUT (err u9003))
 
 ;; Tick bounds (Uniswap V3 limits)
-(define-constant MIN_TICK i-887272)
-(define-constant MAX_TICK i887272)
+(define-constant MIN_TICK (- 0 887272))  ;; -887272 as signed int
+(define-constant MAX_TICK 887272)
 
 ;; Q96 scaling factor (2^96) as per Uniswap V3 sqrtPriceX96
 (define-constant Q96 u79228162514264337593543950336)
@@ -41,7 +41,7 @@
 ;; @param sqrt-price The sqrt price in Q96 format (uint).
 ;; @returns (ok int) The tick value, or an error.
 (define-private (calculate-tick-from-sqrt-ratio-x96 (sqrt-price uint))
-  (ok i0) ;; Simplified implementation for now
+  (ok 0) ;; Simplified implementation for now
 )
 
 ;; --- Public Read-Only Functions ---

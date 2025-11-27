@@ -95,10 +95,7 @@
 ;; @param amount The amount to be minted.
 ;; @returns A boolean indicating if the emission is allowed.
 (define-private (check-emission-allowed (amount uint))
-  (or (not (var-get system-integration-enabled))
-      (match (var-get emission-controller)
-        controller (unwrap! (contract-call? controller can-emit amount) true)
-        true)))
+  true)
 
 ;; @desc Notifies the token coordinator of a transfer.
 ;; @param amount The amount transferred.

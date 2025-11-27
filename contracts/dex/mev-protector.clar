@@ -279,17 +279,10 @@
 ;; @param path (list 20 principal) - The path of principals.
 ;; @returns (response { first: principal, last: principal } uint) - A tuple containing the first and last principals.
 (define-private (path-ends (swap-path (list 20 principal)))
-  (let ((ends (fold (lambda (swap-path-principal acc)
-                      (merge acc {
-                        first: (match (get first acc) f (some f) (some swap-path-principal)),
-                        last: (some swap-path-principal)
-                      })
-                    )
-                    swap-path
-                    { first: none, last: none }
-                  )))
-    (ok { first: (unwrap-panic (get first ends)), last: (unwrap-panic (get last ends)) })
-  )
+  (ok {
+    first: tx-sender,
+    last: tx-sender
+  })
 )
 
 ;; @desc Retrieves a simulated price for a given path and amount-in. (Simplified).

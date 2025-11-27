@@ -20,12 +20,15 @@
 (define-constant ERR_REVENUE_DISTRIBUTION_FAILED u803)
 (define-constant ERR_CONTRACT_NOT_SET u804)
 (define-constant ERR_GOVERNANCE_CALL u805)
+(define-constant ERR_CONTRACT_NOT_FOUND u806)
+(define-constant ERR_CALL_FAILED u807)
 
 ;; --- Storage ---
 (define-data-var governance-contract (optional principal) none)
 (define-data-var revenue-distributor (optional principal) none)
 (define-data-var token-coordinator (optional principal) none)
 (define-data-var protocol-monitor (optional principal) none)
+(define-data-var treasury-contract (optional principal) none)
 
 ;; Dimensional contract references
 (define-data-var dim-yield-contract (optional principal) none)
@@ -147,7 +150,7 @@
               (try! (contract-call? distributor-trait report-revenue 
                      (as-contract tx-sender) 
                      token-holder-portion 
-                     reward-token))
+                     (contract-of reward-token)))
               (var-set total-distributed-revenue (+ (var-get total-distributed-revenue) token-holder-portion))
               true)
           false)
@@ -236,7 +239,7 @@
               (try! (contract-call? distributor-trait report-revenue 
                      (as-contract tx-sender)
                      token-holder-portion
-                     payment-token))
+                     (contract-of payment-token)))
               (var-set total-distributed-revenue (+ (var-get total-distributed-revenue) token-holder-portion))
               true)
           false)

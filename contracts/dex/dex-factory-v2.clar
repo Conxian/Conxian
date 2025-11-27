@@ -61,13 +61,14 @@
 ;; @param type-id The identifier of the pool type to create.
 ;; @param token-a The principal of the first token in the pair.
 ;; @param token-b The principal of the second token in the pair.
+;; @param deployer The pool deployer trait reference.
 ;; @returns (response principal uint) The principal of the created pool or an error.
 ;; @error ERR_TYPE_NOT_FOUND if the specified pool type is not registered.
 (define-public (create-pool
     (type-id (string-ascii 32))
     (token-a principal)
     (token-b principal)
-    (impl-trait .defi-primitives.pool-deployer-trait)
+    (deployer <pool-deployer-trait>)
   )
   (let (
     (type-entry (map-get? pool-types { type-id: type-id }))
@@ -78,12 +79,12 @@
   )
     (asserts! (is-some type-entry) (err ERR_TYPE_NOT_FOUND))
     (asserts!
-      (is-eq (contract-of impl-trait) (get impl (unwrap-panic type-entry)))
+      (is-eq (contract-of deployer) (get impl (unwrap-panic type-entry)))
       (err ERR_UNAUTHORIZED)
     )
     (asserts! (is-none (map-get? pools { token-a: (get t1 sorted-tokens), token-b: (get t2 sorted-tokens) })) (err ERR_POOL_ALREADY_EXISTS))
     (let (
-      (new-pool-principal (contract-call? impl-trait deploy-and-initialize token-a token-b))
+      (new-pool-principal (contract-call? deployer deploy-and-initialize token-a token-b))
     )
       (asserts! (is-ok new-pool-principal) ERR_TYPE_NOT_FOUND)
       (map-set pools {

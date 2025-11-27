@@ -50,7 +50,6 @@
 (define-public (update-position-value (user principal) (new-value uint))
   (begin
     (try! (check-role "ROLE_ADMIN"))
-    (var-set insurance-fund fund)
     (ok true)
   )
 )
@@ -71,5 +70,7 @@
 
 ;; --- Private Functions ---
 (define-private (check-role (role (string-ascii 32)))
-  (contract-call? .roles has-role role tx-sender)
-)
+  (begin
+    (asserts! (is-ok (contract-call? .roles has-role role tx-sender))
+              ERR_UNAUTHORIZED)
+    (ok true)))

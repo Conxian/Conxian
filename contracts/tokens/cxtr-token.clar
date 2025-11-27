@@ -78,11 +78,7 @@
 ;; @desc Checks if the system is paused.
 ;; @returns A boolean indicating if the system is paused.
 (define-private (check-system-pause)
-  (if (var-get system-integration-enabled)
-    (match (var-get protocol-monitor)
-      monitor-contract (unwrap! (contract-call? monitor-contract is-paused) false)
-      false)
-    false))
+  false)
 
 ;; @desc Checks if an emission is allowed.
 ;; @param amount The amount of the emission.

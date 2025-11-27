@@ -3,7 +3,7 @@
 ;; and provides functions for updating the price through governance or in an emergency.
 
 ;; The governance token contract is expected to implement governance-token-trait.
-(use-trait governance-trait .governance.governance-token-trait)
+(use-trait governance-trait .governance-traits.governance-token-trait)
 
 ;; @constants
 ;; @var ERR_UNAUTHORIZED: The caller is not authorized to perform this action.
@@ -74,10 +74,12 @@
         (var-set timelock-end-block (some (+ block-height timelock-blocks)))
         (var-set is-initialized true)
         
-        (ok (print (PriceInitialized 
-            { price: initial-price-amount, 
-              min-price: min-price-amount, 
-              block: block-height })))
+        (ok (print {
+            event: "price-initialized",
+            price: initial-price-amount,
+            min-price: min-price-amount,
+            block: block-height
+        }))
     )
 )
 
@@ -117,12 +119,13 @@
         (var-set initial-price (some new-price))
         (var-set price-last-updated (some block-height))
         
-        (ok (print (PriceUpdated { 
-            old-price: current-price, 
-            new-price: new-price, 
+        (ok (print {
+            event: "price-updated",
+            old-price: current-price,
+            new-price: new-price,
             block: block-height,
             emergency: false
-        })))
+        }))
     )
 )
 
@@ -143,11 +146,12 @@
         
         (var-set min-price (some new-min-price))
         
-        (ok (print (MinPriceUpdated { 
-            old-min-price: current-min, 
-            new-min-price: new-min-price, 
-            block: block-height 
-        })))
+        (ok (print {
+            event: "min-price-updated",
+            old-min-price: current-min,
+            new-min-price: new-min-price,
+            block: block-height
+        }))
     )
 )
 
@@ -168,12 +172,13 @@
         (var-set initial-price (some new-price))
         (var-set price-last-updated (some block-height))
         
-        (ok (print (PriceUpdated { 
-            old-price: current-price, 
-            new-price: new-price, 
+        (ok (print {
+            event: "price-updated",
+            old-price: current-price,
+            new-price: new-price,
             block: block-height,
             emergency: true
-        })))
+        }))
     )
 )
 
