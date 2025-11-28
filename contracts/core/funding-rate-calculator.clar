@@ -1,11 +1,11 @@
 ;; @desc This contract is responsible for calculating and updating funding rates.
 
-(use-trait funding-rate-calculator-trait .traits.funding-rate-calculator-trait.funding-rate-calculator-trait)
-(use-trait oracle-trait .oracle-aggregator-v2-trait.oracle-aggregator-v2-trait)
-(use-trait position-manager-trait .traits.position-manager-trait.position-manager-trait)
-(use-trait rbac-trait .base-traits.rbac-trait)
+(use-trait funding-rate-calculator-trait .dimensional-traits.funding-rate-calculator-trait)
+(use-trait oracle-trait .oracle-pricing.oracle-aggregator-v2-trait)
+(use-trait position-manager-trait .dimensional.position-manager-trait)
+(use-trait rbac-trait .core-protocol.rbac-trait)
 
-(impl-trait .traits.funding-rate-calculator-trait.funding-rate-calculator-trait)
+(impl-trait .dimensional-traits.funding-rate-calculator-trait)
 
 ;; @constants
 (define-constant ERR_UNAUTHORIZED (err u1001))
@@ -74,7 +74,7 @@
 
 ;; --- Private Functions ---
 (define-private (check-role (role (string-ascii 32)))
-  (contract-call? .rbac-trait has-role tx-sender role)
+  (contract-call? .core-protocol.rbac-trait has-role tx-sender role)
 )
 
 (define-private (get-open-interest (asset principal))

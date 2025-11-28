@@ -1,10 +1,6 @@
 ;; monitoring-dashboard.clar
 ;; Provides read-only functions for system monitoring and health checks
 
-(use-trait dimensional-core-trait .all-traits.dimensional-core-trait)
-(use-trait oracle-trait .all-traits.oracle-trait)
-(use-trait monitoring-trait .all-traits.monitoring-trait)
-
 ;; ===== Constants =====
 (define-constant ERR_UNAUTHORIZED (err u100))
 (define-constant ERR_INVALID_MODULE (err u101))

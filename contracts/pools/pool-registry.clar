@@ -4,7 +4,7 @@
 ;; Manages registration and tracking of liquidity pools
 
 ;; Use decentralized traits
-(use-trait rbac-trait .base-traits.rbac-trait)
+(use-trait rbac-trait .core-protocol.rbac-trait)
 
 ;; ===========================================
 ;; DATA STRUCTURES

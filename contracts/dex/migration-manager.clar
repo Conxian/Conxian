@@ -4,8 +4,8 @@
 ;; This contract facilitates the migration of liquidity and positions between different versions of pools or protocols.
 ;; It ensures a smooth transition for users and maintains data integrity during upgrades.
 
-(use-trait rbac-trait .traits.rbac-trait.rbac-trait)
-(use-trait ft-trait .sip-010-trait-ft-standard.sip-010-trait)
+(use-trait rbac-trait .core-protocol.rbac-trait)
+(use-trait sip-010-ft-trait .sip-standards.sip-010-ft-trait)
 (use-trait lp-token-trait .traits.lp-token-trait.lp-token-trait)
 
 
@@ -38,7 +38,7 @@
 
 (define-public (set-contracts (old-dex principal) (new-dex principal))
     (begin
-     (asserts! (is-ok (contract-call? .rbac-contract has-role "contract-owner")) (err ERR_UNAUTHORIZED))
+     (asserts! (is-ok (contract-call? .core-protocol.rbac-trait-contract has-role "contract-owner")) (err ERR_UNAUTHORIZED))
       (var-set old-dex-contract old-dex)
       (var-set new-dex-contract new-dex)
       (ok true)))

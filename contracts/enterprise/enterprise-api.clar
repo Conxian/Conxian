@@ -1,4 +1,5 @@
-;; Conxian Enterprise API - Institutional features
+;; enterprise-api.clar
+;; Provides enterprise-grade features for the Conxian DEX.
 
 ;; Traits - using modular decentralized system
 (use-trait rbac-trait .base-traits.rbac-trait)
@@ -7,57 +8,9 @@
 ;; Note: enterprise-api-trait needs to be created or mapped
 ;; (use-trait enterprise-api-trait .base-traits.enterprise-api-trait)
 
-;; --- Constants ---
-(define-constant ERR_UNAUTHORIZED (err u1100))
-(define-constant ERR_ACCOUNT_NOT_FOUND (err u2001))
-(define-constant ERR_INVALID_TIER (err u2002))
-(define-constant ERR_INVALID_ORDER (err u2003))
-(define-constant ERR_ORDER_NOT_FOUND (err u2004))
-(define-constant ERR_ACCOUNT_NOT_VERIFIED (err u2005))
-(define-constant ERR_CIRCUIT_OPEN (err u2006))
-(define-constant ERR_INVALID_FEE_DISCOUNT (err u2007))
-(define-constant ERR_INVALID_PRIVILEGE (err u2008))
-(define-constant ERR_DEX_ROUTER_NOT_SET (err u2009))
-
-;; Privilege constants
-(define-constant PRIVILEGE_TWAP_ORDER u1)
-(define-constant PRIVILEGE_VWAP_ORDER u2)
-(define-constant PRIVILEGE_ADVANCED_ORDERS u4)
-(define-constant PRIVILEGE_ALL u255)
-
-;; --- Data Variables ---
-(define-data-var contract-owner principal tx-sender)
-(define-data-var account-counter uint u0)
-(define-data-var twap-order-counter uint u0)
-(define-data-var audit-event-counter uint u0)
-(define-data-var compliance-hook (optional principal) none)
-(define-data-var circuit-breaker (optional principal) none)
-(define-data-var dex-router (optional principal) none)
-
-;; --- Maps ---
-(define-map institutional-accounts uint {
-  owner: principal,
-  kyc-expiry: (optional uint),
-  trading-privileges: uint,
-  tier-id: uint
-})
-
-(define-map tier-configurations uint {
-  name: (string-ascii 32),
-  fee-discount-rate: uint,
-  min-volume: uint,
-  max-volume: uint
-})
-
-(define-map twap-orders uint {
-  account-id: uint,
-  token-in: principal,
-  token-out: principal,
-  amount: uint,
-  duration: uint,
-  start-block: uint,
-  executed: bool,
-  expiry: uint
+(define-map enterprise-accounts { user: principal } {
+  tier: uint,
+  kyc-status: bool
 })
 
 (define-map vwap-orders uint {
@@ -141,47 +94,13 @@
 ;; @return (response bool) An (ok true) response if the KYC expiry was successfully set, or an error if unauthorized or the account is not found.
 (define-public (set-kyc-expiry (account-id uint) (expiry (optional uint)))
   (begin
-    (asserts! (contract-call? .access-control-contract has-role "enterprise-admin" tx-sender) ERR_UNAUTHORIZED)
-    (let ((account (unwrap! (map-get? institutional-accounts account-id) ERR_ACCOUNT_NOT_FOUND)))
-      (map-set institutional-accounts account-id (merge account {kyc-expiry: expiry}))
-      (log-audit-event "set-kyc-expiry" account-id "KYC expiry updated")
-      (ok true))))
+    (asserts! (is-eq tx-sender .admin) ERR_UNAUTHORIZED)
+    (map-set enterprise-accounts { user: user } { tier: tier, kyc-status: false })
+    (ok true)
+  )
+)
 
-;; @desc Sets the trading privileges for an institutional account.
-;; @param account-id (uint) The ID of the institutional account.
-;; @param privileges (uint) The new bitmask of trading privileges.
-;; @return (response bool) An (ok true) response if the privileges were successfully set, or an error if unauthorized or the account is not found.
-(define-public (set-trading-privileges (account-id uint) (privileges uint))
-  (begin
-    (asserts! (contract-call? .access-control-contract has-role "enterprise-admin" tx-sender) ERR_UNAUTHORIZED)
-    (let ((account (unwrap! (map-get? institutional-accounts account-id) ERR_ACCOUNT_NOT_FOUND)))
-      (map-set institutional-accounts account-id (merge account {trading-privileges: privileges}))
-      (log-audit-event "set-trading-privileges" account-id "Trading privileges updated")
-      (ok true))))
-
-;; @desc Updates the tier of an existing institutional account.
-;; @param account-id (uint) The ID of the account to update.
-;; @param new-tier-id (uint) The new tier ID for the account.
-;; @return (response bool) An (ok true) response if the account tier was successfully updated, or an error if unauthorized, the account is not found, or the new tier is invalid.
-(define-public (update-account-tier (account-id uint) (new-tier-id uint))
-  (begin
-    (asserts! (contract-call? .access-control-contract has-role "enterprise-admin" tx-sender) ERR_UNAUTHORIZED)
-    (unwrap! (map-get? tier-configurations new-tier-id) ERR_INVALID_TIER)
-    (let ((account (unwrap! (map-get? institutional-accounts account-id) ERR_ACCOUNT_NOT_FOUND)))
-      (map-set institutional-accounts account-id (merge account {tier-id: new-tier-id}))
-      (log-audit-event "update-account-tier" account-id "Account tier updated")
-      (ok true))))
-
-;; --- Tier Configuration ---
-
-;; @desc Sets the configuration for a specific tier.
-;; @param tier-id (uint) The ID of the tier to configure.
-;; @param name (string-ascii 32) The name of the tier.
-;; @param fee-discount-rate (uint) The fee discount rate for this tier (e.g., u100 for 1%).
-;; @param min-volume (uint) The minimum trading volume required for this tier.
-;; @param max-volume (uint) The maximum trading volume allowed for this tier.
-;; @return (response bool) An (ok true) response if the tier configuration was successfully set, or an error if unauthorized.
-(define-public (set-tier-configuration (tier-id uint) (name (string-ascii 32)) (fee-discount-rate uint) (min-volume uint) (max-volume uint))
+(define-public (set-kyc-status (user principal) (status bool))
   (begin
     (asserts! (contract-call? .access-control-contract has-role "enterprise-admin" tx-sender) ERR_UNAUTHORIZED)
     (map-set tier-configurations tier-id {

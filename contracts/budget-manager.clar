@@ -1,10 +1,6 @@
 ;; budget-manager.clar
 ;; Manages treasury allocation and budget proposals for DAO governance
 
-;; Traits
-(use-trait budget-manager-trait .all-traits.budget-manager-trait)
-(use-trait proposal-trait .all-traits.proposal-trait)
-
 ;; Constants
 (define-constant ERR_UNAUTHORIZED (err u100))
 (define-constant ERR_PROPOSAL_NOT_FOUND (err u101))

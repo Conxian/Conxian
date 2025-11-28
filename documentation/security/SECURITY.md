@@ -1,7 +1,6 @@
 # Conxian Security Documentation
 
-This document outlines Conxian's security architecture, implemented
-protections, and audit readiness.
+This document outlines Conxian's security architecture, implemented protections, and audit readiness.
 
 ## Security Overview
 
@@ -159,12 +158,7 @@ Precision Protections:
 
 ## 🔍 Audit Readiness
 
-### Code Quality
-
-- **255+ Smart Contracts**: The protocol has been refactored into a modular architecture with over 255 smart contracts.
-- **Test Suite in Development**: The test suite is currently under development and is not yet stable.
-- **Documentation**: The documentation has been updated to reflect the new modular architecture.
-- **Clean Code**: The codebase has been cleaned up, and legacy variants have been pruned.
+The Conxian protocol is currently in a pre-audit phase. The codebase has undergone a significant refactoring to improve modularity and clarity, but the test suite is not yet stable. An external security audit will be conducted after the test suite has been stabilized and the codebase has been frozen.
 
 ### Security Testing
 
@@ -172,14 +166,6 @@ Precision Protections:
 # Comprehensive test suite
 npm test
 # Expected: The test suite is currently failing with multiple errors.
-
-# Security-specific tests
-npm run test:security
-# Expected: TBD
-
-# Integration testing
-npm run test:integration
-# Expected: TBD
 ```
 
 ### External Audit Preparation
@@ -191,193 +177,9 @@ npm run test:integration
 - [ ] **Deployment Scripts**: The deployment scripts need to be tested and verified to ensure that they are production-ready.
 - [ ] **Emergency Procedures**: The emergency procedures need to be documented and tested to ensure that they are effective.
 
-## 🏗️ Security Architecture
-
-### Access Control Implementation
-
-#### Role Management
-- **Admin Role**: Full system access, can grant/revoke any role
-- **Emergency Role**: Can pause/unpause the system during emergencies
-- **Operator Role**: Limited to operational functions
-- **Multi-sig**: Required for critical operations (configurable threshold)
-
-#### Security Features
-- Role-based function access control
-- Emergency pause functionality
-- Time-delayed role changes
-- Comprehensive event logging
-- Integration with multi-sig wallets
-
-### Contract Security Layers
-
-```text
-User Interface (Frontend)
-├── Input Validation: Sanitize all user inputs
-├── Rate Limiting: Prevent spam and abuse
-└── Authentication: Wallet signature verification
-
-Smart Contract Layer
-├── Access Controls: Admin and user permissions
-├── State Validation: Invariant checking
-├── Emergency Pauses: Circuit breakers
-└── Safe Arithmetic: Overflow protection
-
-Treasury Security
-├── Multi-Signature: Distributed key control
-├── Time Delays: Prevent immediate execution
-├── Audit Trails: Complete transaction history
-└── Balance Monitoring: Real-time validation
-
-Network Security
-├── Stacks Blockchain: Bitcoin-level security
-├── Contract Immutability: No hidden upgrades
-├── Open Source: Community verification
-└── Formal Verification: Clarity language benefits
-```
-
-### Operational Security
-
-- **Key Management**: Hardware wallets for production
-- [x] **Access Control**: Role-based system implemented with multi-signature support privilege
-- **Monitoring**: 24/7 system health monitoring
-- **Incident Response**: Documented procedures
-- **Communication**: Transparent user updates
-
-## 🔐 Best Practices
-
-### For Users
-
-- **Verify Contracts**: Always check official contract addresses
-- **Use Hardware Wallets**: Secure private key storage
-- **Review Transactions**: Understand what you're signing
-- **Stay Updated**: Follow official announcements
-- **Report Issues**: Use official channels for concerns
-
-### For Developers
-
-- **Code Review**: All changes require peer review
-- **Test Coverage**: Security tests for all features
-- **Documentation**: Keep security docs current
-- **Monitoring**: Monitor system health continuously
-- **Response**: Rapid response to security issues
-
-### For Auditors
-
-- **Full Scope**: All contracts and interactions
-- **Economic Review**: Tokenomics and incentive analysis
-- **Operational Review**: Deployment and upgrade procedures
-- **Emergency Testing**: Verify emergency response works
-- **Documentation**: Complete security documentation
-
-## 📊 Security Metrics
-
-### System Health
-
-- **Uptime**: 99.9% target availability
-- **Response Time**: <1 hour for critical issues
-- **False Positives**: <5% alert accuracy
-- **Recovery Time**: <24 hours for major incidents
-
-### Security KPIs
-
-- **Zero Exploits**: No successful attacks to date
-- **100% Test Coverage**: All security features tested
-- **5 AIP Features**: All security implementations active
-- **Multi-Sig Active**: Treasury protection operational
-
 ## 📞 Security Contact
 
 ### Reporting Security Issues
 
-- **Email**: <security@Conxian.org> (when available)
 - **GitHub**: Private security advisories
 - **Discord**: #security channel (when available)
-- **PGP Key**: Available on request
-
-### Emergency Contact
-
-For immediate security concerns:
-
-1. **GitHub Issue**: Create with "SECURITY" label
-2. **Emergency Pause**: Multi-sig signers can trigger
-3. **Community Alert**: Official channels notify users
-
----
-
-## Security Summary
-
-Conxian implements **institutional-grade security** with:
-
-- **5 Active AIP Security Features**
-- **Multi-signature Treasury Protection**
-- **Emergency Response Capabilities**
-- **Comprehensive Testing Coverage**
-- **Audit-Ready Codebase**
-
-The platform is designed for maximum security while maintaining usability and decentralization.
-
----
-
-## Audits
-
-This section contains information about security audits performed on the Conxian platform.
-
-### Security Audit
-
-- **Date Completed:** _TBD_
-- **Performed By:** _Audit Firm_
-- **Full Report:** _Link to report_
-
-### Key Findings & Resolutions
-
-_Summary of findings and how they were addressed._
-
-### Security Contacts
-
-- security@Conxian.defi
-- [Bug Bounty Program](https://bugbounty.Conxian.defi)
-
-## Security Checklist: Liquidation System
-
-### Access Control
-- [ ] All admin functions are protected
-- [ ] Emergency functions have proper access controls
-- [ ] Keeper whitelist is properly managed
-- [ ] Role-based access control is properly implemented
-
-### Input Validation
-- [ ] All user inputs are validated
-- [ ] Slippage protection is working
-- [ ] Amount validations (min/max) are enforced
-- [ ] Asset whitelist is properly checked
-
-### State Management
-- [ ] State changes are atomic
-- [ ] No reentrancy vulnerabilities
-- [ ] Proper event emission for all state changes
-- [ ] Emergency pause functionality works
-
-### Edge Cases
-- [ ] Zero amount handling
-- [ ] Maximum value handling (overflows)
-- [ ] Partial liquidations
-- [ ] Full position liquidation
-- [ ] Oracle price manipulation resistance
-
-### Integration Points
-- [ ] Lending system integration
-- [ ] Oracle integration
-- [ ] Token transfer validation
-- [ ] Error handling for external calls
-
-### Testing Coverage
-- [ ] Unit tests for all functions
-- [ ] Integration tests for full flow
-- [ ] Edge case testing
-- [ ] Fuzz testing for random inputs
-
-### Documentation
-- [ ] All functions documented
-- [ ] Error codes documented
-- [ ] Security assumptions listed
-- [ ] Known limitations documented

@@ -2,6 +2,10 @@
 
 Comprehensive decentralized exchange functionality for the Conxian Protocol implementing advanced DeFi features including concentrated liquidity, multi-hop routing, yield farming, and cross-chain integration.
 
+## Status
+
+**Migration In Progress**: The contracts in this module have not yet been migrated to the new modular trait system. They still use the legacy, individual trait files, and some are in a transitional state with trait imports temporarily commented out. The code examples below reflect the *target* architecture, not the current implementation.
+
 ## Overview
 
 The DEX module contains a complete suite of decentralized exchange contracts supporting:
@@ -20,7 +24,8 @@ The DEX module contains a complete suite of decentralized exchange contracts sup
 
 #### Routing & Swaps
 
-- `multi-hop-router-v3.clar`: Advanced routing engine with Dijkstra's algorithm for optimal pathfinding across multiple pool types (concentrated, stable, weighted)
+- `multi-hop-router-v3.clar`: Advanced routing engine for optimal pathfinding across multiple pool types (concentrated, stable, weighted)
+- `dijkstra-pathfinder.clar`: Implements Dijkstra's algorithm for optimal trade routing.
 - `dex-factory.clar`: Factory contract for creating and managing liquidity pools with comprehensive pool management
 - `dex-factory-v2.clar`: Enhanced factory with improved gas optimization and pool parameter validation
 - `dex-registrar.clar`: Registry for DEX components and protocol integration points
@@ -106,6 +111,8 @@ The DEX module contains a complete suite of decentralized exchange contracts sup
 #### Utilities
 
 - `distributed-cache-manager.clar`: Distributed caching for performance optimization
+- `cross-protocol-integrator.clar`: Integrates with other DeFi protocols.
+- `price-impact-calculator.clar`: Calculates the price impact of trades.
 - `nakamoto-compatibility.clar`: Stacks 2.1 Nakamoto upgrade compatibility layer
 
 ### Legacy & Migration
@@ -120,7 +127,7 @@ The DEX module contains a complete suite of decentralized exchange contracts sup
 ### Creating a Concentrated Liquidity Position
 
 ```clarity
-(use-trait pool-trait .dex-traits.pool-trait)
+;; Note: The following use-trait line is part of the target architecture and is not yet implemented.
 (contract-call? .concentrated-liquidity-pool create-position
   { token-0: token-a, token-1: token-b }
   tick-lower
@@ -136,7 +143,7 @@ The DEX module contains a complete suite of decentralized exchange contracts sup
 ### Multi-Hop Token Swap
 
 ```clarity
-(use-trait router-trait .dex-traits.router-trait)
+;; Note: The following use-trait line is part of the target architecture and is not yet implemented.
 ;; Propose route first
 (contract-call? .multi-hop-router-v3 propose-route
   token-in token-out amount-in min-amount-out route-timeout)
@@ -149,7 +156,7 @@ The DEX module contains a complete suite of decentralized exchange contracts sup
 ### Staking LP Tokens
 
 ```clarity
-(use-trait staking-trait .staking-traits.staking-trait)
+;; Note: The following use-trait line is part of the target architecture and is not yet implemented.
 (contract-call? .auto-compounder stake-tokens
   pool-token amount lock-period)
 ```

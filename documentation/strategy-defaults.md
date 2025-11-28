@@ -14,7 +14,7 @@ The Default Strategy Engine assigns category-optimized strategies to vault-manag
 - Assets: spot/liquidity provisioning; emphasis on price impact, fee APR, and volatility controls.
 - Bonds: fixed-income tokenized positions; emphasis on duration/convexity and coupon yield.
 
-Each category maps to a default strategy contract implementing `.all-traits.strategy-trait`.
+Each category maps to a default strategy contract implementing `.traits folder.strategy-trait`.
 
 ## Assignment and Automation
 

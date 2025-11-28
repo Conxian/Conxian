@@ -23,8 +23,10 @@ describe('Core layer shape (dim-registry, dimensional-engine)', () => {
       expect(true).toBe(true);
       return;
     }
-    expect(src).toMatch(/\(use-trait\s+dim-registry-trait\s+\.all-traits\.dim-registry-trait\)/);
-    expect(src).toMatch(/\(impl-trait\s+\.all-traits\.dim-registry-trait\)/);
+    expect(src).toMatch(
+      /\(use-trait\s+dim-registry-trait\s+\.traits folder\.dim-registry-trait\)/
+    );
+    expect(src).toMatch(/\(impl-trait\s+\.traits folder\.dim-registry-trait\)/);
   });
 
   it('dimensional-engine exists and references centralized traits', () => {
@@ -34,6 +36,8 @@ describe('Core layer shape (dim-registry, dimensional-engine)', () => {
       expect(true).toBe(true);
       return;
     }
-    expect(src).toMatch(/\(use-trait\s+oracle-trait\s+\.all-traits\.oracle-trait\)/);
+    expect(src).toMatch(
+      /\(use-trait\s+oracle-trait\s+\.traits folder\.oracle-trait\)/
+    );
   });
 });

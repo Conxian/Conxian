@@ -1,18 +1,10 @@
-;; ===========================================
-;; DIMENSIONAL TRAITS MODULE
-;; ===========================================
-;; @desc Multi-dimensional DeFi specific traits.
-;; Optimized for complex position management.
+;; Dimensional Traits - Multi-Dimensional Position Management
 
 ;; ===========================================
-;; DIMENSIONAL TRAIT
+;; DIMENSIONAL TRAIT (Core Multi-Dimensional Interface)
 ;; ===========================================
-;; @desc Interface for a dimensional position.
 (define-trait dimensional-trait
   (
-    ;; @desc Gets the details of a specific position.
-    ;; @param position-id: The ID of the position to retrieve.
-    ;; @returns (response (optional { ... }) uint): A tuple containing the position details, or none if the position is not found.
     (get-position (uint) (response (optional {
       owner: principal,
       asset: principal,
@@ -22,15 +14,9 @@
       leverage: uint,
       is-long: bool
     }) uint))
-
-    ;; @desc Closes a position.
-    ;; @param position-id: The ID of the position to close.
-    ;; @param amount: The amount of the position to close.
-    ;; @returns (response bool uint): A boolean indicating success or failure, or an error code.
+    
     (close-position (uint uint) (response bool uint))
-
-    ;; @desc Gets the protocol statistics.
-    ;; @returns (response { ... } uint): A tuple containing the protocol statistics, or an error code.
+    
     (get-protocol-stats () (response {
       total-positions: uint,
       total-volume: uint,
@@ -40,31 +26,58 @@
 )
 
 ;; ===========================================
-;; DIMENSIONAL REGISTRY TRAIT
+;; POSITION MANAGER TRAIT
 ;; ===========================================
-;; @desc Interface for a dimensional registry.
-(define-trait dim-registry-trait
+(define-trait position-manager-trait
   (
-    ;; @desc Registers a new node in the registry.
-    ;; @param principal: The principal of the node to register.
-    ;; @param data: A tuple containing the node's type and metadata.
-    ;; @returns (response uint uint): The ID of the newly registered node, or an error code.
-    (register-node (principal {type: (string-ascii 32), metadata: (optional (string-utf8 256))}) (response uint uint))
+    (open-position (principal uint uint bool (optional uint) (optional uint)) (response uint uint))
+    (close-position (uint (optional uint)) (response {collateral-returned: uint, pnl: int} uint))
+    (get-position (uint) (response {
+      owner: principal, 
+      asset: principal, 
+      collateral: uint, 
+      size: uint, 
+      entry-price: uint, 
+      leverage: uint, 
+      is-long: bool, 
+      funding-rate: int, 
+      last-updated: uint, 
+      stop-loss: (optional uint), 
+      take-profit: (optional uint), 
+      is-active: bool
+    } uint))
+    (update-position (uint (optional uint) (optional uint) (optional uint) (optional uint)) (response bool uint))
+  )
+)
 
-    ;; @desc Gets the details of a specific node.
-    ;; @param node-id: The ID of the node to retrieve.
-    ;; @returns (response (optional { ... }) uint): A tuple containing the node details, or none if the node is not found.
-    (get-node (uint) (response (optional {
-      principal: principal,
-      type: (string-ascii 32),
-      metadata: (optional (string-utf8 256)),
-      active: bool
-    }) uint))
+;; ===========================================
+;; COLLATERAL MANAGER TRAIT
+;; ===========================================
+(define-trait collateral-manager-trait
+  (
+    (deposit-funds (uint principal) (response bool uint))
+    (withdraw-funds (uint principal) (response bool uint))
+    (get-balance (principal) (response uint uint))
+  )
+)
 
-    ;; @desc Updates the status of a node.
-    ;; @param node-id: The ID of the node to update.
-    ;; @param active: A boolean indicating the new status of the node.
-    ;; @returns (response bool uint): A boolean indicating success or failure, or an error code.
-    (update-node-status (uint bool) (response bool uint))
+;; ===========================================
+;; FUNDING RATE CALCULATOR TRAIT
+;; ===========================================
+(define-trait funding-rate-calculator-trait
+  (
+    (update-funding-rate (principal) (response {
+      funding-rate: int, 
+      index-price: uint, 
+      timestamp: uint, 
+      cumulative-funding: int
+    } uint))
+    
+    (apply-funding-to-position (principal uint) (response {
+      funding-rate: int, 
+      funding-payment: int, 
+      new-collateral: uint, 
+      timestamp: uint
+    } uint))
   )
 )

@@ -5,24 +5,24 @@
 (define-trait custody-trait
   (
     ;; @desc Deposits sBTC into the custody contract and mints shares.
-    ;; @param token-contract <sip-010-ft-trait> The sBTC token contract.
+    ;; @param token-contract principal The sBTC token contract.
     ;; @param amount uint The amount of sBTC to deposit.
     ;; @param recipient principal The principal of the user depositing the sBTC.
     ;; @returns (response uint uint) A response containing the number of shares minted or an error.
-    (deposit (trait_reference, uint, principal) (response uint uint))
+    (deposit (principal uint principal) (response uint uint))
 
     ;; @desc Requests the withdrawal of sBTC from the custody contract by burning shares.
-    ;; @param token-contract <sip-010-ft-trait> The sBTC token contract.
+    ;; @param token-contract principal The sBTC token contract.
     ;; @param shares uint The number of shares to burn.
     ;; @param recipient principal The principal of the user withdrawing the sBTC.
     ;; @returns (response uint uint) A response containing the amount of sBTC to be withdrawn or an error.
-    (withdraw (trait_reference, uint, principal) (response uint uint))
+    (withdraw (principal uint principal) (response uint uint))
 
     ;; @desc Completes the withdrawal process after a timelock period.
-    ;; @param token-contract <sip-010-ft-trait> The sBTC token contract.
+    ;; @param token-contract principal The sBTC token contract.
     ;; @param recipient principal The principal of the user completing the withdrawal.
     ;; @returns (response uint uint) A response containing the amount of sBTC transferred to the user or an error.
-    (complete-withdrawal (trait_reference, principal) (response uint uint))
+    (complete-withdrawal (principal principal) (response uint uint))
   )
 )
 
@@ -82,11 +82,11 @@
 ;; --- Public Functions ---
 
 ;; @desc Deposits sBTC into the contract. Can only be called by the sBTC vault.
-;; @param token-contract <sip-010-ft-trait> The sBTC token contract.
+;; @param token-contract principal The sBTC token contract.
 ;; @param amount uint The amount of sBTC to deposit.
 ;; @param recipient principal The user depositing the sBTC.
 ;; @returns (response uint uint) The number of shares minted.
-(define-public (deposit (token-contract <sip-010-ft-trait>) (amount uint) (recipient principal))
+(define-public (deposit (token-contract principal) (amount uint) (recipient principal))
   (begin
     (asserts! (is-eq tx-sender .sbtc-vault) (err u100))
     (try! (contract-call? token-contract transfer amount recipient (as-contract tx-sender) none))
@@ -114,11 +114,11 @@
       (ok shares))))
 
 ;; @desc Initiates a withdrawal. Can only be called by the sBTC vault.
-;; @param token-contract <sip-010-ft-trait> The sBTC token contract.
+;; @param token-contract principal The sBTC token contract.
 ;; @param shares uint The number of shares to burn.
 ;; @param recipient principal The user withdrawing sBTC.
 ;; @returns (response uint uint) The amount of sBTC to be withdrawn.
-(define-public (withdraw (token-contract <sip-010-ft-trait>) (shares uint) (recipient principal))
+(define-public (withdraw (token-contract principal) (shares uint) (recipient principal))
   (begin
     (asserts! (is-eq tx-sender .sbtc-vault) (err u100))
     (let ((user-shares (default-to u0 (map-get? share-balances recipient))))
@@ -135,10 +135,10 @@
         (ok sbtc-amount)))))
 
 ;; @desc Completes a withdrawal after the timelock. Can only be called by the sBTC vault.
-;; @param token-contract <sip-010-ft-trait> The sBTC token contract.
+;; @param token-contract principal The sBTC token contract.
 ;; @param recipient principal The user completing the withdrawal.
 ;; @returns (response uint uint) The amount of sBTC withdrawn.
-(define-public (complete-withdrawal (token-contract <sip-010-ft-trait>) (recipient principal))
+(define-public (complete-withdrawal (token-contract principal) (recipient principal))
   (begin
     (asserts! (is-eq tx-sender .sbtc-vault) (err u100))
     (let ((request (unwrap! (map-get? withdrawal-requests recipient) (err u2001))))

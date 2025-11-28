@@ -1,10 +1,10 @@
 ;; @desc This contract is responsible for all risk management functions,
 ;; including setting risk parameters, calculating liquidation prices, and checking position health.
 
-(use-trait risk-manager-trait .traits.risk-manager-trait.risk-manager-trait)
-(use-trait rbac-trait .base-traits.rbac-trait)
+(use-trait risk-manager-trait .risk-management.risk-manager-trait)
+(use-trait rbac-trait .core-protocol.rbac-trait)
 
-(impl-trait .traits.risk-manager-trait.risk-manager-trait)
+(impl-trait .risk-management.risk-manager-trait)
 
 ;; @constants
 (define-constant ERR_UNAUTHORIZED (err u1001))
@@ -22,7 +22,7 @@
 ;; --- Public Functions ---
 (define-public (set-risk-parameters (new-max-leverage uint) (new-maintenance-margin uint) (new-liquidation-threshold uint))
   (begin
-    (try! (check-role ROLE_ADMIN))
+    (try! (check-role "ROLE_ADMIN"))
     (asserts! (and (>= new-max-leverage MIN_LEVERAGE) (<= new-max-leverage u5000)) ERR_INVALID_PARAMETERS)
     (asserts! (and (> new-maintenance-margin u0) (< new-maintenance-margin u10000)) ERR_INVALID_PARAMETERS)
     (asserts! (and (> new-liquidation-threshold new-maintenance-margin) (<= new-liquidation-threshold u10000)) ERR_INVALID_PARAMETERS)
@@ -37,7 +37,7 @@
 
 (define-public (set-liquidation-rewards (min-reward uint) (max-reward uint))
   (begin
-    (try! (check-role ROLE_ADMIN))
+    (try! (check-role "ROLE_ADMIN"))
     (asserts! (and (> min-reward u0) (<= min-reward max-reward) (<= max-reward u5000)) ERR_INVALID_PARAMETERS)
 
     (var-set min-liquidation-reward min-reward)
@@ -47,9 +47,9 @@
   )
 )
 
-(define-public (set-insurance-fund (fund principal))
+(define-public (update-position-value (user principal) (new-value uint))
   (begin
-    (try! (check-role ROLE_ADMIN))
+    (try! (check-role "ROLE_ADMIN"))
     (var-set insurance-fund fund)
     (ok true)
   )
@@ -71,5 +71,5 @@
 
 ;; --- Private Functions ---
 (define-private (check-role (role (string-ascii 32)))
-  (contract-call? .rbac-trait has-role tx-sender role)
+  (contract-call? .core-protocol.rbac-trait has-role tx-sender role)
 )

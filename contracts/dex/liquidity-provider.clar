@@ -2,7 +2,7 @@
 ;; Implements unified liquidity provisioning for the DEX integration layer.
 
 ;; SIP-010: Fungible Token Standard
-(use-trait ft-trait .requirements.sip-010-trait-ft-standard.sip-010-trait-ft-standard)
+(use-trait sip-010-ft-trait .sip-standards.sip-010-ft-trait)
 
 ;; Constants
 ;; Error codes
@@ -96,7 +96,7 @@
 ;; @param lp-token The principal of the LP token for this pool.
 ;; @param fee-bps The fee in basis points (e.g., u100 for 1%).
 ;; @returns A response with the new pool ID on success, or an error.
-(define-public (create-pool (token-x <ft-trait>) (token-y <ft-trait>) (lp-token <ft-trait>) (fee-bps uint))
+(define-public (create-pool (token-x <sip-010-ft-trait>) (token-y <sip-010-ft-trait>) (lp-token <sip-010-ft-trait>) (fee-bps uint))
   (begin
     (asserts! (is-contract-owner) ERR-NOT-AUTHORIZED)
     (asserts! (not (is-eq token-x token-y)) ERR-INVALID-AMOUNT) ;; Tokens must be different

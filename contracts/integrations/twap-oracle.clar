@@ -2,7 +2,7 @@
 ;; Provides Time-Weighted Average Price (TWAP) data for assets.
 
 ;; SIP-010: Fungible Token Standard
-(use-trait ft-trait .traits.sip-010-ft-trait.sip-010-ft-trait)
+(use-trait sip-010-ft-trait .sip-standards.sip-010-ft-trait)
 
 ;; Constants
 ;; Error codes
@@ -22,16 +22,17 @@
 (define-data-var governance-address principal tx-sender)
 
 ;; Events
-(define-event twap-updated
-  (tuple
-    (event (string-ascii 16))
-    (asset principal)
-    (period uint)
-    (twap uint)
-    (sender principal)
-    (block-height uint)
-  )
-)
+;; Temporarily remove define-event until available
+;; (define-event twap-updated
+;;   (tuple
+;;     (event (string-ascii 16))
+;;     (asset principal)
+;;     (period uint)
+;;     (twap uint)
+;;     (sender principal)
+;;     (block-height uint)
+;;   )
+;; )
 
 ;; Private Helper Functions
 
@@ -92,7 +93,7 @@
         )
       )
     )
-    (print (merge-tuple { event: "twap-updated", asset: asset, period: period, twap: (get-twap asset period), sender: tx-sender, block-height: (get-block-info? block-height) }))
+    (print { event: "twap-updated", asset: asset, period: period, twap: (get-twap asset period), sender: tx-sender, block-height: (get-block-info? block-height) })
     (ok true)
   )
 )
@@ -135,7 +136,7 @@
        (last-timestamp (get last-timestamp data))
        (cumulative-price (get cumulative-price data))
        (samples (get samples data))
-       (current-block-height (get-block-info? block-height))
+       (current-block-height (get-block-info? block-height block-height))
        (time-elapsed (- current-block-height last-timestamp))
       )
       (if (> samples u0)

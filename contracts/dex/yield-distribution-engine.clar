@@ -1,6 +1,6 @@
 ;; ===== Traits =====
-(use-trait finance-metrics-trait .finance-metrics-trait.finance-metrics-trait)
-(impl-trait .finance-metrics-trait.finance-metrics-trait)
+(use-trait finance-metrics-trait .math-utilities.finance-metrics-trait)
+(impl-trait .math-utilities.finance-metrics-trait)
 
 ;; yield-distribution-engine.clar
 ;; Advanced yield distribution system for enterprise loans and bonds

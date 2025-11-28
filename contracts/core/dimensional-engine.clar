@@ -3,11 +3,11 @@
 ;; specialized contracts for position management, funding rate calculation,
 ;; collateral management, and risk management.
 
-(use-trait position-manager-trait .traits.position-manager-trait.position-manager-trait)
-(use-trait funding-rate-calculator-trait .traits.funding-rate-calculator-trait.funding-rate-calculator-trait)
-(use-trait collateral-manager-trait .traits.collateral-manager-trait.collateral-manager-trait)
-(use-trait risk-manager-trait .traits.risk-manager-trait.risk-manager-trait)
-(use-trait rbac-trait .base-traits.rbac-trait)
+(use-trait dimensional-trait .dimensional-traits.dimensional-trait)
+(use-trait funding-rate-calculator-trait .dimensional-traits.funding-rate-calculator-trait)
+(use-trait collateral-manager-trait .dimensional-traits.collateral-manager-trait)
+(use-trait risk-manager-trait .risk-management.risk-manager-trait)
+(use-trait rbac-trait .core-protocol.rbac-trait)
 
 ;; @data-vars
 (define-data-var position-manager principal .position-manager)
@@ -18,55 +18,62 @@
 ;; --- Position Management ---
 (define-public (open-position (asset principal) (collateral uint) (leverage uint) (is-long bool) (stop-loss (optional uint)) (take-profit (optional uint)))
   (let (
-    (collateral-balance (try! (contract-call? .collateral-manager-trait get-balance tx-sender)))
-    (fee (* collateral (try! (get-protocol-fee-rate))))
+    (collateral-balance (try! (contract-call? .collateral-manager get-balance tx-sender)))
+    (fee-rate (try! (contract-call? .collateral-manager get-protocol-fee-rate)))
+    (fee (* collateral fee-rate))
     (total-cost (+ collateral fee))
   )
     (asserts! (>= collateral-balance total-cost) (err u2003))
-    (try! (contract-call? .collateral-manager-trait withdraw-funds total-cost (as-contract tx-sender)))
-    (contract-call? .position-manager-trait open-position asset collateral leverage is-long stop-loss take-profit)
+    (try! (contract-call? .collateral-manager withdraw-funds total-cost asset))
+    (contract-call? .position-manager open-position asset
+      collateral leverage is-long stop-loss take-profit
+    )
   )
 )
 
-(define-public (close-position (position-id uint) (slippage (optional uint)))
+(define-public (close-position (position-id uint) (asset principal) (slippage (optional uint)))
   (let (
-    (result (try! (contract-call? .position-manager-trait close-position position-id slippage)))
+    (result (try! (contract-call? .position-manager close-position position-id slippage)))
     (collateral-returned (get collateral-returned result))
   )
-    (try! (as-contract (contract-call? .collateral-manager-trait deposit-funds collateral-returned (as-contract tx-sender))))
+    (try! (as-contract (contract-call? .collateral-manager deposit-funds collateral-returned asset)))
     (ok result)
   )
 )
 
 ;; --- Funding Rate Calculation ---
 (define-public (update-funding-rate (asset principal))
-  (contract-call? .funding-rate-calculator-trait update-funding-rate asset)
+  (contract-call? .funding-rate-calculator update-funding-rate asset)
 )
 
 (define-public (apply-funding-to-position (position-owner principal) (position-id uint))
-  (contract-call? .funding-rate-calculator-trait apply-funding-to-position position-owner position-id)
+  (contract-call? .funding-rate-calculator apply-funding-to-position
+    position-owner position-id
+  )
 )
 
 ;; --- Collateral Management ---
-(define-public (deposit-funds (amount uint) (token <sip-010-ft-trait>))
-  (contract-call? .collateral-manager-trait deposit-funds amount token)
+(define-public (deposit-funds (amount uint) (token principal))
+  (contract-call? .collateral-manager deposit-funds amount token)
 )
 
-(define-public (withdraw-funds (amount uint) (token <sip-010-ft-trait>))
-  (contract-call? .collateral-manager-trait withdraw-funds amount token)
+(define-public (withdraw-funds (amount uint) (token principal))
+  (contract-call? .collateral-manager withdraw-funds amount token)
 )
 
 ;; --- Risk Management ---
 (define-public (set-risk-parameters (new-max-leverage uint) (new-maintenance-margin uint) (new-liquidation-threshold uint))
-  (contract-call? .risk-manager-trait set-risk-parameters new-max-leverage new-maintenance-margin new-liquidation-threshold)
+  (contract-call? .risk-manager set-risk-parameters new-max-leverage
+    new-maintenance-margin new-liquidation-threshold
+  )
 )
 
 (define-public (set-liquidation-rewards (min-reward uint) (max-reward uint))
-  (contract-call? .risk-manager-trait set-liquidation-rewards min-reward max-reward)
+  (contract-call? .risk-manager set-liquidation-rewards min-reward max-reward)
 )
 
 (define-public (set-insurance-fund (fund principal))
-  (contract-call? .risk-manager-trait set-insurance-fund fund)
+  (contract-call? .risk-manager set-insurance-fund fund)
 )
 
 ;; --- Read-Only Functions ---

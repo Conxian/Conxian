@@ -32,7 +32,7 @@
     "dimensional-oracle-trait"
   ],
   "concentrated-liquidity-pool": [
-    "all-traits",
+    "traits folder",
     "math-lib-concentrated",
     "ownable-trait",
     "pausable-trait",
@@ -51,7 +51,7 @@
   "position-nft": [
     "sip-009-nft-trait"
   ],
-  "all-traits": [
+  "traits folder": [
     "flash-loan-receiver-trait",
     "ownable-trait"
   ],
@@ -66,7 +66,7 @@
     "dual-stacking-trait"
   ],
   "cxd-price-initializer": [
-    "all-traits"
+    "traits folder"
   ],
   "position-manager": [
     "oracle-adapter",
@@ -85,10 +85,10 @@
     "circuit-breaker"
   ],
   "yield-optimizer": [
-    "all-traits"
+    "traits folder"
   ],
   "default-strategy-engine": [
-    "all-traits"
+    "traits folder"
   ],
   "role-manager": [
     "access-control-trait"
@@ -118,7 +118,7 @@
     "bond-issuance-system"
   ],
   "auto-compounder": [
-    "all-traits"
+    "traits folder"
   ],
   "liquidation-manager": [
     "liquidation-trait"

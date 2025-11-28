@@ -19,7 +19,7 @@ Traits and interfaces
 
 - Import traits from their respective modules, e.g., `(use-trait sip-010-ft-trait .dex-traits.sip-010-ft-trait)`
 - Implement traits via alias: `(impl-trait .dex-traits.sip-010-ft-trait)`
-- The `.all-traits` contract is being phased out; please use modular imports for all new development.
+- The `.traits folder` contract is being phased out; please use modular imports for all new development.
 - Do not use principal-qualified traits; avoid hardcoded ST* principals. Configure external contract principals via admin functions.
 
 Encoding and security

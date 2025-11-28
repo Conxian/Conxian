@@ -4,9 +4,10 @@
 
 ;; Implements a concentrated liquidity pool for the Conxian DEX.
 
-(use-trait sip-010-ft-trait .sip-010-ft-trait.sip-010-ft-trait)
-(use-trait pool-trait .dex-traits.pool-trait)
-(use-trait math-trait .math-trait.math-trait)
+(use-trait sip-010-ft-trait .sip-standards.sip-010-ft-trait)
+(use-trait pool-trait .defi-primitives.pool-trait)
+(use-trait math-trait .math-utilities.math-trait)
+(use-trait circuit-breaker-trait .security-monitoring.circuit-breaker-trait)
 
 ;; Error Codes
 (define-constant ERR-NOT-AUTHORIZED u1000)
@@ -32,8 +33,12 @@
 (define-constant ERR-TRANSFER-FAILED u1020)
 (define-constant ERR-MINT-FAILED u1021)
 (define-constant ERR-BURN-FAILED u1022)
-(use-trait sip-009-nft-trait .base-traits.sip-009-nft-trait)
-(use-trait rbac-trait .base-traits.rbac-trait)
+(define-constant ERR-CIRCUIT-OPEN u1023)
+
+(define-data-var circuit-breaker principal .circuit-breaker)
+(define-data-var admin principal tx-sender)
+(use-trait sip-009-nft-trait .sip-standards.sip-009-nft-trait)
+(use-trait rbac-trait .core-protocol.rbac-trait)
 
 ;; Constants
 (define-constant Q128 u340282366920938463463374607431768211455)
@@ -68,9 +73,37 @@
 (define-private (burn-position (owner principal) (position-id uint))
   (nft-burn? position-nft position-id owner))
 
+(define-private (check-circuit-breaker)
+  (contract-call? (var-get circuit-breaker) is-circuit-open)
+)
+
+(define-public (set-admin (new-admin principal))
+  (begin
+    (asserts! (is-eq tx-sender (var-get admin)) ERR-NOT-AUTHORIZED)
+    (var-set admin new-admin)
+    (ok true)
+  )
+)
+
+(define-public (set-circuit-breaker (new-circuit-breaker principal))
+  (begin
+    (asserts! (is-eq tx-sender (var-get admin)) ERR-NOT-AUTHORIZED)
+    (var-set circuit-breaker new-circuit-breaker)
+    (ok true)
+  )
+)
+
 ;; ---------------------------------------------------------------------------
 
 ;; Private helpers
+
+(define-private (update-liquidity-and-fees-for-range (tick-lower int) (tick-upper int) (liquidity-delta int) (fee-growth-global-x uint) (fee-growth-global-y uint) (current-tick int))
+  (begin
+    (try! (update-liquidity-and-fees tick-lower liquidity-delta fee-growth-global-x fee-growth-global-y current-tick))
+    (try! (update-liquidity-and-fees tick-upper (- i0 liquidity-delta) fee-growth-global-x fee-growth-global-y current-tick))
+    (ok true)
+  )
+)
 
 ;; ---------------------------------------------------------------------------
 (define-private (update-liquidity-and-fees (tick int) (liquidity-delta int) (fee-growth-global0 uint) (fee-growth-global1 uint) (current-tick int))
@@ -100,39 +133,43 @@
 (define-public (add-liquidity (pool-id uint) (amount-x-desired uint) (amount-y-desired uint)
                                (amount-x-min uint) (amount-y-min uint) (recipient principal)
                                (tick-lower int) (tick-upper int))
-  (let ((pool (unwrap! (map-get? pools { pool-id: pool-id }) (err ERR-POOL-DOES-NOT-EXIST))))
-        (pos-id (var-get next-position-id))
-        (liquidity u100)) 
+  (begin
+    (asserts! (not (try! (check-circuit-breaker))) (err ERR-CIRCUIT-OPEN))
+    (let ((pool (unwrap! (map-get? pools { pool-id: pool-id }) (err ERR-POOL-DOES-NOT-EXIST)))
+          (pos-id (var-get next-position-id))
+          (liquidity u100))
 
-;; placeholder
-    (var-set next-position-id (+ pos-id u1))
-    (map-set positions { position-id: pos-id }
-      { owner: recipient, pool-id: pool-id, tick-lower: tick-lower, tick-upper: tick-upper,
-        liquidity: liquidity, amount-x: amount-x-desired, amount-y: amount-y-desired,
-        fee-growth-inside-last-x: u0, fee-growth-inside-last-y: u0 })
-    (try! (mint-position recipient pos-id))
-    (try! (update-liquidity-and-fees tick-lower (to-int liquidity)
-                                     (get fee-growth-global-x pool) (get fee-growth-global-y pool)
-                                     (get current-tick pool)))
-    (try! (update-liquidity-and-fees tick-upper (to-int (- u0 liquidity))
-                                     (get fee-growth-global-x pool) (get fee-growth-global-y pool)
-                                     (get current-tick pool)))
-    (ok { tokens-minted: liquidity, token-a-used: amount-x-desired,
-          token-b-used: amount-y-desired, position-id: pos-id })))
+      ;; placeholder
+      (var-set next-position-id (+ pos-id u1))
+      (map-set positions { position-id: pos-id }
+        { owner: recipient, pool-id: pool-id, tick-lower: tick-lower, tick-upper: tick-upper,
+          liquidity: liquidity, amount-x: amount-x-desired, amount-y: amount-y-desired,
+          fee-growth-inside-last-x: u0, fee-growth-inside-last-y: u0 })
+      (try! (mint-position recipient pos-id))
+      (try! (update-liquidity-and-fees-for-range tick-lower tick-upper (to-int liquidity)
+                                               (get fee-growth-global-x pool) (get fee-growth-global-y pool)
+                                               (get current-tick pool)))
+      (ok { tokens-minted: liquidity, token-a-used: amount-x-desired,
+            token-b-used: amount-y-desired, position-id: pos-id })
+    )
+  )
+)
 
 (define-public (remove-liquidity (position-id uint) (amount-x-min uint) (amount-y-min uint) (recipient principal))
-  (let ((pos (unwrap! (map-get? positions { position-id: position-id }) (err ERR-POSITION-DOES-NOT-EXIST))))
-    (asserts! (is-eq tx-sender (get owner pos)) (err ERR-NOT-AUTHORIZED))
-    (map-delete positions { position-id: position-id })
-    (try! (burn-position tx-sender position-id))
-    (let ((pool (unwrap! (map-get? pools { pool-id: (get pool-id pos) }) (err u404))))
-      (try! (update-liquidity-and-fees (get tick-lower pos) (to-int (- u0 (get liquidity pos)))
-                                       (get fee-growth-global-x pool) (get fee-growth-global-y pool)
-                                       (get current-tick pool)))
-      (try! (update-liquidity-and-fees (get tick-upper pos) (to-int (get liquidity pos))
-                                       (get fee-growth-global-x pool) (get fee-growth-global-y pool)
-                                       (get current-tick pool))))
-    (ok { amount-x: u100, amount-y: u100 }))) 
+  (begin
+    (asserts! (not (try! (check-circuit-breaker))) (err ERR-CIRCUIT-OPEN))
+    (let ((pos (unwrap! (map-get? positions { position-id: position-id }) (err ERR-POSITION-DOES-NOT-EXIST)))
+          (pool (unwrap! (map-get? pools { pool-id: (get pool-id pos) }) (err u404))))
+      (asserts! (is-eq tx-sender (get owner pos)) (err ERR-NOT-AUTHORIZED))
+      (map-delete positions { position-id: position-id })
+      (try! (burn-position tx-sender position-id))
+      (try! (update-liquidity-and-fees-for-range (get tick-lower pos) (get tick-upper pos) (to-int (- u0 (get liquidity pos)))
+                                               (get fee-growth-global-x pool) (get fee-growth-global-y pool)
+                                               (get current-tick pool)))
+      (ok { amount-x: u100, amount-y: u100 })
+    )
+  )
+) 
 
 ;; placeholder
 
@@ -164,43 +201,49 @@
 ;; ---------------------------------------------------------------------------
 (define-public (swap (pool-id uint) (token-x <sip-010-ft-trait>) (token-y <sip-010-ft-trait>)
                      (zero-for-one bool) (amount-specified uint) (limit-sqrt-price uint))
-  (let ((pool (unwrap! (map-get? pools { pool-id: pool-id }) (err ERR-POOL-DOES-NOT-EXIST))))
-        (token-x-principal (contract-of token-x))
-        (token-y-principal (contract-of token-y))
-        (fee-bps (get fee-bps pool))
-        (current-sqrt-price (get current-sqrt-price pool))
-        (current-tick (get current-tick pool))
-        (liquidity (get liquidity pool))
-        (fee-growth-global-x (get fee-growth-global-x pool))
-        (fee-growth-global-y (get fee-growth-global-y pool)))
-    (asserts! (is-eq token-x-principal (get token-x pool)) (err ERR-TOKEN-MISMATCH))
-    (asserts! (is-eq token-y-principal (get token-y pool)) (err ERR-TOKEN-MISMATCH))
-    (asserts! (> amount-specified u0) (err ERR-ZERO-AMOUNT))
-    (if zero-for-one
-      (asserts! (> current-sqrt-price limit-sqrt-price) (err ERR-PRICE-LIMIT-EXCEEDED))
-      (asserts! (< current-sqrt-price limit-sqrt-price) (err ERR-PRICE-LIMIT-EXCEEDED)))
-    
-
-;; placeholder swap logic
-    (let ((amount-in amount-specified)
-          (amount-out u99)
-          (total-fee (/ (* amount-in fee-bps) u10000)))
-      (map-set pools { pool-id: pool-id }
-        (merge pool
-          { current-sqrt-price: limit-sqrt-price,
-            current-tick: (unwrap! (contract-call? .math-lib-concentrated get-tick-from-sqrt-price limit-sqrt-price (get tick-spacing pool)) (err u700)),
-            fee-growth-global-x: (+ fee-growth-global-x (if zero-for-one total-fee u0)),
-            fee-growth-global-y: (+ fee-growth-global-y (if zero-for-one u0 total-fee)) }))
+  (begin
+    (asserts! (not (try! (check-circuit-breaker))) (err ERR-CIRCUIT-OPEN))
+    (let ((pool (unwrap! (map-get? pools { pool-id: pool-id }) (err ERR-POOL-DOES-NOT-EXIST))))
+          (token-x-principal (contract-of token-x))
+          (token-y-principal (contract-of token-y))
+          (fee-bps (get fee-bps pool))
+          (current-sqrt-price (get current-sqrt-price pool))
+          (current-tick (get current-tick pool))
+          (liquidity (get liquidity pool))
+          (fee-growth-global-x (get fee-growth-global-x pool))
+          (fee-growth-global-y (get fee-growth-global-y pool)))
+      (asserts! (is-eq token-x-principal (get token-x pool)) (err ERR-TOKEN-MISMATCH))
+      (asserts! (is-eq token-y-principal (get token-y pool)) (err ERR-TOKEN-MISMATCH))
+      (asserts! (> amount-specified u0) (err ERR-ZERO-AMOUNT))
       (if zero-for-one
-        (begin
-          (try! (contract-call? token-x transfer amount-in tx-sender (as-contract tx-sender)))
-          (try! (contract-call? token-y transfer amount-out (as-contract tx-sender) tx-sender)))
-        (begin
-          (try! (contract-call? token-y transfer amount-in tx-sender (as-contract tx-sender)))
-          (try! (contract-call? token-x transfer amount-out (as-contract tx-sender) tx-sender))))
-      (print { type: "swap", pool-id: pool-id, zero-for-one: zero-for-one,
-              amount-in: amount-in, amount-out: amount-out, next-sqrt-price: limit-sqrt-price })
-      (ok u1))))
+        (asserts! (> current-sqrt-price limit-sqrt-price) (err ERR-PRICE-LIMIT-EXCEEDED))
+        (asserts! (< current-sqrt-price limit-sqrt-price) (err ERR-PRICE-LIMIT-EXCEEDED)))
+
+
+      ;; placeholder swap logic
+      (let ((amount-in amount-specified)
+            (amount-out u99)
+            (total-fee (/ (* amount-in fee-bps) u10000)))
+        (map-set pools { pool-id: pool-id }
+          (merge pool
+            { current-sqrt-price: limit-sqrt-price,
+              current-tick: (unwrap! (contract-call? .math-lib-concentrated get-tick-from-sqrt-price limit-sqrt-price (get tick-spacing pool)) (err u700)),
+              fee-growth-global-x: (+ fee-growth-global-x (if zero-for-one total-fee u0)),
+              fee-growth-global-y: (+ fee-growth-global-y (if zero-for-one u0 total-fee)) }))
+        (if zero-for-one
+          (begin
+            (try! (contract-call? token-x transfer amount-in tx-sender (as-contract tx-sender)))
+            (try! (contract-call? token-y transfer amount-out (as-contract tx-sender) tx-sender)))
+          (begin
+            (try! (contract-call? token-y transfer amount-in tx-sender (as-contract tx-sender)))
+            (try! (contract-call? token-x transfer amount-out (as-contract tx-sender) tx-sender))))
+        (print { type: "swap", pool-id: pool-id, zero-for-one: zero-for-one,
+                amount-in: amount-in, amount-out: amount-out, next-sqrt-price: limit-sqrt-price })
+        (ok u1)
+      )
+    )
+  )
+)
 
 ;; ---------------------------------------------------------------------------
 
@@ -237,6 +280,26 @@
 (define-public (get-total-supply-trait-adapter) (ok u0))
 
 ;; ---------------------------------------------------------------------------
+
+(define-read-only (get-sqrt-price-from-tick (tick int))
+  (contract-call? .math-lib-concentrated get-sqrt-price-from-tick tick)
+)
+
+(define-read-only (get-tick-from-sqrt-price (sqrt-price uint) (tick-spacing uint))
+  (contract-call? .math-lib-concentrated get-tick-from-sqrt-price sqrt-price tick-spacing)
+)
+
+(define-read-only (calculate-fee-growth-inside (tick-lower int) (tick-upper int) (current-tick int) (fee-growth-global-x uint) (fee-growth-global-y uint))
+  (let ((fee-growth-below-x (unwrap-panic (contract-call? .math-lib-concentrated get-fee-growth-outside tick-lower current-tick fee-growth-global-x)))
+        (fee-growth-below-y (unwrap-panic (contract-call? .math-lib-concentrated get-fee-growth-outside tick-lower current-tick fee-growth-global-y)))
+        (fee-growth-above-x (unwrap-panic (contract-call? .math-lib-concentrated get-fee-growth-outside tick-upper current-tick fee-growth-global-x)))
+        (fee-growth-above-y (unwrap-panic (contract-call? .math-lib-concentrated get-fee-growth-outside tick-upper current-tick fee-growth-global-y))))
+    (ok {
+      fee-growth-inside-x: (- (- fee-growth-global-x fee-growth-below-x) fee-growth-above-x),
+      fee-growth-inside-y: (- (- fee-growth-global-y fee-growth-below-y) fee-growth-above-y)
+    })
+  )
+)
 
 ;; Pool creation
 

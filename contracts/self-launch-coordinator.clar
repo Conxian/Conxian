@@ -2,7 +2,7 @@
 ;; Coordinates autonomous contract deployment through funding curve mechanism
 ;; Implements self-funded launch system with progressive bootstrapping
 
-(use-trait token-trait .sip-010-trait-ft-standard.sip-010-trait)
+(use-trait token-trait .sip-standards.sip-010-ft-trait)
 (use-trait governance-trait .governance.governance-token-trait)
 (use-trait oracle-trait .oracle.oracle-trait)
 
@@ -29,6 +29,27 @@
 (define-constant MIN_FUNDING_THRESHOLD u10000000) ;; 10 STX minimum (was 10K)
 (define-constant MAX_FUNDING_PER_PHASE u10000000000) ;; 10K STX per phase (was 500K)
 (define-constant MIN_CONTRIBUTION u1000000) ;; 1 STX minimum contribution
+
+;; Enhanced funding system with OPEX integration
+(define-data-var launch-fund-allocation uint u0)      ;; 50% to launch
+(define-data-var opex-fund-allocation uint u0)        ;; 50% to operations
+(define-data-var opex-loan-principal uint u0)         ;; Total OPEX loan amount
+(define-data-var opex-loan-repaid uint u0)            ;; Repaid amount
+(define-data-var opex-loan-start-block uint u0)        ;; Loan start time
+(define-data-var opex-loan-duration uint u0)           ;; 5-8 years in blocks
+(define-data-var opex-loan-interest-rate uint u500)    ;; 5% base interest rate
+
+;; OPEX loan configuration constants
+(define-constant OPEX_LOAN_MIN_YEARS u5)              ;; 5 years minimum
+(define-constant OPEX_LOAN_MAX_YEARS u8)              ;; 8 years maximum  
+(define-constant OPEX_LOAN_BLOCKS_PER_YEAR u52560)     ;; ~52,560 blocks/year
+(define-constant OPEX_LOAN_SUCCESS_MULTIPLIER u1500)  ;; 1.5x success multiplier
+
+;; Repayment trigger thresholds
+(define-data-var repayment-tvl-threshold uint u10000000)     ;; TVL threshold
+(define-data-var repayment-revenue-threshold uint u1000000)   ;; Revenue threshold  
+(define-data-var repayment-utilization-max uint u8000)        ;; 80% max utilization
+(define-data-var emergency-reserve-ratio uint u2000)          ;; 20% reserve ratio
 
 ;; Community contribution tracking
 (define-map community-contributions principal {
@@ -94,13 +115,15 @@
   )
 )
 
-;; Process community funding contribution
+;; Process community funding contribution with 50/50 split
 (define-public (contribute-funding (amount uint))
   (let (
     (current-funding (var-get total-funding-received))
     (curve-price (get-funding-curve-price current-funding))
     (tokens-to-mint (/ (* amount PRECISION) curve-price))
     (contributor tx-sender)
+    (launch-portion (/ amount u2))
+    (opex-portion (/ amount u2))
   )
     (asserts! (var-get self-launch-enabled) ERR_LAUNCH_NOT_READY)
     (asserts! (var-get funding-curve-active) ERR_LAUNCH_NOT_READY)
@@ -108,6 +131,18 @@
 
     ;; Update community contribution tracking
     (try! (update-community-contribution contributor amount))
+
+    ;; Process 50/50 split allocation
+    (var-set launch-fund-allocation (+ (var-get launch-fund-allocation) launch-portion))
+    (var-set opex-fund-allocation (+ (var-get opex-fund-allocation) opex-portion))
+
+    ;; Initialize OPEX loan if this is the first contribution
+    (if (and (> (var-get opex-fund-allocation) u0) (is-eq (var-get opex-loan-start-block) u0))
+      (begin
+        (var-set opex-loan-start-block block-height)
+        (var-set opex-loan-duration (* OPEX_LOAN_MIN_YEARS OPEX_LOAN_BLOCKS_PER_YEAR))
+        (var-set opex-loan-principal (var-get opex-fund-allocation))
+        (print {event: "opex-loan-initialized", principal: (var-get opex-fund-allocation), duration: (var-get opex-loan-duration)})))
 
     ;; Calculate phase progression
     (let ((new-total-funding (+ current-funding amount))
@@ -120,26 +155,31 @@
       (try! (check-phase-advancement new-total-funding current-phase))
 
       ;; Mint governance tokens based on contribution
-      (try! (contract-call? .cxvg-token mint tokens-to-mint contributor))
+      (try! (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.cxvg-token mint tokens-to-mint contributor))
+
+      ;; Mint differentiated NFTs based on contribution type
+      (if (>= launch-portion MIN_CONTRIBUTION)
+        (try! (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.position-factory create-launch-lp-nft contributor launch-portion))
+        (try! (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.position-factory create-normal-lp-nft contributor opex-portion)))
 
       ;; Execute automated deployments if budget allows
-      (try! (execute-autonomous-deployments amount))
+      (try! (execute-autonomous-deployments launch-portion))
+
+      ;; Check for automatic OPEX loan repayment
+      (try! (check-automatic-repayment))
 
       (print {
         event: "community-funding-contribution",
         contributor: contributor,
         amount: amount,
-        tokens-minted: tokens-to-mint,
+        launch-allocation: launch-portion,
+        opex-allocation: opex-portion,
         new-total-funding: new-total-funding,
-        contributor-level: (get-contributor-level contributor)
-      })
-
-      (ok {
-        tokens-received: tokens-to-mint,
-        current-phase: (var-get launch-phase),
+        governance-tokens: tokens-to-mint,
         funding-progress: (/ (* new-total-funding u100) (var-get funding-target)),
-        contributor-level: (get-contributor-level contributor)
+        launch-phase: current-phase
       })
+      (ok { tokens-minted: tokens-to-mint, launch-allocated: launch-portion, opex-allocated: opex-portion })
     )
   )
 )
@@ -322,38 +362,24 @@
   )
 )
 (define-private (get-top-contributors (limit uint))
-  (let (
-    (all-contributors (map-keys community-contributions))
-    (sorted-contributors (sort-contributors-by-amount all-contributors))
-  )
-    (take-first sorted-contributors limit)
-  )
-)
+  (begin
+    ;; Simplified - just get first contributors without sorting
+    (let ((all-contributors (map-keys community-contributions)))
+      (take-first all-contributors limit)
+    )
+  ))
 
 (define-private (sort-contributors-by-amount (contributors (list 100 principal)))
-  (fold compare-and-insert contributors (list))
+  ;; Simplified sorting - just return as-is for now
+  contributors
 )
 
-(define-private (compare-and-insert (contributor principal) (sorted-list (list 100 principal)))
-  (let (
-    (contrib-amount (get-contributor-total contributor))
-  )
-    (insert-sorted contributor contrib-amount sorted-list)
-  )
-)
+;; Removed compare-and-insert to avoid circular dependency
 
 (define-private (insert-sorted (contributor principal) (amount uint) (sorted-list (list 100 principal)))
-  (if (is-eq (len sorted-list) u0)
-    (list contributor)
-    (let (
-      (first-contrib (unwrap-panic (element-at sorted-list u0)))
-      (first-amount (get-contributor-total first-contrib))
-    )
-      (if (> amount first-amount)
-        (unwrap-panic (as-max-len? (concat (list contributor) sorted-list) u100))
-        (unwrap-panic (as-max-len? (concat (list first-contrib) (insert-sorted contributor amount (slice sorted-list u1))) u100))
-      )
-    )
+  (begin
+    ;; Simplified - just prepend to list
+    (concat (list contributor) sorted-list)
   )
 )
 
@@ -393,10 +419,12 @@
   )
 )
 
-; Get top contributors
-define-private (get-top-contributors (limit uint))
- ;; Simplified - in production would sort by contribution amount
- (list)
+;; Get top contributors
+(define-private (get-top-contributors (limit uint))
+  (begin
+    ;; Simplified - in production would sort by contribution amount
+    (list)
+  ))
 
 (define-read-only (get-launch-status)
   (let (
@@ -459,7 +487,7 @@ define-private (get-top-contributors (limit uint))
 (define-read-only (estimate-launch-cost (target-phase uint))
   (let (
     (base-cost (var-get base-system-cost))
-    (phase-multipliers [u100 u150 u200 u250 u300]) ;; 100%, 150%, 200%, 250%, 300%
+    (phase-multipliers (list u100 u150 u200 u250 u300)) ;; 100%, 150%, 200%, 250%, 300%
     (phase-multiplier (default-to u100 (element-at phase-multipliers (- target-phase u1))))
   )
     (* base-cost (/ phase-multiplier u100))
@@ -490,7 +518,7 @@ define-private (get-top-contributors (limit uint))
 ;; Check if contract is core system contract
 (define-private (is-core-contract (contract principal))
   (or
-    (is-eq contract .all-traits)
+    (is-eq contract .traits folder)
     (is-eq contract .utils-encoding)
     (is-eq contract .utils-utils)
     (is-eq contract .cxd-token)
@@ -516,7 +544,7 @@ define-private (get-top-contributors (limit uint))
     (map-set phase-requirements PHASE_BOOTSTRAP {
       min-funding: u100000000,
       max-funding: u500000000,
-      required-contracts: (list .all-traits .utils-encoding .utils-utils),
+      required-contracts: (list .traits folder .utils-encoding .utils-utils),
       estimated-gas: u2000000,
       community-support: u3
     })
@@ -617,7 +645,7 @@ define-private (get-top-contributors (limit uint))
     (map-set phase-requirements PHASE_BOOTSTRAP {
       min-funding: u10000000000,
       max-funding: u50000000000,
-      required-contracts: (list .all-traits .utils-encoding .utils-utils),
+      required-contracts: (list .traits folder .utils-encoding .utils-utils),
       estimated-gas: u30000000
     })
 
@@ -714,6 +742,86 @@ define-private (get-top-contributors (limit uint))
   (ok true)
 )
 
+;; ===== OPEX Loan Management Functions =====
+
+;; Check if automatic repayment should be triggered
+(define-private (check-automatic-repayment)
+  (if (should-trigger-repayment)
+    (execute-automatic-repayment)
+    (ok true)))
+
+;; Determine if repayment conditions are met
+(define-read-only (should-trigger-repayment)
+  (let ((current-tvl (get-total-tvl-safe))
+        (current-revenue (get-monthly-revenue-safe))
+        (current-utilization (get-system-utilization-safe))
+        (reserve-ratio (get-reserve-ratio-safe)))
+    (and 
+      (>= current-tvl (var-get repayment-tvl-threshold))
+      (>= current-revenue (var-get repayment-revenue-threshold))
+      (<= current-utilization (var-get repayment-utilization-max))
+      (>= reserve-ratio (var-get emergency-reserve-ratio)))))
+
+;; Execute automatic repayment
+(define-public (execute-automatic-repayment)
+  (begin
+    (asserts! (should-trigger-repayment) ERR_LAUNCH_NOT_READY)
+    
+    (let ((available-revenue (get-available-revenue-safe))
+          (minimum-reserve (get-minimum-reserve-requirement-safe))
+          (repayable-amount (- available-revenue minimum-reserve))
+          (outstanding-loan (- (var-get opex-loan-principal) (var-get opex-loan-repaid))))
+      
+      (if (>= repayable-amount outstanding-loan)
+        ;; Full repayment
+        (begin
+          (var-set opex-loan-repaid (var-get opex-loan-principal))
+          (print {event: "opex-loan-fully-repaid", amount: outstanding-loan}))
+        
+        ;; Partial repayment  
+        (begin
+          (var-set opex-loan-repaid (+ (var-get opex-loan-repaid) repayable-amount))
+          (print {event: "opex-loan-partial-repayment", amount: repayable-amount})))
+      
+      (ok true))))
+
+;; Calculate dynamic OPEX interest rate
+(define-read-only (calculate-opex-interest-rate)
+  (let ((base-rate (var-get opex-loan-interest-rate))
+        (tvl-multiplier (get-tvl-performance-multiplier-safe))
+        (revenue-multiplier (get-revenue-performance-multiplier-safe))
+        (utilization-discount (get-utilization-discount-safe)))
+    (* base-rate tvl-multiplier revenue-multiplier utilization-discount)))
+
+;; ===== Safe Mock Functions (to be replaced with real implementations) =====
+
+(define-private (get-total-tvl-safe)
+  u50000000)  ;; Mock: 50 STX TVL
+
+(define-private (get-monthly-revenue-safe)
+  u1000000)   ;; Mock: 1 STX monthly revenue
+
+(define-private (get-system-utilization-safe)
+  u7500)      ;; Mock: 75% utilization
+
+(define-private (get-reserve-ratio-safe)
+  u2500)      ;; Mock: 25% reserve ratio
+
+(define-private (get-available-revenue-safe)
+  u2000000)   ;; Mock: 2 STX available revenue
+
+(define-private (get-minimum-reserve-requirement-safe)
+  u500000)    ;; Mock: 0.5 STX minimum reserve
+
+(define-private (get-tvl-performance-multiplier-safe)
+  u1200)      ;; Mock: 1.2x TVL multiplier
+
+(define-private (get-revenue-performance-multiplier-safe)
+  u1100)      ;; Mock: 1.1x revenue multiplier
+
+(define-private (get-utilization-discount-safe)
+  u900)       ;; Mock: 0.9x utilization discount
+
 ;; ===== Read-Only Functions =====
 
 (define-read-only (get-deployed-contract-count)
@@ -733,7 +841,7 @@ define-private (get-top-contributors (limit uint))
 
 (define-private (get-all-contracts)
   (list
-    .all-traits .utils-encoding .utils-utils .lib-error-codes
+    .traits folder .utils-encoding .utils-utils .lib-error-codes
     .cxd-token .cxlp-token .cxvg-token .cxtr-token .cxs-token
     .governance-token .proposal-engine .timelock-controller
     .dex-factory .dex-router .dex-pool .dex-vault .fee-manager

@@ -8,15 +8,15 @@
 ;; functionality for the Conxian DEX protocol.
 
 ;; Use centralized traits
-(use-trait sip-010-ft-trait .sip-010-ft-trait.sip-010-ft-trait)
+(use-trait sip-010-ft-trait .sip-standards.sip-010-ft-trait)
 (use-trait ownable-trait .access-control-trait.access-control-trait)
 (use-trait pausable-trait .pausable-trait.pausable-trait)
-(use-trait pool-trait .pool-trait.pool-trait)
+(use-trait pool-trait .defi-primitives.pool-trait)
 
 ;; Implement required traits
-(impl-trait .pausable-trait.pausable-trait)
-(impl-trait .access-control-trait.access-control-trait)
-(impl-trait .pool-trait.pool-trait)
+(impl-trait .core-protocol.pausable-trait)
+(impl-trait .core-protocol.rbac-trait)
+(impl-trait .defi-primitives.pool-trait)
 
 ;; ===========================================
 ;; CONSTANTS

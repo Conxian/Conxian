@@ -1,7 +1,7 @@
 ;; sbtc-bond-integration.clar
 ;; sBTC Bond Integration - Advanced bond issuance with sBTC collateral and yields
 
-(use-trait sip-010-ft-trait .traits.sip-010-ft-trait.sip-010-ft-trait)
+(use-trait sip-010-ft-trait .sip-standards.sip-010-ft-trait)
 
 ;; CONSTANTS AND ERROR CODES
 (define-constant CONTRACT_OWNER tx-sender)

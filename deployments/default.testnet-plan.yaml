@@ -509,7 +509,7 @@ plan:
             contract-name: liquidation-manager
             expected-sender: STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ
             cost: 2600
-            path: "contracts\\dex\\liquidation-manager.clar"
+            path: "contracts/lending/liquidation-manager.clar"
             anchor-block-only: true
             clarity-version: 1
         - contract-publish:
@@ -524,13 +524,6 @@ plan:
             expected-sender: STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ
             cost: 127030
             path: "contracts\\dex\\liquidity-optimization-engine.clar"
-            anchor-block-only: true
-            clarity-version: 1
-        - contract-publish:
-            contract-name: loan-liquidation-manager
-            expected-sender: STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ
-            cost: 0
-            path: "contracts\\dex\\loan-liquidation-manager.clar"
             anchor-block-only: true
             clarity-version: 1
       epoch: "2.05"

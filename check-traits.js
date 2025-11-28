@@ -55,7 +55,7 @@ for (const file of files) {
         failures.push({ file, message: `(impl-trait ${sym}) has no matching (use-trait ${sym} <path>)` });
         continue;
       }
-      if (!ref.includes('.all-traits.')) {
+      if (!ref.includes('.traits folder.')) {
         failures.push({ file, message: `(impl-trait ${sym}) should reference centralized traits: found ${ref}` });
       }
     }

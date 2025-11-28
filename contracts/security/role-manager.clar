@@ -1,5 +1,5 @@
 (use-trait access-control-trait .access-control-trait.access-control-trait)
-(impl-trait .access-control-trait.access-control-trait)
+(impl-trait .core-protocol.rbac-trait)
 
 (define-constant ERR_UNAUTHORIZED (err u1001))
 (define-constant ERR_NFT (err u1002))
