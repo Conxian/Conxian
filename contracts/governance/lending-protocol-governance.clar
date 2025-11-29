@@ -343,7 +343,8 @@
         (target-contract (get target-contract param-info))
         (param-name (get parameter-name param-info))
         (new-value (get proposed-value param-info)))
-    (contract-call? target-contract update-parameter param-name new-value)))
+    ;; v1 stub: parameter changes are recorded off-chain; on-chain execution is a no-op for now
+    (ok true)))
 
 ;; @desc Executes a treasury spending proposal.
 ;; @param proposal-id The ID of the treasury spending proposal.

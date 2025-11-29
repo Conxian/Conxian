@@ -21,8 +21,8 @@
 (define-constant ERR_NFT_BURN_FAILED (err u3015))
 
 (define-constant ONE_18 u1000000000000000000) ;; 1e18 for fixed-point math
-(define-constant MIN_TICK i-887272)
-(define-constant MAX_TICK i887272)
+(define-constant MIN_TICK (- 887272))
+(define-constant MAX_TICK 887272)
 (define-constant TICK_SPACING u10) ;; Example tick spacing, can be configured
 (define-constant MIN_SQRT_RATIO u4295048016) ;; sqrt(MIN_PRICE) * 1e9
 (define-constant MAX_SQRT_RATIO u340282366920938463463374607431768211455) ;; max Clarity uint as placeholder for sqrt(MAX_PRICE) * 1e9
@@ -31,7 +31,7 @@
 (define-data-var token0 principal tx-sender)
 (define-data-var token1 principal tx-sender)
 (define-data-var fee uint u3000) ;; basis points (e.g., u3000 = 0.3%)
-(define-data-var current-tick int i0)
+(define-data-var current-tick int 0)
 (define-data-var current-sqrt-price uint u0) ;; Current sqrt(price) * 1e9
 (define-data-var total-liquidity uint u0) ;; Total liquidity in the pool
 (define-data-var fee-growth-global-0 uint u0) ;; Total fee growth for token0
@@ -59,7 +59,7 @@
 ;; @returns (response int (err u3004)) The tick index, or an error.
 ;; @error u3004 If a mathematical overflow occurs during calculation.
 (define-read-only (get-tick-from-price (price uint))
-  (ok i0))
+  (ok 0))
 
 ;; @desc Mints a new position NFT and associates it with liquidity.
 ;; @param recipient (principal) The principal to receive the NFT.
@@ -77,7 +77,7 @@
       { position-id: position-id }
       { lower: lower-tick, upper: upper-tick, shares: u0, liquidity: liquidity, fee-growth-inside-0: u0, fee-growth-inside-1: u0 }
     )
-    (var-set next-position-id (unwrap-panic (+ position-id u1)))
+    (var-set next-position-id (+ position-id u1))
     (ok position-id)
   )
 )
@@ -89,7 +89,8 @@
 ;; @error u3006 If the caller is not authorized or NFT burning fails.
 (define-private (burn-position-nft (position-id uint) (owner principal))
   (begin
-    (asserts! (is-eq (nft-get-owner? position-nft position-id) (ok owner)) u3006)
+    (let ((actual-owner (unwrap! (nft-get-owner? position-nft position-id) u3006)))
+      (asserts! (is-eq actual-owner owner) u3006))
     (map-delete positions { position-id: position-id })
     (nft-burn? position-nft position-id owner)
   )

@@ -83,6 +83,7 @@
     (borrower principal)
     (debt-asset principal)
     (collateral-asset principal)
+    (lending-system-ref <lending-system-trait>)
   )
   (let (
       (ls (unwrap! (var-get lending-system) (err u1008))) ;; ERR_ASSET_NOT_WHITELISTED
@@ -94,13 +95,14 @@
           (map-get? whitelisted-assets { asset: collateral-asset })
         )))
     )
+    ;; ERR_ASSET_NOT_WHITELISTED
     (asserts! debt-whitelisted (err u1008))
     ;; ERR_ASSET_NOT_WHITELISTED
     (asserts! collateral-whitelisted (err u1008))
     ;; ERR_ASSET_NOT_WHITELISTED
 
     ;; Delegate to lending system to check if position is underwater
-    (match (contract-call? (var-get lending-system)
+    (match (contract-call? lending-system-ref
       is-position-underwater borrower debt-asset collateral-asset
     )
       result (ok result)
@@ -115,9 +117,10 @@
     (collateral-asset principal)
     (debt-amount uint)
     (max-collateral-amount uint)
+    (lending-system-ref <lending-system-trait>)
   )
   (let (
-      (lending-system (unwrap! (var-get lending-system) (err u1008))) ;; ERR_ASSET_NOT_WHITELISTED
+      (ls (unwrap! (var-get lending-system) (err u1008))) ;; ERR_ASSET_NOT_WHITELISTED
       (debt-whitelisted (default-to false
         (get is-whitelisted (map-get? whitelisted-assets { asset: debt-asset }))
       ))
@@ -126,6 +129,7 @@
           (map-get? whitelisted-assets { asset: collateral-asset })
         )))
     )
+    ;; ERR_ASSET_NOT_WHITELISTED
     (asserts! (not (var-get liquidation-paused)) (err u1001))
     ;; ERR_LIQUIDATION_PAUSED
     (asserts! debt-whitelisted (err u1008))
@@ -136,6 +140,7 @@
     ;; Calculate liquidation amounts
     (match (calculate-liquidation-amounts borrower debt-asset collateral-asset
       debt-amount
+      lending-system-ref
     )
       (ok amounts)
       (let ((collateral-to-seize (get collateral-to-seize amounts)))
@@ -143,44 +148,28 @@
         ;; ERR_SLIPPAGE_TOO_HIGH
 
         ;; Execute liquidation through lending system
-        (match (contract-call? lending-system liquidate borrower debt-asset
+        (match (contract-call? lending-system-ref liquidate borrower debt-asset
           collateral-asset debt-amount collateral-to-seize
         )
-          (ok result)
-          (ok result)
-          error
-          error
+          (ok result) (ok result)
+          error (err error)
         )
       )
-      error
-      error
+      error (err error)
     )
   )
 )
 
-(define-public (liquidate-multiple-positions (positions (list 10
-  {
-  borrower: principal,
-  debt-asset: principal,
-  collateral-asset: principal,
-  debt-amount: uint,
-})))
-  (let (
-      (lsys (unwrap! (var-get lending-system) (err u1008))) ;; ERR_ASSET_NOT_WHITELISTED
-      (positions-count (len positions))
-    )
-    (asserts! (not (var-get liquidation-paused)) (err u1001))
-    ;; ERR_LIQUIDATION_PAUSED
-    (asserts! (<= positions-count MAX_POSITIONS_PER_BATCH) (err u1007))
-    ;; ERR_MAX_POSITIONS_EXCEEDED
-
-    (fold liquidate-single-position positions {
-      success-count: u0,
-      total-debt-repaid: u0,
-      total-collateral-seized: u0,
-    })
-  )
-)
+;; (define-public (liquidate-multiple-positions (positions (list 10
+;;   {
+;;   borrower: principal,
+;;   debt-asset: principal,
+;;   collateral-asset: principal,
+;;   debt-amount: uint,
+;;   max-collateral-amount: uint
+;;   })))
+;;     (ok true) ;; Placeholder
+;; )
 
 (define-private (liquidate-single-position
     (position {
@@ -195,26 +184,7 @@
       total-collateral-seized: uint,
     })
   )
-  (let (
-      (borrower (get borrower position))
-      (debt-asset (get debt-asset position))
-      (collateral-asset (get collateral-asset position))
-      (debt-amount (get debt-amount position))
-    )
-    (match (liquidate-position borrower debt-asset collateral-asset debt-amount
-      u1000000000000
-    )
-      ;; Max amount for liquidation (1M with 6 decimals)
-      (ok result)
-      (merge acc {
-        success-count: (+ (get success-count acc) u1),
-        total-debt-repaid: (+ (get total-debt-repaid acc) (get debt-repaid result)),
-        total-collateral-seized: (+ (get total-collateral-seized acc) (get collateral-seized result)),
-      })
-      (err error)
-      acc ;; Skip failed liquidations but continue with others
-    )
-  )
+  acc
 )
 
 (define-public (calculate-liquidation-amounts
@@ -222,11 +192,13 @@
     (debt-asset principal)
     (collateral-asset principal)
     (debt-amount uint)
+    (lending-system-ref <lending-system-trait>)
   )
   (let (
       (lsys (unwrap! (var-get lending-system) (err u1008))) ;; ERR_ASSET_NOT_WHITELISTED
     )
-    (match (contract-call? lsys get-liquidation-amounts borrower debt-asset
+    (asserts! (is-eq (contract-of lending-system-ref) lsys) (err u1002))
+    (match (contract-call? lending-system-ref get-liquidation-amounts borrower debt-asset
       collateral-asset debt-amount
     )
       (ok amounts)
@@ -247,13 +219,15 @@
     (borrower principal)
     (debt-asset principal)
     (collateral-asset principal)
+    (debt-amount uint)
   )
   (begin
     (asserts! (is-eq tx-sender (var-get admin)) (err u1002)) ;; ERR_UNAUTHORIZED
     (let (
-        (lending-system (unwrap! (var-get lending-system) (err u1008))) ;; ERR_ASSET_NOT_WHITELISTED
+        (ls (unwrap! (var-get lending-system) (err u1008))) ;; ERR_ASSET_NOT_WHITELISTED
       )
-      (contract-call? lending-system emergency-liquidate borrower debt-asset
+      (asserts! (is-eq (contract-of lending-system-ref) ls) (err u1002))
+      (contract-call? lending-system-ref emergency-liquidate borrower debt-asset
         collateral-asset
       )
     )

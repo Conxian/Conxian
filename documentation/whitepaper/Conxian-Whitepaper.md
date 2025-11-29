@@ -1,6 +1,6 @@
 # Conxian Protocol — A Multi‑Dimensional DeFi System on Stacks (Nakamoto)
 
-Version: 1.2 (Updated November 23, 2025)
+Version: 1. (Updated November 27, 2025)
 Status: In Development (Architectural Refactoring in Progress)
 
 ## Abstract
@@ -23,7 +23,7 @@ Conxian addresses these challenges by delivering a unified, deterministic, and a
 ## 2. Design Principles
 
 - **Modular and Decentralized**: The protocol is architecturally designed to be highly modular, with each component encapsulated in its own contract. This separation of concerns improves security, maintainability, and reusability.
-- **Trait-Driven Development**: All contract interfaces are defined in a set of **10 modular trait files**, which are aggregated in a central registry. This provides a clear, consistent, and gas-efficient way for contracts to interact.
+- **Trait-Driven Development**: All contract interfaces are defined in a set of **11 modular trait files**, which are aggregated in a central registry. This provides a clear, consistent, and gas-efficient way for contracts to interact.
 - **Determinism by construction**: Centralized trait imports/implementations, canonical encoding, and deterministic token ordering ensure predictable behavior.
 - **Bitcoin finality & Nakamoto integration**: The protocol leverages the security and finality of the Bitcoin blockchain through the Stacks Nakamoto release.
 - **Safety‑first defaults**: Pausable guards, circuit-breakers, and explicit error codes are used throughout the system to protect against unforeseen events.
@@ -52,6 +52,8 @@ The Conxian protocol is organized into a series of specialized modules, each wit
 - **`tokens`**: The protocol's native tokens and token management utilities.
 - **`traits`**: The modular trait system, which defines all contract interfaces.
 - **`vaults`**: A decentralized sBTC vault and other asset management vaults.
+
+In addition, the protocol design roadmap includes a **loan and liquidity protection cover layer** that can automatically protect lending and LP positions based on refreshed risk metrics, with explicit user authorization and capped, transparent fees. This protection layer is **in design and subject to further legal and regulatory review (including FSCA/IFWG guidance) before any production deployment.**
 
 ## 4. Roadmap & Implementation Status
 

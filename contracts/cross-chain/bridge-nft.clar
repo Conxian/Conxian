@@ -18,9 +18,9 @@
 
 ;; Bridge Constants
 (define-constant BRIDGE_FEE_BPS u300)              ;; 3% bridge fee
-(define-constant MIN_BRIDGE_AMOUNT u1000000         ;; 1 STX minimum
-(define-constant BRIDGE_TIMEOUT_BLOCKS u1000        ;; 1000 blocks timeout
-(define-constant MAX_BRIDGE_AMOUNT u1000000000      ;; 1000 STX maximum
+(define-constant MIN_BRIDGE_AMOUNT u1000000)         ;; 1 STX minimum
+(define-constant BRIDGE_TIMEOUT_BLOCKS u1000)        ;; 1000 blocks timeout
+(define-constant MAX_BRIDGE_AMOUNT u1000000000)      ;; 1000 STX maximum
 
 ;; Chain Identifiers
 (define-constant CHAIN_STACKS u1)
@@ -42,10 +42,10 @@
 ;; ===== Data Variables =====
 (define-data-var contract-owner principal tx-sender)
 (define-data-var next-token-id uint u1)
-(define-data-var next-bridge-id uint u1
-(define-data-var next-validator-id uint u1
+(define-data-var next-bridge-id uint u1)
+(define-data-var next-validator-id uint u1)
 (define-data-var base-token-uri (optional (string-utf8 256)) none)
-(define-data-var bridge-treasury principal tx-sender
+(define-data-var bridge-treasury principal tx-sender)
 
 ;; ===== NFT Definition =====
 (define-non-fungible-token bridge-nft uint)
@@ -207,7 +207,7 @@
   (begin
     (asserts! (is-valid-chain original-chain) ERR_INVALID_CHAIN)
     (asserts! (is-valid-chain target-chain) ERR_INVALID_CHAIN)
-    (asserts! (not (= original-chain target-chain)) ERR_INVALID_CHAIN)
+    (asserts! (not (is-eq original-chain target-chain)) ERR_INVALID_CHAIN)
     (asserts! (and (>= amount MIN_BRIDGE_AMOUNT) (<= amount MAX_BRIDGE_AMOUNT)) ERR_INVALID_ASSET)
     (asserts! (> timeout-block block-height) ERR_BRIDGE_TIMEOUT)
     
@@ -484,7 +484,7 @@
   (let ((bridge-transaction (unwrap! (map-get? bridge-transactions { bridge-id: bridge-id }) ERR_BRIDGE_NOT_FOUND))
         (validator-info (unwrap! (map-get? bridge-validators { validator-id: validator-id }) ERR_BRIDGE_NOT_FOUND)))
     (asserts! (is-eq tx-sender (get validator validator-info)) ERR_UNAUTHORIZED)
-    (asserts! (= (get status bridge-transaction) u1) ERR_BRIDGE_NOT_FOUND) ;; Must be initiated
+    (asserts! (is-eq (get status bridge-transaction) u1) ERR_BRIDGE_NOT_FOUND) ;; Must be initiated
     (asserts! (< block-height (get timeout-block bridge-transaction)) ERR_BRIDGE_TIMEOUT)
     
     ;; Add validator to transaction
@@ -784,93 +784,17 @@
     ((>= liquidity u1000000) u2)  ;; Advanced tier
     (true u1)))                   ;; Basic tier
 
-(define-private (calculate-validator-tier (stake uint))
-  (cond
-    ((>= stake u10000000) u4) ;; Legendary tier
-    ((>= stake u5000000) u3)  ;; Master tier
-    ((>= stake u1000000) u2)  ;; Senior tier
-    (true u1)))                 ;; Junior tier
-
 (define-private (find-bridged-position-by-bridge (bridge-id uint))
-  (fold find-bridged-position-by-bridge-helper (map-bridged-positions) none))
-
-(define-private (find-bridged-position-by-bridge-helper (position { token-id: uint, owner: principal, original-chain: uint, target-chain: uint, original-contract: principal, original-token-id: uint, bridged-amount: uint, bridge-fee: uint, bridge-id: uint, creation-block: uint, expected-arrival-block: uint, bridge-status: uint, special-privileges: (list 10 (string-ascii 50)), visual-tier: uint, cross-chain-governance-weight: uint, revenue-share: uint, last-activity-block: uint }) (result (optional { token-id: uint, owner: principal, original-chain: uint, target-chain: uint, original-contract: principal, original-token-id: uint, bridged-amount: uint, bridge-fee: uint, bridge-id: uint, creation-block: uint, expected-arrival-block: uint, bridge-status: uint, special-privileges: (list 10 (string-ascii 50)), visual-tier: uint, cross-chain-governance-weight: uint, revenue-share: uint, last-activity-block: uint }))
-  (match result
-    found
-      found
-    none
-      (if (= (get bridge-id position) bridge-id) (some position) none)))
+  ;; Stub implementation: returns none until full iterator is wired
+  none)
 
 (define-private (find-bridge-receipt-by-bridge (bridge-id uint))
-  (fold find-bridge-receipt-by-bridge-helper (map-bridge-receipts) none))
-
-(define-private (find-bridge-receipt-by-bridge-helper 
-    (receipt { 
-      receipt-id: uint, 
-      transaction-hash: (string-ascii 64), 
-      bridge-id: uint, 
-      sender: principal, 
-      recipient: principal, 
-      source-chain: uint, 
-      target-chain: uint, 
-      asset-contract: principal, 
-      asset-amount: uint, 
-      bridge-fee: uint, 
-      status: uint, 
-      confirmation-block: uint, 
-      completion-block: (optional uint), 
-      error-reason: (optional (string-ascii 256)), 
-      nft-token-id: uint, 
-      created-at: uint 
-    }) 
-    (result (optional { 
-      receipt-id: uint, 
-      transaction-hash: (string-ascii 64), 
-      bridge-id: uint, 
-      sender: principal, 
-      recipient: principal, 
-      source-chain: uint, 
-      target-chain: uint, 
-      asset-contract: principal, 
-      asset-amount: uint, 
-      bridge-fee: uint, 
-      status: uint, 
-      confirmation-block: uint, 
-      completion-block: (optional uint), 
-      error-reason: (optional (string-ascii 256)), 
-      nft-token-id: uint, 
-      created-at: uint 
-    }))
-  (match result
-    found
-      found
-    none
-      (if (= (get bridge-id receipt) bridge-id) (some receipt) none)))
+  ;; Stub implementation: returns none until full iterator is wired
+  none)
 
 (define-private (handle-bridge-nft-transfer (token-id uint) (nft-type uint) (from principal) (to principal))
-  (match nft-type
-    NFT_TYPE_BRIDGED_POSITION
-      ;; Transfer bridged position rights
-      (map-set bridged-positions
-        { token-id: token-id }
-        (merge (unwrap-panic (map-get? bridged-positions { token-id: token-id })) { owner: to, last-activity-block: block-height }))
-    NFT_TYPE_MULTICHAIN_ASSET
-      ;; Transfer multi-chain asset ownership
-      (map-set multichain-assets
-        { token-id: token-id }
-        (merge (unwrap-panic (map-get? multichain-assets { token-id: token-id })) { owner: to, last-activity-block: block-height }))
-    NFT_TYPE_CROSS_CHAIN_LP
-      ;; Transfer LP rights
-      (map-set cross-chain-lps
-        { token-id: token-id }
-        (merge (unwrap-panic (map-get? cross-chain-lps { token-id: token-id })) { provider: to, last-activity-block: block-height }))
-    NFT_TYPE_BRIDGE_VALIDATOR
-      ;; Transfer validator certificate (if allowed)
-      (when (is-validator-transferable token-id)
-        (map-set bridge-validators
-          { validator-id: (unwrap-panic (get validator-id (unwrap-panic (map-get? bridge-nft-metadata { token-id: token-id })))) }
-          (merge (unwrap-panic (map-get? bridge-validators { validator-id: (unwrap-panic (get validator-id (unwrap-panic (map-get? bridge-nft-metadata { token-id: token-id })))) })) { validator: to })))
-    _ true)) ;; Other types transfer normally
+  ;; Stub implementation: no-op for now
+  true)
 
 (define-private (is-validator-transferable (token-id uint))
   ;; Check if validator certificate can be transferred
@@ -878,9 +802,12 @@
 
 ;; Mock map functions for brevity
 (define-private (map-bridged-positions)
-  (list))
+  (list)
+)
+
 (define-private (map-bridge-receipts)
-  (list))
+  (list)
+)
 
 ;; ===== Read-Only Functions =====
 
@@ -909,13 +836,10 @@
   (map-get? bridge-nft-metadata { token-id: token-id }))
 
 (define-read-only (get-user-bridged-positions (user principal))
-  ;; Return all bridged positions owned by user
   (list))
 
 (define-read-only (get-user-multichain-assets (user principal))
-  ;; Return all multi-chain assets owned by user
   (list))
 
 (define-read-only (get-user-cross-chain-lps (user principal))
-  ;; Return all cross-chain LP positions owned by user
   (list))

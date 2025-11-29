@@ -165,8 +165,8 @@
                      dim-id 
                      total-yield 
                      token-holder-portion)
-              result result
-              (err ERR_CALL_FAILED)))
+              result (ok result)
+              err-val (err ERR_CALL_FAILED)))
         (ok true))
       
       ;; Transfer reserve portion to treasury

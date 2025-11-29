@@ -27,6 +27,7 @@ This is the central documentation hub for the Conxian DeFi platform. All documen
 
 - [`architecture/ARCHITECTURE.md`](./architecture/ARCHITECTURE.md) - **System architecture and design**
 - [`architecture/adr/`](./architecture/adr/) - **Architecture decision records**
+- [`architecture/CONXIAN_DAPPS_MAP.md`](./architecture/CONXIAN_DAPPS_MAP.md) - **DApps & on-chain module mapping**
 - [`whitepaper/Conxian-Whitepaper.md`](./whitepaper/Conxian-Whitepaper.md) - **Technical whitepaper**
 
 ### 🔒 Security & Compliance
@@ -37,6 +38,7 @@ This is the central documentation hub for the Conxian DeFi platform. All documen
 
 - [`guides/liquidation-flow.md`](./guides/liquidation-flow.md) - **Liquidation process guide**
 - [`guides/oracle-integration.md`](./guides/oracle-integration.md) - **Oracle integration guide**
+- [`guides/services-overview.md`](./guides/services-overview.md) - **Services offered & unique positioning overview**
 - [`ANALYTICS_METRICS_GUIDE.md`](./ANALYTICS_METRICS_GUIDE.md) - **Analytics and metrics guide**
 - [`GITHUB_SECRETS.md`](./GITHUB_SECRETS.md) - **GitHub secrets configuration**
 - [`strategy-defaults.md`](./strategy-defaults.md) - **Strategy defaults documentation**
@@ -44,6 +46,8 @@ This is the central documentation hub for the Conxian DeFi platform. All documen
 
 ### 📊 Project Management
 
+- [`project-management/STATUS.md`](./project-management/STATUS.md) - **High-level status and planning**
+- [`../ROADMAP.md`](../ROADMAP.md) - **Protocol roadmap and phased goals**
 
 ## 🎯 Quick Navigation
 
@@ -80,7 +84,8 @@ documentation/
 │   ├── 03-dex.md           # DEX trading guide
 │   ├── 04-tokens.md        # Token management
 │   ├── liquidation-flow.md  # Liquidation process
-│   └── oracle-integration.md # Oracle integration
+│   ├── oracle-integration.md # Oracle integration
+│   └── services-overview.md  # Services & unique positioning overview
 ├── project-management/      # Status, roadmap, and planning
 ├── whitepaper/             # Technical whitepaper
 └── [additional files]      # Analytics, metrics, strategies
@@ -104,4 +109,4 @@ When adding new documentation:
 
 ---
 
-*Last updated: November 13, 2025* | *Documentation reorganized for clarity and maintainability*
+*Last updated: November 27, 2025* | *Documentation reorganized for clarity and maintainability*

@@ -2,12 +2,12 @@
 
 This document outlines the current Conxian protocol architecture, a comprehensive multi-dimensional DeFi system deployed on the Stacks blockchain. The protocol has recently undergone a significant refactoring to improve modularity, clarity, and efficiency.
 
-**Last Updated**: November 23, 2025
+**Last Updated**: November 27, 2025
 
 ## Architecture Principles
 
 - **Modular Design**: The protocol is divided into a series of specialized modules, each with a well-defined responsibility (e.g., DEX, Lending, Governance).
-- **Modular Trait System**: All contract interfaces are defined in a set of **10 modular trait files**, which are aggregated in a central registry. This provides a clear, consistent, and gas-efficient way for contracts to interact.
+- **Modular Trait System**: All contract interfaces are defined in a set of **11 modular trait files**, which are aggregated in a central registry. This provides a clear, consistent, and gas-efficient way for contracts to interact.
 - **Bitcoin-Native**: The protocol leverages Stacks' Bitcoin anchoring for security and finality, with a particular focus on sBTC integration.
 - **Enterprise-Ready**: The architecture includes foundational frameworks for institutional features and compliance integration.
 - **Multi-Dimensional**: The protocol is designed to support a multi-dimensional financial system, with distinct layers for spatial, temporal, risk, and cross-chain operations.
@@ -36,7 +36,7 @@ The Conxian protocol is organized into a series of specialized modules, each loc
 
 ## Trait Architecture
 
-The protocol's trait system is organized into **10 modular files**, which provide a clear and efficient way to define contract interfaces. For a detailed overview of the trait architecture, please see the [`contracts/traits/README-TRAIT-ARCHITECTURE.md`](../traits/README-TRAIT-ARCHITECTURE.md) file.
+The protocol's trait system is organized into **11 modular files**, which provide a clear and efficient way to define contract interfaces. For a detailed overview of the trait architecture, please see the [`contracts/traits/README-TRAIT-ARCHITECTURE.md`](../traits/README-TRAIT-ARCHITECTURE.md) file.
 
 ## Security Architecture
 
@@ -46,6 +46,7 @@ The protocol includes a multi-layered security architecture to protect user fund
 - **MEV Protection**: Mechanisms to mitigate the effects of Maximal Extractable Value (MEV), such as batch auctions.
 - **Access Controls**: A role-based access control system to manage permissions for sensitive functions.
 - **Invariant Monitoring**: A system for monitoring key protocol invariants to detect anomalies and potential security threats.
+ - **Loan & Liquidity Protection (In Design)**: A cover layer that can auto-protect lending and LP positions based on refreshed risk metrics, with explicit user authorization and capped, transparent fees. This is currently being modelled and remains subject to further FSCA-aligned legal review.
 
 ## Deployment Architecture
 

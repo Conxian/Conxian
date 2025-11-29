@@ -84,17 +84,22 @@
     )
     (asserts! (is-none (map-get? pools { token-a: (get t1 sorted-tokens), token-b: (get t2 sorted-tokens) })) (err ERR_POOL_ALREADY_EXISTS))
     (let (
-      (new-pool-principal (contract-call? deployer deploy-and-initialize token-a token-b))
+      (call-result (contract-call? deployer deploy-and-initialize token-a token-b))
     )
-      (asserts! (is-ok new-pool-principal) ERR_TYPE_NOT_FOUND)
-      (map-set pools {
-        token-a: (get t1 sorted-tokens),
-        token-b: (get t2 sorted-tokens),
-      } {
-        type-id: type-id,
-        pool: (unwrap-panic new-pool-principal),
-      })
-      (ok (unwrap-panic new-pool-principal))
+      (asserts! (is-ok call-result) ERR_TYPE_NOT_FOUND)
+      (let ((inner-result (unwrap-panic call-result)))
+        (asserts! (is-ok inner-result) (err ERR_TYPE_NOT_FOUND))
+        (let ((pool-principal (unwrap-panic inner-result)))
+          (map-set pools {
+            token-a: (get t1 sorted-tokens),
+            token-b: (get t2 sorted-tokens),
+          } {
+            type-id: type-id,
+            pool: pool-principal,
+          })
+          (ok pool-principal)
+        )
+      )
     )
   )
 )

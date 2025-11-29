@@ -1,5 +1,6 @@
 ;; @desc Handles initial price setting and management for the CXD token.
-;; This contract is responsible for initializing the price of the CXD token,
+;; This contract initializes the price of the CXD token.
+(use-trait governance-token-trait .governance-token.governance-token-trait)
 ;; and provides functions for updating the price through governance or in an emergency.
 
 ;; The governance token contract is expected to implement governance-token-trait.
@@ -112,7 +113,12 @@
         (timelock (unwrap-panic (var-get timelock-end-block)))
     )
         (asserts! (var-get is-initialized) ERR_NOT_INITIALIZED)
-        (asserts! (is-ok (contract-call? .governance-token-trait get-voting-power caller)) ERR_UNAUTHORIZED)
+        (asserts!
+            (is-ok (contract-call? .governance-token-trait get-voting-power caller))
+            ERR_UNAUTHORIZED
+        )
+(asserts! (>= block-height timelock) ERR_INVALID_TIMELOCK)
+(asserts! (>= new-price current-min) ERR_INVALID_PRICE)
         (asserts! (>= block-height timelock) ERR_INVALID_TIMELOCK)
         (asserts! (>= new-price current-min) ERR_INVALID_PRICE)
         

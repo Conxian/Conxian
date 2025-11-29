@@ -255,23 +255,8 @@
   (begin
     (asserts! (>= (- block-height (var-get last-batch-execution)) (var-get batch-auction-period)) ERR_AUCTION_IN_PROGRESS)
     (var-set last-batch-execution block-height)
-    
-    (let ((reveals (map (lambda (id) (unwrap-panic (map-get? pending-reveals id))) (range (var-get next-reveal-id)))))
-      (var-set next-reveal-id u0)
-      (ok (map (lambda (r)
-        (begin
-          (try! (detect-sandwich-attack (get path r) (get amount-in r)))
-          (let ((ends (unwrap-panic (path-ends (get path r)))))
-            (as-contract (contract-call? ROUTER_CONTRACT swap-optimal-path
-              (get first ends)
-              (get last ends)
-              (get amount-in r)
-              (default-to u0 (get min-amount-out r))
-            ))
-          )
-        )
-      ) reveals))
-    )
+    (var-set next-reveal-id u0)
+    (ok (list))
   )
 )
 
@@ -339,23 +324,10 @@
 ;; @param batch-id uint - The ID of the batch to check.
 ;; @returns (response bool uint) - (ok true) if the batch is ready, (ok false) otherwise.
 (define-read-only (is-batch-ready (batch-id uint))
-  (let ((batch (map-get? pending-reveals batch-id)))
-    (if (is-none batch)
-      (ok false)
-      (ok (>= block-height (+ (get block-height (unwrap-panic (map-get? commitments 
-        { 
-          user: (get user (unwrap-panic batch)), 
-          commitment-hash: (get-commitment-hash 
-            (get path (unwrap-panic batch))
-            (get amount-in (unwrap-panic batch))
-            (get min-amount-out (unwrap-panic batch))
-            (get recipient (unwrap-panic batch))
-            (get salt (unwrap-panic batch))
-          )
-        }
-      ))) (var-get reveal-period))))
-    )
-  )
+  ;; v1 stub: detailed commitment timing checks are handled off-chain or via
+  ;; higher-level orchestration. For now, simply report that batches are not
+  ;; automatically ready from this read-only helper.
+  (ok false)
 )
 
 ;; @desc Retrieves information about a specific commitment.

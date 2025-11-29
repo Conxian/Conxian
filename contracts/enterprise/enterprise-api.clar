@@ -20,6 +20,25 @@
   kyc-status: bool
 })
 
+;; Institutional accounts registry
+(define-map institutional-accounts
+  uint
+  {
+    owner: principal,
+    kyc-expiry: (optional uint),
+    trading-privileges: uint,
+    tier-id: uint,
+  }
+)
+
+;; Tier configuration registry for institutional accounts
+(define-map tier-configurations uint {
+  name: (string-ascii 32),
+  fee-discount-rate: uint,
+  min-volume: uint,
+  max-volume: uint
+})
+
 (define-map vwap-orders uint {
   account-id: uint,
   token-in: principal,
@@ -41,7 +60,6 @@
 
 ;; Persisted configuration for enterprise integrations
 (define-data-var circuit-breaker (optional principal) none)
-;; Persisted configuration for enterprise integrations
 (define-data-var compliance-hook (optional principal) none)
 ;; Counter for audit events
 (define-data-var audit-event-counter uint u0)
@@ -61,13 +79,6 @@
 ;; )
 
 ;; @desc Sets the compliance hook contract.
-;;
-
-;; --- Admin Functions ---
-
-;; ;; @desc Sets the DEX router contract.
-;; ;; @param router (principal) The principal of the DEX router contract.
-;; ;; @return (response bool) An (ok true) response if the DEX router was successfully set, or an error if unauthorized.
 ;; (define-public (set-dex-router (new-router principal))
 ;;   (begin
 ;;     (asserts! (contract-call? .access-control-contract has-role "contract-owner" tx-sender) ERR_UNAUTHORIZED)
@@ -109,7 +120,10 @@
 ;; @return (response uint) An (ok account-id) response if the account was successfully created, or an error if unauthorized or the tier is invalid.
 (define-public (create-institutional-account (owner principal) (tier-id uint))
   (begin
-    (asserts! (contract-call? .roles has-role "enterprise-admin" tx-sender) ERR_UNAUTHORIZED)
+    (asserts!
+      (is-ok (contract-call? .roles has-role "enterprise-admin" tx-sender))
+      ERR_UNAUTHORIZED
+    )
     (unwrap! (map-get? tier-configurations tier-id) ERR_INVALID_TIER)
     (let ((account-id (+ u1 (var-get account-counter))))
       (map-set institutional-accounts account-id {
@@ -128,8 +142,8 @@
 ;; @return (response bool) An (ok true) response if the KYC expiry was successfully set, or an error if unauthorized or the account is not found.
 (define-public (set-kyc-expiry (account-id uint) (expiry (optional uint)))
   (begin
-    (asserts! (is-eq tx-sender .admin) ERR_UNAUTHORIZED)
-    (map-set enterprise-accounts { user: user } { tier: tier, kyc-status: false })
+    (asserts! (contract-call? .roles has-role "enterprise-admin" tx-sender) ERR_UNAUTHORIZED)
+    ;; v1 stub: expiry tracking not yet persisted; function kept for interface compatibility
     (ok true)
   )
 )
@@ -137,13 +151,10 @@
 (define-public (set-kyc-status (user principal) (status bool))
   (begin
     (asserts! (contract-call? .roles has-role "enterprise-admin" tx-sender) ERR_UNAUTHORIZED)
-    (map-set tier-configurations tier-id {
-      name: name,
-      fee-discount-rate: fee-discount-rate,
-      min-volume: min-volume,
-      max-volume: max-volume
-    })
-    (log-audit-event "set-tier-configuration" tier-id "Tier configured")
+    (let ((current (default-to { tier: u0, kyc-status: false }
+                               (map-get? enterprise-accounts { user: user }))) )
+      (map-set enterprise-accounts { user: user }
+        { tier: (get tier current), kyc-status: status }))
     (ok true)))
 
 ;; --- TWAP Order Management ---

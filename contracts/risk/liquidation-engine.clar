@@ -65,21 +65,27 @@
     (position-id uint)
     (max-slippage uint)
     (caller principal)
+    (dim-engine <dimensional-trait>)
+    (oracle <oracle-aggregator-v2-trait>)
   )
   (let (
     (current-block block-height)
     (position (unwrap!
-      (contract-call? (var-get dimensional-engine-contract) get-position
+      (contract-call? dim-engine get-position
         position-owner position-id
       )
       ERR_INVALID_POSITION
     ))
     (asset (get asset position))
     (price (unwrap!
-      (contract-call? (var-get oracle-contract) get-price (get asset position))
+      (contract-call? oracle get-price (get asset position))
       ERR_ORACLE_FAILURE
     ))
   )
+    ;; Verify passed traits match configured contracts
+    (asserts! (is-eq (contract-of dim-engine) (var-get dimensional-engine-contract)) ERR_UNAUTHORIZED)
+    (asserts! (is-eq (contract-of oracle) (var-get oracle-contract)) ERR_UNAUTHORIZED)
+
     ;; Verify position can be liquidated
     (asserts! (is-eq (get status position) ACTIVE) ERR_POSITION_NOT_ACTIVE)
 
@@ -109,7 +115,7 @@
         (try! (contract-call? asset transfer remaining-collateral tx-sender (var-get insurance-fund) none))
 
         ;; Close the position
-        (try! (contract-call? (var-get dimensional-engine-contract) close-position position-owner position-id u0))
+        (try! (contract-call? dim-engine close-position position-owner position-id u0))
 
         ;; Record liquidation
         (map-set liquidations {
@@ -133,14 +139,18 @@
     (position-owner principal)
     (position-id uint)
     (max-slippage uint)
+    (dim-engine <dimensional-trait>)
+    (oracle <oracle-aggregator-v2-trait>)
   )
-  (liquidate-position-internal position-owner position-id max-slippage tx-sender)
+  (liquidate-position-internal position-owner position-id max-slippage tx-sender dim-engine oracle)
 )
 
 ;; ===== Batch Liquidations =====
 (define-public (liquidate-positions
     (positions (list 20 {owner: principal, id: uint}))
     (max-slippage uint)
+    (dim-engine <dimensional-trait>)
+    (oracle <oracle-aggregator-v2-trait>)
   )
   (let (
     (results (map
@@ -150,6 +160,8 @@
           (get id position)
           max-slippage
           tx-sender
+          dim-engine
+          oracle
         )
           success (ok true)
           error error

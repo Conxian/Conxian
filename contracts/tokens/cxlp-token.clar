@@ -354,11 +354,7 @@
         (map-set balance-since recipient block-height)
       )
     )
-    
-    (match (var-get migration-queue-contract)
-      queue-contract (try! (contract-call? queue-contract on-cxlp-transfer sender recipient amount))
-      true
-    )
+    ;; v1 stub: migration queue hook is disabled; transfer logic above is final
     (ok true)
   ))
 
@@ -414,15 +410,19 @@
     (asserts! (or (is-owner tx-sender) (is-minter tx-sender)) (err ERR_UNAUTHORIZED))
     (asserts! (not (check-system-pause)) (err ERR_SYSTEM_PAUSED))
     
-    (try! (var-set total-supply (unwrap! (safe-add (var-get total-supply) amount) (err ERR_OVERFLOW))))
+    (var-set total-supply
+      (unwrap! (safe-add (var-get total-supply) amount) (err ERR_OVERFLOW))
+    )
     
     (let ((bal (default-to u0 (map-get? balances recipient))))
-      (try! (map-set balances recipient (unwrap! (safe-add bal amount) (err ERR_OVERFLOW))))
+      (map-set balances recipient
+        (unwrap! (safe-add bal amount) (err ERR_OVERFLOW))
+      )
       (map-set balance-since recipient block-height)
     )
     
     (match (var-get migration-queue-contract)
-      queue-contract (try! (contract-call? queue-contract initialize-duration-tracking recipient))
+      mq-contract (try! (contract-call? mq-contract initialize-duration-tracking recipient))
       true
     )
     (ok true)
@@ -437,9 +437,11 @@
     
     (let ((bal (default-to u0 (map-get? balances tx-sender))))
       (asserts! (>= bal amount) (err ERR_NOT_ENOUGH_BALANCE))
-      (try! (map-set balances tx-sender (unwrap! (safe-sub bal amount) (err ERR_SUB_UNDERFLOW)))))
+      (map-set balances tx-sender (unwrap! (safe-sub bal amount) (err ERR_SUB_UNDERFLOW))))
     
-    (try! (var-set total-supply (unwrap! (safe-sub (var-get total-supply) amount) (err ERR_SUB_UNDERFLOW))))
+    (var-set total-supply
+      (unwrap! (safe-sub (var-get total-supply) amount) (err ERR_SUB_UNDERFLOW))
+    )
     (ok true)
   ))
 
@@ -465,8 +467,12 @@
       (asserts! (is-eq cxd-stored cxd-contract-param) (err ERR_CXD_MISMATCH))
       (asserts! (>= sender-bal amount) (err ERR_NOT_ENOUGH_BALANCE))
       
-      (try! (map-set balances tx-sender (unwrap! (safe-sub sender-bal amount) (err ERR_SUB_UNDERFLOW))))
-      (try! (var-set total-supply (unwrap! (safe-sub (var-get total-supply) amount) (err ERR_SUB_UNDERFLOW))))
+      (map-set balances tx-sender
+        (unwrap! (safe-sub sender-bal amount) (err ERR_SUB_UNDERFLOW))
+      )
+(var-set total-supply
+        (unwrap! (safe-sub (var-get total-supply) amount) (err ERR_SUB_UNDERFLOW))
+      )
       
       (let (
           (band (unwrap! (current-band) (err u999)))

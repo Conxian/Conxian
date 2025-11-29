@@ -69,10 +69,10 @@
           (asserts! (>= block-height (get start-block proposal)) ERR_PROPOSAL_NOT_ACTIVE)
           (asserts! (<= block-height (get end-block proposal)) ERR_VOTING_CLOSED)
           (asserts!
-            (unwrap-panic (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.governance-token
+            (unwrap-panic (contract-call? .governance-token
               has-voting-power tx-sender))
             ERR_UNAUTHORIZED)
-          (try! (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.governance-voting
+          (try! (contract-call? .governance-voting
                   vote proposal-id support votes-cast tx-sender))
           (print {
             event: "vote-cast",
@@ -89,12 +89,12 @@
 ;; @param proposal-id uint The ID of the proposal.
 ;; @returns (response bool uint) `(ok true)` on success.
 (define-public (execute (proposal-id uint))
-  (let ((maybe-proposal (try! (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.proposal-registry get-proposal proposal-id))))
+  (let ((maybe-proposal (try! (contract-call? .proposal-registry get-proposal proposal-id))))
     (match maybe-proposal
       proposal
         (let ((total-votes (+ (get for-votes proposal) (get against-votes proposal)))
               (governance-token-supply (try! (contract-call?
-                'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.governance-token
+                .governance-token
                 get-total-supply)))
               (quorum (/ (* total-votes u10000) governance-token-supply)))
           (begin
@@ -104,7 +104,7 @@
             (asserts! (not (get canceled proposal)) ERR_VOTING_CLOSED)
             (asserts! (> (get for-votes proposal) (get against-votes proposal)) ERR_PROPOSAL_FAILED)
             (asserts! (>= quorum (var-get quorum-percentage)) ERR_QUORUM_NOT_REACHED)
-            (try! (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.proposal-registry
+            (try! (contract-call? .proposal-registry
                     set-executed proposal-id))
             (print {
               event: "proposal-executed",
@@ -120,14 +120,14 @@
 ;; @param proposal-id uint The ID of the proposal.
 ;; @returns (response bool uint) `(ok true)` on success.
 (define-public (cancel (proposal-id uint))
-  (let ((maybe-proposal (try! (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.proposal-registry get-proposal proposal-id))))
+  (let ((maybe-proposal (try! (contract-call? .proposal-registry get-proposal proposal-id))))
     (match maybe-proposal
       proposal
         (begin
           (asserts! (or (is-eq tx-sender (get proposer proposal)) (is-contract-owner)) ERR_UNAUTHORIZED)
           (asserts! (not (get executed proposal)) ERR_VOTING_CLOSED)
           (asserts! (not (get canceled proposal)) ERR_VOTING_CLOSED)
-          (try! (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.proposal-registry
+          (try! (contract-call? .proposal-registry
                   set-canceled proposal-id))
           (print {
             event: "proposal-canceled",
@@ -144,14 +144,14 @@
 ;; @param proposal-id uint The ID of the proposal.
 ;; @returns (response (optional { ... }) (err uint)) The proposal details.
 (define-read-only (get-proposal (proposal-id uint))
-  (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.proposal-registry get-proposal proposal-id))
+  (contract-call? .proposal-registry get-proposal proposal-id))
 
 ;; @desc Gets a vote on a proposal by a voter.
 ;; @param proposal-id uint The ID of the proposal.
 ;; @param voter principal The address of the voter.
 ;; @returns (response (optional { ... }) (err uint)) The vote details.
 (define-read-only (get-vote (proposal-id uint) (voter principal))
-  (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.governance-voting get-vote proposal-id voter))
+  (contract-call? .governance-voting get-vote proposal-id voter))
 
 ;; --- Admin Functions ---
 

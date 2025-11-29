@@ -28,6 +28,12 @@
     "verify:contracts": "node ./scripts/verify-contracts.cjs",
     "ci": "node ./scripts/ensure-deps.js && node ./scripts/validate-docs.js && node ./scripts/verify-contracts.cjs && npx vitest run",
     "coverage": "vitest run --coverage",
+    "test:dex-dimension": "vitest run tests/dex/**/*.ts tests/dex-factory*.ts tests/pool-integration.test.ts tests/pool-management.test.ts tests/liquidity-provider.test.ts tests/price-impact-calculator.test.ts tests/router/**/*.ts tests/mev-protector.test.ts --config vitest.config.enhanced.ts",
+    "test:lending-dimension": "vitest run tests/lending/**/*.ts tests/comprehensive-lending-system.*.ts tests/flash-loan-integration.test.ts tests/loan-liquidation-manager.spec.ts tests/lending-system-*.ts tests/liquidation-manager-test.ts --config vitest.config.enhanced.ts",
+    "test:governance-dimension": "vitest run tests/governance/**/*.ts tests/governance-token.test.ts tests/governance-signature-verifier.test.ts tests/tokenized-bond.test.ts --config vitest.config.enhanced.ts",
+    "test:oracle-dimension": "vitest run tests/chainlink-adapter.test.ts tests/twap-oracle*.test.ts tests/lending-system-oracle-test.ts tests/monitoring/**/*.ts --config vitest.config.enhanced.ts",
+    "test:risk-dimension": "vitest run tests/risk-management.test.ts tests/insurance-fund.test.ts --config vitest.config.enhanced.ts",
+    "test:dimensional-dimension": "vitest run tests/dimensional/**/*.ts tests/dimensional-engine.test.ts tests/pool-integration.test.ts tests/funding-rate-calculations.test.ts tests/sbtc-integration.test.ts --config vitest.config.enhanced.ts",
     "update-autonomics": "tsx scripts/sdk_update_autonomics.ts",
     "load-test": "artillery run load-test.yml",
     "derive:wallets": "tsx scripts/derive_wallets.ts"

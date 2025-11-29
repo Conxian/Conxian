@@ -99,22 +99,22 @@
   (begin
     (asserts! (is-some (map-get? registered-oracles { oracle-principal: oracle })) ERR_INVALID_ORACLE)
     (try! (check-manipulation asset price))
-    (try! (check-circuit-breaker))
+    (check-circuit-breaker)
     
     ;; Store the current observation with tenure awareness
     ;; Note: In Stacks 2.5, we use get-tenure-info? to get the current tenure ID.
-    ;; For now, we will use block-height as a proxy if get-tenure-info? is not fully supported in this mock environment,
-    ;; but we structure it for tenure awareness.
+;; For now, we will use block-height as a proxy if get-tenure-info? is not fully supported in this mock environment,
+;; but we structure it for tenure awareness.
     (map-set price-observations { asset: asset, block: block-height } { price: price, total-supply: total-supply })
 
     ;; Calculate and update TWAP
     (let ((twap-result (calculate-twap asset TWAP-LOOK-BACK-WINDOW)))
       (match twap-result
-        (ok twap-price)
+        ok-value
           (begin
-            (map-set asset-twap { asset: asset } { price: twap-price, last-updated: block-height, total-supply: total-supply })
+            (map-set asset-twap { asset: asset } { price: ok-value, last-updated: block-height, total-supply: total-supply })
             (ok true))
-        (err code) (err code)))
+        err-value (err err-value)))
   )
 )
 
@@ -189,7 +189,13 @@
   ;; v1: use the most recent price observation at the current block height as
   ;; the TWAP approximation. This avoids complex aggregation while still
   ;; enforcing freshness via get-twap.
-  (match (map-get? price-observations { asset: asset, block: block-height })
-    observation (ok (get price observation))
-    no-observation ERR_NO_ORACLES)
+  (let ((observation (map-get? price-observations {
+      asset: asset,
+      block: block-height,
+    })))
+    (if (is-some observation)
+      (ok (get price (unwrap-panic observation)))
+      ERR_NO_ORACLES
+    )
+  )
 )

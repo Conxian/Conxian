@@ -1,8 +1,9 @@
 ;; funding-calculator.clar
 ;; Handles funding rate calculations for perpetual contracts
 
-;; Optional: dimensional position trait (not strictly required for current logic)
+;; Option
 (use-trait dimensional-trait .dimensional-traits.dimensional-trait)
+(use-trait oracle-trait .oracle-pricing.oracle-trait)
 
 
 ;; ===== Constants =====
@@ -41,6 +42,7 @@
 ;; ===== Core Functions =====
 (define-public (update-funding-rate
     (asset principal)
+    (oracle <oracle-trait>)
   )
   (let (
     (current-time block-height)
@@ -55,13 +57,13 @@
       ERR_INVALID_INTERVAL
     )
 
-    ;; Get current index price and TWAP via the configured oracle contract
+    ;; Get current index price and TWAP via the oracle trait parameter
     (let (
-      (index-price (unwrap! (contract-call? (var-get oracle-contract) get-price asset)
+      (index-price (unwrap! (contract-call? oracle get-price asset)
         (err u5003)
       ))
       (twap (unwrap!
-        (contract-call? (var-get oracle-contract) get-twap-with-window asset
+        (contract-call? oracle get-twap-with-window asset
           (var-get funding-interval)
         )
         (err u5004)
@@ -116,7 +118,7 @@
   )
   (let (
     (position (unwrap!
-      (contract-call? .dimensional-engine get-position position-owner position-id)
+      (contract-call? .dimensional-core get-position position-owner position-id)
       (err u5005)
     ))
     (current-time block-height)

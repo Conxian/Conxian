@@ -5,7 +5,8 @@
 ;; (use-trait factory-trait .dex-traits.factory-trait) ;; Removed: Unused and invalid path
 (use-trait access-control-trait .core-protocol.rbac-trait)
 (use-trait circuit-breaker-trait .security-monitoring.circuit-breaker-trait)
-;; (use-trait dim-registry-trait .dimensional-traits.dim-registry-trait) ;; Removed: Unused and invalid path
+(use-trait dim-registry-trait .dimensional-traits.dim-registry-trait)
+(use-trait pool-trait .dex-traits.pool-trait)
 (use-trait pool-type-registry-trait .pool-type-registry.pool-type-registry-trait)
 (use-trait pool-implementation-registry-trait .pool-implementation-registry.pool-implementation-registry-trait)
 (use-trait pool-registry-trait .pool-registry.pool-registry-trait)
@@ -70,26 +71,59 @@
 ;; @param fee-bps uint The fee in basis points for the pool.
 ;; @param additional-params (optional { tick-spacing: uint, initial-price: uint }) Optional parameters for specific pool types.
 ;; @returns (response principal uint) The principal of the newly created pool or an error.
-(define-public (create-pool (token-a <sip-010-ft-trait>) (token-b <sip-010-ft-trait>) (pool-type (optional (string-ascii 64))) (fee-bps uint) (additional-params (optional { tick-spacing: uint, initial-price: uint })))
+(define-public (create-pool 
+    (token-a <sip-010-ft-trait>) 
+    (token-b <sip-010-ft-trait>) 
+    (pool-type (optional (string-ascii 64))) 
+    (fee-bps uint) 
+    (additional-params (optional { tick-spacing: uint, initial-price: uint }))
+    (pool-impl <pool-trait>)
+    (pool-impl-reg <pool-implementation-registry-trait>)
+    (pool-reg <pool-registry-trait>)
+    (dim-reg <dim-registry-trait>)
+  )
   (begin
     (try! (check-pool-manager))
     (asserts! (not (try! (check-circuit-breaker))) ERR_CIRCUIT_OPEN)
+    
+    ;; Verify passed traits match configured registries
+(asserts!
+      (is-eq (contract-of pool-impl-reg) (var-get pool-implementation-registry))
+      ERR_UNAUTHORIZED
+    )
+(asserts! (is-eq (contract-of pool-reg) (var-get pool-registry))
+      ERR_UNAUTHORIZED
+    )
+(asserts! (is-eq (contract-of dim-reg) (var-get dimensional-registry))
+      ERR_UNAUTHORIZED
+    )
 
     (let ((selected-pool-type (default-to (var-get default-pool-type) pool-type)))
       (try! (validate-pool-type selected-pool-type))
       (asserts! (and (>= fee-bps u0) (<= fee-bps u10000)) (err ERR_INVALID_FEE))
       (asserts! (not (is-eq (contract-of token-a) (contract-of token-b))) (err ERR_INVALID_TOKENS))
 
-      (let ((pool-impl (unwrap! (contract-call? (var-get pool-implementation-registry) get-pool-implementation selected-pool-type) (err ERR_IMPLEMENTATION_NOT_FOUND)))
+      (let ((impl-principal (unwrap! (contract-call? pool-impl-reg get-pool-implementation selected-pool-type) (err ERR_IMPLEMENTATION_NOT_FOUND)))
             (token-a-principal (contract-of token-a))
             (token-b-principal (contract-of token-b)))
         
-        (asserts! (is-none (unwrap! (contract-call? (var-get pool-registry) get-pool token-a-principal token-b-principal) (err u0))) ERR_POOL_EXISTS)
+        ;; Verify the passed pool-impl trait matches the implementation returned by registry
+(asserts! (is-eq (contract-of pool-impl) impl-principal)
+          (err ERR_IMPLEMENTATION_NOT_FOUND)
+        )
+
+(asserts!
+          (is-none (unwrap!
+            (contract-call? pool-reg get-pool token-a-principal token-b-principal)
+            (err u0)
+          ))
+          ERR_POOL_EXISTS
+        )
 
         (let ((pool-principal (unwrap! (contract-call? pool-impl create-pool token-a-principal token-b-principal fee-bps additional-params) (err ERR_SWAP_FAILED))))
 
-          (try! (as-contract (contract-call? (var-get dimensional-registry) register-component pool-principal u100)))
-          (try! (as-contract (contract-call? (var-get pool-registry) add-pool pool-principal token-a-principal token-b-principal selected-pool-type fee-bps additional-params)))
+;; --- Registry Management Functions ---
+
 
           (print {
             event: "pool-created",

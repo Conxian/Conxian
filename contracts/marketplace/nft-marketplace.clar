@@ -333,28 +333,32 @@
 ;; @param bid-amount The bid amount
 ;; @returns Response with success status
 (define-public (place-bid (listing-id uint) (bid-amount uint))
-  (let ((listing (unwrap! (map-get? listings { listing-id: listing-id }) ERR_LISTING_NOT_FOUND))
-        (auction-info (get-auction-by-listing listing-id)))
-    (asserts! (= (get listing-type listing) u2) ERR_INVALID_LISTING) ;; Must be auction
-    (asserts! (= (get listing-status listing) u1) ERR_AUCTION_NOT_ENDED) ;; Must be active
+  (let (
+        (listing (unwrap! (map-get? listings { listing-id: listing-id }) ERR_LISTING_NOT_FOUND))
+        (auction-info (get-auction-by-listing listing-id))
+       )
+    (asserts! (is-eq (get listing-type listing) u2) ERR_INVALID_LISTING) ;; Must be auction
+    (asserts! (is-eq (get listing-status listing) u1) ERR_AUCTION_NOT_ENDED) ;; Must be active
     (asserts! (< block-height (get end-block listing)) ERR_AUCTION_NOT_ENDED) ;; Must not be expired
-    
+
     ;; Verify auction exists and is active
     (match auction-info
       auction
-        (let ((current-high-bid (get current-high-bid auction))
-              (minimum-bid (get minimum-bid listing)))
+        (let (
+              (current-high-bid (get current-high-bid auction))
+              (minimum-bid (get minimum-bid listing))
+             )
           ;; Check bid amount
           (asserts! (>= bid-amount minimum-bid) ERR_BID_TOO_LOW)
           (match current-high-bid
             high-bid
               (asserts! (> bid-amount (get amount high-bid)) ERR_BID_TOO_LOW) ;; Must beat current bid
             none
-              true)) ;; First bid
-          
+              true) ;; First bid
+
           ;; Transfer bid amount (in real implementation, this would escrow the tokens)
           ;; (try! (contract-call? price-token transfer-from tx-sender (as-contract tx-sender) bid-amount))
-          
+
           ;; Record bid
           (map-set bids
             { listing-id: listing-id, bidder: tx-sender }
@@ -364,7 +368,7 @@
               is-winning: true,
               bid-type: u1 ;; Regular bid
             })
-          
+
           ;; Update previous bidder's winning status
           (match current-high-bid
             high-bid
@@ -373,7 +377,7 @@
                 { amount: (get amount high-bid), bid-block: (get bid-block high-bid), is-winning: false, bid-type: u1 })
             none
               true)
-          
+
           ;; Update auction
           (map-set auctions
             { auction-id: (get-auction-id-by-listing listing-id) }
@@ -381,7 +385,7 @@
               current-high-bid: (some { bidder: tx-sender, amount: bid-amount }),
               total-bids: (+ (get total-bids auction) u1)
             }))
-          
+
           ;; Update listing
           (map-set listings
             { listing-id: listing-id }
@@ -389,10 +393,10 @@
               current-bid: (some { bidder: tx-sender, amount: bid-amount }),
               bid-count: (+ (get bid-count listing) u1)
             }))
-          
+
           ;; Create bid certificate NFT
           (create-bid-certificate-nft listing-id tx-sender bid-amount)
-          
+
           (print {
             event: "bid-placed",
             listing-id: listing-id,
@@ -400,19 +404,17 @@
             bid-amount: bid-amount,
             total-bids: (+ (get total-bids auction) u1)
           })
-          
+
           (ok true))
       error-response
-        (err ERR_LISTING_NOT_FOUND))
-  )
-)
+        (err ERR_LISTING_NOT_FOUND))))
 
 ;; @desc Executes a buy-now purchase
 ;; @param listing-id The listing ID
 ;; @returns Response with success status
 (define-public (buy-now (listing-id uint))
   (let ((listing (unwrap! (map-get? listings { listing-id: listing-id }) ERR_LISTING_NOT_FOUND)))
-    (asserts! (= (get listing-status listing) u1) ERR_LISTING_NOT_FOUND) ;; Must be active
+    (asserts! (is-eq (get listing-status listing) u1) ERR_LISTING_NOT_FOUND) ;; Must be active
     (asserts! (< block-height (get end-block listing)) ERR_LISTING_EXPIRED) ;; Must not be expired
     
     (match (get buy-now-price listing)
@@ -436,8 +438,8 @@
 (define-public (end-auction (listing-id uint))
   (let ((listing (unwrap! (map-get? listings { listing-id: listing-id }) ERR_LISTING_NOT_FOUND))
         (auction-info (get-auction-by-listing listing-id)))
-    (asserts! (= (get listing-type listing) u2) ERR_INVALID_LISTING) ;; Must be auction
-    (asserts! (= (get listing-status listing) u1) ERR_AUCTION_NOT_ENDED) ;; Must be active
+    (asserts! (is-eq (get listing-type listing) u2) ERR_INVALID_LISTING) ;; Must be auction
+    (asserts! (is-eq (get listing-status listing) u1) ERR_AUCTION_NOT_ENDED) ;; Must be active
     (asserts! (>= block-height (get end-block listing)) ERR_AUCTION_NOT_ENDED) ;; Must be ended
     
     (match auction-info
@@ -470,7 +472,7 @@
 (define-public (cancel-listing (listing-id uint))
   (let ((listing (unwrap! (map-get? listings { listing-id: listing-id }) ERR_LISTING_NOT_FOUND)))
     (asserts! (is-eq tx-sender (get seller listing)) ERR_UNAUTHORIZED) ;; Must be seller
-    (asserts! (= (get listing-status listing) u1) ERR_LISTING_NOT_FOUND) ;; Must be active
+    (asserts! (is-eq (get listing-status listing) u1) ERR_LISTING_NOT_FOUND) ;; Must be active
     
     ;; Update listing status
     (map-set listings
@@ -478,7 +480,7 @@
       (merge listing { listing-status: u3 })) ;; Cancelled
     
     ;; Update auction if applicable
-    (when (= (get listing-type listing) u2)
+    (when (is-eq (get listing-type listing) u2)
       (let ((auction-id (get-auction-id-by-listing listing-id)))
         (map-set auctions
           { auction-id: auction-id }
@@ -733,23 +735,30 @@
 (define-private (check-if-listed (listing { listing-id: uint, seller: principal, nft-contract: principal, nft-token-id: uint, price-token: principal, price-amount: uint, listing-type: uint, start-block: uint, end-block: uint, current-bid: (optional { bidder: principal, amount: uint }), bid-count: uint, minimum-bid: uint, buy-now-price: (optional uint), listing-status: uint, marketplace-fee: uint, seller-revenue: uint, created-at: uint }) (already-found bool))
   (if already-found
     true
-    (and (is-eq (get nft-contract listing) nft-contract) (= (get nft-token-id listing) nft-token-id) (= (get listing-status listing) u1))))
+    (and (is-eq (get nft-contract listing) nft-contract)
+         (is-eq (get nft-token-id listing) nft-token-id)
+         (is-eq (get listing-status listing) u1))))
 
 (define-private (get-auction-by-listing (listing-id uint))
   (fold find-auction-by-listing (map-auctions) none))
 
-(define-private (find-auction-by-listing (auction { listing-id: uint, seller: principal, nft-contract: principal, nft-token-id: uint, starting-price: uint, reserve-price: uint, current-high-bid: (optional { bidder: principal, amount: uint }), total-bids: uint, start-block: uint, end-block: uint, auction-status: uint, winner: (optional principal), final-price: (optional uint) }) (result (optional { listing-id: uint, seller: principal, nft-contract: principal, nft-token-id: uint, starting-price: uint, reserve-price: uint, current-high-bid: (optional { bidder: principal, amount: uint }), total-bids: uint, start-block: uint, end-block: uint, auction-status: uint, winner: (optional principal), final-price: (optional uint) }))
+(define-private (find-auction-by-listing
+    (auction { listing-id: uint, seller: principal, nft-contract: principal, nft-token-id: uint, starting-price: uint, reserve-price: uint, current-high-bid: (optional { bidder: principal, amount: uint }), total-bids: uint, start-block: uint, end-block: uint, auction-status: uint, winner: (optional principal), final-price: (optional uint) })
+    (result (optional { listing-id: uint, seller: principal, nft-contract: principal, nft-token-id: uint, starting-price: uint, reserve-price: uint, current-high-bid: (optional { bidder: principal, amount: uint }), total-bids: uint, start-block: uint, end-block: uint, auction-status: uint, winner: (optional principal), final-price: (optional uint) }))
+  )
   (match result
     found
       found
     none
-      (if (= (get listing-id auction) listing-id) (some auction) none)))
+      (if (is-eq (get listing-id auction) listing-id) (some auction) none)
+  )
+)
 
 (define-private (get-auction-id-by-listing (listing-id uint))
   (fold find-auction-id-by-listing (map-auctions) u0))
 
 (define-private (find-auction-id-by-listing (auction { listing-id: uint, seller: principal, nft-contract: principal, nft-token-id: uint, starting-price: uint, reserve-price: uint, current-high-bid: (optional { bidder: principal, amount: uint }), total-bids: uint, start-block: uint, end-block: uint, auction-status: uint, winner: (optional principal), final-price: (optional uint) }) (current-id uint))
-  (if (= (get listing-id auction) listing-id) (get-listing-id auction) current-id))
+  (if (is-eq (get listing-id auction) listing-id) (get-listing-id auction) current-id))
 
 (define-private (get-listing-id (listing { listing-id: uint, seller: principal, nft-contract: principal, nft-token-id: uint, price-token: principal, price-amount: uint, listing-type: uint, start-block: uint, end-block: uint, current-bid: (optional { bidder: principal, amount: uint }), bid-count: uint, minimum-bid: uint, buy-now-price: (optional uint), listing-status: uint, marketplace-fee: uint, seller-revenue: uint, created-at: uint }))
   (get listing-id listing))
@@ -798,7 +807,7 @@
   (map-get? user-marketplace-profiles { user: user }))
 
 (define-read-only (get-active-listings)
-  (filter (lambda (listing) (= (get listing-status listing) u1)) (map-listings)))
+  (filter (lambda (listing) (is-eq (get listing-status listing) u1)) (map-listings)))
 
 (define-read-only (get-user-bids (user principal))
   (filter (lambda (bid) (is-eq (get bid-block bid) user)) (map-bids)))

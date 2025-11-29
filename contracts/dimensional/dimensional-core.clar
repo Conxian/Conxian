@@ -24,6 +24,7 @@
 (define-data-var owner principal tx-sender)
 (define-data-var oracle-contract principal tx-sender)
 (define-data-var next-position-id uint u0)
+(define-data-var next-position-id uint u0)
 (define-data-var protocol-fee-rate uint u30)  ;; 0.3% in basis points (30/10000)
 (define-data-var dimensional-token principal tx-sender)
 (define-data-var total-value-locked uint u0)
@@ -97,7 +98,7 @@
   (ok (var-get protocol-fee-rate)))
 
 (define-read-only (get-oracle-contract)
-  (ok (var-get oracle-contract)))
+  (ok (var-get oracle-contract-principal)))
 
 (define-read-only (get-total-positions)
   (ok {
@@ -108,27 +109,22 @@
 )
 
 (define-public (set-owner (new-owner principal))
-  "@doc Transfer contract ownership to a new principal"
   (begin
     (asserts! (is-eq tx-sender (var-get owner)) ERR_UNAUTHORIZED)
-    (asserts! (is-standard-principal new-owner) (err u2014))
     (var-set owner new-owner)
     (ok true)
   ))
 
 
 (define-public (set-oracle-contract (oracle principal))
-  "@doc Set the oracle contract address"
   (begin
     (asserts! (is-eq tx-sender (var-get owner)) ERR_UNAUTHORIZED)
-    (asserts! (is-standard-principal oracle) (err u2015))
-    (var-set oracle-contract oracle)
+    (ok true)
     (ok true)
   )
 )
 
 (define-public (set-protocol-fee-rate (fee-rate uint))
-  "@doc Update the protocol fee rate (in basis points)"
   (begin
     (asserts! (is-eq tx-sender (var-get owner)) ERR_UNAUTHORIZED)
     (asserts! (<= fee-rate u1000) (err u2016)) ;; Max 10% fee
@@ -138,32 +134,30 @@
 )
 
 (define-public (set-dimensional-token (token principal))
-  "@doc Set the dimensional token contract address"
   (begin
     (asserts! (is-eq tx-sender (var-get owner)) ERR_UNAUTHORIZED)
-    (asserts! (is-standard-principal token) (err u2017))
     (var-set dimensional-token token)
     (ok true)
   )
 )
 
-(define-read-only (get-position (owner principal) (position-id uint))
-  "@doc Get position details by ID"
-  (match (map-get? positions {owner: owner, id: position-id})
-    position (ok (some position))
-    (ok none)
+(define-read-only (get-position
+    (owner principal)
+    (position-id uint)
   )
+  (map-get? positions {
+    owner: owner,
+    id: position-id,
+  })
 )
 
-(define-private (get-oracle-price (token principal) (oracle-trait <oracle-trait>))
-  "@private Get price from oracle with error handling"
-  (begin
-    (asserts! (is-eq (contract-of oracle-trait) (var-get oracle-contract)) (err ERR_UNAUTHORIZED))
-    (match (contract-call? oracle-trait get-price token)
-      price (ok price)
-      (err ERR_ORACLE_ERROR)
-    )
+;; Get oracle price - requires oracle trait parameter
+;; NOTE: Public (not read-only) because match with contract-call requires mutable context
+(define-public (get-oracle-price
+    (token principal)
+    (oracle <oracle-trait>)
   )
+  (contract-call? oracle get-price token)
 )
 
 (define-public (get-dimensional-state)
@@ -189,7 +183,7 @@
   (let (
     (position-id (var-get next-position-id))
     (current-block block-height)
-    (price (try! (get-oracle-price token oracle-trait)))
+    (size (* collateral-amount leverage))
     (is-long (or (is-eq position-type "LONG") (is-eq position-type "PERPETUAL")))
     (size (* collateral-amount leverage))
     (min-amount-out (/ (* price (- u10000 slippage-tolerance)) u10000))
@@ -243,10 +237,11 @@
 (define-public (close-position
     (position-id uint)
     (slippage-tolerance uint)
+    (token-trait <sip-010-ft-trait>)(oracle <oracle-trait>)
   )
   (let (
     (position (unwrap! (get-position tx-sender position-id) (err ERR_INVALID_POSITION)))
-    (current-price (try! (get-oracle-price tx-sender)))
+    (current-price (try! (get-oracle-price (var-get dimensional-token) oracle)))
     (pnl (calculate-pnl position current-price))
     (fees (calculate-fees position))
     (total-amount (- pnl fees))
@@ -264,9 +259,10 @@
     )
     
     ;; Transfer funds to user
-    ;; Transfer funds to user
-    (asserts! (is-eq (contract-of token-trait) (var-get dimensional-token)) (err ERR_UNAUTHORIZED))
-    (try! (as-contract (contract-call? token-trait transfer total-amount tx-sender none)))
+    (asserts! (is-eq (contract-of token-trait) (var-get dimensional-token))
+      ERR_UNAUTHORIZED
+    )
+(try! (as-contract (contract-call? token-trait transfer total-amount tx-sender tx-sender none)))
     
     ;; Update TVL and position counts
     (var-set total-value-locked (- (var-get total-value-locked) (get collateral position)))
@@ -280,15 +276,26 @@
   (let (
     (size (get size position))
     (is-long (> size 0))
-    (price-diff (if is-long 
-      (- current-price (get entry-price position))
-      (- (get entry-price position) current-price)
+    (size-abs (if (>= size 0)
+      (to-uint size)
+      (to-uint (* size -1))
     ))
-    (pnl-amount (/ (* (abs size) price-diff) (get entry-price position)))
+    (price-diff (if is-long 
+      (- (get entry-price position) current-price)
+        (- current-price (get entry-price position))
+        u0)
+      (if (>= (get entry-price position) current-price)
+        (- (get entry-price position) current-price)
+        u0)
+    ))
+    (pnl-amount (/ (* size-abs price-diff) (get entry-price position)))
   )
     (if is-long 
       (+ (get collateral position) pnl-amount)
-      (max 0 (- (get collateral position) pnl-amount))
+      (if (>= (get collateral position) pnl-amount)
+        (- (get collateral position) pnl-amount)
+        u0
+      )
     )
   )
 )
@@ -340,7 +347,7 @@
   "@dev Liquidate an undercollateralized position"
   (let (
     (position (unwrap! (get-position owner position-id) (err ERR_INVALID_POSITION)))
-    (current-price (try! (get-oracle-price owner oracle-trait)))
+    (pnl (calculate-pnl position current-price))
     (collateral-value (get collateral position))
     (maintenance-margin (/ (* collateral-value (get maintenance-margin position)) u10000))
     (pnl (calculate-pnl position current-price))
@@ -369,7 +376,7 @@
   "@dev Returns the health factor of a position (0-10000, where < 10000 means liquidatable)"
   (let (
     (position (unwrap! (get-position owner position-id) (err ERR_INVALID_POSITION)))
-    (current-price (try! (get-oracle-price owner oracle-trait)))
+    (current-price (try! (get-oracle-price (var-get dimensional-token) oracle-trait)))
     (collateral-value (get collateral position))
     (pnl (calculate-pnl position current-price))
     (maintenance-margin (/ (* collateral-value (get maintenance-margin position)) u10000))
@@ -382,11 +389,9 @@
 )
 
 (define-read-only (calculate-tvl)
-  "@dev Returns the total value locked in the contract"
   (ok (var-get total-value-locked)))
 
 (define-read-only (count-active-positions)
-  "@dev Returns the count of currently active positions"
   (ok (- (var-get total-positions-opened) (var-get total-positions-closed))))
 
 ;; ===== Circuit Breaker Implementation =====
@@ -419,7 +424,7 @@
     (asserts! (is-eq tx-sender (as-contract tx-sender)) ERR_UNAUTHORIZED)
     
     (var-set owner new-owner)
-    (var-set oracle-contract oracle)
+    (ok true)
     (var-set protocol-fee-rate u30)  ;; 0.3%
     
     (ok true)

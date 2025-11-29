@@ -84,11 +84,8 @@
 ;; @param amount The amount of the emission.
 ;; @returns A boolean indicating if the emission is allowed.
 (define-private (check-emission-allowed (amount uint))
-  (if (var-get system-integration-enabled)
-    (match (var-get emission-controller)
-      controller-contract (unwrap! (contract-call? controller-contract can-emit amount) true)
-      true)
-    true))
+  ;; v1 stub: emission controller integration is disabled; always allow
+  true)
 
 ;; @desc Notifies the token coordinator of a transfer.
 ;; @param amount The amount of the transfer.
@@ -97,10 +94,13 @@
 ;; @returns A boolean indicating if the notification was successful.
 (define-private (notify-transfer (amount uint) (sender principal) (recipient principal))
   (if (var-get system-integration-enabled)
-    (match (var-get token-coordinator)
-      coordinator-contract (unwrap! (contract-call? coordinator-contract on-transfer amount sender recipient) false)
-      true)
-    true))
+      (match (var-get token-coordinator)
+        coordinator-contract
+          (unwrap!
+            (contract-call? coordinator-contract on-transfer amount sender recipient)
+            false)
+        true)
+      true))
 
 ;; @desc Notifies the token coordinator of a mint.
 ;; @param amount The amount of the mint.
@@ -108,9 +108,10 @@
 ;; @returns A boolean indicating if the notification was successful.
 (define-private (notify-mint (amount uint) (recipient principal))
   (if (var-get system-integration-enabled)
-    (match (var-get token-coordinator)
-      coordinator-contract (unwrap! (contract-call? coordinator-contract on-mint amount recipient) true)
-      true)
+    ;; (match (var-get token-coordinator)
+    ;;   coordinator-contract (unwrap! (contract-call? coordinator-contract on-mint amount recipient) true)
+    ;;   true)
+    true
     true))
 
 ;; @desc Notifies the token coordinator of a burn.

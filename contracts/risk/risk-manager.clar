@@ -72,5 +72,8 @@
 (define-private (check-role (role (string-ascii 32)))
   (begin
     (asserts! (is-ok (contract-call? .roles has-role role tx-sender))
-              ERR_UNAUTHORIZED)
-    (ok true)))
+      ERR_UNAUTHORIZED
+    )
+    (ok true)
+  )
+)
