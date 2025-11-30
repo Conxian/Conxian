@@ -1,3 +1,4 @@
+;;
 ;; MEV Protector Contract
 ;; Implements protection against front-running and sandwich attacks
 

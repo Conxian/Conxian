@@ -123,6 +123,10 @@
 ;; @desc Retrieves the time-weighted average price (TWAP) for an asset.
 ;; @param asset principal - The principal of the asset.
 ;; @returns (response uint uint) - (ok price) on success, (err ERR_STALE_PRICE) if price is stale, (err ERR_NO_ORACLES) if no oracles are registered.
+(define-read-only (get-oracle-price (token principal))
+  (map-get? oracle-prices token)
+)
+
 (define-read-only (get-twap (asset principal))
   (let ((twap-entry (map-get? asset-twap { asset: asset })))
     (asserts! (is-some twap-entry) ERR_NO_ORACLES)

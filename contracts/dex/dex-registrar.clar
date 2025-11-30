@@ -2,8 +2,6 @@
 ;; This contract is responsible for registering the DEX components
 ;; with the dimensional registry.
 
-(use-trait dim-registry-trait .traits.dim-registry-trait.dim-registry-trait)
-
 (define-constant ERR_UNAUTHORIZED (err u101))
 (define-constant DEX_ROUTER_WEIGHT u100)
 (define-constant DEX_FACTORY_WEIGHT u100)
@@ -18,7 +16,7 @@
   )
 )
 
-(define-public (register-dex-components (registry <dim-registry-trait>))
+(define-public (register-dex-components (registry principal))
   (begin
     (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
     (try! (contract-call? registry register-component .multi-hop-router-v3 DEX_ROUTER_WEIGHT))

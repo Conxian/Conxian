@@ -1,6 +1,3 @@
-(use-trait cxlp-migration-queue-trait .traits.cxlp-migration-queue-trait.cxlp-migration-queue-trait)
-(use-trait sip-010-ft-mintable-trait .requirements.sip-010-ft-mintable-trait.sip-010-ft-mintable-trait)
-
 ;; cxlp-migration-queue.clar
 ;; Intent queue system for CXLP to CXD migration with pro-rata settlement
 ;; Prevents FCFS races and enables fair distribution based on duration-weighted requests
@@ -226,7 +223,7 @@
       (err ERR_INVALID_EPOCH))))
 
 ;; Claim CXD allocation for settled epoch
-(define-public (claim-allocation (epoch uint) (cxd-token <sip-010-ft-mintable-trait>))
+(define-public (claim-allocation (epoch uint) (cxd-token principal))
   (begin
     (asserts! (var-get migration-enabled) (err ERR_MIGRATION_NOT_STARTED))
     (match (map-get? user-intents { epoch: epoch, user: tx-sender })
@@ -238,7 +235,7 @@
           epoch-data
           (begin
             (asserts! (get settled epoch-data) (err ERR_EPOCH_NOT_ACTIVE))
-            (asserts! (is-eq (contract-of cxd-token) (var-get cxd-contract)) (err ERR_CONTRACT_MISMATCH))
+            (asserts! (is-eq cxd-token (var-get cxd-contract)) (err ERR_CONTRACT_MISMATCH))
             
             ;; Calculate pro-rata allocation
             (let ((user-weight (get weight user-intent))

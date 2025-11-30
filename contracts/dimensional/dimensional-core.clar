@@ -237,7 +237,8 @@
 (define-public (close-position
     (position-id uint)
     (slippage-tolerance uint)
-    (token-trait <sip-010-ft-trait>)(oracle <oracle-trait>)
+    (token-trait <sip-010-ft-trait>)
+    (oracle <oracle-trait>)
   )
   (let (
     (position (unwrap! (get-position tx-sender position-id) (err ERR_INVALID_POSITION)))
