@@ -2,9 +2,9 @@
 ;; Enhanced factory contract for creating and managing differentiated position NFTs.
 
 ;; SIP-010: Fungible Token Standard
-(use-trait sip-010-ft-trait .sip-standards.sip-010-ft-trait)
+(use-trait sip-010-ft-trait .defi-traits.sip-010-ft-trait)
 ;; SIP-009: Non-Fungible Token Standard
-(use-trait sip-009-nft-trait .sip-standards.sip-009-nft-trait)
+(use-trait sip-009-nft-trait .defi-traits.sip-009-nft-trait)
 
 ;; ===== Constants =====
 ;; Error codes
@@ -666,6 +666,12 @@
 ;; @returns The next position ID that will be assigned.
 (define-read-only (get-next-position-id)
   (ok (var-get next-position-id))
+)
+
+(define-private (calculate-bounty-visual-tier (score uint) (difficulty uint))
+  (if (> (* score difficulty) u5000) "LEGENDARY"
+    (if (> (* score difficulty) u2000) "EPIC"
+      "COMMON"))
 )
 
 ;; @desc Checks if a position exists.

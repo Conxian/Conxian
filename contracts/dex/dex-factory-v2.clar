@@ -4,7 +4,7 @@
 ;; Temporarily remove trait until available
 ;; (impl-trait .pool-factory-v2.pool-factory-v2-trait)
 
-(use-trait pool-deployer-trait .defi-primitives.pool-deployer-trait)
+(use-trait pool-deployer-trait .defi-traits.pool-deployer-trait)
 
 (define-constant ERR_UNAUTHORIZED (err u1000))
 (define-constant ERR_TYPE_NOT_FOUND (err u1439))

@@ -7,8 +7,8 @@
 
 ;; --- Traits ---
 (use-trait protocol-monitor-trait .security-monitoring.protocol-monitor-trait)
-(use-trait sip-010-ft-trait .sip-standards.sip-010-ft-trait)
-(use-trait rbac-trait .core-protocol.rbac-trait)
+(use-trait sip-010-ft-trait .defi-traits.sip-010-ft-trait)
+(use-trait rbac-trait .core-traits.rbac-trait)
 
 ;; --- Constants ---
 

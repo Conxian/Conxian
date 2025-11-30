@@ -3,10 +3,10 @@
 ;; Consolidates ALL revenue flows: DEX fees, vault performance, lending interest, migration fees
 ;; Replaces separate revenue-distributor.clar with dimensional architecture
 
-(use-trait sip-010-ft-trait .sip-standards.sip-010-ft-trait)
-(use-trait pausable-trait .core-protocol.pausable-trait)
-(use-trait revenue-distributor-trait .core-protocol.revenue-distributor-trait)
-(use-trait token-coordinator-trait .core-protocol.token-coordinator-trait)
+(use-trait sip-010-ft-trait .defi-traits.sip-010-ft-trait)
+(use-trait pausable-trait .core-traits.pausable-trait)
+(use-trait revenue-distributor-trait .core-traits.revenue-distributor-trait)
+(use-trait token-coordinator-trait .core-traits.token-coordinator-trait)
 
 ;; --- Constants ---
 (define-constant PRECISION u100000000)
@@ -111,11 +111,21 @@
     (match (var-get protocol-monitor)
       monitor-contract
         (begin
-          (asserts! (is-eq (contract-of monitor-trait) monitor-contract) (err ERR_UNAUTHORIZED))
-          (let ((paused (unwrap! (contract-call? monitor-trait is-paused) (err ERR_SYSTEM_PAUSED))))
-            (asserts! (not paused) (err ERR_SYSTEM_PAUSED)))
-          (ok true))
-      (ok true))
+          (if (is-some (var-get protocol-monitor))
+            (match (var-get protocol-monitor)
+              monitor-trait
+                (let ((paused (unwrap! (contract-call? monitor-trait is-paused) (err ERR_SYSTEM_PAUSED))))
+                  (asserts! (not paused) (err ERR_SYSTEM_PAUSED))
+                  (ok true))
+              none
+                (ok true)
+            )
+            (ok true)
+          )
+        )
+      none
+        (ok true)
+    )
     
     ;; Calculate revenue splits
     (let ((token-holder-portion (/ (* total-yield (var-get dimensional-revenue-share)) u10000))

@@ -1,4 +1,5 @@
 ;; DeFi Primitives Traits
+(use-trait sip-010-ft-trait .defi-traits.sip-010-ft-trait)
 
 ;; ===========================================
 ;; POOL TRAIT (AMM Pool Interface)
@@ -59,4 +60,72 @@
     (principal principal)
     (response principal uint)
   )
+))
+
+;; ===========================================
+;; LENDING POOL TRAIT
+;; ===========================================
+(define-trait lending-pool-trait (
+  
+(supply
+  
+  (<sip-010-ft-trait> uint)
+  
+  (response bool uint)
+  
+)
+  
+(withdraw
+  
+  (<sip-010-ft-trait> uint)
+  
+  (response bool uint)
+  
+)
+  
+(borrow
+  
+  (<sip-010-ft-trait> uint)
+  
+  (response bool uint)
+  
+)
+  
+(repay
+  
+  (<sip-010-ft-trait> uint)
+  
+  (response bool uint)
+  
+)
+  
+(get-health-factor
+  
+  (principal)
+  
+  (response uint uint)
+  
+)
+  
+(liquidate
+  
+  (principal principal <sip-010-ft-trait> <sip-010-ft-trait> uint)
+  
+  (
+  
+    response
+  
+    {
+  
+    repaid: uint,
+  
+    seized: uint,
+  
+  }
+  
+    uint
+  
+  )
+  
+)
 ))

@@ -2,7 +2,7 @@
 ;; Provides enterprise-grade features for the Conxian DEX.
 
 ;; Traits - using modular decentralized system
-(use-trait rbac-trait .core-protocol.rbac-trait)
+(use-trait rbac-trait .core-traits.rbac-trait)
 (use-trait circuit-breaker-trait .security-monitoring.circuit-breaker-trait)
 (use-trait governance-trait .governance-traits.governance-token-trait)
 
@@ -14,6 +14,8 @@
 (define-constant ERR_ACCOUNT_NOT_VERIFIED (err u8004))
 ;; Note: enterprise-api-trait needs to be created or mapped
 ;; (use-trait enterprise-api-trait .base-traits.enterprise-api-trait)
+
+(define-data-var account-counter uint u0)
 
 (define-map enterprise-accounts { user: principal } {
   tier: uint,
@@ -133,7 +135,9 @@
         tier-id: tier-id
       })
       (var-set account-counter account-id)
-      (log-audit-event "create-institutional-account" account-id "Account created")
+      (log-audit-event "create-institutional-account" account-id
+        "Account created"
+      )
       (ok account-id))))
 
 ;; @desc Sets the KYC expiry for an institutional account.

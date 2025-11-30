@@ -1,7 +1,7 @@
 ;; Concentrated Liquidity Pool v2 - Minimal trait-compliant adapter for compilation
 
 (use-trait clp-pool-trait .clp-pool-trait)
-(use-trait sip-010-ft-trait .sip-standards.sip-010-ft-trait)
+(use-trait sip-010-ft-trait .defi-traits.sip-010-ft-trait)
 
 (define-constant ERR_UNAUTHORIZED (err u1101))
 (define-constant ERR_INVALID_TICK (err u1102))

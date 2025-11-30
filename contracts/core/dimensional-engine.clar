@@ -4,7 +4,7 @@
 (use-trait funding-rate-calculator-trait .dimensional-traits.funding-rate-calculator-trait)
 (use-trait collateral-manager-trait .dimensional-traits.collateral-manager-trait)
 (use-trait risk-manager-trait .risk-management.risk-manager-trait)
-(use-trait rbac-trait .core-protocol.rbac-trait)
+(use-trait rbac-trait .core-traits.rbac-trait)
 
 (define-data-var position-manager principal tx-sender)
 (define-data-var funding-rate-calculator principal tx-sender)

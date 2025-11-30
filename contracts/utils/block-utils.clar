@@ -128,3 +128,15 @@
     error
   )
 )
+;; ==================== FINALITY CHECKER ====================
+
+;; Check if the chain has at least 6 confirmations of history (Basic Finality Guard)
+(define-public (check-bitcoin-finality)
+  (let (
+    (finality-height (- burn-block-height BTC_FINALITY_BLOCKS))
+    (burn-header (get-burn-block-info? header-hash finality-height))
+  )
+    (asserts! (is-some burn-header) ERR_NOT_FINALIZED)
+    (ok true)
+  )
+)

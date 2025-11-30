@@ -1,7 +1,7 @@
 ;; Concentrated Liquidity Pool (CLP) - Minimal adapter implementation for trait compliance and compilation
 
-(use-trait rbac-trait .core-protocol.rbac-trait)
-(use-trait sip-010-ft-trait .sip-standards.sip-010-ft-trait)
+(use-trait rbac-trait .core-traits.rbac-trait)
+(use-trait sip-010-ft-trait .defi-traits.sip-010-ft-trait)
 
 ;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED (err u1100))
@@ -90,7 +90,8 @@
 (define-private (burn-position-nft (position-id uint) (owner principal))
   (begin
     (let ((actual-owner (unwrap! (nft-get-owner? position-nft position-id) u3006)))
-      (asserts! (is-eq actual-owner owner) u3006))
+      (asserts! (is-eq actual-owner owner) u3006)
+    )
     (map-delete positions { position-id: position-id })
     (nft-burn? position-nft position-id owner)
   )
@@ -161,6 +162,7 @@
 ;; @error u3011 If the tick range is invalid, a mathematical overflow occurs, or token transfers fail.
 (define-public (add-liquidity (lower-tick int) (upper-tick int) (amount0-desired uint) (amount1-desired uint) (token0-trait <sip-010-ft-trait>) (token1-trait <sip-010-ft-trait>))
   (begin
+    (try! (contract-call? .block-utils check-bitcoin-finality))
     (asserts! (and (> upper-tick lower-tick) (>= lower-tick MIN_TICK) (<= upper-tick MAX_TICK)) ERR_INVALID_TICK_RANGE)
     (asserts! (is-eq (contract-of token0-trait) (var-get token0))
       ERR_UNAUTHORIZED
@@ -213,7 +215,8 @@
         )
       )
     )
-  )
+    )
+)
 )
 
 (define-private (update-tick-liquidity (tick int) (liquidity-delta uint) (is-add bool))
@@ -250,7 +253,9 @@
 ;; @returns (response { amount0-returned: uint, amount1-returned: uint, liquidity-removed: uint } (err u3012)) The amounts of token0 and token1 returned, and the liquidity removed, or an error.
 ;; @error u3012 If the position is not found, the caller is not authorized, or token transfers fail.
 (define-public (remove-liquidity (position-id uint) (token0-trait <sip-010-ft-trait>) (token1-trait <sip-010-ft-trait>))
-  (let ((position (unwrap! (map-get? positions { position-id: position-id }) ERR_POSITION_NOT_FOUND))
+  (begin
+    (try! (contract-call? .block-utils check-bitcoin-finality))
+    (let ((position (unwrap! (map-get? positions { position-id: position-id }) ERR_POSITION_NOT_FOUND))
         (owner (unwrap! (nft-get-owner? position-nft position-id) ERR_UNAUTHORIZED)))
     (asserts! (is-eq tx-sender owner) ERR_UNAUTHORIZED)
     (asserts! (is-eq (contract-of token0-trait) (var-get token0))
@@ -289,7 +294,8 @@
           liquidity-removed: liquidity
         })
         (ok { amount0-returned: amount0-returned, amount1-returned: amount1-returned, liquidity-removed: liquidity })
-      )
+        )
+)
     )
   )
 )
@@ -300,17 +306,23 @@
 ;; @returns (response uint (err u3013)) The amount of token1 received, or an error.
 ;; @error u3013 If amount-in is zero, there is insufficient liquidity, the price limit is exceeded, or a mathematical overflow occurs.
 (define-public (swap-x-for-y (amount-in uint) (min-amount-out uint) (token0-trait <sip-010-ft-trait>) (token1-trait <sip-010-ft-trait>))
-  (let ((sqrt-price-limit (unwrap! (get-sqrt-price-from-tick MIN_TICK) ERR_INVALID_TICK)))
-    (swap amount-in min-amount-out sqrt-price-limit true token0-trait
-      token1-trait
+  (begin
+    (try! (contract-call? .block-utils check-bitcoin-finality))
+    (let ((sqrt-price-limit (unwrap! (get-sqrt-price-from-tick MIN_TICK) ERR_INVALID_TICK)))
+      (swap amount-in min-amount-out sqrt-price-limit true token0-trait
+        token1-trait
+      )
     )
   )
 )
 
 (define-public (swap-y-for-x (amount-in uint) (min-amount-out uint) (token0-trait <sip-010-ft-trait>) (token1-trait <sip-010-ft-trait>))
-  (let ((sqrt-price-limit (unwrap! (get-sqrt-price-from-tick MAX_TICK) ERR_INVALID_TICK)))
-    (swap amount-in min-amount-out sqrt-price-limit false token0-trait
-      token1-trait
+  (begin
+    (try! (contract-call? .block-utils check-bitcoin-finality))
+    (let ((sqrt-price-limit (unwrap! (get-sqrt-price-from-tick MAX_TICK) ERR_INVALID_TICK)))
+      (swap amount-in min-amount-out sqrt-price-limit false token0-trait
+        token1-trait
+      )
     )
   )
 )
@@ -455,7 +467,9 @@
 ;; @returns (response { amount0: uint, amount1: uint } (err u3015)) The collected amounts of token0 and token1 or an error.
 ;; @error u3015 If the position ID does not exist or the transaction sender is not the NFT owner.
 (define-public (collect-fees (position-id uint))
-  (let (
+  (begin
+    (try! (contract-call? .block-utils check-bitcoin-finality))
+    (let (
     (position (unwrap! (map-get? positions { position-id: position-id })
       ERR_POSITION_NOT_FOUND
     ))

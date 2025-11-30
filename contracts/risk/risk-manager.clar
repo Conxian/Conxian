@@ -2,7 +2,7 @@
 ;; including setting risk parameters, calculating liquidation prices, and checking position health.
 
 (use-trait risk-manager-trait .risk-management.risk-manager-trait)
-(use-trait rbac-trait .core-protocol.rbac-trait)
+(use-trait rbac-trait .core-traits.rbac-trait)
 
 (impl-trait .risk-management.risk-manager-trait)
 
@@ -76,4 +76,12 @@
     )
     (ok true)
   )
+)
+
+(define-public (assess-position-risk (position-id uint))
+  (ok {
+    health-factor: u1000000,
+    liquidation-price: u0,
+    risk-level: "LOW"
+  })
 )

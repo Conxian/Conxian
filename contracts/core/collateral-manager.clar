@@ -1,8 +1,8 @@
 ;; @desc This contract manages the internal ledger of user balances and handles all deposits and withdrawals.
 
 (use-trait collateral-manager-trait .dimensional-traits.collateral-manager-trait)
-(use-trait sip-010-ft-trait .sip-standards.sip-010-ft-trait)
-(use-trait rbac-trait .core-protocol.rbac-trait)
+(use-trait sip-010-ft-trait .defi-traits.sip-010-ft-trait)
+(use-trait rbac-trait .core-traits.rbac-trait)
 
 (impl-trait .dimensional-traits.collateral-manager-trait)
 

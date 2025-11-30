@@ -1,5 +1,6 @@
 ;; Dimensional Traits - Multi-Dimensional Position Management
 
+
 ;; ===========================================
 ;; DIMENSIONAL TRAIT (Core Multi-Dimensional Interface)
 ;; ===========================================
@@ -81,3 +82,12 @@
     } uint))
   )
 )
+
+;; DIMENSIONAL ENGINE TRAIT
+;; ===========================================
+(define-trait dimensional-engine-trait (
+  (update-position
+    (uint (optional uint) (optional uint) (optional uint) (optional uint) <position-manager-trait>)
+    (response bool uint)
+  )
+))

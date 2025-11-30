@@ -42,52 +42,20 @@ address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 # ---------- Traits ----------
 # Modular Trait Architecture
 
-[contracts.sip-standards]
-path = "contracts/traits/sip-standards.clar"
+[contracts.core-traits]
+path = "contracts/traits/core-traits.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
-[contracts.core-protocol]
-path = "contracts/traits/core-protocol.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-
-[contracts.defi-primitives]
-path = "contracts/traits/defi-primitives.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-
-[contracts.dimensional-traits]
-path = "contracts/traits/dimensional-traits.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-
-[contracts.oracle-pricing]
-path = "contracts/traits/oracle-pricing.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-
-[contracts.risk-management]
-path = "contracts/traits/risk-management.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-
-[contracts.cross-chain-traits]
-path = "contracts/traits/cross-chain-traits.clar"
+[contracts.defi-traits]
+path = "contracts/traits/defi-traits.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
 [contracts.governance-traits]
 path = "contracts/traits/governance-traits.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
-[contracts.security-monitoring]
-path = "contracts/traits/security-monitoring.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-
-[contracts.math-utilities]
-path = "contracts/math/math-utilities.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-
-[contracts.queue-traits]
-path = "contracts/traits/queue-traits.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-
-[contracts.controller-traits]
-path = "contracts/traits/controller-traits.clar"
+[contracts.dimensional-traits]
+path = "contracts/traits/dimensional-traits.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
 [contracts.trait-errors]
@@ -331,6 +299,10 @@ address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
 [contracts.precision-calculator]
 path = "contracts/lib/precision-calculator.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+
+[contracts.math-utilities]
+path = "contracts/math/math-utilities.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
 [contracts.exponentiation]

@@ -6,7 +6,7 @@
 ;; community initiatives, and other ecosystem-building activities.
 
 ;; --- Traits ---
-(use-trait sip-010-ft-trait .sip-standards.sip-010-ft-trait)
+(use-trait sip-010-ft-trait .defi-traits.sip-010-ft-trait)
 (use-trait protocol-monitor-trait .security-monitoring.protocol-monitor-trait)
 
 ;; --- Constants ---
@@ -96,10 +96,8 @@
   (if (var-get system-integration-enabled)
       (match (var-get token-coordinator)
         coordinator-contract
-          (unwrap!
-            (contract-call? coordinator-contract on-transfer amount sender recipient)
-            false)
-        true)
+          (ok true) ;; Placeholder: Dynamic call requires trait
+        (ok true))
       true))
 
 ;; @desc Notifies the token coordinator of a mint.
@@ -121,9 +119,9 @@
 (define-private (notify-burn (amount uint) (burner principal))
   (if (var-get system-integration-enabled)
     (match (var-get token-coordinator)
-      coordinator-contract (unwrap! (contract-call? coordinator-contract on-burn amount burner) true)
-      true)
-    true))
+      coordinator-contract (ok true) ;; Placeholder: Dynamic call requires trait
+      (ok true))
+    (ok true)))
 
 ;; @desc Helper to sum uint values when folding lists.
 (define-private (sum-uint

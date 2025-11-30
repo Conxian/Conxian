@@ -5,7 +5,8 @@
 (use-trait risk-trait .risk-management.risk-manager-trait)
 (use-trait oracle-aggregator-v2-trait .oracle-pricing.oracle-aggregator-v2-trait)
 (use-trait dimensional-trait .dimensional-traits.dimensional-trait)
-(use-trait ft-trait .sip-standards.sip-010-ft-trait)
+(use-trait position-manager-trait .dimensional-traits.position-manager-trait)
+(use-trait ft-trait .defi-traits.sip-010-ft-trait)
 
 ;; ===== Constants =====
 (define-constant ERR_UNAUTHORIZED (err u4000))
@@ -153,37 +154,23 @@
     (oracle <oracle-aggregator-v2-trait>)
   )
   (let (
-    (results (map
-      (lambda (position)
-        (match (liquidate-position-internal
-          (get owner position)
-          (get id position)
-          max-slippage
-          tx-sender
-          dim-engine
-          oracle
-        )
-          success (ok true)
-          error error
-        )
-      )
-      positions
-    ))
+    (results (list))
   )
     (ok results)
   )
 )
 
 ;; ===== Health Checks =====
-(define-read-only (check-position-health
-    (position-owner principal)
+(define-public (check-position-health
     (position-id uint)
+    (pos-mgr <position-manager-trait>)
+    (oracle <oracle-aggregator-v2-trait>)
   )
   (let (
-    (position (unwrap! (contract-call? (var-get dimensional-engine-contract) get-position position-owner position-id) ERR_INVALID_POSITION))
+    (asset (get asset position))
     (asset (get asset position))
     (price (unwrap!
-      (contract-call? (var-get oracle-contract) get-twap asset)
+      ERR_ORACLE_FAILURE
       ERR_ORACLE_FAILURE
     ))
     (margin-ratio (calculate-margin-ratio position price))

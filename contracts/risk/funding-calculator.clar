@@ -115,10 +115,12 @@
 (define-public (apply-funding-to-position
     (position-owner principal)
     (position-id uint)
+    (dim-engine <dimensional-engine-trait>)
+    (pos-mgr <position-manager-trait>)
   )
   (let (
     (position (unwrap!
-      (contract-call? .dimensional-core get-position position-owner position-id)
+      (err u5005)
       (err u5005)
     ))
     (current-time block-height)
@@ -130,8 +132,8 @@
     (asserts! (is-eq position-type PERPETUAL) (err u5007))
 
     ;; Calculate funding payment
-    (let* (
-      (size (abs (get position size)))
+    (let (
+      (size (abs-int (get position size)))
       (funding-rate (get last-update cumulative-funding))
       (funding-payment (/ (* size funding-rate) u10000))  ;; Funding rate is in basis points
 
@@ -139,10 +141,13 @@
       (new-collateral (- (get position collateral) funding-payment))
     )
       ;; Update position collateral
-      (try! (contract-call? (var-get dimensional-engine-contract) update-position
-        position-owner
         position-id
-        {collateral: (some new-collateral)}
+        position-id
+        (some new-collateral)
+none
+none
+none
+pos-mgr
       ))
 
       (ok {

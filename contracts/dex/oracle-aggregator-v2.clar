@@ -38,9 +38,9 @@
 ;; Stores the time-weighted average price (TWAP) for each asset and its last update block height.
 (define-map asset-twap { asset: principal } { price: uint, last-updated: uint, total-supply: uint })
 
-;; @map price-observations { asset: principal, block: uint } { price: uint, total-supply: uint }
+;; @map price-observations { asset: principal, block: uint } { price: uint, total-supply: uint, tenure-height: uint }
 ;; Stores historical price observations for TWAP calculation.
-(define-map price-observations { asset: principal, block: uint } { price: uint, total-supply: uint })
+(define-map price-observations { asset: principal, block: uint } { price: uint, total-supply: uint, tenure-height: uint })
 
 ;; --- Public Functions ---
 
@@ -102,10 +102,9 @@
     (check-circuit-breaker)
     
     ;; Store the current observation with tenure awareness
-    ;; Note: In Stacks 2.5, we use get-tenure-info? to get the current tenure ID.
-;; For now, we will use block-height as a proxy if get-tenure-info? is not fully supported in this mock environment,
-;; but we structure it for tenure awareness.
-    (map-set price-observations { asset: asset, block: block-height } { price: price, total-supply: total-supply })
+    (let ((current-tenure (contract-call? .block-utils get-current-tenure-height)))
+      (map-set price-observations { asset: asset, block: block-height } { price: price, total-supply: total-supply, tenure-height: current-tenure })
+    )
 
     ;; Calculate and update TWAP
     (let ((twap-result (calculate-twap asset TWAP-LOOK-BACK-WINDOW)))

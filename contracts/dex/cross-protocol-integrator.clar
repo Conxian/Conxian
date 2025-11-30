@@ -2,9 +2,9 @@
 
 ;; This contract facilitates cross-protocol integration for maximum yield opportunities.
 
-(use-trait sip-010-ft-trait .sip-standards.sip-010-ft-trait)
+(use-trait sip-010-ft-trait .defi-traits.sip-010-ft-trait)
 (use-trait circuit-breaker-trait .security-monitoring.circuit-breaker-trait)
-(use-trait rbac-trait .core-protocol.rbac-trait)
+(use-trait rbac-trait .core-traits.rbac-trait)
 
 ;; Error constants
 (define-constant ERR_UNAUTHORIZED (err u1000))
@@ -46,7 +46,7 @@
 ;; @returns An `ok` response with the new strategy ID or an error.
 (define-public (register-strategy (strategy-principal principal) (token principal) (protocol-id uint))
   (begin
-    (asserts! (is-ok (contract-call? .core-protocol.rbac-trait-contract has-role "contract-owner")) ERR_UNAUTHORIZED)
+    (asserts! (is-ok (contract-call? .core-traits.rbac-trait-contract has-role "contract-owner")) ERR_UNAUTHORIZED)
     (let ((new-strategy-id (+ (var-get strategy-counter) u1)))
       (map-set strategies new-strategy-id {
           strategy-principal: strategy-principal,
@@ -123,7 +123,7 @@
 ;; @returns An `ok` response or an error.
 (define-public (set-yield-optimizer-contract (optimizer principal))
   (begin
-    (asserts! (is-ok (contract-call? .core-protocol.rbac-trait-contract has-role "contract-owner")) ERR_UNAUTHORIZED)
+    (asserts! (is-ok (contract-call? .core-traits.rbac-trait-contract has-role "contract-owner")) ERR_UNAUTHORIZED)
     (var-set yield-optimizer optimizer)
     (ok true)
   )
@@ -134,7 +134,7 @@
 ;; @returns An `ok` response or an error.
 (define-public (set-circuit-breaker (cb principal))
   (begin
-    (asserts! (is-ok (contract-call? .core-protocol.rbac-trait-contract has-role "contract-owner")) ERR_UNAUTHORIZED)
+    (asserts! (is-ok (contract-call? .core-traits.rbac-trait-contract has-role "contract-owner")) ERR_UNAUTHORIZED)
     (var-set circuit-breaker-contract (some cb))
     (ok true)
   )
@@ -145,7 +145,7 @@
 ;; @returns An `ok` response or an error.
 (define-public (transfer-ownership (new-owner principal))
   (begin
-    (asserts! (is-ok (contract-call? .core-protocol.rbac-trait-contract has-role "contract-owner")) ERR_UNAUTHORIZED)
+    (asserts! (is-ok (contract-call? .core-traits.rbac-trait-contract has-role "contract-owner")) ERR_UNAUTHORIZED)
     (var-set contract-owner new-owner)
     (ok true)
   )

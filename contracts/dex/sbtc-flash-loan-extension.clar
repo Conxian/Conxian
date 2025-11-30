@@ -1,5 +1,5 @@
 (use-trait flash-loan-receiver-trait .flash-loan-receiver-trait)
-(use-trait sip-010-ft-trait .sip-010-trait-ft-standard.sip-010-trait)
+(use-trait sip-010-ft-trait .sip-010-trait.sip-010-trait)
 
 ;; sbtc-flash-loan-extension.clar
 ;; sBTC Flash Loan Extension - Advanced flash loan functionality with sBTC support

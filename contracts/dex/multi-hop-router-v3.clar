@@ -4,7 +4,7 @@
 ;; Temporarily remove traits until available
 ;; (use-trait dijkstra-pathfinder-trait .dijkstra-pathfinder-trait.dijkstra-pathfinder-trait)
 ;; (use-trait route-manager-trait .route-manager-trait.route-manager-trait)
-;; (use-trait rbac-trait .core-protocol.rbac-trait)
+;; (use-trait rbac-trait .core-traits.rbac-trait)
 
 
 ;; @data-vars

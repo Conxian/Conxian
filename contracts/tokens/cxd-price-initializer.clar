@@ -114,7 +114,7 @@
     )
         (asserts! (var-get is-initialized) ERR_NOT_INITIALIZED)
         (asserts!
-            (is-ok (contract-call? .governance-token-trait get-voting-power caller))
+            (is-ok (contract-call? .governance-token get-voting-power caller))
             ERR_UNAUTHORIZED
         )
 (asserts! (>= block-height timelock) ERR_INVALID_TIMELOCK)
@@ -146,7 +146,10 @@
         (timelock (unwrap-panic (var-get timelock-end-block)))
     )
         (asserts! (var-get is-initialized) ERR_NOT_INITIALIZED)
-        (asserts! (is-ok (contract-call? .governance-token-trait get-voting-power caller)) ERR_UNAUTHORIZED)
+        (asserts!
+            (is-ok (contract-call? .governance-token get-voting-power caller))
+            ERR_UNAUTHORIZED
+        )
         (asserts! (>= block-height timelock) ERR_INVALID_TIMELOCK)
         (asserts! (<= new-min-price current-price) ERR_INVALID_PRICE)
         

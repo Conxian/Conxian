@@ -5,7 +5,7 @@
 
 (use-trait base-contract .base-contract.base-contract-trait)
 (use-trait oracle .oracle-pricing.oracle-aggregator-v2-trait)
-(use-trait token .sip-standards.sip-010-ft-trait)
+(use-trait token .defi-traits.sip-010-ft-trait)
 (use-trait risk .risk-trait.risk-trait)
 
 (define-trait dimensional-engine-trait

@@ -4,7 +4,7 @@
 ;; Factory for creating new liquidity pools
 
 ;; Use decentralized traits
-(use-trait rbac-trait .core-protocol.rbac-trait)
+(use-trait rbac-trait .core-traits.rbac-trait)
 
 ;; ===========================================
 ;; DATA STRUCTURES

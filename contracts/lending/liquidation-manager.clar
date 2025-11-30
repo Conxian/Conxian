@@ -2,7 +2,7 @@
 (use-trait liquidation-trait .risk-management.liquidation-trait)
 (impl-trait .risk-management.liquidation-trait)
 ;; Lending system trait for underwater checks
-(use-trait lending-system-trait .defi-primitives.pool-trait)
+(use-trait lending-system-trait .defi-traits.lending-pool-trait)
 
 ;; Constants
 (define-constant CONTRACT_OWNER tx-sender)
@@ -102,10 +102,8 @@
     ;; ERR_ASSET_NOT_WHITELISTED
 
     ;; Delegate to lending system to check if position is underwater
-    (match (contract-call? lending-system-ref
-      is-position-underwater borrower debt-asset collateral-asset
-    )
-      result (ok result)
+    (match (contract-call? lending-system-ref get-health-factor borrower)
+      health-factor (ok (< health-factor u1000000000000000000))
       error error
     )
   )

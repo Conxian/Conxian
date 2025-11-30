@@ -2,10 +2,10 @@
 ;; Cross-chain bridge NFT system for representing assets and positions across multiple blockchains
 ;; Supports bridged position NFTs, multi-chain asset NFTs, and bridge transaction receipts
 
-(use-trait sip-009-nft-trait .sip-standards.sip-009-nft-trait)
-(use-trait sip-010-ft-trait .sip-standards.sip-010-ft-trait)
+(use-trait sip-009-nft-trait .defi-traits.sip-009-nft-trait)
+(use-trait sip-010-ft-trait .defi-traits.sip-010-ft-trait)
 
-(impl-trait .sip-standards.sip-009-nft-trait)
+(impl-trait .defi-traits.sip-009-nft-trait)
 
 ;; ===== Constants =====
 (define-constant ERR_UNAUTHORIZED (err u10000))

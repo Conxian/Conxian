@@ -2,9 +2,9 @@
 
 ;; auto-compounder.clar
 
-(use-trait sip-010-ft-trait .sip-standards.sip-010-ft-trait)
+(use-trait sip-010-ft-trait .defi-traits.sip-010-ft-trait)
 (use-trait metrics-trait .math-utilities.finance-metrics-trait)
-(use-trait rbac-trait .core-protocol.rbac-trait)
+(use-trait rbac-trait .core-traits.rbac-trait)
 (use-trait circuit-breaker-trait .security-monitoring.circuit-breaker-trait)
 ;; This contract automatically compounds rewards for users.
 (define-constant ERR_UNAUTHORIZED (err u8000))
@@ -111,14 +111,14 @@
   (map-get? user-positions (tuple (user user) (token token))))
 (define-public (set-yield-optimizer-contract (optimizer principal))
   (begin
-    (asserts! (is-ok (contract-call? .core-protocol.rbac-trait-contract has-role "contract-owner")) (err ERR_UNAUTHORIZED))
+    (asserts! (is-ok (contract-call? .core-traits.rbac-trait-contract has-role "contract-owner")) (err ERR_UNAUTHORIZED))
     (var-set yield-optimizer optimizer)
     (ok true)
   )
 )
 (define-public (set-metrics-contract (metrics (contract-of metrics-trait)))
   (begin
-    (asserts! (is-ok (contract-call? .core-protocol.rbac-trait-contract has-role "contract-owner")) (err ERR_UNAUTHORIZED))
+    (asserts! (is-ok (contract-call? .core-traits.rbac-trait-contract has-role "contract-owner")) (err ERR_UNAUTHORIZED))
     (var-set metrics-contract metrics)
     (ok true)
   )

@@ -8,7 +8,7 @@
 ;; - User status aggregation
 ;; - Revenue distribution triggers
 
-(use-trait rbac-trait .core-protocol.rbac-trait)
+(use-trait rbac-trait .core-traits.rbac-trait)
 
 ;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED u1001)

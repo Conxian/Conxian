@@ -3,7 +3,7 @@
 
 ;; --- Trait Imports ---
 (use-trait dao-trait .governance-traits.dao-trait)
-(use-trait upgrade-controller-trait .core-protocol.upgradeable-trait)
+(use-trait upgrade-controller-trait .core-traits.upgradeable-trait)
 (use-trait governance-token-trait .governance-traits.governance-token-trait)
 
 ;; --- Constants ---

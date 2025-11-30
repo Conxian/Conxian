@@ -10,7 +10,7 @@
 ;; - Integration with regulatory systems
 
 ;; Use centralized traits
-(use-trait rbac-trait .core-protocol.rbac-trait)
+(use-trait rbac-trait .core-traits.rbac-trait)
 (use-trait oracle-trait .oracle-pricing.oracle-trait)
 (use-trait compliance-trait .compliance-trait.compliance-trait)
 
@@ -132,8 +132,8 @@
 ;; Check if caller has permission to manage circuit breakers
 (define-private (can-manage-circuit (caller principal))
   (or
-    (contract-call? .core-protocol.rbac-trait is-owner caller)
-    (contract-call? .core-protocol.rbac-trait has-role caller "circuit-admin")
+    (contract-call? .core-traits.rbac-trait is-owner caller)
+    (contract-call? .core-traits.rbac-trait has-role caller "circuit-admin")
   )
 )
 
@@ -367,7 +367,7 @@
       ;; If governance approval is required, check if it's been granted
       (if (and 
             (get requires-governance-approval circuit)
-            (not (contract-call? .core-protocol.rbac-trait has-role tx-sender "governance")))
+            (not (contract-call? .core-traits.rbac-trait has-role tx-sender "governance")))
         (err ERR_UNAUTHORIZED)
         (begin
           ;; Update circuit state

@@ -3,6 +3,7 @@
 ;; Integrates with AccessControl for role-based access
 
 ;; --- Traits ---
+(use-trait token .defi-traits.sip-010-ft-trait)
 (define-constant TRAIT_REGISTRY .central-traits-registry)
 (define-constant ERR_UNAUTHORIZED (err u8001))
 (define-constant ERR_PROPOSAL_NOT_FOUND (err u8002))
@@ -348,10 +349,21 @@
 
 ;; @desc Executes a treasury spending proposal.
 ;; @param proposal-id The ID of the treasury spending proposal.
+;; @return response bool uint A response tup
 ;; @return response bool uint A response tuple indicating success or failure.
-(define-private (execute-treasury-proposal (proposal-id uint))
+(define-public (execute-treasury-spend (proposal-id uint) (token <token>))
   (let ((treasury-info (unwrap! (map-get? treasury-proposals proposal-id) ERR_INVALID_PARAMETERS))
         (recipient (get recipient treasury-info))
         (amount (get amount treasury-info))
-        (token (get token treasury-info)))
-    (contract-call? token transfer recipient amount)))
+        (token-principal (get token treasury-info)))
+    (asserts! (is-eq (contract-of token) token-principal) ERR_INVALID_PARAMETERS)
+    ;; Also need to check proposal state/time like execute-proposal
+    (let ((proposal (unwrap! (map-get? proposals proposal-id) ERR_PROPOSAL_NOT_FOUND)))
+      (asserts! (is-eq (get state proposal) PROPOSAL_QUEUED) ERR_PROPOSAL_NOT_ACTIVE)
+      (asserts! (>= block-height (unwrap! (get queue-block proposal) ERR_PROPOSAL_NOT_ACTIVE)) ERR_PROPOSAL_NOT_ACTIVE)
+      
+      (try! (contract-call? token transfer recipient amount))
+      
+      (map-set proposals proposal-id
+        (merge proposal { state: PROPOSAL_EXECUTED, execution-block: (some block-height) }))
+      (ok true))))

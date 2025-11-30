@@ -2,8 +2,8 @@
 ;; Refactored for clarity, security, and correctness.
 
 ;; --- Traits ---
-(use-trait sip-010-ft-trait .sip-standards.sip-010-ft-trait)
-(use-trait lending-system-trait .defi-primitives.pool-trait)
+(use-trait sip-010-ft-trait .defi-traits.sip-010-ft-trait)
+(use-trait lending-system-trait .defi-traits.pool-trait)
 (use-trait rbac-trait .decentralized-trait-registry.decentralized-trait-registry)
 (use-trait err-trait  .error-codes-trait.error-codes-trait)
 
@@ -119,7 +119,7 @@
 (define-public (set-liquidation-manager (lm principal))
   (begin
     (asserts!
-      (contract-call? (var-get access-control-contract)
+      (contract-call? .roles
         has-role "contract-owner" tx-sender
       )
       ERR_UNAUTHORIZED
@@ -135,7 +135,7 @@
 (define-public (set-access-control (ac principal))
   (begin
     (asserts!
-      (contract-call? (var-get access-control-contract)
+      (contract-call? .roles
         has-role "contract-owner" tx-sender
       )
       ERR_UNAUTHORIZED
@@ -151,7 +151,7 @@
 (define-public (set-circuit-breaker (cb principal))
   (begin
     (asserts!
-      (contract-call? (var-get access-control-contract)
+      (contract-call? .roles
         has-role "contract-owner" tx-sender
       )
       ERR_UNAUTHORIZED
@@ -167,7 +167,7 @@
 (define-public (set-proof-of-reserves (por principal))
   (begin
     (asserts!
-      (contract-call? (var-get access-control-contract)
+      (contract-call? .roles
         has-role "contract-owner" tx-sender
       )
       ERR_UNAUTHORIZED
@@ -183,7 +183,7 @@
 (define-public (set-enforce-por-borrow (flag bool))
   (begin
     (asserts!
-      (contract-call? (var-get access-control-contract)
+      (contract-call? .roles
         has-role "contract-owner" tx-sender
       )
       ERR_UNAUTHORIZED
@@ -199,7 +199,7 @@
 (define-public (set-monitoring (mc principal))
   (begin
     (asserts!
-      (contract-call? (var-get access-control-contract)
+      (contract-call? .roles
         has-role "contract-owner" tx-sender
       )
       ERR_UNAUTHORIZED
@@ -217,7 +217,7 @@
 (define-public (set-risk-params (buffer-bps uint) (min-hf uint) (alert-thr-bps uint))
   (begin
     (asserts!
-      (contract-call? (var-get access-control-contract)
+      (contract-call? .roles
         has-role "contract-owner" tx-sender
       )
       ERR_UNAUTHORIZED
@@ -247,7 +247,9 @@
 ;; @returns A response tuple with `(ok true)` if successful, `(err ERR_UNAUTHORIZED)` or `(err ERR_INVALID_TUPLE)` or `(err ERR_INSUFFICIENT_LIQUIDITY)` otherwise.
 (define-public (add-supported-asset (asset principal) (collateral-factor uint) (liquidation-threshold uint) (liquidation-bonus uint))
   (begin
-    (asserts! (contract-call? (var-get access-control-contract) has-role "contract-owner" tx-sender) ERR_UNAUTHORIZED)
+    (asserts! (contract-call? .roles has-role "contract-owner" tx-sender)
+      ERR_UNAUTHORIZED
+    )
     (asserts! (<= collateral-factor BPS) ERR_INVALID_TUPLE)
     (asserts! (and (>= liquidation-threshold u5000) (<= liquidation-threshold BPS)) ERR_INVALID_TUPLE)
     (asserts! (<= liquidation-bonus u2000) ERR_INVALID_TUPLE)
@@ -266,7 +268,9 @@
 ;; @returns A response tuple with `(ok true)` if successful, `(err ERR_UNAUTHORIZED)` otherwise.
 (define-public (remove-supported-asset (asset principal))
   (begin
-    (asserts! (contract-call? (var-get access-control-contract) has-role "contract-owner" tx-sender) ERR_UNAUTHORIZED)
+    (asserts! (contract-call? .roles has-role "contract-owner" tx-sender)
+      ERR_UNAUTHORIZED
+    )
     (map-delete supported-assets { asset: asset })
     (var-set supported-asset-list (filter-assets (var-get supported-asset-list) asset))
     (ok true)
@@ -321,9 +325,9 @@
 ;; @notice Calculates the total collateral value in USD for a given user, safely handling errors.
 ;; @param user The principal of the user.
 ;; @returns The total collateral value in USD as a uint.
-(define-read-only (get-total-collateral-value-in-usd-safe (user principal))
+(define-public (get-total-collateral-value-in-usd-safe (user principal))
   (let ((assets (var-get supported-asset-list)))
-    (fold
+    (ok (fold
       (lambda (asset acc)
         (if (default-to false (map-get? user-collateral-assets { user: user, asset: asset }))
           (match (map-get? supported-assets { asset: asset })
@@ -336,7 +340,7 @@
           acc)
       )
       assets
-      u0)
+      u0))
   )
 )
 
@@ -355,16 +359,16 @@
 ;; @notice Calculates the total borrow value in USD for a given user, safely handling errors.
 ;; @param user The principal of the user.
 ;; @returns The total borrow value in USD as a uint.
-(define-read-only (get-total-borrow-value-in-usd-safe (user principal))
+(define-public (get-total-borrow-value-in-usd-safe (user principal))
   (let ((assets (var-get supported-asset-list)))
-    (fold
+    (ok (fold
       (lambda (asset acc)
         (let ((balance (default-to u0 (get balance (map-get? user-borrow-balances { user: user, asset: asset }))))
               (price (get-asset-price-safe asset)))
           (+ acc (/ (* balance price) PRECISION)))
       )
       assets
-      u0)
+      u0))
   )
 )
 
@@ -379,11 +383,11 @@
 ;; @notice Calculates the health factor for a given user.
 ;; @param user The principal of the user.
 ;; @returns A response tuple with `(ok uint)` representing the health factor, or an error.
-(define-read-only (get-health-factor (user principal))
+(define-public (get-health-factor (user principal))
   (let ((collateral-data (calculate-weighted-collateral user))
         (collateral-value (get total-collateral-value collateral-data))
         (weighted-threshold (get-weighted-liquidation-threshold collateral-data))
-        (borrow-value (get-total-borrow-value-in-usd-safe user)))
+        (borrow-value (unwrap! (get-total-borrow-value-in-usd-safe user) (ok u0))))
     (if (> borrow-value u0)
       (ok (/ (* collateral-value weighted-threshold) borrow-value))
       (ok u18446744073709551615))))
@@ -592,11 +596,11 @@
     (asserts! (> amount u0) ERR_ZERO_AMOUNT)
     (let ((asset-principal (contract-of asset)))
       (try! (accrue-interest asset-principal))
-      (let ((current-borrow-value (get-total-borrow-value-in-usd-safe tx-sender))
+      (let ((current-borrow-value (unwrap! (get-total-borrow-value-in-usd-safe tx-sender) (err ERR_HEALTH_CHECK_FAILED)))
             (price (get-asset-price-safe asset-principal))
             (additional-borrow-value (/ (* amount price) PRECISION))
             (new-borrow-value (+ current-borrow-value additional-borrow-value))
-            (collateral-value (get-total-collateral-value-in-usd-safe tx-sender)))
+            (collateral-value (unwrap! (get-total-collateral-value-in-usd-safe tx-sender) (err ERR_HEALTH_CHECK_FAILED))))
         (let ((buffer (var-get borrow-safety-buffer-bps))
               (max-allowed (/ (* collateral-value (- BPS buffer)) BPS)))
           (asserts! (>= max-allowed new-borrow-value) ERR_INSUFFICIENT_COLLATERAL))
@@ -693,7 +697,7 @@
 (define-public (pause)
   (begin
     (asserts!
-      (contract-call? (var-get access-control-contract)
+      (contract-call? .roles
         has-role "contract-owner" tx-sender
       )
       ERR_UNAUTHORIZED
@@ -708,7 +712,7 @@
 (define-public (resume)
   (begin
     (asserts!
-      (contract-call? (var-get access-control-contract)
+      (contract-call? .roles
         has-role "contract-owner" tx-sender
       )
       ERR_UNAUTHORIZED

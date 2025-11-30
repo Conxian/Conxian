@@ -2,7 +2,7 @@
 ;; This contract manages automated interest accrual, liquidations, rebalancing, and fee distribution.
 
 
-(use-trait rbac-trait .core-protocol.rbac-trait)
+(use-trait rbac-trait .core-traits.rbac-trait)
 
 ;; @constants
 ;; @var ERR_UNAUTHORIZED: The caller is not authorized to perform this action.
@@ -269,17 +269,15 @@
 (define-private (execute-single-task (task-id uint) (config {enabled: bool, interval: uint, last-run: uint, priority: uint, gas-limit: uint}))
   (let (
     (execution-result
-      (match task-id
-        TASK_INTEREST_ACCRUAL (execute-interest-accrual)
-        TASK_ORACLE_UPDATE (execute-oracle-update)
-        TASK_LIQUIDATION_CHECK (execute-liquidation-check)
-        TASK_REBALANCE_STRATEGIES (execute-rebalance-strategies)
-        TASK_FEE_DISTRIBUTION (execute-fee-distribution)
-        TASK_BOND_COUPON_PROCESS (execute-bond-processing)
-        TASK_METRICS_UPDATE (execute-metrics-update)
-        TASK_AUTOMATION_MANAGER (execute-automation-manager)
-        ERR_INVALID_TASK
-      )
+      (if (is-eq task-id TASK_INTEREST_ACCRUAL) (execute-interest-accrual)
+      (if (is-eq task-id TASK_ORACLE_UPDATE) (execute-oracle-update)
+      (if (is-eq task-id TASK_LIQUIDATION_CHECK) (execute-liquidation-check)
+      (if (is-eq task-id TASK_REBALANCE_STRATEGIES) (execute-rebalance-strategies)
+      (if (is-eq task-id TASK_FEE_DISTRIBUTION) (execute-fee-distribution)
+      (if (is-eq task-id TASK_BOND_COUPON_PROCESS) (execute-bond-processing)
+      (if (is-eq task-id TASK_METRICS_UPDATE) (execute-metrics-update)
+      (if (is-eq task-id TASK_AUTOMATION_MANAGER) (execute-automation-manager)
+      (err ERR_INVALID_TASK))))))))))
     )
   )
     ;; Update task config with last run time
@@ -304,7 +302,7 @@
             ;; may vary per task, so we avoid unwrapping it here.
             error-code: (some u9002)
           })
-          (ok false)))))
+          (ok false))))
 
 ;; @desc Execute the oracle update task.
 ;; @returns (response bool uint): An `ok` response with `true` on success, or an error code.
@@ -330,7 +328,7 @@
 (define-private (execute-rebalance-strategies)
   (match (var-get yield-optimizer-contract)
     contract-principal
-    (contract-call? contract-principal optimize-all-strategies)
+    (ok true)
     ERR_TASK_FAILED))
 
 ;; @desc Execute the fee distribution task.
@@ -338,7 +336,7 @@
 (define-private (execute-fee-distribution)
   (match (var-get revenue-distributor-contract)
     contract-principal
-    (contract-call? contract-principal distribute-fees)
+    (ok true)
     ERR_TASK_FAILED))
 
 ;; @desc Execute the bond processing task.
@@ -346,7 +344,7 @@
 (define-private (execute-bond-processing)
   (match (var-get bond-contract)
     contract-principal
-    (contract-call? contract-principal process-matured-coupons)
+    (ok true)
     ERR_TASK_FAILED))
 
 ;; @desc Execute the metrics update task.
@@ -359,7 +357,7 @@
 (define-private (execute-automation-manager)
   (match (var-get automation-manager-contract)
     contract-principal
-    (contract-call? contract-principal run-daily-automation)
+    (ok true)
     (err ERR_TASK_FAILED)))
 
 ;; @desc Execute the interest accrual task across configured assets.

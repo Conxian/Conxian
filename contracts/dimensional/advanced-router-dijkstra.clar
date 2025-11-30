@@ -3,7 +3,7 @@
 ;; Integrates all routing functionality under dimensional architecture
 
 
-;; (impl-trait .defi-primitives.router-trait) ;; TODO: Verify router trait compatibility
+;; (impl-trait .defi-traits.router-trait) ;; TODO: Verify router trait compatibility
 
 
 ;; === DIMENSIONAL INTEGRATION CONSTANTS ===

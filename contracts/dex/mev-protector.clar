@@ -129,7 +129,7 @@
 (define-private (check-circuit-breaker)
   (match (var-get circuit-breaker)
     breaker
-      (let ((is-tripped (try! (contract-call? .circuit-breaker is-circuit-open))))
+      (let ((is-tripped (try! (try! (contract-call? breaker is-circuit-open)))))
         (if is-tripped (err ERR_CIRCUIT_OPEN) (ok true)))
     (ok true))
 )

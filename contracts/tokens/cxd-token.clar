@@ -7,9 +7,9 @@
 ;; integration with staking, monitoring, and other system components.
 
 ;; --- Traits ---
-(use-trait sip-010-ft-trait .sip-standards.sip-010-ft-trait)
+(use-trait sip-010-ft-trait .defi-traits.sip-010-ft-trait)
 (use-trait protocol-monitor-trait .security-monitoring.protocol-monitor-trait)
-(use-trait controller .controller-traits.controller)
+(use-trait controller .core-traits.controller)
 
 ;; --- Constants ---
 
