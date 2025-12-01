@@ -1,32 +1,6 @@
 ;; DeFi Traits
 ;; Defines standard interfaces for tokens, pools, vaults, and oracles.
-
-;; ===========================================
-;; SIP-010 FT STANDARD TRAIT
-;; ===========================================
-(define-trait sip-010-trait
-  (
-    (transfer (uint principal principal (optional (buff 34))) (response bool uint))
-    (get-name () (response (string-ascii 32) uint))
-    (get-symbol () (response (string-ascii 12) uint))
-    (get-decimals () (response uint uint))
-    (get-balance (principal) (response uint uint))
-    (get-total-supply () (response uint uint))
-    (get-token-uri () (response (optional (string-utf8 256)) uint))
-  )
-)
-
-;; ===========================================
-;; SIP-011 NFT STANDARD TRAIT
-;; ===========================================
-(define-trait sip-011-trait
-  (
-    (transfer (uint principal principal) (response bool uint))
-    (get-last-token-id () (response uint uint))
-    (get-token-uri (uint) (response (optional (string-utf8 256)) uint))
-    (get-owner (uint) (response (optional principal) uint))
-  )
-)
+(use-trait sip-010-trait .sip-standards.sip-010-ft-trait)
 
 ;; ===========================================
 ;; FACTORY TRAIT
@@ -77,17 +51,6 @@
     (add-liquidity (uint uint) (response uint uint))
     (remove-liquidity (uint) (response {amount0: uint, amount1: uint} uint))
     (get-reserves () (response {reserve0: uint, reserve1: uint} uint))
-  )
-)
-
-;; ===========================================
-;; ORACLE TRAIT
-;; ===========================================
-(define-trait oracle-trait
-  (
-    (get-price (principal) (response uint uint))
-    (get-price-cumulative (principal) (response uint uint))
-    (update-price (principal uint) (response bool uint))
   )
 )
 

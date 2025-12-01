@@ -1,5 +1,5 @@
 ;; DeFi Primitives Traits
-(use-trait sip-010-ft-trait .defi-traits.sip-010-ft-trait)
+(use-trait sip-010-ft-trait .sip-standards.sip-010-ft-trait)
 
 ;; ===========================================
 ;; POOL TRAIT (AMM Pool Interface)

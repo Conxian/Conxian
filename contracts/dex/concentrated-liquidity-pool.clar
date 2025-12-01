@@ -215,8 +215,7 @@
         )
       )
     )
-    )
-)
+  )
 )
 
 (define-private (update-tick-liquidity (tick int) (liquidity-delta uint) (is-add bool))
@@ -294,9 +293,9 @@
           liquidity-removed: liquidity
         })
         (ok { amount0-returned: amount0-returned, amount1-returned: amount1-returned, liquidity-removed: liquidity })
-        )
-)
+      )
     )
+  )
   )
 )
 
@@ -478,9 +477,9 @@
     (asserts! (is-eq tx-sender owner) ERR_UNAUTHORIZED)
     ;; v1 stub: detailed fee accounting is not wired yet; return zero amounts
     (ok { amount0: u0, amount1: u0 })
+    )
   )
 )
-
 ;; @desc Updates the global fee growth for the pool.
 ;; @param amount0 The amount of token0 swapped.
 ;; @param amount1 The amount of token1 swapped.

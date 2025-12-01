@@ -33,7 +33,7 @@ address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 [contracts.dimensional-core]
 path = "contracts/dimensional/dimensional-core.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["dim-metrics", "pausable"]
+depends_on = ["dim-metrics", "pausable", "oracle-pricing", "sip-standards", "security-monitoring", "core-traits"]
 
 [contracts.dimensional-engine]
 path = "contracts/core/dimensional-engine.clar"
@@ -62,6 +62,26 @@ address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 path = "contracts/traits/trait-errors.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
+[contracts.oracle-pricing]
+path = "contracts/traits/oracle-pricing.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+
+[contracts.sip-standards]
+path = "contracts/traits/sip-standards.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+
+[contracts.security-monitoring]
+path = "contracts/traits/security-monitoring.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+
+[contracts.controller-traits]
+path = "contracts/traits/controller-traits.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+
+[contracts.queue-traits]
+path = "contracts/traits/queue-traits.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+
 # Legacy Traits (for compatibility)
 
 [contracts.oracle-adapter]
@@ -88,7 +108,7 @@ address = "ST2REHHS5J3CERCRBEPMGH7921Q6PYKAADT7JP2VB"
 # ---------- Contract Remappings ----------
 [remap.contracts]
 # Missing contracts referenced in tests
-access-control = ".access-traits"
+access-control = ".core-traits"
 mock-dao = ".mock-token"
 audit-registry = ".audit-registry"
 btc-adapter = ".btc-adapter"

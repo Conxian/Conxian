@@ -3,19 +3,18 @@
 ;;; Core contract for managing dimensional positions with advanced risk management.
 ;;; Implements position management, risk controls, and protocol fee collection.
 ;;;
-;;; Version: 1.0.0
+;;; Version: 1.1.0
 ;;; Conforms to: Clarinet SDK 3.9+, Nakamoto Standard
 
 ;; Standard traits
 (use-trait oracle-trait .oracle-pricing.oracle-trait)
-(use-trait sip-010-ft-trait .defi-traits.sip-010-ft-trait)
-;; (use-trait finance-metrics-trait .math-utilities.finance-metrics-trait)
+(use-trait sip-010-ft-trait .sip-standards.sip-010-ft-trait)
 (use-trait pausable-trait .core-traits.pausable-trait)
-(use-trait access-control-trait .core-traits.rbac-trait)
-(use-trait circuit-breaker-trait .monitoring-security-traits.circuit-breaker-trait)
+(use-trait rbac-trait .core-traits.rbac-trait)
+(use-trait circuit-breaker-trait .security-monitoring.circuit-breaker-trait)
 
 ;; ===== Constants =====
-(define-constant CONTRACT_VERSION "1.0.0")
+(define-constant CONTRACT_VERSION "1.1.0")
 (define-constant MAX_LEVERAGE u100)
 (define-constant MIN_COLLATERAL u1000)
 (define-constant PROTOCOL_FEE_DENOMINATOR u10000)
@@ -37,6 +36,7 @@
 (define-constant ERR_POSITION_LIQUIDATED (err u2012))
 (define-constant ERR_INSUFFICIENT_LIQUIDITY (err u2013))
 (define-constant ERR_UNWRAP_FAILED (err u2018))
+(define-constant ERR_BITCOIN_NOT_FINALIZED (err u10001))
 
 ;; ===== Data Variables =====
 (define-data-var owner principal tx-sender)
@@ -68,7 +68,8 @@
   is-hedged: bool,
   tags: (list 10 (string-utf8 32)),
   version: uint,
-  metadata: (optional (string-utf8 1024))
+  metadata: (optional (string-utf8 1024)),
+  tenure-id: uint ;; Added for Nakamoto tenure tracking
 })
 
 (define-map position-ids
@@ -117,9 +118,19 @@
     (collateral-value (get collateral position))
     (pnl (calculate-pnl position current-price))
     (maintenance-margin (/ (* collateral-value (get maintenance-margin position)) PROTOCOL_FEE_DENOMINATOR))
+    (adjusted-collateral (if (>= pnl 0)
+      (+ collateral-value (to-uint pnl))
+      (if (> (to-uint (* -1 pnl)) collateral-value)
+        u0
+        (- collateral-value (to-uint (* -1 pnl)))
+      )
+    ))
   )
     (if (is-eq (get status position) "ACTIVE")
-      (ok (/ (* pnl u10000) maintenance-margin))
+      (ok (if (> maintenance-margin u0)
+        (/ (* adjusted-collateral u10000) maintenance-margin)
+        u999999999 ;; Max health if maintenance margin is 0
+      ))
       (ok u0))))
 
 ;; ===== Public Functions - Admin =====
@@ -153,7 +164,7 @@
     (token principal)
     (oracle <oracle-trait>)
   )
-  (contract-call? oracle get-price token)
+  (contract-call? oracle get-price)
 )
 
 ;; ===== Public Functions - State =====
@@ -197,12 +208,12 @@
       )
       ERR_INVALID_POSITION_TYPE
     )
-    
+
     (try! (contract-call? token-trait transfer collateral-amount tx-sender
       (as-contract tx-sender) none
     ))
-    
-    (map-set positions 
+
+    (map-set positions
       {owner: tx-sender, id: position-id}
       {
         collateral: collateral-amount,
@@ -221,14 +232,46 @@
         is-hedged: false,
         tags: tags,
         version: (var-get positions-version),
-        metadata: metadata
+        metadata: metadata,
+        tenure-id: block-height ;; Use block-height as proxy for tenure-id in epoch 3.0
       })
-    
+
+    ;; Fix size calculation for short
+(if (not is-long)
+      (map-set positions {
+        owner: tx-sender,
+        id: position-id,
+      }
+        (merge
+          (unwrap!
+            (map-get? positions {
+              owner: tx-sender,
+              id: position-id,
+            })
+            ERR_INVALID_POSITION
+          ) { size: (* (to-int size) -1) }
+        ))
+      true
+    )
+
     (var-set next-position-id (+ position-id u1))
     (var-set total-positions-opened (+ (var-get total-positions-opened) u1))
     (var-set total-value-locked (+ (var-get total-value-locked) collateral-amount))
-    
-    (ok position-id)))
+
+    (print {
+      event: "open-position",
+      position-id: position-id,
+      owner: tx-sender,
+      collateral: collateral-amount,
+      leverage: leverage,
+      position-type: position-type,
+      token: token,
+      price: price,
+      tenure-id: block-height
+    })
+    (ok position-id)
+  )
+)
 
 (define-public (close-position
     (position-id uint)
@@ -243,49 +286,98 @@
     (current-price (try! (get-oracle-price (var-get dimensional-token) oracle)))
     (pnl (calculate-pnl position current-price))
     (fees (calculate-fees position))
-    (total-amount (if (>= pnl fees)
-      (- pnl fees)
-      u0
+    (collateral (get collateral position))
+    (total-amount (if (>= pnl 0)
+        (if (>= (+ collateral (to-uint pnl)) fees)
+          (- (+ collateral (to-uint pnl)) fees)
+          u0
+        )
+        (if (>= collateral (+ (to-uint (* -1 pnl)) fees))
+          (- collateral (+ (to-uint (* -1 pnl)) fees))
+          u0
+        )
     ))
   )
     (asserts! (is-eq (get status position) "ACTIVE") ERR_POSITION_NOT_ACTIVE)
-    
-    (map-set positions 
+
+    (map-set positions
       {owner: tx-sender, id: position-id}
       (merge position {status: "CLOSED", last-updated: block-height}))
-    
+
     (asserts! (is-eq (contract-of token-trait) (var-get dimensional-token))
       ERR_UNAUTHORIZED
     )
-    (try! (as-contract (contract-call? token-trait transfer total-amount tx-sender tx-sender none)))
-    
+    (if (> total-amount u0)
+      (try! (as-contract (contract-call? token-trait transfer total-amount tx-sender
+        (get owner position) none
+      )))
+      true
+    )
+
     (var-set total-value-locked (- (var-get total-value-locked) (get collateral position)))
     (var-set total-positions-closed (+ (var-get total-positions-closed) u1))
-    
+
+    (print {
+      event: "close-position",
+      position-id: position-id,
+      owner: tx-sender,
+      pnl: pnl,
+      fees: fees,
+      tenure-id: block-height
+    })
     (ok true)))
 
 (define-public (liquidate-position (owner principal) (position-id uint) (oracle-trait <oracle-trait>))
   (begin
     (try! (check-bitcoin-finality))
     (let (
-    (position (unwrap! (get-position owner position-id) ERR_INVALID_POSITION))(current-price (try! (get-oracle-price (var-get dimensional-token) oracle-trait)))
-    (pnl (calculate-pnl position current-price))
-    (collateral-value (get collateral position))
-    (maintenance-margin (/ (* collateral-value (get maintenance-margin position))
-      PROTOCOL_FEE_DENOMINATOR
-    ))
+      (position (unwrap! (get-position owner position-id) ERR_INVALID_POSITION))
+      (current-price (try! (get-oracle-price (var-get dimensional-token) oracle-trait)))
+      (pnl (calculate-pnl position current-price))
+      (collateral-value (get collateral position))
+      (maintenance-margin (/ (* collateral-value (get maintenance-margin position))
+        PROTOCOL_FEE_DENOMINATOR
+      ))
+      (adjusted-collateral (if (>= pnl 0)
+        (+ collateral-value (to-uint pnl))
+        (if (> (to-uint (* -1 pnl)) collateral-value)
+          u0
+          (- collateral-value (to-uint (* -1 pnl)))
+        )
+      ))
+    )
+      (asserts! (is-eq (get status position) "ACTIVE") ERR_POSITION_NOT_ACTIVE)
+      (asserts! (< adjusted-collateral maintenance-margin)
+        ERR_INSUFFICIENT_COLLATERAL
+      )
+
+      (map-set positions {
+        owner: owner,
+        id: position-id,
+      }
+        (merge position {
+          status: "LIQUIDATED",
+          last-updated: block-height,
+        })
+      )
+
+      (var-set total-value-locked
+        (- (var-get total-value-locked) collateral-value)
+      )
+(var-set total-positions-closed (+ (var-get total-positions-closed) u1))
+
+      (print {
+        event: "liquidate-position",
+        position-id: position-id,
+        owner: owner,
+        liquidator: tx-sender,
+        tenure-id: block-height
+      })
+
+      (ok true)
+    )
   )
-    (asserts! (is-eq (get status position) "ACTIVE") ERR_POSITION_NOT_ACTIVE)
-    (asserts! (< pnl maintenance-margin) ERR_INSUFFICIENT_COLLATERAL)
-
-    (map-set positions
-      {owner: owner, id: position-id}
-      (merge position {status: "LIQUIDATED", last-updated: block-height}))
-
-    (var-set total-value-locked (- (var-get total-value-locked) collateral-value))
-    (var-set total-positions-closed (+ (var-get total-positions-closed) u1))
-
-    (ok true)))
+)
 
 ;; ===== Public Functions - Pausable =====
 (define-public (check-not-paused (pausable <pausable-trait>))
@@ -302,8 +394,8 @@
     (finality-height (- burn-block-height u6))
     (burn-header (get-burn-block-info? header-hash finality-height))
   )
-    (asserts! (is-some burn-header) (err u10001)) ;; ERR_BITCOIN_NOT_FINALIZED
-(ok true)
+    (asserts! (is-some burn-header) ERR_BITCOIN_NOT_FINALIZED)
+    (ok true)
   )
 )
 
@@ -312,11 +404,11 @@
   "@dev Initialize the contract (can only be called once)"
   (begin
     (asserts! (is-eq tx-sender (var-get owner)) ERR_UNAUTHORIZED)
-    
+
     (var-set owner new-owner)
     (var-set oracle-contract-principal oracle)
     (var-set protocol-fee-rate u30)  ;; 0.3%
-    
+
     (ok true)
   )
 )
@@ -339,6 +431,7 @@
   tags: (list 10 (string-utf8 32)),
   version: uint,
   metadata: (optional (string-utf8 1024)),
+  tenure-id: uint
 }))
   (let (
       (size (get size position))
@@ -352,5 +445,51 @@
       ))
     )
     fee
+  )
+)
+
+(define-private (calculate-pnl
+    (position {
+      collateral: uint,
+      size: int,
+      entry-time: uint,
+      status: (string-ascii 20),
+      entry-price: uint,
+      position-type: (string-ascii 20),
+      last-funding: uint,
+      last-updated: uint,
+      funding-interval: (string-ascii 20),
+      max-leverage: uint,
+      maintenance-margin: uint,
+      time-decay: (optional uint),
+      volatility: (optional uint),
+      is-hedged: bool,
+      tags: (list 10 (string-utf8 32)),
+      version: uint,
+      metadata: (optional (string-utf8 1024)),
+      tenure-id: uint
+    })
+    (current-price uint)
+  )
+  (let (
+      (size (get size position))
+      (entry-price (get entry-price position))
+      (is-long (> size 0))
+      (size-abs (if (>= size 0)
+        (to-uint size)
+        (to-uint (* size -1))
+      ))
+    )
+    (if is-long
+      (if (>= current-price entry-price)
+        (to-int (/ (* size-abs (- current-price entry-price)) entry-price))
+        (* -1 (to-int (/ (* size-abs (- entry-price current-price)) entry-price)))
+      )
+      ;; Short
+      (if (<= current-price entry-price)
+        (to-int (/ (* size-abs (- entry-price current-price)) entry-price))
+        (* -1 (to-int (/ (* size-abs (- current-price entry-price)) entry-price)))
+      )
+    )
   )
 )

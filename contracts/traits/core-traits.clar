@@ -44,25 +44,3 @@
     (transfer-ownership (principal) (response bool uint))
   )
 )
-
-;; ===========================================
-;; CONTROLLER TRAIT
-;; ===========================================
-(define-trait controller-trait
-  (
-    (can-emit (uint) (response bool uint))
-    (can-burn (uint) (response bool uint))
-    (is-authorized (principal) (response bool uint))
-  )
-)
-
-;; ===========================================
-;; QUEUE CONTRACT TRAIT
-;; ===========================================
-(define-trait queue-contract-trait
-  (
-    (on-transfer (principal principal uint) (response bool uint))
-    (on-cxlp-transfer (principal principal uint) (response bool uint))
-    (initialize-duration-tracking (principal) (response bool uint))
-  )
-)
