@@ -54,7 +54,7 @@
     (new-insurance-fund principal)
   )
   (begin
-    (asserts! (is-eq tx-sender (as-contract tx-sender)) ERR_UNAUTHORIZED)
+    (asserts! (is-eq tx-sender (var-get owner)) ERR_UNAUTHORIZED)
     (var-set owner new-owner)
     (var-set oracle-contract oracle)
     (var-set risk-manager-contract risk-manager)

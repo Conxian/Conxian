@@ -73,7 +73,10 @@
     (asset <sip-010-ft-trait>)
     (amount uint)
   )
-  (let ((asset-principal (contract-of asset)))
+  (let (
+      (asset-principal (contract-of asset))
+      (caller tx-sender)
+    )
     (asserts! (> amount u0) ERR_ZERO_AMOUNT)
     (try! (check-circuit-breaker))
     (let ((current-supply (unwrap!
@@ -84,7 +87,7 @@
         ERR_INSUFFICIENT_BALANCE
       )))
       (asserts! (>= (get amount current-supply) amount) ERR_INSUFFICIENT_BALANCE)
-      (try! (as-contract (contract-call? asset transfer amount tx-sender tx-sender none)))
+      (try! (as-contract (contract-call? asset transfer amount tx-sender caller none)))
       (map-set user-supplies {
         user: tx-sender,
         asset: asset-principal,
@@ -99,14 +102,17 @@
     (asset <sip-010-ft-trait>)
     (amount uint)
   )
-  (let ((asset-principal (contract-of asset)))
+  (let (
+      (asset-principal (contract-of asset))
+      (caller tx-sender)
+    )
     (asserts! (> amount u0) ERR_ZERO_AMOUNT)
     (try! (check-circuit-breaker))
     ;; Simplified health check - in production this would check LTV
     (let ((health (unwrap! (get-health-factor tx-sender) ERR_HEALTH_CHECK_FAILED)))
       (asserts! (>= health u10000) ERR_INSUFFICIENT_COLLATERAL)
     )
-    (try! (as-contract (contract-call? asset transfer amount tx-sender tx-sender none)))
+    (try! (as-contract (contract-call? asset transfer amount tx-sender caller none)))
     (let ((current-borrow (default-to { amount: u0 }
         (map-get? user-borrows {
           user: tx-sender,

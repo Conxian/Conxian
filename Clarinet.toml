@@ -25,6 +25,15 @@ depends_on = ["ownable"]
 path = "contracts/errors/standard-errors.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
+[contracts.circuit-breaker]
+path = "contracts/security/circuit-breaker.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+
+[contracts.oracle-aggregator-v2]
+path = "contracts/dex/oracle-aggregator-v2.clar"
+address = "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM"
+depends_on = ["oracle-pricing", "security-monitoring"]
+
 # ---------- Dimensional System ----------
 
 [contracts.dim-metrics]
@@ -99,11 +108,6 @@ path = "contracts/traits/queue-traits.clar"
 address = "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM"
 
 # Legacy Traits (for compatibility)
-
-[contracts.oracle-aggregator-v2]
-path = "contracts/dex/oracle-aggregator-v2.clar"
-address = "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM"
-depends_on = ["oracle-pricing", "security-monitoring"]
 
 [contracts.oracle-adapter]
 path = "contracts/oracle/oracle-adapter-stub.clar"
@@ -242,6 +246,10 @@ path = "contracts/base/base-contract.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
 
+[contracts.math-lib-concentrated]
+path = "contracts/math/math-lib-concentrated.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+
 [contracts.concentrated-liquidity-pool]
 path = "contracts/dex/concentrated-liquidity-pool.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
@@ -337,10 +345,6 @@ address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
 [contracts.math-lib-advanced]
 path = "contracts/lib/math-lib-advanced.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-
-[contracts.math-lib-concentrated]
-path = "contracts/math/math-lib-concentrated.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
 [contracts.precision-calculator]
@@ -502,10 +506,6 @@ path = "contracts/governance/voting.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 depends_on = ["governance-token"]
 
-
-[contracts.circuit-breaker]
-path = "contracts/security/circuit-breaker.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
 [contracts.dlc-manager]
 path = "contracts/sbtc/dlc-manager.clar"

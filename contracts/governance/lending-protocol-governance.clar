@@ -32,7 +32,7 @@
 (define-constant ROLE_GUARDIAN 0x475541524449414e000000000000000000000000000000000000000000000000)  ;; GUARDIAN in hex
 
 ;; Protocol state
-(define-data-var governance-token principal (as-contract .cxvg-token)) ;; Should be set to CXS token
+(define-data-var governance-token principal .cxvg-token) ;; Should be set to CXS token
 (define-data-var timelock-address (optional principal) none) ;; Timelock contract address
 
 ;; Proposal tracking

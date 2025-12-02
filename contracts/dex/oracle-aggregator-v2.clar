@@ -43,6 +43,14 @@
     )
 )
 
+(define-public (set-circuit-breaker (cb principal))
+    (begin
+        (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
+        (var-set circuit-breaker-contract (some cb))
+        (ok true)
+    )
+)
+
 (define-public (register-oracle (oracle principal) (trusted bool))
     (begin
         (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
@@ -56,8 +64,15 @@
     (let (
         (oracle-info (unwrap! (map-get? registered-oracles { oracle: tx-sender }) ERR_UNAUTHORIZED))
         (current-data (map-get? asset-data { asset: asset }))
+        (cb-opt (var-get circuit-breaker-contract))
     )
         (asserts! (get trusted oracle-info) ERR_UNAUTHORIZED)
+        
+        ;; Check Circuit Breaker
+        (match cb-opt
+            cb (asserts! (not (unwrap-panic (contract-call? .circuit-breaker is-circuit-open))) ERR_CIRCUIT_OPEN)
+            true
+        )
         
         ;; Check manipulation (simple deviation check)
         (match current-data
@@ -69,6 +84,7 @@
                                 (- old-price price)))
                     (percent-diff (/ (* deviation u10000) old-price))
                 )
+                    ;; If deviation > MAX, we could trip the breaker, but for now just fail
                     (asserts! (<= percent-diff MAX_DEVIATION) ERR_PRICE_MANIPULATION)
                 )
             )
@@ -105,7 +121,7 @@
 
 ;; @desc Get TWAP for a given window
 ;; Note: In this implementation without historical checkpoints, this returns the Spot Price.
-;; Full TWAP implementation requires a ring buffer or historical checkpoints which exceeds current storage limits for this turn.
+;; Full TWAP implementation requires a ring buffer or historical checkpoints.
 (define-read-only (get-twap (asset principal) (window uint))
     (get-real-time-price asset)
 )
@@ -113,7 +129,6 @@
 ;; @desc Calculate TWAP over a period
 ;; @param asset Asset principal
 ;; @param period Number of blocks
-;; Note: This requires the caller to know the cumulative price 'period' blocks ago.
 (define-read-only (get-cumulative-price (asset principal))
     (let (
         (data (unwrap! (map-get? asset-data { asset: asset }) (err u0)))
