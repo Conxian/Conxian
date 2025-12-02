@@ -1,37 +1,31 @@
-;; yield-optimizer.clar
-;; Optimizes yield for LPs in the Conxian DEX.
+;; Yield Optimizer
+;; Automated strategy selection and allocation
 
-(define-constant ERR_UNAUTHORIZED (err u8000))
+(use-trait vault-trait .defi-traits.vault-trait)
 
-(define-map strategies { strategy-id: uint } {
-  name: (string-ascii 32),
-  contract: principal,
-  is-active: bool
-})
+(define-constant ERR_UNAUTHORIZED (err u6000))
+(define-constant ERR_INVALID_STRATEGY (err u6001))
 
-(define-public (add-strategy (name (string-ascii 32)) (contract principal))
-  (begin
-    (asserts! (is-eq tx-sender .admin) ERR_UNAUTHORIZED)
-    (let ((strategy-id (var-get next-strategy-id)))
-      (map-set strategies { strategy-id: strategy-id } { name: name, contract: contract, is-active: true })
-      (var-set next-strategy-id (+ strategy-id u1))
-    )
-    (ok true)
-  )
+(define-data-var contract-owner principal tx-sender)
+
+(define-map strategies
+    { strategy: principal }
+    { active: bool, apy: uint, risk-score: uint }
 )
 
-(define-public (set-strategy-status (strategy-id uint) (is-active bool))
-  (begin
-    (asserts! (is-eq tx-sender .admin) ERR_UNAUTHORIZED)
-    (let ((strategy (unwrap! (map-get? strategies { strategy-id: strategy-id }) (err u0))))
-      (map-set strategies { strategy-id: strategy-id } (merge strategy { is-active: is-active }))
+(define-public (add-strategy (strategy principal) (apy uint) (risk uint))
+    (begin
+        (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
+        (map-set strategies { strategy: strategy } { active: true, apy: apy, risk-score: risk })
+        (ok true)
     )
-    (ok true)
-  )
 )
 
-(define-read-only (find-best-strategy (asset principal))
-  ;; In a real implementation, this would query all active strategies and return the one with the highest APY.
-  ;; For now, we'll just return a placeholder.
-  (ok { strategy-id: u0, apy: u500 })
+(define-public (optimize-allocation (vault <vault-trait>) (amount uint))
+    (begin
+        (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
+        ;; Placeholder: Logic to pick best strategy would go here.
+        ;; For now, we just allocate to the vault itself or a sub-strategy.
+        (contract-call? vault allocate-to-strategy tx-sender amount)
+    )
 )

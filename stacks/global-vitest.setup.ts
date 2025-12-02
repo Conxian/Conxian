@@ -1,4 +1,5 @@
 // global-vitest.setup.ts
+import 'dotenv/config';
 import { getSDK } from '@stacks/clarinet-sdk';
 
 // Default to the test manifest, but allow callers to override

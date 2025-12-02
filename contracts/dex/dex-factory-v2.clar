@@ -1,150 +1,126 @@
-;; DEX Factory v2 - Minimal trait-compliant implementation
-
-;; Implement centralized factory v2 trait
-;; Temporarily remove trait until available
-;; (impl-trait .pool-factory-v2.pool-factory-v2-trait)
+;; DEX Factory V2
+;; Production-grade factory for managing multiple pool types and deployments.
 
 (use-trait pool-deployer-trait .defi-traits.pool-deployer-trait)
+(use-trait sip-010-trait .sip-standards.sip-010-ft-trait)
 
+;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED (err u1000))
 (define-constant ERR_TYPE_NOT_FOUND (err u1439))
 (define-constant ERR_POOL_ALREADY_EXISTS (err u1440))
+(define-constant ERR_INVALID_POOL (err u1441))
 
 (define-data-var contract-owner principal tx-sender)
+(define-data-var pool-count uint u0)
 
-;; Registry of pool type -> implementation principal
+;; --- Maps ---
+
+;; Registry of pool type -> implementation principal (deployer)
 (define-map pool-types
-  { type-id: (string-ascii 32) }
-  { impl: principal }
+    { type-id: (string-ascii 32) }
+    { impl: principal }
 )
 
-;; Mapping of token pairs -> pool principal and type
+;; Mapping of token pairs -> pool details
+;; We store both (A, B) and (B, A) to avoid sorting issues in older Clarity versions
 (define-map pools
-  {
-    token-a: principal,
-    token-b: principal,
-  }
-  {
-    type-id: (string-ascii 32),
-    pool: principal,
-  }
+    {
+        token-a: principal,
+        token-b: principal,
+    }
+    {
+        type-id: (string-ascii 32),
+        pool: principal,
+        created-at: uint
+    }
 )
+
+;; Reverse mapping: Pool Principal -> Pool Details
+(define-map pool-details
+    { pool: principal }
+    {
+        token-a: principal,
+        token-b: principal,
+        type-id: (string-ascii 32)
+    }
+)
+
+;; --- Public Functions ---
 
 ;; @desc Sets the contract owner.
-;; @param new-owner The principal of the new owner.
-;; @returns (response bool uint) True if successful, or an error.
-;; @error ERR_UNAUTHORIZED if the transaction sender is not the current owner.
 (define-public (set-owner (new-owner principal))
-  (begin
-    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
-    (var-set contract-owner new-owner)
-    (ok true)
-  )
+    (begin
+        (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
+        (var-set contract-owner new-owner)
+        (ok true)
+    )
 )
-;; @desc Registers a new pool type with its implementation contract.
-;; @param type-id A unique identifier for the pool type.
-;; @param impl The principal of the contract implementing this pool type.
-;; @returns (response bool uint) True if successful, or an error.
-;; @error ERR_UNAUTHORIZED if the transaction sender is not the contract owner.
-(define-public (register-pool-type
-    (type-id (string-ascii 32))
-    (impl principal)
-  )
-  (begin
-    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
-    (map-set pool-types { type-id: type-id } { impl: impl })
-    (ok true)
-  )
+
+;; @desc Registers a new pool type with its deployer contract.
+(define-public (register-pool-type (type-id (string-ascii 32)) (impl principal))
+    (begin
+        (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
+        (map-set pool-types { type-id: type-id } { impl: impl })
+        (ok true)
+    )
 )
 
 ;; @desc Creates a new pool for a given token pair and pool type.
-;; @param type-id The identifier of the pool type to create.
-;; @param token-a The principal of the first token in the pair.
-;; @param token-b The principal of the second token in the pair.
-;; @param deployer The pool deployer trait reference.
-;; @returns (response principal uint) The principal of the created pool or an error.
-;; @error ERR_TYPE_NOT_FOUND if the specified pool type is not registered.
 (define-public (create-pool
     (type-id (string-ascii 32))
     (token-a principal)
     (token-b principal)
     (deployer <pool-deployer-trait>)
-  )
-  (let (
-    (type-entry (map-get? pool-types { type-id: type-id }))
-    (sorted-tokens {
-      t1: token-a,
-      t2: token-b,
-    })
-  )
-    (asserts! (is-some type-entry) (err ERR_TYPE_NOT_FOUND))
-    (asserts!
-      (is-eq (contract-of deployer) (get impl (unwrap-panic type-entry)))
-      (err ERR_UNAUTHORIZED)
-    )
-    (asserts! (is-none (map-get? pools { token-a: (get t1 sorted-tokens), token-b: (get t2 sorted-tokens) })) (err ERR_POOL_ALREADY_EXISTS))
+)
     (let (
-      (call-result (contract-call? deployer deploy-and-initialize token-a token-b))
+        (type-entry (unwrap! (map-get? pool-types { type-id: type-id }) ERR_TYPE_NOT_FOUND))
     )
-      (asserts! (is-ok call-result) ERR_TYPE_NOT_FOUND)
-      (let ((inner-result (unwrap-panic call-result)))
-        (asserts! (is-ok inner-result) (err ERR_TYPE_NOT_FOUND))
-        (let ((pool-principal (unwrap-panic inner-result)))
-          (map-set pools {
-            token-a: (get t1 sorted-tokens),
-            token-b: (get t2 sorted-tokens),
-          } {
-            type-id: type-id,
-            pool: pool-principal,
-          })
-          (ok pool-principal)
+        ;; Verify deployer matches registered implementation
+        (asserts! (is-eq (contract-of deployer) (get impl type-entry)) ERR_UNAUTHORIZED)
+        
+        ;; Verify pool doesn't exist (check both directions)
+        (asserts! (is-none (map-get? pools { token-a: token-a, token-b: token-b })) ERR_POOL_ALREADY_EXISTS)
+        (asserts! (is-none (map-get? pools { token-a: token-b, token-b: token-a })) ERR_POOL_ALREADY_EXISTS)
+        
+        ;; Deploy pool
+        (let (
+            (pool-principal (unwrap-panic (contract-call? deployer deploy-and-initialize token-a token-b)))
         )
-      )
+            ;; Register pool in both directions
+            (map-set pools { token-a: token-a, token-b: token-b } {
+                type-id: type-id,
+                pool: pool-principal,
+                created-at: block-height
+            })
+            (map-set pools { token-a: token-b, token-b: token-a } {
+                type-id: type-id,
+                pool: pool-principal,
+                created-at: block-height
+            })
+            
+            (map-set pool-details { pool: pool-principal } {
+                token-a: token-a,
+                token-b: token-b,
+                type-id: type-id
+            })
+            
+            (var-set pool-count (+ (var-get pool-count) u1))
+            (print { event: "pool-created", pool: pool-principal, type: type-id, token-a: token-a, token-b: token-b })
+            (ok pool-principal)
+        )
     )
-  )
 )
 
-;; @desc Retrieves the pool principal for a given token pair.
-;; @param token-a The principal of the first token in the pair.
-;; @param token-b The principal of the second token in the pair.
-;; @returns (response (optional principal) uint) An optional principal of the pool or an error.
-;; @desc Retrieves the pool contract principal for a given token pair.
-;; @param token-a The principal of the first token in the pair.
-;; @param token-b The principal of the second token in the pair.
-;; @returns (response (optional principal) (err u1439)) An optional principal of the pool contract, or an error.
-;; @error u1439 If the pool is not found.
-(define-read-only (get-pool
-    (token-a principal)
-    (token-b principal)
-  )
-  (let (
-    (sorted-tokens {
-      t1: token-a,
-      t2: token-b,
-    })
-    (entry (map-get? pools {
-      token-a: (get t1 sorted-tokens),
-      token-b: (get t2 sorted-tokens),
-    }))
-  )
-    (ok (match entry
-      e (some (get pool e))
-      none
-    ))
-  )
+;; --- Read-Only Functions ---
+
+(define-read-only (get-pool (token-a principal) (token-b principal))
+    (ok (map-get? pools { token-a: token-a, token-b: token-b }))
 )
 
-;; @desc Retrieves all registered pool types.
-;; @returns (response (list 10 {type-id: (string-ascii 32), impl: principal}) uint) A list of all registered pool types.
-;; @desc Retrieves a list of all registered pool types.
-;; @returns (response (list (string-ascii 64)) (err u1451)) A list of all pool types, or an error.
-;; @error u1451 If an unexpected error occurs while retrieving pool types.
-(define-read-only (get-all-pool-types)
-  (ok (list))
+(define-read-only (get-pool-by-principal (pool principal))
+    (ok (map-get? pool-details { pool: pool }))
 )
 
-;; @desc Retrieves all created pools.
-;; @returns (response (list 10 {token-a: principal, token-b: principal, type-id: (string-ascii 32), pool: principal}) uint) A list of all created pools.
-(define-read-only (get-all-pools)
-  (ok (list))
+(define-read-only (get-pool-count)
+    (ok (var-get pool-count))
 )
