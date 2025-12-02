@@ -32,15 +32,38 @@
 ;; --- Data Maps ---
 ;; @map registered-oracles { oracle-principal: principal } { weight: uint, last-updated: uint }
 ;; Stores registered oracles with their weights and last update block height.
-(define-map registered-oracles { oracle-principal: principal } { weight: uint, last-updated: uint })
+(define-map registered-oracles
+  { oracle-principal: principal }
+  {
+    weight: uint,
+    last-updated: uint,
+  }
+)
 
 ;; @map asset-twap { asset: principal } { price: uint, last-updated: uint }
 ;; Stores the time-weighted average price (TWAP) for each asset and its last update block height.
-(define-map asset-twap { asset: principal } { price: uint, last-updated: uint, total-supply: uint })
+(define-map asset-twap
+  { asset: principal }
+  {
+    price: uint,
+    last-updated: uint,
+    total-supply: uint,
+  }
+)
 
 ;; @map price-observations { asset: principal, block: uint } { price: uint, total-supply: uint, tenure-height: uint }
 ;; Stores historical price observations for TWAP calculation.
-(define-map price-observations { asset: principal, block: uint } { price: uint, total-supply: uint, tenure-height: uint })
+(define-map price-observations
+  {
+    asset: principal,
+    block: uint,
+  }
+  {
+    price: uint,
+    total-supply: uint,
+    tenure-height: uint,
+  }
+)
 
 ;; --- Public Functions ---
 
@@ -81,10 +104,16 @@
 ;; @param oracle principal - The principal of the oracle contract.
 ;; @param weight uint - The weight assigned to this oracle.
 ;; @returns (response bool uint) - (ok true) on success, (err ERR_UNAUTHORIZED) if not called by the owner.
-(define-public (register-oracle (oracle principal) (weight uint))
+(define-public (register-oracle
+    (oracle principal)
+    (weight uint)
+  )
   (begin
     (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
-    (map-set registered-oracles { oracle-principal: oracle } { weight: weight, last-updated: block-height })
+    (map-set registered-oracles { oracle-principal: oracle } {
+      weight: weight,
+      last-updated: block-height,
+    })
     (ok true)
   )
 )
@@ -95,25 +124,47 @@
 ;; @param price uint - The price reported by the oracle.
 ;; @param total-supply uint - The total supply of the asset.
 ;; @returns (response bool uint) - (ok true) on success, or an error if unauthorized, oracle not found, or manipulation detected.
-(define-public (update-price (oracle principal) (asset principal) (price uint) (total-supply uint) (circuit-breaker principal))
+(define-public (update-price
+    (oracle principal)
+    (asset principal)
+    (price uint)
+    (total-supply uint)
+    (circuit-breaker principal)
+  )
   (begin
-    (asserts! (is-some (map-get? registered-oracles { oracle-principal: oracle })) ERR_INVALID_ORACLE)
+    (asserts!
+      (is-some (map-get? registered-oracles { oracle-principal: oracle }))
+      ERR_INVALID_ORACLE
+    )
+    (unwrap! (check-circuit-breaker) (err u105))
     (try! (check-manipulation asset price))
-    (check-circuit-breaker)
-    
+
     ;; Store the current observation with tenure awareness
-    (let ((current-tenure (contract-call? .block-utils get-current-tenure-height)))
-      (map-set price-observations { asset: asset, block: block-height } { price: price, total-supply: total-supply, tenure-height: current-tenure })
+    (let ((current-tenure block-height))
+      (map-set price-observations {
+        asset: asset,
+        block: block-height,
+      } {
+        price: price,
+        total-supply: total-supply,
+        tenure-height: current-tenure,
+      })
     )
 
     ;; Calculate and update TWAP
     (let ((twap-result (calculate-twap asset TWAP-LOOK-BACK-WINDOW)))
       (match twap-result
-        ok-value
-          (begin
-            (map-set asset-twap { asset: asset } { price: ok-value, last-updated: block-height, total-supply: total-supply })
-            (ok true))
-        err-value (err err-value)))
+        twap-ok (begin
+          (map-set asset-twap { asset: asset } {
+            price: twap-ok,
+            last-updated: block-height,
+            total-supply: total-supply,
+          })
+          (ok true)
+        )
+        twap-err (err twap-err)
+      )
+    )
   )
 )
 
@@ -122,15 +173,18 @@
 ;; @desc Retrieves the time-weighted average price (TWAP) for an asset.
 ;; @param asset principal - The principal of the asset.
 ;; @returns (response uint uint) - (ok price) on success, (err ERR_STALE_PRICE) if price is stale, (err ERR_NO_ORACLES) if no oracles are registered.
-(define-read-only (get-oracle-price (token principal))
-  (map-get? oracle-prices token)
+(define-read-only (get-real-time-price (token principal))
+  (get-spot-twap token)
 )
 
-(define-read-only (get-twap (asset principal))
+(define-read-only (get-spot-twap (asset principal))
   (let ((twap-entry (map-get? asset-twap { asset: asset })))
     (asserts! (is-some twap-entry) ERR_NO_ORACLES)
     (let ((last-updated (get last-updated (unwrap-panic twap-entry))))
-      (asserts! (<= (- block-height last-updated) TWAP-LOOK-BACK-WINDOW) ERR_STALE_PRICE) ;; Use TWAP-LOOK-BACK-WINDOW for staleness check
+      (asserts! (<= (- block-height last-updated) TWAP-LOOK-BACK-WINDOW)
+        ERR_STALE_PRICE
+      )
+      ;; Use TWAP-LOOK-BACK-WINDOW for staleness check
       (ok (get price (unwrap-panic twap-entry)))
     )
   )
@@ -140,7 +194,7 @@
 ;; @param asset principal - The principal of the asset.
 ;; @param look-back-window uint - The number of blocks to look back.
 ;; @returns (response uint uint) - (ok price) on success, (err ERR_STALE_PRICE) if price is stale, (err ERR_NO_ORACLES) if no oracles are registered.
-(define-read-only (get-twap-with-window
+(define-read-only (get-twap
     (asset principal)
     (look-back-window uint)
   )
@@ -168,12 +222,16 @@
 ;; @param asset principal - The principal of the asset.
 ;; @param price uint - The price to check.
 ;; @returns (response bool uint) - (ok true) if no manipulation, (err ERR_PRICE_MANIPULATION) if detected.
-(define-private (check-manipulation (asset principal) (price uint))
+(define-private (check-manipulation
+    (asset principal)
+    (price uint)
+  )
   ;; v1: basic sanity check only. Reject zero prices; more advanced
   ;; manipulation detection is performed off-chain or via dedicated oracles.
   (if (> price u0)
     (ok true)
-    ERR_PRICE_MANIPULATION)
+    ERR_PRICE_MANIPULATION
+  )
 )
 
 ;; @desc Checks the circuit breaker status.
@@ -181,14 +239,20 @@
 (define-private (check-circuit-breaker)
   ;; v1 stub: circuit-breaker integration is wired via configuration but not
   ;; enforced here. Always report the circuit as closed for compilation safety.
-  (ok true)
+  (if true
+    (ok true)
+    (err u105)
+  )
 )
 
 ;; @desc Calculates the time-weighted average price (TWAP) for an asset over a specified look-back window.
 ;; @param asset principal - The principal of the asset.
 ;; @param look-back-window uint - The number of blocks to look back for observations.
 ;; @returns (response uint uint) - (ok twap-price) on success, or an error if no observations are found.
-(define-private (calculate-twap (asset principal) (look-back-window uint))
+(define-private (calculate-twap
+    (asset principal)
+    (look-back-window uint)
+  )
   ;; v1: use the most recent price observation at the current block height as
   ;; the TWAP approximation. This avoids complex aggregation while still
   ;; enforcing freshness via get-twap.
@@ -201,4 +265,8 @@
       ERR_NO_ORACLES
     )
   )
+)
+(define-map oracle-prices
+  principal
+  uint
 )

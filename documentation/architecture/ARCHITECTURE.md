@@ -7,7 +7,7 @@ This document outlines the current Conxian protocol architecture, a comprehensiv
 ## Architecture Principles
 
 - **Modular Design**: The protocol is divided into a series of specialized modules, each with a well-defined responsibility (e.g., DEX, Lending, Governance).
-- **Modular Trait System**: All contract interfaces are defined in a set of **11 modular trait files**, which are aggregated in a central registry. This provides a clear, consistent, and gas-efficient way for contracts to interact.
+- **Modular Trait System**: All contract interfaces are defined in a set of **15 modular trait files**, which are aggregated in a central registry. This provides a clear, consistent, and gas-efficient way for contracts to interact.
 - **Bitcoin-Native**: The protocol leverages Stacks' Bitcoin anchoring for security and finality, with a particular focus on sBTC integration.
 - **Enterprise-Ready**: The architecture includes foundational frameworks for institutional features and compliance integration.
 - **Multi-Dimensional**: The protocol is designed to support a multi-dimensional financial system, with distinct layers for spatial, temporal, risk, and cross-chain operations.
@@ -36,7 +36,7 @@ The Conxian protocol is organized into a series of specialized modules, each loc
 
 ## Trait Architecture
 
-The protocol's trait system is organized into **11 modular files**, which provide a clear and efficient way to define contract interfaces. For a detailed overview of the trait architecture, please see the [`contracts/traits/README-TRAIT-ARCHITECTURE.md`](../traits/README-TRAIT-ARCHITECTURE.md) file.
+The protocol's trait system is organized into **15 modular files**, which provide a clear and efficient way to define contract interfaces. For a detailed overview of the trait architecture, please see the [`contracts/traits/README-TRAIT-ARCHITECTURE.md`](../../contracts/traits/README-TRAIT-ARCHITECTURE.md) file.
 
 ## Security Architecture
 

@@ -34,3 +34,49 @@
     (ok true)
   )
 )
+
+;; --- Implemented for comprehensive-lending-system compatibility ---
+
+(define-public (record-success (service (string-ascii 32)))
+  (ok true)
+)
+
+(define-public (record-failure (service (string-ascii 32)))
+  (ok true)
+)
+
+(define-public (check-circuit-state (service (string-ascii 32)))
+  (if (var-get circuit-open)
+    (err u5007) ;; ERR_CIRCUIT_BREAKER_OPEN
+    (ok true)
+  )
+)
+
+;; --- Trait Implementation ---
+
+(define-public (trigger-circuit-breaker (reason (string-utf8 200)))
+  (begin
+    (asserts! (is-eq tx-sender (var-get admin)) ERR_UNAUTHORIZED)
+    (var-set circuit-open true)
+    (ok true)
+  )
+)
+
+(define-public (reset-circuit-breaker)
+  (begin
+    (asserts! (is-eq tx-sender (var-get admin)) ERR_UNAUTHORIZED)
+    (var-set circuit-open false)
+    (ok true)
+  )
+)
+
+(define-public (is-circuit-broken)
+  (ok (var-get circuit-open))
+)
+
+(define-public (assert-operational)
+  (if (var-get circuit-open)
+    (err u5007)
+    (ok true)
+  )
+)

@@ -42,7 +42,7 @@
   (ok (default-to u0 (map-get? internal-balances user)))
 )
 
-(define-read-only (get-protocol-fee-rate)
+(define-public (get-protocol-fee-rate)
   (ok u30)
   ;; 0.3% fee rate
 )

@@ -23,7 +23,7 @@ Conxian addresses these challenges by delivering a unified, deterministic, and a
 ## 2. Design Principles
 
 - **Modular and Decentralized**: The protocol is architecturally designed to be highly modular, with each component encapsulated in its own contract. This separation of concerns improves security, maintainability, and reusability.
-- **Trait-Driven Development**: All contract interfaces are defined in a set of **11 modular trait files**, which are aggregated in a central registry. This provides a clear, consistent, and gas-efficient way for contracts to interact.
+- **Trait-Driven Development**: All contract interfaces are defined in a set of **15 modular trait files**, which are aggregated in a central registry. This provides a clear, consistent, and gas-efficient way for contracts to interact.
 - **Determinism by construction**: Centralized trait imports/implementations, canonical encoding, and deterministic token ordering ensure predictable behavior.
 - **Bitcoin finality & Nakamoto integration**: The protocol leverages the security and finality of the Bitcoin blockchain through the Stacks Nakamoto release.
 - **Safety‑first defaults**: Pausable guards, circuit-breakers, and explicit error codes are used throughout the system to protect against unforeseen events.

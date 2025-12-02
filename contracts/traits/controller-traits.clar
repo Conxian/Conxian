@@ -8,3 +8,9 @@
     (is-authorized (principal) (response bool uint))
   )
 )
+
+(define-trait keeper-job-trait
+  (
+    (execute () (response bool uint))
+  )
+)

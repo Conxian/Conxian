@@ -1,6 +1,6 @@
 ;; @desc Handles initial price setting and management for the CXD token.
 ;; This contract initializes the price of the CXD token.
-(use-trait governance-token-trait .governance-token.governance-token-trait)
+(use-trait governance-token-trait .governance-traits.governance-token-trait)
 ;; and provides functions for updating the price through governance or in an emergency.
 
 ;; The governance token contract is expected to implement governance-token-trait.
@@ -51,22 +51,20 @@
 ;; @param min-price-amount: The minimum allowed price for the CXD token.
 ;; @param timelock-blocks: The number of blocks for the timelock period.
 ;; @returns (response (tuple) uint): An `ok` response with a `PriceInitialized` event on success, or an error code on failure.
-(define-public (initialize 
-    (cxd-token-principal principal)
-    (oracle-principal principal)
-    (initial-price-amount uint)
-    (min-price-amount uint)
-    (timelock-blocks uint)
-)
-    (let (
-        (caller tx-sender)
+(define-public (initialize
+        (cxd-token-principal principal)
+        (oracle-principal principal)
+        (initial-price-amount uint)
+        (min-price-amount uint)
+        (timelock-blocks uint)
     )
+    (let ((caller tx-sender))
         (asserts! (is-eq caller (var-get contract-owner)) ERR_UNAUTHORIZED)
         (asserts! (not (var-get is-initialized)) ERR_ALREADY_INITIALIZED)
         (asserts! (> initial-price-amount u0) ERR_INVALID_PRICE)
         (asserts! (> min-price-amount u0) ERR_INVALID_PRICE)
         (asserts! (>= initial-price-amount min-price-amount) ERR_INVALID_PRICE)
-        
+
         (var-set cxd-token (some cxd-token-principal))
         (var-set oracle (some oracle-principal))
         (var-set initial-price (some initial-price-amount))
@@ -74,12 +72,12 @@
         (var-set price-last-updated (some block-height))
         (var-set timelock-end-block (some (+ block-height timelock-blocks)))
         (var-set is-initialized true)
-        
+
         (ok (print {
             event: "price-initialized",
             price: initial-price-amount,
             min-price: min-price-amount,
-            block: block-height
+            block: block-height,
         }))
     )
 )
@@ -107,30 +105,30 @@
 ;; @returns (response (tuple) uint): An `ok` response with a `PriceUpdated` event on success, or an error code on failure.
 (define-public (update-price (new-price uint))
     (let (
-        (caller tx-sender)
-        (current-price (unwrap-panic (var-get initial-price)))
-        (current-min (unwrap-panic (var-get min-price)))
-        (timelock (unwrap-panic (var-get timelock-end-block)))
-    )
+            (caller tx-sender)
+            (current-price (unwrap-panic (var-get initial-price)))
+            (current-min (unwrap-panic (var-get min-price)))
+            (timelock (unwrap-panic (var-get timelock-end-block)))
+        )
         (asserts! (var-get is-initialized) ERR_NOT_INITIALIZED)
         (asserts!
             (is-ok (contract-call? .governance-token get-voting-power caller))
             ERR_UNAUTHORIZED
         )
-(asserts! (>= block-height timelock) ERR_INVALID_TIMELOCK)
-(asserts! (>= new-price current-min) ERR_INVALID_PRICE)
         (asserts! (>= block-height timelock) ERR_INVALID_TIMELOCK)
         (asserts! (>= new-price current-min) ERR_INVALID_PRICE)
-        
+        (asserts! (>= block-height timelock) ERR_INVALID_TIMELOCK)
+        (asserts! (>= new-price current-min) ERR_INVALID_PRICE)
+
         (var-set initial-price (some new-price))
         (var-set price-last-updated (some block-height))
-        
+
         (ok (print {
             event: "price-updated",
             old-price: current-price,
             new-price: new-price,
             block: block-height,
-            emergency: false
+            emergency: false,
         }))
     )
 )
@@ -140,11 +138,11 @@
 ;; @returns (response (tuple) uint): An `ok` response with a `MinPriceUpdated` event on success, or an error code on failure.
 (define-public (update-min-price (new-min-price uint))
     (let (
-        (caller tx-sender)
-        (current-price (unwrap-panic (var-get initial-price)))
-        (current-min (unwrap-panic (var-get min-price)))
-        (timelock (unwrap-panic (var-get timelock-end-block)))
-    )
+            (caller tx-sender)
+            (current-price (unwrap-panic (var-get initial-price)))
+            (current-min (unwrap-panic (var-get min-price)))
+            (timelock (unwrap-panic (var-get timelock-end-block)))
+        )
         (asserts! (var-get is-initialized) ERR_NOT_INITIALIZED)
         (asserts!
             (is-ok (contract-call? .governance-token get-voting-power caller))
@@ -152,14 +150,14 @@
         )
         (asserts! (>= block-height timelock) ERR_INVALID_TIMELOCK)
         (asserts! (<= new-min-price current-price) ERR_INVALID_PRICE)
-        
+
         (var-set min-price (some new-min-price))
-        
+
         (ok (print {
             event: "min-price-updated",
             old-min-price: current-min,
             new-min-price: new-min-price,
-            block: block-height
+            block: block-height,
         }))
     )
 )
@@ -169,24 +167,24 @@
 ;; @returns (response (tuple) uint): An `ok` response with a `PriceUpdated` event on success, or an error code on failure.
 (define-public (emergency-update-price (new-price uint))
     (let (
-        (caller tx-sender)
-        (current-price (unwrap-panic (var-get initial-price)))
-        (current-min (unwrap-panic (var-get min-price)))
-        (oracle-principal (unwrap-panic (var-get oracle)))
-    )
+            (caller tx-sender)
+            (current-price (unwrap-panic (var-get initial-price)))
+            (current-min (unwrap-panic (var-get min-price)))
+            (oracle-principal (unwrap-panic (var-get oracle)))
+        )
         (asserts! (var-get is-initialized) ERR_NOT_INITIALIZED)
         (asserts! (is-eq caller oracle-principal) ERR_UNAUTHORIZED)
         (asserts! (>= new-price current-min) ERR_INVALID_PRICE)
-        
+
         (var-set initial-price (some new-price))
         (var-set price-last-updated (some block-height))
-        
+
         (ok (print {
             event: "price-updated",
             old-price: current-price,
             new-price: new-price,
             block: block-height,
-            emergency: true
+            emergency: true,
         }))
     )
 )
@@ -195,13 +193,13 @@
 ;; @returns (response { ... } uint): An `ok` response with a tuple containing `price`, `min-price`, and `last-updated` on success.
 (define-read-only (get-price-with-minimum)
     (let (
-        (price (unwrap-panic (var-get initial-price)))
-        (min-price (unwrap-panic (var-get min-price)))
-    )
+            (price (unwrap-panic (var-get initial-price)))
+            (minp (unwrap-panic (var-get min-price)))
+        )
         (ok {
             price: price,
-            min-price: min-price,
-            last-updated: (unwrap-panic (var-get price-last-updated))
+            min-price: minp,
+            last-updated: (unwrap-panic (var-get price-last-updated)),
         })
     )
 )
@@ -216,6 +214,8 @@
         initial-price: (var-get initial-price),
         min-price: (var-get min-price),
         last-updated: (var-get price-last-updated),
-        timelock-end: (var-get timelock-end-block)
+        timelock-end: (var-get timelock-end-block),
     })
 )
+;; Owner
+(define-data-var contract-owner principal tx-sender)

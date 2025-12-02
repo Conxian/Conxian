@@ -177,7 +177,7 @@ plan:
             path: "contracts\\dex\\concentrated-liquidity-pool.clar"
             anchor-block-only: true
             clarity-version: 1
-      epoch: "2.05"
+      epoch: "3.0"
     - id: 1
       transactions:
         - contract-publish:

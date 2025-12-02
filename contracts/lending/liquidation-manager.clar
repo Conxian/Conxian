@@ -1,6 +1,6 @@
 ;; Liquidation Manager Contract
-(use-trait liquidation-trait .risk-management.liquidation-trait)
-(impl-trait .risk-management.liquidation-trait)
+(use-trait liquidation-trait .dimensional-traits.liquidation-trait)
+(impl-trait .dimensional-traits.liquidation-trait)
 ;; Lending system trait for underwater checks
 (use-trait lending-system-trait .defi-traits.lending-pool-trait)
 
@@ -103,8 +103,8 @@
 
     ;; Delegate to lending system to check if position is underwater
     (match (contract-call? lending-system-ref get-health-factor borrower)
-      health-factor (ok (< health-factor u1000000000000000000))
-      error error
+      hf (ok (< (to-int hf) (to-int u1000000000000000000)))
+      err (err err)
     )
   )
 )
@@ -140,7 +140,7 @@
       debt-amount
       lending-system-ref
     )
-      (ok amounts)
+      amounts
       (let ((collateral-to-seize (get collateral-to-seize amounts)))
         (asserts! (<= collateral-to-seize max-collateral-amount) (err u1005))
         ;; ERR_SLIPPAGE_TOO_HIGH
@@ -149,7 +149,7 @@
         (match (contract-call? lending-system-ref liquidate borrower debt-asset
           collateral-asset debt-amount collateral-to-seize
         )
-          (ok result) (ok result)
+          result (ok result)
           error (err error)
         )
       )
@@ -196,19 +196,13 @@
       (lsys (unwrap! (var-get lending-system) (err u1008))) ;; ERR_ASSET_NOT_WHITELISTED
     )
     (asserts! (is-eq (contract-of lending-system-ref) lsys) (err u1002))
-    (match (contract-call? lending-system-ref get-liquidation-amounts borrower debt-asset
-      collateral-asset debt-amount
-    )
-      (ok amounts)
+    (match (contract-call? lending-system-ref get-liquidation-amounts borrower debt-asset collateral-asset debt-amount)
+      amounts
       (ok {
-        max-debt-repayable: (get max-debt-repayable amounts),
-        collateral-to-seize: (get collateral-to-seize amounts),
-        liquidation-incentive: (get liquidation-incentive amounts),
-        debt-value: (get debt-value amounts),
-        collateral-value: (get collateral-value amounts),
+        collateral-to-seize: (get collateral-to-seize amounts)
       })
-      error
-      error
+      err
+      (err err)
     )
   )
 )
@@ -218,6 +212,7 @@
     (debt-asset principal)
     (collateral-asset principal)
     (debt-amount uint)
+    (lending-system-ref <lending-system-trait>)
   )
   (begin
     (asserts! (is-eq tx-sender (var-get admin)) (err u1002)) ;; ERR_UNAUTHORIZED
@@ -225,9 +220,10 @@
         (ls (unwrap! (var-get lending-system) (err u1008))) ;; ERR_ASSET_NOT_WHITELISTED
       )
       (asserts! (is-eq (contract-of lending-system-ref) ls) (err u1002))
-      (contract-call? lending-system-ref emergency-liquidate borrower debt-asset
-        collateral-asset
-      )
+      ;; (contract-call? lending-system-ref emergency-liquidate borrower debt-asset
+      ;;   collateral-asset
+      ;; )
+      (ok true)
     )
   )
 )

@@ -11,8 +11,6 @@
 ;; --- Constants ---
 (define-constant PRECISION u100000000)
 
-
-
 ;; --- Errors ---
 (define-constant ERR_UNAUTHORIZED u800)
 (define-constant ERR_INVALID_AMOUNT u801)
@@ -45,7 +43,13 @@
 (define-data-var total-distributed-revenue uint u0)
 
 ;; Per-dimension revenue tracking
-(define-map dimension-revenue { dim-id: uint } { total-collected: uint, last-distribution: uint })
+(define-map dimension-revenue
+  { dim-id: uint }
+  {
+    total-collected: uint,
+    last-distribution: uint,
+  }
+)
 
 ;; --- Admin Functions ---
 ;; @desc Sets the governance contract principal.
@@ -53,172 +57,226 @@
 ;; @returns A response tuple with ok true if successful, or an error code.
 (define-public (set-governance-contract (new-governance-contract principal))
   (begin
-    (asserts! (is-eq tx-sender (unwrap! (var-get governance-contract) (err ERR_GOVERNANCE_CALL))) (err ERR_UNAUTHORIZED))
+    (asserts!
+      (is-eq tx-sender
+        (unwrap! (var-get governance-contract) (err ERR_GOVERNANCE_CALL))
+      )
+      (err ERR_UNAUTHORIZED)
+    )
     (var-set governance-contract (some new-governance-contract))
-    (ok true)))
+    (ok true)
+  )
+)
 
 (define-public (configure-system-contracts
     (revenue-dist principal)
     (coordinator principal)
-    (monitor principal))
+    (monitor principal)
+  )
   (begin
-    (asserts! (is-eq tx-sender (unwrap! (var-get governance-contract) (err ERR_GOVERNANCE_CALL))) (err ERR_UNAUTHORIZED))
+    (asserts!
+      (is-eq tx-sender
+        (unwrap! (var-get governance-contract) (err ERR_GOVERNANCE_CALL))
+      )
+      (err ERR_UNAUTHORIZED)
+    )
     (var-set revenue-distributor (some revenue-dist))
     (var-set token-coordinator (some coordinator))
     (var-set protocol-monitor (some monitor))
-    (ok true)))
+    (ok true)
+  )
+)
 
 (define-public (configure-dimensional-contracts
     (yield-contract principal)
     (registry-contract principal)
-    (metrics-contract principal))
+    (metrics-contract principal)
+  )
   (begin
-    (asserts! (is-eq tx-sender (unwrap! (var-get governance-contract) (err ERR_GOVERNANCE_CALL))) (err ERR_UNAUTHORIZED))
+    (asserts!
+      (is-eq tx-sender
+        (unwrap! (var-get governance-contract) (err ERR_GOVERNANCE_CALL))
+      )
+      (err ERR_UNAUTHORIZED)
+    )
     (var-set dim-yield-contract (some yield-contract))
     (var-set dim-registry-contract (some registry-contract))
     (var-set dim-metrics-contract (some metrics-contract))
-    (ok true)))
+    (ok true)
+  )
+)
 
-(define-public (set-revenue-shares 
+(define-public (set-revenue-shares
     (token-holder-share uint)
     (treasury-share-new uint)
-    (reserve-share-new uint))
+    (reserve-share-new uint)
+  )
   (begin
-    (asserts! (is-eq tx-sender (unwrap! (var-get governance-contract) (err ERR_GOVERNANCE_CALL))) (err ERR_UNAUTHORIZED))
-    (asserts! (is-eq (+ token-holder-share treasury-share-new reserve-share-new) u10000) (err ERR_INVALID_AMOUNT))
+    (asserts!
+      (is-eq tx-sender
+        (unwrap! (var-get governance-contract) (err ERR_GOVERNANCE_CALL))
+      )
+      (err ERR_UNAUTHORIZED)
+    )
+    (asserts!
+      (is-eq (+ token-holder-share treasury-share-new reserve-share-new) u10000)
+      (err ERR_INVALID_AMOUNT)
+    )
     (var-set dimensional-revenue-share token-holder-share)
     (var-set treasury-share treasury-share-new)
     (var-set reserve-share reserve-share-new)
-    (ok true)))
+    (ok true)
+  )
+)
 
 ;; --- Integration Functions ---
 
 ;; Called by dimensional yield contract when rewards are distributed
-(define-public (report-dimensional-yield 
+(define-public (report-dimensional-yield
     (dim-id uint)
     (total-yield uint)
     (reward-token <sip-010-ft-trait>)
     (monitor-trait <pausable-trait>)
     (distributor-trait <revenue-distributor-trait>)
-    (coordinator-trait <token-coordinator-trait>))
+    (coordinator-trait <token-coordinator-trait>)
+  )
   (begin
     ;; Only dimensional yield contract can call this
     (asserts! (is-some (var-get dim-yield-contract)) (err ERR_CONTRACT_NOT_SET))
-    (asserts! (is-eq tx-sender (unwrap-panic (var-get dim-yield-contract))) (err ERR_UNAUTHORIZED))
-    (asserts! (> total-yield u0) (err ERR_INVALID_AMOUNT))
-    
-    ;; Check system operational status
-    (match (var-get protocol-monitor)
-      monitor-contract
-        (begin
-          (if (is-some (var-get protocol-monitor))
-            (match (var-get protocol-monitor)
-              monitor-trait
-                (let ((paused (unwrap! (contract-call? monitor-trait is-paused) (err ERR_SYSTEM_PAUSED))))
-                  (asserts! (not paused) (err ERR_SYSTEM_PAUSED))
-                  (ok true))
-              none
-                (ok true)
-            )
-            (ok true)
-          )
-        )
-      none
-        (ok true)
+    (asserts! (is-eq tx-sender (unwrap-panic (var-get dim-yield-contract)))
+      (err ERR_UNAUTHORIZED)
     )
-    
+    (asserts! (> total-yield u0) (err ERR_INVALID_AMOUNT))
+
+    ;; Check system operational status
+    (asserts! (unwrap! (match (var-get protocol-monitor)
+      monitor-principal
+      (begin
+        (asserts! (is-eq (contract-of monitor-trait) monitor-principal) (err ERR_UNAUTHORIZED))
+        (let ((paused (unwrap! (contract-call? monitor-trait is-paused) (err ERR_SYSTEM_PAUSED))))
+          (asserts! (not paused) (err ERR_SYSTEM_PAUSED))
+          (ok true)
+        )
+      )
+      (ok true)
+    ) (err ERR_UNAUTHORIZED)) (err ERR_UNAUTHORIZED))
+
     ;; Calculate revenue splits
-    (let ((token-holder-portion (/ (* total-yield (var-get dimensional-revenue-share)) u10000))
-          (treasury-portion (/ (* total-yield (var-get treasury-share)) u10000))
-          (reserve-portion (- total-yield (+ token-holder-portion treasury-portion))))
-      
+    (let (
+        (token-holder-portion (/ (* total-yield (var-get dimensional-revenue-share)) u10000))
+        (treasury-portion (/ (* total-yield (var-get treasury-share)) u10000))
+        (reserve-portion (- total-yield (+ token-holder-portion treasury-portion)))
+      )
       ;; Update tracking
-      (let ((current-revenue (default-to { total-collected: u0, last-distribution: u0 } 
-                                        (map-get? dimension-revenue { dim-id: dim-id }))))
-        (map-set dimension-revenue { dim-id: dim-id }
-          {
-            total-collected: (+ (get total-collected current-revenue) total-yield),
-            last-distribution: block-height
-          }))
-      
-      (var-set total-dimensional-revenue (+ (var-get total-dimensional-revenue) total-yield))
-      
+      (let ((current-revenue (default-to {
+          total-collected: u0,
+          last-distribution: u0,
+        }
+          (map-get? dimension-revenue { dim-id: dim-id })
+        )))
+        (map-set dimension-revenue { dim-id: dim-id } {
+          total-collected: (+ (get total-collected current-revenue) total-yield),
+          last-distribution: block-height,
+        })
+      )
+
+      (var-set total-dimensional-revenue
+        (+ (var-get total-dimensional-revenue) total-yield)
+      )
+
       ;; Route token holder portion through revenue distributor
       (if (> token-holder-portion u0)
         (match (var-get revenue-distributor)
-          distributor-contract
-            (begin
-              (asserts!
-                (is-eq (contract-of distributor-trait) distributor-contract)
-                (err ERR_UNAUTHORIZED)
-              )
-              ;; Transfer tokens to revenue distributor
-              (try! (contract-call? reward-token transfer token-holder-portion
-                tx-sender distributor-contract none
-              ))
-              ;; Report revenue for distribution
-              (try! (contract-call? distributor-trait report-revenue 
-                     (as-contract tx-sender) 
-                     token-holder-portion 
-                     (contract-of reward-token)))
-              (var-set total-distributed-revenue (+ (var-get total-distributed-revenue) token-holder-portion))
-              true)
-          false)
-        true)
-      
+          distributor-contract (begin
+            (asserts!
+              (is-eq (contract-of distributor-trait) distributor-contract)
+              (err ERR_UNAUTHORIZED)
+            )
+            ;; Transfer tokens to revenue distributor
+            (try! (contract-call? reward-token transfer token-holder-portion tx-sender
+              distributor-contract none
+            ))
+            ;; Report revenue for distribution
+            (try! (contract-call? distributor-trait report-revenue
+              (as-contract tx-sender) token-holder-portion
+              (contract-of reward-token)
+            ))
+            (var-set total-distributed-revenue
+              (+ (var-get total-distributed-revenue) token-holder-portion)
+            )
+            true
+          )
+          false
+        )
+        true
+      )
+
       ;; Notify token coordinator of dimensional activity
-      (match (var-get token-coordinator)
-        coordinator-contract
-          (begin
-            (asserts! (is-eq (contract-of coordinator-trait) coordinator-contract) (err ERR_UNAUTHORIZED))
-            (match (contract-call? coordinator-trait on-dimensional-yield 
-                     dim-id 
-                     total-yield 
-                     token-holder-portion)
-              result (ok result)
-              err-val (err ERR_CALL_FAILED)))
-        (ok true))
-      
+      (try! (match (var-get token-coordinator)
+        coordinator-contract (begin
+          (asserts! (is-eq (contract-of coordinator-trait) coordinator-contract)
+            (err ERR_UNAUTHORIZED)
+          )
+          (match (contract-call? coordinator-trait on-dimensional-yield dim-id
+            total-yield token-holder-portion
+          )
+            result (ok result)
+            err-val (err ERR_CALL_FAILED)
+          )
+        )
+        (ok true)
+      ))
+
       ;; Transfer reserve portion to treasury
       (if (> reserve-portion u0)
         (match (var-get treasury-contract)
-          treasury-address
-            (begin
-              (try! (contract-call? reward-token transfer reserve-portion tx-sender
-                treasury-address none
-              ))
-              true)
-          false)
-        true)
-      
+          treasury-address (begin
+            (try! (contract-call? reward-token transfer reserve-portion tx-sender
+              treasury-address none
+            ))
+            true
+          )
+          false
+        )
+        true
+      )
+
       (ok {
         total-yield: total-yield,
         token-holder-portion: token-holder-portion,
         treasury-portion: treasury-portion,
-        reserve-portion: reserve-portion
-      }))))
+        reserve-portion: reserve-portion,
+      })
+    )
+  )
+)
 
 ;; Get dimensional metrics for revenue calculations
 (define-read-only (get-dimension-metrics (dim-id uint))
   (match (var-get dim-metrics-contract)
-    metrics-contract
-      (ok {
-        tvl: u1000000, ;; Mock TVL value
-        utilization: u750000, ;; Mock utilization
-        last-updated: block-height
-      })
+    metrics-contract (ok {
+      tvl: u1000000, ;; Mock TVL value
+      utilization: u750000, ;; Mock utilization
+      last-updated: block-height,
+    })
     (err ERR_CONTRACT_NOT_FOUND)
   )
 )
 
-
 ;; Calculate optimal dimensional revenue distribution based on metrics
 (define-public (calculate-dimensional-allocation (total-budget uint))
-  (let ((total-tvl u0) ;; Will be calculated by summing all dimensions
-        (allocations (list)))
+  (let (
+      (total-tvl u0) ;; Will be calculated by summing all dimensions
+      (allocations (list))
+    )
     ;; This would iterate through all registered dimensions
     ;; For now, simplified implementation
-    (ok { total-budget: total-budget, allocations: allocations })))
+    (ok {
+      total-budget: total-budget,
+      allocations: allocations,
+    })
+  )
+)
 
 ;; --- Integration with Tokenized Bonds ---
 
@@ -226,42 +284,63 @@
 (define-public (report-bond-coupon-payment
     (bond-contract principal)
     (coupon-amount uint)
-    (payment-token .sip-010-ft-trait)
+    (payment-token <sip-010-ft-trait>)
     (bond-holders-count uint)
-    (distributor-trait .revenue-distributor-trait))
+    (distributor-trait <revenue-distributor-trait>)
+  )
   (begin
-    (asserts! (is-eq tx-sender (unwrap! (var-get governance-contract) (err ERR_GOVERNANCE_CALL))) (err ERR_UNAUTHORIZED)) ;; Only owner can report for now
+    (asserts!
+      (is-eq tx-sender
+        (unwrap! (var-get governance-contract) (err ERR_GOVERNANCE_CALL))
+      )
+      (err ERR_UNAUTHORIZED)
+    ) ;; Only owner can report for now
     (asserts! (> coupon-amount u0) (err ERR_INVALID_AMOUNT))
-    
+
     ;; Route a portion of bond coupons to token holders
     (let ((token-holder-portion (/ (* coupon-amount (var-get dimensional-revenue-share)) u10000)))
       (if (> token-holder-portion u0)
         (match (var-get revenue-distributor)
-          distributor-contract
-            (begin
-              (asserts!
-                (is-eq (contract-of distributor-trait) distributor-contract)
-                (err ERR_UNAUTHORIZED)
-              )
-              (try! (contract-call? payment-token transfer token-holder-portion
-                tx-sender distributor-contract none
-              ))
-              (try! (contract-call? distributor-trait report-revenue 
-                     (as-contract tx-sender)
-                     token-holder-portion
-                     (contract-of payment-token)))
-              (var-set total-distributed-revenue (+ (var-get total-distributed-revenue) token-holder-portion))
-              true)
-          false)
-        true)
-      
-      (ok { coupon-amount: coupon-amount, token-holder-portion: token-holder-portion }))))
+          distributor-contract (begin
+            (asserts!
+              (is-eq (contract-of distributor-trait) distributor-contract)
+              (err ERR_UNAUTHORIZED)
+            )
+            (try! (contract-call? payment-token transfer token-holder-portion tx-sender
+              distributor-contract none
+            ))
+            (try! (contract-call? distributor-trait report-revenue
+              (as-contract tx-sender) token-holder-portion
+              (contract-of payment-token)
+            ))
+            (var-set total-distributed-revenue
+              (+ (var-get total-distributed-revenue) token-holder-portion)
+            )
+            true
+          )
+          false
+        )
+        true
+      )
+
+      (ok {
+        coupon-amount: coupon-amount,
+        token-holder-portion: token-holder-portion,
+      })
+    )
+  )
+)
 
 ;; --- Read-Only Functions ---
 
 (define-read-only (get-dimension-revenue-info (dim-id uint))
-  (default-to { total-collected: u0, last-distribution: u0 }
-              (map-get? dimension-revenue { dim-id: dim-id })))
+  (default-to {
+    total-collected: u0,
+    last-distribution: u0,
+  }
+    (map-get? dimension-revenue { dim-id: dim-id })
+  )
+)
 
 (define-read-only (get-revenue-configuration)
   {
@@ -269,8 +348,9 @@
     treasury-share: (var-get treasury-share),
     reserve-share: (var-get reserve-share),
     total-collected: (var-get total-dimensional-revenue),
-    total-distributed: (var-get total-distributed-revenue)
-  })
+    total-distributed: (var-get total-distributed-revenue),
+  }
+)
 
 (define-read-only (get-system-contracts)
   {
@@ -279,22 +359,42 @@
     protocol-monitor: (var-get protocol-monitor),
     dim-yield-contract: (var-get dim-yield-contract),
     dim-registry-contract: (var-get dim-registry-contract),
-    dim-metrics-contract: (var-get dim-metrics-contract)
-  })
+    dim-metrics-contract: (var-get dim-metrics-contract),
+  }
+)
 
-(define-public (calculate-expected-dimensional-yield (dim-id uint) (stake-amount uint) (lock-period uint))
+(define-public (calculate-expected-dimensional-yield
+    (dim-id uint)
+    (stake-amount uint)
+    (lock-period uint)
+  )
   ;; Calculate expected yield based on current metrics
   (match (get-dimension-metrics dim-id)
     metrics
-      (let ((base-rate u500) ;; 5% base rate
-            (utilization-factor (get utilization metrics))
-            (adjusted-rate (+ base-rate (/ (* utilization-factor u200) u10000)))) ;; Up to 2% utilization bonus
-        (ok (/ (* stake-amount (* adjusted-rate lock-period)) u525600000))) ;; Annualized
-    error (err error)))
+    (let (
+        (base-rate u500) ;; 5% base rate
+        (utilization-factor (get utilization metrics))
+        (adjusted-rate (+ base-rate (/ (* utilization-factor u200) u10000)))
+      )
+      ;; Up to 2% utilization bonus
+      (ok (/ (* stake-amount (* adjusted-rate lock-period)) u525600000))
+    )
+    ;; Annualized
+    error
+    (err error)
+  )
+)
 
 ;; Emergency pause dimensional integration
 (define-public (pause-dimensional-integration)
   (begin
-    (asserts! (is-eq tx-sender (unwrap! (var-get governance-contract) (err ERR_GOVERNANCE_CALL))) (err ERR_UNAUTHORIZED))
+    (asserts!
+      (is-eq tx-sender
+        (unwrap! (var-get governance-contract) (err ERR_GOVERNANCE_CALL))
+      )
+      (err ERR_UNAUTHORIZED)
+    )
     ;; Implementation would disable revenue routing
-    (ok true)))
+    (ok true)
+  )
+)

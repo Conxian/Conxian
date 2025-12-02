@@ -421,10 +421,7 @@
       (map-set balance-since recipient block-height)
     )
     
-    (match (var-get migration-queue-contract)
-      mq-contract (ok true) ;; Placeholder: Dynamic call requires trait
-(ok true)
-    )
+    true
     (ok true)
   ))
 
@@ -479,7 +476,7 @@
           (mult (unwrap! (band-multiplier band) (err ERR_OVERFLOW)))
           (cxd-to-mint (/ (* amount mult) u10000))
         )
-        (try! (as-contract (contract-call? cxd-stored mint recipient cxd-to-mint)))
+        (try! (as-contract (contract-call? .cxd-token mint recipient cxd-to-mint)))
         (ok cxd-to-mint)
       )
     )

@@ -30,7 +30,8 @@
 
 ;; @desc Asserts that the transaction sender is the contract owner.
 (define-private (is-contract-owner)
-  (is-eq tx-sender (var-get contract-owner)))
+  (is-eq tx-sender (var-get contract-owner))
+)
 
 ;; --- Public Functions ---
 
@@ -43,47 +44,68 @@
 ;; @param start-block uint The starting block for voting.
 ;; @param end-block uint The ending block for voting.
 ;; @returns (response uint uint) The ID of the new proposal.
-(define-public (propose (description (string-ascii 256)) (targets (list 10 principal)) (values (list 10 uint)) (signatures (list 10 (string-ascii 64))) (calldatas (list 10 (buff 1024))) (start-block uint) (end-block uint))
-  (let ((proposal-id (try! (contract-call? .proposal-registry create-proposal tx-sender description start-block end-block))))
+(define-public (propose
+    (description (string-ascii 256))
+    (targets (list 10 principal))
+    (values (list 10 uint))
+    (signatures (list 10 (string-ascii 64)))
+    (calldatas (list 10 (buff 1024)))
+    (start-block uint)
+    (end-block uint)
+  )
+  (let ((proposal-id (try! (contract-call? .proposal-registry create-proposal tx-sender description
+      start-block end-block
+    ))))
     (print {
       event: "proposal-created",
       proposal-id: proposal-id,
       proposer: tx-sender,
       start-block: start-block,
-      end-block: end-block
+      end-block: end-block,
     })
-    (ok proposal-id)))
+    (ok proposal-id)
+  )
+)
 
 ;; @desc Casts a vote on a proposal.
 ;; @param proposal-id uint The ID of the proposal.
 ;; @param support bool Whether to support the proposal.
 ;; @param votes-cast uint The number of votes to cast.
 ;; @returns (response bool uint) `(ok true)` on success.
-(define-public (vote (proposal-id uint) (support bool) (votes-cast uint))
+(define-public (vote
+    (proposal-id uint)
+    (support bool)
+    (votes-cast uint)
+  )
   (let ((maybe-proposal (try! (contract-call? .proposal-registry get-proposal proposal-id))))
     (match maybe-proposal
-      proposal
-        (begin
-          (asserts! (is-eq (get executed proposal) false) ERR_VOTING_CLOSED)
-          (asserts! (is-eq (get canceled proposal) false) ERR_VOTING_CLOSED)
-          (asserts! (>= block-height (get start-block proposal)) ERR_PROPOSAL_NOT_ACTIVE)
-          (asserts! (<= block-height (get end-block proposal)) ERR_VOTING_CLOSED)
-          (asserts!
-            (unwrap-panic (contract-call? .governance-token
-              has-voting-power tx-sender))
-            ERR_UNAUTHORIZED)
-          (try! (contract-call? .governance-voting
-                  vote proposal-id support votes-cast tx-sender))
-          (print {
-            event: "vote-cast",
-            proposal-id: proposal-id,
-            voter: tx-sender,
-            support: support,
-            votes: votes-cast
-          })
-          (ok true))
-      none
-        ERR_PROPOSAL_NOT_FOUND)))
+      proposal (begin
+        (asserts! (is-eq (get executed proposal) false) ERR_VOTING_CLOSED)
+        (asserts! (is-eq (get canceled proposal) false) ERR_VOTING_CLOSED)
+        (asserts! (>= block-height (get start-block proposal))
+          ERR_PROPOSAL_NOT_ACTIVE
+        )
+        (asserts! (<= block-height (get end-block proposal)) ERR_VOTING_CLOSED)
+        (asserts!
+          (is-ok (contract-call? .governance-token has-voting-power tx-sender))
+          ERR_UNAUTHORIZED
+        )
+        (try! (contract-call? .governance-voting vote proposal-id support votes-cast
+          tx-sender
+        ))
+        (print {
+          event: "vote-cast",
+          proposal-id: proposal-id,
+          voter: tx-sender,
+          support: support,
+          votes: votes-cast,
+        })
+        (ok true)
+      )
+      ERR_PROPOSAL_NOT_FOUND
+    )
+  )
+)
 
 ;; @desc Executes a proposal.
 ;; @param proposal-id uint The ID of the proposal.
@@ -91,30 +113,38 @@
 (define-public (execute (proposal-id uint))
   (let ((maybe-proposal (try! (contract-call? .proposal-registry get-proposal proposal-id))))
     (match maybe-proposal
-      proposal
-        (let ((total-votes (+ (get for-votes proposal) (get against-votes proposal)))
-              (governance-token-supply (try! (contract-call?
-                .governance-token
-                get-total-supply)))
-              (quorum (/ (* total-votes u10000) governance-token-supply)))
-          (begin
-            (asserts! (is-eq tx-sender (get proposer proposal)) ERR_UNAUTHORIZED)
-            (asserts! (>= block-height (get end-block proposal)) ERR_PROPOSAL_NOT_ACTIVE)
-            (asserts! (not (get executed proposal)) ERR_VOTING_CLOSED)
-            (asserts! (not (get canceled proposal)) ERR_VOTING_CLOSED)
-            (asserts! (> (get for-votes proposal) (get against-votes proposal)) ERR_PROPOSAL_FAILED)
-            (asserts! (>= quorum (var-get quorum-percentage)) ERR_QUORUM_NOT_REACHED)
-            (try! (contract-call? .proposal-registry
-                    set-executed proposal-id))
-            (print {
-              event: "proposal-executed",
-              proposal-id: proposal-id,
-              votes-for: (get for-votes proposal),
-              votes-against: (get against-votes proposal)
-            })
-            (ok true)))
-      none
-        ERR_PROPOSAL_NOT_FOUND)))
+      proposal (let (
+          (total-votes (+ (get for-votes proposal) (get against-votes proposal)))
+          (governance-token-supply (unwrap! (contract-call? .governance-token get-total-supply) (err u999)))
+          (quorum (/ (* total-votes u10000) governance-token-supply))
+        )
+        (begin
+          (asserts! (is-eq tx-sender (get proposer proposal)) ERR_UNAUTHORIZED)
+          (asserts! (>= block-height (get end-block proposal))
+            ERR_PROPOSAL_NOT_ACTIVE
+          )
+          (asserts! (not (get executed proposal)) ERR_VOTING_CLOSED)
+          (asserts! (not (get canceled proposal)) ERR_VOTING_CLOSED)
+          (asserts! (> (get for-votes proposal) (get against-votes proposal))
+            ERR_PROPOSAL_FAILED
+          )
+          (asserts! (>= quorum (var-get quorum-percentage))
+            ERR_QUORUM_NOT_REACHED
+          )
+          (try! (contract-call? .proposal-registry set-executed proposal-id))
+          (print {
+            event: "proposal-executed",
+            proposal-id: proposal-id,
+            votes-for: (get for-votes proposal),
+            votes-against: (get against-votes proposal),
+          })
+          (ok true)
+        )
+      )
+      ERR_PROPOSAL_NOT_FOUND
+    )
+  )
+)
 
 ;; @desc Cancels a proposal.
 ;; @param proposal-id uint The ID of the proposal.
@@ -122,21 +152,25 @@
 (define-public (cancel (proposal-id uint))
   (let ((maybe-proposal (try! (contract-call? .proposal-registry get-proposal proposal-id))))
     (match maybe-proposal
-      proposal
-        (begin
-          (asserts! (or (is-eq tx-sender (get proposer proposal)) (is-contract-owner)) ERR_UNAUTHORIZED)
-          (asserts! (not (get executed proposal)) ERR_VOTING_CLOSED)
-          (asserts! (not (get canceled proposal)) ERR_VOTING_CLOSED)
-          (try! (contract-call? .proposal-registry
-                  set-canceled proposal-id))
-          (print {
-            event: "proposal-canceled",
-            proposal-id: proposal-id,
-            canceled-by: tx-sender
-          })
-          (ok true))
-      none
-        ERR_PROPOSAL_NOT_FOUND)))
+      proposal (begin
+        (asserts!
+          (or (is-eq tx-sender (get proposer proposal)) (is-contract-owner))
+          ERR_UNAUTHORIZED
+        )
+        (asserts! (not (get executed proposal)) ERR_VOTING_CLOSED)
+        (asserts! (not (get canceled proposal)) ERR_VOTING_CLOSED)
+        (try! (contract-call? .proposal-registry set-canceled proposal-id))
+        (print {
+          event: "proposal-canceled",
+          proposal-id: proposal-id,
+          canceled-by: tx-sender,
+        })
+        (ok true)
+      )
+      ERR_PROPOSAL_NOT_FOUND
+    )
+  )
+)
 
 ;; --- Read-Only Functions ---
 
@@ -144,14 +178,19 @@
 ;; @param proposal-id uint The ID of the proposal.
 ;; @returns (response (optional { ... }) (err uint)) The proposal details.
 (define-read-only (get-proposal (proposal-id uint))
-  (contract-call? .proposal-registry get-proposal proposal-id))
+  (contract-call? .proposal-registry get-proposal proposal-id)
+)
 
 ;; @desc Gets a vote on a proposal by a voter.
 ;; @param proposal-id uint The ID of the proposal.
 ;; @param voter principal The address of the voter.
 ;; @returns (response (optional { ... }) (err uint)) The vote details.
-(define-read-only (get-vote (proposal-id uint) (voter principal))
-  (contract-call? .governance-voting get-vote proposal-id voter))
+(define-read-only (get-vote
+    (proposal-id uint)
+    (voter principal)
+  )
+  (contract-call? .governance-voting get-vote proposal-id voter)
+)
 
 ;; --- Admin Functions ---
 
@@ -163,7 +202,9 @@
     (asserts! (is-contract-owner) ERR_UNAUTHORIZED)
     (asserts! (> new-period u0) ERR_INVALID_VOTING_PERIOD)
     (var-set voting-period-blocks new-period)
-    (ok true)))
+    (ok true)
+  )
+)
 
 ;; @desc Sets the quorum percentage.
 ;; @param new-quorum uint The new quorum percentage.
@@ -173,7 +214,9 @@
     (asserts! (is-contract-owner) ERR_UNAUTHORIZED)
     (asserts! (<= new-quorum u10000) ERR_UNAUTHORIZED)
     (var-set quorum-percentage new-quorum)
-    (ok true)))
+    (ok true)
+  )
+)
 
 ;; @desc Transfers ownership of the contract.
 ;; @param new-owner principal The new owner.
@@ -182,4 +225,6 @@
   (begin
     (asserts! (is-contract-owner) ERR_UNAUTHORIZED)
     (var-set contract-owner new-owner)
-    (ok true)))
+    (ok true)
+  )
+)

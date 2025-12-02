@@ -3,7 +3,7 @@
 (use-trait dimensional-trait .dimensional-traits.dimensional-trait)
 (use-trait funding-rate-calculator-trait .dimensional-traits.funding-rate-calculator-trait)
 (use-trait collateral-manager-trait .dimensional-traits.collateral-manager-trait)
-(use-trait risk-manager-trait .risk-management.risk-manager-trait)
+(use-trait risk-manager-trait .dimensional-traits.risk-manager-trait)
 (use-trait rbac-trait .core-traits.rbac-trait)
 
 (define-data-var position-manager principal tx-sender)
@@ -13,33 +13,27 @@
 
 (define-public (open-position (asset principal) (collateral uint) (leverage uint) (is-long bool) (stop-loss (optional uint)) (take-profit (optional uint)))
   (let (
-    (collateral-manager-contract (var-get collateral-manager))
-    (collateral-balance (try! (contract-call? collateral-manager-contract get-balance tx-sender)))
-    (fee-rate (try! (contract-call? collateral-manager-contract get-protocol-fee-rate)))
+    (collateral-balance (unwrap! (contract-call? .collateral-manager get-balance tx-sender) (err u2003)))
+    (fee-rate (try! (contract-call? .collateral-manager get-protocol-fee-rate)))
     (fee (* collateral fee-rate))
     (total-cost (+ collateral fee))
   )
     (asserts! (>= collateral-balance total-cost) (err u2003))
-    (try! (contract-call? collateral-manager-contract withdraw-funds total-cost asset))
-    (let ((position-manager-contract (var-get position-manager)))
-      (contract-call? position-manager-contract open-position asset
-        collateral leverage is-long stop-loss take-profit
-      )
+    (try! (contract-call? .collateral-manager withdraw-funds total-cost asset))
+    (contract-call? .position-manager open-position asset
+      collateral leverage is-long stop-loss take-profit
     )
   )
 )
 
 (define-public (close-position (position-id uint) (asset principal) (slippage (optional uint)))
   (let (
-    (position-manager-contract (var-get position-manager))
-    (result (try! (contract-call? position-manager-contract close-position position-id slippage)))
+    (result (try! (contract-call? .position-manager close-position position-id slippage)))
     (collateral-returned (get collateral-returned result))
   )
-    (let ((collateral-manager-contract (var-get collateral-manager)))
-      (try! (as-contract (contract-call? collateral-manager-contract deposit-funds
-        collateral-returned asset
-      )))
-    )
+    (try! (as-contract (contract-call? .collateral-manager deposit-funds
+      collateral-returned asset
+    )))
     (ok result)
   )
 )

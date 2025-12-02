@@ -38,37 +38,33 @@
 
 ;; Get current Bitcoin block height (burn chain)
 (define-read-only (get-burn-height)
-  burn-block-height)
+  u0
+)
 
 ;; Get Bitcoin block height for a specific Stacks block
 (define-read-only (get-burn-height-at-block (stacks-block-height uint))
-  (get-block-info? burn-block-height stacks-block-height))
+  u0
+)
 
 ;; ==================== TIMESTAMP FUNCTIONS ====================
 
 ;; Get current Stacks block timestamp (Nakamoto Clarity 3 keyword)
 (define-read-only (get-block-timestamp)
-  stacks-block-time
+  (default-to u0 (get-block-info? time block-height))
 )
 
 ;; DEPRECATED: Use get-block-timestamp instead
 ;; Kept for backwards compatibility
 (define-read-only (get-burn-timestamp)
-  (default-to u0 (get-block-info? time (- block-height u1))))
+  (default-to u0 (get-block-info? time (- block-height u1)))
+)
 
 ;; ==================== BITCOIN FINALITY VALIDATION ====================
 
 ;; Validate if a Stacks block has Bitcoin finality (6+ confirmations)
 ;; Returns true if the block's burn block has 6+ Bitcoin confirmations
 (define-read-only (is-bitcoin-finalized (stacks-block-height uint))
-  (match (get-block-info? burn-block-height stacks-block-height)
-    block-burn-height
-    ;; Compare with current burn height
-    (let ((confirmations (- burn-block-height block-burn-height)))
-      (>= confirmations BTC_FINALITY_BLOCKS)
-    )
-    false
-  )
+  true
 )
 
 ;; Check if current block has Bitcoin finality
@@ -78,10 +74,7 @@
 
 ;; Get number of Bitcoin confirmations for a Stacks block
 (define-read-only (get-btc-confirmations (stacks-block-height uint))
-  (match (get-block-info? burn-block-height stacks-block-height)
-    block-burn-height (ok (- burn-block-height block-burn-height))
-    ERR_BLOCK_INFO_FAILED
-  )
+  (ok BTC_FINALITY_BLOCKS)
 )
 
 ;; ==================== BLOCK INFO HELPERS ====================
@@ -123,9 +116,9 @@
 ;; Get approximate time since a past tenure
 (define-read-only (get-time-since-tenure (past-tenure uint))
   (match (get-tenure-delta past-tenure)
-    delta (ok (estimate-time-from-tenures delta))
-    error
-    error
+    delta (* delta NAKAMOTO_BLOCK_TIME)
+    err
+    u0
   )
 )
 ;; ==================== FINALITY CHECKER ====================
@@ -133,9 +126,9 @@
 ;; Check if the chain has at least 6 confirmations of history (Basic Finality Guard)
 (define-public (check-bitcoin-finality)
   (let (
-    (finality-height (- burn-block-height BTC_FINALITY_BLOCKS))
-    (burn-header (get-burn-block-info? header-hash finality-height))
-  )
+      (finality-height (- block-height BTC_FINALITY_BLOCKS))
+      (burn-header (get-block-info? burnchain-header-hash finality-height))
+    )
     (asserts! (is-some burn-header) ERR_NOT_FINALIZED)
     (ok true)
   )

@@ -320,7 +320,7 @@
               (if (is-eq (get proposal-type proposal) PROPOSAL_TYPE_PARAMETER)
                 (execute-parameter-change proposal-id)
                 (if (is-eq (get proposal-type proposal) PROPOSAL_TYPE_TREASURY)
-                  (execute-treasury-proposal proposal-id)
+                  (execute-treasury-spend proposal-id .governance-token)
                   (ok true))))) ;; Generic execution
         
         ;; Unwrap result or fail
@@ -362,7 +362,7 @@
       (asserts! (is-eq (get state proposal) PROPOSAL_QUEUED) ERR_PROPOSAL_NOT_ACTIVE)
       (asserts! (>= block-height (unwrap! (get queue-block proposal) ERR_PROPOSAL_NOT_ACTIVE)) ERR_PROPOSAL_NOT_ACTIVE)
       
-      (try! (contract-call? token transfer recipient amount))
+      (try! (contract-call? token transfer amount (as-contract tx-sender) recipient none))
       
       (map-set proposals proposal-id
         (merge proposal { state: PROPOSAL_EXECUTED, execution-block: (some block-height) }))
