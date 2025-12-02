@@ -47,9 +47,18 @@
   )
 )
 
-(define-public (update-position-value (user principal) (new-value uint))
+(define-public (liquidate-position (position-id uint) (liquidator principal))
+  (ok {
+    liquidated: true,
+    reward: u0,
+    repaid: u0
+  })
+)
+
+(define-public (set-insurance-fund (fund principal))
   (begin
     (try! (check-role "ROLE_ADMIN"))
+    (var-set insurance-fund fund)
     (ok true)
   )
 )
@@ -78,7 +87,7 @@
   )
 )
 
-(define-public (assess-position-risk (position-id uint))
+(define-public (check-position-health (position-id uint))
   (ok {
     health-factor: u1000000,
     liquidation-price: u0,
