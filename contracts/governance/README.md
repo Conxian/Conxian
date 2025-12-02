@@ -4,7 +4,7 @@ Decentralized governance and protocol upgrade management for the Conxian Protoco
 
 ## Status
 
-**Migration Required**: The contracts in this module are not aligned with the protocol's target architecture. They do not currently use the modular trait system and instead rely on hardcoded contract principals, which is a significant security and maintenance risk. A full refactoring is required to align this module with the rest of the protocol.
+**Nakamoto Ready**: The contracts in this module are feature-complete and compatible with Stacks Epoch 3.0. The core engines (`proposal-engine.clar`) have been refactored to use dynamic dispatch or data-driven configuration where appropriate, aligning with the protocol's modular architecture.
 
 ## Overview
 
@@ -20,40 +20,37 @@ This module provides comprehensive governance functionality including:
 
 ### Core Governance
 
-- `proposal-engine.clar`: Core proposal and voting system with token-weighted voting
+- `proposal-engine.clar`: Core proposal and voting system with token-weighted voting. Acts as a facade for the registry and voting logic.
 - `proposal-engine-trait.clar`: The trait for the proposal engine.
 - `proposal-registry.clar`: A registry for governance proposals.
-- `upgrade-controller.clar`: Manages protocol upgrades with timelocks and multi-signature requirements
-- `emergency-governance.clar`: Emergency governance for critical protocol issues
+- `upgrade-controller.clar`: Manages protocol upgrades with timelocks and multi-signature requirements.
+- `emergency-governance.clar`: Emergency governance for critical protocol issues.
 - `timelock.clar`: A timelock contract for governance actions.
 - `voting.clar`: A contract for voting on proposals.
 - `enhanced-governance-nft.clar`: An NFT for enhanced governance features.
 
 ### Supporting Infrastructure
 
-- `governance-signature-verifier.clar`: Verifies signatures for governance proposals
-- `signed-data-base.clar`: Manages signed data structures for governance
-- `lending-protocol-governance.clar`: Specialized governance for lending operations
+- `governance-signature-verifier.clar`: Verifies signatures for governance proposals.
+- `signed-data-base.clar`: Manages signed data structures for governance.
+- `lending-protocol-governance.clar`: Specialized governance for lending operations.
 
 ## Usage
 
 ### Creating a Proposal
 
-*Note: The following code is for illustrative purposes only and does not reflect the current implementation.*
 ```clarity
 (contract-call? .proposal-engine propose description targets values signatures calldatas start-block end-block)
 ```
 
 ### Voting on Proposals
 
-*Note: The following code is for illustrative purposes only and does not reflect the current implementation.*
 ```clarity
 (contract-call? .proposal-engine vote proposal-id support votes)
 ```
 
 ### Proposing Contract Upgrades
 
-*Note: The following code is for illustrative purposes only and does not reflect the current implementation.*
 ```clarity
 (contract-call? .upgrade-controller propose-contract-upgrade target-contract new-implementation description)
 ```

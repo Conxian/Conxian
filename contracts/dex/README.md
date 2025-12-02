@@ -4,7 +4,7 @@ Comprehensive decentralized exchange functionality for the Conxian Protocol impl
 
 ## Status
 
-**Migration In Progress**: The contracts in this module have not yet been migrated to the new modular trait system. They still use the legacy, individual trait files, and some are in a transitional state with trait imports temporarily commented out. The code examples below reflect the *target* architecture, not the current implementation.
+**Nakamoto Ready**: This module is feature-complete and fully integrated with the Conxian modular trait system. It supports Stacks Epoch 3.0 fast blocks and Bitcoin finality.
 
 ## Overview
 
@@ -127,7 +127,6 @@ The DEX module contains a complete suite of decentralized exchange contracts sup
 ### Creating a Concentrated Liquidity Position
 
 ```clarity
-;; Note: The following use-trait line is part of the target architecture and is not yet implemented.
 (contract-call? .concentrated-liquidity-pool create-position
   { token-0: token-a, token-1: token-b }
   tick-lower
@@ -143,7 +142,6 @@ The DEX module contains a complete suite of decentralized exchange contracts sup
 ### Multi-Hop Token Swap
 
 ```clarity
-;; Note: The following use-trait line is part of the target architecture and is not yet implemented.
 ;; Propose route first
 (contract-call? .multi-hop-router-v3 propose-route
   token-in token-out amount-in min-amount-out route-timeout)
@@ -156,7 +154,6 @@ The DEX module contains a complete suite of decentralized exchange contracts sup
 ### Staking LP Tokens
 
 ```clarity
-;; Note: The following use-trait line is part of the target architecture and is not yet implemented.
 (contract-call? .auto-compounder stake-tokens
   pool-token amount lock-period)
 ```

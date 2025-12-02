@@ -2,7 +2,7 @@
 ;; This contract acts as a facade, delegating logic to specialized contracts for custody,
 ;; yield aggregation, BTC bridging, and fee management.
 
-(use-trait vault-trait .vault-trait.vault-trait)
+(use-trait vault-trait .defi-traits.vault-trait)
 (use-trait custody-trait .custody.custody-trait)
 (use-trait yield-aggregator-trait .yield-aggregator.yield-aggregator-trait)
 (use-trait btc-bridge-trait .btc-bridge.btc-bridge-trait)
