@@ -2,10 +2,10 @@
 ;; Comprehensive MEV (Maximum Extractable Value) protection NFT system
 ;; Provides front-running protection, sandwich attack prevention, and fair transaction ordering
 
-(use-trait sip-009-nft-trait .sip-standards.sip-009-nft-trait)
-(use-trait sip-010-ft-trait .sip-standards.sip-010-ft-trait)
+(use-trait sip-009-nft-trait .defi-traits.sip-009-nft-trait)
+(use-trait sip-010-ft-trait .defi-traits.sip-010-ft-trait)
 
-(impl-trait .sip-standards.sip-009-nft-trait)
+(impl-trait .defi-traits.sip-009-nft-trait)
 
 ;; ===== Constants =====
 (define-constant ERR_UNAUTHORIZED (err u13000))
@@ -16,13 +16,13 @@
 (define-constant ERR_INSUFFICIENT_FEE (err u13005))
 
 ;; MEV Protection Constants
-(define-constant BASE_PROTECTION_FEE u1000          ;; 0.1% base protection fee
-(define-constant MIN_PROTECTION_AMOUNT u1000000      ;; 1 STX minimum
-(define-constant MAX_PROTECTION_AMOUNT u100000000    ;; 1000 STX maximum
-(define-constant COMMITMENT_WINDOW u10              ;; 10 block commitment window
-(define-constant BATCH_SIZE_LIMIT u50               ;; 50 transactions per batch
-(define-constant REVEAL_TIMEOUT u100                 ;; 100 block reveal timeout
-(define-constant FAIR_ORDERING_FEE u500              ;; 0.05% fair ordering fee
+(define-constant BASE_PROTECTION_FEE u1000)          ;; 0.1% base protection fee
+(define-constant MIN_PROTECTION_AMOUNT u1000000)      ;; 1 STX minimum
+(define-constant MAX_PROTECTION_AMOUNT u100000000)    ;; 1000 STX maximum
+(define-constant COMMITMENT_WINDOW u10)              ;; 10 block commitment window
+(define-constant BATCH_SIZE_LIMIT u50)               ;; 50 transactions per batch
+(define-constant REVEAL_TIMEOUT u100)                 ;; 100 block reveal timeout
+(define-constant FAIR_ORDERING_FEE u500)              ;; 0.05% fair ordering fee
 
 ;; MEV Protection NFT Types
 (define-constant NFT_TYPE_MEV_SHIELD u1)             ;; MEV protection shield
@@ -46,13 +46,13 @@
 
 ;; ===== Data Variables =====
 (define-data-var contract-owner principal tx-sender)
-(define-data-var next-token-id uint u1
-(define-data-var next-protection-id uint u1
-(define-data-var next-commitment-id uint u1
-(define-data-var next-batch-id uint u1
+(define-data-var next-token-id uint u1)
+(define-data-var next-protection-id uint u1)
+(define-data-var next-commitment-id uint u1)
+(define-data-var next-batch-id uint u1)
 (define-data-var base-token-uri (optional (string-utf8 256)) none)
-(define-data-var mev-treasury principal tx-sender
-(define-data-var oracle-contract principal tx-sender
+(define-data-var mev-treasury principal tx-sender)
+(define-data-var oracle-contract principal tx-sender)
 
 ;; ===== NFT Definition =====
 (define-non-fungible-token mev-nft uint)
@@ -90,16 +90,16 @@
     committer: principal,
     commitment-hash: (buff 32),                    ;; Hash of committed transaction
     encrypted-payload: (buff 1024),               ;; Encrypted transaction data
-    reveal-window: uint,                          /// Blocks until reveal
-    reveal-deadline: uint,                        /// Deadline for reveal
-    protection-level: uint,                       /// Protection level for this commitment
-    transaction-type: uint,                       /// Type of transaction being protected
-    expected-gas: uint,                          /// Expected gas cost
-    commitment-status: uint,                      /// 1=pending, 2=revealed, 3=expired, 4=cancelled
-    reveal-data: (optional (buff 512)),           /// Revealed transaction data
-    execution-block: (optional uint),             /// Block where executed
-    mev-saved: uint,                             /// MEV amount saved
-    nft-token-id: uint,                           /// Associated NFT
+    reveal-window: uint,                          ;; Blocks until reveal
+    reveal-deadline: uint,                        ;; Deadline for reveal
+    protection-level: uint,                       ;; Protection level for this commitment
+    transaction-type: uint,                       ;; Type of transaction being protected
+    expected-gas: uint,                          ;; Expected gas cost
+    commitment-status: uint,                      ;; 1=pending, 2=revealed, 3=expired, 4=cancelled
+    reveal-data: (optional (buff 512)),           ;; Revealed transaction data
+    execution-block: (optional uint),             ;; Block where executed
+    mev-saved: uint,                             ;; MEV amount saved
+    nft-token-id: uint,                           ;; Associated NFT
     created-at: uint
   })
 
@@ -107,19 +107,19 @@
 (define-map batch-auctions
   { batch-id: uint }
   {
-    auctioneer: principal,                         /// Who initiated the batch
-    batch-type: uint,                             /// 1=uniform-price, 2=vwap, 3=discriminatory
-    transactions: (list 50 { user: principal, tx-data: (buff 1024), min-price: uint, max-slippage: uint }), /// Batch transactions
-    batch-deadline: uint,                         /// Deadline for batch submission
-    execution-block: (optional uint),             /// Block where batch was executed
-    clearing-price: uint,                        /// Clearing price for uniform price auction
-    total-volume: uint,                          /// Total volume in batch
-    auction-status: uint,                        /// 1=open, 2=closed, 3=executed, 4=failed
-    mev-captured: uint,                          /// MEV captured by batch
-    fee-distributed: uint,                       /// Fees distributed to participants
-    participant-rewards: (list 50 { user: principal, reward: uint }), /// Participant rewards
-    special-features: (list 10 (string-ascii 50)), /// Special batch features
-    nft-token-id: uint,                           /// Associated NFT
+    auctioneer: principal,                         ;; Who initiated the batch
+    batch-type: uint,                             ;; 1=uniform-price, 2=vwap, 3=discriminatory
+    transactions: (list 50 { user: principal, tx-data: (buff 1024), min-price: uint, max-slippage: uint }), ;; Batch transactions
+    batch-deadline: uint,                         ;; Deadline for batch submission
+    execution-block: (optional uint),             ;; Block where batch was executed
+    clearing-price: uint,                        ;; Clearing price for uniform price auction
+    total-volume: uint,                          ;; Total volume in batch
+    auction-status: uint,                        ;; 1=open, 2=closed, 3=executed, 4=failed
+    mev-captured: uint,                          ;; MEV captured by batch
+    fee-distributed: uint,                       ;; Fees distributed to participants
+    participant-rewards: (list 50 { user: principal, reward: uint }), ;; Participant rewards
+    special-features: (list 10 (string-ascii 50)), ;; Special batch features
+    nft-token-id: uint,                           ;; Associated NFT
     created-at: uint,
     last-update-block: uint
   })
@@ -128,19 +128,19 @@
 (define-map fair-ordering
   { ordering-id: uint }
   {
-    subscriber: principal,                        /// Who subscribed to fair ordering
-    ordering-type: uint,                          /// 1=time-based, 2=fair-based, 3=priority-based
-    subscription-fee: uint,                      /// Subscription fee paid
-    subscription-duration: uint,                  /// Duration in blocks
-    priority-level: uint,                        /// Priority level (1-10)
-    max-transactions-per-block: uint,            /// Max transactions per block
-    ordering-features: (list 10 (string-ascii 50)), /// Ordering features
-    transactions-ordered: uint,                   /// Total transactions ordered
-    mev-prevented: uint,                         /// MEV prevented through fair ordering
-    current-status: uint,                        /// 1=active, 2=expired, 3=suspended
-    special-privileges: (list 10 (string-ascii 50)), /// Special privileges
-    visual-tier: uint,                           /// Visual appearance tier
-    nft-token-id: uint,                           /// Associated NFT
+    subscriber: principal,                        ;; Who subscribed to fair ordering
+    ordering-type: uint,                          ;; 1=time-based, 2=fair-based, 3=priority-based
+    subscription-fee: uint,                      ;; Subscription fee paid
+    subscription-duration: uint,                  ;; Duration in blocks
+    priority-level: uint,                        ;; Priority level (1-10)
+    max-transactions-per-block: uint,            ;; Max transactions per block
+    ordering-features: (list 10 (string-ascii 50)), ;; Ordering features
+    transactions-ordered: uint,                   ;; Total transactions ordered
+    mev-prevented: uint,                         ;; MEV prevented through fair ordering
+    current-status: uint,                        ;; 1=active, 2=expired, 3=suspended
+    special-privileges: (list 10 (string-ascii 50)), ;; Special privileges
+    visual-tier: uint,                           ;; Visual appearance tier
+    nft-token-id: uint,                           ;; Associated NFT
     created-at: uint,
     last-activity-block: uint
   })
@@ -149,20 +149,20 @@
 (define-map mev-detectors
   { detector-id: uint }
   {
-    operator: principal,                          /// Who operates the detector
-    detection-capabilities: (list 5 uint),       /// Attack types that can be detected
-    detection-accuracy: uint,                    /// Detection accuracy (basis points)
-    false-positive-rate: uint,                   /// False positive rate (basis points)
-    detection-fee: uint,                         /// Fee per detection
-    total-detections: uint,                      /// Total attacks detected
-    successful-detections: uint,                 /// Successfully detected attacks
-    detection-rewards: uint,                      /// Total rewards earned
-    detector-tier: uint,                          /// 1=basic, 2=advanced, 3=expert, 4=master
-    special-abilities: (list 10 (string-ascii 50)), /// Special detection abilities
-    visual-effects: (list 5 (string-ascii 30)),   /// Visual effects
-    governance-weight: uint,                     /// Enhanced governance weight
-    revenue-share: uint,                         /// Revenue sharing percentage
-    nft-token-id: uint,                           /// Associated NFT
+    operator: principal,                          ;; Who operates the detector
+    detection-capabilities: (list 5 uint),       ;; Attack types that can be detected
+    detection-accuracy: uint,                    ;; Detection accuracy (basis points)
+    false-positive-rate: uint,                   ;; False positive rate (basis points)
+    detection-fee: uint,                         ;; Fee per detection
+    total-detections: uint,                      ;; Total attacks detected
+    successful-detections: uint,                 ;; Successfully detected attacks
+    detection-rewards: uint,                      ;; Total rewards earned
+    detector-tier: uint,                          ;; 1=basic, 2=advanced, 3=expert, 4=master
+    special-abilities: (list 10 (string-ascii 50)), ;; Special detection abilities
+    visual-effects: (list 5 (string-ascii 30)),   ;; Visual effects
+    governance-weight: uint,                     ;; Enhanced governance weight
+    revenue-share: uint,                         ;; Revenue sharing percentage
+    nft-token-id: uint,                           ;; Associated NFT
     created-at: uint,
     last-detection-block: uint
   })
@@ -171,17 +171,17 @@
 (define-map mev-protection-pools
   { pool-id: uint }
   {
-    pool-type: uint,                              /// 1=shield-pool, 2=detection-pool, 3=reward-pool
-    total-capital: uint,                          /// Total capital in pool
-    available-capital: uint,                       /// Available capital
-    total-protections: uint,                      /// Total protections provided
-    total-attacks-prevented: uint,                /// Total attacks prevented
-    pool-performance: uint,                        /// Pool performance score
-    risk-adjustment-factor: uint,                  /// Risk adjustment factor
-    contributors: (list 50 principal),            /// Pool contributors
-    contribution-amounts: (list 50 uint),         /// Contribution amounts
-    reward-distribution: (list 50 uint),         /// Reward amounts distributed
-    pool-status: uint,                            /// 1=active, 2=suspended, 3=closed
+    pool-type: uint,                              ;; 1=shield-pool, 2=detection-pool, 3=reward-pool
+    total-capital: uint,                          ;; Total capital in pool
+    available-capital: uint,                       ;; Available capital
+    total-protections: uint,                      ;; Total protections provided
+    total-attacks-prevented: uint,                ;; Total attacks prevented
+    pool-performance: uint,                        ;; Pool performance score
+    risk-adjustment-factor: uint,                  ;; Risk adjustment factor
+    contributors: (list 50 principal),            ;; Pool contributors
+    contribution-amounts: (list 50 uint),         ;; Contribution amounts
+    reward-distribution: (list 50 uint),         ;; Reward amounts distributed
+    pool-status: uint,                            ;; 1=active, 2=suspended, 3=closed
     created-at: uint,
     last-rebalance-block: uint
   })
@@ -190,17 +190,17 @@
 (define-map user-mev-profiles
   { user: principal }
   {
-    total-protections: uint,                     /// Total MEV protections purchased
-    total-protected-value: uint,                 /// Total value protected
-    total-mev-saved: uint,                       /// Total MEV saved
-    attacks-prevented: uint,                     /// Attacks prevented against user
-    commitment-count: uint,                     /// Total commitments made
-    batch-participations: uint,                  /// Batch auction participations
-    fair-ordering-subscriptions: uint,           /// Fair ordering subscriptions
-    detection-rewards: uint,                     /// Rewards from detections
-    mev-tier: uint,                              /// 1=basic, 2=enhanced, 3=premium, 4=institutional
-    special-privileges: (list 15 (string-ascii 50)), /// Special privileges
-    protection-preferences: (list 10 (string-ascii 50)), /// Protection preferences
+    total-protections: uint,                     ;; Total MEV protections purchased
+    total-protected-value: uint,                 ;; Total value protected
+    total-mev-saved: uint,                       ;; Total MEV saved
+    attacks-prevented: uint,                     ;; Attacks prevented against user
+    commitment-count: uint,                     ;; Total commitments made
+    batch-participations: uint,                  ;; Batch auction participations
+    fair-ordering-subscriptions: uint,           ;; Fair ordering subscriptions
+    detection-rewards: uint,                     ;; Rewards from detections
+    mev-tier: uint,                              ;; 1=basic, 2=enhanced, 3=premium, 4=institutional
+    special-privileges: (list 15 (string-ascii 50)), ;; Special privileges
+    protection-preferences: (list 10 (string-ascii 50)), ;; Protection preferences
     last-activity-block: uint
   })
 
@@ -208,18 +208,18 @@
 (define-map mev-attack-history
   { attack-id: uint }
   {
-    attack-type: uint,                           /// Type of MEV attack
-    victim: principal,                           /// Who was attacked
-    attacker: (optional principal),              /// Who performed the attack (if known)
-    attack-block: uint,                         /// Block where attack occurred
-    attack-value: uint,                         /// Value extracted by attack
-    protection-applied: bool,                   /// Whether protection was applied
-    mitigation-success: bool,                   /// Whether mitigation was successful
-    mev-saved: uint,                            /// MEV value saved
-    detection-method: uint,                     /// How attack was detected
-    response-time: uint,                        /// Response time in blocks
-    prevention-cost: uint,                      /// Cost of prevention
-    nft-evidence: (optional uint),              /// NFT evidence of attack
+    attack-type: uint,                           ;; Type of MEV attack
+    victim: principal,                           ;; Who was attacked
+    attacker: (optional principal),              ;; Who performed the attack (if known)
+    attack-block: uint,                         ;; Block where attack occurred
+    attack-value: uint,                         ;; Value extracted by attack
+    protection-applied: bool,                   ;; Whether protection was applied
+    mitigation-success: bool,                   ;; Whether mitigation was successful
+    mev-saved: uint,                            ;; MEV value saved
+    detection-method: uint,                     ;; How attack was detected
+    response-time: uint,                        ;; Response time in blocks
+    prevention-cost: uint,                      ;; Cost of prevention
+    nft-evidence: (optional uint),              ;; NFT evidence of attack
     created-at: uint
   })
 
@@ -367,7 +367,7 @@
           batch-id: none,
           ordering-id: none,
           detector-id: none,
-          protected-amount: u0, // Not applicable for commitments
+          protected-amount: u0, ;; Not applicable for commitments
           protection-level: protection_level,
           visual-tier: (calculate-commitment-visual-tier protection_level),
           creation-block: block-height,
@@ -450,7 +450,7 @@
           ordering-id: none,
           detector-id: none,
           protected-amount: total_volume,
-          protection-level: PROTECTION_LEVEL_ENHANCED, // Default for batch auctions
+          protection-level: PROTECTION_LEVEL_ENHANCED, ;; Default for batch auctions
           visual-tier: (calculate-batch-visual-tier total_volume batch_type),
           creation-block: block-height,
           last-activity-block: block-height
@@ -532,8 +532,8 @@
           batch-id: none,
           ordering-id: (some ordering_id),
           detector-id: none,
-          protected-amount: u0, // Not applicable for ordering
-          protection-level: PROTECTION_LEVEL_ENHANCED, // Default for fair ordering
+          protected-amount: u0, ;; Not applicable for ordering
+          protection-level: PROTECTION_LEVEL_ENHANCED, ;; Default for fair ordering
           visual-tier: (calculate-ordering-visual-tier priority_level),
           creation-block: block-height,
           last-activity-block: block-height
@@ -590,7 +590,7 @@
           operator: tx-sender,
           detection-capabilities: detection-capabilities,
           detection-accuracy: detection_accuracy,
-          false-positive-rate: (- u10000 detection_accuracy), // Complement of accuracy
+          false-positive-rate: (- u10000 detection_accuracy), ;; Complement of accuracy
           detection-fee: detection_fee,
           total-detections: u0,
           successful-detections: u0,
@@ -616,8 +616,8 @@
           batch-id: none,
           ordering-id: none,
           detector-id: (some detector_id),
-          protected-amount: u0, // Not applicable for detectors
-          protection-level: PROTECTION_LEVEL_PREMIUM, // Default for detectors
+          protected-amount: u0, ;; Not applicable for detectors
+          protection-level: PROTECTION_LEVEL_PREMIUM, ;; Default for detectors
           visual-tier: detector-tier,
           creation-block: block-height,
           last-activity-block: block-height
@@ -651,7 +651,7 @@
 (define-public (reveal-transaction (commitment-id uint) (reveal-data (buff 512)))
   (let ((commitment (unwrap! (map-get? commitment-certificates { commitment-id: commitment_id }) ERR_PROTECTION_NOT_FOUND)))
     (asserts! (is-eq tx-sender (get committer commitment)) ERR_UNAUTHORIZED)
-    (asserts! (= (get commitment-status commitment) u1) ERR_COMMITMENT_EXPIRED) ;; Must be pending
+    (asserts! (is-eq (get commitment-status commitment) u1) ERR_COMMITMENT_EXPIRED) ;; Must be pending
     (asserts! (< block-height (get reveal-deadline commitment)) ERR_COMMITMENT_EXPIRED) ;; Must not be expired
     
     ;; Verify commitment hash matches reveal data
@@ -693,7 +693,7 @@
     (asserts! (is-authorized-batch-executor tx-sender) ERR_UNAUTHORIZED)
     
     (let ((batch (unwrap! (map-get? batch-auctions { batch-id: batch_id }) ERR_PROTECTION_NOT_FOUND)))
-      (asserts! (= (get auction-status batch) u1) ERR_BATCH_FULL) ;; Must be open
+      (asserts! (is-eq (get auction-status batch) u1) ERR_BATCH_FULL) ;; Must be open
       (asserts! (< block-height (get batch-deadline batch)) ERR_BATCH_FULL) ;; Must not be expired
       
       ;; Execute batch auction
@@ -747,59 +747,58 @@
   (evidence (string-utf8 1000)))
   (begin
     (asserts! (is-authorized-detector tx-sender) ERR_UNAUTHORIZED)
-    
-    (let ((detector (unwrap! (map-get? mev-detectors { detector-id: detector_id }) ERR_PROTECTION_NOT_FOUND))
-          (attack-id (+ (var-get next-protection-id) u30000))) ;; Use offset to avoid conflicts
-      
+
+    (let (
+          (detector (unwrap! (map-get? mev-detectors { detector-id: detector-id }) ERR_PROTECTION_NOT_FOUND))
+          (attack-id (+ (var-get next-protection-id) u30000)) ;; Use offset to avoid conflicts
+         )
+
       ;; Verify detector can detect this attack type
-      (asserts! (contains-attack-type (get detection-capabilities detector) attack_type) ERR_INVALID_PROTECTION)
-      
+      (asserts! (contains-attack-type (get detection-capabilities detector) attack-type) ERR_INVALID_PROTECTION)
+
       ;; Record MEV attack
       (map-set mev-attack-history
-        { attack-id: attack_id }
+        { attack-id: attack-id }
         {
-          attack-type: attack_type,
+          attack-type: attack-type,
           victim: victim,
-          attacker: none, // Would be determined by analysis
+          attacker: none, ;; Would be determined by analysis
           attack-block: block-height,
-          attack-value: attack_value,
-          protection-applied: false, // Would check if victim had protection
-          mitigation-success: false, // Would be determined by response
-          mev-saved: u0, // Would be calculated based on intervention
-          detection-method: u1, // Detector-based
-          response-time: u0, // Would be measured
-          prevention-cost: u0, // Would be calculated
-          nft-evidence: none, // Could create evidence NFT
+          attack-value: attack-value,
+          protection-applied: false, ;; Would check if victim had protection
+          mitigation-success: false, ;; Would be determined by response
+          mev-saved: u0, ;; Would be calculated based on intervention
+          detection-method: u1, ;; Detector-based
+          response-time: u0, ;; Would be measured
+          prevention-cost: u0, ;; Would be calculated
+          nft-evidence: none, ;; Could create evidence NFT
           created-at: block-height
         })
-      
+
       ;; Update detector stats
       (map-set mev-detectors
-        { detector-id: detector_id }
+        { detector-id: detector-id }
         (merge detector {
           total-detections: (+ (get total-detections detector) u1),
           successful-detections: (+ (get successful-detections detector) u1),
           detection-rewards: (+ (get detection-rewards detector) (get detection-fee detector)),
           last-detection-block: block-height
         }))
-      
+
       ;; Update victim's MEV profile
-      (update-user-mev-profile_on_attack victim attack_id attack_value)
-      
+      (update-user-mev-profile_on_attack victim attack-id attack-value)
+
       (print {
         event: "mev-attack-recorded",
-        attack-id: attack_id,
-        detector-id: detector_id,
-        attack-type: attack_type,
+        attack-id: attack-id,
+        detector-id: detector-id,
+        attack-type: attack-type,
         victim: victim,
-        attack-value: attack_value,
+        attack-value: attack-value,
         detection-block: block-height
       })
-      
-      (ok attack_id)
-    )
-  )
-)
+
+      (ok attack-id))))
 
 ;; ===== SIP-009 Implementation =====
 
@@ -813,35 +812,32 @@
   (ok (map-get? mev-nft-metadata { token-id: token-id })))
 
 (define-public (transfer (token-id uint) (sender principal) (recipient principal))
-  (let ((nft-data (unwrap! (map-get? mev-nft-metadata { token-id: token-id }) ERR_POSITION_NOT_FOUND)))
+  (let (
+        (nft-data (unwrap! (map-get? mev-nft-metadata { token-id: token-id }) ERR_PROTECTION_NOT_FOUND))
+        (nft-type (get nft-type nft-data))
+       )
     (asserts! (is-eq sender (get owner nft-data)) ERR_UNAUTHORIZED)
-    
+
     ;; Transfer NFT ownership
     (nft-transfer? mev-nft token-id sender recipient)
-    
+
     ;; Update metadata
     (map-set mev-nft-metadata
-      { token-id: token_id }
+      { token-id: token-id }
       (merge nft-data { owner: recipient, last-activity-block: block-height }))
-    
+
     ;; Handle specific NFT type transfers
-    (match (get nft-type nft-data)
-      nft-type
-        (handle-mev-nft-transfer token_id nft_type sender recipient)
-      error-response
-        (ok true))
-    
+    (handle-mev-nft-transfer token-id nft-type sender recipient)
+
     (print {
       event: "mev-nft-transferred",
-      token-id: token_id,
+      token-id: token-id,
       from: sender,
       to: recipient,
-      nft-type: (get nft-type nft_data)
+      nft-type: nft-type
     })
-    
-    (ok true)
-  )
-)
+
+    (ok true)))
 
 ;; ===== MEV NFT Metadata =====
 
@@ -886,12 +882,15 @@
   (and (>= ordering-type u1) (<= ordering_type u3))) ;; 1=time-based, 2=fair-based, 3=priority-based
 
 (define-private (calculate-protection-fee (protection-level uint) (protected-amount uint))
-  (let ((base-rate BASE_PROTECTION_FEE)
-        (level-multiplier (match protection_level
-                              PROTECTION_LEVEL_BASIC u1000    ;; 1x
-                              PROTECTION_LEVEL_ENHANCED u1500   ;; 1.5x
-                              PROTECTION_LEVEL_PREMIUM u2000    ;; 2x
-                              PROTECTION_LEVEL_INSTITUTIONAL u3000)) ;; 3x
+  (let (
+        (base-rate BASE_PROTECTION_FEE)
+        (level-multiplier
+          (match protection_level
+            PROTECTION_LEVEL_BASIC u1000    ;; 1x
+            PROTECTION_LEVEL_ENHANCED u1500 ;; 1.5x
+            PROTECTION_LEVEL_PREMIUM u2000  ;; 2x
+            PROTECTION_LEVEL_INSTITUTIONAL u3000)) ;; 3x
+       )
     (/ (* protected-amount base-rate level-multiplier) u10000)))
 
 (define-private (calculate-commitment-fee (protection-level uint))
@@ -902,22 +901,29 @@
     PROTECTION_LEVEL_INSTITUTIONAL u100000)) ;; 10 STX
 
 (define-private (calculate-batch-fee (batch-type uint) (total-volume uint))
-  (let ((base-rate (match batch_type
-                        u1 u500   ;; 0.05% for uniform-price
-                        u2 u800   ;; 0.08% for vwap
-                        u3 u1200)) ;; 0.12% for discriminatory
+  (let (
+        (base-rate
+          (match batch_type
+            u1 u500   ;; 0.05% for uniform-price
+            u2 u800   ;; 0.08% for vwap
+            u3 u1200)) ;; 0.12% for discriminatory
+       )
     (/ (* total-volume base-rate) u10000)))
 
 (define-private (calculate-ordering-fee (ordering-type uint) (priority-level uint) (duration uint))
-  (let ((base-rate FAIR_ORDERING_FEE)
-        (priority-multiplier (match priority_level
-                                 u1 u500   ;; 0.5x for priority 1
-                                 u5 u1000  ;; 1x for priority 5
-                                 u10 u2000)) ;; 2x for priority 10
-        (type-multiplier (match ordering_type
-                            u1 u1000  ;; 1x for time-based
-                            u2 u1500  ;; 1.5x for fair-based
-                            u3 u2000)) ;; 2x for priority-based
+  (let (
+        (base-rate FAIR_ORDERING_FEE)
+        (priority-multiplier
+          (match priority_level
+            u1 u500   ;; 0.5x for priority 1
+            u5 u1000  ;; 1x for priority 5
+            u10 u2000)) ;; 2x for priority 10
+        (type-multiplier
+          (match ordering_type
+            u1 u1000  ;; 1x for time-based
+            u2 u1500  ;; 1.5x for fair-based
+            u3 u2000)) ;; 2x for priority-based
+       )
     (/ (* duration base-rate priority-multiplier type-multiplier) u10000)))
 
 (define-private (get-max-uses-for-level (protection-level uint))
@@ -1006,9 +1012,9 @@
 
 (define-private (calculate-shield-visual-tier (protected-amount uint) (protection-level uint))
   (cond
-    ((and (>= protected-amount u50000000) (= protection-level PROTECTION_LEVEL_INSTITUTIONAL)) u5) ;; Legendary
+    ((and (>= protected-amount u50000000) (is-eq protection-level PROTECTION_LEVEL_INSTITUTIONAL)) u5) ;; Legendary
     ((and (>= protected-amount u10000000) (>= protection-level PROTECTION_LEVEL_PREMIUM)) u4) ;; Epic
-    ((and (>= protected-amount u1000000) (>= protection_level PROTECTION_LEVEL_ENHANCED)) u3) ;; Rare
+    ((and (>= protected-amount u1000000) (>= protection-level PROTECTION_LEVEL_ENHANCED)) u3) ;; Rare
     (true u2))) ;; Common
 
 (define-private (calculate-commitment-visual-tier (protection-level uint))
@@ -1050,7 +1056,7 @@
 
 (define-private (contains-attack-type (capabilities (list 5 uint)) (attack-type uint))
   ;; Check if attack type is in capabilities
-  (fold (lambda (capability acc) (or acc (= capability attack-type))) capabilities false))
+  (fold (lambda (capability acc) (or acc (is-eq capability attack-type))) capabilities false))
 
 (define-private (is-authorized-detector (user principal))
   ;; Check if user is authorized to be a detector
@@ -1146,38 +1152,38 @@
       true)) rewards true))
 
 (define-private (handle-mev-nft-transfer (token-id uint) (nft-type uint) (from principal) (to principal))
-  (match nft_type
-    NFT_TYPE_MEV_SHIELD
+  (cond
+    ((is-eq nft-type NFT_TYPE_MEV_SHIELD)
       ;; Transfer shield rights
       (let ((protection-id (unwrap-panic (get protection-id (unwrap-panic (map-get? mev-nft-metadata { token-id: token-id }))))))
         (map-set mev-shields
           { protection-id: protection_id }
-          (merge (unwrap-panic (map-get? mev-shields { protection-id: protection_id })) { owner: to, last-activity-block: block-height })))
-    NFT_TYPE_COMMITMENT_CERT
+          (merge (unwrap-panic (map-get? mev-shields { protection-id: protection_id })) { owner: to, last-activity-block: block-height }))))
+    ((is-eq nft-type NFT_TYPE_COMMITMENT_CERT)
       ;; Transfer commitment rights
       (let ((commitment-id (unwrap-panic (get commitment-id (unwrap-panic (map-get? mev-nft-metadata { token-id: token-id }))))))
         (map-set commitment-certificates
           { commitment-id: commitment_id }
-          (merge (unwrap-panic (map-get? commitment-certificates { commitment-id: commitment_id })) { committer: to })))
-    NFT_TYPE_BATCH_AUCTION
+          (merge (unwrap-panic (map-get? commitment-certificates { commitment-id: commitment_id })) { committer: to }))))
+    ((is-eq nft-type NFT_TYPE_BATCH_AUCTION)
       ;; Transfer batch auction rights
       (let ((batch-id (unwrap-panic (get batch-id (unwrap-panic (map-get? mev-nft-metadata { token-id: token-id }))))))
         (map-set batch-auctions
           { batch-id: batch_id }
-          (merge (unwrap-panic (map-get? batch-auctions { batch-id: batch_id })) { auctioneer: to })))
-    NFT_TYPE_FAIR_ORDERING
+          (merge (unwrap-panic (map-get? batch-auctions { batch-id: batch_id })) { auctioneer: to }))))
+    ((is-eq nft-type NFT_TYPE_FAIR_ORDERING)
       ;; Transfer fair ordering rights
       (let ((ordering-id (unwrap-panic (get ordering-id (unwrap-panic (map-get? mev-nft-metadata { token-id: token-id }))))))
         (map-set fair-ordering
           { ordering-id: ordering_id }
-          (merge (unwrap-panic (map-get? fair-ordering { ordering-id: ordering_id })) { subscriber: to })))
-    NFT_TYPE_MEV_DETECTOR
+          (merge (unwrap-panic (map-get? fair-ordering { ordering-id: ordering_id })) { subscriber: to }))))
+    ((is-eq nft-type NFT_TYPE_MEV_DETECTOR)
       ;; Transfer detector rights
       (let ((detector-id (unwrap-panic (get detector_id (unwrap-panic (map-get? mev-nft-metadata { token-id: token-id }))))))
         (map-set mev-detectors
           { detector-id: detector_id }
-          (merge (unwrap-panic (map-get? mev-detectors { detector-id: detector_id })) { operator: to })))
-    _ true)) ;; Other types transfer normally
+          (merge (unwrap-panic (map-get? mev-detectors { detector-id: detector_id })) { operator: to }))))
+    (true true))) ;; Other types transfer normally
 
 ;; ===== Read-Only Functions =====
 
@@ -1225,6 +1231,7 @@
     none
       (err u13001)))
 
-;; Mock function for SHA256 (would use crypto library in real implementation)
+;; Mock function for SHA256 (returns zeroed buff; replace with real crypto in production)
 (define-private (sha256 (data (buff 512)))
-  "0000000000000000000000000000000000000000000000000000000000000000")
+  0x0000000000000000000000000000000000000000000000000000000000000000)
+

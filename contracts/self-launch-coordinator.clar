@@ -2,7 +2,7 @@
 ;; Coordinates autonomous contract deployment through funding curve mechanism
 ;; Implements self-funded launch system with progressive bootstrapping
 
-(use-trait token-trait .sip-standards.sip-010-ft-trait)
+(use-trait token-trait .defi-traits.sip-010-ft-trait)
 (use-trait governance-trait .governance.governance-token-trait)
 (use-trait oracle-trait .oracle.oracle-trait)
 

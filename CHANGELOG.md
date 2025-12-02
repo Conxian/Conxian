@@ -5,21 +5,19 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
-- **Cross-Chain Dimension**: Implemented `btc-adapter.clar` with 6-block Bitcoin finality verification.
-- **Risk Dimension**: Enhanced `oracle-aggregator-v2.clar` with tenure-aware price tracking and circuit breaker hooks.
-- **DLC Integration**: Added `dlc-manager.clar` and `dlc-manager-trait.clar` to support Native Bitcoin Lending and Derivatives.
-- **Traits**: Added missing traits (`collateral-manager-trait`, `risk-manager-trait`, `funding-rate-calculator-trait`, `position-manager-trait`) to `Clarinet.toml`.
-
-### Changed
-- **Liquidation Engine**: Updated `liquidation-engine.clar` to use correct trait imports and fixed syntax errors.
-- **Dimensional Engine**: Fixed `dimensional-engine.clar` to correctly handle `sip-010-ft-trait` in `open-position` and `close-position` calls.
-- **Configuration**: Updated `Clarinet.toml` to include new DLC contracts and fix dependency ordering.
+- **Enhanced Circuit Breaker**: Implemented `contracts/security/circuit-breaker.clar` with comprehensive interface support for lending systems, including `record-success`, `record-failure`, and `check-circuit-state`.
+- **Keeper Coordination**: Implemented `contracts/automation/keeper-coordinator.clar` with batch execution logic for protocol maintenance tasks.
 
 ### Fixed
-- Resolved multiple `clarinet check` errors related to missing traits and invalid contract calls.
-- Fixed `use-trait` paths in `dimensional-engine.clar` and `liquidation-engine.clar`.
+- **Compilation Errors**:
+  - Resolved `err` type indeterminacy in `dimensional-engine.clar` by explicit unwrapping of `collateral-manager` calls.
+  - Resolved `err` type indeterminacy in `funding-rate-calculator.clar` for `open-interest` retrieval.
+  - Fixed list expression syntax in `keeper-coordinator.clar`.
+  - Harmonized return types in `comprehensive-lending-system.clar` circuit breaker checks.
+- **Line Endings**: Converted multiple contract files from CRLF to LF to satisfy Clarity parser requirements.
+- **Trait Implementations**: Corrected function signatures in `funding-rate-calculator.clar` to match defined traits.
+- **Dependency Management**: Updated `Clarinet.toml` contract deployment order to resolve unresolved contract references.
 
-## [0.1.0] - 2025-11-22
-### Added
-- Initial Conxian Protocol architecture.
-- 6-Dimensional System Design (Spatial, Temporal, Risk, Cross-Chain, Institutional, Governance).
+### Changed
+- Refactored `check-circuit-breaker` in `comprehensive-lending-system.clar` to use explicit `match` flow for robust error propagation.
+- Updated `funding-rate-calculator.clar` to use `get-real-time-price` and `get-twap` with proper lookback window from `oracle-aggregator-v2`.

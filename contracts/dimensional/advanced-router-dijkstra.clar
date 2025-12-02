@@ -2,8 +2,8 @@
 ;; Implements optimal path finding for multi-hop swaps across all DEX operations
 ;; Integrates all routing functionality under dimensional architecture
 
-(use-trait advanced-router-dijkstra-trait .advanced-router-dijkstra-trait.advanced-router-dijkstra-trait)
-;; (impl-trait .defi-primitives.router-trait) ;; TODO: Verify router trait compatibility
+
+;; (impl-trait .defi-traits.router-trait) ;; TODO: Verify router trait compatibility
 
 
 ;; === DIMENSIONAL INTEGRATION CONSTANTS ===
@@ -157,6 +157,9 @@
         hops: u1
       })
       (err ERR_NO_PATH))))
+
+(define-read-only (compute-best-route (token-in principal) (token-out principal) (amount-in uint))
+  (find-optimal-path token-in token-out amount-in))
 
 ;; Add missing calculate-path-price function to match trait
 (define-read-only (calculate-path-price

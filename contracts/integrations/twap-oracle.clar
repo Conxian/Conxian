@@ -2,7 +2,7 @@
 ;; Provides Time-Weighted Average Price (TWAP) data for assets.
 
 ;; SIP-010: Fungible Token Standard
-(use-trait sip-010-ft-trait .sip-standards.sip-010-ft-trait)
+(use-trait sip-010-ft-trait .defi-traits.sip-010-ft-trait)
 
 ;; Constants
 ;; Error codes
@@ -57,11 +57,11 @@
 ;; @returns A response with ok on success, or an error.
 (define-public (update-twap (asset principal) (period uint) (current-price uint))
   (begin
-    (asserts! (is-governance) ERR-NOT-AUTHORIZED)
+    (try! (is-governance))
     (asserts! (> period u0) ERR-INVALID-PERIOD)
 
     (let
-      ((current-block-height (get-block-info? block-height))
+      ((current-block-height (unwrap-panic (get-block-info? time block-height)))
        (key { asset: asset, period: period })
        (existing-data (map-get? twap-data key))
       )
@@ -93,7 +93,7 @@
         )
       )
     )
-    (print { event: "twap-updated", asset: asset, period: period, twap: (get-twap asset period), sender: tx-sender, block-height: (get-block-info? block-height) })
+    (print { event: "twap-updated", asset: asset, period: period, twap: (get-twap asset period), sender: tx-sender, block-height: (unwrap-panic (get-block-info? time block-height)) })
     (ok true)
   )
 )
@@ -103,7 +103,7 @@
 ;; @returns A response with ok on success, or an error.
 (define-public (set-contract-owner (new-owner principal))
   (begin
-    (asserts! (is-contract-owner) ERR-NOT-AUTHORIZED)
+    (asserts! (unwrap! (is-contract-owner) ERR-NOT-AUTHORIZED) ERR-NOT-AUTHORIZED)
     (var-set contract-owner new-owner)
     (ok true)
   )
@@ -114,7 +114,7 @@
 ;; @returns A response with ok on success, or an error.
 (define-public (set-governance-address (new-governance principal))
   (begin
-    (asserts! (is-contract-owner) ERR-NOT-AUTHORIZED)
+    (asserts! (unwrap! (is-contract-owner) ERR-NOT-AUTHORIZED) ERR-NOT-AUTHORIZED)
     (var-set governance-address new-governance)
     (ok true)
   )
@@ -136,7 +136,7 @@
        (last-timestamp (get last-timestamp data))
        (cumulative-price (get cumulative-price data))
        (samples (get samples data))
-       (current-block-height (get-block-info? block-height block-height))
+       (current-block-height (unwrap-panic (get-block-info? time block-height)))
        (time-elapsed (- current-block-height last-timestamp))
       )
       (if (> samples u0)

@@ -8,7 +8,7 @@
 ;; - User status aggregation
 ;; - Revenue distribution triggers
 
-(use-trait rbac-trait .core-protocol.rbac-trait)
+(use-trait rbac-trait .core-traits.rbac-trait)
 
 ;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED u1001)
@@ -154,7 +154,7 @@
       token-count: (get token-count current-activity),
       reputation-score: (get reputation-score current-activity)
     })
-    (ok true)
+    true
   )
 )
 
@@ -217,7 +217,7 @@
     })
     (var-set last-operation-id new-op-id)
 
-    (try! (update-user-activity user total-value))
+    (update-user-activity user total-value)
 
     (if (is-eq operation-type "yield-claim")
       (try! (trigger-revenue-distribution (unwrap-panic (element-at tokens u0)) total-value))
@@ -232,8 +232,8 @@
     (try! (when-not-paused))
     (try! (validate-token token))
 
-    ;; Call revenue distributor
-    (try! (contract-call? (var-get revenue-distributor) distribute-revenue token amount))
+    ;; Call revenue distributor - commented out until revenue distributor contract exists
+    ;; (try! (contract-call? .revenue-distributor distribute-revenue token amount))
 
     ;; Update token activity
     (try! (update-token-activity token amount))

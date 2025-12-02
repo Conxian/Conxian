@@ -15,7 +15,7 @@ global.options = {
   clarinet: {
     manifestPath,
     initBeforeEach: false,
-    coverage: false,
+    coverage: true,
     coverageFilename: 'coverage.lcov',
     costs: false,
     costsFilename: 'costs.json',

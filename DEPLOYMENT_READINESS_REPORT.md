@@ -4,6 +4,10 @@
 
 This report provides a comprehensive review of the Conxian protocol's foundation layer, assessing deployment readiness and identifying critical issues that must be resolved before mainnet deployment.
 
+> **Status Note (Historical Snapshot, November 12, 2025):**
+> This report reflects an earlier state of the protocol in which Clarinet reported 68 compilation errors and the system was classified as **NOT READY FOR DEPLOYMENT**. It is retained for historical context only.
+> For the current baseline, refer to the root `README.md` and `ROADMAP.md`, which document a syntactically clean global manifest and **20 remaining semantic/trait/config errors** (primarily in risk, lending, enterprise, token, and MEV-helper contracts) as of November 27, 2025.
+
 ## Work Completed
 
 ### ✅ Phase 1: Enhanced Circuit Breaker Implementation

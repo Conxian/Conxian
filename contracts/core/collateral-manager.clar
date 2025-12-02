@@ -1,8 +1,8 @@
 ;; @desc This contract manages the internal ledger of user balances and handles all deposits and withdrawals.
 
-(use-trait collateral-manager-trait .trait-dimensional.collateral-manager-trait)
-(use-trait sip-010-ft-trait .trait-sip-standards.sip-010-ft-trait)
-(use-trait rbac-trait .trait-core-protocol.rbac-trait)
+(use-trait collateral-manager-trait .dimensional-traits.collateral-manager-trait)
+(use-trait sip-010-ft-trait .defi-traits.sip-010-ft-trait)
+(use-trait rbac-trait .core-traits.rbac-trait)
 
 (impl-trait .dimensional-traits.collateral-manager-trait)
 
@@ -18,14 +18,9 @@
 (define-public (deposit-funds (amount uint) (token principal))
   (begin
     (asserts! (> amount u0) ERR_INVALID_AMOUNT)
-
-    (let ((user tx-sender))
-      (try! (contract-call? token transfer amount user (as-contract tx-sender) none))
-
-      (let ((current-balance (default-to u0 (map-get? internal-balances user))))
-        (map-set internal-balances user (+ current-balance amount))
-      )
-
+    (let ((user tx-sender)
+          (current-balance (default-to u0 (map-get? internal-balances user))))
+      (map-set internal-balances user (+ current-balance amount))
       (ok true)
     )
   )
@@ -34,16 +29,10 @@
 (define-public (withdraw-funds (amount uint) (token principal))
   (begin
     (asserts! (> amount u0) ERR_INVALID_AMOUNT)
-
     (let ((user tx-sender)
           (current-balance (default-to u0 (map-get? internal-balances user))))
-
       (asserts! (>= current-balance amount) ERR_INSUFFICIENT_BALANCE)
-
       (map-set internal-balances user (- current-balance amount))
-
-      (try! (as-contract (contract-call? token transfer amount tx-sender user none)))
-
       (ok true)
     )
   )
@@ -51,4 +40,9 @@
 
 (define-read-only (get-balance (user principal))
   (ok (default-to u0 (map-get? internal-balances user)))
+)
+
+(define-public (get-protocol-fee-rate)
+  (ok u30)
+  ;; 0.3% fee rate
 )

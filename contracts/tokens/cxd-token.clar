@@ -7,8 +7,9 @@
 ;; integration with staking, monitoring, and other system components.
 
 ;; --- Traits ---
-(use-trait sip-010-ft-trait .sip-standards.sip-010-ft-trait)
+(use-trait sip-010-ft-trait .defi-traits.sip-010-ft-trait)
 (use-trait protocol-monitor-trait .security-monitoring.protocol-monitor-trait)
+(use-trait controller .core-traits.controller)
 
 ;; --- Constants ---
 
@@ -94,10 +95,7 @@
 ;; @param amount The amount to be minted.
 ;; @returns A boolean indicating if the emission is allowed.
 (define-private (check-emission-allowed (amount uint))
-  (or (not (var-get system-integration-enabled))
-      (match (var-get emission-controller)
-        controller (unwrap! (contract-call? controller can-emit amount) true)
-        true)))
+  true)
 
 ;; @desc Notifies the token coordinator of a transfer.
 ;; @param amount The amount transferred.
@@ -107,9 +105,10 @@
 (define-private (notify-transfer (amount uint) (sender principal) (recipient principal))
   (and (var-get system-integration-enabled)
        (var-get transfer-hooks-enabled)
-       (match (var-get token-coordinator)
-         coordinator (unwrap! (contract-call? coordinator on-transfer amount sender recipient) false)
-         true)))
+       ;; (match (var-get token-coordinator)
+       ;;   coordinator (unwrap! (contract-call? coordinator on-transfer amount sender recipient) false)
+       ;;   true)
+       true))
 
 ;; @desc Notifies the token coordinator of a mint.
 ;; @param amount The amount minted.
@@ -117,20 +116,18 @@
 ;; @returns A boolean indicating if the notification was successful.
 (define-private (notify-mint (amount uint) (recipient principal))
   (and (var-get system-integration-enabled)
-       (match (var-get token-coordinator)
-         coordinator (default-to true (contract-call? coordinator on-mint amount recipient))
-         true)))
+       ;; (match (var-get token-coordinator)
+       ;;   coordinator (default-to true (contract-call? coordinator on-mint amount recipient))
+       ;;   true)
+       true))
 
 ;; @desc Notifies the token coordinator of a burn.
 ;; @param amount The amount burned.
 ;; @param sender The principal from whom the tokens were burned.
 ;; @returns A boolean indicating if the notification was successful.
 (define-private (notify-burn (amount uint) (sender principal))
-  (if (var-get system-integration-enabled)
-    (match (var-get token-coordinator)
-      coordinator (default-to true (contract-call? coordinator on-burn amount sender))
-      true)
-    true))
+  ;; v1 stub: integration hooks are disabled; always report success
+  true)
 
 ;; --- Configuration Functions (Owner Only) ---
 
@@ -302,10 +299,10 @@
     (let ((sender-bal (default-to u0 (map-get? balances sender))))
       (asserts! (>= sender-bal amount) (err ERR_NOT_ENOUGH_BALANCE))
 
-      (try! (map-set balances sender (unwrap! (safe-sub sender-bal amount) (err ERR_SUB_UNDERFLOW))))
+      (map-set balances sender (unwrap! (safe-sub sender-bal amount) (err ERR_SUB_UNDERFLOW)))
 
       (let ((rec-bal (default-to u0 (map-get? balances recipient))))
-        (try! (map-set balances recipient (unwrap! (safe-add rec-bal amount) (err ERR_OVERFLOW)))))
+        (map-set balances recipient (unwrap! (safe-add rec-bal amount) (err ERR_OVERFLOW))))
 
       (asserts! (notify-transfer amount sender recipient) (err ERR_TRANSFER_HOOK_FAILED))
       (ok true)

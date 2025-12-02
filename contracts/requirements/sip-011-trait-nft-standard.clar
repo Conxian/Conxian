@@ -1,7 +1,7 @@
 ;; SIP-011: Non-Fungible Token Standard
 ;; Defines a standard interface for non-fungible tokens.
 
-(define-trait sip-011-trait-nft-standard
+(define-trait sip-011-trait
   (
     ;; @desc Returns the last token ID.
     ;; @returns A uint representing the last token ID.

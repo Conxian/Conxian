@@ -2,10 +2,9 @@
 
 ;; This contract facilitates cross-protocol integration for maximum yield opportunities.
 
-(use-trait yield-optimizer-trait .traits.yield-optimizer-trait.yield-optimizer-trait)
-(use-trait sip-010-ft-trait .sip-standards.sip-010-ft-trait)
-(use-trait circuit-breaker-trait .traits.security-monitoring.circuit-breaker-trait)
-(use-trait rbac-trait .decentralized-trait-registry.decentralized-trait-registry)
+(use-trait sip-010-ft-trait .defi-traits.sip-010-ft-trait)
+(use-trait circuit-breaker-trait .security-monitoring.circuit-breaker-trait)
+(use-trait rbac-trait .core-traits.rbac-trait)
 
 ;; Error constants
 (define-constant ERR_UNAUTHORIZED (err u1000))
@@ -18,8 +17,8 @@
 ;; Data variables
 (define-data-var contract-owner principal tx-sender)
 (define-data-var strategy-counter uint u0)
-(define-data-var yield-optimizer (contract-of yield-optimizer-trait) (as-contract tx-sender))
-(define-data-var circuit-breaker-contract (optional <circuit-breaker-trait>) none)
+(define-data-var yield-optimizer principal (as-contract tx-sender))
+(define-data-var circuit-breaker-contract (optional principal) none)
 
 ;; Maps
 ;; strategies: maps strategy-id to strategy-details (principal, token, protocol-id)
@@ -47,7 +46,7 @@
 ;; @returns An `ok` response with the new strategy ID or an error.
 (define-public (register-strategy (strategy-principal principal) (token principal) (protocol-id uint))
   (begin
-    (asserts! (is-ok (contract-call? .core-protocol.rbac-trait-contract has-role "contract-owner")) ERR_UNAUTHORIZED)
+    (asserts! (is-ok (contract-call? .core-traits.rbac-trait-contract has-role "contract-owner")) ERR_UNAUTHORIZED)
     (let ((new-strategy-id (+ (var-get strategy-counter) u1)))
       (map-set strategies new-strategy-id {
           strategy-principal: strategy-principal,
@@ -122,20 +121,20 @@
 ;; @desc Sets the yield-optimizer contract.
 ;; @param optimizer The principal of the yield-optimizer contract.
 ;; @returns An `ok` response or an error.
-(define-public (set-yield-optimizer-contract (optimizer (contract-of yield-optimizer-trait)))
+(define-public (set-yield-optimizer-contract (optimizer principal))
   (begin
-    (asserts! (is-ok (contract-call? .core-protocol.rbac-trait-contract has-role "contract-owner")) ERR_UNAUTHORIZED)
+    (asserts! (is-ok (contract-call? .core-traits.rbac-trait-contract has-role "contract-owner")) ERR_UNAUTHORIZED)
     (var-set yield-optimizer optimizer)
     (ok true)
   )
 )
 
 ;; @desc Sets the circuit breaker contract.
-;; @param cb The circuit breaker trait object.
+;; @param cb The circuit breaker contract principal.
 ;; @returns An `ok` response or an error.
-(define-public (set-circuit-breaker (cb <circuit-breaker-trait>))
+(define-public (set-circuit-breaker (cb principal))
   (begin
-    (asserts! (is-ok (contract-call? .core-protocol.rbac-trait-contract has-role "contract-owner")) ERR_UNAUTHORIZED)
+    (asserts! (is-ok (contract-call? .core-traits.rbac-trait-contract has-role "contract-owner")) ERR_UNAUTHORIZED)
     (var-set circuit-breaker-contract (some cb))
     (ok true)
   )
@@ -146,7 +145,7 @@
 ;; @returns An `ok` response or an error.
 (define-public (transfer-ownership (new-owner principal))
   (begin
-    (asserts! (is-ok (contract-call? .core-protocol.rbac-trait-contract has-role "contract-owner")) ERR_UNAUTHORIZED)
+    (asserts! (is-ok (contract-call? .core-traits.rbac-trait-contract has-role "contract-owner")) ERR_UNAUTHORIZED)
     (var-set contract-owner new-owner)
     (ok true)
   )

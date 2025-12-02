@@ -2,7 +2,7 @@
 ;; Implements vault-trait and vault-admin-trait with full system integration
 
 ;; Traits
-(use-trait sip-010-ft-trait .sip-standards.sip-010-ft-trait)
+(use-trait sip-010-ft-trait .defi-traits.sip-010-ft-trait)
 
 ;; Error Constants
 (define-constant ERR_UNAUTHORIZED (err u1001))

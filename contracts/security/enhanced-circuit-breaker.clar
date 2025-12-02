@@ -10,7 +10,7 @@
 ;; - Integration with regulatory systems
 
 ;; Use centralized traits
-(use-trait rbac-trait .core-protocol.rbac-trait)
+(use-trait rbac-trait .core-traits.rbac-trait)
 (use-trait oracle-trait .oracle-pricing.oracle-trait)
 (use-trait compliance-trait .compliance-trait.compliance-trait)
 
@@ -41,90 +41,89 @@
 ;; Trigger types
 (define-constant TRIGGER_TYPE_PRICE_DELTA u1)
 (define-constant TRIGGER_TYPE_VOLUME_DELTA u2)
-(define-constant TRIGGER_TYPE_ABSOLUTE_PRICE u3
-(define-constant TRIGGER_TYPE_TIME_BASED u4
-(define-constant TRIGGER_TYPE_GOVERNANCE_VOTE u5
-(define-constant TRIGGER_TYPE_COMPLIANCE_ALERT u6
+(define-constant TRIGGER_TYPE_ABSOLUTE_PRICE u3)
+(define-constant TRIGGER_TYPE_TIME_BASED u4)
+(define-constant TRIGGER_TYPE_GOVERNANCE_VOTE u5)
+(define-constant TRIGGER_TYPE_COMPLIANCE_ALERT u6)
 
 ;; ===========================================
 ;; DATA STRUCTURES
 ;; ===========================================
 
 ;; Circuit breaker configuration
-data-var next-circuit-id uint
+(define-data-var next-circuit-id uint u1)
+(define-data-var next-event-id uint u0)
 
-define-map circuit-breakers {
-  circuit-id: uint
-} {
-  circuit-type: uint,
-  name: (string-ascii 32),
-  description: (string-ascii 256),
-  is-active: bool,
-  created-at: uint,
-  created-by: principal,
-  max-pause-duration: uint,
-  cooldown-period: uint,
-  auto-recovery: bool,
-  min-recovery-time: uint,
-  requires-governance-approval: bool
-}
+(define-map circuit-breakers
+  { circuit-id: uint }
+  {
+    circuit-type: uint,
+    name: (string-ascii 32),
+    description: (string-ascii 256),
+    is-active: bool,
+    created-at: uint,
+    created-by: principal,
+    max-pause-duration: uint,
+    cooldown-period: uint,
+    auto-recovery: bool,
+    min-recovery-time: uint,
+    requires-governance-approval: bool
+  })
 
 ;; Circuit breaker state
-define-map circuit-states {
-  circuit-id: uint
-} {
-  is-tripped: bool,
-  last-tripped: uint,
-  last-reset: uint,
-  trip-count: uint,
-  last-trigger-id: uint,
-  current-cooldown: uint
-}
+(define-map circuit-states
+  { circuit-id: uint }
+  {
+    is-tripped: bool,
+    last-tripped: uint,
+    last-reset: uint,
+    trip-count: uint,
+    last-trigger-id: uint,
+    current-cooldown: uint
+  })
 
 ;; Trigger configurations
-define-map triggers {
-  circuit-id: uint,
-  trigger-id: uint
-} {
-  trigger-type: uint,
-  is-active: bool,
-  threshold: uint,
-  window-size: uint,
-  comparison: uint,  ;; 1: >, 2: <, 3: =, 4: !=, 5: >=, 6: <=
-  cooldown: uint,
-  last-triggered: uint,
-  trigger-count: uint,
-  metadata: (optional (string-utf8 1024))
-}
+(define-map triggers
+  { circuit-id: uint, trigger-id: uint }
+  {
+    trigger-type: uint,
+    is-active: bool,
+    threshold: uint,
+    window-size: uint,
+    comparison: uint,  ;; 1: >, 2: <, 3: =, 4: !=, 5: >=, 6: <=
+    cooldown: uint,
+    last-triggered: uint,
+    trigger-count: uint,
+    metadata: (optional (string-utf8 1024))
+  })
 
 ;; Event logging
-define-map events {
-  event-id: uint
-} {
-  event-type: (string-ascii 32),
-  circuit-id: uint,
-  trigger-id: (optional uint),
-  severity: uint,  ;; 1: Info, 2: Warning, 3: Critical
-  message: (string-utf8 1024),
-  metadata: (optional (string-utf8 4096)),
-  timestamp: uint,
-  block-height: uint,
-  tx-sender: principal
-}
+(define-map events
+  { event-id: uint }
+  {
+    event-type: (string-ascii 32),
+    circuit-id: uint,
+    trigger-id: (optional uint),
+    severity: uint,  ;; 1: Info, 2: Warning, 3: Critical
+    message: (string-utf8 1024),
+    metadata: (optional (string-utf8 4096)),
+    timestamp: uint,
+    block-height: uint,
+    tx-sender: principal
+  })
 
 ;; Recovery actions
-define-map recovery-actions {
-  circuit-id: uint,
-  action-id: uint
-} {
-  action-type: uint,  ;; 1: Auto-recover, 2: Governance vote, 3: Time delay
-  is-completed: bool,
-  created-at: uint,
-  completed-at: (optional uint),
-  required-approvals: uint,
-  current-approvals: uint,
-  approvers: (list 100 principal)
-}
+(define-map recovery-actions
+  { circuit-id: uint, action-id: uint }
+  {
+    action-type: uint,  ;; 1: Auto-recover, 2: Governance vote, 3: Time delay
+    is-completed: bool,
+    created-at: uint,
+    completed-at: (optional uint),
+    required-approvals: uint,
+    current-approvals: uint,
+    approvers: (list 100 principal)
+  })
 
 ;; ===========================================
 ;; PRIVATE FUNCTIONS
@@ -133,8 +132,8 @@ define-map recovery-actions {
 ;; Check if caller has permission to manage circuit breakers
 (define-private (can-manage-circuit (caller principal))
   (or
-    (contract-call? .core-protocol.rbac-trait is-owner caller)
-    (contract-call? .core-protocol.rbac-trait has-role caller "circuit-admin")
+    (contract-call? .core-traits.rbac-trait is-owner caller)
+    (contract-call? .core-traits.rbac-trait has-role caller "circuit-admin")
   )
 )
 
@@ -155,7 +154,7 @@ define-map recovery-actions {
       severity: severity,
       message: message,
       metadata: metadata,
-      timestamp: (at 'time (chain-state 'time))
+      timestamp: block-height,
       block-height: block-height,
       tx-sender: tx-sender
     })
@@ -349,8 +348,8 @@ define-map recovery-actions {
 ;; Reset a tripped circuit breaker
 (define-public (reset-circuit (circuit-id uint) (reason (string-utf8 1024)))
   (begin
-    (asserts! (can-manage-circuit tx-sender) ERR_UNAUTHORIZED
-    (asserts! (map-get? circuit-breakers {circuit-id: circuit-id}) ERR_CIRCUIT_NOT_FOUND
+    (asserts! (can-manage-circuit tx-sender) ERR_UNAUTHORIZED)
+    (asserts! (map-get? circuit-breakers {circuit-id: circuit-id}) ERR_CIRCUIT_NOT_FOUND)
     
     (let* (
         (circuit (unwrap-panic (map-get? circuit-breakers {circuit-id: circuit-id})))
@@ -368,7 +367,7 @@ define-map recovery-actions {
       ;; If governance approval is required, check if it's been granted
       (if (and 
             (get requires-governance-approval circuit)
-            (not (contract-call? .core-protocol.rbac-trait has-role tx-sender "governance")))
+            (not (contract-call? .core-traits.rbac-trait has-role tx-sender "governance")))
         (err ERR_UNAUTHORIZED)
         (begin
           ;; Update circuit state
@@ -457,7 +456,7 @@ define-map recovery-actions {
     })
   )
   (let* (
-      (current-time (at 'time (chain-state 'time)))
+      (current-time block-height)
       (time-since-last (- current-time (get last-triggered trigger)))
     )
     

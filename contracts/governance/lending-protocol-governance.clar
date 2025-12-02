@@ -3,6 +3,7 @@
 ;; Integrates with AccessControl for role-based access
 
 ;; --- Traits ---
+(use-trait token .defi-traits.sip-010-ft-trait)
 (define-constant TRAIT_REGISTRY .central-traits-registry)
 (define-constant ERR_UNAUTHORIZED (err u8001))
 (define-constant ERR_PROPOSAL_NOT_FOUND (err u8002))
@@ -84,6 +85,19 @@
 (define-map voting-power-snapshots
   { user: principal, block-height: uint }
   uint)
+
+;; === INTERNAL HELPERS ===
+
+(define-private (snapshot-voting-power (user principal) (height uint))
+  (let ((power (unwrap!
+                 (contract-call?
+                   'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.governance-token
+                   get-voting-power-at
+                   user
+                   height)
+                 u0)))
+    (map-set voting-power-snapshots { user: user, block-height: height } power)
+    power))
 
 ;; Parameter change proposals
 (define-map parameter-proposals
@@ -232,7 +246,7 @@
       (asserts! (is-none (map-get? vote-receipts { proposal-id: proposal-id, voter: voter })) ERR_ALREADY_VOTED)
       
       ;; Get voting power at proposal start
-      (let ((voting-power (unwrap! (contract-call? (var-get governance-token) get-voting-power-at voter (get start-block proposal)) ERR_INSUFFICIENT_VOTING_POWER)))
+      (let ((voting-power (unwrap! (contract-call? .governance-token get-voting-power-at voter (get start-block proposal)) ERR_INSUFFICIENT_VOTING_POWER)))
         (asserts! (> voting-power u0) ERR_INSUFFICIENT_VOTING_POWER)
         
         ;; Record vote
@@ -306,7 +320,7 @@
               (if (is-eq (get proposal-type proposal) PROPOSAL_TYPE_PARAMETER)
                 (execute-parameter-change proposal-id)
                 (if (is-eq (get proposal-type proposal) PROPOSAL_TYPE_TREASURY)
-                  (execute-treasury-proposal proposal-id)
+                  (execute-treasury-spend proposal-id .governance-token)
                   (ok true))))) ;; Generic execution
         
         ;; Unwrap result or fail
@@ -330,14 +344,26 @@
         (target-contract (get target-contract param-info))
         (param-name (get parameter-name param-info))
         (new-value (get proposed-value param-info)))
-    (contract-call? target-contract update-parameter param-name new-value)))
+    ;; v1 stub: parameter changes are recorded off-chain; on-chain execution is a no-op for now
+    (ok true)))
 
 ;; @desc Executes a treasury spending proposal.
 ;; @param proposal-id The ID of the treasury spending proposal.
+;; @return response bool uint A response tup
 ;; @return response bool uint A response tuple indicating success or failure.
-(define-private (execute-treasury-proposal (proposal-id uint))
+(define-public (execute-treasury-spend (proposal-id uint) (token <token>))
   (let ((treasury-info (unwrap! (map-get? treasury-proposals proposal-id) ERR_INVALID_PARAMETERS))
         (recipient (get recipient treasury-info))
         (amount (get amount treasury-info))
-        (token (get token treasury-info)))
-    (contract-call? token transfer recipient amount)))
+        (token-principal (get token treasury-info)))
+    (asserts! (is-eq (contract-of token) token-principal) ERR_INVALID_PARAMETERS)
+    ;; Also need to check proposal state/time like execute-proposal
+    (let ((proposal (unwrap! (map-get? proposals proposal-id) ERR_PROPOSAL_NOT_FOUND)))
+      (asserts! (is-eq (get state proposal) PROPOSAL_QUEUED) ERR_PROPOSAL_NOT_ACTIVE)
+      (asserts! (>= block-height (unwrap! (get queue-block proposal) ERR_PROPOSAL_NOT_ACTIVE)) ERR_PROPOSAL_NOT_ACTIVE)
+      
+      (try! (contract-call? token transfer amount (as-contract tx-sender) recipient none))
+      
+      (map-set proposals proposal-id
+        (merge proposal { state: PROPOSAL_EXECUTED, execution-block: (some block-height) }))
+      (ok true))))

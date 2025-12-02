@@ -12,13 +12,18 @@
 (define-constant ERR_DIM_ORACLE_MISSING (err u1002))
 
 (define-data-var owner principal tx-sender)
+(define-data-var fee-manager-contract (optional principal) none)
+(define-data-var pool-factory-contract (optional principal) none)
 
 (define-map pools
   {pool-id: principal}
   {token-x: principal, token-y: principal, fee-tier: uint, active: bool})
 
 (define-private (check-owner)
-  (ok (asserts! (is-eq tx-sender (var-get owner)) ERR_UNAUTHORIZED)))
+  (begin
+    (asserts! (is-eq tx-sender (var-get owner)) ERR_UNAUTHORIZED)
+    (ok true)
+  ))
 
 (define-public (set-fee-manager-contract (new-fee-manager principal))
   (begin
@@ -97,5 +102,10 @@
     pool-data (get active pool-data)
     false))
 
+;; Basic fee-tier validation: ensure non-zero fee; extend with additional
+;; constraints as needed. Returns (response bool uint) so it composes with try!.
 (define-private (validate-fee-tier (fee-tier uint))
-  (ok true))
+  (begin
+    (asserts! (> fee-tier u0) ERR_INVALID_FEE)
+    (ok true)
+  ))

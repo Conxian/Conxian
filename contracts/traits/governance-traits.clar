@@ -1,4 +1,5 @@
 ;; Governance Traits
+;; Defines interfaces for DAO governance, proposals, and voting.
 
 ;; ===========================================
 ;; DAO TRAIT

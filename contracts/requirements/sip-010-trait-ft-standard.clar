@@ -1,7 +1,7 @@
 ;; SIP-010: Fungible Token Standard
 ;; Defines a standard interface for fungible tokens.
 
-(define-trait sip-010-trait-ft-standard
+(define-trait sip-010-trait
   (
     ;; @desc Returns the total supply of the fungible token.
     ;; @returns A uint representing the total supply.

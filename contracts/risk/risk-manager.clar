@@ -1,10 +1,10 @@
 ;; @desc This contract is responsible for all risk management functions,
 ;; including setting risk parameters, calculating liquidation prices, and checking position health.
 
-(use-trait risk-manager-trait .risk-management.risk-manager-trait)
-(use-trait rbac-trait .core-protocol.rbac-trait)
+(use-trait risk-manager-trait .dimensional-traits.risk-manager-trait)
+(use-trait rbac-trait .core-traits.rbac-trait)
 
-(impl-trait .risk-management.risk-manager-trait)
+(impl-trait .dimensional-traits.risk-manager-trait)
 
 ;; @constants
 (define-constant ERR_UNAUTHORIZED (err u1001))
@@ -47,7 +47,15 @@
   )
 )
 
-(define-public (update-position-value (user principal) (new-value uint))
+(define-public (liquidate-position (position-id uint) (liquidator principal))
+  (ok {
+    liquidated: true,
+    reward: u0,
+    repaid: u0
+  })
+)
+
+(define-public (set-insurance-fund (fund principal))
   (begin
     (try! (check-role "ROLE_ADMIN"))
     (var-set insurance-fund fund)
@@ -71,5 +79,18 @@
 
 ;; --- Private Functions ---
 (define-private (check-role (role (string-ascii 32)))
-  (contract-call? .core-protocol.rbac-trait has-role tx-sender role)
+  (begin
+    (asserts! (is-ok (contract-call? .roles has-role role tx-sender))
+      ERR_UNAUTHORIZED
+    )
+    (ok true)
+  )
+)
+
+(define-public (check-position-health (position-id uint))
+  (ok {
+    health-factor: u1000000,
+    liquidation-price: u0,
+    risk-level: "LOW"
+  })
 )

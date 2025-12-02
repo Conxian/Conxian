@@ -2,9 +2,9 @@
 ;; Enhanced factory contract for creating and managing differentiated position NFTs.
 
 ;; SIP-010: Fungible Token Standard
-(use-trait sip-010-ft-trait .sip-standards.sip-010-ft-trait)
+(use-trait sip-010-ft-trait .defi-traits.sip-010-ft-trait)
 ;; SIP-009: Non-Fungible Token Standard
-(use-trait sip-009-nft-trait .sip-standards.sip-009-nft-trait)
+(use-trait sip-009-nft-trait .defi-traits.sip-009-nft-trait)
 
 ;; ===== Constants =====
 ;; Error codes
@@ -136,6 +136,135 @@
 ;; @returns A response with ok true if authorized, or an error.
 (define-private (check-is-governance)
   (ok (asserts! (is-eq tx-sender (var-get governance-address)) ERR_UNAUTHORIZED))
+)
+
+
+;; ===== Helper Functions for NFT Calculations =====
+
+;; Calculate rarity score based on contribution amount and NFT type
+(define-private (calculate-rarity-score
+    (amount uint)
+    (nft-type uint)
+  )
+  (if (is-eq nft-type NFT_TYPE_LAUNCH_LP)
+    (if (>= amount u10000000)
+      u1000
+      u500
+    )
+    (if (is-eq nft-type NFT_TYPE_NORMAL_LP)
+      (if (>= amount u5000000)
+        u600
+        u300
+      )
+      u400
+    )
+  )
+)
+
+;; Calculate visual tier based on contribution amount and NFT type
+(define-private (calculate-visual-tier
+    (amount uint)
+    (nft-type uint)
+  )
+  (if (is-eq nft-type NFT_TYPE_LAUNCH_LP)
+    (if (>= amount u50000000)
+      u5
+      (if (>= amount u10000000)
+        u4
+        (if (>= amount u1000000)
+          u3
+          u2
+        )
+      )
+    )
+    (if (is-eq nft-type NFT_TYPE_NORMAL_LP)
+      (if (>= amount u10000000)
+        u3
+        (if (>= amount u1000000)
+          u2
+          u1
+        )
+      )
+      u2
+    )
+  )
+)
+
+;; Calculate bounty rarity based on achievement score and difficulty
+(define-private (calculate-bounty-rarity
+    (achievement-score uint)
+    (difficulty uint)
+  )
+  (let ((base-score (* achievement-score difficulty)))
+    (if (>= base-score u20)
+      u1000
+      (if (>= base-score u15)
+        u800
+        (if (>= base-score u10)
+          u600
+          (if (>= base-score u5)
+            u400
+            u200
+          )
+        )
+      )
+    )
+  )
+)
+
+;; Calculate bounty visual tier based on achievement score and difficulty
+(define-private (calculate-bounty-visual-tier
+    (achievement-score uint)
+    (difficulty uint)
+  )
+  (let ((base-score (* achievement-score difficulty)))
+    (if (>= base-score u20)
+      u5
+      (if (>= base-score u15)
+        u4
+        (if (>= base-score u10)
+          u3
+          (if (>= base-score u5)
+            u2
+            u1
+          )
+        )
+      )
+    )
+  )
+)
+
+;; Calculate competition rarity based on rank and participants
+(define-private (calculate-competition-rarity
+    (prize-rank uint)
+    (max-participants uint)
+  )
+  (let ((participant-multiplier (/ max-participants u10)))
+    (if (is-eq prize-rank u1)
+      (* participant-multiplier u1000)
+      (if (is-eq prize-rank u2)
+        (* participant-multiplier u800)
+        (if (is-eq prize-rank u3)
+          (* participant-multiplier u600)
+          (* participant-multiplier u400)
+        )
+      )
+    )
+  )
+)
+
+;; Calculate competition visual tier based on rank
+(define-private (calculate-competition-visual-tier (prize-rank uint))
+  (if (is-eq prize-rank u1)
+    u5
+    (if (is-eq prize-rank u2)
+      u4
+      (if (is-eq prize-rank u3)
+        u3
+        u2
+      )
+    )
+  )
 )
 
 ;; ===== Public Functions =====
@@ -335,33 +464,32 @@
 )
 
 ;; Legacy create-position function for backward compatibility
-(define-public (create-position 
-  (collateral-token <sip-010-ft-trait>) 
-  (collateral-amount uint) 
-  (debt-token <sip-010-ft-trait>) 
-  (debt-amount uint))
-  (let (
-    (position-id (var-get next-position-id))
-    (current-block block-height)
-    (collateral-principal (contract-of collateral-token))
-    (debt-principal (contract-of debt-token))
+(define-public (create-position
+    (collateral-token <sip-010-ft-trait>)
+    (collateral-amount uint)
+    (debt-token <sip-010-ft-trait>)
+    (debt-amount uint)
   )
+  (let (
+      (position-id (var-get next-position-id))
+      (current-block block-height)
+      (collateral-principal (contract-of collateral-token))
+      (debt-principal (contract-of debt-token))
+    )
     (asserts! (> collateral-amount u0) ERR_ZERO_AMOUNT)
     (asserts! (> debt-amount u0) ERR_ZERO_AMOUNT)
-    
-    (map-set position-metadata
-      { position-id: position-id }
-      { 
-        owner: tx-sender,
-        collateral-token: collateral-principal,
-        collateral-amount: collateral-amount,
-        debt-token: debt-principal,
-        debt-amount: debt-amount,
-        creation-block: current-block
-      })
-    
+
+    (map-set position-metadata { position-id: position-id } {
+      owner: tx-sender,
+      collateral-token: collateral-principal,
+      collateral-amount: collateral-amount,
+      debt-token: debt-principal,
+      debt-amount: debt-amount,
+      creation-block: current-block,
+    })
+
     (var-set next-position-id (+ position-id u1))
-    
+
     (print {
       event: "position-created",
       position-id: position-id,
@@ -369,72 +497,13 @@
       collateral-token: collateral-principal,
       collateral-amount: collateral-amount,
       debt-token: debt-principal,
-      debt-amount: debt-amount
+      debt-amount: debt-amount,
     })
-    
+
     (ok position-id)
   )
 )
 
-;; ===== Helper Functions for NFT Calculations =====
-
-;; Calculate rarity score based on contribution amount and NFT type
-(define-private (calculate-rarity-score (amount uint) (nft-type uint))
-  (match nft-type
-    NFT_TYPE_LAUNCH_LP 
-      (if (>= amount u10000000) u1000 u500) ;; High rarity for large launch contributions
-    NFT_TYPE_NORMAL_LP
-      (if (>= amount u5000000) u600 u300)   ;; Medium rarity for normal contributions
-    else u400))                                   ;; Default rarity
-
-;; Calculate visual tier based on contribution amount and NFT type
-(define-private (calculate-visual-tier (amount uint) (nft-type uint))
-  (match nft-type
-    NFT_TYPE_LAUNCH_LP
-      (if (>= amount u50000000) u5
-        (if (>= amount u10000000) u4
-          (if (>= amount u1000000) u3
-            u2)))
-    NFT_TYPE_NORMAL_LP
-      (if (>= amount u10000000) u3
-        (if (>= amount u1000000) u2
-          u1))
-    else u2))                             ;; Default visual tier
-
-;; Calculate bounty rarity based on achievement score and difficulty
-(define-private (calculate-bounty-rarity (achievement-score uint) (difficulty uint))
-  (let ((base-score (* achievement-score difficulty)))
-    (if (>= base-score u20) u1000
-      (if (>= base-score u15) u800
-        (if (>= base-score u10) u600
-          (if (>= base-score u5) u400
-            u200))))))
-
-;; Calculate bounty visual tier based on achievement score and difficulty
-(define-private (calculate-bounty-visual-tier (achievement-score uint) (difficulty uint))
-  (let ((base-score (* achievement-score difficulty)))
-    (if (>= base-score u20) u5
-      (if (>= base-score u15) u4
-        (if (>= base-score u10) u3
-          (if (>= base-score u5) u2
-            u1))))))
-
-;; Calculate competition rarity based on rank and participants
-(define-private (calculate-competition-rarity (prize-rank uint) (max-participants uint))
-  (let ((participant-multiplier (/ max-participants u10)))
-    (match prize-rank
-      u1 (* participant-multiplier u1000)     ;; 1st place - highest rarity
-      u2 (* participant-multiplier u800)      ;; 2nd place
-      u3 (* participant-multiplier u600)      ;; 3rd place
-      else (* participant-multiplier u400))))    ;; Other places
-
-;; Calculate competition visual tier based on rank
-(define-private (calculate-competition-visual-tier (prize-rank uint))
-  (match prize-rank
-    u1 u5      ;; 1st place - legendary animated
-    u2 u4      ;; 2nd place - epic glowing
-    u3 u3      ;; 3rd place - rare special
-    else u2))     ;; Other places - uncommon enhanced
 
 ;; ===== Bounty Management Functions =====
 
@@ -448,52 +517,51 @@
 ;; @param deadline-block The deadline block height.
 ;; @param max-submissions Maximum number of submissions.
 ;; @returns A response with the new bounty ID on success, or an error.
-(define-public (create-bounty 
-  (title (string-ascii 100))
-  (description (string-utf8 500))
-  (reward-amount uint)
-  (reward-token principal)
-  (difficulty uint)
-  (category (string-ascii 50))
-  (deadline-block uint)
-  (max-submissions uint))
+(define-public (create-bounty
+    (title (string-ascii 100))
+    (description (string-utf8 500))
+    (reward-amount uint)
+    (reward-token principal)
+    (difficulty uint)
+    (category (string-ascii 50))
+    (deadline-block uint)
+    (max-submissions uint)
+  )
   (begin
     (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
     (asserts! (> reward-amount u0) ERR_ZERO_AMOUNT)
     (asserts! (and (>= difficulty u1) (<= difficulty u5)) ERR_INVALID_INPUT)
     (asserts! (> deadline-block block-height) ERR_INVALID_INPUT)
-    
+
     (let ((bounty-id (var-get next-bounty-id)))
-      (map-set bounties
-        { bounty-id: bounty-id }
-        {
-          title: title,
-          description: description,
-          reward-amount: reward-amount,
-          reward-token: reward-token,
-          difficulty: difficulty,
-          category: category,
-          deadline-block: deadline-block,
-          max-submissions: max-submissions,
-          current-submissions: u0,
-          is-active: true,
-          judging-criteria: u"",
-          special-rewards: (list),
-          created-by: tx-sender,
-          created-at: block-height
-        })
-      
+      (map-set bounties { bounty-id: bounty-id } {
+        title: title,
+        description: description,
+        reward-amount: reward-amount,
+        reward-token: reward-token,
+        difficulty: difficulty,
+        category: category,
+        deadline-block: deadline-block,
+        max-submissions: max-submissions,
+        current-submissions: u0,
+        is-active: true,
+        judging-criteria: u"",
+        special-rewards: (list),
+        created-by: tx-sender,
+        created-at: block-height,
+      })
+
       (var-set next-bounty-id (+ bounty-id u1))
-      
+
       (print {
         event: "bounty-created",
         bounty-id: bounty-id,
         title: title,
         reward-amount: reward-amount,
         difficulty: difficulty,
-        category: category
+        category: category,
       })
-      
+
       (ok bounty-id)
     )
   )
@@ -503,27 +571,32 @@
 ;; @param bounty-id The ID of the bounty.
 ;; @param solution-hash The hash of the submitted solution.
 ;; @returns A response with ok true on success, or an error.
-(define-public (submit-bounty-solution (bounty-id uint) (solution-hash (string-ascii 64)))
+(define-public (submit-bounty-solution
+    (bounty-id uint)
+    (solution-hash (string-ascii 64))
+  )
   (let ((bounty (unwrap! (map-get? bounties { bounty-id: bounty-id }) ERR_POSITION_NOT_FOUND)))
     (asserts! (get is-active bounty) ERR_INVALID_INPUT)
     (asserts! (<= block-height (get deadline-block bounty)) ERR_INVALID_INPUT)
-    (asserts! (< (get current-submissions bounty) (get max-submissions bounty)) ERR_INVALID_INPUT)
-    
+    (asserts! (< (get current-submissions bounty) (get max-submissions bounty))
+      ERR_INVALID_INPUT
+    )
+
     ;; Update submission count
-    (map-set bounties
-      { bounty-id: bounty-id }
-      (merge bounty { current-submissions: (+ (get current-submissions bounty) u1) }))
-    
+    (map-set bounties { bounty-id: bounty-id }
+      (merge bounty { current-submissions: (+ (get current-submissions bounty) u1) })
+    )
+
     ;; In a real implementation, this would store the solution hash
     ;; and trigger a review process
-    
+
     (print {
       event: "bounty-solution-submitted",
       bounty-id: bounty-id,
       submitter: tx-sender,
-      solution-hash: solution-hash
+      solution-hash: solution-hash,
     })
-    
+
     (ok true)
   )
 )
@@ -538,52 +611,51 @@
 ;; @param max-participants Maximum number of participants.
 ;; @param category The competition category.
 ;; @returns A response with the new competition ID on success, or an error.
-(define-public (create-competition 
-  (name (string-ascii 100))
-  (description (string-utf8 1000))
-  (prize-pool uint)
-  (entry-fee uint)
-  (start-block uint)
-  (end-block uint)
-  (max-participants uint)
-  (category (string-ascii 50)))
+(define-public (create-competition
+    (name (string-ascii 100))
+    (description (string-utf8 1000))
+    (prize-pool uint)
+    (entry-fee uint)
+    (start-block uint)
+    (end-block uint)
+    (max-participants uint)
+    (category (string-ascii 50))
+  )
   (begin
     (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
     (asserts! (> prize-pool u0) ERR_ZERO_AMOUNT)
     (asserts! (> start-block block-height) ERR_INVALID_INPUT)
     (asserts! (> end-block start-block) ERR_INVALID_INPUT)
-    
+
     (let ((competition-id (var-get next-competition-id)))
-      (map-set competitions
-        { competition-id: competition-id }
-        {
-          name: name,
-          description: description,
-          prize-pool: prize-pool,
-          entry-fee: entry-fee,
-          start-block: start-block,
-          end-block: end-block,
-          max-participants: max-participants,
-          current-participants: u0,
-          prize-distribution: (list u5000 u3000 u1500 u500), ;; 50%, 30%, 15%, 5%
-          special-nft-rewards: (list),
-          leaderboard: (list),
-          category: category,
-          judging-method: "score-based",
-          created-by: tx-sender,
-          created-at: block-height
-        })
-      
+      (map-set competitions { competition-id: competition-id } {
+        name: name,
+        description: description,
+        prize-pool: prize-pool,
+        entry-fee: entry-fee,
+        start-block: start-block,
+        end-block: end-block,
+        max-participants: max-participants,
+        current-participants: u0,
+        prize-distribution: (list u5000 u3000 u1500 u500), ;; 50%, 30%, 15%, 5%
+        special-nft-rewards: (list),
+        leaderboard: (list),
+        category: category,
+        judging-method: "score-based",
+        created-by: tx-sender,
+        created-at: block-height,
+      })
+
       (var-set next-competition-id (+ competition-id u1))
-      
+
       (print {
         event: "competition-created",
         competition-id: competition-id,
         name: name,
         prize-pool: prize-pool,
-        category: category
+        category: category,
       })
-      
+
       (ok competition-id)
     )
   )
@@ -593,13 +665,17 @@
 ;; @param position-id The ID of the position to update.
 ;; @param new-collateral-amount The new collateral amount.
 ;; @returns A response with ok true on success, or an error.
-(define-public (update-collateral (position-id uint) (new-collateral-amount uint))
-  (let ((position (unwrap! (map-get? position-metadata { position-id: position-id }) ERR_POSITION_NOT_FOUND)))
+(define-public (update-collateral
+    (position-id uint)
+    (new-collateral-amount uint)
+  )
+  (let ((position (unwrap! (map-get? position-metadata { position-id: position-id })
+      ERR_POSITION_NOT_FOUND
+    )))
     (asserts! (is-eq tx-sender (get owner position)) ERR_UNAUTHORIZED)
     (asserts! (> new-collateral-amount u0) ERR_ZERO_AMOUNT)
-    
-    (map-set position-metadata
-      { position-id: position-id }
+
+    (map-set position-metadata { position-id: position-id }
       (merge position { collateral-amount: new-collateral-amount })
     )
     (ok true)
@@ -610,13 +686,17 @@
 ;; @param position-id The ID of the position to update.
 ;; @param new-debt-amount The new debt amount.
 ;; @returns A response with ok true on success, or an error.
-(define-public (update-debt (position-id uint) (new-debt-amount uint))
-  (let ((position (unwrap! (map-get? position-metadata { position-id: position-id }) ERR_POSITION_NOT_FOUND)))
+(define-public (update-debt
+    (position-id uint)
+    (new-debt-amount uint)
+  )
+  (let ((position (unwrap! (map-get? position-metadata { position-id: position-id })
+      ERR_POSITION_NOT_FOUND
+    )))
     (asserts! (is-eq tx-sender (get owner position)) ERR_UNAUTHORIZED)
     (asserts! (> new-debt-amount u0) ERR_ZERO_AMOUNT)
-    
-    (map-set position-metadata
-      { position-id: position-id }
+
+    (map-set position-metadata { position-id: position-id }
       (merge position { debt-amount: new-debt-amount })
     )
     (ok true)

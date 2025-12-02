@@ -6,9 +6,9 @@
 ;; representation of a user's stake.
 
 ;; --- Traits ---
-(use-trait protocol-monitor-trait .monitoring-security-traits.protocol-monitor-trait)
-(use-trait sip-010-ft-trait .sip-standards.sip-010-ft-trait)
-(use-trait rbac-trait .core-protocol.rbac-trait)
+(use-trait protocol-monitor-trait .security-monitoring.protocol-monitor-trait)
+(use-trait sip-010-ft-trait .defi-traits.sip-010-ft-trait)
+(use-trait rbac-trait .core-traits.rbac-trait)
 
 ;; --- Constants ---
 
@@ -75,7 +75,7 @@
 ;; @returns A response indicating success or failure.
 (define-public (set-staking-contract (contract-address principal))
   (begin
-    (asserts! (is-ok (contract-call? .core-protocol.rbac-trait has-role "contract-owner"))
+    (asserts! (is-ok (contract-call? .roles has-role "contract-owner" tx-sender))
       (err ERR_UNAUTHORIZED)
     )
     (var-set staking-contract (some contract-address))
@@ -87,7 +87,7 @@
 ;; @returns A response indicating success or failure.
 (define-public (set-protocol-monitor (monitor principal))
   (begin
-    (asserts! (is-ok (contract-call? .core-protocol.rbac-trait has-role "contract-owner")) (err ERR_UNAUTHORIZED))
+    (asserts! (is-ok (contract-call? .roles has-role "contract-owner" tx-sender)) (err ERR_UNAUTHORIZED))
     (var-set protocol-monitor (some monitor))
     (print {event: "protocol-monitor-set", sender: tx-sender, monitor: monitor, block-height: block-height})
     (ok true)))

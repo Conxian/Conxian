@@ -30,7 +30,7 @@
   { event-id: uint }
   {
     event-type: (string-ascii 32),
-    data: (buff 256),
+    data: (string-ascii 256),
     timestamp: uint,
   }
 )

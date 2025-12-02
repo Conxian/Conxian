@@ -165,4 +165,8 @@
 ;; @param proposal-id uint The ID of the proposal.
 ;; @returns (response (optional { ... }) uint) An optional tuple containing the proposal details.
 (define-read-only (get-proposal (proposal-id uint))
-  (ok (map-get? proposals { id: proposal-id })))
+  (if true
+    (ok (map-get? proposals { id: proposal-id }))
+    (err u0)
+  )
+)

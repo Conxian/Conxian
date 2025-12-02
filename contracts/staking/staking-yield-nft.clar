@@ -2,10 +2,10 @@
 ;; Comprehensive staking and yield farming NFT system
 ;; Represents staking positions, yield farming participation, and reward tier achievements
 
-(use-trait sip-009-nft-trait .sip-standards.sip-009-nft-trait)
-(use-trait sip-010-ft-trait .sip-standards.sip-010-ft-trait)
+(use-trait sip-009-nft-trait .defi-traits.sip-009-nft-trait)
+(use-trait sip-010-ft-trait .defi-traits.sip-010-ft-trait)
 
-(impl-trait .sip-standards.sip-009-nft-trait)
+(impl-trait .defi-traits.sip-009-nft-trait)
 
 ;; ===== Constants =====
 (define-constant ERR_UNAUTHORIZED (err u11000))
@@ -17,12 +17,12 @@
 (define-constant ERR_FARM_NOT_ACTIVE (err u11006))
 
 ;; Staking Constants
-(define-constant MIN_STAKE_AMOUNT u1000000          ;; 1 STX minimum
-(define-constant MAX_STAKE_AMOUNT u1000000000        ;; 1000 STX maximum
-(define-constant MIN_LOCK_DURATION u100              ;; 100 blocks minimum
-(define-constant MAX_LOCK_DURATION u100000           ;; 100000 blocks maximum
-(define-constant BASE_YIELD_RATE u500                 ;; 5% base yield rate
-(define-constant YIELD_BOOST_MULTIPLIER u1500         ;; 1.5x yield boost multiplier
+(define-constant MIN_STAKE_AMOUNT u1000000)          ;; 1 STX minimum
+(define-constant MAX_STAKE_AMOUNT u1000000000)        ;; 1000 STX maximum
+(define-constant MIN_LOCK_DURATION u100)              ;; 100 blocks minimum
+(define-constant MAX_LOCK_DURATION u100000)           ;; 100000 blocks maximum
+(define-constant BASE_YIELD_RATE u500)                 ;; 5% base yield rate
+(define-constant YIELD_BOOST_MULTIPLIER u1500)         ;; 1.5x yield boost multiplier
 
 ;; Staking NFT Types
 (define-constant NFT_TYPE_STAKING_POSITION u1)        ;; Staking position NFT
@@ -692,15 +692,19 @@
   (nft-mint? staking-nft token-id recipient))
 
 (define-private (calculate-staking-yield-rate (amount uint) (lock-duration uint))
-  (let ((base-rate BASE_YIELD_RATE)
-        (amount-bonus (cond
-                      ((>= amount u100000000) u200) ;; 2% bonus for large stakes
-                      ((>= amount u10000000) u100)   ;; 1% bonus for medium stakes
-                      (true u0)))                   ;; No bonus for small stakes
-        (lock-bonus (cond
-                     ((>= lock-duration u50000) u300) ;; 3% bonus for long locks
-                     ((>= lock-duration u10000) u150)  ;; 1.5% bonus for medium locks
-                     (true u50)))                     ;; 0.5% bonus for short locks
+  (let (
+        (base-rate BASE_YIELD_RATE)
+        (amount-bonus
+          (cond
+            ((>= amount u100000000) u200) ;; 2% bonus for large stakes
+            ((>= amount u10000000) u100)  ;; 1% bonus for medium stakes
+            (true u0)))                   ;; No bonus for small stakes
+        (lock-bonus
+          (cond
+            ((>= lock-duration u50000) u300) ;; 3% bonus for long locks
+            ((>= lock-duration u10000) u150) ;; 1.5% bonus for medium locks
+            (true u50)))                     ;; 0.5% bonus for short locks
+       )
     (+ base-rate amount-bonus lock-bonus)))
 
 (define-private (calculate-lockup-tier (amount uint) (lock-duration uint))
@@ -809,13 +813,13 @@
     (true u1000)))               ;; 1x bonus for tier 1
 
 (define-private (get-tier-special-access (tier-level uint))
-  (match tier-level
-    u10 (list "legendary-access" "exclusive-pools" "priority-everything")
-    u8 (list "elite-access" "exclusive-pools" "priority-harvest")
-    u6 (list "advanced-access" "priority-pools")
-    u4 (list "enhanced-access" "standard-pools")
-    u2 (list "basic-access" "public-pools")
-    else (list "limited-access")))
+  (cond
+    ((is-eq tier-level u10) (list "legendary-access" "exclusive-pools" "priority-everything"))
+    ((is-eq tier-level u8) (list "elite-access" "exclusive-pools" "priority-harvest"))
+    ((is-eq tier-level u6) (list "advanced-access" "priority-pools"))
+    ((is-eq tier-level u4) (list "enhanced-access" "standard-pools"))
+    ((is-eq tier-level u2) (list "basic-access" "public-pools"))
+    (true (list "limited-access"))))
 
 (define-private (calculate-lockup-bonus-multiplier (lock-extension uint))
   (cond
@@ -1035,7 +1039,9 @@
 
 (define-read-only (calculate-expected-rewards (token-id uint) (blocks-to-add uint))
   ;; Calculate expected rewards for additional blocks
-  (let ((position (unwrap-panic (map-get? staking-positions { token-id: token-id }))))
-    (let ((rate-per-block (/ (get yield-rate position) u10000))
-          (total-rewards (* (get stake-amount position) blocks-to-add rate-per-block)))
-      (ok total-rewards))))
+  (let (
+        (position (unwrap-panic (map-get? staking-positions { token-id: token-id })))
+        (rate-per-block (/ (get yield-rate position) u10000))
+        (total-rewards (* (get stake-amount position) blocks-to-add rate-per-block))
+       )
+    (ok total-rewards)))

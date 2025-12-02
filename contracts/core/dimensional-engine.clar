@@ -1,25 +1,20 @@
 ;; @desc Core contract for the dimensional engine.
-;; This contract serves as a facade, delegating calls to the appropriate
-;; specialized contracts for position management, funding rate calculation,
-;; collateral management, and risk management.
 
 (use-trait dimensional-trait .dimensional-traits.dimensional-trait)
 (use-trait funding-rate-calculator-trait .dimensional-traits.funding-rate-calculator-trait)
 (use-trait collateral-manager-trait .dimensional-traits.collateral-manager-trait)
-(use-trait risk-manager-trait .risk-management.risk-manager-trait)
-(use-trait rbac-trait .core-protocol.rbac-trait)
+(use-trait risk-manager-trait .dimensional-traits.risk-manager-trait)
+(use-trait rbac-trait .core-traits.rbac-trait)
 
-;; @data-vars
-(define-data-var position-manager principal .position-manager)
-(define-data-var funding-rate-calculator principal .funding-rate-calculator)
-(define-data-var collateral-manager principal .collateral-manager)
-(define-data-var risk-manager principal .risk-manager)
+(define-data-var position-manager principal tx-sender)
+(define-data-var funding-rate-calculator principal tx-sender)
+(define-data-var collateral-manager principal tx-sender)
+(define-data-var risk-manager principal tx-sender)
 
-;; --- Position Management ---
 (define-public (open-position (asset principal) (collateral uint) (leverage uint) (is-long bool) (stop-loss (optional uint)) (take-profit (optional uint)))
   (let (
-    (collateral-balance (try! (contract-call? .collateral-manager get-balance tx-sender)))
-    (fee-rate (try! (contract-call? .collateral-manager get-protocol-fee-rate)))
+    (collateral-balance (unwrap! (contract-call? .collateral-manager get-balance tx-sender) (err u2003)))
+    (fee-rate (unwrap! (contract-call? .collateral-manager get-protocol-fee-rate) (err u2004)))
     (fee (* collateral fee-rate))
     (total-cost (+ collateral fee))
   )
@@ -36,12 +31,13 @@
     (result (try! (contract-call? .position-manager close-position position-id slippage)))
     (collateral-returned (get collateral-returned result))
   )
-    (try! (as-contract (contract-call? .collateral-manager deposit-funds collateral-returned asset)))
+    (try! (as-contract (contract-call? .collateral-manager deposit-funds
+      collateral-returned asset
+    )))
     (ok result)
   )
 )
 
-;; --- Funding Rate Calculation ---
 (define-public (update-funding-rate (asset principal))
   (contract-call? .funding-rate-calculator update-funding-rate asset)
 )
@@ -52,7 +48,6 @@
   )
 )
 
-;; --- Collateral Management ---
 (define-public (deposit-funds (amount uint) (token principal))
   (contract-call? .collateral-manager deposit-funds amount token)
 )
@@ -61,11 +56,16 @@
   (contract-call? .collateral-manager withdraw-funds amount token)
 )
 
-;; --- Risk Management ---
+(define-public (check-position-health (position-id uint))
+  (contract-call? .risk-manager check-position-health position-id)
+)
+
+(define-public (liquidate-position (position-id uint) (liquidator principal))
+  (contract-call? .risk-manager liquidate-position position-id liquidator)
+)
+
 (define-public (set-risk-parameters (new-max-leverage uint) (new-maintenance-margin uint) (new-liquidation-threshold uint))
-  (contract-call? .risk-manager set-risk-parameters new-max-leverage
-    new-maintenance-margin new-liquidation-threshold
-  )
+  (contract-call? .risk-manager set-risk-parameters new-max-leverage new-maintenance-margin new-liquidation-threshold)
 )
 
 (define-public (set-liquidation-rewards (min-reward uint) (max-reward uint))
@@ -76,7 +76,6 @@
   (contract-call? .risk-manager set-insurance-fund fund)
 )
 
-;; --- Read-Only Functions ---
 (define-read-only (get-protocol-fee-rate)
-  (ok u30) ;; 0.3%
+  (ok u30)
 )

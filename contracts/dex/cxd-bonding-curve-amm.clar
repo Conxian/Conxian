@@ -1,7 +1,7 @@
 ;; cxd-bonding-curve-amm.clar
 ;; Minimal placeholder implementation for CXD bonding curve AMM
 
-(use-trait token-trait .sip-standards.sip-010-ft-trait)
+(use-trait token-trait .defi-traits.sip-010-ft-trait)
 (use-trait governance-token-trait .governance.governance-token-trait)
 (use-trait price-initializer-trait .oracle-pricing.price-initializer-trait)
 

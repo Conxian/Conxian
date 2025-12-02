@@ -1,26 +1,18 @@
 ;; mev-protector.clar
 ;; Implements MEV protection mechanisms for the Conxian DEX.
 
-(use-trait multi-hop-router-trait .multi-hop-router-v3.multi-hop-router-trait)
-(use-trait crypto-lib-trait .crypto-lib.crypto-lib-trait)
-(use-trait serializer-lib-trait .serializer-lib.serializer-lib-trait)
+ 
 
 (define-trait multi-hop-router-trait
-  (
-    (execute-swap (list 10 {pool: principal, token-in: principal, token-out: principal}) uint uint) (response uint uint))
-  )
+  ((execute-swap (routes (list 10 (tuple (pool principal) (token-in principal) (token-out principal)))) (amount-in uint) (min-amount-out uint)) (response uint uint))
 )
 
 (define-trait crypto-lib-trait
-  (
-    (sha256 (buff 512)) (response (buff 32) uint))
-  )
+  ((sha256 (data (buff 512))) (response (buff 32) uint))
 )
 
 (define-trait serializer-lib-trait
-  (
-    (serialize-trade-details (tuple (token-in principal) (token-out principal) (amount-in uint) (min-amount-out uint)) (nonce (buff 16))) (response (buff 512) uint))
-  )
+  ((serialize-trade-details (details (tuple (token-in principal) (token-out principal) (amount-in uint) (min-amount-out uint))) (nonce (buff 16))) (response (buff 512) uint))
 )
 
 (define-constant REVEAL_WINDOW u10)

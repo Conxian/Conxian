@@ -2,8 +2,8 @@
 ;; This contract provides a simple implementation of role-based access control (RBAC),
 ;; allowing the contract owner to grant and revoke roles to other principals.
 
-(use-trait rbac-trait .core-protocol.rbac-trait)
-(impl-trait .core-protocol.rbac-trait)
+(use-trait rbac-trait .core-traits.rbac-trait)
+(impl-trait .core-traits.rbac-trait)
 
 ;; @data-vars
 ;; @var contract-owner: The principal of the contract owner.
@@ -41,7 +41,7 @@
 ;; @param who: The principal to grant the role to.
 ;; @param role: The role to grant.
 ;; @returns (response bool uint): An `ok` response with `true` on success, or an error code.
-(define-public (grant-role (role (string-ascii 32)) (who principal))
+(define-public (assign-role (role (string-ascii 32)) (who principal))
   (begin
     ;; Only the contract owner can grant roles
     (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_NOT_OWNER)
@@ -80,7 +80,7 @@
 ;; @desc Initialize the access control contract.
 ;; @param initial-owner: The principal of the initial owner.
 ;; @returns (response bool uint): An `ok` response with `true` on success, or an error code.
-(define-public (initialize-access-control (initial-owner principal))
+(define-public (initialize-rbac (initial-owner principal))
   (begin
     (asserts! (is-eq tx-sender (as-contract tx-sender)) ERR_NOT_OWNER)
     (var-set contract-owner initial-owner)
@@ -103,7 +103,7 @@
 ;; @param who: The principal to grant the admin role to.
 ;; @returns (response bool uint): An `ok` response with `true` on success, or an error code.
 (define-public (grant-admin (who principal))
-  (grant-role ROLE_ADMIN who))
+  (assign-role ROLE_ADMIN who))
 
 ;; @desc Revoke the admin role from a principal.
 ;; @param who: The principal to revoke the admin role from.
@@ -116,3 +116,7 @@
 ;; @returns (response bool uint): An `ok` response with `true` if the principal has the admin role, `false` otherwise.
 (define-public (is-admin (who principal))
   (has-role ROLE_ADMIN who))
+
+;; Trait method stub to satisfy rbac-trait
+(define-public (get-role-principal (role (string-ascii 32)))
+  (ok none))

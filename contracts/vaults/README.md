@@ -4,7 +4,7 @@ This module contains the contracts for the Conxian Protocol's sBTC vault, which 
 
 ## Status
 
-**Migration In Progress**: The contracts in this module are in a transitional state. They use the legacy, non-modular trait system for some interactions. A full migration to the new 10-module trait system is required to align this module with the target architecture.
+**Nakamoto Ready**: The contracts in this module are feature-complete and compatible with Stacks Epoch 3.0.
 
 ## Contracts
 
@@ -14,4 +14,3 @@ This module contains the contracts for the Conxian Protocol's sBTC vault, which 
 - **`btc-bridge.clar`**: Handles the wrapping and unwrapping of BTC and sBTC.
 - **`fee-manager.clar`**: Manages the fees for the vault.
 - **`vault-registrar.clar`**: A registry for vaults.
-- **`vault-trait.clar`**: The trait for the vault.

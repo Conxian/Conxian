@@ -13,6 +13,7 @@
 (define-constant MAX_PRICE (* u1000000000000000000 u1000000))  ;; $1M with 18 decimals
 
 ;; Admin
+(define-data-var admin principal tx-sender)
 (define-data-var manipulation-threshold-bps uint u500) ;; 5% default
 (define-data-var twap-alpha-bps uint u1000) ;; 10% EMA weight for new observations
 (define-data-var circuit-breaker (optional principal) none)
@@ -49,7 +50,7 @@
 )
 
 (define-private (abs (n int))
-  (if (< n i0) (- i0 n) n)
+  (if (< n 0) (- 0 n) n)
 )
 
 (define-public (set-admin (new-admin principal))

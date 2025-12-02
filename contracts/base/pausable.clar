@@ -3,9 +3,9 @@
 ;; Only the contract owner can pause or unpause the contract.
 
 ;; --- Traits ---
-(use-trait pausable-trait .core-protocol.pausable-trait)
-(use-trait ownable-trait .core-protocol.ownable-trait)
-(use-trait rbac-trait .core-protocol.rbac-trait)
+(use-trait pausable-trait .core-traits.pausable-trait)
+(use-trait ownable-trait .core-traits.ownable-trait)
+(use-trait rbac-trait .core-traits.rbac-trait)
 
 ;; @constants
 ;; @var ERR_CONTRACT_PAUSED: The contract is currently paused.
@@ -39,12 +39,14 @@
 ;; @returns (response bool uint): An `ok` response with `true` on success, or an error code.
 (define-public (pause)
   (begin
-    (asserts! (is-ok (contract-call? .rbac-trait has-role "contract-owner")) (err ERR_NOT_OWNER))
+    (asserts! (is-ok (contract-call? .roles has-role "contract-owner" tx-sender))
+      ERR_NOT_OWNER
+    )
     ;; Ensure contract is not already paused
-    (asserts! (not (var-get is-paused)) ERR_ALREADY_PAUSED)
+    (asserts! (not (var-get paused-flag)) ERR_ALREADY_PAUSED)
 
     ;; Update state
-    (var-set is-paused true)
+    (var-set paused-flag true)
     (ok true)
   )
 )
@@ -53,12 +55,12 @@
 ;; @returns (response bool uint): An `ok` response with `true` on success, or an error code.
 (define-public (unpause)
   (begin
-    (asserts! (is-ok (contract-call? .rbac-trait has-role "contract-owner")) (err ERR_NOT_OWNER))
+    (asserts! (is-ok (contract-call? .roles has-role "contract-owner" tx-sender)) ERR_NOT_OWNER)
     ;; Ensure contract is currently paused
-    (asserts! (var-get is-paused) ERR_ALREADY_UNPAUSED)
+    (asserts! (var-get paused-flag) ERR_ALREADY_UNPAUSED)
 
     ;; Update state
-    (var-set is-paused false)
+    (var-set paused-flag false)
     (ok true)
   )
 )
