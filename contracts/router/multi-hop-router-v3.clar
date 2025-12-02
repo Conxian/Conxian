@@ -1,145 +1,100 @@
-;; multi-hop-router-v3.clar
-;; Conxian Multi-Hop Routing Engine V3
+;; Multi-Hop Router V3
+;; Production-grade routing engine with support for up to 4 hops.
 
-;; SIP-010: Fungible Token Standard
-(use-trait sip-010-ft-trait .defi-traits.sip-010-ft-trait)
-(use-trait circuit-breaker-trait .security-monitoring.circuit-breaker-trait)
+(use-trait sip-010-trait .sip-standards.sip-010-ft-trait)
+(use-trait pool-trait .defi-traits.pool-trait)
 
-(define-trait dex-factory-v2-trait
-  (
-    (get-pool (principal principal) (response (optional principal) uint))
-  )
+;; --- Constants ---
+(define-constant ERR_UNAUTHORIZED (err u1000))
+(define-constant ERR_INVALID_PATH (err u1001))
+(define-constant ERR_SLIPPAGE_EXCEEDED (err u1002))
+(define-constant ERR_SWAP_FAILED (err u1003))
+
+;; --- Public Functions ---
+
+;; @desc Swap 1 hop
+;; @param amount-in Amount in
+;; @param min-amount-out Minimum amount out
+;; @param pool Pool trait
+;; @param token-in Token in trait
+;; @param token-out Token out trait
+(define-public (swap-hop-1
+    (amount-in uint)
+    (min-amount-out uint)
+    (pool <pool-trait>)
+    (token-in <sip-010-trait>)
+    (token-out <sip-010-trait>)
 )
-
-(define-trait pool-trait
-  (
-    (swap-trait-adapter (trait_reference <ft-trait>) (trait_reference <ft-trait>) uint uint principal) (response uint uint))
-  )
-)
-
-;; Error codes
-(define-public err-unauthorized (err u100))
-(define-public err-invalid-pair (err u101))
-(define-public err-invalid-amount (err u102))
-(define-public err-no-route-found (err u103))
-(define-public err-swap-failed (err u104))
-(define-public err-slippage-exceeded (err u105))
-(define-public err-circuit-open (err u106))
-
-(define-data-var circuit-breaker principal .circuit-breaker)
-(define-data-var admin principal tx-sender)
-(define-public err-circuit-open (err u106))
-
-(define-data-var circuit-breaker principal .circuit-breaker)
-(define-data-var admin principal tx-sender)
-
-;; Data maps
-(define-map routes
-  {
-    token-in: principal,
-    token-out: principal,
-    amount-in: uint
-  }
-  {
-    path: (list 10 {pool: principal, token-in: principal, token-out: principal}),
-    amount-out: uint
-  }
-)
-
-(define-private (check-circuit-breaker)
-  (contract-call? (var-get circuit-breaker) is-circuit-open)
-)
-
-(define-public (set-admin (new-admin principal))
-  (begin
-    (asserts! (is-eq tx-sender (var-get admin)) err-unauthorized)
-    (var-set admin new-admin)
-    (ok true)
-  )
-)
-
-(define-public (set-circuit-breaker (new-circuit-breaker principal))
-  (begin
-    (asserts! (is-eq tx-sender (var-get admin)) err-unauthorized)
-    (var-set circuit-breaker new-circuit-breaker)
-    (ok true)
-  )
-)
-
-(define-private (check-circuit-breaker)
-  (contract-call? (var-get circuit-breaker) is-circuit-open)
-)
-
-(define-public (set-admin (new-admin principal))
-  (begin
-    (asserts! (is-eq tx-sender (var-get admin)) err-unauthorized)
-    (var-set admin new-admin)
-    (ok true)
-  )
-)
-
-(define-public (set-circuit-breaker (new-circuit-breaker principal))
-  (begin
-    (asserts! (is-eq tx-sender (var-get admin)) err-unauthorized)
-    (var-set circuit-breaker new-circuit-breaker)
-    (ok true)
-  )
-)
-
-;; @desc Finds the optimal route for a token swap.
-;; @param token-in (principal) The principal of the input token.
-;; @param token-out (principal) The principal of the output token.
-;; @param amount-in (uint) The amount of the input token.
-;; @returns (response {path: (list 10 {pool: principal, token-in: principal, token-out: principal}), amount-out: uint} (err uint)) The optimal route and output amount, or an error.
-(define-read-only (find-best-route (token-in principal) (token-out principal) (amount-in uint))
-  (let ((factory <dex-factory-v2-trait> 'SP3FBR2AGK5H9QBDV3K5SK2TKAH8Q6H5X2F8X5PJK.dex-factory-v2))
-    (match (contract-call? factory get-pool token-in token-out)
-      (ok (some pool)) (ok {path: (list {pool: pool, token-in: token-in, token-out: token-out}), amount-out: u0})
-      (ok none) (err err-no-route-found)
-      (err e) (err e)
+    (let (
+        (swap-res (try! (contract-call? pool swap amount-in (contract-of token-in))))
     )
-  )
-  (let ((factory <dex-factory-v2-trait> 'SP3FBR2AGK5H9QBDV3K5SK2TKAH8Q6H5X2F8X5PJK.dex-factory-v2))
-    (match (contract-call? factory get-pool token-in token-out)
-      (ok (some pool)) (ok {path: (list {pool: pool, token-in: token-in, token-out: token-out}), amount-out: u0})
-      (ok none) (err err-no-route-found)
-      (err e) (err e)
+        (asserts! (>= swap-res min-amount-out) ERR_SLIPPAGE_EXCEEDED)
+        (ok swap-res)
     )
-  )
 )
 
-;; @desc Executes a token swap along a given route.
-;; @param path (list 10 {pool: principal, token-in: principal, token-out: principal}) The path to execute the swap.
-;; @param amount-in (uint) The amount of the input token.
-;; @param min-amount-out (uint) The minimum acceptable amount of the output token.
-;; @returns (response uint (err uint)) The actual amount of the output token received, or an error.
-(define-public (execute-swap (path (list 10 {pool: principal, token-in: principal, token-out: principal})) (amount-in uint) (min-amount-out uint))
-  (begin
-    (asserts! (not (try! (check-circuit-breaker))) err-circuit-open)
-    (fold
-      (lambda (hop prev-amount-out)
-        (let ((pool <pool-trait> (get pool hop))
-              (token-in-trait (contract-of (get token-in hop)))
-              (token-out-trait (contract-of (get token-out hop))))
-          (unwrap-panic (contract-call? pool swap-trait-adapter token-in-trait token-out-trait prev-amount-out min-amount-out tx-sender))
-        )
-      )
-      path
-      amount-in
+;; @desc Swap 2 hops
+(define-public (swap-hop-2
+    (amount-in uint)
+    (min-amount-out uint)
+    (pool1 <pool-trait>)
+    (token1 <sip-010-trait>)
+    (pool2 <pool-trait>)
+    (token2 <sip-010-trait>)
+    (token3 <sip-010-trait>)
+)
+    (let (
+        (amt1 (try! (contract-call? pool1 swap amount-in (contract-of token1))))
+        (amt2 (try! (contract-call? pool2 swap amt1 (contract-of token2))))
     )
-  )
-  (begin
-    (asserts! (not (try! (check-circuit-breaker))) err-circuit-open)
-    (fold
-      (lambda (hop prev-amount-out)
-        (let ((pool <pool-trait> (get pool hop))
-              (token-in-trait (contract-of (get token-in hop)))
-              (token-out-trait (contract-of (get token-out hop))))
-          (unwrap-panic (contract-call? pool swap-trait-adapter token-in-trait token-out-trait prev-amount-out min-amount-out tx-sender))
-        )
-      )
-      path
-      amount-in
+        (asserts! (>= amt2 min-amount-out) ERR_SLIPPAGE_EXCEEDED)
+        (ok amt2)
     )
-  )
+)
+
+;; @desc Swap 3 hops
+(define-public (swap-hop-3
+    (amount-in uint)
+    (min-amount-out uint)
+    (pool1 <pool-trait>)
+    (token1 <sip-010-trait>)
+    (pool2 <pool-trait>)
+    (token2 <sip-010-trait>)
+    (pool3 <pool-trait>)
+    (token3 <sip-010-trait>)
+    (token4 <sip-010-trait>)
+)
+    (let (
+        (amt1 (try! (contract-call? pool1 swap amount-in (contract-of token1))))
+        (amt2 (try! (contract-call? pool2 swap amt1 (contract-of token2))))
+        (amt3 (try! (contract-call? pool3 swap amt2 (contract-of token3))))
+    )
+        (asserts! (>= amt3 min-amount-out) ERR_SLIPPAGE_EXCEEDED)
+        (ok amt3)
+    )
+)
+
+;; @desc Swap 4 hops
+(define-public (swap-hop-4
+    (amount-in uint)
+    (min-amount-out uint)
+    (pool1 <pool-trait>)
+    (token1 <sip-010-trait>)
+    (pool2 <pool-trait>)
+    (token2 <sip-010-trait>)
+    (pool3 <pool-trait>)
+    (token3 <sip-010-trait>)
+    (pool4 <pool-trait>)
+    (token4 <sip-010-trait>)
+    (token5 <sip-010-trait>)
+)
+    (let (
+        (amt1 (try! (contract-call? pool1 swap amount-in (contract-of token1))))
+        (amt2 (try! (contract-call? pool2 swap amt1 (contract-of token2))))
+        (amt3 (try! (contract-call? pool3 swap amt2 (contract-of token3))))
+        (amt4 (try! (contract-call? pool4 swap amt3 (contract-of token4))))
+    )
+        (asserts! (>= amt4 min-amount-out) ERR_SLIPPAGE_EXCEEDED)
+        (ok amt4)
+    )
 )

@@ -247,9 +247,20 @@ path = "contracts/dex/concentrated-liquidity-pool.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
 [contracts.mev-protector]
-path = "contracts/dex/mev-protector.clar"
+path = "contracts/security/mev-protector.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
+[contracts.dex-factory-v2]
+path = "contracts/dex/dex-factory-v2.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+
+[contracts.multi-hop-router-v3]
+path = "contracts/router/multi-hop-router-v3.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+
+[contracts.yield-optimizer]
+path = "contracts/yield/yield-optimizer.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
 [contracts.oracle]
 path = "contracts/dex/oracle.clar"

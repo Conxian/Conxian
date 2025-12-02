@@ -2,6 +2,13 @@
 ;; Defines standard interfaces for tokens, pools, vaults, and oracles.
 (use-trait sip-010-ft-trait .sip-standards.sip-010-ft-trait)
 
+(define-trait pool-deployer-trait (
+  (deploy-and-initialize
+    (principal principal)
+    (response principal uint)
+  )
+))
+
 ;; ===========================================
 ;; FACTORY TRAIT
 ;; ===========================================
