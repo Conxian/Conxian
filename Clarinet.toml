@@ -60,10 +60,24 @@ address = "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM"
 path = "contracts/core/conxian-protocol.clar"
 address = "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM"
 
+[contracts.tier-manager]
+path = "contracts/core/tier-manager.clar"
+address = "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM"
+
 [contracts.protocol-fee-switch]
 path = "contracts/core/protocol-fee-switch.clar"
 address = "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM"
 depends_on = ["defi-traits"]
+
+[contracts.operational-treasury]
+path = "contracts/core/operational-treasury.clar"
+address = "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM"
+depends_on = ["defi-traits"]
+
+[contracts.economic-policy-engine]
+path = "contracts/core/economic-policy-engine.clar"
+address = "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM"
+depends_on = ["defi-traits", "protocol-fee-switch", "operational-treasury", "tier-manager"]
 
 # ---------- Traits ----------
 # Modular Trait Architecture
@@ -166,7 +180,6 @@ mev-protector = ".mev-protector"
 proof-of-reserves = ".audit-registry"
 position-factory = ".position-factory"
 price-impact-calculator = ".dex-factory"
-advanced-router-dijkstra = ".dimensional-advanced-router-dijkstra"
 multi-hop-router-v3 = ".multi-hop-router-v3"
 sbtc-integration = ".sbtc-integration"
 sbtc-flash-loan-vault = ".lending-protocol-governance"
@@ -186,7 +199,7 @@ dimensional-core = ".dimensional-core"
 dimensional-engine = ".dimensional-engine"
 
 # DEX
-dex-router = ".dimensional-advanced-router-dijkstra"
+dex-router = ".multi-hop-router-v3"
 pool-template = ".pool-template"
 concentrated-liquidity-pool = ".concentrated-liquidity-pool"
 
@@ -506,10 +519,6 @@ address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 path = "contracts/governance-token.clar"
 address = "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM"
 
-[contracts.mev-protector-root]
-path = "contracts/mev/mev-protector-root.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-
 [contracts.audit-badge-nft]
 path = "contracts/audit-registry/audit-badge-nft.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
@@ -519,10 +528,6 @@ path = "contracts/pools/pool-registry.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
 # ---------- Modular Trait System ----------
-
-[contracts.dimensional-advanced-router-dijkstra]
-path = "contracts/dimensional/advanced-router-dijkstra.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
 [contracts.governance-voting]
 path = "contracts/governance/voting.clar"

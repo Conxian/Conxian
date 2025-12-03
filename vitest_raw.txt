@@ -1,0 +1,264 @@
+
+[1m[44m DEV [49m[22m [34mv4.0.8 [39m[90mC:/Users/bmokoka/anyachainlabs/Conxian[39m
+
+[90mstdout[2m | stacks/tests/enterprise-system-integration.test.ts
+[22m[39m­ƒÄ» Enterprise Loan System Integration Tests Ready for Execution
+­ƒôè Test Coverage: Mathematical Libraries, Flash Loans, Enterprise Loans, Bonds, Yield Distribution, Liquidity Optimization
+­ƒöÆ Security Tests: Authorization, Collateral Validation, Emergency Controls
+ÔÜí Performance Tests: Concurrent Operations, Multi-pool Optimization
+
+ [2m[90mÔåô[39m[22m stacks/tests/enterprise-system-integration.test.ts[2m > [22mEnterprise Loan System Integration Tests[2m > [22mPhase 1: Mathematical Foundation[2m > [22mshould have working mathematical libraries
+ [2m[90mÔåô[39m[22m stacks/tests/enterprise-system-integration.test.ts[2m > [22mEnterprise Loan System Integration Tests[2m > [22mPhase 1: Mathematical Foundation[2m > [22mshould handle precision calculations correctly
+ [2m[90mÔåô[39m[22m stacks/tests/enterprise-system-integration.test.ts[2m > [22mEnterprise Loan System Integration Tests[2m > [22mPhase 2: Flash Loan System[2m > [22mshould setup flash loan vault correctly
+ [2m[90mÔåô[39m[22m stacks/tests/enterprise-system-integration.test.ts[2m > [22mEnterprise Loan System Integration Tests[2m > [22mPhase 2: Flash Loan System[2m > [22mshould calculate maximum flash loan amounts
+ [2m[90mÔåô[39m[22m stacks/tests/enterprise-system-integration.test.ts[2m > [22mEnterprise Loan System Integration Tests[2m > [22mPhase 3: Enterprise Loan System[2m > [22mshould create enterprise loan manager with liquidity
+ [2m[90mÔåô[39m[22m stacks/tests/enterprise-system-integration.test.ts[2m > [22mEnterprise Loan System Integration Tests[2m > [22mPhase 3: Enterprise Loan System[2m > [22mshould calculate loan terms for borrowers
+ [2m[90mÔåô[39m[22m stacks/tests/enterprise-system-integration.test.ts[2m > [22mEnterprise Loan System Integration Tests[2m > [22mPhase 3: Enterprise Loan System[2m > [22mshould create small enterprise loan (no bond)
+ [2m[90mÔåô[39m[22m stacks/tests/enterprise-system-integration.test.ts[2m > [22mEnterprise Loan System Integration Tests[2m > [22mPhase 3: Enterprise Loan System[2m > [22mshould create large enterprise loan with bond issuance
+ [2m[90mÔåô[39m[22m stacks/tests/enterprise-system-integration.test.ts[2m > [22mEnterprise Loan System Integration Tests[2m > [22mPhase 4: Bond Issuance System[2m > [22mshould create bond series for large loans
+ [2m[90mÔåô[39m[22m stacks/tests/enterprise-system-integration.test.ts[2m > [22mEnterprise Loan System Integration Tests[2m > [22mPhase 4: Bond Issuance System[2m > [22mshould allow bond purchases
+ [2m[90mÔåô[39m[22m stacks/tests/enterprise-system-integration.test.ts[2m > [22mEnterprise Loan System Integration Tests[2m > [22mPhase 4: Bond Issuance System[2m > [22mshould provide bond series statistics
+ [2m[90mÔåô[39m[22m stacks/tests/enterprise-system-integration.test.ts[2m > [22mEnterprise Loan System Integration Tests[2m > [22mPhase 5: Yield Distribution System[2m > [22mshould create yield distribution pools
+ [2m[90mÔåô[39m[22m stacks/tests/enterprise-system-integration.test.ts[2m > [22mEnterprise Loan System Integration Tests[2m > [22mPhase 5: Yield Distribution System[2m > [22mshould add yield to pools
+ [2m[90mÔåô[39m[22m stacks/tests/enterprise-system-integration.test.ts[2m > [22mEnterprise Loan System Integration Tests[2m > [22mPhase 5: Yield Distribution System[2m > [22mshould calculate claimable yield
+ [2m[90mÔåô[39m[22m stacks/tests/enterprise-system-integration.test.ts[2m > [22mEnterprise Loan System Integration Tests[2m > [22mPhase 6: Liquidity Optimization[2m > [22mshould create and manage liquidity pools
+ [2m[90mÔåô[39m[22m stacks/tests/enterprise-system-integration.test.ts[2m > [22mEnterprise Loan System Integration Tests[2m > [22mPhase 6: Liquidity Optimization[2m > [22mshould update pool liquidity and trigger rebalancing
+ [2m[90mÔåô[39m[22m stacks/tests/enterprise-system-integration.test.ts[2m > [22mEnterprise Loan System Integration Tests[2m > [22mPhase 6: Liquidity Optimization[2m > [22mshould calculate pool efficiency metrics
+ [2m[90mÔåô[39m[22m stacks/tests/enterprise-system-integration.test.ts[2m > [22mEnterprise Loan System Integration Tests[2m > [22mPhase 7: End-to-End Integration[2m > [22mshould handle loan payments and distribute yield
+ [2m[90mÔåô[39m[22m stacks/tests/enterprise-system-integration.test.ts[2m > [22mEnterprise Loan System Integration Tests[2m > [22mPhase 7: End-to-End Integration[2m > [22mshould enable automated yield distribution from loan payments
+ [2m[90mÔåô[39m[22m stacks/tests/enterprise-system-integration.test.ts[2m > [22mEnterprise Loan System Integration Tests[2m > [22mPhase 7: End-to-End Integration[2m > [22mshould allow bond holders to claim their yield
+ [2m[90mÔåô[39m[22m stacks/tests/enterprise-system-integration.test.ts[2m > [22mEnterprise Loan System Integration Tests[2m > [22mPhase 8: System Health and Performance[2m > [22mshould provide comprehensive system health metrics
+ [2m[90mÔåô[39m[22m stacks/tests/enterprise-system-integration.test.ts[2m > [22mEnterprise Loan System Integration Tests[2m > [22mPhase 8: System Health and Performance[2m > [22mshould validate production readiness
+ [2m[90mÔåô[39m[22m stacks/tests/enterprise-system-integration.test.ts[2m > [22mEnterprise Loan System Integration Tests[2m > [22mPhase 8: System Health and Performance[2m > [22mshould demonstrate high-volume transaction capabilities
+ [2m[90mÔåô[39m[22m stacks/tests/enterprise-system-integration.test.ts[2m > [22mEnterprise Loan System Integration Tests[2m > [22mPhase 9: Integration Test Summary[2m > [22mshould run the complete Clarity integration test suite
+stderr | stacks/tests/enterprise-system-integration.test.ts > Enterprise System Performance Benchmarks > should handle concurrent loan operations efficiently
+Error: Runtime error while interpreting ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.enterprise-loan-manager
+
+[90mstdout[2m | stacks/tests/enterprise-system-integration.test.ts[2m > [22m[2mEnterprise System Performance Benchmarks[2m > [22m[2mshould optimize liquidity efficiently across multiple pools
+[22m[39m{ asset: 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.mock-token, category: "ENTERPRISE", event: "liquidity-pool-created", pool-id: u1 } (liquidity-optimization-engine:194)
+
+[90mstdout[2m | stacks/tests/enterprise-system-integration.test.ts[2m > [22m[2mEnterprise System Performance Benchmarks[2m > [22m[2mshould optimize liquidity efficiently across multiple pools
+[22m[39m{ asset: 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.mock-token, category: "ENTERPRISE", event: "liquidity-pool-created", pool-id: u2 } (liquidity-optimization-engine:194)
+
+[90mstdout[2m | stacks/tests/enterprise-system-integration.test.ts[2m > [22m[2mEnterprise System Performance Benchmarks[2m > [22m[2mshould optimize liquidity efficiently across multiple pools
+[22m[39m{ event: "rebalance-needed", pool-id: u1, utilization: u2000 } (liquidity-optimization-engine:340)
+{ event: "pool-liquidity-updated", pool-id: u1, total: u5000000000000000000000000 } (liquidity-optimization-engine:218)
+{ event: "rebalance-needed", pool-id: u2, utilization: u2000 } (liquidity-optimization-engine:340)
+{ event: "pool-liquidity-updated", pool-id: u2, total: u10000000000000000000000000 } (liquidity-optimization-engine:218)
+
+ [31m├ù[39m stacks/tests/enterprise-system-integration.test.ts[2m > [22mEnterprise System Performance Benchmarks[2m > [22mshould handle concurrent loan operations efficiently[32m 53[2mms[22m[39m
+[31m   ÔåÆ Call contract function error: enterprise-loan-manager::add-liquidity(u50000000000000000000000000) -> Contract 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.enterprise-loan-manager' does not exist[39m
+stderr | tests/interoperability/wormhole-inbox-outbox.test.ts > Wormhole Interoperability > receives a message with guardian-set validation and idempotency
+Error: Runtime error while interpreting ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.interop-wormhole-inbox
+
+stderr | tests/interoperability/wormhole-inbox-outbox.test.ts > Wormhole Interoperability > emits an outbound intent and returns intent id
+Error: Runtime error while interpreting ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.interop-wormhole-outbox
+
+stderr | tests/interoperability/wormhole-inbox-outbox.test.ts > Wormhole Interoperability > handles governance and PoR attestation via stubs
+Error: Runtime error while interpreting ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.interop-wormhole-handlers
+
+ [31m├ù[39m tests/interoperability/wormhole-inbox-outbox.test.ts[2m > [22mWormhole Interoperability[2m > [22mreceives a message with guardian-set validation and idempotency[32m 172[2mms[22m[39m
+[31m   ÔåÆ Call contract function error: interop-wormhole-inbox::set-guardian-set-index(u1) -> Contract 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.interop-wormhole-inbox' does not exist[39m
+ [31m├ù[39m tests/interoperability/wormhole-inbox-outbox.test.ts[2m > [22mWormhole Interoperability[2m > [22memits an outbound intent and returns intent id[32m 4[2mms[22m[39m
+[31m   ÔåÆ Call contract function error: interop-wormhole-outbox::emit-intent("ETH", 0x0202020202020202020202020202020202020202020202020202020202020202, 0x696e74656e742d7061796c6f6164) -> Contract 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.interop-wormhole-outbox' does not exist[39m
+ [31m├ù[39m tests/interoperability/wormhole-inbox-outbox.test.ts[2m > [22mWormhole Interoperability[2m > [22mhandles governance and PoR attestation via stubs[32m 1[2mms[22m[39m
+[31m   ÔåÆ Call contract function error: interop-wormhole-handlers::handle-governance(0x7365742d706172616d3a783d3432) -> Contract 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.interop-wormhole-handlers' does not exist[39m
+ [31m├ù[39m stacks/tests/enterprise-system-integration.test.ts[2m > [22mEnterprise System Performance Benchmarks[2m > [22mshould optimize liquidity efficiently across multiple pools[32m 245[2mms[22m[39m
+[31m   ÔåÆ Invalid Chai property: toBeOk. Did you mean "toBe"?[39m
+stderr | stacks/tests/enterprise-system-integration.test.ts > Enterprise System Security Tests > should prevent unauthorized loan creation
+Error: Runtime error while interpreting ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.enterprise-loan-manager
+
+stderr | stacks/tests/enterprise-system-integration.test.ts > Enterprise System Security Tests > should handle insufficient collateral scenarios
+Error: Runtime error while interpreting ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.enterprise-loan-manager
+
+ [31m├ù[39m stacks/tests/enterprise-system-integration.test.ts[2m > [22mEnterprise System Security Tests[2m > [22mshould prevent unauthorized loan creation[32m 17[2mms[22m[39m
+[31m   ÔåÆ Call contract function error: enterprise-loan-manager::add-liquidity(u1000000000000000000000000) -> Contract 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.enterprise-loan-manager' does not exist[39m
+ [31m├ù[39m stacks/tests/enterprise-system-integration.test.ts[2m > [22mEnterprise System Security Tests[2m > [22mshould handle insufficient collateral scenarios[32m 5[2mms[22m[39m
+[31m   ÔåÆ Call contract function error: enterprise-loan-manager::add-liquidity(u1000000000000000000000000) -> Contract 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.enterprise-loan-manager' does not exist[39m
+ [31m├ù[39m stacks/tests/enterprise-system-integration.test.ts[2m > [22mEnterprise System Security Tests[2m > [22mshould handle emergency scenarios gracefully[32m 36[2mms[22m[39m
+[31m   ÔåÆ Invalid Chai property: toBeOk. Did you mean "toBe"?[39m
+[33mTest removed...[39m[2m [ tests/interoperability/wormhole-inbox-outbox.test.ts ]
+[22m
+
+ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ» Failed Tests 8 ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»
+
+ FAIL  stacks/tests/enterprise-system-integration.test.ts > Enterprise System Performance Benchmarks > should handle concurrent loan operations efficiently
+Unknown Error: Call contract function error: enterprise-loan-manager::add-liquidity(u50000000000000000000000000) -> Contract 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.enterprise-loan-manager' does not exist
+ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»[1/8]ÔÄ»
+
+ FAIL  stacks/tests/enterprise-system-integration.test.ts > Enterprise System Performance Benchmarks > should optimize liquidity efficiently across multiple pools
+Error: Invalid Chai property: toBeOk. Did you mean "toBe"?
+ ÔØ» stacks/tests/enterprise-system-integration.test.ts:807:27
+    805|     
+    806|     results.forEach(result => {
+    807|       expect(result.result).toBeOk(Cl.bool(true));
+       |                           ^
+    808|     });
+    809|     
+ ÔØ» stacks/tests/enterprise-system-integration.test.ts:806:13
+
+ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»[2/8]ÔÄ»
+
+ FAIL  stacks/tests/enterprise-system-integration.test.ts > Enterprise System Security Tests > should prevent unauthorized loan creation
+Unknown Error: Call contract function error: enterprise-loan-manager::add-liquidity(u1000000000000000000000000) -> Contract 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.enterprise-loan-manager' does not exist
+ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»[3/8]ÔÄ»
+
+ FAIL  stacks/tests/enterprise-system-integration.test.ts > Enterprise System Security Tests > should handle insufficient collateral scenarios
+Unknown Error: Call contract function error: enterprise-loan-manager::add-liquidity(u1000000000000000000000000) -> Contract 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.enterprise-loan-manager' does not exist
+ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»[4/8]ÔÄ»
+
+ FAIL  stacks/tests/enterprise-system-integration.test.ts > Enterprise System Security Tests > should handle emergency scenarios gracefully
+Error: Invalid Chai property: toBeOk. Did you mean "toBe"?
+ ÔØ» stacks/tests/enterprise-system-integration.test.ts:887:30
+    885|     );
+    886|     
+    887|     expect(pauseResult.result).toBeOk(Cl.bool(true));
+       |                              ^
+    888|     
+    889|     // Test that operations are blocked when paused
+
+ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»[5/8]ÔÄ»
+
+ FAIL  tests/interoperability/wormhole-inbox-outbox.test.ts > Wormhole Interoperability > receives a message with guardian-set validation and idempotency
+Unknown Error: Call contract function error: interop-wormhole-inbox::set-guardian-set-index(u1) -> Contract 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.interop-wormhole-inbox' does not exist
+ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»[6/8]ÔÄ»
+
+ FAIL  tests/interoperability/wormhole-inbox-outbox.test.ts > Wormhole Interoperability > emits an outbound intent and returns intent id
+Unknown Error: Call contract function error: interop-wormhole-outbox::emit-intent("ETH", 0x0202020202020202020202020202020202020202020202020202020202020202, 0x696e74656e742d7061796c6f6164) -> Contract 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.interop-wormhole-outbox' does not exist
+ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»[7/8]ÔÄ»
+
+ FAIL  tests/interoperability/wormhole-inbox-outbox.test.ts > Wormhole Interoperability > handles governance and PoR attestation via stubs
+Unknown Error: Call contract function error: interop-wormhole-handlers::handle-governance(0x7365742d706172616d3a783d3432) -> Contract 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.interop-wormhole-handlers' does not exist
+ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»[8/8]ÔÄ»
+
+ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ» Unhandled Errors ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»
+
+Vitest caught 2 unhandled errors during the test run.
+This might cause false positive tests. Resolve unhandled errors to make sure your tests are not affected.
+
+ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ» Unhandled Error ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»
+Error: [vitest-pool]: Timeout starting forks runner.
+ ÔØ» Timeout.<anonymous> node_modules/vitest/dist/chunks/cli-api.BQ-bjcRi.js:7235:65
+ ÔØ» listOnTimeout node:internal/timers:588:17
+ ÔØ» processTimers node:internal/timers:523:7
+
+
+ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ» Unhandled Error ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»
+Error: [vitest-pool]: Timeout starting forks runner.
+ ÔØ» Timeout.<anonymous> node_modules/vitest/dist/chunks/cli-api.BQ-bjcRi.js:7235:65
+ ÔØ» listOnTimeout node:internal/timers:588:17
+ ÔØ» processTimers node:internal/timers:523:7
+
+ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»
+
+
+[2m Test Files [22m [1m[31m2 failed[39m[22m[90m (87)[39m
+[2m      Tests [22m [1m[31m8 failed[39m[22m[2m | [22m[33m24 skipped[39m[90m (32)[39m
+[2m     Errors [22m [1m[31m2 errors[39m[22m
+[2m   Start at [22m 18:18:11
+[2m   Duration [22m 4039.60s[2m (transform 1.13s, setup 4.06s, collect 1.71s, tests 72.53s, environment 1ms, prepare 106ms)[22m
+
+[1m[41m FAIL [49m[22m [31mTests failed. Watching for file changes...[39m
+       [2mpress [22m[1mh[22m[2m to show help[22m[2m, [22m[2mpress [22m[1mq[22m[2m to quit[22m
+c[3J[1m[44m RERUN [49m[22m [34m[2mtests/integration/token-system-coordinator.test.ts [22m[39m
+
+ [90m┬À[39m tests/tokens/enhanced-tokenomics.test.ts[2m > [22mEnhanced Tokenomics System[2m > [22mCXD Token (Revenue Token)[2m > [22mshould have correct initial metadata
+ [90m┬À[39m tests/tokens/enhanced-tokenomics.test.ts[2m > [22mEnhanced Tokenomics System[2m > [22mCXD Token (Revenue Token)[2m > [22mshould start with zero total supply
+ [90m┬À[39m tests/tokens/enhanced-tokenomics.test.ts[2m > [22mEnhanced Tokenomics System[2m > [22mCXD Token (Revenue Token)[2m > [22mshould allow owner to set minter
+ [90m┬À[39m tests/tokens/enhanced-tokenomics.test.ts[2m > [22mEnhanced Tokenomics System[2m > [22mCXD Token (Revenue Token)[2m > [22mshould not allow non-owner to set minter
+ [90m┬À[39m tests/tokens/enhanced-tokenomics.test.ts[2m > [22mEnhanced Tokenomics System[2m > [22mCXD Token (Revenue Token)[2m > [22mshould allow owner or minter to mint tokens
+ [90m┬À[39m tests/tokens/enhanced-tokenomics.test.ts[2m > [22mEnhanced Tokenomics System[2m > [22mCXD Token (Revenue Token)[2m > [22mshould support token transfers and update balances
+ [90m┬À[39m tests/tokens/enhanced-tokenomics.test.ts[2m > [22mEnhanced Tokenomics System[2m > [22mCXVG Token (Voting / Governance Token)[2m > [22mshould have correct initial metadata
+ [90m┬À[39m tests/tokens/enhanced-tokenomics.test.ts[2m > [22mEnhanced Tokenomics System[2m > [22mCXVG Token (Voting / Governance Token)[2m > [22mshould allow owner to configure system integration
+ [90m┬À[39m tests/tokens/enhanced-tokenomics.test.ts[2m > [22mEnhanced Tokenomics System[2m > [22mCXVG Token (Voting / Governance Token)[2m > [22mshould support minting and transfers
+ [90m┬À[39m tests/tokens/enhanced-tokenomics.test.ts[2m > [22mEnhanced Tokenomics System[2m > [22mCXLP Token (Liquidity Provider Token)[2m > [22mshould have correct initial metadata
+ [90m┬À[39m tests/tokens/enhanced-tokenomics.test.ts[2m > [22mEnhanced Tokenomics System[2m > [22mCXLP Token (Liquidity Provider Token)[2m > [22mshould support migration configuration
+ [90m┬À[39m tests/tokens/enhanced-tokenomics.test.ts[2m > [22mEnhanced Tokenomics System[2m > [22mCXLP Token (Liquidity Provider Token)[2m > [22mshould allow setting liquidity parameters
+ [90m┬À[39m tests/tokens/enhanced-tokenomics.test.ts[2m > [22mEnhanced Tokenomics System[2m > [22mCXTR Token (Treasury / Creator Token)[2m > [22mshould have correct initial metadata
+ [90m┬À[39m tests/tokens/enhanced-tokenomics.test.ts[2m > [22mEnhanced Tokenomics System[2m > [22mCXTR Token (Treasury / Creator Token)[2m > [22mshould support contributor rewards
+ [90m┬À[39m tests/dimensional/dimensional-system.test.ts[2m > [22mDimensional DeFi System[2m > [22mdim-registry[2m > [22mshould allow deployer to register a new dimension
+ [90m┬À[39m tests/dimensional/dimensional-system.test.ts[2m > [22mDimensional DeFi System[2m > [22mdim-registry[2m > [22mshould not allow non-deployer to register a new dimension
+ [90m┬À[39m tests/dimensional/dimensional-system.test.ts[2m > [22mDimensional DeFi System[2m > [22mdim-registry[2m > [22mshould not allow registering the same dimension twice
+ [90m┬À[39m tests/dimensional/dimensional-system.test.ts[2m > [22mDimensional DeFi System[2m > [22mdim-registry[2m > [22mshould allow deployer to update weight
+ [90m┬À[39m tests/dimensional/dimensional-system.test.ts[2m > [22mDimensional DeFi System[2m > [22mdim-registry[2m > [22mshould not allow non-oracle principal to update weight
+ [90m┬À[39m tests/dimensional/dimensional-system.test.ts[2m > [22mDimensional DeFi System[2m > [22mdim-registry[2m > [22mshould return the correct dimension weight by id
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[2m | [22m[33m2 skipped[39m[90m (4)[39m
+[2m      Tests [22m [1m[31m5 failed[39m[22m[2m | [22m[33m24 skipped[39m[90m (49)[39m
+[2m   Start at [22m 19:25:33
+[2m   Duration [22m 3.42s
+
+[1m[41m CANCELLED [49m[22m [31mTest run cancelled. Watching for file changes...[39m
+       [2mpress [22m[1mh[22m[2m to show help[22m[2m, [22m[2mpress [22m[1mq[22m[2m to quit[22m
+c[3J[1m[44m RERUN [49m[22m [34m[2mrerun all tests [22m[39m
+
+
+ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ» Failed Tests 5 ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»
+
+ FAIL  stacks/tests/enterprise-system-integration.test.ts > Enterprise System Performance Benchmarks > should handle concurrent loan operations efficiently
+Unknown Error: Call contract function error: enterprise-loan-manager::add-liquidity(u50000000000000000000000000) -> Contract 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.enterprise-loan-manager' does not exist
+ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»[1/5]ÔÄ»
+
+ FAIL  stacks/tests/enterprise-system-integration.test.ts > Enterprise System Performance Benchmarks > should optimize liquidity efficiently across multiple pools
+Error: Invalid Chai property: toBeOk. Did you mean "toBe"?
+ ÔØ» stacks/tests/enterprise-system-integration.test.ts:807:27
+    805|     
+    806|     results.forEach(result => {
+    807|       expect(result.result).toBeOk(Cl.bool(true));
+       |                           ^
+    808|     });
+    809|     
+ ÔØ» stacks/tests/enterprise-system-integration.test.ts:806:13
+
+ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»[2/5]ÔÄ»
+
+ FAIL  stacks/tests/enterprise-system-integration.test.ts > Enterprise System Security Tests > should prevent unauthorized loan creation
+Unknown Error: Call contract function error: enterprise-loan-manager::add-liquidity(u1000000000000000000000000) -> Contract 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.enterprise-loan-manager' does not exist
+ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»[3/5]ÔÄ»
+
+ FAIL  stacks/tests/enterprise-system-integration.test.ts > Enterprise System Security Tests > should handle insufficient collateral scenarios
+Unknown Error: Call contract function error: enterprise-loan-manager::add-liquidity(u1000000000000000000000000) -> Contract 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.enterprise-loan-manager' does not exist
+ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»[4/5]ÔÄ»
+
+ FAIL  stacks/tests/enterprise-system-integration.test.ts > Enterprise System Security Tests > should handle emergency scenarios gracefully
+Error: Invalid Chai property: toBeOk. Did you mean "toBe"?
+ ÔØ» stacks/tests/enterprise-system-integration.test.ts:887:30
+    885|     );
+    886|     
+    887|     expect(pauseResult.result).toBeOk(Cl.bool(true));
+       |                              ^
+    888|     
+    889|     // Test that operations are blocked when paused
+
+ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»[5/5]ÔÄ»
+
+ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ» Unhandled Errors ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»
+
+Vitest caught 1 unhandled error during the test run.
+This might cause false positive tests. Resolve unhandled errors to make sure your tests are not affected.
+
+ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ» Unhandled Error ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»
+Error: ENOENT: no such file or directory, open 'C:\Users\bmokoka\anyachainlabs\Conxian\tests\audit-badge-nft.test.ts'
+ ÔØ» open node:internal/fs/promises:641:25
+ ÔØ» Object.readFile node:internal/fs/promises:1245:14
+ ÔØ» node_modules/vitest/dist/chunks/cli-api.BQ-bjcRi.js:6286:11
+ ÔØ» getSpecificationsEnvironments node_modules/vitest/dist/chunks/cli-api.BQ-bjcRi.js:6281:2
+ ÔØ» executeTests node_modules/vitest/dist/chunks/cli-api.BQ-bjcRi.js:7371:24
+ ÔØ» node_modules/vitest/dist/chunks/cli-api.BQ-bjcRi.js:11607:6
+ ÔØ» Vitest.runFiles node_modules/vitest/dist/chunks/cli-api.BQ-bjcRi.js:11634:10
+ ÔØ» Vitest.rerunFiles node_modules/vitest/dist/chunks/cli-api.BQ-bjcRi.js:11717:22
+ ÔØ» Vitest.changeNamePattern node_modules/vitest/dist/chunks/cli-api.BQ-bjcRi.js:11748:3
+
+ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»
+Serialized Error: { errno: -4058, code: 'ENOENT', syscall: 'open', path: 'C:\Users\bmokoka\anyachainlabs\Conxian\tests\audit-badge-nft.test.ts' }
+ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[2m | [22m[33m2 skipped[39m[90m (89)[39m
+[2m      Tests [22m [1m[31m5 failed[39m[22m[2m | [22m[33m24 skipped[39m[90m (49)[39m
+[2m     Errors [22m [1m[31m1 error[39m[22m
+[2m   Start at [22m 19:25:42
+[2m   Duration [22m 44.07s
+
+[1m[41m FAIL [49m[22m [31mTests failed. Watching for file changes...[39m
+       [2mpress [22m[1mh[22m[2m to show help[22m[2m, [22m[2mpress [22m[1mq[22m[2m to quit[22m

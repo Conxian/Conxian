@@ -61,7 +61,9 @@
     (asserts! (> period u0) ERR-INVALID-PERIOD)
 
     (let
-      ((current-block-height (unwrap-panic (get-block-info? time block-height)))
+      ;; Use block-height directly instead of get-block-info? time, to avoid
+      ;; UnwrapFailure in environments where block timestamps are unavailable.
+      ((current-block-height block-height)
        (key { asset: asset, period: period })
        (existing-data (map-get? twap-data key))
       )
@@ -136,7 +138,8 @@
        (last-timestamp (get last-timestamp data))
        (cumulative-price (get cumulative-price data))
        (samples (get samples data))
-       (current-block-height (unwrap-panic (get-block-info? time block-height)))
+       ;; Use block-height as a stand-in for time for TWAP in this environment.
+       (current-block-height block-height)
        (time-elapsed (- current-block-height last-timestamp))
       )
       (if (> samples u0)

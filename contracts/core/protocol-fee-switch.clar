@@ -28,6 +28,7 @@
 
 ;; --- Data Variables ---
 (define-data-var contract-owner principal tx-sender)
+(define-data-var policy-engine principal tx-sender)
 
 ;; Fee Configurations per Module
 ;; Key: Module Name
@@ -52,6 +53,10 @@
   (is-eq tx-sender (var-get contract-owner))
 )
 
+(define-private (is-authorized)
+  (or (is-owner) (is-eq tx-sender (var-get policy-engine)))
+)
+
 ;; --- Admin Functions ---
 
 (define-public (set-contract-owner (new-owner principal))
@@ -62,9 +67,17 @@
   )
 )
 
-(define-public (set-module-fee (module (string-ascii 32)) (fee-bps uint))
+(define-public (set-policy-engine (new-engine principal))
   (begin
     (asserts! (is-owner) ERR_UNAUTHORIZED)
+    (var-set policy-engine new-engine)
+    (ok true)
+  )
+)
+
+(define-public (set-module-fee (module (string-ascii 32)) (fee-bps uint))
+  (begin
+    (asserts! (is-authorized) ERR_UNAUTHORIZED)
     (asserts! (<= fee-bps MAX_BPS) ERR_INVALID_FEE)
     (map-set module-fees module fee-bps)
     (print { event: "fee-updated", module: module, new-fee: fee-bps })
@@ -79,7 +92,7 @@
     (burn uint)
   )
   (begin
-    (asserts! (is-owner) ERR_UNAUTHORIZED)
+    (asserts! (is-authorized) ERR_UNAUTHORIZED)
     (asserts! (is-eq (+ (+ (+ treasury staking) insurance) burn) MAX_BPS) ERR_INVALID_SHARE)
     
     (var-set treasury-share-bps treasury)
@@ -119,15 +132,31 @@
   (ok (default-to u0 (map-get? module-fees module)))
 )
 
+;; @desc Get the effective fee rate for a user (applying tier discounts)
+(define-read-only (get-effective-fee-rate (user principal) (module (string-ascii 32)))
+  (let (
+    (base-rate (default-to u0 (map-get? module-fees module)))
+    ;; Call tier-manager for discount. If it fails (e.g. not deployed), default to 0 discount.
+    (discount (match (contract-call? .tier-manager get-discount user)
+      d d
+      err-val u0
+    ))
+  )
+    (ok (/ (* base-rate (- MAX_BPS discount)) MAX_BPS))
+  )
+)
+
 ;; @desc Calculate and route fees for a specific amount
 ;; @param token: The token being collected
 ;; @param amount: The total amount to calculate fee from (or the raw fee amount depending on context)
-;; @param is-total: If true, 'amount' is the transaction size and we calculate fee. 
+;; @param is-total: If true, 'amount' is the transaction size and we calculate fee using effective rate. 
 ;;                  If false, 'amount' is the already-collected fee to be split.
 (define-public (route-fees (token <sip-010-trait>) (amount uint) (is-total bool) (module (string-ascii 32)))
   (let (
+    (sender tx-sender)
     (fee-amount (if is-total 
-      (/ (* amount (unwrap-panic (get-fee-rate module))) MAX_BPS)
+      (let ((rate (unwrap-panic (get-effective-fee-rate sender module))))
+        (/ (* amount rate) MAX_BPS))
       amount
     ))
   )

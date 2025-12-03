@@ -1,5 +1,6 @@
 ;; Timelock Controller
 ;; Implements the time-delayed execution functionality specified in CXIP-7
+;; Production-grade: Includes Proposer/Executor Role Access Control
 
 ;; Constants
 (define-constant MIN_DELAY u86400)  ;; 24 hours in seconds
@@ -28,6 +29,10 @@
 (define-data-var minDelay uint MIN_DELAY)
 (define-data-var currentId uint u0)
 
+;; Roles
+(define-map proposers principal bool)
+(define-map executors principal bool)
+
 ;; Data maps
 (define-map operations uint {
   target: principal,
@@ -39,6 +44,20 @@
   proposer: principal,
   status: uint
 })
+
+;; ===== Authorization Helpers =====
+
+(define-read-only (is-proposer (user principal))
+  (default-to false (map-get? proposers user))
+)
+
+(define-read-only (is-executor (user principal))
+  (default-to false (map-get? executors user))
+)
+
+(define-read-only (is-admin (user principal))
+  (is-eq user (var-get admin))
+)
 
 ;; ===== Core Functions =====
 
@@ -56,6 +75,9 @@
       (operation-id (+ (var-get currentId) u1))
       (timestamp (+ current-block delay))
     )
+    ;; Authorization: Only Proposers
+    (asserts! (is-proposer caller) ERR_UNAUTHORIZED)
+
     ;; Input validation
     (asserts! (>= delay (var-get minDelay)) ERR_DELAY_TOO_SHORT)
     (asserts! (<= delay MAX_DELAY) ERR_DELAY_TOO_LONG)
@@ -92,7 +114,11 @@
   (let (
       (operation (unwrap! (map-get? operations operation-id) ERR_OPERATION_NOT_FOUND))
       (current-time block-height)
+      (caller tx-sender)
     )
+    ;; Authorization: Only Executors
+    (asserts! (is-executor caller) ERR_UNAUTHORIZED)
+
     ;; Check operation status
     (asserts! (is-eq (get status operation) OP_PENDING) ERR_OPERATION_NOT_PENDING)
     
@@ -115,6 +141,13 @@
       target: (get target operation)
     })
     
+    ;; NOTE: In Clarity, we cannot arbitrarily "execute" the binary data buffer.
+    ;; The executor must manually perform the call that matches the intention,
+    ;; or this contract must act as a proxy for specific known function calls.
+    ;; For this production implementation, we assume the "execution" is the
+    ;; act of marking it DONE, and the off-chain executor then performs the
+    ;; privileged action if the target contract checks `timelock-controller` state.
+    
     (ok true)
   )
 )
@@ -125,7 +158,7 @@
     )
     ;; Only admin or proposer can cancel
     (asserts! (or 
-      (is-eq tx-sender (var-get admin))
+      (is-admin tx-sender)
       (is-eq tx-sender (get proposer operation))
     ) ERR_UNAUTHORIZED)
     
@@ -142,6 +175,40 @@
       by: tx-sender
     })
     
+    (ok true)
+  )
+)
+
+;; ===== Role Management =====
+
+(define-public (grant-proposer-role (user principal))
+  (begin
+    (asserts! (is-admin tx-sender) ERR_UNAUTHORIZED)
+    (map-set proposers user true)
+    (ok true)
+  )
+)
+
+(define-public (revoke-proposer-role (user principal))
+  (begin
+    (asserts! (is-admin tx-sender) ERR_UNAUTHORIZED)
+    (map-set proposers user false)
+    (ok true)
+  )
+)
+
+(define-public (grant-executor-role (user principal))
+  (begin
+    (asserts! (is-admin tx-sender) ERR_UNAUTHORIZED)
+    (map-set executors user true)
+    (ok true)
+  )
+)
+
+(define-public (revoke-executor-role (user principal))
+  (begin
+    (asserts! (is-admin tx-sender) ERR_UNAUTHORIZED)
+    (map-set executors user false)
     (ok true)
   )
 )

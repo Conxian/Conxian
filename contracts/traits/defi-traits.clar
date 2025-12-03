@@ -7,6 +7,7 @@
 ;; ===========================================
 (define-trait fee-manager-trait (
   (get-fee-rate ((string-ascii 32)) (response uint uint))
+  (get-effective-fee-rate (principal (string-ascii 32)) (response uint uint))
   (route-fees (<sip-010-ft-trait> uint bool (string-ascii 32)) (response uint uint))
 ))
 

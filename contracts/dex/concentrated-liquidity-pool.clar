@@ -5,6 +5,7 @@
 (impl-trait .sip-standards.sip-009-nft-trait)
 
 (use-trait sip-010-trait .sip-standards.sip-010-ft-trait)
+(use-trait fee-manager-trait .defi-traits.fee-manager-trait)
 
 ;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED (err u1100))
@@ -32,7 +33,7 @@
 (define-data-var liquidity uint u0)
 (define-data-var sqrt-price-x96 uint u0)
 (define-data-var current-tick int 0)
-(define-data-var protocol-fee-switch principal 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.protocol-fee-switch)
+(define-data-var protocol-fee-switch principal .protocol-fee-switch)
 (define-data-var pool-fee-tier uint u30) ;; Default 0.3% (30 bps)
 
 (use-trait hook-trait .defi-traits.hook-trait)
@@ -108,67 +109,82 @@
 
         ;; 2. Route Fees (Dynamic)
         (let (
-              (switch-contract 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.protocol-fee-switch)
-              (fee-rate (unwrap! (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.protocol-fee-switch get-fee-rate "DEX") ERR_FEE_CALC))
-              (fee-amount (/ (* amount-in fee-rate) u10000))
-              (amount-in-less-fee (- amount-in fee-amount))
-             )
-             
-             ;; Emit Swap/Fee Event
-             (print {
-                 event: "swap-execution",
-                 sender: sender,
-                 token-in: token-in-principal,
-                 token-out: token-out-principal,
-                 amount-in: amount-in,
-                 fee-collected: fee-amount,
-                 timestamp: block-height
-             })
-
-             ;; Transfer Fee to Switch & Route
-             (if (> fee-amount u0)
-                 (begin
-                     (try! (as-contract (contract-call? token-in transfer fee-amount tx-sender switch-contract none)))
-                     (try! (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.protocol-fee-switch route-fees token-in fee-amount false "DEX"))
-                 )
-                 u0
-             )
-             
-             (let (
-                ;; 3. Calculate amount out
-                (next-price-outer (if is-token0
-                    (contract-call? .math-lib-concentrated
-                        get-next-sqrt-price-from-amount0 current-sqrt
-                        current-liq amount-in-less-fee true
+                (fee-rate (unwrap!
+                    (contract-call?
+                        .protocol-fee-switch
+                        get-fee-rate "DEX"
                     )
-                    (contract-call? .math-lib-concentrated
-                        get-next-sqrt-price-from-amount1 current-sqrt
-                        current-liq amount-in-less-fee true
-                    )
+                    ERR_FEE_CALC
                 ))
-                (next-price (unwrap! next-price-outer ERR_MATH_FAIL))
-                (amount-out-outer (if is-token0
-                    (contract-call? .math-lib-concentrated get-amount1-delta
-                        next-price current-sqrt current-liq
-                    )
-                    (contract-call? .math-lib-concentrated get-amount0-delta
-                        current-sqrt next-price current-liq
-                    )
-                ))
-                (amount-out (unwrap! amount-out-outer ERR_MATH_FAIL))
+                (fee-amount (/ (* amount-in fee-rate) u10000))
+                (amount-in-less-fee (- amount-in fee-amount))
             )
-            (var-set sqrt-price-x96 next-price)
-            
-            ;; Note: We should also update current-tick based on new sqrt-price, but 
-            ;; since we don't have tick bitmap traversal in this simplified version, 
-            ;; we assume we stay in the same tick or just update price.
-            ;; For production, we MUST cross ticks. This is a simplified "single-tick" swap 
-            ;; or infinite liquidity assumption for the current range.
+            ;; Emit Swap/Fee Event
+            (print {
+                event: "swap-execution",
+                sender: sender,
+                token-in: token-in-principal,
+                token-out: token-out-principal,
+                amount-in: amount-in,
+                fee-collected: fee-amount,
+                timestamp: block-height,
+            })
 
-            ;; 4. Transfer amount-out to user
-            (try! (as-contract (contract-call? token-out transfer amount-out tx-sender sender none)))
+            ;; Transfer Fee to Switch & Route
+            (if (> fee-amount u0)
+                (begin
+                    (try! (as-contract (contract-call? token-in transfer fee-amount tx-sender
+                        .protocol-fee-switch
+                        none
+                    )))
+                    (unwrap!
+                        (contract-call?
+                            .protocol-fee-switch
+                            route-fees token-in fee-amount false "DEX"
+                        )
+                        ERR_FEE_CALC
+                    )
+                )
+                u0
+            )
 
-            (ok amount-out)
+            (let (
+                    ;; 3. Calculate amount out
+                    (next-price-outer (if is-token0
+                        (contract-call? .math-lib-concentrated
+                            get-next-sqrt-price-from-amount0 current-sqrt
+                            current-liq amount-in-less-fee true
+                        )
+                        (contract-call? .math-lib-concentrated
+                            get-next-sqrt-price-from-amount1 current-sqrt
+                            current-liq amount-in-less-fee true
+                        )
+                    ))
+                    (next-price (unwrap! next-price-outer ERR_MATH_FAIL))
+                    (amount-out-outer (if is-token0
+                        (contract-call? .math-lib-concentrated get-amount1-delta
+                            next-price current-sqrt current-liq
+                        )
+                        (contract-call? .math-lib-concentrated get-amount0-delta
+                            current-sqrt next-price current-liq
+                        )
+                    ))
+                    (amount-out (unwrap! amount-out-outer ERR_MATH_FAIL))
+                )
+                (var-set sqrt-price-x96 next-price)
+
+                ;; Note: We should also update current-tick based on new sqrt-price, but 
+                ;; since we don't have tick bitmap traversal in this simplified version, 
+                ;; we assume we stay in the same tick or just update price.
+                ;; For production, we MUST cross ticks. This is a simplified "single-tick" swap 
+                ;; or infinite liquidity assumption for the current range.
+
+                ;; 4. Transfer amount-out to user
+                (try! (as-contract (contract-call? token-out transfer amount-out tx-sender sender
+                    none
+                )))
+
+                (ok amount-out)
             )
         )
     )
@@ -240,13 +256,82 @@
 )
 
 (define-public (remove-liquidity
-        (liquidity-amount uint)
+        (position-id uint)
         (token0-trait <sip-010-trait>)
         (token1-trait <sip-010-trait>)
     )
-    (let ((res { amount0: u0, amount1: u0 }))
-        (asserts! false ERR_NOT_SUPPORTED)
-        (ok res)
+    (begin
+        ;; 1. Verify Ownership
+        (let (
+            (position (unwrap! (map-get? positions { position-id: position-id }) ERR_POSITION_NOT_FOUND))
+            (owner (get owner position))
+        )
+             (asserts! (is-eq tx-sender owner) ERR_UNAUTHORIZED)
+             
+             ;; 2. Calculate Amounts to Withdraw
+             ;; In a real implementation, we would calculate amounts based on:
+             ;; - Current Price vs Range
+             ;; - Fees accumulated
+             ;; Here we simplify by using the liquidity amount directly as a proxy for proportional withdrawal
+             ;; OR we reverse the liquidity calculation.
+             
+             (let (
+                (liq (get liquidity position))
+                (tick-lower (get tick-lower position))
+                (tick-upper (get tick-upper position))
+                (curr-tick (var-get current-tick))
+                (current-sqrt (var-get sqrt-price-x96))
+                (lower-sqrt (unwrap! (contract-call? .math-lib-concentrated tick-to-sqrt-price tick-lower) ERR_MATH_FAIL))
+                (upper-sqrt (unwrap! (contract-call? .math-lib-concentrated tick-to-sqrt-price tick-upper) ERR_MATH_FAIL))
+             )
+                (asserts! (> liq u0) ERR_ZERO_AMOUNT)
+                
+                (let (
+                    (amounts (if (< curr-tick tick-lower)
+                        ;; Current price below range: All in Token0
+                        { 
+                           amount0: (unwrap! (contract-call? .math-lib-concentrated get-amount0-delta lower-sqrt upper-sqrt liq) ERR_MATH_FAIL),
+                           amount1: u0
+                        }
+                        (if (>= curr-tick tick-upper)
+                            ;; Current price above range: All in Token1
+                            {
+                                amount0: u0,
+                                amount1: (unwrap! (contract-call? .math-lib-concentrated get-amount1-delta lower-sqrt upper-sqrt liq) ERR_MATH_FAIL)
+                            }
+                            ;; Current price in range: Mixed
+                            {
+                                amount0: (unwrap! (contract-call? .math-lib-concentrated get-amount0-delta current-sqrt upper-sqrt liq) ERR_MATH_FAIL),
+                                amount1: (unwrap! (contract-call? .math-lib-concentrated get-amount1-delta lower-sqrt current-sqrt liq) ERR_MATH_FAIL)
+                            }
+                        )
+                    ))
+                )
+                    ;; 3. Update Position
+                    (map-set positions { position-id: position-id } 
+                        (merge position { liquidity: u0 })
+                    )
+                    
+                    ;; 4. Update Global Liquidity (if active)
+                    (if (and (<= tick-lower curr-tick) (< curr-tick tick-upper))
+                        (var-set liquidity (- (var-get liquidity) liq))
+                        true
+                    )
+
+                    ;; 5. Transfer Tokens
+                    (if (> (get amount0 amounts) u0)
+                        (try! (as-contract (contract-call? token0-trait transfer (get amount0 amounts) tx-sender owner none)))
+                        true
+                    )
+                    (if (> (get amount1 amounts) u0)
+                        (try! (as-contract (contract-call? token1-trait transfer (get amount1 amounts) tx-sender owner none)))
+                        true
+                    )
+
+                    (ok amounts)
+                )
+             )
+        )
     )
 )
 
@@ -283,30 +368,48 @@
             (curr-tick (var-get current-tick))
         )
         ;; Calculate liquidity based on range relative to current tick
-        (let (
-            (liq (if (< curr-tick tick-lower)
-                    ;; Range is strictly above current price. We need token0.
-                    (unwrap! (contract-call? .math-lib-concentrated get-liquidity-for-amount0
-                        lower-sqrt upper-sqrt amount0) ERR_MATH_FAIL)
-                    (if (>= curr-tick tick-upper)
-                        ;; Range is strictly below current price. We need token1.
-                        (unwrap! (contract-call? .math-lib-concentrated get-liquidity-for-amount1
-                            lower-sqrt upper-sqrt amount1) ERR_MATH_FAIL)
-                        ;; Range covers current price. We need both.
-                        ;; Liquidity is determined by the tighter constraint.
-                        ;; Ideally we calculate L from amount0 and L from amount1 and take the minimum?
-                        ;; Or we take the one that matches the ratio.
-                        ;; For simplicity here, we just assume amount0 determines it if provided, else amount1.
-                        ;; Real implementation should verify ratio.
-                        (if (> amount0 u0)
-                            (unwrap! (contract-call? .math-lib-concentrated get-liquidity-for-amount0
-                                (var-get sqrt-price-x96) upper-sqrt amount0) ERR_MATH_FAIL)
-                            (unwrap! (contract-call? .math-lib-concentrated get-liquidity-for-amount1
-                                lower-sqrt (var-get sqrt-price-x96) amount1) ERR_MATH_FAIL)
+        (let ((liq (if (< curr-tick tick-lower)
+                ;; Range is strictly above current price. We need token0.
+                (unwrap!
+                    (contract-call? .math-lib-concentrated
+                        get-liquidity-for-amount0 lower-sqrt upper-sqrt
+                        amount0
+                    )
+                    ERR_MATH_FAIL
+                )
+                (if (>= curr-tick tick-upper)
+                    ;; Range is strictly below current price. We need token1.
+                    (unwrap!
+                        (contract-call? .math-lib-concentrated
+                            get-liquidity-for-amount1 lower-sqrt upper-sqrt
+                            amount1
+                        )
+                        ERR_MATH_FAIL
+                    )
+                    ;; Range covers current price. We need both.
+                    ;; Liquidity is determined by the tighter constraint.
+                    ;; Ideally we calculate L from amount0 and L from amount1 and take the minimum?
+                    ;; Or we take the one that matches the ratio.
+                    ;; For simplicity here, we just assume amount0 determines it if provided, else amount1.
+                    ;; Real implementation should verify ratio.
+                    (if (> amount0 u0)
+                        (unwrap!
+                            (contract-call? .math-lib-concentrated
+                                get-liquidity-for-amount0
+                                (var-get sqrt-price-x96) upper-sqrt amount0
+                            )
+                            ERR_MATH_FAIL
+                        )
+                        (unwrap!
+                            (contract-call? .math-lib-concentrated
+                                get-liquidity-for-amount1 lower-sqrt
+                                (var-get sqrt-price-x96) amount1
+                            )
+                            ERR_MATH_FAIL
                         )
                     )
-                 ))
-        )
+                )
+            )))
             (try! (nft-mint? position-nft id recipient))
             (map-set positions { position-id: id } {
                 owner: recipient,
