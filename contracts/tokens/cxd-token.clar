@@ -11,6 +11,9 @@
 (use-trait protocol-monitor-trait .security-monitoring.protocol-monitor-trait)
 (use-trait controller .core-traits.controller)
 
+;; Declare that cxd-token implements the SIP-010 fungible token trait.
+(impl-trait .defi-traits.sip-010-ft-trait)
+
 ;; --- Constants ---
 
 ;; @var ERR_UNAUTHORIZED The caller is not authorized to perform the action.

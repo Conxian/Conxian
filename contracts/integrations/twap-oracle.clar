@@ -95,7 +95,14 @@
         )
       )
     )
-    (print { event: "twap-updated", asset: asset, period: period, twap: (get-twap asset period), sender: tx-sender, block-height: (unwrap-panic (get-block-info? time block-height)) })
+    (print {
+      event: "twap-updated",
+      asset: asset,
+      period: period,
+      twap: (get-twap asset period),
+      sender: tx-sender,
+      block-height: block-height,
+    })
     (ok true)
   )
 )

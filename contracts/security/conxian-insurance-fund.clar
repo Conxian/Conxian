@@ -2,11 +2,13 @@
 ;; Conxian Safety Module (CSM)
 ;;
 ;; @desc A Safety Module acting as the protocol's insurance layer.
-;; Users stake CONX tokens to underwrite protocol risk.
+;; Users stake CXD tokens to underwrite protocol risk.
 ;; In exchange, they receive a portion of protocol fees (routed here via protocol-fee-switch).
 ;; In a shortfall event, funds can be slashed by governance to cover deficits.
 
 (use-trait sip-010-ft-trait .defi-traits.sip-010-ft-trait)
+
+;; --- Constants ---
 
 ;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED (err u5000))

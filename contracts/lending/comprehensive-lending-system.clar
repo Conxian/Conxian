@@ -21,7 +21,7 @@
 
 ;; Data Variables
 (define-data-var contract-owner principal tx-sender)
-(define-data-var protocol-fee-switch principal 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.protocol-fee-switch)
+(define-data-var protocol-fee-switch principal 'STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ.protocol-fee-switch)
 
 ;; Maps
 ;; amount: Principal balance (scaled)
