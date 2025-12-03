@@ -1,4 +1,5 @@
 import { Cl } from '@stacks/transactions';
+import { describe, it, expect, beforeEach } from 'vitest';
 
 // Comprehensive Pool Type Integration Tests
 describe('Conxian Pool Type Integration Tests', () => {

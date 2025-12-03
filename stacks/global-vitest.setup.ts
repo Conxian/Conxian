@@ -35,12 +35,15 @@ if (process.env.SKIP_SDK === '1') {
   global.simnet = undefined;
   // Early return: do not initialize Clarinet SDK
 } else {
-// Initialize a global simnet instance so Clarinet vitest helpers can manage sessions
-const sdk = await getSDK({
-  manifestPath,
-  trackCosts: global.options.clarinet.costs,
-  trackCoverage: global.options.clarinet.coverage,
-});
-// @ts-ignore assign to declared global from SDK helpers
-global.simnet = sdk;
+  // Only initialize if simnet is not already defined (e.g. by environment)
+  if (!(global as any).simnet) {
+    // Initialize a global simnet instance so Clarinet vitest helpers can manage sessions
+    const sdk = await getSDK({
+      manifestPath,
+      trackCosts: global.options.clarinet.costs,
+      trackCoverage: global.options.clarinet.coverage,
+    });
+    // @ts-ignore assign to declared global from SDK helpers
+    global.simnet = sdk;
+  }
 }

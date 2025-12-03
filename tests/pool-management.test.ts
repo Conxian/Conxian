@@ -11,21 +11,28 @@ describe('Pool Management Comprehensive Tests', () => {
   let liquidityProvider: string;
 
   // Contract addresses
-  const POOL_MANAGER = `${deployer}.pool-manager`;
-  const CONCENTRATED_POOL = `${deployer}.concentrated-liquidity-pool`;
-  const POOL_REGISTRY = `${deployer}.pool-registry`;
-  const TOKEN_A = `${deployer}.token-a`;
-  const TOKEN_B = `${deployer}.token-b`;
-  const LP_TOKEN = `${deployer}.cxlp-token`;
+  let POOL_MANAGER: string;
+  let CONCENTRATED_POOL: string;
+  let POOL_REGISTRY: string;
+  let TOKEN_A: string;
+  let TOKEN_B: string;
+  let LP_TOKEN: string;
 
   beforeAll(async () => {
     simnet = (global as any).simnet;
     const accounts = simnet.getAccounts();
     deployer = accounts.get('deployer')?.address || '';
-    user1 = accounts.get('wallet_1')?.address || '';
-    user2 = accounts.get('wallet_2')?.address || '';
-    poolManager = accounts.get('wallet_3')?.address || '';
-    liquidityProvider = accounts.get('wallet_4')?.address || '';
+    user1 = accounts.get('wallet_1')?.address || 'ST1SJ3DTE5DN7X54YDH5D64R3BCB6A2AG2ZQ8YPD5';
+    user2 = accounts.get('wallet_2')?.address || 'ST2NEB84ASENDXKYGJPQW86YXQCEFEX2ZQPG87ND';
+    poolManager = accounts.get('wallet_3')?.address || 'ST2REHHS5J3CERCRBEPMGH7921Q6PYKAADT7JP2VB';
+    liquidityProvider = accounts.get('wallet_4')?.address || 'ST3AM1A56AK2C1XAFJ4115ZSV26EB49BVQ10MG55';
+
+    POOL_MANAGER = `${deployer}.pool-manager`;
+    CONCENTRATED_POOL = `${deployer}.concentrated-liquidity-pool`;
+    POOL_REGISTRY = `${deployer}.pool-registry`;
+    TOKEN_A = `${deployer}.token-a`;
+    TOKEN_B = `${deployer}.token-b`;
+    LP_TOKEN = `${deployer}.cxlp-token`;
 
     await setupInitialTokens();
     await setupRoles();

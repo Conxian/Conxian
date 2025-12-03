@@ -174,3 +174,14 @@
   (get-liquidation-amounts (principal principal principal uint) (response { collateral-to-seize: uint } uint))
   (liquidate (principal principal principal uint uint) (response bool uint))
 ))
+
+;; ===========================================
+;; STRATEGY TRAIT
+;; ===========================================
+(define-trait strategy-trait (
+  (get-apy () (response uint uint))
+  (get-risk-score () (response uint uint))
+  (get-total-value-locked () (response uint uint))
+  (invest (uint) (response uint uint))
+  (divest (uint) (response uint uint))
+))

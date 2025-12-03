@@ -3,22 +3,43 @@
 ;; Manages yield strategies and allocates funds to the highest yielding safe strategy.
 
 (use-trait vault-trait .defi-traits.vault-trait)
+(use-trait circuit-breaker-trait .security-monitoring.circuit-breaker-trait)
+(use-trait strategy-trait .defi-traits.strategy-trait)
 
 (define-constant ERR_UNAUTHORIZED (err u6000))
 (define-constant ERR_INVALID_STRATEGY (err u6001))
 (define-constant ERR_NO_STRATEGY (err u6002))
 (define-constant ERR_LOW_YIELD (err u6003))
+(define-constant ERR_CIRCUIT_OPEN (err u6004))
+(define-constant ERR_SLIPPAGE (err u6005))
 
 (define-data-var contract-owner principal tx-sender)
 (define-data-var best-strategy principal tx-sender)
 (define-data-var max-risk-score uint u50) ;; Max allowed risk (0-100)
+(define-data-var circuit-breaker-contract (optional <circuit-breaker-trait>) none)
 
 (define-map strategies
     { strategy: principal }
     { active: bool, apy: uint, risk-score: uint, total-allocated: uint }
 )
 
+;; --- Private Helper ---
+(define-private (check-circuit-breaker)
+  (match (var-get circuit-breaker-contract)
+    cb (contract-call? cb is-circuit-open)
+    (ok false) ;; If no CB set, assume closed (safe to proceed)
+  )
+)
+
 ;; --- Public Functions ---
+
+(define-public (set-circuit-breaker (cb <circuit-breaker-trait>))
+    (begin
+        (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
+        (var-set circuit-breaker-contract (some cb))
+        (ok true)
+    )
+)
 
 (define-public (set-owner (new-owner principal))
     (begin
@@ -55,6 +76,18 @@
         (map-set strategies { strategy: strategy } (merge current { apy: apy, risk-score: risk }))
         
         (unwrap-panic (check-and-update-best strategy apy risk))
+        (ok true)
+    )
+)
+
+(define-public (refresh-strategy (strategy <strategy-trait>))
+    (let (
+        (strategy-principal (contract-of strategy))
+        (apy (unwrap! (contract-call? strategy get-apy) ERR_INVALID_STRATEGY))
+        (risk (unwrap! (contract-call? strategy get-risk-score) ERR_INVALID_STRATEGY))
+    )
+        ;; Update metrics internally (this will also update best-strategy if needed)
+        (try! (update-metrics strategy-principal apy risk))
         (ok true)
     )
 )
