@@ -2,6 +2,24 @@
 ;; Defines standard interfaces for tokens, pools, vaults, and oracles.
 (use-trait sip-010-ft-trait .sip-standards.sip-010-ft-trait)
 
+;; ===========================================
+;; FEE MANAGER TRAIT
+;; ===========================================
+(define-trait fee-manager-trait (
+  (get-fee-rate ((string-ascii 32)) (response uint uint))
+  (route-fees (<sip-010-ft-trait> uint bool (string-ascii 32)) (response uint uint))
+))
+
+;; ===========================================
+;; HOOK TRAIT
+;; ===========================================
+(define-trait hook-trait (
+  (on-action ((string-ascii 32) principal uint principal (optional uint)) (response bool uint))
+))
+
+;; ===========================================
+;; POOL DEPLOYER TRAIT
+;; ===========================================
 (define-trait pool-deployer-trait (
   (deploy-and-initialize
     (principal principal)
@@ -122,15 +140,15 @@
 ;; ===========================================
 (define-trait pool-trait (
   (swap
-    (uint principal)
+    (uint <sip-010-ft-trait> <sip-010-ft-trait>)
     (response uint uint)
   )
   (add-liquidity
-    (uint uint)
+    (uint uint <sip-010-ft-trait> <sip-010-ft-trait>)
     (response uint uint)
   )
   (remove-liquidity
-    (uint)
+    (uint <sip-010-ft-trait> <sip-010-ft-trait>)
     (
       response       {
       amount0: uint,

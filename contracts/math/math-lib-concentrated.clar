@@ -50,6 +50,49 @@
     )
 )
 
+;; @desc Calculates liquidity for a given amount0
+;; L = amount0 * sqrtA * sqrtB / (sqrtB - sqrtA)
+(define-read-only (get-liquidity-for-amount0 (sqrt-ratio-a uint) (sqrt-ratio-b uint) (amount0 uint))
+    (let (
+        (sqrt-ratio-lower (if (< sqrt-ratio-a sqrt-ratio-b) sqrt-ratio-a sqrt-ratio-b))
+        (sqrt-ratio-upper (if (< sqrt-ratio-a sqrt-ratio-b) sqrt-ratio-b sqrt-ratio-a))
+    )
+        (if (is-eq sqrt-ratio-lower sqrt-ratio-upper)
+            (ok u0)
+            (let (
+                (diff (- sqrt-ratio-upper sqrt-ratio-lower))
+                (product (/ (* sqrt-ratio-lower sqrt-ratio-upper) Q96))
+            )
+                (if (is-eq diff u0)
+                    (err ERR_DIV_ZERO)
+                    (ok (/ (* amount0 product) diff))
+                )
+            )
+        )
+    )
+)
+
+;; @desc Calculates liquidity for a given amount1
+;; L = amount1 * Q96 / (sqrtB - sqrtA)
+(define-read-only (get-liquidity-for-amount1 (sqrt-ratio-a uint) (sqrt-ratio-b uint) (amount1 uint))
+    (let (
+        (sqrt-ratio-lower (if (< sqrt-ratio-a sqrt-ratio-b) sqrt-ratio-a sqrt-ratio-b))
+        (sqrt-ratio-upper (if (< sqrt-ratio-a sqrt-ratio-b) sqrt-ratio-b sqrt-ratio-a))
+    )
+        (if (is-eq sqrt-ratio-lower sqrt-ratio-upper)
+            (ok u0)
+            (let (
+                (diff (- sqrt-ratio-upper sqrt-ratio-lower))
+            )
+                (if (is-eq diff u0)
+                    (err ERR_DIV_ZERO)
+                    (ok (/ (* amount1 Q96) diff))
+                )
+            )
+        )
+    )
+)
+
 ;; @desc Get next sqrt price given an input amount of token0
 ;; Liquidity remains constant.
 ;; New Price = (Liquidity * Price) / (Liquidity + Amount * Price)

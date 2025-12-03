@@ -68,6 +68,6 @@
 
         ;; Execute Swap
         (map-delete commitments { user: tx-sender })
-        (contract-call? pool swap amount-in (contract-of token-in))
+        (contract-call? pool swap amount-in token-in token-out)
     )
 )

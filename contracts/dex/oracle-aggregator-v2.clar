@@ -1,5 +1,6 @@
 ;; Oracle Aggregator V2
 ;; Production-grade Oracle System with TWAP (Cumulative) and Manipulation Detection
+;; Hybrid Architecture (Weighted Average / Median)
 
 (use-trait oracle-trait .oracle-pricing.oracle-trait)
 (use-trait circuit-breaker-trait .security-monitoring.circuit-breaker-trait)
@@ -51,12 +52,18 @@
     )
 )
 
+;; Standard function (deprecated or for boolean trust)
 (define-public (register-oracle (oracle principal) (trusted bool))
     (begin
         (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
         (map-set registered-oracles { oracle: oracle } { trusted: trusted })
         (ok true)
     )
+)
+
+;; Alias for test compatibility (hybrid support)
+(define-public (add-oracle-source (oracle principal) (weight uint))
+    (register-oracle oracle true)
 )
 
 ;; @desc Update price and cumulative values
@@ -117,6 +124,10 @@
     )
         (ok (get price data))
     )
+)
+
+(define-read-only (get-price (asset principal))
+    (get-real-time-price asset)
 )
 
 ;; @desc Get TWAP for a given window

@@ -60,6 +60,11 @@ address = "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM"
 path = "contracts/core/conxian-protocol.clar"
 address = "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM"
 
+[contracts.protocol-fee-switch]
+path = "contracts/core/protocol-fee-switch.clar"
+address = "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM"
+depends_on = ["defi-traits"]
+
 # ---------- Traits ----------
 # Modular Trait Architecture
 
@@ -85,6 +90,10 @@ address = "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM"
 
 [contracts.trait-errors]
 path = "contracts/traits/trait-errors.clar"
+address = "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM"
+
+[contracts.pyth-traits]
+path = "contracts/traits/pyth-traits.clar"
 address = "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM"
 
 [contracts.oracle-pricing]
@@ -147,7 +156,7 @@ test-token-b = ".mock-token"
 dex-factory = ".dex-factory"
 finance-metrics = ".finance-metrics-trait"
 flash-loan-vault = ".lending-protocol-governance"
-insurance-fund = ".audit-registry"
+insurance-fund = ".conxian-insurance-fund"
 bond-factory = ".dex-factory"
 interop-wormhole-outbox = ".btc-adapter"
 oracle-aggregator-v2 = ".oracle-aggregator-v2"
@@ -250,6 +259,15 @@ address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 path = "contracts/math/math-lib-concentrated.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
+[contracts.conxian-math]
+path = "contracts/lib/conxian-math.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+
+[contracts.conxian-token-factory]
+path = "contracts/core/conxian-token-factory.clar"
+address = "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM"
+depends_on = ["defi-traits"]
+
 [contracts.concentrated-liquidity-pool]
 path = "contracts/dex/concentrated-liquidity-pool.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
@@ -257,6 +275,11 @@ address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 [contracts.mev-protector]
 path = "contracts/security/mev-protector.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+
+[contracts.conxian-insurance-fund]
+path = "contracts/security/conxian-insurance-fund.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+depends_on = ["defi-traits"]
 
 [contracts.dex-factory-v2]
 path = "contracts/dex/dex-factory-v2.clar"
@@ -513,6 +536,42 @@ address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
 [contracts.twap-oracle]
 path = "contracts/integrations/twap-oracle.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+
+[contracts.pyth-oracle-adapter]
+path = "contracts/integrations/pyth-oracle-adapter.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+depends_on = [
+    "oracle-pricing",
+    "pyth-oracle-v2-mock",
+    "pyth-traits",
+    "pyth-store-mock",
+]
+
+[contracts.dia-oracle-adapter]
+path = "contracts/integrations/dia-oracle-adapter.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+depends_on = ["oracle-pricing", "dia-oracle-mock"]
+
+[contracts.redstone-oracle-adapter]
+path = "contracts/integrations/redstone-oracle-adapter.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+depends_on = ["oracle-pricing", "redstone-oracle-mock"]
+
+[contracts.pyth-oracle-v2-mock]
+path = "contracts/mocks/pyth-oracle-v2-mock.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+
+[contracts.pyth-store-mock]
+path = "contracts/mocks/pyth-store-mock.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+
+[contracts.dia-oracle-mock]
+path = "contracts/mocks/dia-oracle-mock.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+
+[contracts.redstone-oracle-mock]
+path = "contracts/mocks/redstone-oracle-mock.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
 # End of file

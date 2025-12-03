@@ -19,6 +19,10 @@ async function main() {
   await deployContract('router/multi-hop-router-v3.clar', 'multi-hop-router-v3');
   await deployContract('dex/oracle-aggregator-v2.clar', 'oracle-aggregator-v2');
 
+  // Lending
+  await deployContract('lending/interest-rate-model.clar', 'interest-rate-model');
+  await deployContract('lending/comprehensive-lending-system.clar', 'comprehensive-lending-system');
+
   // Enterprise & Yield
   await deployContract('enterprise/enterprise-api.clar', 'enterprise-api');
   await deployContract('yield/yield-optimizer.clar', 'yield-optimizer');

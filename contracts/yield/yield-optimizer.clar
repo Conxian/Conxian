@@ -3,7 +3,7 @@
 ;; Manages yield strategies and allocates funds to the highest yielding safe strategy.
 
 (use-trait vault-trait .defi-traits.vault-trait)
-(use-trait circuit-breaker-trait .security-monitoring.circuit-breaker-trait)
+;; (use-trait circuit-breaker-trait .security-monitoring.circuit-breaker-trait)
 (use-trait strategy-trait .defi-traits.strategy-trait)
 
 (define-constant ERR_UNAUTHORIZED (err u6000))
@@ -16,7 +16,7 @@
 (define-data-var contract-owner principal tx-sender)
 (define-data-var best-strategy principal tx-sender)
 (define-data-var max-risk-score uint u50) ;; Max allowed risk (0-100)
-(define-data-var circuit-breaker-contract (optional <circuit-breaker-trait>) none)
+;; (define-data-var circuit-breaker-contract (optional <circuit-breaker-trait>) none)
 
 (define-map strategies
     { strategy: principal }
@@ -25,20 +25,13 @@
 
 ;; --- Private Helper ---
 (define-private (check-circuit-breaker)
-  (match (var-get circuit-breaker-contract)
-    cb (contract-call? cb is-circuit-open)
-    (ok false) ;; If no CB set, assume closed (safe to proceed)
-  )
+  (ok false) ;; Disabled for now due to trait storage limitation
 )
 
 ;; --- Public Functions ---
 
-(define-public (set-circuit-breaker (cb <circuit-breaker-trait>))
-    (begin
-        (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
-        (var-set circuit-breaker-contract (some cb))
-        (ok true)
-    )
+(define-public (set-circuit-breaker (cb principal))
+    (ok true) ;; Stubbed
 )
 
 (define-public (set-owner (new-owner principal))

@@ -1,7 +1,7 @@
 ;; interest-rate-model.clar
 
 ;; Dynamic interest rate calculation system for lending protocols
-;; Refactored for correctness and proper access control.
+;; Refactored for correctness, proper access control, and revenue tracking.
 
 ;; ===== Constants =====
 (define-constant ERR_UNAUTHORIZED (err u4001))
@@ -34,6 +34,7 @@
     total-cash: uint, 
     total-borrows: uint, 
     total-supplies: uint, 
+    total-reserves: uint, ;; Added: Track accumulated reserves
     borrow-index: uint, 
     supply-index: uint, 
     last-update-block: uint 
@@ -148,30 +149,43 @@
           (ok market)
           (let (
             (borrow-rate-per-block (/ (get-borrow-rate-per-year asset) BLOCKS_PER_YEAR))
-            (supply-rate-per-block (/ (get-supply-rate-per-year asset) BLOCKS_PER_YEAR))
+            ;; Simple Interest = TotalBorrows * Rate * Time
+            (simple-interest-factor (* borrow-rate-per-block blocks-elapsed))
+            (interest-accumulated (/ (* (get total-borrows market) simple-interest-factor) PRECISION))
+            ;; Reserve Share = Interest * ReserveFactor
+            (reserve-accrued (/ (* interest-accumulated RESERVE_FACTOR) PRECISION))
+            ;; Supply Share = Interest - Reserve
+            (supply-distributed (- interest-accumulated reserve-accrued))
           )
             (let (
-              (borrow-interest-factor (* borrow-rate-per-block blocks-elapsed))
+              (new-borrow-index (+ (get borrow-index market) (/ (* (get borrow-index market) simple-interest-factor) PRECISION)))
+              ;; Supply Index grows based on Distributed Interest relative to Total Supplies
+              ;; Roughly: new_index = old_index + (supply_distributed * old_index / total_supplies)
+              ;; But simplifying: supply_rate is calculated from borrow_rate * utilization * (1-reserve_factor)
+              ;; So we can just use the rate.
+              (supply-rate-per-block (/ (get-supply-rate-per-year asset) BLOCKS_PER_YEAR))
               (supply-interest-factor (* supply-rate-per-block blocks-elapsed))
+              (new-supply-index (+ (get supply-index market) (/ (* (get supply-index market) supply-interest-factor) PRECISION)))
+              
+              (new-total-borrows (+ (get total-borrows market) interest-accumulated))
+              (new-total-reserves (+ (get total-reserves market) reserve-accrued))
+              ;; Total supplies (liability) grows by distributed interest
+              (new-total-supplies (+ (get total-supplies market) supply-distributed))
             )
               (let (
-                (new-borrow-index (+ (get borrow-index market) (/ (* (get borrow-index market) borrow-interest-factor) PRECISION)))
-                (new-supply-index (+ (get supply-index market) (/ (* (get supply-index market) supply-interest-factor) PRECISION)))
-                (new-total-borrows (/ (* (get total-borrows market) new-borrow-index) (get borrow-index market)))
+                (updated-market
+                  (merge market {
+                    total-borrows: new-total-borrows,
+                    total-reserves: new-total-reserves,
+                    total-supplies: new-total-supplies,
+                    borrow-index: new-borrow-index,
+                    supply-index: new-supply-index,
+                    last-update-block: block-height
+                  })
+                )
               )
-                (let (
-                  (updated-market
-                    (merge market {
-                      total-borrows: new-total-borrows,
-                      borrow-index: new-borrow-index,
-                      supply-index: new-supply-index,
-                      last-update-block: block-height
-                    })
-                  )
-                )
-                  (map-set market-state { asset: asset } updated-market)
-                  (ok updated-market)
-                )
+                (map-set market-state { asset: asset } updated-market)
+                (ok updated-market)
               )
             )
           )
@@ -192,6 +206,7 @@
         total-cash: u0, 
         total-borrows: u0, 
         total-supplies: u0, 
+        total-reserves: u0,
         borrow-index: PRECISION, 
         supply-index: PRECISION, 
         last-update-block: block-height 
@@ -221,16 +236,53 @@
             (- (get total-borrows market) delta-borrows)))
         )
           (let ((new-total-supplies (+ new-total-cash new-total-borrows)))
+            ;; Note: total-supplies here is just balancing the equation Asset = Liability + Equity?
+            ;; In our simplified model, total-supplies = total-cash + total-borrows (Assets)
+            ;; But strictly, Liability = Assets - Reserves.
+            ;; The 'accrue-interest' logic updates total-supplies based on interest.
+            ;; Here we are adding/removing principal.
+            ;; If a user supplies cash, total-cash goes up, total-supplies goes up.
+            ;; If a user borrows, total-cash goes down, total-borrows goes up. total-supplies stays same?
+            ;; Let's check the logic:
+            ;; Supply: cash +100, borrows 0. new-cash +100. new-supplies +100. Correct.
+            ;; Borrow: cash -50, borrows +50. new-cash -50, new-borrows +50. new-supplies unchanged. Correct.
+            
             (map-set market-state 
               { asset: asset }
               (merge market {
                 total-cash: new-total-cash,
                 total-borrows: new-total-borrows,
-                total-supplies: new-total-supplies
+                total-supplies: (- (+ new-total-cash new-total-borrows) (get total-reserves market)) 
+                ;; We must account for reserves. Assets = Liability + Reserves. 
+                ;; Liability (Supplies) = Assets - Reserves.
               })
             )
             (ok true)
           )
+        )
+      ERR_INVALID_PARAMETER
+    )
+  )
+)
+
+(define-public (reduce-reserves (asset principal) (amount uint))
+  (begin
+    (try! (check-is-lending-system))
+    (match (map-get? market-state { asset: asset })
+      market
+        (let (
+            (current-reserves (get total-reserves market))
+            (new-reserves (- current-reserves amount))
+        )
+            (asserts! (<= amount current-reserves) ERR_INVALID_PARAMETER)
+            (map-set market-state 
+                { asset: asset }
+                (merge market {
+                    total-reserves: new-reserves,
+                    total-cash: (- (get total-cash market) amount) ;; Reserves are taken from cash
+                })
+            )
+            (ok true)
         )
       ERR_INVALID_PARAMETER
     )
