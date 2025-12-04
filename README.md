@@ -1,7 +1,7 @@
 # Conxian Protocol
 
 [![Tests](https://img.shields.io/badge/Tests-Under_Review-yellow)](https://github.com/Anya-org/Conxian)
-[![Contracts](https://img.shields.io/badge/Contracts-91-blue)](https://github.com/Anya-org/Conxian)
+[![Contracts](https://img.shields.io/badge/Contracts-108-blue)](https://github.com/Anya-org/Conxian)
 [![Compilation](https://img.shields.io/badge/Compile-Passing-brightgreen)](https://github.com/Anya-org/Conxian)
 [![Traits](https://img.shields.io/badge/Traits-15%20Modular%20Files-brightgreen)](https://github.com/Anya-org/Conxian/tree/main/contracts/traits)
 [![Status](https://img.shields.io/badge/Status-Stabilization_Phase-orange)](https://github.com/Anya-org/Conxian)
