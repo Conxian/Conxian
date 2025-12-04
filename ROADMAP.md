@@ -1,113 +1,37 @@
-# Conxian Protocol Roadmap
+# Roadmap
 
-This document outlines the future development plans for the Conxian Protocol, tracking progress on critical fixes, Nakamoto integration, and strategic improvements.
+## Overview
 
-## 🚀 Current Status: Nakamoto Readiness & Zero-Error Gate (Dec 2025)
+This roadmap outlines the development phases and status of the Conxian Protocol. The project is currently in the **Stabilization Phase**, with a focus on ensuring the correctness, security, and alignment of all contracts and documentation.
 
-**Network Status**: Stacks Nakamoto Mainnet (Epoch 3.0) Active
-**SDK Version**: Clarinet SDK 3.9.0 (Enabled)
-**Compilation Status**: 100% Passing (0 Errors)
+## Phase 1: Stabilization and Documentation (In Progress)
 
-### ✅ Completed Critical Actions
+- **Objective**: To create a solid foundation for the protocol by ensuring that all existing code is well-documented, secure, and aligned with the modular architecture.
+- **Key Activities**:
+  - Comprehensive documentation of all smart contracts.
+  - Alignment of all `README.md` files with the current state of the code.
+  - Identification and remediation of any critical security vulnerabilities.
+  - Implementation of a comprehensive test suite.
 
-- [x] **Zero-Error Compile Gate**: Resolved all compilation errors across 91 contracts.
-  - Fixed `keeper-coordinator.clar` syntax and list errors.
-  - Fixed `comprehensive-lending-system.clar` circuit breaker integration.
-  - Fixed `dimensional-engine.clar` dependency resolution.
-  - Fixed `funding-rate-calculator.clar` trait alignment.
-- [x] **Standardized trait imports**: Fixed SIP-010 trait references across contracts.
-- [x] **Created math-utilities contract**: Basic implementation for fixed-point math.
-- [x] **Nakamoto Alignment**: Contracts optimized for fast block times.
-- [x] **Modular Architecture**: Full separation of concerns across Core, DEX, and Lending modules.
+## Phase 2: Feature Completion and Testing (Planned)
 
-### 🔄 In Progress (Phase 2: Verification & Security)
+- **Objective**: To complete the implementation of all core features and to conduct thorough testing to ensure the protocol is production-ready.
+- **Key Activities**:
+  - **Lending Module**:
+    - Implement the `get-health-factor` function in the `comprehensive-lending-system.clar` contract.
+    - Complete the implementation of the `liquidation-manager.clar` contract.
+  - **DEX Module**:
+    - Complete the implementation of the `concentrated-liquidity-pool.clar` contract.
+    - Integrate the `dijkstra-pathfinder.clar` contract with the `multi-hop-router-v3.clar`.
+  - **Tokens Module**:
+    - Enable the integration hooks in the `cxd-token.clar` contract.
+    - Complete the implementation of the `token-system-coordinator.clar` contract.
+  - **Security Audit**: Conduct an external security audit of the entire codebase.
 
-- [ ] **Comprehensive Test Suite**: Running comprehensive unit and integration tests (Target: >95% coverage).
-- [ ] **Gas Optimization**: Fine-tuning for Nakamoto block limits and cost reduction.
-- [ ] **External Security Audit**: Engaging third-party auditors for final review.
-- [ ] **sBTC Integration Testing**: Verifying `sbtc-integration` and `btc-adapter` contracts.
+## Phase 3: Mainnet Launch (Planned)
 
----
-
-## Phase 1: Mainnet Launch (Q1 2026)
-
-### 🎯 Goal: Launch the Conxian Protocol on the Stacks Mainnet
-
-#### ✅ Completed Tasks
-
-- [x] **Modular trait system migration**: 15-file architecture implemented and wired.
-- [x] **Test suite stabilization**: Testing framework established.
-- [x] **Documentation alignment**: Whitepaper, README, and System Index updated.
-- [x] **Compilation Fixes**: Achieved 0 compilation errors.
-
-#### 🔄 Remaining Tasks
-
-- [ ] **Achieve >95% test coverage**.
-- [ ] **Complete security audit**.
-- [ ] **Mainnet deployment preparation** (Deployment scripts & params).
-- [ ] **Launch Guarded Mainnet**.
-
----
-
-## Phase 2: Advanced Features (Q2 2026)
-
-### 🎯 Goal: Implement next-generation DeFi features
-
-#### 📋 Planned Tasks
-
-- [ ] **Standalone oracle module**: Decentralized price feeds with manipulation detection.
-- [ ] **Enterprise module completion**: Institutional features (KYC hooks, tiered access).
-- [ ] **Dimensional vaults**: Advanced position management strategies.
-- [ ] **MEV protection enhancements**: Advanced anti-MEV mechanisms (Sandwich defense).
-
----
-
-## Phase 3: Ecosystem Expansion (Q3 2026)
-
-### 🎯 Goal: Expand Conxian ecosystem and integrations
-
-#### 📋 Planned Tasks
-
-- [ ] **Oracle provider partnerships**: Pyth, RedStone integration.
-- [ ] **Conxian Pro interface**: Institutional trading platform.
-- [ ] **Bitcoin L2 expansion**: Cross-chain deployments.
-- [ ] **DeFi protocol integrations**: Strategic partnerships.
-
----
-
-## 🛠️ Technical Debt & Improvements
-
-### 🔄 In Progress
-
-- [ ] **Contract optimization**: Gas efficiency improvements.
-- [ ] **Upgrade patterns**: Contract evolution mechanisms.
-- [ ] **Cross-chain bridges**: Bitcoin L2 implementations.
-
-### 📋 Long-term Architecture
-
-- [ ] **Advanced monitoring**: Analytics dashboard.
-- [ ] **Compliance frameworks**: Enterprise adoption.
-
----
-
-## 📊 Progress Metrics
-
-### Compilation Status
-
-- **Start**: 30+ errors
-- **Current (Dec 02, 2025)**: **0 errors** (Zero-Error Gate Achieved).
-- **Target**: 0 errors prior to external audit (MET).
-
-### Documentation Coverage
-
-- **Whitepaper**: ✅ Updated (v2.0)
-- **API Documentation**: ✅ Complete
-- **Security Process**: ✅ Complete
-- **Testing Framework**: ✅ Complete
-
-### Security Posture
-
-- **Security Review Process**: ✅ Implemented
-- **Automated Scanning**: ✅ Configured
-- **Internal Audit Suite**: 📋 Planned
-- **External Audit**: 📋 Pending
+- **Objective**: To launch the Conxian Protocol on the Stacks mainnet.
+- **Key Activities**:
+  - **Deployment**: Deploy all smart contracts to the mainnet.
+  - **Web Application**: Launch the official web application.
+  - **Bug Bounty**: Initiate a bug bounty program to incentivize community involvement in securing the protocol.
