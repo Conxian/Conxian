@@ -1,58 +1,33 @@
 # Conxian Protocol
 
-[![Tests](https://img.shields.io/badge/Tests-Under_Review-yellow)](https://github.com/Anya-org/Conxian)
-[![Contracts](https://img.shields.io/badge/Contracts-108-blue)](https://github.com/Anya-org/Conxian)
-[![Compilation](https://img.shields.io/badge/Compile-Passing-brightgreen)](https://github.com/Anya-org/Conxian)
-[![Traits](https://img.shields.io/badge/Traits-15%20Modular%20Files-brightgreen)](https://github.com/Anya-org/Conxian/tree/main/contracts/traits)
-[![Status](https://img.shields.io/badge/Status-Stabilization_Phase-orange)](https://github.com/Anya-org/Conxian)
-[![Network](https://img.shields.io/badge/Network-Nakamoto%20Active-green)](https://docs.hiro.so/)
+[![Status](https://img.shields.io/badge/Status-Under_Review-orange)](https://github.com/Anya-org/Conxian)
+[![Contracts](https://img.shields.io/badge/Contracts-100+-blue)](https://github.com/Anya-org/Conxian)
+[![Network](https://img.shields.io/badge/Network-Nakamoto_Ready-green)](https://docs.hiro.so/)
 
-## 🚀 A New Era of Decentralized Architecture
+## 🚀 A Multi-Dimensional DeFi Protocol on Stacks
 
-The Conxian Protocol is a comprehensive Bitcoin‑anchored, multi‑dimensional DeFi
-protocol deployed on Stacks (Nakamoto). It features a modular, decentralized
-architecture designed for security, scalability, and enterprise adoption.
+The Conxian Protocol is a comprehensive DeFi protocol built on the Stacks blockchain, designed to be fully compatible with the Nakamoto release. It features a modular architecture that separates concerns into specialized smart contracts for security, scalability, and maintainability.
 
-### Key Innovations
+### Key Features
 
-- **Modular by Design**: Protocol architecturally divided into specialized,
-  single-responsibility contracts for security, maintainability, and
-  reusability.
-- **Official Stacks Trait System**: All contract interfaces defined in **15
-  modular trait files** following official Stacks SIP standards.
-- **Nakamoto-Ready**: Architecture optimized for sub-second block times and
-  Bitcoin finality of Stacks Nakamoto release.
-- **Enhanced Features**:
-  - **Concentrated Liquidity**: Capital efficiency with tick-based pools.
-  - **MEV Protection**: Commit-reveal schemes and sandwich defense.
-  - **Advanced Routing**: Dijkstra-based multi-hop pathfinding.
-  - **Enterprise Suite**: Compliance hooks and tiered account management.
+- **Modular by Design**: The protocol is architecturally divided into specialized, single-responsibility contracts.
+- **Nakamoto-Ready**: The architecture is optimized for the sub-second block times and Bitcoin finality of the Stacks Nakamoto release.
+- **Core DeFi Primitives**:
+  - **Concentrated Liquidity**: A DEX with tick-based pools for capital efficiency.
+  - **Multi-Hop Routing**: An advanced router for finding optimal trading paths.
+  - **Lending Market**: A comprehensive system for supplying, borrowing, and liquidating assets.
+  - **Decentralized Governance**: A proposal and voting system for protocol management.
 
-## 📊 Current Status - STABILIZATION PHASE (Updated Dec 03, 2025)
+## 📊 Current Status - Under Review
 
-The Conxian Protocol is currently undergoing a **Critical Stabilization & Safety Review**.
-While the architectural foundation is strong, the codebase is **NOT currently production-ready** due to pending compilation fixes and safety standard alignments.
+The Conxian Protocol is currently undergoing a **Critical Stabilization & Safety Review**. While the architectural foundation is strong, the codebase is **NOT currently production-ready**. Several key components, such as the lending market's health factor calculation, are not fully implemented, and the protocol has not yet undergone a formal security audit.
 
-**⚠️ WARNING: Do not attempt to deploy to Mainnet.**
+**⚠️ WARNING: Do not attempt to deploy this code to Mainnet.**
 
-### 🔄 Ongoing Work (Phase 1 & 2)
+### ✅ Achievements
 
-- **Compilation**: Resolving syntax blockers in `concentrated-liquidity-pool` and dependency resolution.
-- **Safety Hardening**: Systematically removing `unwrap-panic` calls (180+ identified) to prevent runtime state freezing.
-- **Oracle Integration**: Replacing development stubs with functional Chainlink/Pyth adapter mocks for valid testing.
-- **Test Unification**: Deduplicating test suites between `tests/` and `stacks/tests/`.
-
-Detailed status reports:
-- **[Latest Readiness Review](./documentation/reports/SYSTEM_READINESS_LATEST.md)**: Detailed breakdown of blockers and remediation plan.
-- **[Architecture Specification](./documentation/ARCHITECTURE_SPEC.md)**: The target vision and design patterns.
-
-### ✅ Major Achievements
-
-- **Modular Trait System (COMPLETE)**: Implemented **15 modular trait files**
-  following official Stacks standards.
-- **Architectural Reorganization**: Repository restructured with clear
-  separation of concerns.
-- **Critical Fixes**: Resolved access control gaps in `multi-hop-router-v3` and `enhanced-circuit-breaker`.
+- **Modular Architecture**: The repository has been successfully restructured into a clear, module-based system.
+- **Core Functionality Implemented**: The foundational contracts for the DEX, governance, and lending modules are in place.
 
 ## Quick Start
 
@@ -62,34 +37,21 @@ Detailed status reports:
 
 ## Contract Modules
 
-The Conxian protocol is organized into a series of specialized modules:
+The Conxian protocol is organized into a series of specialized modules, each with its own detailed `README.md`:
 
-- **[Core Module](./contracts/core/README.md)**: Dimensional engine and
-  position management.
-- **[DEX Module](./contracts/dex/README.md)**: Concentrated liquidity AMM and
-  routing.
-- **[Governance Module](./contracts/governance/README.md)**: Proposal and voting
-  system.
-- **[Lending Module](./contracts/lending/README.md)**: Multi-asset lending and
-  flash loans.
-- **[Tokens Module](./contracts/tokens/README.md)**: Token ecosystem management.
-- **[Vaults Module](./contracts/vaults/README.md)**: Asset custody and sBTC
-  integration.
-- **[Security Module](./contracts/security/README.md)**: Circuit breakers and
-  MEV protection.
+- **[Core](./contracts/core/README.md)**: The central dimensional engine and protocol-wide administrative controls.
+- **[DEX](./contracts/dex/README.md)**: A concentrated liquidity AMM with a multi-hop router.
+- **[Governance](./contracts/governance/README.md)**: The proposal and voting system for decentralized decision-making.
+- **[Lending](./contracts/lending/README.md)**: A multi-asset lending market with a liquidation manager.
+- **[Tokens](./contracts/tokens/README.md)**: The ecosystem of SIP-010 fungible tokens.
+- **[Vaults](./contracts/vaults/README.md)**: Asset management vaults, including a dedicated sBTC vault.
+- **[Security](./contracts/security/README.md)**: A suite of contracts for risk management, including circuit breakers and access control.
 
 ## Documentation
 
-**[Whitepaper]
-(./documentation/whitepaper/Conxian-Whitepaper.md)**:
-
-- Full technical vision and architecture.
-  
-**[Roadmap](./ROADMAP.md)**:
-
-- Development phases and status tracking.
-**[System Index](./system-index.md)**:
-- Technical fix log and component index.
+- **[Whitepaper](./documentation/whitepaper/Conxian-Whitepaper.md)**: The full technical vision and architecture of the protocol.
+- **[Roadmap](./ROADMAP.md)**: The development phases and status tracking.
+- **[Documentation Hub](./documentation/README.md)**: A central hub for all project documentation.
 
 ## Contributing
 

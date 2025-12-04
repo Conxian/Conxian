@@ -1,174 +1,82 @@
-# Conxian Protocol — A Multi‑Dimensional DeFi System on Stacks (Nakamoto)
+# Conxian Protocol — A Multi‑Dimensional DeFi System on Stacks
 
-Version: 2.0 (Updated December 02, 2025)
-Status: Nakamoto Ready (Zero-Error Compile Achieved)
+**Version**: 2.0 (Updated December 03, 2025)
+**Status**: Under Review
 
 ## Abstract
 
-Conxian is a comprehensive Bitcoin‑anchored, multi‑dimensional DeFi protocol
-deployed on Stacks (Nakamoto). The protocol has undergone a significant
-architectural refactoring to create a more modular, decentralized, and
-Nakamoto-compliant system. This new architecture unifies **concentrated
-liquidity pools**, **advanced multi-hop routing**, **multi-source oracle
-aggregation**, **enterprise-grade lending**, **comprehensive MEV protection**,
-and **yield strategy automation** into a cohesive and extensible ecosystem.
-
-The system is architecturally divided into specialized, single-responsibility
-contracts, governed by a robust, modular trait system. This modular design
-enhances security, maintainability, and future extensibility, ensuring that the
-Conxian protocol remains at the forefront of decentralized finance.
+Conxian is a multi-dimensional DeFi protocol deployed on the Stacks blockchain, designed to be compatible with the Nakamoto release. The protocol is built on a modular architecture that separates concerns into specialized, single-responsibility contracts. This design provides a foundation for a comprehensive DeFi ecosystem, including a concentrated liquidity DEX, a multi-asset lending market, and a decentralized governance system. This whitepaper describes the protocol's architecture, its core components, and its current state of development.
 
 ## 1. Motivation
 
-- **Fragmented liquidity** across isolated DEXes prevents efficient capital
-  utilization.
-- **Monolithic architectures** create complexity, hinder modularity, and
-  increase security risks.
-- **MEV exploitation** drains liquidity providers without adequate protection
-  mechanisms.
-- **Cross-chain complexity** requires unified settlement with Bitcoin finality
-  guarantees.
-- **Institutional adoption** demands enterprise compliance without compromising
-  retail accessibility.
-- **Monitoring gaps** leave protocols vulnerable to manipulation and operational
-  failures.
+The DeFi landscape faces several challenges that hinder its growth and adoption:
 
-Conxian addresses these challenges by delivering a unified, deterministic, and
-auditable DeFi platform where Bitcoin finality, multi-dimensional risk
-management, and institutional-grade controls are built upon a foundation of
-modular, decentralized contracts.
+- **Fragmented Liquidity**: Capital is often spread thinly across isolated DEXes, leading to inefficient markets.
+- **Monolithic Architectures**: Complex, tightly-coupled systems are difficult to maintain, upgrade, and secure.
+- **MEV Exploitation**: Value is often extracted from users through front-running and other MEV strategies.
+- **Institutional Barriers**: Traditional financial institutions require compliance and risk management features that are often lacking in DeFi.
+
+Conxian aims to address these challenges by providing a unified, modular, and secure DeFi platform on Stacks.
 
 ## 2. Design Principles
 
-- **Modular and Decentralized**: The protocol is architecturally designed to be
-  highly modular, with each component encapsulated in its own contract. This
-  separation of concerns improves security, maintainability, and reusability.
-- **Trait-Driven Development**: All contract interfaces are defined in a set of
-  **15 modular trait files**, which are aggregated in a central registry. This
-  provides a clear, consistent, and gas-efficient way for contracts to interact.
-- **Determinism by construction**: Centralized trait imports/implementations,
-  canonical encoding, and deterministic token ordering ensure predictable
-  behavior.
-- **Bitcoin finality & Nakamoto integration**: The protocol leverages the
-  security and finality of the Bitcoin blockchain through the Stacks Nakamoto
-  release.
-- **Safety‑first defaults**: Pausable guards, circuit-breakers, and explicit
-  error codes are used throughout the system to protect against unforeseen
-  events.
-- **Compliance without compromise**: Modular enterprise controls allow for
-  institutional adoption without compromising the permissionless nature of the
-  retail-facing components.
+- **Modularity**: The protocol is architecturally designed to be highly modular. Each core component is encapsulated in its own set of contracts, improving security, maintainability, and reusability.
+- **Facade Pattern**: Core modules often use a facade contract as a single entry point, which delegates calls to more specialized contracts. This simplifies user interaction and contract integration.
+- **Bitcoin Finality & Nakamoto Integration**: The protocol leverages the security and finality of the Bitcoin blockchain through the Stacks Nakamoto release.
+- **Security First**: The architecture includes security-focused components like circuit breakers and access control, though a formal audit is still required.
 
 ## 3. System Architecture Overview
 
-The Conxian protocol is organized into a series of specialized layers, each containing modules with well-defined responsibilities.
+The Conxian protocol is organized into a series of specialized modules, each located in a dedicated subdirectory within the `contracts` directory.
 
-### 3.1 Enhanced Core Layers
+### 3.1 Core Modules
 
-#### 1. Concentrated Liquidity Layer
+- **Core**: Contains the `dimensional-engine`, which acts as a central facade for DeFi operations, and the `conxian-protocol` contract, which handles administrative functions like contract authorization and emergency pauses.
 
-*Implemented in `concentrated-liquidity-pool.clar`*
+- **DEX**: A decentralized exchange featuring a `concentrated-liquidity-pool` for capital-efficient trading and a `multi-hop-router-v3` for finding optimal trade routes. The route discovery mechanism in `dijkstra-pathfinder` is currently a simplified implementation that finds the best single-hop path.
 
-- **Tick-based Liquidity**: Capital efficiency maximization using geometric
-  price progression ticks.
-- **Position NFTs**: Complex position tracking and management via standard
-  SIP-009 NFTs.
-- **Range Fees**: Precise fee accumulation logic within active liquidity ranges.
+- **Lending**: A multi-asset lending market, centered around the `comprehensive-lending-system.clar` contract. It is supported by a `liquidation-manager` for handling under-collateralized positions. **Note**: The critical `get-health-factor` function is currently a placeholder and requires an oracle for a full implementation.
 
-#### 2. Advanced Routing Engine
+- **Governance**: A decentralized governance system built around a `proposal-engine` that manages the lifecycle of proposals, from creation to execution, supported by a `timelock` contract for delayed execution.
 
-*Implemented in `multi-hop-router-v3.clar`*
+- **Vaults**: A system for asset management, including a dedicated `sbtc-vault` for earning yield on sBTC deposits.
 
-- **Dijkstra's Algorithm**: Optimal path finding across constant-product,
-  stable-swap, and concentrated liquidity pools.
-- **Atomic Execution**: Multi-hop swaps with full rollback guarantees and
-  slippage protection.
-- **Price Impact Modeling**: Accurate estimation of trade impact on pool
-  reserves.
+### 3.2 Token Ecosystem
 
-#### 3. MEV Protection Layer
-
-*Implemented in `mev-protector.clar`*
-
-- **Commit-Reveal Scheme**: Prevents front-running by separating transaction
-  ordering from execution.
-- **Batch Auctions**: Fair ordering mechanism for high-contention assets.
-- **Sandwich Defense**: Real-time detection and rejection of predatory slippage
-  exploitation.
-
-#### 4. Enterprise Integration Suite
-
-*Implemented in `enterprise-api.clar` & `enterprise-loan-manager.clar`*
-
-- **Tiered Accounts**: Institutional-grade access controls with specific
-  privilege levels.
-- **Compliance Hooks**: Integration points for KYC/AML providers (optional for
-  retail, mandatory for institutions).
-- **Advanced Orders**: Support for TWAP, VWAP, and Iceberg orders.
-
-#### 5. Yield Automation Layer
-
-*Implemented in `yield-optimizer.clar`*
-
-- **Strategy Automation**: Algorithmic selection of optimal yield paths across
-  protocol pools.
-- **Auto-Compounding**: Frequency-optimized reinvestment of accrued fees and
-  rewards.
-- **Risk-Adjusted Rebalancing**: Dynamic position adjustment based on real-time
-  market volatility.
-
-### 3.2 Supporting Modules
-
-- **`core`**: Dimensional engine logic for derivatives and leverage.
-- **`lending`**: Comprehensive lending system with over-collateralized loans and flash loan support.
-- **`governance`**: Proposal, voting, and execution engine (Governor Bravo style).
-- **`oracle`**: Oracle aggregation with TWAP and manipulation detection.
-- **`sbtc`**: Native sBTC integration for Bitcoin-backed DeFi.
-- **`vaults`**: Secure asset custody and strategy execution vaults.
-
-The Conxian Protocol features a comprehensive, multi-token system designed to incentivize participation, facilitate governance, and ensure the long-term sustainability of the ecosystem.
+The Conxian Protocol features a multi-token system to facilitate governance and incentivize participation. All tokens adhere to the SIP-010 fungible token standard.
 
 | Token | Symbol | Role |
 | :--- | :--- | :--- |
-| **Conxian Token** | CXD | The primary utility token of the protocol, used for staking, fee reductions, and as a medium of exchange. |
-| **Conxian Treasury** | CXTR | A treasury token used to fund the ongoing development and growth of the protocol. |
-| **Conxian LP** | CXLP | A liquidity provider token that represents a user's share of a liquidity pool. |
-| **Conxian Governance** | CXVG | The governance token of the protocol, used to vote on proposals and participate in the decision-making process. |
-| **Conxian Stability** | CXS | A stability token that is algorithmically pegged to the US dollar and is used to provide a stable medium of exchange within the protocol. |
+| **Conxian Token** | CXD | The primary utility and governance token of the protocol. |
+| **Conxian Treasury** | CXTR | A treasury token used to fund protocol development and operations. |
+| **Conxian LP** | CXLP | A liquidity provider token that represents a user's share of a DEX liquidity pool. |
+| **Conxian Governance**| CXVG | A specialized governance utility token. |
+| **Conxian Stability**| CXS | A token intended for use in protocol stability mechanisms. |
 
 ## 4. Security
 
-The Conxian Protocol is designed with a security-first mindset, incorporating a multi-layered approach to protect user funds and ensure the long-term stability of the ecosystem.
+The Conxian Protocol is designed with security in mind, incorporating a multi-layered approach to protect user funds.
 
-- **Audits & Formal Verification**: All smart contracts will undergo rigorous security audits by reputable third-party firms before being deployed to mainnet. We will also leverage formal verification techniques to mathematically prove the correctness of our most critical components.
-- **MEV Protection**: The protocol includes a dedicated MEV protection layer with commit-reveal schemes and batch auctions to minimize the impact of front-running and other forms of MEV exploitation.
-- **Circuit Breakers**: The system incorporates circuit breakers that can be triggered in the event of a black swan event or other unforeseen market conditions. These circuit breakers can pause critical functions of the protocol to protect user funds.
-- **Rate Limiting**: To prevent market manipulation and other forms of abuse, the protocol includes rate-limiting mechanisms on key functions.
-- **Role-Based Access Control**: The protocol uses a robust role-based access control (RBAC) system to ensure that only authorized addresses can perform critical administrative functions.
+- **Formal Audit Pending**: The protocol has **not yet undergone a formal, external security audit**. This is a critical step before any mainnet deployment.
+- **Circuit Breakers**: The system includes a `circuit-breaker` contract that can be used to halt critical protocol functions in an emergency.
+- **Role-Based Access Control**: The protocol uses a `role-manager` contract to ensure that only authorized addresses can perform sensitive administrative functions.
+- **MEV Considerations**: The protocol includes a `mev-protector` contract, indicating an architectural intention to mitigate MEV, though the implementation is still under review.
 
 ## 5. Roadmap & Implementation Status
 
-The Conxian Protocol has achieved **Nakamoto Readiness** with a **Zero-Error Compile** status as of December 2025.
+The Conxian Protocol has a strong, modular architectural foundation.
 
-### Completed Work (Phase 1: Foundation)
+### Current Status: Under Review
 
-- **Architectural Refactoring**: Complete modularization of Core, DEX, Lending, and Governance.
-- **Zero-Error Gate**: All compilation errors across 91 contracts have been resolved.
-- **Trait System**: Implementation of 15 standardized trait files.
-- **Critical Fixes**: Resolution of high-priority issues in Keeper Coordinator, Lending System, and Dimensional Engine.
+The protocol is currently in a **stabilization and safety review phase**. While the core architectural components have been built, the codebase is not yet production-ready.
 
-### Future Work (Phase 2 & 3)
+### Future Work
 
-- **Comprehensive Test Coverage**: Expanding unit and integration tests to >95% coverage.
-- **External Security Audit**: Third-party verification of all smart contracts.
-- **Mainnet Deployment**: Final deployment to Stacks Mainnet.
-- **Cross-Chain Expansion**: Integration with other Bitcoin L2s.
+- **Comprehensive Test Coverage**: Expanding unit and integration tests to achieve a high level of coverage.
+- **Full Feature Implementation**: Completing placeholder functionality, such as the lending market's health factor calculation.
+- **External Security Audit**: Engaging a reputable third-party firm to conduct a full security audit of all smart contracts.
+- **Mainnet Deployment**: A mainnet deployment will only be considered after a successful security audit and a period of successful testing on a public testnet.
 
-## 5. Conclusion
+## 6. Conclusion
 
-The Conxian Protocol is poised to become a leading DeFi ecosystem on the Stacks
-blockchain. By embracing a modular, decentralized architecture and integrating
-advanced features like concentrated liquidity and MEV protection, we are
-building a protocol that is secure, maintainable, and extensible. We are
-confident that this new architecture will enable us to deliver on our vision of
-a comprehensive, multi-dimensional DeFi system.
+The Conxian Protocol provides a solid, modular foundation for a comprehensive DeFi ecosystem on the Stacks blockchain. By focusing on a clear separation of concerns, the protocol is well-positioned for future growth and development. The immediate next steps are to complete the implementation of all features, undergo a rigorous security audit, and expand test coverage to ensure the protocol is safe and reliable.

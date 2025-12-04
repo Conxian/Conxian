@@ -1,112 +1,36 @@
 # Conxian Documentation Hub
 
-This is the central documentation hub for the Conxian DeFi platform. All documentation follows best practices and is organized by audience and purpose.
+This is the central documentation hub for the Conxian DeFi platform. The documentation is organized by audience and purpose to help you find the information you need.
 
 ## 📚 Documentation Structure
 
-### 🛍️ For Retail Users
+### 🏗️ Architecture & Design
 
-- [`retail/USER_GUIDE.md`](./retail/USER_GUIDE.md) - **Complete user guide and onboarding**
-- [`guides/01-vault.md`](./guides/01-vault.md) - **Vault operations guide**
-- [`guides/02-governance.md`](./guides/02-governance.md) - **Governance participation guide**
-- [`guides/03-dex.md`](./guides/03-dex.md) - **DEX trading guide**
-- [`guides/04-tokens.md`](./guides/04-tokens.md) - **Token management guide**
+- **[System Architecture](./architecture/ARCHITECTURE.md)**: A high-level overview of the protocol's design and component interactions.
+- **[Whitepaper](./whitepaper/Conxian-Whitepaper.md)**: The technical whitepaper detailing the protocol's vision, goals, and core mechanics.
+- **[Architecture Decision Records](./architecture/adr/)**: A collection of records documenting key architectural decisions.
 
-### 🏢 For Enterprise & Institutions
+###  modu-level Documentation
 
-- [`enterprise/ONBOARDING.md`](./enterprise/ONBOARDING.md) - **Technical guide for developers and institutions**
-- [`enterprise/BUSINESS_VALUE_ROI.md`](./enterprise/BUSINESS_VALUE_ROI.md) - **Business value analysis and ROI**
-- [`enterprise/COMPLIANCE_SECURITY.md`](./enterprise/COMPLIANCE_SECURITY.md) - **Compliance and security framework**
+For a detailed understanding of each of the protocol's core components, please refer to the `README.md` files located within each module's directory:
+
+- **[Core Module](../contracts/core/README.md)**
+- **[DEX Module](../contracts/dex/README.md)**
+- **[Governance Module](../contracts/governance/README.md)**
+- **[Lending Module](../contracts/lending/README.md)**
+- **[Tokens Module](../contracts/tokens/README.md)**
+- **[Vaults Module](../contracts/vaults/README.md)**
+- **[Security Module](../contracts/security/README.md)**
 
 ### 👨‍💻 For Developers
 
-- [`developer/DEVELOPER_GUIDE.md`](./developer/DEVELOPER_GUIDE.md) - **Development setup and contributing**
-- [`developer/MIGRATION_GUIDE_ACCESS_CONTROL.md`](./developer/MIGRATION_GUIDE_ACCESS_CONTROL.md) - **Access control migration guide**
+- **[Developer Guide](./developer/DEVELOPER_GUIDE.md)**: Instructions for setting up your development environment and contributing to the protocol.
 
-### 🏗️ Architecture & Design
+### 🔒 Security
 
-- [`architecture/ARCHITECTURE.md`](./architecture/ARCHITECTURE.md) - **System architecture and design**
-- [`architecture/adr/`](./architecture/adr/) - **Architecture decision records**
-- [`architecture/CONXIAN_DAPPS_MAP.md`](./architecture/CONXIAN_DAPPS_MAP.md) - **DApps & on-chain module mapping**
-- [`whitepaper/Conxian-Whitepaper.md`](./whitepaper/Conxian-Whitepaper.md) - **Technical whitepaper**
-
-### 🔒 Security & Compliance
-
-- [`security/SECURITY.md`](./security/SECURITY.md) - **Security features and audit information**
-
-### 📖 Guides & References
-
-- [`guides/liquidation-flow.md`](./guides/liquidation-flow.md) - **Liquidation process guide**
-- [`guides/oracle-integration.md`](./guides/oracle-integration.md) - **Oracle integration guide**
-- [`guides/services-overview.md`](./guides/services-overview.md) - **Services offered & unique positioning overview**
-- [`ANALYTICS_METRICS_GUIDE.md`](./ANALYTICS_METRICS_GUIDE.md) - **Analytics and metrics guide**
-- [`GITHUB_SECRETS.md`](./GITHUB_SECRETS.md) - **GitHub secrets configuration**
-- [`strategy-defaults.md`](./strategy-defaults.md) - **Strategy defaults documentation**
-- [`strategy-testing-plan.md`](./strategy-testing-plan.md) - **Strategy testing plan**
-
-### 📊 Project Management
-
-- [`project-management/STATUS.md`](./project-management/STATUS.md) - **High-level status and planning**
-- [`../ROADMAP.md`](../ROADMAP.md) - **Protocol roadmap and phased goals**
-
-## 🎯 Quick Navigation
-
-| I want to... | Read this |
-|---------------|-----------|
-| Get started as a retail user | [Retail User Guide](./retail/USER_GUIDE.md) |
-| Integrate as an institution | [Enterprise Onboarding](./enterprise/ONBOARDING.md) |
-| Understand the system architecture | [Architecture](./architecture/ARCHITECTURE.md) |
-| Contribute code | [Developer Guide](./developer/DEVELOPER_GUIDE.md) |
-| Review security | [Security](./security/SECURITY.md) |
-
-## 🗂️ File Organization
-
-```
-documentation/
-├── README.md (this file)
-├── retail/                  # Retail user-focused documentation
-│   └── USER_GUIDE.md        # Complete user guide and onboarding
-├── enterprise/              # Enterprise & institutional documentation
-│   ├── ONBOARDING.md        # Technical guide for institutions
-│   ├── BUSINESS_VALUE_ROI.md # Business value analysis
-│   └── COMPLIANCE_SECURITY.md # Compliance framework
-├── developer/               # Developer guides and standards
-│   ├── DEVELOPER_GUIDE.md   # Development setup
-│   └── MIGRATION_GUIDE_ACCESS_CONTROL.md # Migration guide
-├── architecture/            # System design and specifications
-│   ├── ARCHITECTURE.md      # System architecture
-│   └── adr/                 # Architecture decision records
-├── security/                # Security and compliance
-│   └── SECURITY.md          # Security features and audit info
-├── guides/                  # How-to guides and tutorials
-│   ├── 01-vault.md         # Vault operations
-│   ├── 02-governance.md    # Governance guide
-│   ├── 03-dex.md           # DEX trading guide
-│   ├── 04-tokens.md        # Token management
-│   ├── liquidation-flow.md  # Liquidation process
-│   ├── oracle-integration.md # Oracle integration
-│   └── services-overview.md  # Services & unique positioning overview
-├── project-management/      # Status, roadmap, and planning
-├── whitepaper/             # Technical whitepaper
-└── [additional files]      # Analytics, metrics, strategies
-```
-
-## 📝 Contributing
-
-When adding new documentation:
-
-1. Follow the existing structure - Place files in the appropriate directory
-2. Use consistent naming - Follow the established naming conventions
-3. Update this README - Add new files to the navigation table
-4. Cross-reference - Link related documents where appropriate
-5. Keep it current - Remove outdated information
+- **[Security Overview](./security/SECURITY.md)**: Information about the protocol's security features, audits, and best practices.
 
 ## 🔗 Related Resources
 
-- **📖 Main Project README**: [`../README.md`](../README.md)
-- **⚙️ Configuration**: [`../Clarinet.toml`](../Clarinet.toml)
-- **📊 Project Status**: [`project-management/STATUS.md`](./project-management/STATUS.md)
-
----
-
-*Last updated: November 27, 2025* | *Documentation reorganized for clarity and maintainability*
+- **[Main Project README](../README.md)**: The main entry point for the project.
+- **[Protocol Roadmap](../ROADMAP.md)**: The high-level roadmap and future development plans.

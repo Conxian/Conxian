@@ -1,70 +1,32 @@
 # Governance Module
 
-Decentralized governance and protocol upgrade management for the Conxian Protocol.
+This module provides the decentralized governance framework for the Conxian Protocol, enabling token holders to propose, vote on, and execute changes.
 
 ## Status
 
-**Nakamoto Ready**: The contracts in this module are feature-complete and compatible with Stacks Epoch 3.0. The core engines (`proposal-engine.clar`) have been refactored to use dynamic dispatch or data-driven configuration where appropriate, aligning with the protocol's modular architecture.
+**Under Review**: The governance contracts provide a solid foundation for decentralized decision-making. However, they are part of the protocol-wide stabilization and safety review and should not be considered production-ready.
 
-## Overview
+## Core Components
 
-This module provides comprehensive governance functionality including:
+The governance system is designed around a proposal lifecycle that is managed by a few key contracts.
 
-- Proposal creation and voting
-- Emergency governance mechanisms
-- Protocol upgrade management
-- Signature verification for governance actions
-- Lending protocol governance
+### Key Contracts
 
-## Key Contracts
+- **`proposal-engine.clar`**: The central entry point for all governance activities. This contract acts as a facade, coordinating the proposal and voting processes. It delegates the detailed logic to the `proposal-registry` and `voting` contracts.
 
-### Core Governance
+- **`proposal-registry.clar`**: Responsible for creating, storing, and tracking the state of all governance proposals.
 
-- `proposal-engine.clar`: Core proposal and voting system with token-weighted voting. Acts as a facade for the registry and voting logic.
-- `proposal-engine-trait.clar`: The trait for the proposal engine.
-- `proposal-registry.clar`: A registry for governance proposals.
-- `upgrade-controller.clar`: Manages protocol upgrades with timelocks and multi-signature requirements.
-- `emergency-governance.clar`: Emergency governance for critical protocol issues.
-- `timelock.clar`: A timelock contract for governance actions.
-- `voting.clar`: A contract for voting on proposals.
-- `enhanced-governance-nft.clar`: An NFT for enhanced governance features.
+- **`voting.clar`**: Manages the voting process. It records votes cast by token holders for specific proposals and can only be called by the `proposal-engine`.
 
-### Supporting Infrastructure
+- **`timelock.clar`**: A contract that imposes a mandatory delay between the time a governance proposal is approved and when it can be executed. This provides a window for users to react to changes they may disagree with.
 
-- `governance-signature-verifier.clar`: Verifies signatures for governance proposals.
-- `signed-data-base.clar`: Manages signed data structures for governance.
-- `lending-protocol-governance.clar`: Specialized governance for lending operations.
+### Supporting Contracts
 
-## Usage
+- **`governance-token.clar`**: The SIP-010 fungible token that represents voting power within the system.
+- **`upgrade-controller.clar`**: A contract designed to manage the process of upgrading the protocol's smart contracts.
 
-### Creating a Proposal
+## Governance Flow
 
-```clarity
-(contract-call? .proposal-engine propose description targets values signatures calldatas start-block end-block)
-```
-
-### Voting on Proposals
-
-```clarity
-(contract-call? .proposal-engine vote proposal-id support votes)
-```
-
-### Proposing Contract Upgrades
-
-```clarity
-(contract-call? .upgrade-controller propose-contract-upgrade target-contract new-implementation description)
-```
-
-## Security Features
-
-- Multi-signature requirements for critical actions
-- Time-locked upgrades with approval windows
-- Emergency governance mechanisms
-- Signature verification for all governance actions
-
-## Governance Parameters
-
-- **Voting Period**: Configurable block duration (default ~10 days)
-- **Quorum Threshold**: Minimum participation required (default 50%)
-- **Upgrade Timelock**: Delay before upgrades can be executed
-- **Emergency Threshold**: Required approvals for emergency actions
+1.  **Propose**: A token holder calls `propose` on the `proposal-engine.clar` contract to create a new proposal, which is then stored in the `proposal-registry.clar`.
+2.  **Vote**: Other token holders call `vote` on the `proposal-engine.clar` contract to cast their votes, which are recorded in the `voting.clar` contract.
+3.  **Execute**: Once the voting period ends and if the proposal passes, the `execute` function can be called on the `proposal-engine.clar`. For critical changes, the execution might be routed through the `timelock.clar` contract to enforce a delay.
