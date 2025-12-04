@@ -1,5 +1,14 @@
-;; comprehensive-lending-system.clar
-;; Core lending protocol contract with interest accrual and hooks
+;;
+;; @title Comprehensive Lending System
+;; @author Conxian Protocol
+;; @desc This contract is the core of the lending module, providing a comprehensive
+;; suite of functionalities for supplying, borrowing, and managing digital
+;; assets. It integrates with a modular interest rate model to dynamically
+;; adjust rates based on market conditions and includes hooks for extending its
+;; functionality. The system is designed to be secure and robust, with features
+;; such as over-collateralization, health factor monitoring, and circuit
+;; breakers to protect user funds.
+;;
 
 ;; Traits
 (use-trait sip-010-ft-trait .sip-standards.sip-010-ft-trait)

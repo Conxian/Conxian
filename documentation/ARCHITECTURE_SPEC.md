@@ -1,121 +1,65 @@
-# Conxian Protocol: Full Production Specification & Architecture Guide
+# Conxian Protocol: Architecture Specification
 
-**Version:** 1.0.0  
-**Date:** November 30, 2025  
-**Status:** Living Document  
-**Vision:** Full Production, Hexagonal, Modular, Multi-Dimensional DeFi on Stacks/Bitcoin.
-
----
-
-## 1. Executive Summary & Vision
-
-Conxian is a Bitcoin-native, multi-dimensional DeFi protocol built on Stacks. It aims to provide institutional-grade financial primitives (Lending, DEX, Derivatives) with a focus on **modularity**, **security**, and **compliance**.
-
-**Core Philosophy:**
-
-* **Hexagonal Architecture (Ports & Adapters):** Core domain logic (`contracts/core`, `contracts/dimensional`) is isolated from external dependencies (Oracles, Tokens, UI) via **Traits** (Ports) and **Contracts** (Adapters).
-* **Decentralization:** No single point of failure; decentralized governance and oracle aggregation.
-* **Production Readiness:** Zero compilation errors, >90% test coverage, comprehensive auditing, and strict adherence to Clarity constraints.
-* **Agent-Driven Development:** The codebase is structured to be easily parsed, understood, and modified by AI agents (`stacksorbit`), with clear "Agents.md" alignment.
+**Version:** 0.8.0 (Alpha)
+**Date:** December 03, 2025
+**Status:** In Review
 
 ---
 
-## 2. Architecture: Hexagonal & Modular
+## 1. Vision & Architecture
 
-The system is organized into distinct layers to ensure loosely coupled, highly cohesive components.
+Conxian is a multi-dimensional DeFi protocol built on the Stacks blockchain, with a focus on modularity, security, and a seamless user experience. The protocol is designed with a **facade-based architecture**, where central contracts provide a unified interface for interacting with specialized, single-responsibility contracts.
 
-### 2.1 The Core (Domain Logic)
+**Core Principles:**
 
-* **Location:** `contracts/core/`, `contracts/dimensional/`
-* **Responsibility:** Pure business logic (Positions, Health Factors, Risk Calculations).
-* **Constraints:** Should depend *only* on Traits, not specific external contracts.
-* **Example:** `dimensional-core.clar` manages position state but asks `oracle-trait` for prices.
-
-### 2.2 The Ports (Traits)
-
-* **Location:** `contracts/traits/`
-* **Responsibility:** Define the interfaces for external interaction.
-* **Key Traits:**
-  * `oracle-trait`: Price feeds.
-  * `sip-010-trait`: Tokens.
-  * `risk-management-trait`: Risk parameters.
-* **Rule:** All inter-module communication MUST go through these traits.
-
-### 2.3 The Adapters (Implementations)
-
-* **Location:** `contracts/oracle/`, `contracts/dex/`, `contracts/tokens/`
-* **Responsibility:** Implement the Traits to provide real functionality.
-* **Examples:**
-  * `oracle-aggregator-v2.clar` implements `oracle-trait` using a weighted average strategy.
-  * `sbtc-oracle-adapter.clar` adapts sBTC price feeds to `oracle-trait`.
+- **Modularity**: The protocol is divided into distinct modules (e.g., Core, DEX, Governance, Lending), each with a clear and specific purpose.
+- **Facade-Based Design**: Each module is centered around a primary contract that acts as a facade, routing calls to the appropriate specialized contracts.
+- **Security First**: The architecture is designed to minimize the attack surface by isolating logic and enforcing strict access control.
+- **Clarity and Readability**: The codebase is written to be as clear and understandable as possible, with comprehensive docstrings and documentation.
 
 ---
 
-## 3. Clarity Constraints & Design Patterns
+## 2. System Architecture
 
-To achieve "Full Production" status, we must adhere to strict Clarity limitations found during research (docs.hiro.co).
+The Conxian Protocol is organized into a series of distinct modules, each responsible for a specific area of functionality.
 
-### 3.1 The "Read-Only Trait" Limitation
+### 2.1 Core Module
 
-**Constraint:** A `define-read-only` function cannot call a `contract-call?` on a Trait. Clarity assumes all dynamic calls are potentially state-changing.
-**Impact:** Pure "View" functions (like `get-health-factor`) that need external data (Prices) cannot be `read-only` if they use Traits for modularity.
-**Pattern for Production:**
+- **Location**: `contracts/core/`
+- **Responsibility**: The foundational layer of the protocol, responsible for orchestrating interactions between various components.
+- **Key Contracts**:
+  - `dimensional-engine.clar`: The central facade for the Core Module, routing calls to the specialized manager contracts.
+  - `position-manager.clar`: Manages the lifecycle of user positions.
+  - `collateral-manager.clar`: Handles the deposit, withdrawal, and management of user collateral.
 
-1. **Public Views:** Define these functions as `define-public`.
-    * *Pros:* Fully modular (can use Traits).
-    * *Cons:* Requires a transaction if called on-chain; "simulated" read-only off-chain.
-    * *Usage:* The UI/API calls them via the `read_only` endpoint, simulating a transaction.
-2. **Private Helpers:** If the logic is used internally by a transaction (e.g., `liquidate-position`), make the helper `define-private`.
+### 2.2 DEX Module
 
-### 3.2 Monolith Avoidance
+- **Location**: `contracts/dex/`
+- **Responsibility**: Provides the core functionality for decentralized exchange operations.
+- **Key Contracts**:
+  - `multi-hop-router-v3.clar`: The central routing engine for the DEX, supporting 1-hop, 2-hop, and 3-hop swaps.
+  - `concentrated-liquidity-pool.clar`: Implements a concentrated liquidity AMM.
 
-**Constraint:** Contracts should be focused and small (< 1000 lines preferred) to avoid "Contract Size Exceeded" errors and ensure auditability.
-**Status:** `comprehensive-lending-system.clar` is growing.
-**Action:** Split logic into `lending-core`, `lending-storage`, and `lending-actions` if it exceeds complexity limits.
+### 2.3 Governance Module
 
----
+- **Location**: `contracts/governance/`
+- **Responsibility**: A comprehensive framework for decentralized decision-making and protocol upgrades.
+- **Key Contracts**:
+  - `proposal-engine.clar`: The core of the governance module, acting as a facade for all governance-related actions.
+  - `proposal-registry.clar`: A specialized contract for storing and managing all governance proposals.
+  - `voting.clar`: Manages the voting process for all proposals.
 
-## 4. Current Status vs. Vision (Gap Analysis)
+### 2.4 Lending Module
 
-| Feature | Current Status | Vision | Action Required |
-| :--- | :--- | :--- | :--- |
-| **Compilation** | ~20 Errors (Semantic/Trait) | 0 Errors (Clean) | Resolve trait mismatches in Risk/Lending. |
-| **Oracle Integration** | Mixed (Direct vs Trait) | 100% Trait-based | Refactor `dimensional-core` to strict Trait usage (Done). |
-| **Health Checks** | `read-only` (Broken) | `public` (Simulated View) | Applied fix to `dimensional-core`. Apply to `lending`. |
-| **Security** | Internal Drafts | Full Audit Suite | Implement automated property tests. |
-| **Docs** | Extensive but Scattered | Unified "Spec" | This document serves as the central anchor. |
-
----
-
-## 5. Implementation Plan (Refactoring Roadmap)
-
-### Phase 1: Critical Fixes (Immediate)
-
-1. **Fix Read-Only Violations:**
-    * Scan all `define-read-only` functions.
-    * If they use `contract-call? <trait>`, convert to `define-public` or `define-private`.
-2. **Align Traits:**
-    * Ensure `oracle-trait`, `liquidity-pool-trait`, and `flash-loan-trait` are consistent across all implementations.
-
-### Phase 2: Modular Hardening (Week 1)
-
-1. **Decouple `comprehensive-lending-system`:**
-    * Verify it doesn't hardcode oracle dependencies.
-    * Ensure it uses `risk-manager-trait`.
-2. **Standardize Error Codes:**
-    * Move all errors to `contracts/traits/trait-errors.clar` or a shared constant contract.
-
-### Phase 3: "Full Spec" Verification (Week 2)
-
-1. **Agent Verification:**
-    * Use `stacksorbit` to auto-verify that every contract in `Clarinet.toml` implements its declared traits.
-2. **Network State Sync:**
-    * Ensure `contracts/oracle` has a "mock" mode for local devnet that mimics Mainnet state (prices).
+- **Location**: `contracts/lending/`
+- **Responsibility**: The core infrastructure for decentralized lending and borrowing.
+- **Key Contracts**:
+  - `comprehensive-lending-system.clar`: The main contract for the lending module, managing user deposits, loans, and collateral.
+  - `interest-rate-model.clar`: A specialized contract that calculates interest rates based on market conditions.
+  - `liquidation-manager.clar`: A contract responsible for managing the liquidation process for under-collateralized loans.
 
 ---
 
-## 6. Agent & Tooling Alignment
+## 3. Current Status
 
-* **`stacksorbit`:** The deployment tool must support "Dry Run" deployments that verify trait compliance before broadcasting.
-* **`AGENTS.md`:** Agents must check `FULL_PRODUCTION_SPEC.md` before proposing architectural changes.
-* **API:** The Conxian UI must be updated to handle "Public View" functions (using `callReadOnly` on public functions) instead of assuming they are native read-only.
+The Conxian Protocol is currently in the **Alpha** stage and is undergoing a comprehensive review to ensure the correctness, security, and alignment of all contracts and documentation. The codebase is not yet production-ready, and some features are still under development.
