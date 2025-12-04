@@ -1,6 +1,12 @@
-;; @desc Advanced routing engine for optimal path finding across multiple DEX pools.
-;; Implements 2-hop and 3-hop path discovery and execution.
-;; Replaces the previous stub with actual routing logic.
+;;
+;; @title Multi-Hop Router v3
+;; @author Conxian Protocol
+;; @desc Provides a robust and gas-efficient routing engine for executing
+;; multi-hop swaps across various liquidity pools. This contract supports 1-hop,
+;; 2-hop, and 3-hop swaps, allowing users to find the best possible exchange
+;; rates by routing trades through intermediate base tokens. The design relies on
+;; off-chain route discovery to minimize on-chain computation costs.
+;;
 
 (use-trait pool-trait .defi-traits.pool-trait)
 (use-trait sip-010-trait .sip-standards.sip-010-ft-trait)

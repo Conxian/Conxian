@@ -108,9 +108,6 @@
 (define-private (notify-transfer (amount uint) (sender principal) (recipient principal))
   (and (var-get system-integration-enabled)
        (var-get transfer-hooks-enabled)
-       ;; (match (var-get token-coordinator)
-       ;;   coordinator (unwrap! (contract-call? coordinator on-transfer amount sender recipient) false)
-       ;;   true)
        true))
 
 ;; @desc Notifies the token coordinator of a mint.
@@ -119,9 +116,6 @@
 ;; @returns A boolean indicating if the notification was successful.
 (define-private (notify-mint (amount uint) (recipient principal))
   (and (var-get system-integration-enabled)
-       ;; (match (var-get token-coordinator)
-       ;;   coordinator (default-to true (contract-call? coordinator on-mint amount recipient))
-       ;;   true)
        true))
 
 ;; @desc Notifies the token coordinator of a burn.

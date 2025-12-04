@@ -1,4 +1,12 @@
-;; @desc Core contract for the dimensional engine.
+;;
+;; @title Dimensional Engine
+;; @author Conxian Protocol
+;; @desc This contract is the central facade for the dimensional engine, routing all
+;; user-facing calls to the appropriate specialized contracts (e.g., Position
+;; Manager, Collateral Manager). It enforces a modular architecture where this
+;; contract acts as the single entry point, simplifying user interaction and
+;; enhancing security by isolating logic.
+;;
 
 (use-trait dimensional-trait .dimensional-traits.dimensional-trait)
 (use-trait funding-rate-calculator-trait .dimensional-traits.funding-rate-calculator-trait)

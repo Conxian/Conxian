@@ -1,6 +1,13 @@
-;; proposal-engine.clar (Refactored)
-;; This contract acts as a facade, delegating logic to specialized contracts for proposal
-;; registration and voting.
+;;
+;; @title Proposal Engine
+;; @author Conxian Protocol
+;; @desc This contract serves as the central governance facade, providing a unified
+;; interface for creating, voting on, and executing proposals. It delegates the
+;; underlying logic to specialized contracts, such as `proposal-registry` for
+;; storing proposal data and `voting` for managing the voting process. This
+;; modular design enhances security and maintainability by separating concerns,
+;; allowing individual components to be upgraded independently.
+;;
 
 ;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED (err u100))
