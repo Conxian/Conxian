@@ -35,7 +35,7 @@
 ;; @var decimals The number of decimals for the token.
 (define-data-var decimals uint u6)
 ;; @var name The name of the token.
-(define-data-var name (string-ascii 32) "Conxian Contributor Token")
+(define-data-var name (string-ascii 32) "Conxian Treasury Token")
 ;; @var symbol The symbol of the token.
 (define-data-var symbol (string-ascii 10) "CXTR")
 ;; @var token-uri The URI for the token's metadata.

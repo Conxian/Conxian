@@ -225,11 +225,12 @@
       
       (var-set next-circuit-id (+ circuit-id u1))
       
+      ;; Safe logging
       (log-event 
         "CIRCUIT_CREATED" 
         circuit-id 
         u1 
-        (unwrap-panic (string-utf8-append "Circuit " name " created"))
+        (default-to u"Circuit Created" (string-utf8-append "Circuit " name " created"))
         none
         none
       )

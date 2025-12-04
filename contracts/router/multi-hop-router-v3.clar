@@ -1,5 +1,6 @@
 ;; Multi-Hop Router V3
 ;; Production-grade routing engine with support for up to 4 hops.
+;; Updated to match new pool trait signature.
 
 (use-trait sip-010-trait .sip-standards.sip-010-ft-trait)
 (use-trait pool-trait .defi-traits.pool-trait)
@@ -26,7 +27,7 @@
     (token-out <sip-010-trait>)
 )
     (let (
-        (swap-res (try! (contract-call? pool swap amount-in (contract-of token-in))))
+        (swap-res (try! (contract-call? pool swap amount-in token-in token-out)))
     )
         (asserts! (>= swap-res min-amount-out) ERR_SLIPPAGE_EXCEEDED)
         (ok swap-res)
@@ -44,8 +45,8 @@
     (token3 <sip-010-trait>)
 )
     (let (
-        (amt1 (try! (contract-call? pool1 swap amount-in (contract-of token1))))
-        (amt2 (try! (contract-call? pool2 swap amt1 (contract-of token2))))
+        (amt1 (try! (contract-call? pool1 swap amount-in token1 token2)))
+        (amt2 (try! (contract-call? pool2 swap amt1 token2 token3)))
     )
         (asserts! (>= amt2 min-amount-out) ERR_SLIPPAGE_EXCEEDED)
         (ok amt2)
@@ -65,9 +66,9 @@
     (token4 <sip-010-trait>)
 )
     (let (
-        (amt1 (try! (contract-call? pool1 swap amount-in (contract-of token1))))
-        (amt2 (try! (contract-call? pool2 swap amt1 (contract-of token2))))
-        (amt3 (try! (contract-call? pool3 swap amt2 (contract-of token3))))
+        (amt1 (try! (contract-call? pool1 swap amount-in token1 token2)))
+        (amt2 (try! (contract-call? pool2 swap amt1 token2 token3)))
+        (amt3 (try! (contract-call? pool3 swap amt2 token3 token4)))
     )
         (asserts! (>= amt3 min-amount-out) ERR_SLIPPAGE_EXCEEDED)
         (ok amt3)
@@ -89,10 +90,10 @@
     (token5 <sip-010-trait>)
 )
     (let (
-        (amt1 (try! (contract-call? pool1 swap amount-in (contract-of token1))))
-        (amt2 (try! (contract-call? pool2 swap amt1 (contract-of token2))))
-        (amt3 (try! (contract-call? pool3 swap amt2 (contract-of token3))))
-        (amt4 (try! (contract-call? pool4 swap amt3 (contract-of token4))))
+        (amt1 (try! (contract-call? pool1 swap amount-in token1 token2)))
+        (amt2 (try! (contract-call? pool2 swap amt1 token2 token3)))
+        (amt3 (try! (contract-call? pool3 swap amt2 token3 token4)))
+        (amt4 (try! (contract-call? pool4 swap amt3 token4 token5)))
     )
         (asserts! (>= amt4 min-amount-out) ERR_SLIPPAGE_EXCEEDED)
         (ok amt4)

@@ -145,6 +145,22 @@
     
     (ok true)))
 
+(define-public (emergency-pause)
+  (begin
+    (asserts! (is-admin) ERR_UNAUTHORIZED)
+    (var-set system-paused true)
+    (ok true)
+  )
+)
+
+(define-public (emergency-unpause)
+  (begin
+    (asserts! (is-admin) ERR_UNAUTHORIZED)
+    (var-set system-paused false)
+    (ok true)
+  )
+)
+
 ;; === LIQUIDITY POOL MANAGEMENT ===
 (define-public (create-liquidity-pool
   (pool-id uint)
@@ -154,6 +170,7 @@
   (target-utilization uint))
   (begin
     (asserts! (is-admin) ERR_UNAUTHORIZED)
+    (asserts! (not (var-get system-paused)) ERR_UNAUTHORIZED)
     (asserts! (is-none (map-get? liquidity-pools {pool-id: pool-id, asset: asset})) ERR_UNAUTHORIZED)
     (asserts! (<= target-utilization MAX_UTILIZATION_RATE) ERR_INVALID_AMOUNT)
     
@@ -185,6 +202,7 @@
   (new-available uint))
   (let ((pool (unwrap! (map-get? liquidity-pools {pool-id: pool-id, asset: asset}) ERR_POOL_NOT_FOUND)))
     (asserts! (is-admin) ERR_UNAUTHORIZED)
+    (asserts! (not (var-get system-paused)) ERR_UNAUTHORIZED)
     (asserts! (>= new-total new-available) ERR_INVALID_AMOUNT)
     
     ;; Update pool liquidity

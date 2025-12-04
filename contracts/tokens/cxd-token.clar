@@ -11,6 +11,9 @@
 (use-trait protocol-monitor-trait .security-monitoring.protocol-monitor-trait)
 (use-trait controller .core-traits.controller)
 
+;; Declare that cxd-token implements the SIP-010 fungible token trait.
+(impl-trait .defi-traits.sip-010-ft-trait)
+
 ;; --- Constants ---
 
 ;; @var ERR_UNAUTHORIZED The caller is not authorized to perform the action.
@@ -105,9 +108,6 @@
 (define-private (notify-transfer (amount uint) (sender principal) (recipient principal))
   (and (var-get system-integration-enabled)
        (var-get transfer-hooks-enabled)
-       ;; (match (var-get token-coordinator)
-       ;;   coordinator (unwrap! (contract-call? coordinator on-transfer amount sender recipient) false)
-       ;;   true)
        true))
 
 ;; @desc Notifies the token coordinator of a mint.
@@ -116,9 +116,6 @@
 ;; @returns A boolean indicating if the notification was successful.
 (define-private (notify-mint (amount uint) (recipient principal))
   (and (var-get system-integration-enabled)
-       ;; (match (var-get token-coordinator)
-       ;;   coordinator (default-to true (contract-call? coordinator on-mint amount recipient))
-       ;;   true)
        true))
 
 ;; @desc Notifies the token coordinator of a burn.

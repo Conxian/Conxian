@@ -715,9 +715,9 @@ describe('Enterprise System Performance Benchmarks', () => {
     
     // Setup liquidity
     await simnet.callPublicFn(
-      'enterprise-loan-manager',
-      'add-liquidity',
-      [Cl.uint(50000000000000000000000000)], // 50M tokens
+      "enterprise-loan-manager",
+      "add-liquidity",
+      [Cl.uint(50000000000000000000000000n)], // 50M tokens
       deployer
     );
     
@@ -736,14 +736,14 @@ describe('Enterprise System Performance Benchmarks', () => {
       
       loanPromises.push(
         simnet.callPublicFn(
-          'enterprise-loan-manager',
-          'create-enterprise-loan',
+          "enterprise-loan-manager",
+          "create-enterprise-loan",
           [
-            Cl.uint((50000 + i * 10000) * 1000000000000000000), // Varying loan amounts
-            Cl.uint((60000 + i * 12000) * 1000000000000000000), // Corresponding collateral
+            Cl.uint(BigInt(50000 + i * 10000) * 1000000000000000000n), // Varying loan amounts
+            Cl.uint(BigInt(60000 + i * 12000) * 1000000000000000000n), // Corresponding collateral
             Cl.principal(`${deployer}.mock-token`),
             Cl.principal(`${deployer}.mock-token`),
-            Cl.uint(10512 + i * 1000) // Varying durations
+            Cl.uint(10512 + i * 1000), // Varying durations
           ],
           borrower
         )
@@ -787,13 +787,13 @@ describe('Enterprise System Performance Benchmarks', () => {
     for (let i = 1; i <= 3; i++) {
       updatePromises.push(
         simnet.callPublicFn(
-          'liquidity-optimization-engine',
-          'update-pool-liquidity',
+          "liquidity-optimization-engine",
+          "update-pool-liquidity",
           [
             Cl.uint(i),
             Cl.principal(`${deployer}.mock-token`),
-            Cl.uint(i * 5000000000000000000000000), // Varying total liquidity
-            Cl.uint(i * 4000000000000000000000000)  // Varying available
+            Cl.uint(BigInt(i) * 5000000000000000000000000n), // Varying total liquidity
+            Cl.uint(BigInt(i) * 4000000000000000000000000n), // Varying available
           ],
           deployer
         )
@@ -830,9 +830,9 @@ describe('Enterprise System Security Tests', () => {
     
     // Try to add liquidity as non-admin
     const unauthorizedResult = simnet.callPublicFn(
-      'enterprise-loan-manager',
-      'add-liquidity',
-      [Cl.uint(1000000000000000000000000)],
+      "enterprise-loan-manager",
+      "add-liquidity",
+      [Cl.uint(1000000000000000000000000n)],
       unauthorizedUser // Non-admin user
     );
     
@@ -846,7 +846,12 @@ describe('Enterprise System Security Tests', () => {
     const borrower = accounts.get('wallet_2')!;
     
     // Setup liquidity and credit score
-    await simnet.callPublicFn('enterprise-loan-manager', 'add-liquidity', [Cl.uint(1000000000000000000000000)], deployer);
+    await simnet.callPublicFn(
+      "enterprise-loan-manager",
+      "add-liquidity",
+      [Cl.uint(1000000000000000000000000n)],
+      deployer
+    );
     await simnet.callPublicFn('enterprise-loan-manager', 'update-credit-score', [Cl.principal(borrower), Cl.uint(750)], deployer);
     
     // Try to create loan with insufficient collateral

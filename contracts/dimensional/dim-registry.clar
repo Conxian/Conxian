@@ -132,7 +132,7 @@
 ;; Add missing get-registered-oracles function to match trait
 (define-read-only (get-registered-oracles)
   (ok {
-    oracles: (list 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.mock-oracle), ;; Mock oracle
+    oracles: (list 'STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ.mock-oracle), ;; Mock oracle
     count: u1,
   })
 )

@@ -283,9 +283,9 @@
     (map-set enhanced-position-metadata { position-id: position-id } {
       owner: tx-sender,
       nft-type: NFT_TYPE_LAUNCH_LP,
-      collateral-token: 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.cxvg-token,
+      collateral-token: 'STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ.cxvg-token,
       collateral-amount: contribution-amount,
-      debt-token: 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.cxvg-token,
+      debt-token: 'STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ.cxvg-token,
       debt-amount: u0,
       launch-phase: launch-phase,
       special-privileges: (list
@@ -330,9 +330,9 @@
     (map-set enhanced-position-metadata { position-id: position-id } {
       owner: tx-sender,
       nft-type: NFT_TYPE_NORMAL_LP,
-      collateral-token: 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.cxvg-token,
+      collateral-token: 'STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ.cxvg-token,
       collateral-amount: contribution-amount,
-      debt-token: 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.cxvg-token,
+      debt-token: 'STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ.cxvg-token,
       debt-amount: u0,
       launch-phase: launch-phase,
       special-privileges: (list "standard-access" "basic-governance"),
@@ -378,9 +378,9 @@
     (map-set enhanced-position-metadata { position-id: position-id } {
       owner: tx-sender,
       nft-type: NFT_TYPE_BOUNTY_HUNTER,
-      collateral-token: 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.cxvg-token,
+      collateral-token: 'STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ.cxvg-token,
       collateral-amount: (get reward-amount bounty-info),
-      debt-token: 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.cxvg-token,
+      debt-token: 'STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ.cxvg-token,
       debt-amount: u0,
       launch-phase: u7, ;; Fully operational phase
       special-privileges: (list "bounty-access" "skill-recognition" "priority-bounties"),
@@ -429,9 +429,9 @@
     (map-set enhanced-position-metadata { position-id: position-id } {
       owner: tx-sender,
       nft-type: NFT_TYPE_COMPETITION_WINNER,
-      collateral-token: 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.cxvg-token,
+      collateral-token: 'STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ.cxvg-token,
       collateral-amount: (get prize-pool competition-info),
-      debt-token: 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.cxvg-token,
+      debt-token: 'STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ.cxvg-token,
       debt-amount: u0,
       launch-phase: u7, ;; Fully operational phase
       special-privileges: (list "competition-access" "winner-status" "exclusive-events"),

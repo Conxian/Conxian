@@ -1,8 +1,7 @@
 ;; bond-factory.clar
 ;; Factory contract for creating and managing bond tokens
 (use-trait bond-factory-trait .bond-factory-trait.bond-factory-trait)
-
-;; (impl-trait .defi-traits.pool-factory-trait) ;; TODO: Add bond-factory-trait to defi-primitives
+;; (use-trait pool-factory-trait .defi-traits.pool-factory-trait) ;; Disabled until trait definition matches
 (define-constant ERR_UNAUTHORIZED (err u5000))
 (define-constant ERR_INVALID_TERMS (err u5001))
 (define-constant ERR_INSUFFICIENT_COLLATERAL (err u5002))

@@ -82,7 +82,7 @@
 ;; @returns (response bool uint): An `ok` response with `true` on success, or an error code.
 (define-public (initialize-rbac (initial-owner principal))
   (begin
-    (asserts! (is-eq tx-sender (as-contract tx-sender)) ERR_NOT_OWNER)
+    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_NOT_OWNER)
     (var-set contract-owner initial-owner)
     (ok true)
   )

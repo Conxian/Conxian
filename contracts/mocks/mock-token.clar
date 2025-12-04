@@ -16,7 +16,7 @@
 (define-data-var symbol (string-ascii 32) TOKEN_SYMBOL)
 (define-data-var decimals uint (to-uint TOKEN_DECIMALS))
 (define-data-var total-supply uint u0)
-(define-data-var admin principal (as-contract tx-sender))
+(define-data-var admin principal tx-sender)
 
 ;; Balances
 (define-map balances

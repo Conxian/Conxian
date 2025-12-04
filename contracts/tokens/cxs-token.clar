@@ -1,7 +1,7 @@
-;; @contract Conxian Staking Token (CXS)
+;; @contract Conxian Staking Position (CXS)
 ;; @version 1.0.0
 ;; @author Conxian Protocol
-;; @desc This contract implements the Conxian Staking Token (CXS), a SIP-009 compliant non-fungible token.
+;; @desc This contract implements the Conxian Staking Position (CXS), a SIP-009 compliant non-fungible token.
 ;; Each NFT represents a unique staked position in the Conxian protocol, providing a clear and transferable
 ;; representation of a user's stake.
 

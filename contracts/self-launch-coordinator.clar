@@ -155,12 +155,12 @@
       (try! (check-phase-advancement new-total-funding current-phase))
 
       ;; Mint governance tokens based on contribution
-      (try! (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.cxvg-token mint tokens-to-mint contributor))
+      (try! (contract-call? 'STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ.cxvg-token mint tokens-to-mint contributor))
 
       ;; Mint differentiated NFTs based on contribution type
       (if (>= launch-portion MIN_CONTRIBUTION)
-        (try! (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.position-factory create-launch-lp-nft contributor launch-portion))
-        (try! (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.position-factory create-normal-lp-nft contributor opex-portion)))
+        (try! (contract-call? 'STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ.position-factory create-launch-lp-nft contributor launch-portion))
+        (try! (contract-call? 'STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ.position-factory create-normal-lp-nft contributor opex-portion)))
 
       ;; Execute automated deployments if budget allows
       (try! (execute-autonomous-deployments launch-portion))

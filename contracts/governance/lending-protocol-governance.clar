@@ -32,7 +32,7 @@
 (define-constant ROLE_GUARDIAN 0x475541524449414e000000000000000000000000000000000000000000000000)  ;; GUARDIAN in hex
 
 ;; Protocol state
-(define-data-var governance-token principal (as-contract .cxvg-token)) ;; Should be set to CXS token
+(define-data-var governance-token principal .cxvg-token) ;; Should be set to CXS token
 (define-data-var timelock-address (optional principal) none) ;; Timelock contract address
 
 ;; Proposal tracking
@@ -91,7 +91,7 @@
 (define-private (snapshot-voting-power (user principal) (height uint))
   (let ((power (unwrap!
                  (contract-call?
-                   'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.governance-token
+                   .governance-token
                    get-voting-power-at
                    user
                    height)
@@ -139,7 +139,7 @@
   (parameters (optional (list 10 uint))))
   (let ((proposal-id (var-get next-proposal-id))
         (proposer tx-sender)
-        (voting-power (unwrap! (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.governance-token get-voting-power-at proposer (- block-height u1)) ERR_INSUFFICIENT_VOTING_POWER)))
+        (voting-power (unwrap! (contract-call? .governance-token get-voting-power-at proposer (- block-height u1)) ERR_INSUFFICIENT_VOTING_POWER)))
     (begin
       ;; Check proposal threshold
       (asserts! (>= voting-power (var-get proposal-threshold)) ERR_INSUFFICIENT_VOTING_POWER)
