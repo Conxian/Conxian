@@ -187,40 +187,19 @@
 
         ;; Execute Transfers
         ;; We assume the calling module has already transferred `fee-amount` to
-        ;; this contract, so CXD balances are held by `FEE_SWITCH_CONTRACT`.
-        
-        (if (> treasury-amt u0)
-          (let ((res (as-contract (contract-call? token transfer treasury-amt FEE_SWITCH_CONTRACT (var-get treasury-address) none))))
-            (print { event: "treasury-transfer", result: res })
-            (try! res)
-          )
-          true
-        )
-        
-        (if (> staking-amt u0)
-          (let ((res (as-contract (contract-call? token transfer staking-amt FEE_SWITCH_CONTRACT (var-get staking-address) none))))
-            (print { event: "staking-transfer", result: res })
-            (try! res)
-          )
-          true
-        )
-        
-        (if (> insurance-amt u0)
-          (let ((res (as-contract (contract-call? token transfer insurance-amt FEE_SWITCH_CONTRACT (var-get insurance-address) none))))
-            (print { event: "insurance-transfer", result: res })
-            (try! res)
-          )
-          true
-        )
-        
-        ;; Burn logic (if token supports it, otherwise send to treasury)
-        (if (> burn-amt u0)
-           (let ((res (as-contract (contract-call? token transfer burn-amt FEE_SWITCH_CONTRACT (var-get treasury-address) none))))
-             (print { event: "burn-transfer", result: res })
-             (try! res)
-           )
-           true
-        )
+        ;; this contract, so CXD balances are held by this contract. Inside
+;; as-contract, tx-sender resolves to this contract's principal.
+(as-contract (print {
+          event: "debug-contract-tx-sender",
+          sender: tx-sender,
+        }))
+
+        (try! (as-contract (let ((res (contract-call? token transfer treasury-amt tx-sender (var-get treasury-address) none)))
+                             (print { event: "treasury-transfer", result: res })
+                             res)))
+        (try! (as-contract (contract-call? token transfer staking-amt tx-sender (var-get staking-address) none)))
+        (try! (as-contract (contract-call? token transfer insurance-amt tx-sender (var-get insurance-address) none)))
+        (try! (as-contract (contract-call? token transfer burn-amt tx-sender (var-get treasury-address) none)))
         
         (ok fee-amount)
       )
