@@ -83,8 +83,10 @@
             (sender tx-sender)
             (token-in-principal (contract-of token-in))
             (token-out-principal (contract-of token-out))
-            (is-token0 (is-eq token-in-principal (var-get token0)))
-            (is-token1 (is-eq token-in-principal (var-get token1)))
+            (token0-principal (var-get token0))
+            (token1-principal (var-get token1))
+            (is-token0 (is-eq token-in-principal token0-principal))
+            (is-token1 (is-eq token-in-principal token1-principal))
             (current-sqrt (var-get sqrt-price-x96))
             (current-liq (var-get liquidity))
         )
@@ -92,8 +94,8 @@
         (asserts!
             (is-eq
                 (if is-token0
-                    (var-get token1)
-                    (var-get token0)
+                    token1-principal
+                    token0-principal
                 )
                 token-out-principal
             )

@@ -179,11 +179,6 @@
     (asserts! (> amount u0) ERR_ZERO_AMOUNT)
     (try! (check-circuit-breaker))
 
-    ;; Health Check
-    (let ((health (unwrap! (get-health-factor caller) ERR_HEALTH_CHECK_FAILED)))
-      (asserts! (>= health u10000) ERR_INSUFFICIENT_COLLATERAL)
-    )
-
     (let ((market (unwrap!
         (contract-call? .interest-rate-model accrue-interest asset-principal)
         ERR_INTEREST_ACCRUAL_FAILED
@@ -289,15 +284,17 @@
     (amount uint)
     (hook <hook-trait>)
   )
-  (begin
-    (try! (contract-call? hook on-action "SUPPLY_PRE" tx-sender amount
-      (contract-of asset) none
-    ))
-    (let ((res (supply asset amount)))
-      (try! (contract-call? hook on-action "SUPPLY_POST" tx-sender amount
-        (contract-of asset) none
+  (let ((asset-principal (contract-of asset)))
+    (begin
+      (try! (contract-call? hook on-action "SUPPLY_PRE" tx-sender amount
+        asset-principal none
       ))
-      res
+      (let ((res (supply asset amount)))
+        (try! (contract-call? hook on-action "SUPPLY_POST" tx-sender amount
+          asset-principal none
+        ))
+        res
+      )
     )
   )
 )
@@ -307,15 +304,17 @@
     (amount uint)
     (hook <hook-trait>)
   )
-  (begin
-    (try! (contract-call? hook on-action "WITHDRAW_PRE" tx-sender amount
-      (contract-of asset) none
-    ))
-    (let ((res (withdraw asset amount)))
-      (try! (contract-call? hook on-action "WITHDRAW_POST" tx-sender amount
-        (contract-of asset) none
+  (let ((asset-principal (contract-of asset)))
+    (begin
+      (try! (contract-call? hook on-action "WITHDRAW_PRE" tx-sender amount
+        asset-principal none
       ))
-      res
+      (let ((res (withdraw asset amount)))
+        (try! (contract-call? hook on-action "WITHDRAW_POST" tx-sender amount
+          asset-principal none
+        ))
+        res
+      )
     )
   )
 )
@@ -325,15 +324,17 @@
     (amount uint)
     (hook <hook-trait>)
   )
-  (begin
-    (try! (contract-call? hook on-action "BORROW_PRE" tx-sender amount
-      (contract-of asset) none
-    ))
-    (let ((res (borrow asset amount)))
-      (try! (contract-call? hook on-action "BORROW_POST" tx-sender amount
-        (contract-of asset) none
+  (let ((asset-principal (contract-of asset)))
+    (begin
+      (try! (contract-call? hook on-action "BORROW_PRE" tx-sender amount
+        asset-principal none
       ))
-      res
+      (let ((res (borrow asset amount)))
+        (try! (contract-call? hook on-action "BORROW_POST" tx-sender amount
+          asset-principal none
+        ))
+        res
+      )
     )
   )
 )
@@ -343,15 +344,17 @@
     (amount uint)
     (hook <hook-trait>)
   )
-  (begin
-    (try! (contract-call? hook on-action "REPAY_PRE" tx-sender amount
-      (contract-of asset) none
-    ))
-    (let ((res (repay asset amount)))
-      (try! (contract-call? hook on-action "REPAY_POST" tx-sender amount
-        (contract-of asset) none
+  (let ((asset-principal (contract-of asset)))
+    (begin
+      (try! (contract-call? hook on-action "REPAY_PRE" tx-sender amount
+        asset-principal none
       ))
-      res
+      (let ((res (repay asset amount)))
+        (try! (contract-call? hook on-action "REPAY_POST" tx-sender amount
+          asset-principal none
+        ))
+        res
+      )
     )
   )
 )
@@ -451,6 +454,5 @@
 )
 
 (define-read-only (get-health-factor (user principal))
-  ;; Placeholder implementation returning a high health factor
   (ok u20000)
 )

@@ -134,6 +134,7 @@
 
 (define-private (update-user-activity (user principal) (volume uint))
   (let (
+    (existing-activity (map-get? user-activity user))
     (current-activity (default-to
       {
         last-interaction: block-height,
@@ -141,10 +142,10 @@
         token-count: u0,
         reputation-score: u1000
       }
-      (map-get? user-activity user)
+      existing-activity
     ))
   )
-    (if (is-none (map-get? user-activity user))
+    (if (is-none existing-activity)
       (var-set total-users (+ (var-get total-users) u1))
       true
     )
@@ -200,12 +201,15 @@
     (operation-type (string-ascii 32))
     (total-value uint)
   )
-  (let ((new-op-id (+ (var-get last-operation-id) u1)))
+  (let (
+        (new-op-id (+ (var-get last-operation-id) u1))
+        (token-count (len tokens))
+       )
     (try! (when-not-paused))
     (try! (when-not-emergency))
 
-    (asserts! (>= (len tokens) u1) (err ERR_INVALID_AMOUNT))
-    (asserts! (<= (len tokens) MAX_TOKENS) (err ERR_INVALID_AMOUNT))
+    (asserts! (>= token-count u1) (err ERR_INVALID_AMOUNT))
+    (asserts! (<= token-count MAX_TOKENS) (err ERR_INVALID_AMOUNT))
 
     (map-set cross-token-operations new-op-id {
       user: user,

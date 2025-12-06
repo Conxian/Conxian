@@ -46,6 +46,20 @@ describe('TWAP Oracle', () => {
     expect(twap.result).toBeErr(Cl.uint(6002));
   });
 
+  it("rejects update-twap with an invalid (zero) period", () => {
+    const asset = Cl.contractPrincipal(deployer, "cxd-token");
+
+    const res = simnet.callPublicFn(
+      "twap-oracle",
+      "update-twap",
+      [asset, Cl.uint(0), Cl.uint(123_456)],
+      deployer
+    );
+
+    // ERR-INVALID-PERIOD = (err u6001)
+    expect(res.result).toBeErr(Cl.uint(6001));
+  });
+
   it('allows governance to update TWAP and returns last price for first sample', () => {
     const asset = Cl.contractPrincipal(deployer, 'cxd-token');
 

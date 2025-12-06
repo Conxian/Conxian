@@ -342,6 +342,14 @@ address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 path = "contracts/mocks/mock-token.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
+[contracts.mock-pool]
+path = "contracts/mocks/mock-pool.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+
+[contracts.mock-lending-pool]
+path = "contracts/mocks/mock-lending-pool.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+
 [contracts.enterprise-api]
 path = "contracts/enterprise/enterprise-api.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
@@ -415,6 +423,10 @@ address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 path = "contracts/governance/proposal-registry.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
+[contracts.conxian-operations-engine]
+path = "contracts/governance/conxian-operations-engine.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+
 [contracts.funding-calculator]
 path = "contracts/risk/funding-calculator.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
@@ -449,6 +461,10 @@ address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
 [contracts.cxlp-token]
 path = "contracts/tokens/cxlp-token.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+
+[contracts.cxlp-position-nft]
+path = "contracts/tokens/cxlp-position-nft.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
 [contracts.cxs-token]

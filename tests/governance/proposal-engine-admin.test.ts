@@ -55,4 +55,39 @@ describe('Proposal Engine - Admin Controls', () => {
     ], wallet1);
     expect(successSetPeriod.result).toBeOk(Cl.bool(true));
   });
+
+  it("enforces quorum percentage bounds between 10% and 100%", () => {
+    const zeroQuorum = simnet.callPublicFn(
+      "proposal-engine",
+      "set-quorum-percentage",
+      [Cl.uint(0)],
+      deployer
+    );
+    // Uses ERR_UNAUTHORIZED (u100) for invalid quorum as well
+    expect(zeroQuorum.result).toBeErr(Cl.uint(100));
+
+    const lowQuorum = simnet.callPublicFn(
+      "proposal-engine",
+      "set-quorum-percentage",
+      [Cl.uint(500)],
+      deployer
+    );
+    expect(lowQuorum.result).toBeErr(Cl.uint(100));
+
+    const minQuorum = simnet.callPublicFn(
+      "proposal-engine",
+      "set-quorum-percentage",
+      [Cl.uint(1_000)],
+      deployer
+    );
+    expect(minQuorum.result).toBeOk(Cl.bool(true));
+
+    const fullQuorum = simnet.callPublicFn(
+      "proposal-engine",
+      "set-quorum-percentage",
+      [Cl.uint(10_000)],
+      deployer
+    );
+    expect(fullQuorum.result).toBeOk(Cl.bool(true));
+  });
 });

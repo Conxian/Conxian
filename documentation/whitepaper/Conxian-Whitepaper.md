@@ -1,7 +1,9 @@
 # Conxian Protocol — A Multi‑Dimensional DeFi System on Stacks (Nakamoto)
 
-Version: 2.0 (Updated December 02, 2025)
-Status: Nakamoto Ready (Zero-Error Compile Achieved)
+Version: 2.2 (Updated December 06, 2025)
+Status: Testnet, Nakamoto-compatible (Zero-Error Compile; comprehensive
+testing and external audit preparation in progress; not yet deployed to
+mainnet)
 
 ## Abstract
 
@@ -11,7 +13,9 @@ architectural refactoring to create a more modular, decentralized, and
 Nakamoto-compliant system. This new architecture unifies **concentrated
 liquidity pools**, **advanced multi-hop routing**, **multi-source oracle
 aggregation**, **enterprise-grade lending**, **comprehensive MEV protection**,
-and **yield strategy automation** into a cohesive and extensible ecosystem.
+**yield strategy automation**, and a **multi-council governance model with an
+automated Conxian Operations Engine** into a cohesive and extensible
+ecosystem.
 
 The system is architecturally divided into specialized, single-responsibility
 contracts, governed by a robust, modular trait system. This modular design
@@ -126,17 +130,115 @@ The Conxian protocol is organized into a series of specialized layers, each cont
 - **`sbtc`**: Native sBTC integration for Bitcoin-backed DeFi.
 - **`vaults`**: Secure asset custody and strategy execution vaults.
 
-The Conxian Protocol features a comprehensive, multi-token system designed to incentivize participation, facilitate governance, and ensure the long-term sustainability of the ecosystem.
+The Conxian Protocol features a comprehensive, multi-token system designed to
+incentivize participation, facilitate governance, and ensure the long-term
+sustainability of the ecosystem.
 
-| Token | Symbol | Role |
-| :--- | :--- | :--- |
-| **Conxian Token** | CXD | The primary utility token of the protocol, used for staking, fee reductions, and as a medium of exchange. |
-| **Conxian Treasury** | CXTR | A treasury token used to fund the ongoing development and growth of the protocol. |
-| **Conxian LP** | CXLP | A liquidity provider token that represents a user's share of a liquidity pool. |
-| **Conxian Governance** | CXVG | The governance token of the protocol, used to vote on proposals and participate in the decision-making process. |
-| **Conxian Stability** | CXS | A stability token that is algorithmically pegged to the US dollar and is used to provide a stable medium of exchange within the protocol. |
+| Token | Symbol | Type | Role |
+| :--- | :--- | :--- | :--- |
+| **Conxian Revenue Token** | CXD | SIP-010 FT | Primary utility and revenue-accruing token of the protocol, used for fees, incentives, and governance participation. |
+| **Conxian Treasury Token** | CXTR | SIP-010 FT | Treasury and reserves token used for internal accounting, creator economy incentives, and long-term funding of the protocol. |
+| **Conxian LP Token** | CXLP | SIP-010 FT | Liquidity provider token that represents a user's share of a liquidity pool and serves as the basis for LP position NFTs. |
+| **Conxian Voting Token** | CXVG | SIP-010 FT | Governance voting power token used to vote on proposals and participate in protocol decision-making. |
+| **Conxian Staking Position** | CXS | SIP-009 NFT | Non-fungible staking position token that represents a unique stake, with lock duration and reward tracking encoded per position. |
 
-## 4. Security
+## 4. Governance & Organizational Design
+
+The Conxian Protocol is governed by the **Conxian Protocol DAO**, which
+operates through a set of on-chain councils and role NFTs. This design mirrors
+traditional board and committee structures while remaining fully on-chain and
+compatible with decentralized participation.
+
+### 4.1 DAO & Councils
+
+Conxian governance is organized around the following council-style bodies,
+implemented via enhanced governance NFTs and council membership roles:
+
+- **Protocol & Strategy Council**  
+  Oversees the long-term direction of the protocol, core parameter frameworks,
+  and major architectural changes.
+
+- **Risk & Compliance Council**  
+  Oversees prudential risk limits, liquidation and collateralization
+  thresholds, and alignment with regulatory-style safety and user-protection
+  objectives.
+
+- **Treasury & Investment Council**  
+  Manages treasury reserves, investment policies, and capital deployment,
+  including budget approvals for strategic initiatives and service providers.
+
+- **Technology & Security Council**  
+  Oversees upgrades, audits, security posture, and incident response plans for
+  critical contracts.
+
+- **Operations & Resilience Council**  
+  Focuses on day-to-day operational health, incident handling, runtime
+  resilience, and service-level performance across modules.
+
+Council membership and specialized powers (e.g., veto certificates, quorum
+boosters, delegation certificates) are represented via governance NFTs in the
+`enhanced-governance-nft.clar` module.
+
+### 4.2 Conxian Operations Engine — Automated DAO Seat
+
+To reflect that Conxian is designed as a fully-automated system, the protocol
+includes a dedicated on-chain agent, the **Conxian Operations Engine**. This
+agent:
+
+- Holds a council membership NFT within the **Operations & Resilience
+  Council**, giving it one formal seat in governance.
+- Consumes metrics from risk, lending, DEX, oracle, circuit breaker, treasury,
+  and monitoring modules (e.g., `token-system-coordinator.clar`).
+- Aggregates inputs corresponding to LegEx (legal & policy), DevEx (technical
+  quality), OpEx (operational health), CapEx (infrastructure investment), and
+  InvEx (treasury & investment) into deterministic voting policies.
+- Casts votes via the proposal engine as a contract principal, providing an
+  **automated, policy-driven voice** in DAO decisions.
+
+This seat is intentionally transparent and rules-based: its behavior is
+governed by on-chain policy rather than human discretion, and its metrics
+mirror the operational and regulatory alignment documented in the
+`OPERATIONS_RUNBOOK.md` and `REGULATORY_ALIGNMENT.md` artifacts.
+
+### 4.3 NFTs for Positions and Roles
+
+Conxian uses NFTs to represent both **economic positions** and **governance
+roles**:
+
+- **Staking Positions (CXS)**: Each CXS token is a SIP-009 NFT representing a
+  unique staking position, including deposited amount, lock configuration, and
+  accrued rewards.
+- **LP Position NFTs**: Concentrated liquidity pools and future extensions use
+  NFTs to represent liquidity positions, enabling granular accounting of range,
+  fees, and ownership.
+- **DAO Role NFTs**: Council memberships, reputation badges, delegation
+  certificates, veto powers, and quorum boosters are all represented as NFTs in
+  the enhanced governance system, enabling fine-grained, auditable role
+  management.
+
+This NFT-based representation enables unified, on-chain views of positions and
+governance rights, and makes complex structures (e.g., multi-asset LP
+positions or layered delegate roles) easily composable.
+
+### 4.4 Service Vaults and External Dependencies
+
+The protocol architecture supports **service vaults** that hold CXD (and, where
+appropriate, CXTR) to pay for on-chain and off-chain services such as bridges,
+oracles, and infrastructure providers.
+
+Key characteristics:
+
+- Vaults are governed by the Treasury & Investment and Operations & Resilience
+  councils.
+- Budgets, withdrawal limits, and renewal policies are enforced via on-chain
+  rules and routed through the governance process.
+- Payments are made in CXD/CXTR under explicit policies, enabling auditors and
+  regulators to trace infrastructure and service spend at the contract level.
+
+These vaults provide a structured way for the protocol to pay for its own
+critical dependencies while remaining within the DAO’s governance framework.
+
+## 5. Security
 
 The Conxian Protocol is designed with a security-first mindset, incorporating a multi-layered approach to protect user funds and ensure the long-term stability of the ecosystem.
 
@@ -146,25 +248,49 @@ The Conxian Protocol is designed with a security-first mindset, incorporating a 
 - **Rate Limiting**: To prevent market manipulation and other forms of abuse, the protocol includes rate-limiting mechanisms on key functions.
 - **Role-Based Access Control**: The protocol uses a robust role-based access control (RBAC) system to ensure that only authorized addresses can perform critical administrative functions.
 
-## 5. Roadmap & Implementation Status
+## 6. Roadmap & Implementation Status
 
-The Conxian Protocol has achieved **Nakamoto Readiness** with a **Zero-Error Compile** status as of December 2025.
+The Conxian Protocol has achieved zero-error Clarinet compilation and testnet
+deployments under the Stacks Nakamoto release as of December 2025. The system
+is currently in a stabilization and alignment phase on testnet and is **not yet
+production-ready**.
 
 ### Completed Work (Phase 1: Foundation)
 
-- **Architectural Refactoring**: Complete modularization of Core, DEX, Lending, and Governance.
-- **Zero-Error Gate**: All compilation errors across 91 contracts have been resolved.
+- **Architectural Refactoring**: Complete modularization of Core, DEX, Lending,
+  and Governance.
+- **Zero-Error Gate**: All compilation errors across 91 contracts have been
+  resolved.
 - **Trait System**: Implementation of 15 standardized trait files.
-- **Critical Fixes**: Resolution of high-priority issues in Keeper Coordinator, Lending System, and Dimensional Engine.
+- **Critical Fixes**: Resolution of high-priority issues in Keeper Coordinator,
+  Lending System, and Dimensional Engine.
+- **Initial Cross-Module Tests**: Introduction of strict, deterministic tests
+  across lending, risk, liquidation, DEX, vault, yield, automation, and sBTC
+  vault modules, including the use of mocks for liquidation and routing
+  behavior.
+- **Enterprise Documentation Set**: Publication of SERVICE_CATALOG,
+  ENTERPRISE_BUYER_OVERVIEW, REGULATORY_ALIGNMENT, OPERATIONS_RUNBOOK, and
+  BUSINESS_VALUE_ROI to describe target institutional services and ROI while
+  clearly marking the protocol as testnet-only.
 
 ### Future Work (Phase 2 & 3)
 
-- **Comprehensive Test Coverage**: Expanding unit and integration tests to >95% coverage.
-- **External Security Audit**: Third-party verification of all smart contracts.
-- **Mainnet Deployment**: Final deployment to Stacks Mainnet.
-- **Cross-Chain Expansion**: Integration with other Bitcoin L2s.
+- **Comprehensive Test Coverage & Scenario Testing**: Expanding unit,
+  integration, and cross-domain economic scenarios (risk/liquidation,
+  automation liveness, governance/operations engine, monitoring/circuit
+  breakers, and performance/gas budgets) toward audit-grade coverage.
+- **External Security Audit**: Third-party verification of all smart contracts
+  and operational controls prior to any mainnet deployment.
+- **Mainnet Deployment**: Final deployment to Stacks Mainnet once audits,
+  governance bootstrapping, and incident processes are complete.
+- **Enterprise Service Hardening**: Implementation and validation of
+  enterprise-focused credit lines, bond/opex loan patterns, bridge and
+  asset-protection vaults, and compliance/analytics APIs aligned with the
+  documented service catalog.
+- **Cross-Chain Expansion**: Integration with other Bitcoin L2s where
+  consistent with the protocol's risk and compliance framework.
 
-## 5. Conclusion
+## 7. Conclusion
 
 The Conxian Protocol is poised to become a leading DeFi ecosystem on the Stacks
 blockchain. By embracing a modular, decentralized architecture and integrating
