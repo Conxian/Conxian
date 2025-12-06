@@ -49,6 +49,16 @@
     }
 )
 
+;; Tick data for liquidity tracking
+(define-map ticks
+    { tick: int }
+    {
+        liquidity-gross: uint, ;; Total liquidity referencing this tick
+        liquidity-net: int, ;; Liquidity added (lower) or removed (upper) when crossing
+        initialized: bool,
+    }
+)
+
 (define-non-fungible-token position-nft uint)
 
 ;; --- Public Functions ---
@@ -175,11 +185,37 @@
                 )
                 (var-set sqrt-price-x96 next-price)
 
-                ;; Note: We should also update current-tick based on new sqrt-price, but 
-                ;; since we don't have tick bitmap traversal in this simplified version, 
-                ;; we assume we stay in the same tick or just update price.
-                ;; For production, we MUST cross ticks. This is a simplified "single-tick" swap 
-                ;; or infinite liquidity assumption for the current range.
+                ;; Update current tick based on new price
+                ;; Convert sqrt-price to tick (fallback to current tick if conversion fails)
+                (let ((tick-val (unwrap! (contract-call? .math-lib-concentrated sqrt-price-to-tick next-price) ERR_MATH_FAIL)))
+                    ;; Check if we crossed a tick boundary
+                    (if (not (is-eq tick-val (var-get current-tick)))
+                        (begin
+                            ;; Tick crossing: update liquidity
+                            (let ((tick-data (default-to {
+                                    liquidity-gross: u0,
+                                    liquidity-net: 0,
+                                    initialized: false,
+                                }
+                                    (map-get? ticks { tick: tick-val })
+                                )))
+                                ;; Apply liquidity-net change when crossing
+                                (if (get initialized tick-data)
+                                    (var-set liquidity
+                                        (if (> tick-val (var-get current-tick))
+                                            ;; Crossing up: add liquidity-net
+                                            (to-uint (+ (to-int (var-get liquidity)) (get liquidity-net tick-data)))
+                                            ;; Crossing down: subtract liquidity-net
+                                            (to-uint (- (to-int (var-get liquidity)) (get liquidity-net tick-data)))
+                                        ))
+                                    true
+                                )
+                                (var-set current-tick tick-val)
+                            )
+                        )
+                        true
+                    )
+                )
 
                 ;; 4. Transfer amount-out to user
                 (try! (as-contract (contract-call? token-out transfer amount-out tx-sender sender

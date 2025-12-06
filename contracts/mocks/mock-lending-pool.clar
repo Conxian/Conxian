@@ -1,9 +1,9 @@
 ;; mock-lending-pool.clar
 ;; Minimal implementation of lending-pool-trait for testing liquidation-manager.
 
-(use-trait lending-pool-trait .defi-traits.lending-pool-trait)
+(use-trait lending-pool-trait .dimensional-traits.lending-pool-trait)
 
-(impl-trait .defi-traits.lending-pool-trait)
+(impl-trait .dimensional-traits.lending-pool-trait)
 
 (define-data-var health-factor uint u2000000000000000000) ;; default > 1e18 (healthy)
 

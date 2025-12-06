@@ -31,6 +31,7 @@
 ;; Data Variables
 (define-data-var contract-owner principal tx-sender)
 (define-data-var protocol-fee-switch principal 'STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ.protocol-fee-switch)
+(define-data-var min-health-factor uint u10000)
 
 ;; Maps
 ;; amount: Principal balance (scaled)
@@ -54,6 +55,15 @@
     amount: uint,
     index: uint,
   }
+)
+
+(define-map user-total-supplies
+  principal
+  uint
+)
+(define-map user-total-borrows
+  principal
+  uint
 )
 
 ;; Circuit Breaker
@@ -108,6 +118,10 @@
           index: supply-index,
         })
 
+        (map-set user-total-supplies sender
+          (+ (default-to u0 (map-get? user-total-supplies sender)) amount)
+        )
+
         ;; Update Global State
         (try! (contract-call? .interest-rate-model update-market-state asset-principal
           (to-int amount) 0
@@ -159,6 +173,14 @@
           index: supply-index,
         })
 
+        (let ((current-total (default-to u0 (map-get? user-total-supplies caller))))
+          (map-set user-total-supplies caller
+            (if (>= current-total amount)
+              (- current-total amount)
+              u0
+            ))
+        )
+
         (try! (contract-call? .interest-rate-model update-market-state asset-principal
           (- 0 (to-int amount)) 0
         ))
@@ -207,6 +229,10 @@
           amount: new-principal,
           index: borrow-index,
         })
+
+        (map-set user-total-borrows caller
+          (+ (default-to u0 (map-get? user-total-borrows caller)) amount)
+        )
 
         ;; Update Market: Cash -amount, Borrows +amount
         (try! (contract-call? .interest-rate-model update-market-state asset-principal
@@ -264,6 +290,14 @@
             amount: (- current-principal actual-repay-principal),
             index: borrow-index,
           })
+
+          (let ((current-total (default-to u0 (map-get? user-total-borrows sender))))
+            (map-set user-total-borrows sender
+              (if (>= current-total actual-amount)
+                (- current-total actual-amount)
+                u0
+              ))
+          )
 
           ;; Update Market: Cash +amount, Borrows -amount
           (try! (contract-call? .interest-rate-model update-market-state
@@ -454,5 +488,71 @@
 )
 
 (define-read-only (get-health-factor (user principal))
-  (ok u20000)
+  (let (
+      (total-supply (default-to u0 (map-get? user-total-supplies user)))
+      (total-borrow (default-to u0 (map-get? user-total-borrows user)))
+    )
+    (if (is-eq total-borrow u0)
+      (ok u20000)
+      (ok (/ (* total-supply u10000) total-borrow))
+    )
+  )
+)
+
+(define-public (set-min-health-factor (new-min uint))
+  (begin
+    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
+    (var-set min-health-factor new-min)
+    (ok true)
+  )
+)
+
+(define-read-only (is-user-healthy (user principal))
+  (let ((hf (unwrap! (get-health-factor user) ERR_HEALTH_CHECK_FAILED)))
+    (ok (>= hf (var-get min-health-factor)))
+  )
+)
+
+(define-public (borrow-checked
+    (asset <sip-010-ft-trait>)
+    (amount uint)
+  )
+  (let ((caller tx-sender))
+    (let (
+        (current-supply (default-to u0 (map-get? user-total-supplies caller)))
+        (current-borrow (default-to u0 (map-get? user-total-borrows caller)))
+        (new-borrow (+ current-borrow amount))
+        (new-hf (if (is-eq new-borrow u0)
+                  u1000000
+                  (/ (* current-supply u10000) new-borrow)))
+      )
+      (if (< new-hf (var-get min-health-factor))
+        ERR_HEALTH_CHECK_FAILED
+        (borrow asset amount)
+      )
+    )
+  )
+)
+
+(define-public (withdraw-checked
+    (asset <sip-010-ft-trait>)
+    (amount uint)
+  )
+  (let ((caller tx-sender))
+    (let (
+        (current-supply (default-to u0 (map-get? user-total-supplies caller)))
+        (current-borrow (default-to u0 (map-get? user-total-borrows caller)))
+        (new-supply (if (>= current-supply amount)
+                      (- current-supply amount)
+                      u0))
+        (new-hf (if (is-eq current-borrow u0)
+                  u1000000
+                  (/ (* new-supply u10000) current-borrow)))
+      )
+      (if (< new-hf (var-get min-health-factor))
+        ERR_HEALTH_CHECK_FAILED
+        (withdraw asset amount)
+      )
+    )
+  )
 )

@@ -106,7 +106,7 @@
   )
   (let (
       (token-id (var-get next-token-id))
-      (current-block u0)
+      (current-block block-height)
     )
     (asserts! (is-eq tx-sender (var-get owner)) (err ERR_UNAUTHORIZED))
 
@@ -126,7 +126,14 @@
 
     ;; Increment token ID
     (var-set next-token-id (+ token-id u1))
-
+    (print {
+      event: "dimensional-position-nft-minted",
+      token-id: token-id,
+      owner: recipient,
+      core-contract: (get pool position-data),
+      position-id: (get position-id position-data),
+      created-at: current-block,
+    })
     (ok token-id)
   )
 )
@@ -146,6 +153,12 @@
     ;; Remove position data
     (map-delete dimensional-positions { id: token-id })
 
+    (print {
+      event: "dimensional-position-nft-burned",
+      token-id: token-id,
+      owner: token-owner,
+    })
+
     (ok true)
   )
 )
@@ -164,12 +177,19 @@
     (map-set dimensional-positions { id: token-id }
       (merge position {
         owner: recipient,
-        last-updated: u0,
+        last-updated: block-height,
       })
     )
 
     ;; Transfer NFT
     (try! (transfer token-id sender recipient))
+
+    (print {
+      event: "dimensional-position-nft-transferred",
+      token-id: token-id,
+      from: sender,
+      to: recipient,
+    })
 
     (ok true)
   )
@@ -186,6 +206,10 @@
     })
     (err ERR_NONEXISTENT_TOKEN)
   )
+)
+
+(define-read-only (get-position-metadata (token-id uint))
+  (map-get? dimensional-positions { id: token-id })
 )
 
 (define-public (set-authorized-pool (pool principal))

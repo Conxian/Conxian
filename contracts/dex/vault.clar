@@ -48,6 +48,15 @@
 (define-map collected-fees principal uint) ;; asset -> accumulated protocol fees
 (define-map performance-metrics principal (tuple (total-volume uint) (total-fees uint)))
 
+(define-map service-budgets
+  { asset: principal, service-type: (string-ascii 32) }
+  {
+    period-start: uint,
+    period-length: uint,
+    max-amount: uint,
+    spent: uint
+  })
+
 ;; Read-only functions
 (define-public (get-admin) (ok (var-get admin)))
 (define-read-only (is-paused) (ok (var-get paused)))
@@ -62,6 +71,9 @@
 (define-read-only (get-strategy (token-contract principal)) (ok (map-get? asset-strategies token-contract)))
 (define-read-only (get-apy (token-contract principal)) (ok u800)) ;; 8% APY
 (define-read-only (get-tvl (token-contract principal)) (ok (default-to u0 (map-get? vault-balances token-contract))))
+
+(define-read-only (get-service-budget (asset principal) (service-type (string-ascii 32)))
+  (ok (map-get? service-budgets { asset: asset, service-type: service-type })))
 
 ;; Private functions
 (define-private (is-admin (user principal)) (is-eq user (var-get admin)))
@@ -302,3 +314,64 @@
           (print (tuple (event "vault-rebalanced") (asset asset) (amount total-balance)))
           (ok true))
       ERR_INVALID_ASSET)))
+
+(define-public (set-service-budget
+  (asset principal)
+  (service-type (string-ascii 32))
+  (period-start uint)
+  (period-length uint)
+  (max-amount uint))
+  (begin
+    (asserts! (is-admin tx-sender) ERR_UNAUTHORIZED)
+    (asserts! (> max-amount u0) ERR_INVALID_AMOUNT)
+    (map-set service-budgets
+      { asset: asset, service-type: service-type }
+      {
+        period-start: period-start,
+        period-length: period-length,
+        max-amount: max-amount,
+        spent: u0
+      })
+    (ok true)))
+
+(define-public (pay-service
+  (asset principal)
+  (amount uint)
+  (recipient principal)
+  (service-type (string-ascii 32)))
+  (let ((current-balance (default-to u0 (map-get? vault-balances asset))))
+    (begin
+      (asserts! (is-admin tx-sender) ERR_UNAUTHORIZED)
+      (asserts! (> amount u0) ERR_INVALID_AMOUNT)
+      (asserts! (>= current-balance amount) ERR_INSUFFICIENT_BALANCE)
+      (match (map-get? service-budgets { asset: asset, service-type: service-type })
+        budget
+          (let ((start (get period-start budget))
+                (len (get period-length budget))
+                (max-amt (get max-amount budget))
+                (spent (get spent budget)))
+            (let ((effective-budget
+                    (if (and (> len u0) (>= (- block-height start) len))
+                      {
+                        period-start: block-height,
+                        period-length: len,
+                        max-amount: max-amt,
+                        spent: u0
+                      }
+                      budget)))
+              (let ((new-spent (+ (get spent effective-budget) amount)))
+                (asserts! (<= new-spent max-amt) ERR_CAP_EXCEEDED)
+                (map-set service-budgets
+                  { asset: asset, service-type: service-type }
+                  (merge effective-budget { spent: new-spent }))
+                (try! (contract-call? asset transfer amount (as-contract tx-sender) recipient none))
+                (map-set vault-balances asset (- current-balance amount))
+                (print (tuple
+                  (event "service-payment")
+                  (asset asset)
+                  (amount amount)
+                  (recipient recipient)
+                  (service-type service-type)))
+                (ok amount))))
+        ERR_INVALID_ASSET))))
+

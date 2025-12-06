@@ -20,4 +20,4 @@ The Lending Module is designed with a modular architecture, where the `comprehen
 
 ## Status
 
-**Under Development**: The contracts in this module are currently under development and are not yet considered production-ready. The core functionality is implemented, but the `get-health-factor` function in the `comprehensive-lending-system.clar` contract has a placeholder implementation, which is a critical gap that needs to be addressed.
+**Under Review**: The contracts in this module are currently under review and are not yet considered production-ready. The core functionality is implemented, including a conservative `get-health-factor` implementation and optional health-factor-based guardrails (`borrow-checked` and `withdraw-checked`). These metrics are also wired into the Conxian Operations Engine for monitoring, but parameters and cross-module tests are still being hardened.

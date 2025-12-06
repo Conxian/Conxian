@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Governance Module provides a comprehensive framework for decentralized decision-making and protocol upgrades within the Conxian Protocol. It is designed to be secure, transparent, and flexible, allowing the community to propose, vote on, and execute changes to the protocol. The `proposal-engine.clar` contract serves as the central facade for all governance operations, delegating logic to specialized contracts for proposal management and voting.
+The Governance Module provides a comprehensive framework for decentralized decision-making and protocol upgrades within the Conxian Protocol. It is designed to be secure, transparent, and flexible, allowing the community to propose, vote on, and execute changes to the protocol. The `proposal-engine.clar` contract serves as the central facade for all governance operations, delegating logic to specialized contracts for proposal management and voting. The module also includes the Conxian Operations Engine, an automated Operations & Resilience governance seat that acts as on-chain "ops staff" under DAO control.
 
 ## Contracts
 
@@ -15,6 +15,10 @@ The Governance Module provides a comprehensive framework for decentralized decis
 - **`upgrade-controller.clar`**: A contract dedicated to managing protocol upgrades. It includes features such as timelocks and multi-signature requirements to ensure the security and stability of the upgrade process.
 
 - **`emergency-governance.clar`**: Provides a mechanism for addressing critical issues that require immediate action. This contract allows for expedited decision-making in emergency situations.
+
+- **`enhanced-governance-nft.clar`**: Implements council and role NFTs, including the Operations & Resilience Council membership tokens, aligned with the documented council taxonomy.
+
+- **`conxian-operations-engine.clar`**: An automated Operations & Resilience governance seat that reads metrics from core subsystems (token-system coordinator, circuit breaker, lending, emissions, MEV, insurance, and cross-chain bridge) and casts policy-constrained votes via `proposal-engine.clar`.
 
 ## Architecture
 

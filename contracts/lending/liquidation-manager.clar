@@ -2,7 +2,7 @@
 (use-trait liquidation-trait .dimensional-traits.liquidation-trait)
 (impl-trait .dimensional-traits.liquidation-trait)
 ;; Lending system trait for underwater checks
-(use-trait lending-system-trait .defi-traits.lending-pool-trait)
+(use-trait lending-system-trait .dimensional-traits.lending-pool-trait)
 
 ;; Constants
 (define-constant CONTRACT_OWNER tx-sender)

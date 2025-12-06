@@ -578,18 +578,20 @@
 
 (define-private (get-council-emergency-powers (council-type uint))
   (match council-type
-    u1 (list "protocol-emergency" "critical-updates")  ;; Core council
-    u2 (list "security-emergency" "veto-activation")   ;; Security council
+    u1 (list "protocol-emergency" "strategic-changes")  ;; Core council
+    u2 (list "risk-emergency" "compliance-freeze")   ;; Security council
     u3 (list "treasury-emergency" "fund-reallocation") ;; Treasury council
-    u4 (list "technical-emergency" "system-maintenance") ;; Technical council
+    u4 (list "technical-emergency" "security-rollback") ;; Technical council
+    u5 (list "operations-emergency" "service-degradation")
     else (list)))
 
 (define-private (get-council-responsibilities (council-type uint))
   (match council-type
     u1 (list "protocol-oversight" "strategic-direction" "community-representation")
-    u2 (list "security-audits" "risk-assessment" "vulnerability-management")
-    u3 (list "treasury-management" "budget-oversight" "financial-planning")
-    u4 (list "technical-review" "system-maintenance" "upgrade-approval")
+    u2 (list "risk-assessment" "compliance-oversight" "policy-enforcement")
+    u3 (list "treasury-management" "budget-oversight" "investment-policy")
+    u4 (list "technical-review" "system-maintenance" "security-posture")
+    u5 (list "operations-monitoring" "incident-response" "service-budget-oversight")
     else (list "general-governance")))
 
 (define-private (calculate-reputation-boost (voting-weight uint))

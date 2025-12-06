@@ -177,3 +177,8 @@
 (define-read-only (get-total-assets)
     (ok (var-get total-staked))
 )
+
+;; Get user's stake information
+(define-read-only (get-user-stake (user principal))
+    (map-get? user-stakes { user: user })
+)

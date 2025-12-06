@@ -19,7 +19,7 @@ The Conxian protocol is organized into a series of specialized modules, each loc
 ### Core Modules
 - **`core`**: Contains the core logic of the dimensional engine, which is responsible for coordinating the various dimensions of the protocol.
 - **`dex`**: A feature-complete decentralized exchange with a modular router, a factory for creating liquidity pools, and support for concentrated liquidity.
-- **`governance`**: A modular proposal and voting system that allows the community to manage the protocol.
+- **`governance`**: A modular proposal and voting system that allows the community to manage the protocol, including the `conxian-operations-engine.clar` contract as an automated Operations & Resilience governance seat that reads metrics from core subsystems and casts policy-constrained votes.
 - **`lending`**: A feature-complete, multi-asset lending and borrowing system, centered around the `comprehensive-lending-system.clar` contract.
 
 ### Supporting Modules
@@ -46,7 +46,7 @@ The protocol includes a multi-layered security architecture to protect user fund
 - **MEV Protection**: Mechanisms to mitigate the effects of Maximal Extractable Value (MEV), such as batch auctions.
 - **Access Controls**: A role-based access control system to manage permissions for sensitive functions.
 - **Invariant Monitoring**: A system for monitoring key protocol invariants to detect anomalies and potential security threats.
- - **Loan & Liquidity Protection (In Design)**: A cover layer that can auto-protect lending and LP positions based on refreshed risk metrics, with explicit user authorization and capped, transparent fees. This is currently being modelled and remains subject to further FSCA-aligned legal review.
+- **Loan & Liquidity Protection (Foundational Layer Implemented)**: A cover layer that can auto-protect lending and LP positions based on refreshed risk metrics, backed by NFT-based insurance (`insurance-protection-nft.clar`), MEV protection and per-user MEV profiles, conservative lending health-factor metrics, and service-vault style budget controls. The foundational contracts and dashboards are implemented, but the full policy layer remains in design and subject to further FSCA-aligned legal review.
 
 ## Deployment Architecture
 

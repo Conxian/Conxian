@@ -136,6 +136,29 @@ describe('Comprehensive Lending System', () => {
 
       expect(hf.result).toBeOk(Cl.uint(20000));
     });
+
+    it("reports user as healthy by default when there is no borrow", () => {
+      const healthy = simnet.callReadOnlyFn(
+        "comprehensive-lending-system",
+        "is-user-healthy",
+        [Cl.standardPrincipal(wallet1)],
+        wallet1
+      );
+
+      expect(healthy.result).toBeOk(Cl.bool(true));
+    });
+
+    it("only the contract owner can set the minimum health factor", () => {
+      const unauthorized = simnet.callPublicFn(
+        "comprehensive-lending-system",
+        "set-min-health-factor",
+        [Cl.uint(15000)],
+        wallet1
+      );
+
+      // ERR_UNAUTHORIZED = (err u1000)
+      expect(unauthorized.result).toBeErr(Cl.uint(1000));
+    });
   });
 
   describe("full lifecycle: supply, borrow, repay, withdraw", () => {

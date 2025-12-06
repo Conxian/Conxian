@@ -237,24 +237,22 @@
         )
           (let ((new-total-supplies (+ new-total-cash new-total-borrows)))
             ;; Note: total-supplies here is just balancing the equation Asset = Liability + Equity?
-            ;; In our simplified model, total-supplies = total-cash + total-borrows (Assets)
-            ;; But strictly, Liability = Assets - Reserves.
-            ;; The 'accrue-interest' logic updates total-supplies based on interest.
-            ;; Here we are adding/removing principal.
-            ;; If a user supplies cash, total-cash goes up, total-supplies goes up.
-            ;; If a user borrows, total-cash goes down, total-borrows goes up. total-supplies stays same?
-            ;; Let's check the logic:
-            ;; Supply: cash +100, borrows 0. new-cash +100. new-supplies +100. Correct.
-            ;; Borrow: cash -50, borrows +50. new-cash -50, new-borrows +50. new-supplies unchanged. Correct.
+;; In our simplified model, total-supplies = total-cash + total-borrows (Assets)
+;; But strictly, Liability = Assets - Reserves.
+;; The 'accrue-interest' logic updates total-supplies based on interest.
+;; Here we are adding/removing principal.
+;; If a user supplies cash, total-cash goes up, total-supplies goes up.
+;; If a user borrows, total-cash goes down, total-borrows goes up. total-supplies stays same?
+;; Let's check the logic:
+;; Supply: cash +100, borrows 0. new-cash +100. new-supplies +100. Correct.
+;; Borrow: cash -50, borrows +50. new-cash -50, new-borrows +50.
             
             (map-set market-state 
               { asset: asset }
               (merge market {
                 total-cash: new-total-cash,
                 total-borrows: new-total-borrows,
-                total-supplies: (- (+ new-total-cash new-total-borrows) (get total-reserves market)) 
-                ;; We must account for reserves. Assets = Liability + Reserves. 
-                ;; Liability (Supplies) = Assets - Reserves.
+                total-supplies: (- (+ new-total-cash new-total-borrows) (get total-reserves market))
               })
             )
             (ok true)

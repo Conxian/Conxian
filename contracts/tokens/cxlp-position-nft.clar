@@ -92,6 +92,13 @@
         created-at: block-height,
         last-updated-at: block-height
       })
+      (print {
+        event: "cxlp-position-created",
+        position-id: position-id,
+        owner: owner,
+        pool-id: pool-id,
+        cxlp-amount: cxlp-amount,
+      })
       (ok position-id))))
 
 ;; Closes an LP position, transferring the recorded CXLP amount back from this
@@ -117,6 +124,12 @@
 
       (map-delete position-owners position-id)
       (map-delete positions position-id)
+      (print {
+        event: "cxlp-position-closed",
+        position-id: position-id,
+        owner: owner,
+        cxlp-amount: (get cxlp-amount position),
+      })
       (ok true))))
 
 ;; --- SIP-009-style Interface (minimal) ---
@@ -133,6 +146,12 @@
       (asserts! (var-get transfers-enabled) (err ERR_TRANSFER_DISABLED))
       (asserts! (not (check-system-pause)) (err ERR_TRANSFER_DISABLED))
       (map-set position-owners position-id recipient)
+      (print {
+        event: "cxlp-position-transferred",
+        position-id: position-id,
+        from: sender,
+        to: recipient,
+      })
       (ok true))))
 
 ;; --- Read-Only Views ---

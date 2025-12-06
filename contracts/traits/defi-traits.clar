@@ -185,16 +185,6 @@
 (use-trait sip-009-nft-trait .sip-standards.sip-009-nft-trait)
 
 ;; ===========================================
-;; LENDING POOL TRAIT (minimal)
-;; ===========================================
-(define-trait lending-pool-trait (
-  (get-health-factor (principal) (response uint uint))
-  (update-position (principal uint) (response bool uint))
-  (get-liquidation-amounts (principal principal principal uint) (response { collateral-to-seize: uint } uint))
-  (liquidate (principal principal principal uint uint) (response bool uint))
-))
-
-;; ===========================================
 ;; STRATEGY TRAIT
 ;; ===========================================
 (define-trait strategy-trait (
