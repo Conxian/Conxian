@@ -1,6 +1,6 @@
 # Conxian Protocol Documentation Index
 
-**Last Updated**: December 6, 2025  
+**Last Updated**: December 7, 2025  
 **Status**: Stabilization Phase - Testnet Only  
 **Compilation Status**: ✅ 111 contracts passing
 
@@ -35,6 +35,7 @@
 
 - **[Architecture Specification](./documentation/ARCHITECTURE_SPEC.md)** - High-level system design and module interactions
 - **[Architecture Deep Dive](./documentation/architecture/ARCHITECTURE.md)** - Detailed architectural decisions and patterns
+- **[Company Charter](./documentation/COMPANY_CHARTER.md)** - On-chain company model (departments, roles, and alignment under DAO + Conxian Labs)
 - **[Whitepaper](./documentation/whitepaper/Conxian-Whitepaper.md)** - Complete technical vision and protocol design
 
 ### System Components
@@ -42,6 +43,11 @@
 - **[Behavior Metrics System](./documentation/BEHAVIOR_METRICS.md)** - Reputation tracking and incentive system
 - **[Operations Runbook](./documentation/OPERATIONS_RUNBOOK.md)** - Operational procedures and admin controls
 - **[Regulatory Alignment](./documentation/REGULATORY_ALIGNMENT.md)** - Compliance mapping and regulatory objectives
+- **[Identity, KYC & POPIA Charter](./documentation/IDENTITY_KYC_POPIA.md)** - Identity, KYC/KYB, and data protection alignment
+- **[Treasury & Revenue Router](./documentation/TREASURY_AND_REVENUE_ROUTER.md)** - Treasury structure and protocol revenue routing
+- **[Payroll & Rewards](./documentation/PAYROLL_AND_REWARDS.md)** - Guardian, contributor, and Labs payment design
+- **[Legal Representatives & Bounties](./documentation/LEGAL_REPRESENTATIVES_AND_BOUNTIES.md)** - Legal wrappers, advisors, and bounty incentives
+- **[Payments & Providers](./documentation/PAYMENTS_AND_PROVIDERS.md)** - External payment and banking provider integration
 
 ---
 
@@ -91,6 +97,8 @@
 
 - **[Compliance & Security Framework](./documentation/enterprise/COMPLIANCE_SECURITY.md)** - Security controls and compliance standards
 - **[Regulatory Alignment](./documentation/REGULATORY_ALIGNMENT.md)** - Regulatory mapping and objectives
+- **[Identity, KYC & POPIA Charter](./documentation/IDENTITY_KYC_POPIA.md)** - Identity and data protection standards (Conxian and Conxian Labs)
+- **[Payments & Providers](./documentation/PAYMENTS_AND_PROVIDERS.md)** - How Conxian Labs interacts with payment and banking providers
 - **[Security Review Process](./documentation/SECURITY_REVIEW_PROCESS.md)** - Security audit procedures
 
 ---
@@ -237,6 +245,12 @@
 | BEHAVIOR_METRICS.md | ✅ Current | Dec 6, 2025 |
 | SERVICE_CATALOG.md | ✅ Current | Dec 6, 2025 |
 | DOCUMENTATION_INDEX.md | ✅ Current | Dec 6, 2025 |
+| COMPANY_CHARTER.md | 🔄 In Progress | Dec 7, 2025 |
+| IDENTITY_KYC_POPIA.md | 🔄 In Progress | Dec 7, 2025 |
+| TREASURY_AND_REVENUE_ROUTER.md | 🔄 In Progress | Dec 7, 2025 |
+| PAYROLL_AND_REWARDS.md | 🔄 In Progress | Dec 7, 2025 |
+| LEGAL_REPRESENTATIVES_AND_BOUNTIES.md | 🔄 In Progress | Dec 7, 2025 |
+| PAYMENTS_AND_PROVIDERS.md | 🔄 In Progress | Dec 7, 2025 |
 
 ---
 
