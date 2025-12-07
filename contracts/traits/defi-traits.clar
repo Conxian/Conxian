@@ -29,6 +29,19 @@
 ))
 
 ;; ===========================================
+;; POOL FACTORY TRAIT
+;; ===========================================
+(define-trait pool-factory-trait (
+  (create-pool
+    (<sip-010-ft-trait> <sip-010-ft-trait> (optional (string-ascii 64)) uint (optional {
+      tick-spacing: uint,
+      initial-price: uint,
+    }))
+    (response principal uint)
+  )
+))
+
+;; ===========================================
 ;; FACTORY TRAIT
 ;; ===========================================
 (define-trait factory-trait (

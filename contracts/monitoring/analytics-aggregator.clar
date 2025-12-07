@@ -15,8 +15,8 @@
 (define-constant ERR_INSUFFICIENT_DATA (err u5004))
 (define-constant PRECISION u1000000000000000000) ;; 1e18
 (define-constant BASIS_POINTS u10000) ;; 100%
-(define-constant BLOCKS_PER_DAY u144) ;; ~24 hours
-(define-constant BLOCKS_PER_YEAR u52560) ;; ~365 days
+(define-constant ONE_DAY u17280) ;; u144 * 120hours
+(define-constant BLOCKS_PER_YEAR u6307200) ;; ~365 days
 (define-constant DAYS_PER_YEAR u365)
 
 ;; Metric types

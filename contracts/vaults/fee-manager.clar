@@ -38,15 +38,15 @@
 (define-public (calculate-fee (operation (string-ascii 64)) (amount uint))
   (begin
     (asserts! (is-eq tx-sender .sbtc-vault) (err u100))
-    (cond
-      ((is-eq operation "wrap") (ok (/ (* amount (var-get wrap-fee-bps)) u10000)))
-      ((is-eq operation "unwrap") (ok (/ (* amount (var-get unwrap-fee-bps)) u10000)))
-      ((is-eq operation "performance") (ok (/ (* amount (var-get performance-fee-bps)) u10000)))
-      ((is-eq operation "management") (ok (/ (* amount (var-get management-fee-bps)) u10000)))
-      (else (err u3001))
-    )
-  )
-)
+    (if (is-eq operation "wrap")
+      (ok (/ (* amount (var-get wrap-fee-bps)) u10000))
+      (if (is-eq operation "unwrap")
+        (ok (/ (* amount (var-get unwrap-fee-bps)) u10000))
+        (if (is-eq operation "performance")
+          (ok (/ (* amount (var-get performance-fee-bps)) u10000))
+          (if (is-eq operation "management")
+            (ok (/ (* amount (var-get management-fee-bps)) u10000))
+            (err u3001)))))))
 
 ;; @desc Sets the fee for a given operation. Can only be called by the sBTC vault.
 ;; @param operation (string-ascii 64) The operation ("wrap", "unwrap", "performance", "management").
@@ -55,13 +55,12 @@
 (define-public (set-fee (operation (string-ascii 64)) (fee-bps uint))
   (begin
     (asserts! (is-eq tx-sender .sbtc-vault) (err u100))
-    (cond
-      ((is-eq operation "wrap") (var-set wrap-fee-bps fee-bps))
-      ((is-eq operation "unwrap") (var-set unwrap-fee-bps fee-bps))
-      ((is-eq operation "performance") (var-set performance-fee-bps fee-bps))
-      ((is-eq operation "management") (var-set management-fee-bps fee-bps))
-      (else (err u3001))
-    )
-    (ok true)
-  )
-)
+    (if (is-eq operation "wrap")
+      (begin (var-set wrap-fee-bps fee-bps) (ok true))
+      (if (is-eq operation "unwrap")
+        (begin (var-set unwrap-fee-bps fee-bps) (ok true))
+        (if (is-eq operation "performance")
+          (begin (var-set performance-fee-bps fee-bps) (ok true))
+          (if (is-eq operation "management")
+            (begin (var-set management-fee-bps fee-bps) (ok true))
+            (err u3001)))))))

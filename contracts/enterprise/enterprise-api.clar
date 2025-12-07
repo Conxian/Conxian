@@ -4,6 +4,7 @@
 (define-constant ERR_UNAUTHORIZED (err u5000))
 (define-constant ERR_LIMIT_EXCEEDED (err u5001))
 (define-constant ERR_COMPLIANCE_FAIL (err u5002))
+(define-constant DEFAULT_CACHE_TTL u17280)
 
 (define-data-var contract-owner principal tx-sender)
 

@@ -3,17 +3,17 @@
 ;; Addresses governance token utility sinks and voting power concentration risks
 
 (use-trait token-trait .defi-traits.sip-010-ft-trait)
-(use-trait governance-token-trait .governance.governance-token-trait)
+(use-trait governance-token-trait .governance-traits.governance-token-trait)
 
 ;; --- Constants ---
 (define-constant CONTRACT_OWNER tx-sender)
 (define-constant PRECISION u100000000)
 
 ;; Voting power tiers based on lock duration (blocks)
-(define-constant TIER1_DURATION u10080)   ;; ~1 week
-(define-constant TIER2_DURATION u43200)   ;; ~1 month
-(define-constant TIER3_DURATION u129600)  ;; ~3 months
-(define-constant TIER4_DURATION u525600)  ;; ~1 year
+(define-constant TIER1_DURATION u120960)    ;; ~1 week (7 * 17280)
+(define-constant TIER2_DURATION u518400)    ;; ~1 month (30 * 17280)
+(define-constant TIER3_DURATION u1555200)   ;; ~3 months (90 * 17280)
+(define-constant TIER4_DURATION u6307200)   ;; ~1 year (365 * 17280)
 
 ;; Voting multipliers (basis points)
 (define-constant TIER1_MULTIPLIER u10000) ;; 1.0x
@@ -22,6 +22,7 @@
 (define-constant TIER4_MULTIPLIER u40000) ;; 4.0x
 
 ;; Fee discount tiers (basis points)
+(define-constant ONE_DAY u17280) ;; u144 * 120 blocks (approx 24 hours)
 (define-constant FEE_DISCOUNT_TIER1 u9500) ;; 5% discount
 (define-constant FEE_DISCOUNT_TIER2 u9000) ;; 10% discount
 (define-constant FEE_DISCOUNT_TIER3 u8500) ;; 15% discount

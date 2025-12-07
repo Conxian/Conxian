@@ -13,6 +13,7 @@
 (define-constant BAND1 u12500) ;; 1.25x  
 (define-constant BAND2 u15000) ;; 1.50x
 (define-constant BAND3 u20000) ;; 2.00x
+(define-constant BLOCKS_PER_DAY u17280) ;; u144 * 120
 
 ;; --- Errors ---
 (define-constant ERR_UNAUTHORIZED u500)

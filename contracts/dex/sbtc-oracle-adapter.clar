@@ -5,6 +5,7 @@
 ;; =============================================================================
 ;; CONSTANTS AND ERROR CODES
 ;; =============================================================================
+(define-constant ONE_DAY u17280) ;; u144 * 120
 (define-constant CONTRACT_OWNER tx-sender)
 (define-constant ERR_NOT_AUTHORIZED (err u3000))
 (define-constant ERR_INVALID_ORACLE (err u3001))

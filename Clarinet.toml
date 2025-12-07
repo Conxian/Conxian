@@ -40,6 +40,10 @@ depends_on = ["oracle-pricing", "security-monitoring"]
 path = "contracts/dimensional/dim-metrics.clar"
 address = "ST3N0ZC9HBPDEBEJ1H1QFGMJF3PSNGW3FYZSVN513"
 
+[contracts.risk-manager]
+path = "contracts/risk/risk-manager.clar"
+address = "ST3N0ZC9HBPDEBEJ1H1QFGMJF3PSNGW3FYZSVN513"
+
 [contracts.funding-rate-calculator]
 path = "contracts/core/funding-rate-calculator.clar"
 address = "ST3N0ZC9HBPDEBEJ1H1QFGMJF3PSNGW3FYZSVN513"
@@ -124,6 +128,10 @@ address = "ST3N0ZC9HBPDEBEJ1H1QFGMJF3PSNGW3FYZSVN513"
 
 [contracts.controller-traits]
 path = "contracts/traits/controller-traits.clar"
+address = "ST3N0ZC9HBPDEBEJ1H1QFGMJF3PSNGW3FYZSVN513"
+
+[contracts.automation-traits]
+path = "contracts/traits/automation-traits.clar"
 address = "ST3N0ZC9HBPDEBEJ1H1QFGMJF3PSNGW3FYZSVN513"
 
 [contracts.queue-traits]
@@ -383,6 +391,10 @@ depends_on = ["comprehensive-lending-system"]
 path = "contracts/automation/keeper-coordinator.clar"
 address = "ST3N0ZC9HBPDEBEJ1H1QFGMJF3PSNGW3FYZSVN513"
 
+[contracts.guardian-registry]
+path = "contracts/automation/guardian-registry.clar"
+address = "ST3N0ZC9HBPDEBEJ1H1QFGMJF3PSNGW3FYZSVN513"
+
 [contracts.lending-protocol-governance]
 path = "contracts/governance/lending-protocol-governance.clar"
 address = "ST3N0ZC9HBPDEBEJ1H1QFGMJF3PSNGW3FYZSVN513"
@@ -430,6 +442,19 @@ address = "ST3N0ZC9HBPDEBEJ1H1QFGMJF3PSNGW3FYZSVN513"
 [contracts.conxian-operations-engine]
 path = "contracts/governance/conxian-operations-engine.clar"
 address = "ST3N0ZC9HBPDEBEJ1H1QFGMJF3PSNGW3FYZSVN513"
+depends_on = ["token-emission-controller", "mev-protection-nft", "insurance-protection-nft", "bridge-nft"]
+
+[contracts.mev-protection-nft]
+path = "contracts/mev/mev-protection-nft.clar"
+address = "ST3N0ZC9HBPDEBEJ1H1QFGMJF3PSNGW3FYZSVN513"
+
+[contracts.insurance-protection-nft]
+path = "contracts/insurance/insurance-protection-nft.clar"
+address = "ST3N0ZC9HBPDEBEJ1H1QFGMJF3PSNGW3FYZSVN513"
+
+[contracts.bridge-nft]
+path = "contracts/cross-chain/bridge-nft.clar"
+address = "ST3N0ZC9HBPDEBEJ1H1QFGMJF3PSNGW3FYZSVN513"
 
 [contracts.funding-calculator]
 path = "contracts/risk/funding-calculator.clar"
@@ -437,10 +462,6 @@ address = "ST3N0ZC9HBPDEBEJ1H1QFGMJF3PSNGW3FYZSVN513"
 
 [contracts.liquidation-engine]
 path = "contracts/risk/liquidation-engine.clar"
-address = "ST3N0ZC9HBPDEBEJ1H1QFGMJF3PSNGW3FYZSVN513"
-
-[contracts.risk-manager]
-path = "contracts/risk/risk-manager.clar"
 address = "ST3N0ZC9HBPDEBEJ1H1QFGMJF3PSNGW3FYZSVN513"
 
 [contracts.sbtc-integration]
@@ -594,5 +615,28 @@ address = "ST3N0ZC9HBPDEBEJ1H1QFGMJF3PSNGW3FYZSVN513"
 [contracts.redstone-oracle-mock]
 path = "contracts/mocks/redstone-oracle-mock.clar"
 address = "ST3N0ZC9HBPDEBEJ1H1QFGMJF3PSNGW3FYZSVN513"
+
+# ---------- Vault Contracts ----------
+
+[contracts.custody]
+path = "contracts/vaults/custody.clar"
+address = "ST3N0ZC9HBPDEBEJ1H1QFGMJF3PSNGW3FYZSVN513"
+
+[contracts.yield-aggregator]
+path = "contracts/vaults/yield-aggregator.clar"
+address = "ST3N0ZC9HBPDEBEJ1H1QFGMJF3PSNGW3FYZSVN513"
+
+[contracts.btc-bridge]
+path = "contracts/vaults/btc-bridge.clar"
+address = "ST3N0ZC9HBPDEBEJ1H1QFGMJF3PSNGW3FYZSVN513"
+
+[contracts.fee-manager]
+path = "contracts/vaults/fee-manager.clar"
+address = "ST3N0ZC9HBPDEBEJ1H1QFGMJF3PSNGW3FYZSVN513"
+
+[contracts.sbtc-vault]
+path = "contracts/vaults/sbtc-vault.clar"
+address = "ST3N0ZC9HBPDEBEJ1H1QFGMJF3PSNGW3FYZSVN513"
+depends_on = ["sip-standards", "defi-traits", "custody", "yield-aggregator", "btc-bridge", "fee-manager"]
 
 # End of file

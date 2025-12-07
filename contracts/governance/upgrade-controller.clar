@@ -21,11 +21,11 @@
 (define-constant UPGRADE_IMPLEMENTATION u3)
 
 ;; ===== Timelock Settings =====
-(define-constant UPGRADE_TIMELOCK_BLOCKS u1008) ;; ~16.8 hours
-(define-constant APPROVAL_WINDOW_BLOCKS u4320) ;; ~3 days
+(define-constant UPGRADE_TIMELOCK_BLOCKS u120960) ;; 1008 * 120 (1 week)
+(define-constant APPROVAL_WINDOW_BLOCKS u518400) ;; 4320 * 120 (1 month)
 (define-constant REQUIRED_APPROVALS u3)
 (define-constant EMERGENCY_TIMELOCK u2) ;; ~20 minutes
-(define-constant ROLLBACK_WINDOW u144) ;; ~24 hours
+(define-constant MIN_DELAY u17280) ;; u144 * 120~24 hours
 
 ;; ===== Data Variables =====
 (define-data-var contract-owner principal tx-sender)

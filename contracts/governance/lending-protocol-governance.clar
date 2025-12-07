@@ -43,8 +43,9 @@
 (define-constant PROPOSAL_PENDING u1)
 (define-constant PROPOSAL_ACTIVE u2)
 (define-constant PROPOSAL_SUCCEEDED u3)
-(define-constant PROPOSAL_DEFEATED u4)
-(define-constant PROPOSAL_QUEUED u5)
+(define-constant PROPOSAL_QUEUED u4)
+(define-constant PROPOSAL_DELAY u17280) ;; u144 * 120
+(define-constant VOTING_PERIOD u120960) ;; 1008 * 120 (1 week)
 (define-constant PROPOSAL_EXECUTED u6)
 (define-constant PROPOSAL_CANCELLED u7)
 

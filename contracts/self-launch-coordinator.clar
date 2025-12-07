@@ -42,7 +42,7 @@
 ;; OPEX loan configuration constants
 (define-constant OPEX_LOAN_MIN_YEARS u5)              ;; 5 years minimum
 (define-constant OPEX_LOAN_MAX_YEARS u8)              ;; 8 years maximum  
-(define-constant OPEX_LOAN_BLOCKS_PER_YEAR u52560)     ;; ~52,560 blocks/year
+(define-constant OPEX_LOAN_BLOCKS_PER_YEAR u6307200)     ;; ~6,307,200 blocks/year (Nakamoto 5s blocks)
 (define-constant OPEX_LOAN_SUCCESS_MULTIPLIER u1500)  ;; 1.5x success multiplier
 
 ;; Repayment trigger thresholds

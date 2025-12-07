@@ -13,6 +13,7 @@
 
 ;; ===== Cache Configuration =====
 (define-constant MAX_CACHE_ENTRIES u1000)
+(define-constant ONE_DAY u17280) ;; u144 * 120blocks
 (define-constant DEFAULT_TTL u144) ;; ~24 hours in blocks
 (define-constant CLEANUP_THRESHOLD u900) ;; Cleanup when 90% full
 

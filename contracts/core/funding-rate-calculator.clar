@@ -10,6 +10,7 @@
 ;; @constants
 (define-constant ERR_UNAUTHORIZED (err u1001))
 (define-constant ERR_INVALID_TASK (err u9004))
+(define-constant ONE_DAY u17280) ;; u144 * 120
 (define-constant ERR_TASK_NOT_READY (err u9003))
 (define-constant ERR_POSITION_NOT_PERPETUAL (err u4003))
 (define-constant ROLE_OPERATOR "ROLE_OPERATOR") ;; Added missing constant

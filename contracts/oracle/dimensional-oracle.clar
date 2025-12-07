@@ -18,7 +18,8 @@
 (define-constant ERR_CONTRACT_PAUSED u107)
 
 ;; Data structures
-(define-constant DEFAULT_HEARTBEAT u1440)  ;; ~1 day in blocks
+(define-constant DEFAULT_HEARTBEAT u17280) ;; ~1 day in blocks
+(define-constant ONE_DAY u17280) ;; u144 * 120 for Nakamoto per token
 (define-constant DEFAULT_MAX_DEVIATION u500)  ;; 5% in basis points
 (define-constant MAX_FEEDS u10)  ;; Maximum number of feeds per token
 

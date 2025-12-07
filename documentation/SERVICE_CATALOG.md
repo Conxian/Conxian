@@ -3,6 +3,7 @@
 This catalog summarizes the main services provided by the Conxian ecosystem (on-chain protocol, tooling, and user interfaces). It is intended for internal teams, prospective institutional clients, and partners.
 
 > **Maturity & Availability (as of 2025-12-06)**
+>
 > - Conxian smart contracts are in **technical alpha on testnet** and **not yet production-ready**.
 > - Enterprise support tiers, formal SLAs, and REST APIs are **target designs** and will only be offered after security audits and regulatory review.
 > - This catalog is a **planning and alignment tool**, not a legal commitment.
@@ -77,13 +78,15 @@ This catalog summarizes the main services provided by the Conxian ecosystem (on-
 - **Status**: **Stable tooling**, used for Conxian testnet deployments; still evolving.
 - **SLA**: No hosted SLA; support via open-source processes and any enterprise arrangements outside this repo.
 
-### 2.2 Operations Runbook & Regulatory Alignment
+### 2.2 Operations, Identity & Regulatory Alignment
 
 - **Docs**:
   - `documentation/OPERATIONS_RUNBOOK.md` – incident playbooks and SOPs for core contracts.
   - `documentation/REGULATORY_ALIGNMENT.md` – mapping contracts/tests to regulatory-style objectives.
-- **Description**: Internal knowledge base for operations, risk, and compliance teams.
-- **Status**: **Living documentation**, updated alongside contract changes.
+  - `documentation/IDENTITY_KYC_POPIA.md` – identity, KYC/KYB and POPIA alignment charter (Conxian and Conxian Labs).
+  - `documentation/TREASURY_AND_REVENUE_ROUTER.md` – protocol treasury and revenue routing design.
+- **Description**: Internal knowledge base for operations, risk, compliance, and treasury teams.
+- **Status**: **Living documentation**, updated alongside contract changes and governance decisions.
 
 ### 2.3 Test & Verification Framework
 
@@ -91,6 +94,21 @@ This catalog summarizes the main services provided by the Conxian ecosystem (on-
 - **Description**: Vitest-based test harness and Clarinet checks (unit, integration, system tests).
 - **Docs**: `DEVELOPER_GUIDE.md`, references in `ROADMAP.md` and `REGULATORY_ALIGNMENT.md`.
 - **Status**: **Active**, but still expanding as new modules and scenarios are covered.
+
+### 2.4 Guardian Network & Automation SDK (Planned)
+
+- **Repos**: `Conxian_UI` (shared TS client stack), future dedicated package for Guardian SDK/CLI.
+- **Description**: TypeScript SDK and reference Guardian client for running bonded automation
+  on behalf of the protocol and enterprise users. Guardians use the Hiro Core API
+  (`/v2/contracts/call-read`, `/extended/v1/*`) to:
+  - Discover automation targets via `keeper-coordinator.clar`.
+  - Call read-only views such as `get-runnable-actions` and `get-action-needed`.
+  - Submit on-chain `execute-action` or governance transactions when required.
+- **Primary users**: Internal ops, institutional partners running their own Guardians,
+  and community automation providers.
+- **Delivery form**: SDK + CLI, built on the same Stacks client utilities as Conxian_UI.
+- **Status**: **Planned**, to be developed alongside the Conxian Operations Engine and
+  Guardian registry.
 
 ---
 

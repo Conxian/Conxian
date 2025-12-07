@@ -15,13 +15,14 @@
 (define-constant CXTR_MAX_ANNUAL_INFLATION u10000) ;; 10% max for creator token
 
 ;; Hard caps per epoch (blocks)
-(define-constant EPOCH_BLOCKS u52560) ;; ~1 year at 1 min blocks
+(define-constant EMISSION_PERIOD u6307200) ;; 1 year in Nakamoto blocks
+(define-constant EPOCH_BLOCKS u6307200) ;; Alias for EMISSION_PERIOD
 (define-constant MAX_SINGLE_MINT_BPS u100) ;; 1% of supply max per mint
 
 ;; Governance requirements for changes
 (define-constant SUPERMAJORITY_THRESHOLD u6667) ;; 66.67% required
-(define-constant TIMELOCK_BLOCKS u20160) ;; ~2 weeks minimum delay
-(define-constant EMERGENCY_TIMELOCK u1440) ;; ~1 day for emergency reduction
+(define-constant TIMELOCK_BLOCKS u2419200) ;; ~2 weeks in Nakamoto blocks (20160 * 120)
+(define-constant EMERGENCY_TIMELOCK u172800) ;; ~1 day in Nakamoto blocks (1440 * 120) (17280 blocks)
 
 ;; --- Errors ---
 (define-constant ERR_UNAUTHORIZED u700)

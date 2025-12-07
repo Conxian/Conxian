@@ -10,6 +10,7 @@
 ;; ===========================================
 ;; DATA STRUCTURES
 ;; ===========================================
+(define-constant TIMELOCK_DELAY u17280) ;; u144 * 120 blocks (approx 24 hours)
 (define-constant MIN_DELAY u144)  ;; 1 day
 (define-constant MAX_DELAY u10080) ;; 1 week
 

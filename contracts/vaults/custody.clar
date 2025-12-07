@@ -2,6 +2,7 @@
 
 ;; Custody Contract
 ;; This contract manages the custody of sBTC deposits and withdrawals for the sBTC vault.
+
 (define-trait custody-trait
   (
     ;; @desc Deposits sBTC into the custody contract and mints shares.
@@ -86,10 +87,9 @@
 ;; @param amount uint The amount of sBTC to deposit.
 ;; @param recipient principal The user depositing the sBTC.
 ;; @returns (response uint uint) The number of shares minted.
-(define-public (deposit (token-contract principal) (amount uint) (recipient principal))
+(define-public (deposit (amount uint) (recipient principal))
   (begin
     (asserts! (is-eq tx-sender .sbtc-vault) (err u100))
-    (try! (contract-call? token-contract transfer amount recipient (as-contract tx-sender) none))
     (let ((shares (calculate-shares-to-mint amount)))
       (match (map-get? user-deposits recipient)
         existing
@@ -118,7 +118,7 @@
 ;; @param shares uint The number of shares to burn.
 ;; @param recipient principal The user withdrawing sBTC.
 ;; @returns (response uint uint) The amount of sBTC to be withdrawn.
-(define-public (withdraw (token-contract principal) (shares uint) (recipient principal))
+(define-public (withdraw (shares uint) (recipient principal))
   (begin
     (asserts! (is-eq tx-sender .sbtc-vault) (err u100))
     (let ((user-shares (default-to u0 (map-get? share-balances recipient))))
@@ -138,13 +138,12 @@
 ;; @param token-contract principal The sBTC token contract.
 ;; @param recipient principal The user completing the withdrawal.
 ;; @returns (response uint uint) The amount of sBTC withdrawn.
-(define-public (complete-withdrawal (token-contract principal) (recipient principal))
+(define-public (complete-withdrawal (recipient principal))
   (begin
     (asserts! (is-eq tx-sender .sbtc-vault) (err u100))
     (let ((request (unwrap! (map-get? withdrawal-requests recipient) (err u2001))))
       (asserts! (>= block-height (get unlock-at request)) (err u2005))
       (let ((amount (get amount request)))
-        (try! (as-contract (contract-call? token-contract transfer amount (as-contract tx-sender) recipient none)))
         (map-delete withdrawal-requests recipient)
         (var-set total-sbtc-deposited (- (var-get total-sbtc-deposited) amount))
         (ok amount)))))

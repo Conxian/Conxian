@@ -30,6 +30,8 @@ The Conxian Protocol is organized into a series of specialized modules:
 - **[🗺️ Roadmap](./ROADMAP.md)** - Development phases and milestones
 - **[📝 Changelog](./CHANGELOG.md)** - Version history and features
 - **[✅ TODO Audit Report](./TODO_AUDIT_REPORT.md)** - Production readiness status
+ - **[🧩 Identity, KYC & POPIA Charter](./documentation/IDENTITY_KYC_POPIA.md)** - Identity, KYC/KYB and POPIA alignment for Conxian and Conxian Labs
+ - **[💰 Treasury & Revenue Router Design](./documentation/TREASURY_AND_REVENUE_ROUTER.md)** - Protocol treasury and fee routing architecture
 
 ### For Developers
 - **[Developer Guide](./documentation/developer/DEVELOPER_GUIDE.md)** - Setup and development workflow

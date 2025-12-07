@@ -12,6 +12,7 @@
 
 ;; =============================================================================
 (define-constant CONTRACT_OWNER tx-sender)
+(define-constant ONE_DAY u17280) ;; u144 * 120 for Nakamotoer)
 (define-constant ERR_NOT_AUTHORIZED (err u2000))
 (define-constant ERR_BITCOIN_REORG_DETECTED (err u2001))
 (define-constant ERR_INSUFFICIENT_FINALITY (err u2002))

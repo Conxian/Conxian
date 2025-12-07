@@ -24,20 +24,21 @@ describe('Conxian Operations Engine', () => {
 
   it('exposes basic ops dashboard and config', () => {
     const config = simnet.callReadOnlyFn(
-      'conxian-operations-engine',
-      'get-config',
+      "conxian-operations-engine",
+      "get-config",
       [],
-      deployer,
+      deployer
     );
-    expect((config.result as any)).toBeOk();
+    // get-config returns a tuple, not a response
+    expect(config.result).toBeTuple();
 
     const ops = simnet.callReadOnlyFn(
-      'conxian-operations-engine',
-      'get-ops-dashboard',
+      "conxian-operations-engine",
+      "get-ops-dashboard",
       [],
-      deployer,
+      deployer
     );
-    expect((ops.result as any)).toBeOk();
+    expect(ops.result).toBeOk(Cl.tuple({}));
   });
 
   it('wires lending, MEV, insurance, and bridge systems and exposes user dashboards', () => {

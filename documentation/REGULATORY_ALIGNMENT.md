@@ -157,6 +157,32 @@ It is **not** legal advice, but a technical alignment guide to support audits, i
   - Structured testing and review process demonstrates ongoing operational due diligence.
   - Facilitates external audits and supervisory reviews.
 
+### 5.3 Guardian Network & Automation (Planned)
+
+- **Contracts / components (planned)**
+  - `conxian-operations-engine.clar` – automated Operations & Resilience council seat.
+  - `guardian-registry.clar` – bonded Guardian registry in CXD (tiers, slashing).
+  - `keeper-coordinator.clar` and automation targets implementing `automation-trait`
+    (e.g., `liquidation-manager.clar`, `yield-optimizer.clar`, `funding-rate-calculator.clar`).
+  - `ops-service-vault.clar` – CXD-funded service vault for automation and infrastructure OpEx.
+- **Key controls (design)**
+  - Guardians must bond CXD in `guardian-registry` to execute high-impact automated actions
+    (liquidations, rebalances, funding updates, operations engine votes).
+  - Slashing mechanisms allow governance to penalize malicious or persistently failing
+    Guardians, protecting users from unfair execution or neglected automation.
+  - Off-chain monitoring and decision logic runs via Conxian Guardian tooling that uses the
+    Hiro Core API (`/v2/contracts/call-read`, extended endpoints) for read-only views,
+    minimizing on-chain gas and centralizing observability.
+  - The Conxian Operations Engine encodes deterministic policies in `ops-policy.clar` for
+    when to adjust Guardian rewards, fee splits, or service vault funding, based on
+    objective metrics.
+- **Regulatory rationale**
+  - Supports **operational resilience** by ensuring critical automated tasks (liquidations,
+    risk updates, governance operations) are handled by accountable, bonded actors rather
+    than anonymous bots.
+  - Aligns off-chain automation with on-chain governance and capital at risk, aiding
+    supervisory review of outsourcing, third-party risk, and fair treatment of users.
+
 ---
 
 ## 6. Gaps & Future Work
@@ -171,5 +197,8 @@ The following areas are identified for further alignment work:
 - **Off-Chain Processes**
   - Runbooks for governance proposal reviews.
   - Expanded incident playbooks and SLAs.
+  - Consolidation of identity, KYC/KYB and POPIA practices under
+    `IDENTITY_KYC_POPIA.md`, with Conxian Labs as the primary off-chain
+    processor and controller for personal and business data.
 
 These items should be tracked as separate enhancements and validated via additional tests and documentation updates.

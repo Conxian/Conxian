@@ -78,6 +78,50 @@ This runbook maps key on-chain contracts, events, and admin controls to operatio
     - Use `activate-emergency-mode` only during severe incidents; this may block certain coordinated operations.
     - Always document reason, timestamp, and expected resolution path in ops logs.
 
+### 1.4 Conxian Operations Engine & Guardian Automation
+
+- **Purpose**
+  - Provide an on-chain, deterministic "operations seat" for the Operations & Resilience Council.
+  - Aggregate system metrics (LegEx / DevEx / OpEx / CapEx / InvEx) and recommend parameter changes.
+  - Coordinate with a bonded Guardian network that performs off-chain monitoring and on-chain execution.
+- **Key contracts (planned / in design)**
+  - `conxian-operations-engine.clar` – on-chain policy engine and council seat.
+  - `keeper-coordinator.clar` – registry of automation targets implementing a shared `automation-trait`.
+  - `guardian-registry.clar` – manages Guardian roles, CXD bonding, tiers, and slashing.
+  - `ops-service-vault.clar` – service vault for funding Guardian rewards and automation OpEx in CXD (to be aligned with `TREASURY_AND_REVENUE_ROUTER.md` as that design is implemented).
+  - Automation targets: `liquidation-manager.clar`, `yield-optimizer.clar`, `funding-rate-calculator.clar`, and others.
+- **Operational model**
+  - Guardians run off-chain software (CLI/SDK) that:
+    - Uses the Hiro Core API (`/v2/contracts/call-read`, extended APIs) to call read-only views
+      such as `get-runnable-actions` and `get-action-needed`.
+    - Submits transactions (e.g. `execute-action`, `execute-vote`) only when required and
+      when Guardian tier/permissions allow it.
+  - The Operations Engine reads Guardian metrics (coverage, success rate, vault balance) and
+    encodes policy in `ops-policy.clar` to recommend:
+    - Adjustments to fee splits into `ops-service-vault`.
+    - Changes to Guardian rewards or bond thresholds.
+    - Temporary restrictions on high-risk modules if automation coverage is degraded.
+- **SOPs (Guardian & Ops Engine)**
+  - **Normal operations**
+    - Guardians continuously poll read-only views via Hiro API. No on-chain gas is consumed
+      until an action is actually needed.
+    - `ops-service-vault` maintains a target CXD buffer (e.g. several months of projected
+      automation spend).
+  - **When automation coverage degrades**
+    - Monitor Guardian metrics (active Guardians, tiers, success/failure rates) via
+      dashboards and on-chain views.
+    - If coverage or success rate drops below thresholds, the Operations & Resilience
+      Council should:
+      - Review Ops Engine recommendations from `get-action-needed`.
+      - Initiate governance actions to increase Guardian rewards, adjust fee splits into
+        `ops-service-vault`, or throttle risky modules.
+  - **When ops budget is low**
+    - If `ops-service-vault` balance falls below agreed minimums, treat this as an
+      operational risk.
+    - Use governance to either:
+      - Increase the fee-share routed to `ops-service-vault` via `protocol-fee-switch`.
+      - Allocate a one-off top-up from treasury vaults, with clear change records.
+
 ---
 
 ## 2. Risk & Lending Operations

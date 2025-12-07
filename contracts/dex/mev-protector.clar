@@ -22,15 +22,15 @@
 ;; @desc Error: Circuit breaker is open, preventing transactions.
 (define-constant ERR_CIRCUIT_OPEN (err u6008))
 ;; @desc The principal of the router contract.
-(define-constant ROUTER_CONTRACT .dimensional-advanced-router-dijkstra)
+(define-constant ROUTER_CONTRACT .multi-hop-router-v3)
 
 ;; --- Data Variables ---
 ;; @desc The principal of the contract owner.
 (define-data-var contract-owner principal tx-sender)
 ;; @desc The number of blocks for the reveal period.
-(define-data-var reveal-period uint u10)
+(define-data-var reveal-period uint u24) ;; ~2 minutes (Nakamoto)
 ;; @desc The number of blocks for the batch auction period.
-(define-data-var batch-auction-period uint u5)
+(define-data-var batch-auction-period uint u12) ;; ~1 minute (Nakamoto)
 ;; @desc The block height of the last batch execution.
 (define-data-var last-batch-execution uint u0)
 ;; @desc Optional principal of a circuit breaker contract.

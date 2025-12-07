@@ -58,6 +58,8 @@ See `documentation/enterprise/COMPLIANCE_SECURITY.md` for full details. Key poin
 - **Governance**:
   - Governance token, proposal engine, proposal registry, and voting modules.
   - Planned council structure and Conxian Operations Engine seat.
+  - Planned bonded Guardian network (with CXD bonding and slashing) and a Guardian
+    automation SDK/CLI that uses Hiro Core API for monitoring and execution.
 
 For a technical mapping of these elements to regulatory-style objectives, see `REGULATORY_ALIGNMENT.md`.
 
@@ -65,7 +67,12 @@ For a technical mapping of these elements to regulatory-style objectives, see `R
 
 - **On-chain integration**: Direct Clarity calls via Stacks nodes (Hiro Core API endpoints) for trading, lending, governance, and monitoring.
 - **Deployment integration**: StacksOrbit JS/Python APIs and CLI for managing deployments (see `stacksorbit/docs/api.md` and `stacksorbit/README_ENHANCED.md`).
-- **Planned enterprise REST APIs**: Compliance, analytics, and audit-oriented endpoints described conceptually in `COMPLIANCE_SECURITY.md` and more concretely in `API_OVERVIEW.md`.
+- **Guardian & Automation SDK (Planned)**: TypeScript SDK and reference Guardian client built
+  on the same stack as Conxian_UI, enabling institutions to run their own bonded Guardians
+  that monitor metrics via Hiro Core API and execute automated on-chain actions.
+- **Planned enterprise REST APIs**: Compliance, analytics, and audit-oriented endpoints
+  described conceptually in `COMPLIANCE_SECURITY.md` and more concretely in
+  `API_OVERVIEW.md`.
 
 Integration teams should treat the on-chain and StacksOrbit interfaces as **primary integration points** until REST services are explicitly documented as GA.
 

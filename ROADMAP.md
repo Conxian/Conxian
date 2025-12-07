@@ -38,6 +38,10 @@ The phases below incorporate the agreed recommendations around:
     - Keep `OPERATIONS_RUNBOOK.md` and `REGULATORY_ALIGNMENT.md` synchronized
       with code changes and test coverage, especially for critical paths
       (lending, DEX, fee routing, insurance, circuit breaker, oracle).
+    - Maintain `IDENTITY_KYC_POPIA.md` as the single source of truth for
+      identity, KYC/KYB and POPIA alignment, and
+      `TREASURY_AND_REVENUE_ROUTER.md` as the reference for protocol revenue
+      routing and vault design.
     - Maintain `NAMING_STANDARDS.md` as the single source of truth for token,
       council, and contract naming.
   - **Security & monitoring basics**
@@ -92,18 +96,22 @@ The phases below incorporate the agreed recommendations around:
       regulatory-friendly labels (e.g., `risk-and-compliance-council-member`).
 
   - **Conxian Automated Operations Seat**
-    - Design and implement `conxian-operations-engine.clar` as a governance
-      engine that:
+    - Design and implement `conxian-operations-engine.clar` with **deterministic on-chain policy logic**:
+      - Replace manual voting maps with `ops-policy.clar` library.
       - Reads metrics from `token-system-coordinator.clar`, risk/treasury
         contracts, circuit breaker, and oracle modules.
-      - Aggregates LegEx / DevEx / OpEx / CapEx / InvEx-style inputs into a
-        deterministic voting policy.
+      - Aggregates LegEx / DevEx / OpEx / CapEx / InvEx-style inputs.
       - Holds an Operations & Resilience Council membership NFT.
       - Casts votes via `proposal-engine.clar` as an on-chain contract
         principal.
     - Add governance tests to assert that the Conxian Operations Engine seat
       can participate in voting and that its policy respects risk and
       regulatory guardrails.
+
+  - **Guardian Network & Automation Scaffolding**
+    - Design and implement `guardian-registry.clar` for managing Guardian roles and bonding in CXD.
+    - Wire `keeper-coordinator.clar` and automation targets to enforce Guardian checks via a shared `automation-trait`.
+    - Add baseline tests for Guardian registration, bonding/unbonding, and basic misbehavior cases.
 
   - **Position NFTs & DAO Role NFTs**
     - Design NFT schemas and traits for:
@@ -115,10 +123,12 @@ The phases below incorporate the agreed recommendations around:
     - Ensure these NFTs integrate cleanly with the existing token system,
       emission controls, and governance modules.
 
-  - **Service Vaults for External / Infrastructure Spend**
+  - **Service Vaults & Treasury / Fee Routing**
     - Design a "service vault" pattern for holding CXD (and possibly CXTR) to
       pay for on-chain / off-chain services (e.g., bridges, oracles,
       infrastructure providers).
+    - Align service vaults and protocol fee distribution with the patterns
+      described in `TREASURY_AND_REVENUE_ROUTER.md` as they are implemented.
     - Implement one or more vault contracts governed by the Treasury &
       Investment and Operations & Resilience councils, with clear budget and
       withdrawal policies.
@@ -146,6 +156,9 @@ The phases below incorporate the agreed recommendations around:
   - **Governance & Council Behavior**
     - Add tests for quorum, proposal lifecycle, council-based permissions, and
       the impact of the Conxian Operations Engine seat on governance outcomes.
+  - **Bonded Guardian Economics**
+    - Scenario-test Guardian reward and slashing parameters (bond sizes in CXD, rewards per action, slashing amounts).
+    - Validate that Guardian incentives remain aligned with protocol safety under stress scenarios.
   - **Regulatory Alignment Extensions**
     - Extend `REGULATORY_ALIGNMENT.md` with more concrete mappings from
       specific contracts and tests to regulatory-style objectives and stress

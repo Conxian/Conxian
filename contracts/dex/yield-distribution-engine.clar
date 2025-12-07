@@ -18,9 +18,9 @@
 ;; ===== Precision and Time Constants =====
 (define-constant PRECISION u1000000000000000000) ;; 18 decimals
 (define-constant BASIS_POINTS u10000)
-(define-constant BLOCKS_PER_DAY u144)
-(define-constant BLOCKS_PER_WEEK u1008)
-(define-constant BLOCKS_PER_MONTH u4320)
+(define-constant ONE_DAY u17280) ;; u144 * 120
+(define-constant BLOCKS_PER_WEEK u120960) ;; 1008 * 120
+(define-constant BLOCKS_PER_MONTH u518400) ;; 4320 * 120
 
 ;; ===== Pool Types =====
 (define-constant POOL_TYPE_BOND "BOND")

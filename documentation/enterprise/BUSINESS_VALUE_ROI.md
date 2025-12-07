@@ -5,6 +5,7 @@
 Conxian Protocol offers institutional-grade DeFi infrastructure with measurable ROI improvements across trading efficiency, capital utilization, and operational cost reduction. This analysis demonstrates how enterprise adoption delivers 3-5x better economics compared to traditional finance while maintaining regulatory compliance.
 
 > **Maturity & Availability (as of 2025-12-06)**
+>
 > - The Conxian Protocol is in a **stabilization & alignment phase on testnet** and is **not yet production-ready for mainnet**.
 > - This ROI analysis describes a **target institutional platform design** rather than an already-operational regulated service.
 > - For a current view of services and status, see `documentation/SERVICE_CATALOG.md` and `documentation/ENTERPRISE_BUY_OVERVIEW.md`.
@@ -32,7 +33,19 @@ Conxian Protocol offers institutional-grade DeFi infrastructure with measurable 
 **Manual Processes**: 2-5 days settlement, 10-20 staff for operations
 **Conxian Automation**: Real-time settlement, 90% process automation
 
-**ROI Impact**: 70-85% reduction in operational costs saves $1.2M-$2M annually
+**ROI Impact**: 70-85% reduction in operational costs saves $1.2M-$2M annually.
+
+Conxian achieves this via a bonded Guardian network and Operations Engine that move
+monitoring and execution off human runbooks and into automated, policy-driven flows:
+
+- Guardians, bonded in CXD, use the Guardian SDK/CLI and Hiro Core API to watch prices,
+  health factors, and operational metrics in real time.
+- Only the necessary on-chain transactions (liquidations, rebalances, governance
+  executions) are submitted, minimizing gas costs while maintaining strong risk
+  controls.
+- An `ops-service-vault` funded in CXD covers automation OpEx (Guardian rewards,
+  infrastructure), aligning operating costs directly with protocol revenues and
+  usage.
 
 #### 4. Revenue Enhancement
 
