@@ -102,7 +102,7 @@
 (define-private (check-emission-allowed (amount uint))
   (if (not (var-get system-integration-enabled))
     true
-    (let ((limits-opt (unwrap! (contract-call? .token-emission-controller get-token-emission-limits .cxd-token) none)))
+    (let ((limits-opt (unwrap! (contract-call? .token-emission-controller get-token-emission-limits .cxd-token) true)))
       (match limits-opt
         some-limits
           (let (

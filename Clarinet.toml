@@ -89,7 +89,12 @@ address = "ST3N0ZC9HBPDEBEJ1H1QFGMJF3PSNGW3FYZSVN513"
 [contracts.dimensional-engine]
 path = "contracts/core/dimensional-engine.clar"
 address = "ST3N0ZC9HBPDEBEJ1H1QFGMJF3PSNGW3FYZSVN513"
-depends_on = ["position-manager", "collateral-manager", "funding-rate-calculator", "risk-manager"]
+depends_on = [
+    "position-manager",
+    "collateral-manager",
+    "funding-rate-calculator",
+    "risk-manager",
+]
 
 [contracts.position-manager]
 path = "contracts/core/position-manager.clar"
@@ -120,7 +125,12 @@ depends_on = ["defi-traits"]
 [contracts.economic-policy-engine]
 path = "contracts/core/economic-policy-engine.clar"
 address = "ST3N0ZC9HBPDEBEJ1H1QFGMJF3PSNGW3FYZSVN513"
-depends_on = ["defi-traits", "protocol-fee-switch", "operational-treasury", "tier-manager"]
+depends_on = [
+    "defi-traits",
+    "protocol-fee-switch",
+    "operational-treasury",
+    "tier-manager",
+]
 
 # ---------- Traits ----------
 # Modular Trait Architecture
@@ -185,19 +195,7 @@ address = "ST3N0ZC9HBPDEBEJ1H1QFGMJF3PSNGW3FYZSVN513"
 
 # ---------- Shared Traits (Refactored) ----------
 
-[contracts.accounts.deployer]
-address = "ST3N0ZC9HBPDEBEJ1H1QFGMJF3PSNGW3FYZSVN513"
-
-[contracts.accounts.wallet_1]
-address = "ST1SJ3DTE5DN7X54YDH5D64R3BCB6A2AG2ZQ8YPD5"
-
-[contracts.accounts.wallet_2]
-address = "ST2NEB84ASENDXKYGJPQW86YXQCEFEX2ZQPG87ND"
-
-[contracts.accounts.wallet_3]
-address = "ST2REHHS5J3CERCRBEPMGH7921Q6PYKAADT7JP2VB"
-
-# ---------- REPL Remappings ----------
+# ---------- Core Contracts ---------- REPL Remappings ----------
 [repl.remappings]
 
 # ---------- Contract Remappings ----------
@@ -481,7 +479,12 @@ address = "ST3N0ZC9HBPDEBEJ1H1QFGMJF3PSNGW3FYZSVN513"
 [contracts.conxian-operations-engine]
 path = "contracts/governance/conxian-operations-engine.clar"
 address = "ST3N0ZC9HBPDEBEJ1H1QFGMJF3PSNGW3FYZSVN513"
-depends_on = ["token-emission-controller", "mev-protection-nft", "insurance-protection-nft", "bridge-nft"]
+depends_on = [
+    "token-emission-controller",
+    "mev-protection-nft",
+    "insurance-protection-nft",
+    "bridge-nft",
+]
 
 [contracts.mev-protection-nft]
 path = "contracts/mev/mev-protection-nft.clar"
@@ -676,6 +679,13 @@ address = "ST3N0ZC9HBPDEBEJ1H1QFGMJF3PSNGW3FYZSVN513"
 [contracts.sbtc-vault]
 path = "contracts/vaults/sbtc-vault.clar"
 address = "ST3N0ZC9HBPDEBEJ1H1QFGMJF3PSNGW3FYZSVN513"
-depends_on = ["sip-standards", "defi-traits", "custody", "yield-aggregator", "btc-bridge", "fee-manager"]
+depends_on = [
+    "sip-standards",
+    "defi-traits",
+    "custody",
+    "yield-aggregator",
+    "btc-bridge",
+    "fee-manager",
+]
 
 # End of file
