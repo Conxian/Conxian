@@ -7,6 +7,15 @@
 (define-data-var min-bond-tier-1 uint u100000000)
 (define-data-var min-bond-tier-2 uint u1000000000)
 
+(define-data-var reward-admin principal tx-sender)
+
+(define-map guardian-rewards
+  principal
+  {
+    accrued: uint,
+  }
+)
+
 (define-map guardians
   principal
   {
@@ -134,4 +143,77 @@
 
 (define-read-only (get-guardian-info (who principal))
   (ok (map-get? guardians who))
+)
+
+(define-public (set-min-bond-tiers (tier-1 uint) (tier-2 uint))
+  (begin
+    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
+    (asserts! (> tier-1 u0) ERR_INVALID_AMOUNT)
+    (asserts! (>= tier-2 tier-1) ERR_INVALID_AMOUNT)
+    (var-set min-bond-tier-1 tier-1)
+    (var-set min-bond-tier-2 tier-2)
+    (ok true)
+  )
+)
+
+(define-public (set-reward-admin (new-admin principal))
+  (begin
+    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
+    (var-set reward-admin new-admin)
+    (ok true)
+  )
+)
+
+(define-public (credit-reward (guardian principal) (amount uint))
+  (begin
+    (asserts! (is-eq tx-sender (var-get reward-admin)) ERR_UNAUTHORIZED)
+    (asserts! (> amount u0) ERR_INVALID_AMOUNT)
+    (let
+      (
+        (g (map-get? guardians guardian))
+      )
+      (asserts! (is-some g) ERR_UNKNOWN_GUARDIAN)
+      (let
+        (
+          (current (default-to { accrued: u0 } (map-get? guardian-rewards guardian)))
+        )
+        (map-set guardian-rewards guardian
+          {
+            accrued: (+ (get accrued current) amount),
+          }
+        )
+        (ok true)
+      )
+    )
+  )
+)
+
+(define-read-only (get-accrued-rewards (who principal))
+  (let
+    (
+      (entry (map-get? guardian-rewards who))
+    )
+    (ok (if (is-some entry)
+            (get accrued (unwrap-panic entry))
+            u0))
+  )
+)
+
+(define-public (claim-rewards (guardian principal))
+  (begin
+    (asserts! (is-eq tx-sender guardian) ERR_UNAUTHORIZED)
+    (let
+      (
+        (entry (map-get? guardian-rewards guardian))
+      )
+      (if (is-some entry)
+          (let
+            (
+              (value (get accrued (unwrap-panic entry)))
+            )
+            (begin
+              (map-set guardian-rewards guardian { accrued: u0 })
+              (ok value)))
+          (ok u0)))
+  )
 )

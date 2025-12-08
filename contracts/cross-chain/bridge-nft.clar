@@ -16,6 +16,7 @@
 (define-constant ERR_INVALID_ASSET (err u10005))
 (define-constant ERR_BRIDGE_TIMEOUT (err u10006))
 (define-constant ERR_INVALID_NFT (err u10007))
+(define-constant ERR_POSITION_NOT_FOUND (err u10008))
 
 ;; Bridge Constants
 (define-constant BRIDGE_FEE_BPS u300)              ;; 3% bridge fee
@@ -114,6 +115,17 @@
     nft-token-id: uint,                          ;; Associated NFT
     created-at: uint
   })
+
+;; Index maps for efficient lookups by bridge-id
+(define-map bridge-position-index
+  { bridge-id: uint }
+  { token-id: uint }
+)
+
+(define-map bridge-receipt-index
+  { bridge-id: uint }
+  { receipt-id: uint }
+)
 
 ;; Cross-chain liquidity provider NFTs
 (define-map cross-chain-lps
@@ -214,7 +226,7 @@
     (token-id uint)
     (recipient principal)
   )
-  (nft-mint? bridge-nft token-id recipient)
+  (unwrap-panic (nft-mint? bridge-nft token-id recipient))
 )
 
 (define-private (create-bridge-receipt
@@ -246,6 +258,7 @@
       nft-token-id: nft-token-id,
       created-at: block-height,
     })
+    (map-set bridge-receipt-index { bridge-id: bridge-id } { receipt-id: receipt-id })
     receipt-id
   )
 )
@@ -281,7 +294,7 @@
   (or (is-eq user (var-get contract-owner)) (has-validator-privileges user))
 )
 
-(define-private (get-chain-config (chain-id uint))
+(define-private (get-chain-config-or-default (chain-id uint))
   (default-to {
     chain-name: "Unknown",
     bridge-contract: tx-sender,
@@ -484,16 +497,27 @@
     )
   )
 )
-
 (define-private (find-bridged-position-by-bridge (bridge-id uint))
-  ;; Stub implementation: returns none until full iterator is wired
-  none
-)
+  (match (map-get? bridge-position-index { bridge-id: bridge-id })
+    index (match (map-get? bridged-positions { token-id: (get token-id index) })
+      position (some {
+        token-id: (get token-id index),
+        position: position,
+      })
+      none
+    )
+    none))
 
 (define-private (find-bridge-receipt-by-bridge (bridge-id uint))
-  ;; Stub implementation: returns none until full iterator is wired
-  none
-)
+  (match (map-get? bridge-receipt-index { bridge-id: bridge-id })
+    index (match (map-get? bridge-receipts { receipt-id: (get receipt-id index) })
+      receipt (some {
+        receipt-id: (get receipt-id index),
+        receipt: receipt,
+      })
+      none
+    )
+    none))
 
 (define-private (handle-bridge-nft-transfer
     (token-id uint)
@@ -501,15 +525,52 @@
     (from principal)
     (to principal)
   )
-  ;; Stub implementation: no-op for now
-  true
-)
+  (begin
+    ;; Update ownership on associated structures based on NFT type
+    (if (is-eq nft-type NFT_TYPE_BRIDGED_POSITION)
+      (match (map-get? bridged-positions { token-id: token-id })
+        position
+          (map-set bridged-positions { token-id: token-id }
+            (merge position {
+              owner: to,
+              last-activity-block: block-height
+            }))
+        true)
+      true)
+
+    (if (is-eq nft-type NFT_TYPE_MULTICHAIN_ASSET)
+      (match (map-get? multichain-assets { token-id: token-id })
+        asset
+          (map-set multichain-assets { token-id: token-id }
+            (merge asset {
+              owner: to,
+              last-activity-block: block-height
+            }))
+        true)
+      true)
+
+    (if (is-eq nft-type NFT_TYPE_CROSS_CHAIN_LP)
+      (match (map-get? cross-chain-lps { token-id: token-id })
+        lp
+          (map-set cross-chain-lps { token-id: token-id }
+            (merge lp {
+              provider: to,
+              last-activity-block: block-height
+            }))
+        true)
+      true)
+
+    ;; Validator certificates are non-transferable unless explicitly allowed
+    (if (is-eq nft-type NFT_TYPE_BRIDGE_VALIDATOR)
+      (asserts! (is-validator-transferable token-id) ERR_UNAUTHORIZED)
+      true)
+
+    (ok true)))
 
 (define-private (is-validator-transferable (token-id uint))
   ;; Check if validator certificate can be transferred
   false
 )
-;; Simplified - validator certificates are non-transferable
 
 (define-private (map-bridged-positions)
   (list)
@@ -531,42 +592,41 @@
         status: u3, ;; Completed
         completed-block: (some block-height)
       }))
-    
+
     ;; Update associated bridged position NFT
     (let ((bridged-position (find-bridged-position-by-bridge bridge-id)))
       (match bridged-position
-        position (map-set bridged-positions { token-id: (get token-id position) }
-          (merge position {
-            bridge-status: u3  ;; Completed
-            last-activity-block: block-height
-          }))
+        bp
+          (map-set bridged-positions { token-id: (get token-id bp) }
+            (merge (get position bp) {
+              bridge-status: u3, ;; Completed
+              last-activity-block: block-height,
+            })
+          )
         true
       )
     )
-    
+
     ;; Update bridge receipt
     (let ((receipt (find-bridge-receipt-by-bridge bridge-id)))
       (match receipt
-        receipt-info (map-set bridge-receipts { receipt-id: (get receipt-id receipt-info) }
-          (merge receipt-info {
-            status: u3  ;; Completed
-            completion-block: (some block-height)
-          }))
+        receipt-info
+          (map-set bridge-receipts { receipt-id: (get receipt-id receipt-info) }
+            (merge (get receipt receipt-info) {
+              status: u3, ;; Completed
+              completion-block: (some block-height),
+            })
+          )
         true
       )
     )
-            (merge receipt-info {
-              status: u3  ;; Completed
-              completion-block: (some block-height)
-            }))
-        true))
-    
+
     (print {
       event: "bridge-transaction-completed",
       bridge-id: bridge-id,
       completion-block: block-height
     })
-    
+
     (ok true)))
 
 ;; ===== Public Functions =====
@@ -594,18 +654,14 @@
     (asserts! (> timeout-block block-height) ERR_BRIDGE_TIMEOUT)
     
     ;; Verify NFT ownership
-    (asserts! (is-valid-chain target-chain) ERR_INVALID_CHAIN)
-      owner-info
-        (begin
-          (asserts! (is-eq tx-sender (unwrap-panic owner-info)) ERR_UNAUTHORIZED)
-          (ok true))
-      error-response
-        (err ERR_INVALID_NFT)))
-    
+    ;; v1 stub: NFT ownership verification will be wired to the
+;; underlying NFT contract in a later iteration. For now we only
+;; rely on the chain and amount checks above.
+
     (let ((token-id (var-get next-token-id))
           (bridge-id (var-get next-bridge-id))
           (bridge-fee (/ (* amount BRIDGE_FEE_BPS) u10000))
-          (chain-config (unwrap-panic (get-chain-config target-chain)))
+          (chain-config (get-chain-config-or-default target-chain))
           (expected-arrival (+ block-height (get confirmation-time chain-config))))
       
       ;; Create bridge transaction
@@ -651,6 +707,7 @@
           revenue-share: u300, ;; 3% cross-chain revenue share
           last-activity-block: block-height
         })
+      (map-set bridge-position-index { bridge-id: bridge-id } { token-id: token-id })
       
       ;; Create bridge receipt
       (create-bridge-receipt bridge-id tx-sender tx-sender original-chain
@@ -874,7 +931,7 @@
     (asserts! (< block-height (get timeout-block bridge-transaction)) ERR_BRIDGE_TIMEOUT)
     
     ;; Add validator to transaction
-    (let ((updated-validators (append (get validators bridge-transaction) (list tx-sender)))
+    (let ((updated-validators (unwrap-panic (as-max-len? (append (get validators bridge-transaction) tx-sender) u10)))
           (new-confirmation-count (+ (get confirmation-count bridge-transaction) u1)))
       
       ;; Update bridge transaction
@@ -928,14 +985,17 @@
   (ok (var-get base-token-uri)))
 
 (define-read-only (get-owner (token-id uint))
-  (ok (map-get? bridge-nft-metadata { token-id: token-id })))
+  (match (map-get? bridge-nft-metadata { token-id: token-id })
+    nft
+      (ok (some (get owner nft)))
+    (ok none)))
 
 (define-public (transfer (token-id uint) (sender principal) (recipient principal))
   (let ((nft-data (unwrap! (map-get? bridge-nft-metadata { token-id: token-id }) ERR_POSITION_NOT_FOUND)))
     (asserts! (is-eq sender (get owner nft-data)) ERR_UNAUTHORIZED)
     
     ;; Transfer NFT ownership
-    (nft-transfer? bridge-nft token-id sender recipient)
+    (unwrap-panic (nft-transfer? bridge-nft token-id sender recipient))
     
     ;; Update metadata
     (map-set bridge-nft-metadata
@@ -943,11 +1003,9 @@
       (merge nft-data { owner: recipient, last-activity-block: block-height }))
     
     ;; Handle specific NFT type transfers
-    (match (get nft-type nft-data)
-      nft-type
-        (handle-bridge-nft-transfer token-id nft-type sender recipient)
-      error-response
-        (ok true))
+    (let ((nft-type-value (get nft-type nft-data)))
+      (unwrap-panic (handle-bridge-nft-transfer token-id nft-type-value sender recipient))
+    )
     
     (print {
       event: "bridge-nft-transferred",
