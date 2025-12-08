@@ -1,8 +1,22 @@
-
 [network]
 name = "devnet"
-[accounts]
-deployer = "ST3N0ZC9HBPDEBEJ1H1QFGMJF3PSNGW3FYZSVN513"
-wallet_1 = "ST1SJ3DTE5DN7X54YDH5D64R3BCB6A2AG2ZQ8YPD5"
-wallet_2 = "ST2NEB84ASENDXKYGJPQW86YXQCEFEX2ZQPG87ND"
-wallet_3 = "ST2REHHS5J3CERCRBEPMGH7921Q6PYKAADT7JP2VB"
+
+[accounts.deployer]
+mnemonic = "twice kind fence tip hidden tilt action fragile skin nothing glory cousin green tomorrow spring wrist shed math olympic multiply hip blue scout claw"
+balance = 100_000_000_000_000
+address = "ST3N0ZC9HBPDEBEJ1H1QFGMJF3PSNGW3FYZSVN513"
+
+[accounts.wallet_1]
+mnemonic = "sell invite acquire kitten bamboo drastic jelly vivid peace spawn twice guilt pave pen trash pretty park cube fragile unaware remain midnight betray rebuild"
+balance = 100_000_000_000_000
+address = "ST1SJ3DTE5DN7X54YDH5D64R3BCB6A2AG2ZQ8YPD5"
+
+[accounts.wallet_2]
+mnemonic = "hold excess usual excess ring elephant install account glad dry fragile donkey gaze humble truck breeze nation gasp vacuum limb head keep delay hospital"
+balance = 100_000_000_000_000
+address = "ST2NEB84ASENDXKYGJPQW86YXQCEFEX2ZQPG87ND"
+
+[accounts.wallet_3]
+mnemonic = "cycle puppy glare enroll cost improve round trend wrist mushroom scorpion tower claim oppose clever elephant dinosaur eight problem before frozen dune wagon high"
+balance = 100_000_000_000_000
+address = "ST2REHHS5J3CERCRBEPMGH7921Q6PYKAADT7JP2VB"

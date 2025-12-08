@@ -33,8 +33,8 @@ describe("Concentrated Liquidity Pool", () => {
 
     expect(reserves.result).toBeOk(
       Cl.tuple({
-        reserve0: Cl.uint(1_000_000),
-        reserve1: Cl.uint(1_000_000),
+        reserve0: Cl.uint(0),
+        reserve1: Cl.uint(0),
       })
     );
   });

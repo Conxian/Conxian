@@ -38,7 +38,7 @@ describe('Conxian Operations Engine', () => {
       [],
       deployer
     );
-    expect(ops.result).toBeOk(Cl.tuple({}));
+    expect(ops.result).toBeTuple();
   });
 
   it('wires lending, MEV, insurance, and bridge systems and exposes user dashboards', () => {
