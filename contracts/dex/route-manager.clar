@@ -5,8 +5,6 @@
 (use-trait dijkstra-pathfinder-trait .dijkstra-pathfinder-trait.dijkstra-pathfinder-trait)
 (use-trait rbac-trait .core-traits.rbac-trait)
 
-;; (impl-trait .defi-traits.router-trait) ;; TODO: Verify router trait compatibility
-
 ;; @constants
 (define-constant ERR_INVALID_ROUTE (err u1400))
 (define-constant ERR_ROUTE_NOT_FOUND (err u1401))

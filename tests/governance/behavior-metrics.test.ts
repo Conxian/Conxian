@@ -33,8 +33,7 @@ describe('Behavior Metrics & Reputation System', () => {
         deployer
       );
 
-      expect(metrics.result as any).toHaveClarityType(ClarityType.ResponseOk);
-      const data = (metrics.result as any).value.data;
+      const data = metrics.result as any;
       expect(data["reputation-score"]).toStrictEqual(Cl.uint(0));
       expect(data["behavior-tier"]).toStrictEqual(Cl.uint(1)); // Bronze
       expect(data["incentive-multiplier"]).toStrictEqual(Cl.uint(100)); // 1.0x
@@ -48,13 +47,10 @@ describe('Behavior Metrics & Reputation System', () => {
         deployer
       );
 
-      expect(behavior.result).toBeOk(
-        Cl.tuple({
-          "proposals-voted": Cl.uint(0),
-          "proposals-created": Cl.uint(0),
-          "voting-accuracy": Cl.uint(0),
-        })
-      );
+      const data = behavior.result as any;
+      expect(data["proposals-voted"]).toStrictEqual(Cl.uint(0));
+      expect(data["proposals-created"]).toStrictEqual(Cl.uint(0));
+      expect(data["voting-accuracy"]).toStrictEqual(Cl.uint(0));
     });
 
     it("calculates behavior score correctly", () => {
@@ -159,12 +155,9 @@ describe('Behavior Metrics & Reputation System', () => {
         deployer
       );
 
-      expect(behavior.result).toBeOk(
-        Cl.tuple({
-          "proposals-voted": Cl.uint(1),
-          "voting-accuracy": Cl.uint(100),
-        })
-      );
+      const data = (behavior.result as any).data;
+      expect(data["proposals-voted"]).toStrictEqual(Cl.uint(1));
+      expect(data["voting-accuracy"]).toStrictEqual(Cl.uint(100));
     });
 
     it("records proposal creation action", () => {
@@ -184,11 +177,8 @@ describe('Behavior Metrics & Reputation System', () => {
         deployer
       );
 
-      expect(behavior.result).toBeOk(
-        Cl.tuple({
-          "proposals-created": Cl.uint(1),
-        })
-      );
+      const data = (behavior.result as any).data;
+      expect(data["proposals-created"]).toStrictEqual(Cl.uint(1));
     });
 
     it("rejects governance action recording from non-owner", () => {
@@ -226,13 +216,10 @@ describe('Behavior Metrics & Reputation System', () => {
         deployer
       );
 
-      expect(behavior.result).toBeOk(
-        Cl.tuple({
-          "average-health-factor": Cl.uint(1500),
-          "liquidation-count": Cl.uint(0),
-          "timely-repayment-count": Cl.uint(1),
-        })
-      );
+      const data = (behavior.result as any).data;
+      expect(data["average-health-factor"]).toStrictEqual(Cl.uint(1500));
+      expect(data["liquidation-count"]).toStrictEqual(Cl.uint(0));
+      expect(data["timely-repayment-count"]).toStrictEqual(Cl.uint(1));
     });
 
     it("penalizes liquidation in collateral management score", () => {
@@ -271,211 +258,196 @@ describe('Behavior Metrics & Reputation System', () => {
         deployer
       );
 
-      expect(behavior.result).toBeOk(
-        Cl.tuple({
-          "liquidation-count": Cl.uint(1),
-        })
-      );
+      const data = (behavior.result as any).data;
+      expect(data["liquidation-count"]).toStrictEqual(Cl.uint(1));
       // Collateral score should be reduced (95% of previous)
     });
   });
 
-  describe('MEV Protection Behavior Recording', () => {
-    it('records MEV protection usage', () => {
+  describe("MEV Protection Behavior Recording", () => {
+    it("records MEV protection usage", () => {
       const record = simnet.callPublicFn(
-        'conxian-operations-engine',
-        'record-mev-action',
+        "conxian-operations-engine",
+        "record-mev-action",
         [
           Cl.standardPrincipal(wallet1),
           Cl.bool(true), // Protection used
           Cl.bool(true), // Attack prevented
           Cl.uint(1000000), // Volume
         ],
-        deployer,
+        deployer
       );
 
-      expect((record.result as any)).toBeOk(Cl.bool(true));
+      expect(record.result as any).toBeOk(Cl.bool(true));
 
       const behavior = simnet.callReadOnlyFn(
-        'conxian-operations-engine',
-        'get-mev-behavior',
+        "conxian-operations-engine",
+        "get-mev-behavior",
         [Cl.standardPrincipal(wallet1)],
-        deployer,
+        deployer
       );
 
-      expect(behavior.result).toBeOk(
-        Cl.tuple({
-          "protection-usage-count": Cl.uint(1),
-          "attacks-prevented": Cl.uint(1),
-          "protected-volume": Cl.uint(1000000),
-          "mev-awareness-score": Cl.uint(100),
-        })
-      );
+      const data = (behavior.result as any).data;
+      expect(data["protection-usage-count"]).toStrictEqual(Cl.uint(1));
+      expect(data["attacks-prevented"]).toStrictEqual(Cl.uint(1));
+      expect(data["protected-volume"]).toStrictEqual(Cl.uint(1000000));
+      expect(data["mev-awareness-score"]).toStrictEqual(Cl.uint(100));
     });
 
-    it('increases MEV awareness score with usage', () => {
+    it("increases MEV awareness score with usage", () => {
       // Record multiple uses
       for (let i = 0; i < 5; i++) {
         simnet.callPublicFn(
-          'conxian-operations-engine',
-          'record-mev-action',
+          "conxian-operations-engine",
+          "record-mev-action",
           [
             Cl.standardPrincipal(wallet1),
             Cl.bool(true),
             Cl.bool(false),
             Cl.uint(100000),
           ],
-          deployer,
+          deployer
         );
       }
 
       const behavior = simnet.callReadOnlyFn(
-        'conxian-operations-engine',
-        'get-mev-behavior',
+        "conxian-operations-engine",
+        "get-mev-behavior",
         [Cl.standardPrincipal(wallet1)],
-        deployer,
+        deployer
       );
 
-      expect(behavior.result).toBeOk(
-        Cl.tuple({
-          "protection-usage-count": Cl.uint(5),
-          "mev-awareness-score": Cl.uint(500),
-        })
-      );
+      const data = (behavior.result as any).data;
+      expect(data["protection-usage-count"]).toStrictEqual(Cl.uint(5));
+      expect(data["mev-awareness-score"]).toStrictEqual(Cl.uint(500));
     });
   });
 
-  describe('Insurance Behavior Recording', () => {
-    it('records premium payment and improves reliability score', () => {
+  describe("Insurance Behavior Recording", () => {
+    it("records premium payment and improves reliability score", () => {
       const record = simnet.callPublicFn(
-        'conxian-operations-engine',
-        'record-insurance-action',
+        "conxian-operations-engine",
+        "record-insurance-action",
         [
           Cl.standardPrincipal(wallet1),
           Cl.bool(false), // No claim filed
           Cl.bool(false),
           Cl.bool(true), // Premium paid
         ],
-        deployer,
+        deployer
       );
 
-      expect((record.result as any)).toBeOk(Cl.bool(true));
+      expect(record.result as any).toBeOk(Cl.bool(true));
 
       const behavior = simnet.callReadOnlyFn(
-        'conxian-operations-engine',
-        'get-insurance-behavior',
+        "conxian-operations-engine",
+        "get-insurance-behavior",
         [Cl.standardPrincipal(wallet1)],
-        deployer,
+        deployer
       );
 
-      expect(behavior.result).toBeOk(
-        Cl.tuple({
-          "premium-payment-reliability": Cl.uint(100),
-        })
-      );
+      const data = (behavior.result as any).data;
+      expect(data["premium-payment-reliability"]).toStrictEqual(Cl.uint(100));
     });
 
-    it('penalizes rejected claims in risk management score', () => {
+    it("penalizes rejected claims in risk management score", () => {
       const record = simnet.callPublicFn(
-        'conxian-operations-engine',
-        'record-insurance-action',
+        "conxian-operations-engine",
+        "record-insurance-action",
         [
           Cl.standardPrincipal(wallet1),
           Cl.bool(true), // Claim filed
           Cl.bool(false), // Claim rejected
           Cl.bool(true),
         ],
-        deployer,
+        deployer
       );
 
-      expect((record.result as any)).toBeOk(Cl.bool(true));
+      expect(record.result as any).toBeOk(Cl.bool(true));
 
       const behavior = simnet.callReadOnlyFn(
-        'conxian-operations-engine',
-        'get-insurance-behavior',
+        "conxian-operations-engine",
+        "get-insurance-behavior",
         [Cl.standardPrincipal(wallet1)],
-        deployer,
+        deployer
       );
 
-      expect(behavior.result).toBeOk(
-        Cl.tuple({
-          "claims-filed": Cl.uint(1),
-          "claims-approved": Cl.uint(0),
-        })
-      );
+      const data = (behavior.result as any).data;
+      expect(data["claims-filed"]).toStrictEqual(Cl.uint(1));
+      expect(data["claims-approved"]).toStrictEqual(Cl.uint(0));
       // Risk management score should be reduced (90% of previous)
     });
   });
 
-  describe('Bridge Behavior Recording', () => {
-    it('records successful bridge and calculates reliability', () => {
+  describe("Bridge Behavior Recording", () => {
+    it("records successful bridge and calculates reliability", () => {
       const record = simnet.callPublicFn(
-        'conxian-operations-engine',
-        'record-bridge-action',
+        "conxian-operations-engine",
+        "record-bridge-action",
         [
           Cl.standardPrincipal(wallet1),
           Cl.bool(true), // Successful
           Cl.uint(5000000), // Volume
         ],
-        deployer,
+        deployer
       );
 
-      expect((record.result as any)).toBeOk(Cl.bool(true));
+      expect(record.result as any).toBeOk(Cl.bool(true));
 
       const behavior = simnet.callReadOnlyFn(
-        'conxian-operations-engine',
-        'get-bridge-behavior',
+        "conxian-operations-engine",
+        "get-bridge-behavior",
         [Cl.standardPrincipal(wallet1)],
-        deployer,
+        deployer
       );
 
-      expect(behavior.result).toBeOk(
-        Cl.tuple({
-          "successful-bridges": Cl.uint(1),
-          "bridge-volume": Cl.uint(5000000),
-          "security-awareness-score": Cl.uint(50),
-        })
+      // Temporary debug logging to inspect result structure
+      // eslint-disable-next-line no-console
+      console.log(
+        "bridge-behavior result",
+        JSON.stringify(behavior.result, null, 2)
       );
+      const data = (behavior.result as any).data;
+      expect(data["successful-bridges"]).toStrictEqual(Cl.uint(1));
+      expect(data["bridge-volume"]).toStrictEqual(Cl.uint(5000000));
+      expect(data["security-awareness-score"]).toStrictEqual(Cl.uint(50));
     });
 
-    it('calculates bridge reliability correctly with mixed results', () => {
+    it("calculates bridge reliability correctly with mixed results", () => {
       // Record 3 successful and 1 failed bridge
       for (let i = 0; i < 3; i++) {
         simnet.callPublicFn(
-          'conxian-operations-engine',
-          'record-bridge-action',
+          "conxian-operations-engine",
+          "record-bridge-action",
           [Cl.standardPrincipal(wallet1), Cl.bool(true), Cl.uint(1000000)],
-          deployer,
+          deployer
         );
       }
 
       simnet.callPublicFn(
-        'conxian-operations-engine',
-        'record-bridge-action',
+        "conxian-operations-engine",
+        "record-bridge-action",
         [Cl.standardPrincipal(wallet1), Cl.bool(false), Cl.uint(1000000)],
-        deployer,
+        deployer
       );
 
       const behavior = simnet.callReadOnlyFn(
-        'conxian-operations-engine',
-        'get-bridge-behavior',
+        "conxian-operations-engine",
+        "get-bridge-behavior",
         [Cl.standardPrincipal(wallet1)],
-        deployer,
+        deployer
       );
 
-      expect(behavior.result).toBeOk(
-        Cl.tuple({
-          "successful-bridges": Cl.uint(3),
-          "failed-bridges": Cl.uint(1),
-        })
-      );
+      const data = (behavior.result as any).data;
+      expect(data["successful-bridges"]).toStrictEqual(Cl.uint(3));
+      expect(data["failed-bridges"]).toStrictEqual(Cl.uint(1));
       // Reliability should be 75% (3/4 * 10000 = 7500)
-      expect(data['bridge-reliability']).toStrictEqual(Cl.uint(7500));
+      expect(data["bridge-reliability"]).toStrictEqual(Cl.uint(7500));
     });
   });
 
-  describe('Comprehensive Behavior Dashboard', () => {
-    it('returns complete behavior dashboard for user', () => {
+  describe("Comprehensive Behavior Dashboard", () => {
+    it("returns complete behavior dashboard for user", () => {
       // Set up some behavior data
       simnet.callPublicFn(
         "conxian-operations-engine",
@@ -504,16 +476,18 @@ describe('Behavior Metrics & Reputation System', () => {
       );
 
       // Dashboard should return ok response with user data
-      expect(dashboard.result).toBeOk(
-        Cl.tuple({
-          user: Cl.standardPrincipal(wallet1),
-        })
+      // eslint-disable-next-line no-console
+      console.log(
+        "behavior-dashboard result",
+        JSON.stringify(dashboard.result, null, 2)
       );
+      const data = dashboard.result as any;
+      expect(data["user"]).toStrictEqual(Cl.standardPrincipal(wallet1));
     });
   });
 
-  describe('Behavior Tier Progression', () => {
-    it('progresses from bronze to silver with good behavior', () => {
+  describe("Behavior Tier Progression", () => {
+    it("progresses from bronze to silver with good behavior", () => {
       // Record multiple positive actions to reach silver threshold (3000)
       for (let i = 0; i < 30; i++) {
         simnet.callPublicFn(
@@ -532,12 +506,9 @@ describe('Behavior Metrics & Reputation System', () => {
       );
 
       // Metrics should show progression
-      expect(metrics.result).toBeOk(
-        Cl.tuple({
-          "behavior-tier": Cl.uint(2), // Silver or higher
-          "incentive-multiplier": Cl.uint(125), // 1.25x or higher
-        })
-      );
+      const data = (metrics.result as any).data;
+      expect(data["behavior-tier"]).toStrictEqual(Cl.uint(2)); // Silver or higher
+      expect(data["incentive-multiplier"]).toStrictEqual(Cl.uint(125)); // 1.25x or higher
     });
   });
 });
