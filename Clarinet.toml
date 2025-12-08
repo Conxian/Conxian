@@ -40,6 +40,44 @@ depends_on = ["oracle-pricing", "security-monitoring"]
 path = "contracts/dimensional/dim-metrics.clar"
 address = "ST3N0ZC9HBPDEBEJ1H1QFGMJF3PSNGW3FYZSVN513"
 
+# ---------- Identity & Legal ----------
+
+[contracts.kyc-registry]
+path = "contracts/identity/kyc-registry.clar"
+address = "ST3N0ZC9HBPDEBEJ1H1QFGMJF3PSNGW3FYZSVN513"
+
+[contracts.legal-representative-registry]
+path = "contracts/governance/legal-representative-registry.clar"
+address = "ST3N0ZC9HBPDEBEJ1H1QFGMJF3PSNGW3FYZSVN513"
+
+# ---------- Treasury ----------
+
+[contracts.conxian-vaults]
+path = "contracts/treasury/conxian-vaults.clar"
+address = "ST3N0ZC9HBPDEBEJ1H1QFGMJF3PSNGW3FYZSVN513"
+depends_on = ["sip-standards"]
+
+[contracts.allocation-policy]
+path = "contracts/treasury/allocation-policy.clar"
+address = "ST3N0ZC9HBPDEBEJ1H1QFGMJF3PSNGW3FYZSVN513"
+
+[contracts.revenue-router]
+path = "contracts/treasury/revenue-router.clar"
+address = "ST3N0ZC9HBPDEBEJ1H1QFGMJF3PSNGW3FYZSVN513"
+depends_on = ["allocation-policy", "conxian-vaults", "sip-standards"]
+
+# ---------- Marketplace & Monitoring ----------
+
+[contracts.nft-marketplace]
+path = "contracts/marketplace/nft-marketplace.clar"
+address = "ST3N0ZC9HBPDEBEJ1H1QFGMJF3PSNGW3FYZSVN513"
+depends_on = ["defi-traits", "sip-standards"]
+
+[contracts.real-time-monitoring-dashboard]
+path = "contracts/dex/real-time-monitoring-dashboard.clar"
+address = "ST3N0ZC9HBPDEBEJ1H1QFGMJF3PSNGW3FYZSVN513"
+depends_on = ["defi-traits"]
+
 [contracts.risk-manager]
 path = "contracts/risk/risk-manager.clar"
 address = "ST3N0ZC9HBPDEBEJ1H1QFGMJF3PSNGW3FYZSVN513"
@@ -51,6 +89,7 @@ address = "ST3N0ZC9HBPDEBEJ1H1QFGMJF3PSNGW3FYZSVN513"
 [contracts.dimensional-engine]
 path = "contracts/core/dimensional-engine.clar"
 address = "ST3N0ZC9HBPDEBEJ1H1QFGMJF3PSNGW3FYZSVN513"
+depends_on = ["position-manager", "collateral-manager", "funding-rate-calculator", "risk-manager"]
 
 [contracts.position-manager]
 path = "contracts/core/position-manager.clar"

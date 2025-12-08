@@ -100,7 +100,25 @@
 ;; @param amount The amount to be minted.
 ;; @returns A boolean indicating if the emission is allowed.
 (define-private (check-emission-allowed (amount uint))
-  true)
+  (if (not (var-get system-integration-enabled))
+    true
+    (let ((limits-opt (unwrap! (contract-call? .token-emission-controller get-token-emission-limits .cxd-token) none)))
+      (match limits-opt
+        some-limits
+          (let (
+            (current-supply (var-get total-supply))
+            (max-single-mint-bps (get max-single-mint-bps some-limits))
+          )
+            ;; Allow bootstrap when supply is zero
+            (if (is-eq current-supply u0)
+              true
+              (let ((single-mint-cap (/ (* current-supply max-single-mint-bps) u10000)))
+                (<= amount single-mint-cap)
+              )
+            )
+          )
+        true)))
+)
 
 ;; @desc Notifies the token coordinator of a transfer.
 ;; @param amount The amount transferred.

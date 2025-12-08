@@ -91,15 +91,24 @@
   (let (
     (position (unwrap! (contract-call? .position-manager get-position position-id)
       ERR_INVALID_PARAMETERS
-    ))(collateral (get collateral position))
-    (size (get size position))(entry-price (get entry-price position))
+    ))
+    (collateral (get collateral position))
+    (size (get size position))
+    (entry-price (get entry-price position))
     (threshold (var-get liquidation-threshold))
     (health-factor (if (is-eq size u0) u1000000 (/ (* collateral threshold) size)))
+    (liquidation-price (unwrap! (calculate-liquidation-price {
+        entry-price: entry-price,
+        leverage: (get leverage position),
+        is-long: (get is-long position)
+      }) ERR_INVALID_PARAMETERS))
   )
     (ok {
       health-factor: health-factor,
-      liquidation-price: (unwrap! (calculate-liquidation-price {entry-price: entry-price, leverage: (get leverage position), is-long: (get is-long position)}) u0),
-      risk-level: (if (> health-factor u15000) "LOW" (if (> health-factor u11000) "MEDIUM" "HIGH"))
+      liquidation-price: liquidation-price,
+      risk-level: (if (> health-factor u15000)
+                    "LOW"
+                    (if (> health-factor u11000) "MEDIUM" "HIGH"))
     })
   )
 )

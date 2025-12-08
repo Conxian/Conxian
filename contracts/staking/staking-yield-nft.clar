@@ -638,7 +638,9 @@
   (ok (var-get base-token-uri)))
 
 (define-read-only (get-owner (token-id uint))
-  (ok (map-get? staking-nft-metadata { token-id: token-id })))
+  (match (map-get? staking-nft-metadata { token-id: token-id })
+    nft (ok (some (get owner nft)))
+    (ok none)))
 
 (define-public (transfer (token-id uint) (sender principal) (recipient principal))
   (let ((nft-data (unwrap! (map-get? staking-nft-metadata { token-id: token-id }) ERR_POSITION_NOT_FOUND)))

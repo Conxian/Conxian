@@ -120,7 +120,11 @@ function verifyContractFiles(contracts, contractsDir) {
   
   for (const [contractName, contractData] of Object.entries(contracts)) {
     if (!contractData.path) {
-      missingFiles.push(`${contractName}: no path defined`);
+      // Some entries in Clarinet.toml (like accounts.*) are pseudo-contracts
+      // used only for address aliases and are not expected to have a path.
+      if (!contractName.startsWith('accounts.')) {
+        missingFiles.push(`${contractName}: no path defined`);
+      }
       continue;
     }
     // The path in TOML is relative to project root, not contractsDir

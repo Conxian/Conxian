@@ -135,7 +135,8 @@
     (try! (check-not-paused))
     (let ((fee (unwrap! (contract-call? .fee-manager calculate-fee "wrap" btc-amount) (err u0))))
       (let ((net-amount (- btc-amount fee)))
-        (contract-call? .btc-bridge wrap-btc net-amount btc-txid tx-sender)))))
+        ;; Temporarily reuse btc-txid as header-hash until full SPV wiring is implemented
+        (contract-call? .btc-bridge wrap-btc net-amount btc-txid btc-txid tx-sender)))))
 
 ;; @desc Unwraps sBTC to BTC.
 ;; @param sbtc-amount uint The amount of sBTC to unwrap.

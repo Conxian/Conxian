@@ -373,7 +373,9 @@
   (ok (var-get base-token-uri)))
 
 (define-read-only (get-owner (token-id uint))
-  (ok (map-get? lending-position-metadata { token-id: token-id })))
+  (match (map-get? lending-position-metadata { token-id: token-id })
+    position (ok (some (get owner position)))
+    (ok none)))
 
 (define-public (transfer (token-id uint) (sender principal) (recipient principal))
   (let ((position (unwrap! (map-get? lending-position-metadata { token-id: token-id }) ERR_POSITION_NOT_FOUND)))

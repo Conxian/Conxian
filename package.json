@@ -12,7 +12,7 @@
     "test:load": "vitest run tests/load-testing/massive-scale.test.ts --config vitest.config.enhanced.ts",
     "test:integration": "vitest run tests/integration/critical-systems.test.ts --config vitest.config.enhanced.ts",
     "test:fee-insurance": "vitest run tests/integration/full-system-fee-insurance.test.ts --config vitest.config.enhanced.ts --pool=threads",
-    "test:contracts": "vitest run 'tests/**/*.test.ts' --config vitest.config.enhanced.ts",
+    "test:contracts": "vitest run --config vitest.config.enhanced.ts",
     "test:enterprise": "vitest run tests/enterprise/enterprise-loan-manager.test.ts --config vitest.config.enhanced.ts",
     "test:flash-loans": "vitest run tests/comprehensive-lending-system.test.ts --config vitest.config.enhanced.ts",
     "test:tokens:watch": "vitest watch tests/cx-tokens-simple.test.ts",

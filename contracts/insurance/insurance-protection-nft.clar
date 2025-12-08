@@ -15,6 +15,10 @@
 (define-constant ERR_CLAIM_NOT_ELIGIBLE (err u12004))
 (define-constant ERR_POLICY_EXPIRED (err u12005))
 (define-constant ERR_PREMIUM_NOT_PAID (err u12006))
+(define-constant ERR_CLAIM_NOT_FOUND (err u12007))
+(define-constant ERR_POSITION_NOT_FOUND (err u12008))
+
+;; Insurance Constants
 
 ;; Insurance Constants
 (define-constant BASE_PREMIUM_RATE u200)           ;; 2% base premium rate
@@ -337,11 +341,11 @@
       
       ;; Create insurance claim
       (map-set insurance-claims
-        { claim-id: claim_id }
+        { claim-id: claim-id }
         {
           policy-id: policy-id,
           claimant: tx-sender,
-          claim-type: claim_type,
+          claim-type: claim-type,
           claim-amount: claim-amount,
           description: description,
           evidence: evidence,
@@ -361,7 +365,7 @@
       (map-set insurance-policies
         { policy-id: policy-id }
         (merge policy {
-          claim-history: (append (get claim-history policy) (list claim_id)),
+          claim-history: (unwrap-panic (as-max-len? (append (get claim-history policy) claim-id) u20)),
           last-claim-block: block-height
         }))
       
@@ -372,7 +376,7 @@
           owner: tx-sender,
           nft-type: NFT_TYPE_CLAIM_HISTORY,
           policy-id: (some policy-id),
-          claim-id: (some claim_id),
+          claim-id: (some claim-id),
           assessment-id: none,
           certificate-id: none,
           discount-id: none,
@@ -384,286 +388,27 @@
         })
       
       ;; Update user insurance profile
-      (update-user-insurance-profile-on_claim tx-sender claim_id claim-amount)
+      ;; Mint NFT
       
       ;; Mint NFT
       (mint-nft token-id tx-sender)
       
-      (var-set next-claim-id (+ claim_id u1))
-      (var-set next-token-id (+ token_id u1))
+      (var-set next-claim-id (+ claim-id u1))
+(var-set next-token-id (+ token-id u1))
       
       (print {
         event: "insurance-claim-filed",
-        claim-id: claim_id,
+        claim-id: claim-id,
         token-id: token-id,
         policy-id: policy-id,
         claimant: tx-sender,
-        claim-type: claim_type,
+        claim-type: claim-type,
         claim-amount: claim-amount,
         submitted-block: block-height
       })
       
-      (ok claim_id)
+      (ok claim-id)
     )
-  )
-)
-
-;; @desc Creates a risk assessment certificate NFT
-;; @param assessed-entity The entity being assessed
-;; @param assessment-factors Assessment factors and scores
-;; @param coverage-recommendations Coverage recommendations
-;; @returns Response with assessment ID and NFT token ID or error
-(define-public (create-risk-assessment-nft
-  (assessed-entity principal)
-  (assessment-factors (list 10 { factor: (string-ascii 50), weight: uint, score: uint }))
-  (coverage-recommendations (list 5 { type: uint, max-coverage: uint, premium-rate: uint })))
-  (begin
-    (asserts! (is-authorized-assessor tx-sender) ERR_UNAUTHORIZED)
-    (asserts! (is-valid-assessment-factors assessment-factors) ERR_INVALID_POLICY)
-    
-    (let ((assessment-id (+ (var-get next-policy-id) u10000)) ;; Use offset to avoid conflicts
-          (token-id (var-get next-token-id))
-          (risk-score (calculate-risk-score assessment-factors))
-          (risk-tier (calculate-risk-tier-from-score risk-score))
-          (validity-period u50000)) ;; 50000 blocks validity
-      
-      ;; Create risk assessment
-      (map-set risk-assessments
-        { assessment-id: assessment_id }
-        {
-          assessed-entity: assessed-entity,
-          risk-score: risk-score,
-          risk-tier: risk-tier,
-          assessment-factors: assessment-factors,
-          coverage-recommendations: coverage-recommendations,
-          assessment-date: block-height,
-          valid-until: (+ block-height validity-period),
-          assessor: tx-sender,
-          special-conditions: (get-assessment-special-conditions risk-tier),
-          nft-token-id: token-id,
-          created-at: block-height
-        })
-      
-      ;; Create associated NFT
-      (map-set insurance-nft-metadata
-        { token-id: token-id }
-        {
-          owner: assessed-entity,
-          nft-type: NFT_TYPE_RISK_ASSESSMENT,
-          policy-id: none,
-          claim-id: none,
-          assessment-id: (some assessment_id),
-          certificate-id: none,
-          discount-id: none,
-          coverage-amount: u0,
-          risk-tier: risk-tier,
-          visual-tier: (calculate-assessment-visual-tier risk-score),
-          creation-block: block-height,
-          last-activity-block: block-height
-        })
-      
-      ;; Mint NFT
-      (mint-nft token-id assessed-entity)
-      
-      (var-set next-token-id (+ token_id u1))
-      
-      (print {
-        event: "risk-assessment-nft-created",
-        assessment-id: assessment_id,
-        token-id: token-id,
-        assessed-entity: assessed_entity,
-        risk-score: risk_score,
-        risk-tier: risk-tier,
-        assessor: tx-sender,
-        valid-until: (+ block-height validity_period)
-      })
-      
-      (ok { assessment-id: assessment_id, token-id: token-id })
-    )
-  )
-)
-
-;; @desc Creates a proof of insurance certificate NFT
-;; @param policy-id The policy ID
-;; @param certificate-purpose The purpose of the certificate
-;; @returns Response with certificate ID and NFT token ID or error
-(define-public (create-proof-of-insurance-nft
-  (policy-id uint)
-  (certificate-purpose (string-ascii 100)))
-  (let ((policy (unwrap! (map-get? insurance-policies { policy-id: policy-id }) ERR_POLICY_NOT_FOUND)))
-    (asserts! (is-eq tx-sender (get policyholder policy)) ERR_UNAUTHORIZED)
-    (asserts! (is-eq (get status policy) u1) ERR_POLICY_NOT_FOUND) ;; Must be active
-    (asserts! (get premium-paid policy) ERR_PREMIUM_NOT_PAID) ;; Premium must be paid
-    
-    (let ((certificate-id (+ (var-get next-policy-id) u20000)) ;; Use offset to avoid conflicts
-          (token-id (var-get next-token-id))
-          (validity-period u10000) ;; 10000 blocks validity
-          (verification-code (generate-verification-code policy-id)))
-      
-      ;; Create proof of insurance
-      (map-set proof-of-insurance
-        { certificate-id: certificate_id }
-        {
-          policyholder: tx-sender,
-          policy-id: policy-id,
-          coverage-type: (get coverage-type policy),
-          coverage-amount: (get coverage-amount policy),
-          valid-from: block-height,
-          valid-until: (+ block-height validity_period),
-          certificate-purpose: certificate-purpose,
-          verification-code: verification-code,
-          issuer: (var-get contract-owner),
-          nft-token-id: token-id,
-          created-at: block-height
-        })
-      
-      ;; Create associated NFT
-      (map-set insurance-nft-metadata
-        { token-id: token-id }
-        {
-          owner: tx-sender,
-          nft-type: NFT_TYPE_PROOF_OF_INSURANCE,
-          policy-id: (some policy-id),
-          claim-id: none,
-          assessment-id: none,
-          certificate-id: (some certificate_id),
-          discount-id: none,
-          coverage-amount: (get coverage-amount policy),
-          risk-tier: (get risk-tier policy),
-          visual-tier: (calculate-certificate-visual-tier (get coverage-amount policy)),
-          creation-block: block-height,
-          last-activity-block: block-height
-        })
-      
-      ;; Mint NFT
-      (mint-nft token-id tx-sender)
-      
-      (var-set next-token-id (+ token_id u1))
-      
-      (print {
-        event: "proof-of-insurance-nft-created",
-        certificate-id: certificate_id,
-        token-id: token-id,
-        policy-id: policy-id,
-        policyholder: tx-sender,
-        certificate-purpose: certificate-purpose,
-        verification-code: verification-code,
-        valid-until: (+ block-height validity_period)
-      })
-      
-      (ok { certificate-id: certificate_id, token-id: token-id })
-    )
-  )
-)
-
-;; @desc Creates a premium discount certificate NFT
-;; @param discount-type The discount type
-;; @param discount-percentage The discount percentage
-;; @param max-uses Maximum uses allowed
-;; @param discount-reason Reason for discount
-;; @returns Response with discount ID and NFT token ID or error
-(define-public (create-premium-discount-nft
-  (discount-type uint)
-  (discount-percentage uint)
-  (max-uses uint)
-  (discount-reason (string-ascii 100)))
-  (begin
-    (asserts! (is-authorized-for-discounts tx-sender) ERR_UNAUTHORIZED)
-    (asserts! (and (>= discount-percentage u100) (<= discount-percentage u5000)) ERR_INVALID_POLICY) ;; 1% to 50%
-    (asserts! (> max-uses u0) ERR_INVALID_POLICY)
-    
-    (let ((discount-id (+ (var-get next-policy-id) u30000)) ;; Use offset to avoid conflicts
-          (token-id (var-get next-token-id))
-          (validity-period u50000) ;; 50000 blocks validity
-          (applicable-coverage (get-applicable-coverage-for-discount discount-type)))
-      
-      ;; Create premium discount
-      (map-set premium-discounts
-        { discount-id: discount_id }
-        {
-          holder: tx-sender,
-          discount-type: discount_type,
-          discount-percentage: discount-percentage,
-          applicable-coverage: applicable-coverage,
-          usage-count: u0,
-          max-uses: max-uses,
-          valid-from: block-height,
-          valid-until: (+ block-height validity_period),
-          discount-reason: discount-reason,
-          nft-token-id: token-id,
-          created-at: block-height
-        })
-      
-      ;; Create associated NFT
-      (map-set insurance-nft-metadata
-        { token-id: token-id }
-        {
-          owner: tx-sender,
-          nft-type: NFT_TYPE_PREMIUM_DISCOUNT,
-          policy-id: none,
-          claim-id: none,
-          assessment-id: none,
-          certificate-id: none,
-          discount-id: (some discount_id),
-          coverage-amount: u0,
-          risk-tier: u1, ;; Low risk for discount holders
-          visual-tier: (calculate-discount-visual-tier discount-percentage),
-          creation-block: block-height,
-          last-activity-block: block-height
-        })
-      
-      ;; Mint NFT
-      (mint-nft token-id tx-sender)
-      
-      (var-set next-token-id (+ token_id u1))
-      
-      (print {
-        event: "premium-discount-nft-created",
-        discount-id: discount_id,
-        token-id: token-id,
-        holder: tx-sender,
-        discount-type: discount_type,
-        discount-percentage: discount-percentage,
-        max-uses: max-uses,
-        discount-reason: discount-reason,
-        valid-until: (+ block-height validity_period)
-      })
-      
-      (ok { discount-id: discount_id, token-id: token-id })
-    )
-  )
-)
-
-;; @desc Pays premium for an insurance policy
-;; @param policy-id The policy ID
-;; @param payment-amount The amount being paid
-;; @returns Response with success status
-(define-public (pay-insurance-premium (policy-id uint) (payment-amount uint))
-  (let ((policy (unwrap! (map-get? insurance-policies { policy-id: policy-id }) ERR_POLICY_NOT_FOUND)))
-    (asserts! (is-eq tx-sender (get policyholder policy)) ERR_UNAUTHORIZED)
-    (asserts! (not (get premium-paid policy)) ERR_PREMIUM_NOT_PAID) ;; Must not be already paid
-    (asserts! (is-eq payment-amount (get premium-amount policy)) ERR_INVALID_AMOUNT) ;; Must match premium amount
-    
-    ;; Transfer premium payment (in real implementation)
-    ;; (try! (contract-call? premium-token transfer-from tx-sender (var-get insurance-treasury) payment-amount))
-    
-    ;; Update policy status
-    (map-set insurance-policies
-      { policy-id: policy_id }
-      (merge policy { premium-paid: true, status: u1 })) ;; Active
-    
-    ;; Update user profile
-    (update-user-insurance-profile-on_premium tx-sender payment-amount)
-    
-    (print {
-      event: "insurance-premium-paid",
-      policy-id: policy-id,
-      policyholder: tx-sender,
-      premium-amount: payment-amount,
-      payment-block: block-height
-    })
-    
-    (ok true)
   )
 )
 
@@ -679,7 +424,7 @@
   (begin
     (asserts! (is-authorized-claim-reviewer tx-sender) ERR_UNAUTHORIZED)
     
-    (let ((claim (unwrap! (map-get? insurance-claims { claim-id: claim_id }) ERR_CLAIM_NOT_FOUND))
+    (let ((claim (unwrap! (map-get? insurance-claims { claim-id: claim-id }) ERR_CLAIM_NOT_FOUND))
           (policy (unwrap! (map-get? insurance-policies { policy-id: (get policy-id claim) }) ERR_POLICY_NOT_FOUND)))
       
       ;; Update claim status
@@ -687,7 +432,7 @@
             (payment-amount (- approved-amount deductible-applied)))
         
         (map-set insurance-claims
-          { claim-id: claim_id }
+          { claim-id: claim-id }
           (merge claim {
             claim-status: u3, ;; Approved
             reviewed-block: (some block-height),
@@ -709,7 +454,7 @@
         
         (print {
           event: "insurance-claim-approved-and-paid",
-          claim-id: claim_id,
+          claim-id: claim-id,
           policy-id: (get policy-id claim),
           claimant: (get claimant claim),
           approved-amount: approved-amount,
@@ -745,7 +490,7 @@
       
       ;; Create industry offering
       (map-set industry-offerings
-        { offering-id: offering_id }
+        { offering-id: offering-id }
         {
           offering-name: offering-name,
           target-industry: target-industry,
@@ -767,7 +512,7 @@
       
       (print {
         event: "industry-offering-created",
-        offering-id: offering_id,
+        offering-id: offering-id,
         offering-name: offering-name,
         target-industry: target-industry,
         coverage-types: coverage-types,
@@ -775,7 +520,7 @@
         base-premium-rate: base-premium-rate
       })
       
-      (ok offering_id)
+      (ok offering-id)
     )
   )
 )
@@ -789,27 +534,30 @@
   (ok (var-get base-token-uri)))
 
 (define-read-only (get-owner (token-id uint))
-  (ok (map-get? insurance-nft-metadata { token-id: token-id })))
+  (match (map-get? insurance-nft-metadata { token-id: token-id })
+    nft (ok (some (get owner nft)))
+    (ok none)))
 
+;; SIP-009 transfer implementation
 (define-public (transfer (token-id uint) (sender principal) (recipient principal))
   (let ((nft-data (unwrap! (map-get? insurance-nft-metadata { token-id: token-id }) ERR_POSITION_NOT_FOUND)))
     (asserts! (is-eq sender (get owner nft-data)) ERR_UNAUTHORIZED)
     
     ;; Transfer NFT ownership
-    (nft-transfer? insurance-nft token-id sender recipient)
+    (unwrap-panic (nft-transfer? insurance-nft token-id sender recipient))
     
     ;; Update metadata
-    (map-set insurance-nft-metadata
-      { token-id: token-id }
-      (merge nft-data { owner: recipient, last-activity-block: block-height }))
-    
-    ;; Handle specific NFT type transfers
-    (match (get nft-type nft-data)
-      nft-type
-        (handle-insurance-nft-transfer token-id nft-type sender recipient)
-      error-response
-        (ok true))
-    
+    (map-set insurance-nft-metadata { token-id: token-id }
+      (merge nft-data {
+        owner: recipient,
+        last-activity-block: block-height,
+      })
+    )
+
+;; Handle specific NFT type transfers (e.g., policy ownership)
+(handle-insurance-nft-transfer token-id (get nft-type nft-data) sender
+      recipient
+    )
     (print {
       event: "insurance-nft-transferred",
       token-id: token-id,
@@ -818,9 +566,7 @@
       nft-type: (get nft-type nft-data)
     })
     
-    (ok true)
-  )
-)
+    (ok true)))
 
 ;; ===== Insurance NFT Metadata =====
 
@@ -864,7 +610,7 @@
 )
 
 (define-private (mint-nft (token-id uint) (recipient principal))
-  (nft-mint? insurance-nft token-id recipient))
+  (unwrap-panic (nft-mint? insurance-nft token-id recipient)))
 
 (define-private (is-valid-coverage-type (coverage-type uint))
   (and (>= coverage-type COVERAGE_SMART_CONTRACT) (<= coverage-type COVERAGE_BRIDGE_FAILURE)))
@@ -1072,7 +818,7 @@
       { user: user }
       (merge profile {
         total-claims-filed: (+ (get total-claims-filed profile) u1),
-        claim-history: (append (get claim-history profile) (list claim_id)),
+        claim-history: (unwrap-panic (as-max-len? (append (get claim-history profile) claim-id) u30)),
         risk-score: (+ (get risk-score profile) u200), ;; +2% risk per claim
         last-activity-block: block-height
       }))))
@@ -1110,25 +856,25 @@
   (map-get? insurance-policies { policy-id: policy-id }))
 
 (define-read-only (get-insurance-claim (claim-id uint))
-  (map-get? insurance-claims { claim-id: claim_id }))
+  (map-get? insurance-claims { claim-id: claim-id }))
 
 (define-read-only (get-risk-assessment (assessment-id uint))
-  (map-get? risk-assessments { assessment-id: assessment_id }))
+  (map-get? risk-assessments { assessment-id: assessment-id }))
 
 (define-read-only (get-proof-of-insurance (certificate-id uint))
-  (map-get? proof-of-insurance { certificate-id: certificate_id }))
+  (map-get? proof-of-insurance { certificate-id: certificate-id }))
 
 (define-read-only (get-premium-discount (discount-id uint))
-  (map-get? premium-discounts { discount-id: discount_id }))
+  (map-get? premium-discounts { discount-id: discount-id }))
 
 (define-read-only (get-insurance-pool (pool-id uint))
-  (map-get? insurance-pools { pool-id: pool_id }))
+  (map-get? insurance-pools { pool-id: pool-id }))
 
 (define-read-only (get-user-insurance-profile (user principal))
   (map-get? user-insurance-profiles { user: user }))
 
 (define-read-only (get-industry-offering (offering-id uint))
-  (map-get? industry-offerings { offering-id: offering_id }))
+  (map-get? industry-offerings { offering-id: offering-id }))
 
 (define-read-only (get-insurance-nft-metadata (token-id uint))
   (map-get? insurance-nft-metadata { token-id: token-id }))
@@ -1147,6 +893,6 @@
 
 (define-read-only (verify-proof-of-insurance (certificate-id uint) (verification-code (string-ascii 32)))
   ;; Verify proof of insurance certificate
-  (match (map-get? proof-of-insurance { certificate-id: certificate_id })
+  (match (map-get? proof-of-insurance { certificate-id: certificate-id })
     certificate (ok (is-eq (get verification-code certificate) verification-code))
-    none (err u12001)))
+    (err u12001)))

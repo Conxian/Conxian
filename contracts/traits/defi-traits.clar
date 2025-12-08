@@ -207,3 +207,11 @@
   (invest (uint) (response uint uint))
   (divest (uint) (response uint uint))
 ))
+
+;; ===========================================
+;; MONITORING DASHBOARD TRAIT
+;; ===========================================
+(define-trait monitoring-dashboard-trait (
+  (record-metric ((string-ascii 64) uint uint) (response bool uint))
+  (trigger-alert ((string-ascii 64) (string-ascii 64) uint uint uint) (response bool uint))
+))

@@ -149,8 +149,8 @@
 (sqrt-price (/ (* Q96 numerator) u20000))
     )
         (if (< tick 0)
-            ;; For negative ticks, invert: Q96^2 / sqrt-price
-            (ok (/ (* Q96 Q96) sqrt-price))
+            ;; For negative ticks, invert: Q96 * 20000 / numerator
+            (ok (/ (* Q96 u20000) numerator))
             (ok sqrt-price)
         )
     )

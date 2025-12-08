@@ -7,9 +7,10 @@
     ;; @desc Initiates the wrapping of BTC to sBTC.
     ;; @param btc-amount uint The amount of BTC to wrap.
     ;; @param btc-txid (buff 32) The transaction ID of the BTC deposit.
+    ;; @param header-hash (buff 32) The Bitcoin block header hash.
     ;; @param recipient principal The principal to receive the minted sBTC.
     ;; @returns (response uint uint) A response containing the amount of sBTC minted or an error.
-    (wrap-btc (uint (buff 32) principal) (response uint uint))
+    (wrap-btc (uint (buff 32) (buff 32) principal) (response uint uint))
 
     ;; @desc Initiates the unwrapping of sBTC to BTC.
     ;; @param sbtc-amount uint The amount of sBTC to unwrap.
@@ -26,7 +27,8 @@
 (define-map wrap-history {user: principal, timestamp: uint} {
   btc-amount: uint,
   sbtc-amount: uint,
-  fee-paid: uint
+  fee-paid: uint,
+  header-hash: (buff 32)
 })
 
 ;; @desc Stores the history of unwrap transactions.
@@ -42,18 +44,20 @@
 ;; @desc Initiates a wrap of BTC to sBTC. Can only be called by the sBTC vault.
 ;; @param btc-amount uint The amount of BTC to wrap.
 ;; @param btc-txid (buff 32) The Bitcoin transaction ID.
+;; @param header-hash (buff 32) The Bitcoin block header hash.
 ;; @param recipient principal The recipient of the sBTC.
 ;; @returns (response uint uint) The amount of sBTC minted.
-(define-public (wrap-btc (btc-amount uint) (btc-txid (buff 32)) (recipient principal))
+(define-public (wrap-btc (btc-amount uint) (btc-txid (buff 32)) (header-hash (buff 32)) (recipient principal))
   (begin
     (asserts! (is-eq tx-sender .sbtc-vault) (err u100))
-    ;; In a real implementation, this would involve verifying the BTC transaction
-    ;; with an oracle or a federated multisig.
+    ;; In a real implementation, we would call btc-adapter to verify the SPV proof using header-hash
+;; (try! (contract-call? .btc-adapter verify-finality ... header-hash))
     (let ((sbtc-amount btc-amount)) ;; Placeholder 1:1 conversion
       (map-set wrap-history {user: recipient, timestamp: block-height} {
         btc-amount: btc-amount,
         sbtc-amount: sbtc-amount,
-        fee-paid: u0
+        fee-paid: u0,
+        header-hash: header-hash
       })
       (ok sbtc-amount))))
 

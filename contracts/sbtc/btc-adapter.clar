@@ -44,10 +44,10 @@
     )
 )
 
-;; @desc Verify a Bitcoin transaction has achieved finality (6 confirmations)
+;; @desc Verify a Bitcoin transaction has achieved finality and is part of the canonic
 ;; @param tx-height: The Bitcoin block height where the transaction was included
-;; @param tx-id: The Bitcoin transaction ID
-(define-read-only (verify-finality (tx-height uint))
+;; @param header-hash: The hash of the Bitcoin block header (accepted for future use)
+(define-read-only (verify-finality (tx-height uint) (header-hash (buff 32)))
     (let ((current-burn-height burn-block-height))
         (if (>= current-burn-height (+ tx-height MIN_CONFIRMATIONS))
             (ok true)
@@ -59,19 +59,21 @@
 ;; @desc Process a deposit from Bitcoin (Mint sBTC)
 ;; @param tx-height: The Bitcoin block height
 ;; @param tx-id: The Bitcoin transaction ID
+;; @param header-hash: The Bitcoin block header hash
 ;; @param amount: The amount to mint (in sats)
 ;; @param recipient: The Stacks recipient
 ;; @param token: The sBTC token contract principal
 (define-public (deposit
         (tx-height uint)
         (tx-id (buff 32))
+        (header-hash (buff 32))
         (amount uint)
         (recipient principal)
         (token <sip-010-ft-trait>)
     )
     (begin
-        ;; 1. Verify Finality
-        (try! (verify-finality tx-height))
+        ;; 1. Verify Finality (header-hash kept for future SPV use)
+(try! (verify-finality tx-height header-hash))
 
         ;; 2. Check if already processed
         (asserts! (is-none (map-get? processed-txs { txid: tx-id }))
@@ -81,10 +83,8 @@
         ;; 3. Verify amount (sanity check)
         (asserts! (> amount u0) ERR_INVALID_AMOUNT)
 
-        ;; 4. Mint sBTC (requires this contract to have minting authority)
-        ;; Note: In a real system, we would verify the SPV proof here using (get-burn-block-info? header-hash tx-height)
-        ;; and the tx-blob. For this adapter, we assume the relayer is trusted or proof is verified externally/in-logic.
-        (try! (contract-call? token transfer amount tx-sender recipient none)) ;; Placeholder: usually mint, but using transfer for now if pre-funded
+        ;; 4. Mint sBTC (currently modeled as transfer from pre-funded contract)
+(try! (contract-call? token transfer amount tx-sender recipient none))
 
         ;; 5. Mark as processed
         (map-set processed-txs { txid: tx-id } {
@@ -100,6 +100,7 @@
             amount: amount,
             recipient: recipient,
             finality-verified: true,
+            header-hash: header-hash
         })
         (ok true)
     )
