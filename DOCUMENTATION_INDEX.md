@@ -44,6 +44,7 @@
 - **[Operations Runbook](./documentation/OPERATIONS_RUNBOOK.md)** - Operational procedures and admin controls
 - **[Regulatory Alignment](./documentation/REGULATORY_ALIGNMENT.md)** - Compliance mapping and regulatory objectives
 - **[Identity, KYC & POPIA Charter](./documentation/IDENTITY_KYC_POPIA.md)** - Identity, KYC/KYB, and data protection alignment
+- **[Guardian Network & FSCA Alignment](./documentation/GUARDIAN_NETWORK_AND_FSCA_ALIGNMENT.md)** - Guardian roles, risks, and FSCA-style alignment
 - **[Treasury & Revenue Router](./documentation/TREASURY_AND_REVENUE_ROUTER.md)** - Treasury structure and protocol revenue routing
 - **[Payroll & Rewards](./documentation/PAYROLL_AND_REWARDS.md)** - Guardian, contributor, and Labs payment design
 - **[Legal Representatives & Bounties](./documentation/LEGAL_REPRESENTATIVES_AND_BOUNTIES.md)** - Legal wrappers, advisors, and bounty incentives
@@ -60,8 +61,10 @@
 - **[Contributing Guide](./CONTRIBUTING.md)** - Contribution guidelines and standards
 
 ### Contract Development
+
 - **[Naming Standards](./NAMING_STANDARDS.md)** - Contract, token, and council naming conventions
 - **[Architecture Specification](./documentation/ARCHITECTURE_SPEC.md)** - System design and module interactions
+- **[SDK Strategy & Packages](./documentation/SDK_STRATEGY_AND_PACKAGES.md)** - SDK layout, packages, and integration points
 
 ### Testing
 
@@ -232,6 +235,7 @@
 ## 📋 Document Status Legend
 
 - ✅ **Current** - Up to date with latest codebase
+- ✅ **Current (Design)** - Complete design specification (implementation pending)
 - 🔄 **In Progress** - Being actively updated
 
 ### Current Status by Document
@@ -241,16 +245,18 @@
 | README.md | ✅ Current | Dec 6, 2025 |
 | ROADMAP.md | ✅ Current | Dec 6, 2025 |
 | CHANGELOG.md | ✅ Current | Dec 6, 2025 |
-| TODO_AUDIT_REPORT.md | ✅ Current | Dec 6, 2025 |
+| TODO_AUDIT_REPORT.md | ✅ Current | Dec 7, 2025 |
 | BEHAVIOR_METRICS.md | ✅ Current | Dec 6, 2025 |
 | SERVICE_CATALOG.md | ✅ Current | Dec 6, 2025 |
-| DOCUMENTATION_INDEX.md | ✅ Current | Dec 6, 2025 |
-| COMPANY_CHARTER.md | 🔄 In Progress | Dec 7, 2025 |
-| IDENTITY_KYC_POPIA.md | 🔄 In Progress | Dec 7, 2025 |
-| TREASURY_AND_REVENUE_ROUTER.md | 🔄 In Progress | Dec 7, 2025 |
-| PAYROLL_AND_REWARDS.md | 🔄 In Progress | Dec 7, 2025 |
-| LEGAL_REPRESENTATIVES_AND_BOUNTIES.md | 🔄 In Progress | Dec 7, 2025 |
-| PAYMENTS_AND_PROVIDERS.md | 🔄 In Progress | Dec 7, 2025 |
+| DOCUMENTATION_INDEX.md | ✅ Current | Dec 7, 2025 |
+| GUARDIAN_NETWORK_AND_FSCA_ALIGNMENT.md | ✅ Current (Design) | Dec 7, 2025 |
+| SDK_STRATEGY_AND_PACKAGES.md | ✅ Current (Design) | Dec 7, 2025 |
+| COMPANY_CHARTER.md | ✅ Current (Design) | Dec 7, 2025 |
+| IDENTITY_KYC_POPIA.md | ✅ Current (Design) | Dec 7, 2025 |
+| TREASURY_AND_REVENUE_ROUTER.md | ✅ Current (Design) | Dec 7, 2025 |
+| PAYROLL_AND_REWARDS.md | ✅ Current (Design) | Dec 7, 2025 |
+| LEGAL_REPRESENTATIVES_AND_BOUNTIES.md | ✅ Current (Design) | Dec 7, 2025 |
+| PAYMENTS_AND_PROVIDERS.md | ✅ Current (Design) | Dec 7, 2025 |
 
 ---
 
