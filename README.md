@@ -90,3 +90,8 @@ Full documentation is available in the `documentation/` directory.
 * [Architecture Guide](documentation/architecture/ARCHITECTURE.md)
 * [Developer Guide](documentation/developer/DEVELOPER_GUIDE.md)
 * [User Guide](documentation/retail/USER_GUIDE.md)
+
+## System Status & Reviews
+
+* **[Comprehensive System Review (Dec 2025)](documentation/reports/SYSTEM_REVIEW_AND_ALIGNMENT.md)**: Detailed analysis of architecture, gaps, and roadmap.
+

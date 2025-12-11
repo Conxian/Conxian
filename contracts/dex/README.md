@@ -10,7 +10,7 @@ The DEX Module provides the core functionality for decentralized exchange operat
 
 - **`concentrated-liquidity-pool.clar`**: Implements a concentrated liquidity AMM, allowing for greater capital efficiency. This contract is currently under review and is not yet considered production-ready.
 
-- **`dijkstra-pathfinder.clar`**: A contract intended to implement Dijkstra's algorithm for on-chain route discovery. This contract is not yet fully implemented and is not integrated with the `multi-hop-router-v3.clar`.
+- **`on-chain-router-helper.clar`**: A helper contract that replaces the legacy pathfinder. It provides read-only functions to verify off-chain routes, check liquidity availability, and validate token connectivity before execution.
 
 - **`dex-factory.clar`**: A factory contract for creating and managing liquidity pools. This contract is currently under review.
 

@@ -240,13 +240,23 @@ critical dependencies while remaining within the DAO’s governance framework.
 
 ## 5. Security
 
-The Conxian Protocol is designed with a security-first mindset, incorporating a multi-layered approach to protect user funds and ensure the long-term stability of the ecosystem.
+The Conxian Protocol is designed with a security-first mindset,
+incorporating a multi-layered approach to protect user funds and
+ensure the long-term stability of the ecosystem.
 
-- **Audits & Formal Verification**: All smart contracts will undergo rigorous security audits by reputable third-party firms before being deployed to mainnet. We will also leverage formal verification techniques to mathematically prove the correctness of our most critical components.
-- **MEV Protection**: The protocol includes a dedicated MEV protection layer with commit-reveal schemes and batch auctions to minimize the impact of front-running and other forms of MEV exploitation.
-- **Circuit Breakers**: The system incorporates circuit breakers that can be triggered in the event of a black swan event or other unforeseen market conditions. These circuit breakers can pause critical functions of the protocol to protect user funds.
-- **Rate Limiting**: To prevent market manipulation and other forms of abuse, the protocol includes rate-limiting mechanisms on key functions.
-- **Role-Based Access Control**: The protocol uses a robust role-based access control (RBAC) system to ensure that only authorized addresses can perform critical administrative functions.
+- **Audits & Formal Verification**: All smart contracts will undergo
+  rigorous security audits by reputable third-party firms before being
+  deployed to mainnet. We will also leverage formal verification techniques
+  to mathematically prove the correctness of our most critical components.
+- **MEV Protection**: The protocol includes a dedicated MEV protection layer
+  with commit-reveal schemes and batch auctions to minimize the impact of
+  front-running and other forms of MEV exploitation.
+- **Circuit Breakers**: The system incorporates circuit breakers that can be
+  triggered in the event of a black swan event or other unforeseen market
+  conditions. These circuit breakers can pause critical functions of the
+  protocol to protect user funds.
+- **Rate Limiting**: To prevent market manipulation and other forms of abuse, the protocol includesrate-limiting mechanisms on key functions.
+- **Role-Based Access Control**: The protocol uses a robust role-based,   access control (RBAC) system to ensure that only authorized addresses can perform critical administrative functions.
 
 ## 6. Roadmap & Implementation Status
 
