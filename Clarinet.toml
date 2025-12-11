@@ -344,7 +344,11 @@ path = "contracts/dex/dex-factory-v2.clar"
 address = "ST3N0ZC9HBPDEBEJ1H1QFGMJF3PSNGW3FYZSVN513"
 
 [contracts.multi-hop-router-v3]
-path = "contracts/router/multi-hop-router-v3.clar"
+path = "contracts/dex/multi-hop-router-v3.clar"
+address = "ST3N0ZC9HBPDEBEJ1H1QFGMJF3PSNGW3FYZSVN513"
+
+[contracts.on-chain-router-helper]
+path = "contracts/dex/on-chain-router-helper.clar"
 address = "ST3N0ZC9HBPDEBEJ1H1QFGMJF3PSNGW3FYZSVN513"
 
 [contracts.yield-optimizer]
@@ -389,6 +393,10 @@ address = "ST3N0ZC9HBPDEBEJ1H1QFGMJF3PSNGW3FYZSVN513"
 
 [contracts.mock-token]
 path = "contracts/mocks/mock-token.clar"
+address = "ST3N0ZC9HBPDEBEJ1H1QFGMJF3PSNGW3FYZSVN513"
+
+[contracts.mock-usda-token]
+path = "contracts/mocks/mock-usda-token.clar"
 address = "ST3N0ZC9HBPDEBEJ1H1QFGMJF3PSNGW3FYZSVN513"
 
 [contracts.mock-pool]

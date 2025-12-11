@@ -278,13 +278,6 @@ plan:
             anchor-block-only: true
             clarity-version: 1
         - contract-publish:
-            contract-name: dimensional-advanced-router-dijkstra
-            expected-sender: STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ
-            cost: 78030
-            path: "contracts\\dimensional\\advanced-router-dijkstra.clar"
-            anchor-block-only: true
-            clarity-version: 1
-        - contract-publish:
             contract-name: oracle-pricing
             expected-sender: STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ
             cost: 15180
