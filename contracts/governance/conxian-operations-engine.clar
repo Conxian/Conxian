@@ -392,7 +392,7 @@
         (mev-score (/ (* (get mev-awareness-score mev) u1500) u10000)) ;; 15% weight
         (insurance-score (/ (* (get risk-management-score insurance) u1500) u10000)) ;; 15% weight
         (bridge-score (/ (* (get bridge-reliability bridge) u1500) u10000)) ;; 15% weight
-        (participation-bonus (/ (* (get governance-participation metrics) u10) u1)) ;; 10% weight
+        (participation-bonus (/ (* (+ (get proposals-voted gov) (get proposals-created gov)) u10) u1)) ;; 10% weight
       )
       (+ gov-score lending-score mev-score insurance-score bridge-score
         participation-bonus

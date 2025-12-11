@@ -8,7 +8,7 @@
 (define-constant ERR_INVALID_PARAMETER (err u4002))
 (define-constant ERR_LENDING_SYSTEM_NOT_SET (err u4004))
 (define-constant PRECISION u1000000000000000000) ;; 1e18
-(define-constant BLOCKS_PER_YEAR u525600) ;; Approximate blocks per year (assu
+(define-constant BLOCKS_PER_YEAR u6307200) ;; Approximate blocks per year (assu
 (define-constant RESERVE_FACTOR u100000000000000000) ;; 10% reserve factor
 
 ;; ===== Data Variables =====

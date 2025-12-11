@@ -75,9 +75,9 @@
   )
 )
 
-;; Public Functions
+;; Internal Core Functions
 
-(define-public (supply
+(define-private (supply-internal
     (asset <sip-010-ft-trait>)
     (amount uint)
   )
@@ -132,7 +132,7 @@
   )
 )
 
-(define-public (withdraw
+(define-private (withdraw-internal
     (asset <sip-010-ft-trait>)
     (amount uint)
   )
@@ -190,7 +190,7 @@
   )
 )
 
-(define-public (borrow
+(define-private (borrow-internal
     (asset <sip-010-ft-trait>)
     (amount uint)
   )
@@ -244,7 +244,7 @@
   )
 )
 
-(define-public (repay
+(define-private (repay-internal
     (asset <sip-010-ft-trait>)
     (amount uint)
   )
@@ -311,6 +311,36 @@
   )
 )
 
+;; Public Wrappers
+
+(define-public (supply
+    (asset <sip-010-ft-trait>)
+    (amount uint)
+  )
+  (supply-internal asset amount)
+)
+
+(define-public (withdraw
+    (asset <sip-010-ft-trait>)
+    (amount uint)
+  )
+  (withdraw-internal asset amount)
+)
+
+(define-public (borrow
+    (asset <sip-010-ft-trait>)
+    (amount uint)
+  )
+  (borrow-internal asset amount)
+)
+
+(define-public (repay
+    (asset <sip-010-ft-trait>)
+    (amount uint)
+  )
+  (repay-internal asset amount)
+)
+
 ;; --- Hook Enabled Functions ---
 
 (define-public (supply-with-hook
@@ -323,7 +353,7 @@
       (try! (contract-call? hook on-action "SUPPLY_PRE" tx-sender amount
         asset-principal none
       ))
-      (let ((res (supply asset amount)))
+      (let ((res (supply-internal asset amount)))
         (try! (contract-call? hook on-action "SUPPLY_POST" tx-sender amount
           asset-principal none
         ))
@@ -343,7 +373,7 @@
       (try! (contract-call? hook on-action "WITHDRAW_PRE" tx-sender amount
         asset-principal none
       ))
-      (let ((res (withdraw asset amount)))
+      (let ((res (withdraw-internal asset amount)))
         (try! (contract-call? hook on-action "WITHDRAW_POST" tx-sender amount
           asset-principal none
         ))
@@ -363,7 +393,7 @@
       (try! (contract-call? hook on-action "BORROW_PRE" tx-sender amount
         asset-principal none
       ))
-      (let ((res (borrow asset amount)))
+      (let ((res (borrow-internal asset amount)))
         (try! (contract-call? hook on-action "BORROW_POST" tx-sender amount
           asset-principal none
         ))
@@ -383,7 +413,7 @@
       (try! (contract-call? hook on-action "REPAY_PRE" tx-sender amount
         asset-principal none
       ))
-      (let ((res (repay asset amount)))
+      (let ((res (repay-internal asset amount)))
         (try! (contract-call? hook on-action "REPAY_POST" tx-sender amount
           asset-principal none
         ))
@@ -528,7 +558,7 @@
       )
       (if (< new-hf (var-get min-health-factor))
         ERR_HEALTH_CHECK_FAILED
-        (borrow asset amount)
+        (borrow-internal asset amount)
       )
     )
   )
@@ -551,7 +581,7 @@
       )
       (if (< new-hf (var-get min-health-factor))
         ERR_HEALTH_CHECK_FAILED
-        (withdraw asset amount)
+        (withdraw-internal asset amount)
       )
     )
   )

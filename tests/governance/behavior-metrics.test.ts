@@ -33,7 +33,7 @@ describe('Behavior Metrics & Reputation System', () => {
         deployer
       );
 
-      const data = metrics.result as any;
+      const data = (metrics.result as any).value;
       expect(data["reputation-score"]).toStrictEqual(Cl.uint(0));
       expect(data["behavior-tier"]).toStrictEqual(Cl.uint(1)); // Bronze
       expect(data["incentive-multiplier"]).toStrictEqual(Cl.uint(100)); // 1.0x
@@ -47,7 +47,7 @@ describe('Behavior Metrics & Reputation System', () => {
         deployer
       );
 
-      const data = behavior.result as any;
+      const data = (behavior.result as any).value;
       expect(data["proposals-voted"]).toStrictEqual(Cl.uint(0));
       expect(data["proposals-created"]).toStrictEqual(Cl.uint(0));
       expect(data["voting-accuracy"]).toStrictEqual(Cl.uint(0));
@@ -155,7 +155,7 @@ describe('Behavior Metrics & Reputation System', () => {
         deployer
       );
 
-      const data = (behavior.result as any).data;
+      const data = (behavior.result as any).value;
       expect(data["proposals-voted"]).toStrictEqual(Cl.uint(1));
       expect(data["voting-accuracy"]).toStrictEqual(Cl.uint(100));
     });
@@ -177,7 +177,7 @@ describe('Behavior Metrics & Reputation System', () => {
         deployer
       );
 
-      const data = (behavior.result as any).data;
+      const data = (behavior.result as any).value;
       expect(data["proposals-created"]).toStrictEqual(Cl.uint(1));
     });
 
@@ -216,7 +216,7 @@ describe('Behavior Metrics & Reputation System', () => {
         deployer
       );
 
-      const data = (behavior.result as any).data;
+      const data = (behavior.result as any).value;
       expect(data["average-health-factor"]).toStrictEqual(Cl.uint(1500));
       expect(data["liquidation-count"]).toStrictEqual(Cl.uint(0));
       expect(data["timely-repayment-count"]).toStrictEqual(Cl.uint(1));
@@ -258,7 +258,7 @@ describe('Behavior Metrics & Reputation System', () => {
         deployer
       );
 
-      const data = (behavior.result as any).data;
+      const data = (behavior.result as any).value;
       expect(data["liquidation-count"]).toStrictEqual(Cl.uint(1));
       // Collateral score should be reduced (95% of previous)
     });
@@ -287,7 +287,7 @@ describe('Behavior Metrics & Reputation System', () => {
         deployer
       );
 
-      const data = (behavior.result as any).data;
+      const data = (behavior.result as any).value;
       expect(data["protection-usage-count"]).toStrictEqual(Cl.uint(1));
       expect(data["attacks-prevented"]).toStrictEqual(Cl.uint(1));
       expect(data["protected-volume"]).toStrictEqual(Cl.uint(1000000));
@@ -317,7 +317,7 @@ describe('Behavior Metrics & Reputation System', () => {
         deployer
       );
 
-      const data = (behavior.result as any).data;
+      const data = (behavior.result as any).value;
       expect(data["protection-usage-count"]).toStrictEqual(Cl.uint(5));
       expect(data["mev-awareness-score"]).toStrictEqual(Cl.uint(500));
     });
@@ -346,7 +346,7 @@ describe('Behavior Metrics & Reputation System', () => {
         deployer
       );
 
-      const data = (behavior.result as any).data;
+      const data = (behavior.result as any).value;
       expect(data["premium-payment-reliability"]).toStrictEqual(Cl.uint(100));
     });
 
@@ -372,7 +372,7 @@ describe('Behavior Metrics & Reputation System', () => {
         deployer
       );
 
-      const data = (behavior.result as any).data;
+      const data = (behavior.result as any).value;
       expect(data["claims-filed"]).toStrictEqual(Cl.uint(1));
       expect(data["claims-approved"]).toStrictEqual(Cl.uint(0));
       // Risk management score should be reduced (90% of previous)
@@ -407,7 +407,7 @@ describe('Behavior Metrics & Reputation System', () => {
         "bridge-behavior result",
         JSON.stringify(behavior.result, null, 2)
       );
-      const data = (behavior.result as any).data;
+      const data = (behavior.result as any).value;
       expect(data["successful-bridges"]).toStrictEqual(Cl.uint(1));
       expect(data["bridge-volume"]).toStrictEqual(Cl.uint(5000000));
       expect(data["security-awareness-score"]).toStrictEqual(Cl.uint(50));
@@ -438,7 +438,7 @@ describe('Behavior Metrics & Reputation System', () => {
         deployer
       );
 
-      const data = (behavior.result as any).data;
+      const data = (behavior.result as any).value;
       expect(data["successful-bridges"]).toStrictEqual(Cl.uint(3));
       expect(data["failed-bridges"]).toStrictEqual(Cl.uint(1));
       // Reliability should be 75% (3/4 * 10000 = 7500)
@@ -481,7 +481,7 @@ describe('Behavior Metrics & Reputation System', () => {
         "behavior-dashboard result",
         JSON.stringify(dashboard.result, null, 2)
       );
-      const data = dashboard.result as any;
+      const data = (dashboard.result as any).value;
       expect(data["user"]).toStrictEqual(Cl.standardPrincipal(wallet1));
     });
   });
@@ -489,7 +489,8 @@ describe('Behavior Metrics & Reputation System', () => {
   describe("Behavior Tier Progression", () => {
     it("progresses from bronze to silver with good behavior", () => {
       // Record multiple positive actions to reach silver threshold (3000)
-      for (let i = 0; i < 30; i++) {
+      // Need 100 actions to reach 3000 score (2000 from accuracy + 1000 from bonus)
+      for (let i = 0; i < 100; i++) {
         simnet.callPublicFn(
           "conxian-operations-engine",
           "record-governance-action",
@@ -506,7 +507,7 @@ describe('Behavior Metrics & Reputation System', () => {
       );
 
       // Metrics should show progression
-      const data = (metrics.result as any).data;
+      const data = (metrics.result as any).value;
       expect(data["behavior-tier"]).toStrictEqual(Cl.uint(2)); // Silver or higher
       expect(data["incentive-multiplier"]).toStrictEqual(Cl.uint(125)); // 1.25x or higher
     });

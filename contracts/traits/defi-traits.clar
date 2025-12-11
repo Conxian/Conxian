@@ -184,8 +184,12 @@
 ))
 
 ;; ===========================================
-;; FLASH LOAN TRAIT
+;; ROUTER TRAIT
 ;; ===========================================
+(define-trait router-trait (
+  (propose-route (principal principal uint uint uint) (response uint uint))
+  (execute-route (uint uint principal) (response uint uint))
+))
 (define-trait flash-loan-trait (
   (execute-loan
     (principal uint (optional (buff 1024)))

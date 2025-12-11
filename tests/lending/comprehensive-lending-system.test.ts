@@ -372,4 +372,268 @@ describe('Comprehensive Lending System', () => {
       expect(finalContractBal.result).toBeOk(Cl.uint(0));
     });
   });
+
+  describe("checked operations guard rails", () => {
+    it("prevents uncollateralized borrow via borrow-checked", () => {
+      const asset = Cl.contractPrincipal(deployer, "cxd-token");
+
+      const res = simnet.callPublicFn(
+        "comprehensive-lending-system",
+        "borrow-checked",
+        [asset, Cl.uint(100)],
+        wallet1
+      );
+
+      // ERR_HEALTH_CHECK_FAILED = (err u1005)
+      expect(res.result).toBeErr(Cl.uint(1005));
+
+      const supplyBal = simnet.callReadOnlyFn(
+        "comprehensive-lending-system",
+        "get-user-supply-balance",
+        [Cl.standardPrincipal(wallet1), asset],
+        wallet1
+      );
+      expect(supplyBal.result).toBeOk(Cl.uint(0));
+
+      const borrowBal = simnet.callReadOnlyFn(
+        "comprehensive-lending-system",
+        "get-user-borrow-balance",
+        [Cl.standardPrincipal(wallet1), asset],
+        wallet1
+      );
+      expect(borrowBal.result).toBeOk(Cl.uint(0));
+    });
+
+    it("rejects withdrawals that would violate the health factor via withdraw-checked", () => {
+      const asset = Cl.contractPrincipal(deployer, "cxd-token");
+      const lendingContract = Cl.contractPrincipal(
+        deployer,
+        "comprehensive-lending-system"
+      );
+
+      const initialMintAmount = 10_000n;
+      const supplyAmount = 1_000n;
+      const borrowAmount = 600n;
+
+      const setMinter = simnet.callPublicFn(
+        "cxd-token",
+        "set-minter",
+        [Cl.principal(deployer), Cl.bool(true)],
+        deployer
+      );
+      expect(setMinter.result).toBeOk(Cl.bool(true));
+
+      const mint = simnet.callPublicFn(
+        "cxd-token",
+        "mint",
+        [Cl.standardPrincipal(wallet1), Cl.uint(initialMintAmount)],
+        deployer
+      );
+      expect(mint.result).toBeOk(Cl.bool(true));
+
+      const setLs = simnet.callPublicFn(
+        "interest-rate-model",
+        "set-lending-system-contract",
+        [Cl.standardPrincipal(wallet1)],
+        deployer
+      );
+      expect(setLs.result).toBeOk(Cl.bool(true));
+
+      const initMarket = simnet.callPublicFn(
+        "interest-rate-model",
+        "initialize-market",
+        [asset],
+        wallet1
+      );
+      expect(initMarket.result).toBeOk(Cl.bool(true));
+
+      const setModel = simnet.callPublicFn(
+        "interest-rate-model",
+        "set-interest-rate-model",
+        [
+          asset,
+          Cl.uint(0),
+          Cl.uint(0),
+          Cl.uint(0),
+          Cl.uint(1_000_000_000_000_000_000n),
+        ],
+        deployer
+      );
+      expect(setModel.result).toBeOk(Cl.bool(true));
+
+      const supply = simnet.callPublicFn(
+        "comprehensive-lending-system",
+        "supply",
+        [asset, Cl.uint(supplyAmount)],
+        wallet1
+      );
+      expect(supply.result).toBeOk(Cl.bool(true));
+
+      const borrow = simnet.callPublicFn(
+        "comprehensive-lending-system",
+        "borrow",
+        [asset, Cl.uint(borrowAmount)],
+        wallet1
+      );
+      expect(borrow.result).toBeOk(Cl.bool(true));
+
+      const beforeSupply = simnet.callReadOnlyFn(
+        "comprehensive-lending-system",
+        "get-user-supply-balance",
+        [Cl.standardPrincipal(wallet1), asset],
+        wallet1
+      );
+      expect(beforeSupply.result).toBeOk(Cl.uint(supplyAmount));
+
+      const beforeBorrow = simnet.callReadOnlyFn(
+        "comprehensive-lending-system",
+        "get-user-borrow-balance",
+        [Cl.standardPrincipal(wallet1), asset],
+        wallet1
+      );
+      expect(beforeBorrow.result).toBeOk(Cl.uint(borrowAmount));
+
+      const withdrawAttempt = simnet.callPublicFn(
+        "comprehensive-lending-system",
+        "withdraw-checked",
+        [asset, Cl.uint(borrowAmount)],
+        wallet1
+      );
+      // With supply=1000 and borrow=600, withdrawing 600 would drop HF below min.
+      expect(withdrawAttempt.result).toBeErr(Cl.uint(1005));
+
+      const afterSupply = simnet.callReadOnlyFn(
+        "comprehensive-lending-system",
+        "get-user-supply-balance",
+        [Cl.standardPrincipal(wallet1), asset],
+        wallet1
+      );
+      expect(afterSupply.result).toBeOk(Cl.uint(supplyAmount));
+
+      const afterBorrow = simnet.callReadOnlyFn(
+        "comprehensive-lending-system",
+        "get-user-borrow-balance",
+        [Cl.standardPrincipal(wallet1), asset],
+        wallet1
+      );
+      expect(afterBorrow.result).toBeOk(Cl.uint(borrowAmount));
+
+      const contractBal = simnet.callReadOnlyFn(
+        "cxd-token",
+        "get-balance",
+        [lendingContract],
+        deployer
+      );
+      expect(contractBal.result).toBeOk(Cl.uint(supplyAmount - borrowAmount));
+    });
+
+    it("caps repay amount to outstanding debt when user overpays", () => {
+      const asset = Cl.contractPrincipal(deployer, "cxd-token");
+      const lendingContract = Cl.contractPrincipal(
+        deployer,
+        "comprehensive-lending-system"
+      );
+
+      const initialMintAmount = 10_000n;
+      const supplyAmount = 1_000n;
+      const borrowAmount = 200n;
+      const overRepayAmount = 1_000n;
+
+      const setMinter = simnet.callPublicFn(
+        "cxd-token",
+        "set-minter",
+        [Cl.principal(deployer), Cl.bool(true)],
+        deployer
+      );
+      expect(setMinter.result).toBeOk(Cl.bool(true));
+
+      const mint = simnet.callPublicFn(
+        "cxd-token",
+        "mint",
+        [Cl.standardPrincipal(wallet1), Cl.uint(initialMintAmount)],
+        deployer
+      );
+      expect(mint.result).toBeOk(Cl.bool(true));
+
+      const setLs = simnet.callPublicFn(
+        "interest-rate-model",
+        "set-lending-system-contract",
+        [Cl.standardPrincipal(wallet1)],
+        deployer
+      );
+      expect(setLs.result).toBeOk(Cl.bool(true));
+
+      const initMarket = simnet.callPublicFn(
+        "interest-rate-model",
+        "initialize-market",
+        [asset],
+        wallet1
+      );
+      expect(initMarket.result).toBeOk(Cl.bool(true));
+
+      const setModel = simnet.callPublicFn(
+        "interest-rate-model",
+        "set-interest-rate-model",
+        [
+          asset,
+          Cl.uint(0),
+          Cl.uint(0),
+          Cl.uint(0),
+          Cl.uint(1_000_000_000_000_000_000n),
+        ],
+        deployer
+      );
+      expect(setModel.result).toBeOk(Cl.bool(true));
+
+      const supply = simnet.callPublicFn(
+        "comprehensive-lending-system",
+        "supply",
+        [asset, Cl.uint(supplyAmount)],
+        wallet1
+      );
+      expect(supply.result).toBeOk(Cl.bool(true));
+
+      const borrow = simnet.callPublicFn(
+        "comprehensive-lending-system",
+        "borrow",
+        [asset, Cl.uint(borrowAmount)],
+        wallet1
+      );
+      expect(borrow.result).toBeOk(Cl.bool(true));
+
+      const overRepay = simnet.callPublicFn(
+        "comprehensive-lending-system",
+        "repay",
+        [asset, Cl.uint(overRepayAmount)],
+        wallet1
+      );
+      expect(overRepay.result).toBeOk(Cl.bool(true));
+
+      const finalBorrow = simnet.callReadOnlyFn(
+        "comprehensive-lending-system",
+        "get-user-borrow-balance",
+        [Cl.standardPrincipal(wallet1), asset],
+        wallet1
+      );
+      expect(finalBorrow.result).toBeOk(Cl.uint(0));
+
+      const finalUserBal = simnet.callReadOnlyFn(
+        "cxd-token",
+        "get-balance",
+        [Cl.standardPrincipal(wallet1)],
+        deployer
+      );
+      expect(finalUserBal.result).toBeOk(
+        Cl.uint(initialMintAmount - supplyAmount)
+      );
+
+      const finalContractBal = simnet.callReadOnlyFn(
+        "cxd-token",
+        "get-balance",
+        [lendingContract],
+        deployer
+      );
+      expect(finalContractBal.result).toBeOk(Cl.uint(supplyAmount));
+    });
+  });
 });

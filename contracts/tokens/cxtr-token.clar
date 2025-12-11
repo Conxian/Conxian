@@ -146,11 +146,7 @@
     (recipient principal)
   )
   (if (var-get system-integration-enabled)
-    (match (var-get token-coordinator)
-      coordinator-contract
-      true
-      true
-    )
+    (unwrap! (contract-call? .token-system-coordinator on-transfer amount sender recipient) true)
     true
   )
 )
@@ -164,10 +160,7 @@
     (recipient principal)
   )
   (if (var-get system-integration-enabled)
-    ;; (match (var-get token-coordinator)
-    ;;   coordinator-contract (unwrap! (contract-call? coordinator-contract on-mint amount recipient) true)
-    ;;   true)
-    true
+    (unwrap! (contract-call? .token-system-coordinator on-mint amount recipient) true)
     true
   )
 )
@@ -181,11 +174,7 @@
     (burner principal)
   )
   (if (var-get system-integration-enabled)
-    (match (var-get token-coordinator)
-      coordinator-contract
-      true
-      true
-    )
+    (unwrap! (contract-call? .token-system-coordinator on-burn amount burner) true)
     true
   )
 )

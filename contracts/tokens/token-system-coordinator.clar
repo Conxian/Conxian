@@ -195,6 +195,50 @@
   )
 )
 
+(define-public (on-transfer (amount uint) (sender principal) (recipient principal))
+  (begin
+    (try! (when-not-paused))
+    (try! (validate-token contract-caller))
+    (update-user-activity sender amount)
+    (update-user-activity recipient amount)
+    (ok true)
+  )
+)
+
+(define-public (on-mint (amount uint) (recipient principal))
+  (begin
+    (try! (when-not-paused))
+    (try! (validate-token contract-caller))
+    (update-user-activity recipient amount)
+    (let ((meta (unwrap-panic (map-get? token-metadata contract-caller))))
+         (map-set token-metadata contract-caller (merge meta {
+             total-supply: (+ (get total-supply meta) amount),
+             last-activity: block-height
+         }))
+    )
+    (ok true)
+  )
+)
+
+(define-public (on-burn (amount uint) (sender principal))
+  (begin
+    (try! (when-not-paused))
+    (try! (validate-token contract-caller))
+    (update-user-activity sender amount)
+    (let ((meta (unwrap-panic (map-get? token-metadata contract-caller))))
+         (map-set token-metadata contract-caller (merge meta {
+             total-supply: (if (>= (get total-supply meta) amount) (- (get total-supply meta) amount) u0),
+             last-activity: block-height
+         }))
+    )
+    (ok true)
+  )
+)
+
+(define-public (on-dimensional-yield (amount uint) (start-height uint) (end-height uint))
+    (ok true)
+)
+
 (define-public (coordinate-multi-token-operation
     (user principal)
     (tokens (list 5 principal))
