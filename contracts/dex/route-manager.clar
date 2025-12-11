@@ -4,6 +4,7 @@
 (use-trait route-manager-trait .route-manager-trait.route-manager-trait)
 (use-trait dijkstra-pathfinder-trait .dijkstra-pathfinder-trait.dijkstra-pathfinder-trait)
 (use-trait rbac-trait .core-traits.rbac-trait)
+(impl-trait .defi-traits.router-trait)
 
 ;; @constants
 (define-constant ERR_INVALID_ROUTE (err u1400))

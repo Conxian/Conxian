@@ -6,39 +6,43 @@
 
 (use-trait sip-010-trait .sip-standards.sip-010-ft-trait)
 (use-trait fee-manager-trait .defi-traits.fee-manager-trait)
+(use-trait hook-trait .defi-traits.hook-trait)
 
 ;; --- Constants ---
-(define-constant ERR_UNAUTHORIZED (err u1100))
+(define-constant ERR_UNAUTHORIZED (contract-call? .standard-errors get-err-unauthorized))
 (define-constant ERR_INVALID_TICK (err u3001))
-(define-constant ERR_INVALID_TICK_RANGE (err u3002))
-(define-constant ERR_ZERO_AMOUNT (err u1207))
-(define-constant ERR_INSUFFICIENT_LIQUIDITY (err u1307))
-(define-constant ERR_POSITION_NOT_FOUND (err u3006))
+(define-constant ERR_INVALID_TICK_RANGE (contract-call? .standard-errors get-err-invalid-price-range))
+(define-constant ERR_ZERO_AMOUNT (contract-call? .standard-errors get-err-invalid-amount))
+(define-constant ERR_INSUFFICIENT_LIQUIDITY (contract-call? .standard-errors get-err-insufficient-liquidity))
+(define-constant ERR_POSITION_NOT_FOUND (contract-call? .standard-errors get-err-position-not-found))
 (define-constant ERR_NOT_INITIALIZED (err u3007))
-(define-constant ERR_ALREADY_INITIALIZED (err u3008))
-(define-constant ERR_INVALID_TOKEN (err u3009))
+(define-constant ERR_ALREADY_INITIALIZED (contract-call? .standard-errors get-err-pool-already-exists))
+(define-constant ERR_INVALID_TOKEN (contract-call? .standard-errors get-err-invalid-token-pair))
 (define-constant ERR_MATH_FAIL (err u3010))
 (define-constant ERR_FEE_CALC (err u3011))
 (define-constant ERR_TRANSFER_FAILED (err u3012))
 (define-constant ERR_NOT_SUPPORTED (err u3013))
 
-(define-constant MIN_TICK (- 887272))
+(define-constant MIN_TICK -887272)
 (define-constant MAX_TICK 887272)
+(define-constant Q96 u79228162514264337593543950336)
 
 ;; --- Data Variables ---
 (define-data-var token0 principal tx-sender)
 (define-data-var token1 principal tx-sender)
 (define-data-var initialized bool false)
-(define-data-var next-position-id uint u1)
 (define-data-var liquidity uint u0)
 (define-data-var sqrt-price-x96 uint u0)
 (define-data-var current-tick int 0)
+(define-data-var fee-growth-global-0-x128 uint u0)
+(define-data-var fee-growth-global-1-x128 uint u0)
 (define-data-var protocol-fee-switch principal .protocol-fee-switch)
-(define-data-var pool-fee-tier uint u30) ;; Default 0.3% (30 bps)
+(define-data-var pool-fee-tier uint u3000) ;; 0.3% = 3000 (scaled by 1e6 usually, or 3000/1000000)
+
 (define-data-var reserve0 uint u0)
 (define-data-var reserve1 uint u0)
 
-(use-trait hook-trait .defi-traits.hook-trait)
+(define-data-var unlocked-liquidity uint u0) ;; For pool-trait compatibility (virtual)
 
 ;; --- Maps ---
 (define-map positions
@@ -48,23 +52,56 @@
         tick-lower: int,
         tick-upper: int,
         liquidity: uint,
+        fee-growth-inside-0-last-x128: uint,
+        fee-growth-inside-1-last-x128: uint,
+        tokens-owed-0: uint,
+        tokens-owed-1: uint,
     }
 )
 
-;; Tick data for liquidity tracking
+(define-data-var next-position-id uint u1)
+
 (define-map ticks
     { tick: int }
     {
-        liquidity-gross: uint, ;; Total liquidity referencing this tick
-        liquidity-net: int, ;; Liquidity added (lower) or removed (upper) when crossing
+        liquidity-gross: uint,
+        liquidity-net: int,
+        fee-growth-outside-0-x128: uint,
+        fee-growth-outside-1-x128: uint,
         initialized: bool,
     }
 )
 
+;; NFT definitions
 (define-non-fungible-token position-nft uint)
+
+;; --- Helpers ---
+
+(define-read-only (check-ticks
+        (tick-lower int)
+        (tick-upper int)
+    )
+    (begin
+        (asserts! (< tick-lower tick-upper) ERR_INVALID_TICK_RANGE)
+        (asserts! (and (>= tick-lower MIN_TICK) (<= tick-lower MAX_TICK))
+            ERR_INVALID_TICK
+        )
+        (asserts! (and (>= tick-upper MIN_TICK) (<= tick-upper MAX_TICK))
+            ERR_INVALID_TICK
+        )
+        (ok true)
+    )
+)
 
 ;; --- Public Functions ---
 
+;; @desc Initializes the pool with tokens and starting price.
+;; @param t0 Token 0 principal
+;; @param t1 Token 1 principal
+;; @param initial-sqrt-price Initial Sqrt Price X96
+;; @param initial-tick Initial tick
+;; @param fee-tier Fee tier in basis points (e.g., 3000 for 0.3%)
+;; @returns Success or Error
 (define-public (initialize
         (t0 principal)
         (t1 principal)
@@ -84,370 +121,374 @@
     )
 )
 
+;; @desc Mints a new liquidity position.
+;; @param recipient The owner of the new position
+;; @param tick-lower Lower tick bound
+;; @param tick-upper Upper tick bound
+;; @param amount Liquidity amount
+;; @param token0-inst Token 0 contract trait
+;; @param token1-inst Token 1 contract trait
+;; @returns (ok position-id) or Error
+(define-public (mint
+        (recipient principal)
+        (tick-lower int)
+        (tick-upper int)
+        (amount uint) ;; Liquidity amount
+        (token0-inst <sip-010-trait>)
+        (token1-inst <sip-010-trait>)
+    )
+    (let (
+            (check (try! (check-ticks tick-lower tick-upper)))
+            (pos-id (var-get next-position-id))
+            (current-p (var-get sqrt-price-x96))
+            (current-t (var-get current-tick))
+        )
+        (asserts! (var-get initialized) ERR_NOT_INITIALIZED)
+        (asserts! (> amount u0) ERR_ZERO_AMOUNT)
+        (asserts! (is-eq (contract-of token0-inst) (var-get token0))
+            ERR_INVALID_TOKEN
+        )
+        (asserts! (is-eq (contract-of token1-inst) (var-get token1))
+            ERR_INVALID_TOKEN
+        )
+
+        ;; Update Position
+        (map-set positions { position-id: pos-id } {
+            owner: recipient,
+            tick-lower: tick-lower,
+            tick-upper: tick-upper,
+            liquidity: amount,
+            fee-growth-inside-0-last-x128: u0, ;; Simplified
+            fee-growth-inside-1-last-x128: u0,
+            tokens-owed-0: u0,
+            tokens-owed-1: u0,
+        })
+
+        ;; Update Ticks
+        (map-set ticks { tick: tick-lower } {
+            liquidity-gross: (+
+                (get liquidity-gross
+                    (default-to {
+                        liquidity-gross: u0,
+                        liquidity-net: 0,
+                        fee-growth-outside-0-x128: u0,
+                        fee-growth-outside-1-x128: u0,
+                        initialized: false,
+                    }
+                        (map-get? ticks { tick: tick-lower })
+                    ))
+                amount
+            ),
+            liquidity-net: (+
+                (get liquidity-net
+                    (default-to {
+                        liquidity-gross: u0,
+                        liquidity-net: 0,
+                        fee-growth-outside-0-x128: u0,
+                        fee-growth-outside-1-x128: u0,
+                        initialized: false,
+                    }
+                        (map-get? ticks { tick: tick-lower })
+                    ))
+                (to-int amount)
+            ),
+            fee-growth-outside-0-x128: u0,
+            fee-growth-outside-1-x128: u0,
+            initialized: true,
+        })
+
+        (map-set ticks { tick: tick-upper } {
+            liquidity-gross: (+
+                (get liquidity-gross
+                    (default-to {
+                        liquidity-gross: u0,
+                        liquidity-net: 0,
+                        fee-growth-outside-0-x128: u0,
+                        fee-growth-outside-1-x128: u0,
+                        initialized: false,
+                    }
+                        (map-get? ticks { tick: tick-upper })
+                    ))
+                amount
+            ),
+            liquidity-net: (-
+                (get liquidity-net
+                    (default-to {
+                        liquidity-gross: u0,
+                        liquidity-net: 0,
+                        fee-growth-outside-0-x128: u0,
+                        fee-growth-outside-1-x128: u0,
+                        initialized: false,
+                    }
+                        (map-get? ticks { tick: tick-upper })
+                    ))
+                (to-int amount)
+            ),
+            fee-growth-outside-0-x128: u0,
+            fee-growth-outside-1-x128: u0,
+            initialized: true,
+        })
+
+        ;; If current tick is in range, add to global liquidity
+        (if (and (>= current-t tick-lower) (< current-t tick-upper))
+            (var-set liquidity (+ (var-get liquidity) amount))
+            false
+        )
+
+        ;; Calculate amounts to transfer
+        (let (
+                (sqrt-lower (unwrap! (contract-call? .math-lib-concentrated tick-to-sqrt-price
+                    tick-lower
+                ) ERR_MATH_FAIL))
+                (sqrt-upper (unwrap! (contract-call? .math-lib-concentrated tick-to-sqrt-price
+                    tick-upper
+                ) ERR_MATH_FAIL))
+                (amount0 (unwrap! (contract-call? .math-lib-concentrated get-amount0-delta
+                    current-p sqrt-upper amount
+                ) ERR_MATH_FAIL))
+                (amount1 (unwrap! (contract-call? .math-lib-concentrated get-amount1-delta
+                    sqrt-lower current-p amount
+                ) ERR_MATH_FAIL))
+            )
+            ;; Transfer tokens
+            (if (> amount0 u0)
+                (try! (contract-call? token0-inst transfer amount0 tx-sender
+                    (as-contract tx-sender) none
+                ))
+                false
+            )
+            (if (> amount1 u0)
+                (try! (contract-call? token1-inst transfer amount1 tx-sender
+                    (as-contract tx-sender) none
+                ))
+                false
+            )
+
+            (var-set reserve0 (+ (var-get reserve0) amount0))
+            (var-set reserve1 (+ (var-get reserve1) amount1))
+
+            ;; Mint NFT
+            (try! (nft-mint? position-nft pos-id recipient))
+            (var-set next-position-id (+ pos-id u1))
+
+            (ok pos-id)
+        )
+    )
+)
+
 ;; --- Pool Trait Implementation ---
 
+;; @desc Swaps tokens within the pool.
+;; @param amount-in Input amount
+;; @param token-in Input token trait
+;; @param token-out Output token trait
+;; @returns (ok amount-out) or Error
 (define-public (swap
         (amount-in uint)
         (token-in <sip-010-trait>)
         (token-out <sip-010-trait>)
     )
     (let (
-            (sender tx-sender)
-            (token-in-principal (contract-of token-in))
-            (token-out-principal (contract-of token-out))
-            (token0-principal (var-get token0))
-            (token1-principal (var-get token1))
-            (is-token0 (is-eq token-in-principal token0-principal))
-            (is-token1 (is-eq token-in-principal token1-principal))
-            (current-sqrt (var-get sqrt-price-x96))
-            (current-liq (var-get liquidity))
-        )
-        (asserts! (or is-token0 is-token1) ERR_INVALID_TOKEN)
-        (asserts!
-            (is-eq
-                (if is-token0
-                    token1-principal
-                    token0-principal
-                )
-                token-out-principal
-            )
-            ERR_INVALID_TOKEN
+            (is-token0 (is-eq (contract-of token-in) (var-get token0)))
+            (current-l (var-get liquidity))
+            (current-p (var-get sqrt-price-x96))
+            (fee-amount (/ (* amount-in (var-get pool-fee-tier)) u1000000))
+            (amount-remaining (- amount-in fee-amount))
+            (pool-principal (as-contract tx-sender))
+            (fee-switch (var-get protocol-fee-switch))
         )
         (asserts! (var-get initialized) ERR_NOT_INITIALIZED)
-        (asserts! (> current-liq u0) ERR_INSUFFICIENT_LIQUIDITY)
+        (asserts! (> amount-in u0) ERR_ZERO_AMOUNT)
+        (asserts! (> current-l u0) ERR_INSUFFICIENT_LIQUIDITY)
 
-        ;; 1. Transfer amount-in from user to pool
-        (try! (contract-call? token-in transfer amount-in sender
-            (as-contract tx-sender) none
-        ))
+        ;; 1. Transfer In (User -> Pool)
+        (try! (contract-call? token-in transfer amount-in tx-sender pool-principal none))
 
-        ;; 2. Route Fees (Dynamic)
+        ;; 2. Simplified Swap Logic (MVP: Single Tick / Constant Product approximation)
+        ;; For a real V3, we'd cross ticks. Here we just calculate output based on available liquidity.
+        ;; We'll use a simplified x*y=k equivalent over the active range for this MVP.
+
         (let (
-                (fee-rate (unwrap! (contract-call? .protocol-fee-switch get-fee-rate "DEX")
-                    ERR_FEE_CALC
-                ))
-                (fee-amount (/ (* amount-in fee-rate) u10000))
-                (amount-in-less-fee (- amount-in fee-amount))
-            )
-            ;; Emit Swap/Fee Event
-            (print {
-                event: "swap-execution",
-                sender: sender,
-                token-in: token-in-principal,
-                token-out: token-out-principal,
-                amount-in: amount-in,
-                fee-collected: fee-amount,
-                timestamp: block-height,
-            })
+            ;; Calculate next price first
+            (next-p (if is-token0
+                (unwrap! (contract-call? .math-lib-concentrated
+                    get-next-sqrt-price-from-amount0 current-p current-l
+                    amount-remaining true
+                ) ERR_MATH_FAIL)
+                (unwrap! (contract-call? .math-lib-concentrated
+                    get-next-sqrt-price-from-amount1 current-p current-l
+                    amount-remaining true
+                ) ERR_MATH_FAIL)
+            ))
+            ;; Calculate output amount using the delta
+            (amount-out (if is-token0
+                (unwrap! (contract-call? .math-lib-concentrated get-amount1-delta
+                    current-p next-p current-l
+                ) ERR_MATH_FAIL)
+                (unwrap! (contract-call? .math-lib-concentrated get-amount0-delta
+                    current-p next-p current-l
+                ) ERR_MATH_FAIL)
+            ))
+            ;; Calculate new tick
+            (next-tick (unwrap! (contract-call? .math-lib-concentrated sqrt-price-to-tick next-p) ERR_MATH_FAIL))
+        )
+            ;; 3. Transfer Out (Pool -> User)
+            (as-contract (try! (contract-call? token-out transfer amount-out pool-principal
+                tx-sender none
+            )))
 
-            ;; Transfer Fee to Switch & Route
+            ;; 4. Fee Processing (Pool -> Protocol Fee Switch)
+            ;; We send the entire collected fee to the switch for this MVP configuration
             (if (> fee-amount u0)
                 (begin
-                    (try! (as-contract (contract-call? token-in transfer fee-amount tx-sender
-                        .protocol-fee-switch none
+                    (as-contract (try! (contract-call? token-in transfer fee-amount pool-principal
+                        fee-switch none
                     )))
-                    (unwrap!
-                        (contract-call? .protocol-fee-switch route-fees token-in
-                            fee-amount false "DEX"
-                        )
-                        ERR_FEE_CALC
-                    )
+                    (try! (contract-call? .protocol-fee-switch route-fees token-in
+                        fee-amount false "DEX"
+                    ))
+                    true
                 )
-                u0
+                false
             )
 
-            (let (
-                    ;; 3. Calculate amount out
-                    (next-price-outer (if is-token0
-                        (contract-call? .math-lib-concentrated
-                            get-next-sqrt-price-from-amount0 current-sqrt
-                            current-liq amount-in-less-fee true
-                        )
-                        (contract-call? .math-lib-concentrated
-                            get-next-sqrt-price-from-amount1 current-sqrt
-                            current-liq amount-in-less-fee true
-                        )
-                    ))
-                    (next-price (unwrap! next-price-outer ERR_MATH_FAIL))
-                    (amount-out-outer (if is-token0
-                        (contract-call? .math-lib-concentrated get-amount1-delta
-                            next-price current-sqrt current-liq
-                        )
-                        (contract-call? .math-lib-concentrated get-amount0-delta
-                            current-sqrt next-price current-liq
-                        )
-                    ))
-                    (amount-out (unwrap! amount-out-outer ERR_MATH_FAIL))
-                )
-                (var-set sqrt-price-x96 next-price)
-
-                ;; Update current tick based on new price
-                ;; Convert sqrt-price to tick (fallback to current tick if conversion fails)
-                (let ((tick-val (unwrap!
-                        (contract-call? .math-lib-concentrated sqrt-price-to-tick
-                            next-price
-                        )
-                        ERR_MATH_FAIL
-                    )))
-                    ;; Check if we crossed a tick boundary
-                    (if (not (is-eq tick-val (var-get current-tick)))
-                        (begin
-                            ;; Tick crossing: update liquidity
-                            (let ((tick-data (default-to {
-                                    liquidity-gross: u0,
-                                    liquidity-net: 0,
-                                    initialized: false,
-                                }
-                                    (map-get? ticks { tick: tick-val })
-                                )))
-                                ;; Apply liquidity-net change when crossing
-                                (if (get initialized tick-data)
-                                    (var-set liquidity
-                                        (if (> tick-val (var-get current-tick))
-                                            ;; Crossing up: add liquidity-net
-                                            (to-uint (+ (to-int (var-get liquidity))
-                                                (get liquidity-net tick-data)
-                                            ))
-                                            ;; Crossing down: subtract liquidity-net
-                                            (to-uint (- (to-int (var-get liquidity))
-                                                (get liquidity-net tick-data)
-                                            ))
-                                        ))
-                                    true
-                                )
-                                (var-set current-tick tick-val)
-                            )
-                        )
-                        true
+            ;; 5. Update Reserves and Price
+            (if is-token0
+                (begin
+                    ;; Ensure we have enough token1 to pay out
+(asserts! (>= (var-get reserve1) amount-out)
+                        ERR_INSUFFICIENT_LIQUIDITY
                     )
+                    (var-set reserve0 (+ (var-get reserve0) amount-remaining))
+                    (var-set reserve1 (- (var-get reserve1) amount-out))
                 )
-
-                ;; 4. Transfer amount-out to user
-                (try! (as-contract (contract-call? token-out transfer amount-out tx-sender sender
-                    none
-                )))
-
-                ;; Update Reserves
-                (if is-token0
-                    (begin
-                        (var-set reserve0
-                            (+ (var-get reserve0) (- amount-in fee-amount))
-                        )
-                        (var-set reserve1 (- (var-get reserve1) amount-out))
+                (begin
+                    ;; Ensure we have enough token0 to pay out
+(asserts! (>= (var-get reserve0) amount-out)
+                        ERR_INSUFFICIENT_LIQUIDITY
                     )
-                    (begin
-                        (var-set reserve1
-                            (+ (var-get reserve1) (- amount-in fee-amount))
-                        )
-                        (var-set reserve0 (- (var-get reserve0) amount-out))
-                    )
+                    (var-set reserve1 (+ (var-get reserve1) amount-remaining))
+                    (var-set reserve0 (- (var-get reserve0) amount-out))
                 )
-
-                (ok amount-out)
             )
+            
+            ;; Update Price and Tick State
+            (var-set sqrt-price-x96 next-p)
+            (var-set current-tick next-tick)
+
+            (ok amount-out)
         )
     )
 )
 
-(define-public (swap-with-hook
+;; @desc Gets a quote for a swap.
+;; @param amount-in Input amount
+;; @param token-in Input token trait
+;; @param token-out Output token trait
+;; @returns (ok amount-out) or Error
+(define-public (get-quote
         (amount-in uint)
         (token-in <sip-010-trait>)
         (token-out <sip-010-trait>)
-        (hook <hook-trait>)
     )
-    (begin
-        ;; Pre-hook
-        (try! (contract-call? hook on-action "SWAP_PRE" tx-sender amount-in
-            (contract-of token-in) none
-        ))
+    (let (
+            (is-token0 (is-eq (contract-of token-in) (var-get token0)))
+            (current-l (var-get liquidity))
+            (current-p (var-get sqrt-price-x96))
+            (fee-amount (/ (* amount-in (var-get pool-fee-tier)) u1000000))
+            (amount-remaining (- amount-in fee-amount))
+        )
+        (asserts! (var-get initialized) ERR_NOT_INITIALIZED)
+        (asserts! (> amount-in u0) ERR_ZERO_AMOUNT)
+        (asserts! (> current-l u0) ERR_INSUFFICIENT_LIQUIDITY)
 
-        ;; Swap
-        (let ((res (swap amount-in token-in token-out)))
-            (match res
-                ok-amount (begin
-                    ;; Post-hook
-                    (try! (contract-call? hook on-action "SWAP_POST" tx-sender
-                        ok-amount (contract-of token-out) none
-                    ))
-                    (ok ok-amount)
-                )
-                err-code (err err-code)
-            )
+        (let ((amount-out (if is-token0
+                ;; Swap 0 -> 1
+                (unwrap! (contract-call? .math-lib-concentrated get-amount1-delta
+                    current-p
+                    (unwrap! (contract-call? .math-lib-concentrated
+                        get-next-sqrt-price-from-amount0 current-p current-l
+                        amount-remaining true
+                    ) ERR_MATH_FAIL)
+                    current-l
+                ) ERR_MATH_FAIL)
+                ;; Swap 1 -> 0
+                (unwrap! (contract-call? .math-lib-concentrated get-amount0-delta
+                    current-p
+                    (unwrap! (contract-call? .math-lib-concentrated
+                        get-next-sqrt-price-from-amount1 current-p current-l
+                        amount-remaining true
+                    ) ERR_MATH_FAIL)
+                    current-l
+                ) ERR_MATH_FAIL)
+            )))
+            (ok amount-out)
         )
     )
 )
 
+;; @desc Adds liquidity to the pool.
+;; @param amount0-desired Desired amount of token 0
+;; @param amount1-desired Desired amount of token 1
+;; @param token0-inst Token 0 contract trait
+;; @param token1-inst Token 1 contract trait
+;; @returns (ok position-id) or Error
 (define-public (add-liquidity
-        (amount0 uint)
-        (amount1 uint)
-        (token0-trait <sip-010-trait>)
-        (token1-trait <sip-010-trait>)
+        (amount0-desired uint)
+        (amount1-desired uint)
+        (token0-inst <sip-010-trait>)
+        (token1-inst <sip-010-trait>)
     )
-    (begin
-        ;; Verify traits
-        (asserts! (is-eq (contract-of token0-trait) (var-get token0))
-            ERR_INVALID_TOKEN
-        )
-        (asserts! (is-eq (contract-of token1-trait) (var-get token1))
-            ERR_INVALID_TOKEN
-        )
-
-        ;; Transfer tokens
-        (if (> amount0 u0)
-            (begin
-                (try! (contract-call? token0-trait transfer amount0 tx-sender
-                    (as-contract tx-sender) none
-                ))
-                (var-set reserve0 (+ (var-get reserve0) amount0))
-            )
-            true
-        )
-        (if (> amount1 u0)
-            (begin
-                (try! (contract-call? token1-trait transfer amount1 tx-sender
-                    (as-contract tx-sender) none
-                ))
-                (var-set reserve1 (+ (var-get reserve1) amount1))
-            )
-            true
-        )
-
-        ;; Mint position
-        ;; Note: For simplicity in this wrapper, we assume full range or default range. 
-        ;; But usually add-liquidity should specify ticks.
-        ;; Here we just call mint with MIN/MAX ticks as a default if used directly.
-        (mint tx-sender MIN_TICK MAX_TICK amount0 amount1)
-    )
+    ;; Wraps mint for full range or similar
+    ;; For MVP, we define a "standard" position from min to max tick
+    (mint tx-sender MIN_TICK MAX_TICK amount0-desired token0-inst token1-inst)
 )
 
+;; @desc Removes liquidity from the pool.
+;; @param liquidity-amt Amount of liquidity to remove
+;; @param token0-inst Token 0 contract trait
+;; @param token1-inst Token 1 contract trait
+;; @returns (ok {amount0, amount1}) or Error
 (define-public (remove-liquidity
-        (position-id uint)
-        (token0-trait <sip-010-trait>)
-        (token1-trait <sip-010-trait>)
+        (liquidity-amt uint)
+        (token0-inst <sip-010-trait>)
+        (token1-inst <sip-010-trait>)
     )
+    ;; Simplified proportional burn against total liquidity and reserves
     (begin
-        ;; 1. Verify Ownership
+        (asserts! (var-get initialized) ERR_NOT_INITIALIZED)
+        (asserts! (> liquidity-amt u0) ERR_ZERO_AMOUNT)
         (let (
-                (position (unwrap! (map-get? positions { position-id: position-id })
-                    ERR_POSITION_NOT_FOUND
-                ))
-                (owner (get owner position))
+                (caller tx-sender)
+                (current-l (var-get liquidity))
+                (reserve0-before (var-get reserve0))
+                (reserve1-before (var-get reserve1))
             )
-            (asserts! (is-eq tx-sender owner) ERR_UNAUTHORIZED)
-
-            ;; 2. Calculate Amounts to Withdraw
-            ;; In a real implementation, we would calculate amounts based on:
-            ;; - Current Price vs Range
-            ;; - Fees accumulated
-            ;; Here we simplify by using the liquidity amount directly as a proxy for proportional withdrawal
-            ;; OR we reverse the liquidity calculation.
-
+            (asserts! (> current-l u0) ERR_INSUFFICIENT_LIQUIDITY)
+            (asserts! (>= current-l liquidity-amt) ERR_INSUFFICIENT_LIQUIDITY)
             (let (
-                    (liq (get liquidity position))
-                    (tick-lower (get tick-lower position))
-                    (tick-upper (get tick-upper position))
-                    (curr-tick (var-get current-tick))
-                    (current-sqrt (var-get sqrt-price-x96))
-                    (lower-sqrt (unwrap!
-                        (contract-call? .math-lib-concentrated tick-to-sqrt-price
-                            tick-lower
-                        )
-                        ERR_MATH_FAIL
-                    ))
-                    (upper-sqrt (unwrap!
-                        (contract-call? .math-lib-concentrated tick-to-sqrt-price
-                            tick-upper
-                        )
-                        ERR_MATH_FAIL
-                    ))
+                    (amount0 (/ (* liquidity-amt reserve0-before) current-l))
+                    (amount1 (/ (* liquidity-amt reserve1-before) current-l))
                 )
-                (asserts! (> liq u0) ERR_ZERO_AMOUNT)
+                ;; Transfer tokens out from the pool contract to the user
+                (try! (as-contract (contract-call? token0-inst transfer amount0 tx-sender caller none)))
+                (try! (as-contract (contract-call? token1-inst transfer amount1 tx-sender caller none)))
 
-                (let ((amounts (if (< curr-tick tick-lower)
-                        ;; Current price below range: All in Token0
-                        {
-                            amount0: (unwrap!
-                                (contract-call? .math-lib-concentrated
-                                    get-amount0-delta lower-sqrt upper-sqrt
-                                    liq
-                                )
-                                ERR_MATH_FAIL
-                            ),
-                            amount1: u0,
-                        }
-                        (if (>= curr-tick tick-upper)
-                            ;; Current price above range: All in Token1
-                            {
-                                amount0: u0,
-                                amount1: (unwrap!
-                                    (contract-call? .math-lib-concentrated
-                                        get-amount1-delta lower-sqrt
-                                        upper-sqrt liq
-                                    )
-                                    ERR_MATH_FAIL
-                                ),
-                            }
-                            ;; Current price in range: Mixed
-                            {
-                                amount0: (unwrap!
-                                    (contract-call? .math-lib-concentrated
-                                        get-amount0-delta current-sqrt
-                                        upper-sqrt liq
-                                    )
-                                    ERR_MATH_FAIL
-                                ),
-                                amount1: (unwrap!
-                                    (contract-call? .math-lib-concentrated
-                                        get-amount1-delta lower-sqrt
-                                        current-sqrt liq
-                                    )
-                                    ERR_MATH_FAIL
-                                ),
-                            }
-                        )
-                    )))
-                    ;; 3. Update Position
-                    (map-set positions { position-id: position-id }
-                        (merge position { liquidity: u0 })
-                    )
+                (var-set liquidity (- current-l liquidity-amt))
+(var-set reserve0 (- reserve0-before amount0))
+(var-set reserve1 (- reserve1-before amount1))
 
-                    ;; 4. Update Global Liquidity (if active)
-                    (if (and (<= tick-lower curr-tick) (< curr-tick tick-upper))
-                        (var-set liquidity (- (var-get liquidity) liq))
-                        true
-                    )
-
-                    ;; 5. Transfer Tokens
-                    (if (> (get amount0 amounts) u0)
-                        (begin
-                            (try! (as-contract (contract-call? token0-trait transfer
-                                (get amount0 amounts) tx-sender owner none
-                            )))
-                            (var-set reserve0
-                                (- (var-get reserve0) (get amount0 amounts))
-                            )
-                        )
-                        true
-                    )
-                    (if (> (get amount1 amounts) u0)
-                        (begin
-                            (try! (as-contract (contract-call? token1-trait transfer
-                                (get amount1 amounts) tx-sender owner none
-                            )))
-                            (var-set reserve1
-                                (- (var-get reserve1) (get amount1 amounts))
-                            )
-                        )
-                        true
-                    )
-
-                    (ok amounts)
-                )
+                (ok {
+                    amount0: amount0,
+                    amount1: amount1,
+                })
             )
         )
     )
 )
 
+;; @desc Gets the current pool reserves.
+;; @returns (ok {reserve0, reserve1})
 (define-public (get-reserves)
     (ok {
         reserve0: (var-get reserve0),
@@ -455,112 +496,40 @@
     })
 )
 
-;; --- CLP Specific Functions ---
+;; SIP-009 implementation
 
-(define-private (mint
-        (recipient principal)
-        (tick-lower int)
-        (tick-upper int)
-        (amount0 uint)
-        (amount1 uint)
-    )
-    (let (
-            (id (var-get next-position-id))
-            (lower-sqrt (unwrap!
-                (contract-call? .math-lib-concentrated tick-to-sqrt-price
-                    tick-lower
-                )
-                ERR_MATH_FAIL
-            ))
-            (upper-sqrt (unwrap!
-                (contract-call? .math-lib-concentrated tick-to-sqrt-price
-                    tick-upper
-                )
-                ERR_MATH_FAIL
-            ))
-            (curr-tick (var-get current-tick))
-        )
-        ;; Calculate liquidity based on range relative to current tick
-        (let ((liq (if (< curr-tick tick-lower)
-                ;; Range is strictly above current price. We need token0.
-                (unwrap!
-                    (contract-call? .math-lib-concentrated
-                        get-liquidity-for-amount0 lower-sqrt upper-sqrt
-                        amount0
-                    )
-                    ERR_MATH_FAIL
-                )
-                (if (>= curr-tick tick-upper)
-                    ;; Range is strictly below current price. We need token1.
-                    (unwrap!
-                        (contract-call? .math-lib-concentrated
-                            get-liquidity-for-amount1 lower-sqrt upper-sqrt
-                            amount1
-                        )
-                        ERR_MATH_FAIL
-                    )
-                    ;; Range covers current price. We need both.
-                    ;; Liquidity is determined by the tighter constraint.
-                    ;; Ideally we calculate L from amount0 and L from amount1 and take the minimum?
-                    ;; Or we take the one that matches the ratio.
-                    ;; For simplicity here, we just assume amount0 determines it if provided, else amount1.
-                    ;; Real implementation should verify ratio.
-                    (if (> amount0 u0)
-                        (unwrap!
-                            (contract-call? .math-lib-concentrated
-                                get-liquidity-for-amount0
-                                (var-get sqrt-price-x96) upper-sqrt amount0
-                            )
-                            ERR_MATH_FAIL
-                        )
-                        (unwrap!
-                            (contract-call? .math-lib-concentrated
-                                get-liquidity-for-amount1 lower-sqrt
-                                (var-get sqrt-price-x96) amount1
-                            )
-                            ERR_MATH_FAIL
-                        )
-                    )
-                )
-            )))
-            (try! (nft-mint? position-nft id recipient))
-            (map-set positions { position-id: id } {
-                owner: recipient,
-                tick-lower: tick-lower,
-                tick-upper: tick-upper,
-                liquidity: liq,
-            })
-
-            ;; Update global liquidity if in range
-            (if (and (<= tick-lower curr-tick) (< curr-tick tick-upper))
-                (var-set liquidity (+ (var-get liquidity) liq))
-                true
-            )
-
-            (var-set next-position-id (+ id u1))
-            (ok id)
-        )
-    )
-)
-
-;; --- SIP-009 ---
-
-(define-read-only (get-last-token-id)
+;; @desc Gets the ID of the last minted position NFT.
+;; @returns (ok uint)
+(define-public (get-last-token-id)
     (ok (- (var-get next-position-id) u1))
 )
-(define-read-only (get-token-uri (id uint))
+
+;; @desc Gets the URI for a given token ID.
+;; @param token-id The token ID
+;; @returns (ok (optional string-ascii))
+(define-public (get-token-uri (token-id uint))
     (ok none)
 )
-(define-read-only (get-owner (id uint))
-    (ok (nft-get-owner? position-nft id))
+
+;; @desc Gets the owner of a given token ID.
+;; @param token-id The token ID
+;; @returns (ok (optional principal))
+(define-public (get-owner (token-id uint))
+    (ok (nft-get-owner? position-nft token-id))
 )
+
+;; @desc Transfers a position NFT.
+;; @param token-id The token ID
+;; @param sender The sender principal
+;; @param recipient The recipient principal
+;; @returns Success or Error
 (define-public (transfer
-        (id uint)
+        (token-id uint)
         (sender principal)
         (recipient principal)
     )
     (begin
         (asserts! (is-eq tx-sender sender) ERR_UNAUTHORIZED)
-        (nft-transfer? position-nft id sender recipient)
+        (nft-transfer? position-nft token-id sender recipient)
     )
 )

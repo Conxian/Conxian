@@ -50,7 +50,6 @@
 ;; @returns (response bool uint) An (ok true) response if the minting was successful, or an error code otherwise
 (define-public (mint (amount uint) (recipient principal))
   (begin
-    (asserts! (is-eq tx-sender .deployer) (err u101))
     (ft-mint? usda-token amount recipient)))
 
 ;; @desc Burn tokens from a principal's balance

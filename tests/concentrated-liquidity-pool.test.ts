@@ -88,7 +88,7 @@ describe('Concentrated Liquidity Pool', () => {
       deployer
     );
 
-    expect(result.result).toBeErr(Cl.uint(3008)); // ERR_ALREADY_INITIALIZED
+    expect(result.result).toBeErr(Cl.uint(1001)); // ERR_ALREADY_INITIALIZED (Standardized to u1001)
   });
 
   it('adds liquidity successfully', () => {

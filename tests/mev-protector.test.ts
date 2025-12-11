@@ -53,28 +53,25 @@ describe('MEV Protector', () => {
   });
 
   it('completes full batch lifecycle', () => {
-    const payload = Cl.bufferFromHex('0x' + '0'.repeat(256));
-    // Calculate hash of payload (mocking sha256 behavior if needed, or using known hash)
-    // Since we can't easily do sha256 in JS that matches Clarity exactly without library, 
-    // we rely on the fact that the contract checks (sha256 payload) == commitment.
-    // However, in simnet, we might need to actually generate the hash.
-    // For now, let's assume we can use a dummy hash and just check the flow logic, 
-    // BUT the contract enforces `(is-eq (sha256 payload) hash)`.
-    // So we need a valid hash.
-    // We can use a simpler payload like 0x01
-
-    // In this environment, we might not have a sha256 lib handy. 
-    // We can use `simnet.runSnippet` or similar if available, or just skip the hash check by mocking? No, contract is real.
-    // Let's use a known hash for 0x00...00 (32 bytes)
-    // SHA256(0x00...00 32 bytes) = ...
-    // Actually, let's just use a simple payload and pre-calculate hash if possible.
-    // Or, we can use the `sha256` function from `@stacks/encryption` or node crypto if available.
-    // Since we are in `vitest` with node env, we can use `crypto`.
-
     const crypto = require('crypto');
-    const payloadHex = '01020304';
-    const payloadBuffer = Buffer.from(payloadHex, 'hex');
-    const hash = crypto.createHash('sha256').update(payloadBuffer).digest();
+    const salt = Buffer.from('0102030405060708090a0b0c0d0e0f10', 'hex'); // 16 bytes
+
+    // Define order parameters
+    const tokenIn = Cl.contractPrincipal(deployer, 'cxd-token');
+    const tokenOut = Cl.contractPrincipal(deployer, 'cxs-token');
+    const amountIn = Cl.uint(1000);
+    const minOut = Cl.uint(900);
+
+    // Construct the tuple as expected by Clarity for hashing
+    // Note: Contract currently uses salt-only hashing due to Clarity version constraints.
+    // const orderTuple = Cl.tuple({ ... });
+    
+    // Serialize and Hash
+    // const serialized = Cl.serialize(orderTuple);
+    // const hash = crypto.createHash('sha256').update(serialized).digest();
+    
+    // Hash salt only
+    const hash = crypto.createHash('sha256').update(salt).digest();
 
     // 1. Commit
     const commitResult = simnet.callPublicFn(
@@ -92,7 +89,14 @@ describe('MEV Protector', () => {
     const revealResult = simnet.callPublicFn(
       'mev-protector',
       'reveal-order',
-      [Cl.uint(0), Cl.buffer(payloadBuffer)],
+      [
+        Cl.uint(0),
+        tokenIn, // token-in-trait
+        tokenOut, // token-out
+        amountIn, // amount-in
+        minOut, // min-out
+        Cl.buffer(salt) // salt
+      ],
       wallet1
     );
     expect(revealResult.result).toBeOk(Cl.uint(0)); // Batch ID 0
@@ -104,10 +108,19 @@ describe('MEV Protector', () => {
     // 5. Execute Batch
     const executeResult = simnet.callPublicFn(
       'mev-protector',
-      'execute-batch',
-      [Cl.uint(0)],
+      'execute-order-in-batch',
+      [
+        Cl.uint(0), // batch-id
+        Cl.uint(0), // order-index
+        Cl.contractPrincipal(deployer, 'mock-pool'),
+        tokenIn,
+        tokenOut,
+        Cl.contractPrincipal(deployer, 'oracle')
+      ],
       deployer // Owner
     );
-    expect(executeResult.result).toBeOk(Cl.bool(true));
+    // Since mock-pool swaps 1:1, amount-out should be 1000.
+    // Oracle price check should pass (1:1).
+    expect(executeResult.result).toBeOk(Cl.uint(1000));
   });
 });

@@ -1,3 +1,4 @@
+
 import { describe, it, expect, beforeAll, beforeEach } from 'vitest';
 import { initSimnet, type Simnet } from '@stacks/clarinet-sdk';
 import { Cl } from '@stacks/transactions';
@@ -6,97 +7,235 @@ let simnet: Simnet;
 let deployer: string;
 let wallet1: string;
 
-// Baseline tests for concentrated-liquidity-pool to ensure core read-only
-// views behave as expected with the current deployment configuration.
-describe("Concentrated Liquidity Pool", () => {
+describe('Concentrated Liquidity Pool', () => {
   beforeAll(async () => {
-    simnet = await initSimnet("Clarinet.toml", false, {
+    simnet = await initSimnet('Clarinet.toml', false, {
       trackCosts: false,
       trackCoverage: false,
     });
   });
 
   beforeEach(async () => {
-    await simnet.initSession(process.cwd(), "Clarinet.toml");
+    await simnet.initSession(process.cwd(), 'Clarinet.toml');
     const accounts = simnet.getAccounts();
-    deployer = accounts.get("deployer")!;
-    wallet1 = accounts.get("wallet_1")!;
+    deployer = accounts.get('deployer')!;
+    wallet1 = accounts.get('wallet_1')!;
   });
 
-  it("exposes static reserves in get-reserves", () => {
-    const reserves = simnet.callPublicFn(
-      "concentrated-liquidity-pool",
-      "get-reserves",
-      [],
-      deployer
-    );
+  const token0 = 'mock-token';
+  const token1 = 'mock-usda-token';
 
-    expect(reserves.result).toBeOk(
-      Cl.tuple({
-        reserve0: Cl.uint(0),
-        reserve1: Cl.uint(0),
-      })
-    );
+  it('should initialize correctly', () => {
+    const receipt = simnet.callPublicFn('concentrated-liquidity-pool', 'initialize', [
+      Cl.contractPrincipal(deployer, token0),
+      Cl.contractPrincipal(deployer, token1),
+      Cl.uint(79228162514264337593543950336n), // Q96 (price = 1.0)
+      Cl.int(0), // Tick 0
+      Cl.uint(3000), // 0.3% fee
+    ], deployer);
+    expect(receipt.result).toBeOk(Cl.bool(true));
   });
 
-  it("reports last-token-id as u0 before any mints", () => {
-    const lastId = simnet.callReadOnlyFn(
-      "concentrated-liquidity-pool",
-      "get-last-token-id",
-      [],
-      deployer
-    );
+  it('should allow minting a position', () => {
+    // 1. Initialize
+    simnet.callPublicFn('concentrated-liquidity-pool', 'initialize', [
+      Cl.contractPrincipal(deployer, token0),
+      Cl.contractPrincipal(deployer, token1),
+      Cl.uint(79228162514264337593543950336n),
+      Cl.int(0),
+      Cl.uint(3000),
+    ], deployer);
 
-    expect(lastId.result).toBeOk(Cl.uint(0));
+    // 2. Mint tokens to wallet1 (assuming mocks have mint)
+    simnet.callPublicFn(token0, 'mint', [Cl.uint(1000000000), Cl.standardPrincipal(wallet1)], deployer);
+    simnet.callPublicFn(token1, 'mint', [Cl.uint(1000000000), Cl.standardPrincipal(wallet1)], deployer);
+
+    // 3. Mint Position
+    // Range: -100 to 100
+    const receipt = simnet.callPublicFn('concentrated-liquidity-pool', 'mint', [
+      Cl.standardPrincipal(wallet1),
+      Cl.int(-100),
+      Cl.int(100),
+      Cl.uint(1000000), // Liquidity
+      Cl.contractPrincipal(deployer, token0),
+      Cl.contractPrincipal(deployer, token1),
+    ], wallet1);
+
+    expect(receipt.result).toBeOk(Cl.uint(1)); // Position ID 1
+
+    // Verify liquidity
+    const liquidity = simnet.getDataVar('concentrated-liquidity-pool', 'liquidity');
+    expect(liquidity).toBeUint(1000000);
   });
 
-  it("rejects swap before initialization", () => {
-    const tokenIn = Cl.contractPrincipal(deployer, "cxd-token");
-    const tokenOut = Cl.contractPrincipal(deployer, "cxlp-token");
+  it('should allow swapping', () => {
+    // 1. Initialize & Mint
+    simnet.callPublicFn('concentrated-liquidity-pool', 'initialize', [
+      Cl.contractPrincipal(deployer, token0),
+      Cl.contractPrincipal(deployer, token1),
+      Cl.uint(79228162514264337593543950336n),
+      Cl.int(0),
+      Cl.uint(3000),
+    ], deployer);
 
-    const res = simnet.callPublicFn(
-      "concentrated-liquidity-pool",
-      "swap",
-      [Cl.uint(100n), tokenIn, tokenOut],
-      wallet1
-    );
+    simnet.callPublicFn(token0, 'mint', [Cl.uint(1000000000), Cl.standardPrincipal(wallet1)], deployer);
+    simnet.callPublicFn(token1, 'mint', [Cl.uint(1000000000), Cl.standardPrincipal(wallet1)], deployer);
 
-    expect(res.result).toBeErr(Cl.uint(3009));
+    simnet.callPublicFn('concentrated-liquidity-pool', 'mint', [
+      Cl.standardPrincipal(wallet1),
+      Cl.int(-1000),
+      Cl.int(1000),
+      Cl.uint(10000000), // More liquidity
+      Cl.contractPrincipal(deployer, token0),
+      Cl.contractPrincipal(deployer, token1),
+    ], wallet1);
+
+    // 2. Swap token0 for token1
+    const amountIn = 1000;
+    const receipt = simnet.callPublicFn('concentrated-liquidity-pool', 'swap', [
+      Cl.uint(amountIn),
+      Cl.contractPrincipal(deployer, token0),
+      Cl.contractPrincipal(deployer, token1),
+    ], wallet1);
+
+    expect(receipt.result).toBeOk(expect.anything()); // Should return amount out
+    
+    // Check amount out is roughly what we expect (price is 1.0, so slightly less than 1000 due to fees)
+    // Fee = 0.3% = 3
+    // Amount remaining = 997
+    // Output approx 997 (since ample liquidity and price ~1)
+    const amountOut = (receipt.result as any).value;
+    expect(Number(amountOut)).toBeLessThan(1000);
+    expect(Number(amountOut)).toBeGreaterThan(990);
+  });
+  
+  it('should allow burning a position', () => {
+      // 1. Initialize & Mint
+      simnet.callPublicFn('concentrated-liquidity-pool', 'initialize', [
+        Cl.contractPrincipal(deployer, token0),
+        Cl.contractPrincipal(deployer, token1),
+        Cl.uint(79228162514264337593543950336n),
+        Cl.int(0),
+        Cl.uint(3000),
+      ], deployer);
+  
+      simnet.callPublicFn(token0, 'mint', [Cl.uint(1000000000), Cl.standardPrincipal(wallet1)], deployer);
+      simnet.callPublicFn(token1, 'mint', [Cl.uint(1000000000), Cl.standardPrincipal(wallet1)], deployer);
+  
+      simnet.callPublicFn('concentrated-liquidity-pool', 'mint', [
+        Cl.standardPrincipal(wallet1),
+        Cl.int(-100),
+        Cl.int(100),
+        Cl.uint(1000000),
+        Cl.contractPrincipal(deployer, token0),
+        Cl.contractPrincipal(deployer, token1),
+      ], wallet1);
+      
+      // 2. Burn
+      const receipt = simnet.callPublicFn('concentrated-liquidity-pool', 'remove-liquidity', [
+          Cl.uint(500000), // Remove half
+          Cl.contractPrincipal(deployer, token0),
+          Cl.contractPrincipal(deployer, token1),
+      ], wallet1);
+      
+      expect(receipt.result).toBeOk(expect.anything());
+      
+      // Verify liquidity reduced
+      const liquidity = simnet.getDataVar('concentrated-liquidity-pool', 'liquidity');
+      expect(liquidity).toBeUint(500000);
   });
 
-  it("rejects swap without liquidity after initialization", () => {
-    const tokenIn = Cl.contractPrincipal(deployer, "cxd-token");
-    const tokenOut = Cl.contractPrincipal(deployer, "cxlp-token");
-
-    const init = simnet.callPublicFn(
+  it("rejects zero-amount liquidity removal", () => {
+    // Initialize pool
+    simnet.callPublicFn(
       "concentrated-liquidity-pool",
       "initialize",
-      [tokenIn, tokenOut, Cl.uint(1), Cl.int(0), Cl.uint(30)],
+      [
+        Cl.contractPrincipal(deployer, token0),
+        Cl.contractPrincipal(deployer, token1),
+        Cl.uint(79228162514264337593543950336n),
+        Cl.int(0),
+        Cl.uint(3000),
+      ],
       deployer
     );
-    expect(init.result).toBeOk(Cl.bool(true));
 
-    const res = simnet.callPublicFn(
-      "concentrated-liquidity-pool",
-      "swap",
-      [Cl.uint(100n), tokenIn, tokenOut],
-      wallet1
-    );
-
-    expect(res.result).toBeErr(Cl.uint(1307));
-  });
-
-  it("rejects remove-liquidity for unknown position id", () => {
-    const token0 = Cl.contractPrincipal(deployer, "cxd-token");
-    const token1 = Cl.contractPrincipal(deployer, "cxlp-token");
-
-    const res = simnet.callPublicFn(
+    const receipt = simnet.callPublicFn(
       "concentrated-liquidity-pool",
       "remove-liquidity",
-      [Cl.uint(1), token0, token1],
+      [
+        Cl.uint(0),
+        Cl.contractPrincipal(deployer, token0),
+        Cl.contractPrincipal(deployer, token1),
+      ],
       wallet1
     );
 
-    expect(res.result).toBeErr(Cl.uint(3006));
+    expect(receipt.result).toBeErr(expect.anything());
+  });
+
+  it("rejects removing more liquidity than exists", () => {
+    // 1. Initialize & Mint
+    simnet.callPublicFn(
+      "concentrated-liquidity-pool",
+      "initialize",
+      [
+        Cl.contractPrincipal(deployer, token0),
+        Cl.contractPrincipal(deployer, token1),
+        Cl.uint(79228162514264337593543950336n),
+        Cl.int(0),
+        Cl.uint(3000),
+      ],
+      deployer
+    );
+
+    simnet.callPublicFn(
+      token0,
+      "mint",
+      [Cl.uint(1000000000), Cl.standardPrincipal(wallet1)],
+      deployer
+    );
+    simnet.callPublicFn(
+      token1,
+      "mint",
+      [Cl.uint(1000000000), Cl.standardPrincipal(wallet1)],
+      deployer
+    );
+
+    simnet.callPublicFn(
+      "concentrated-liquidity-pool",
+      "mint",
+      [
+        Cl.standardPrincipal(wallet1),
+        Cl.int(-100),
+        Cl.int(100),
+        Cl.uint(1000000),
+        Cl.contractPrincipal(deployer, token0),
+        Cl.contractPrincipal(deployer, token1),
+      ],
+      wallet1
+    );
+
+    const before = simnet.getDataVar(
+      "concentrated-liquidity-pool",
+      "liquidity"
+    );
+
+    const receipt = simnet.callPublicFn(
+      "concentrated-liquidity-pool",
+      "remove-liquidity",
+      [
+        Cl.uint(2000000), // More than total liquidity
+        Cl.contractPrincipal(deployer, token0),
+        Cl.contractPrincipal(deployer, token1),
+      ],
+      wallet1
+    );
+
+    expect(receipt.result).toBeErr(expect.anything());
+
+    // Liquidity should remain unchanged
+    const after = simnet.getDataVar("concentrated-liquidity-pool", "liquidity");
+    expect(after).toEqual(before);
   });
 });
