@@ -1,7 +1,7 @@
 [project]
 name = "Conxian"
 description = "A comprehensive, standardized Clarinet configuration for the Conxian DeFi protocol."
-clarinet_version = "3.9"
+clarinet_version = "3.11.0"
 epoch = "3.0"
 
 # ---------- Core Contracts ----------
@@ -28,6 +28,11 @@ address = "ST3N0ZC9HBPDEBEJ1H1QFGMJF3PSNGW3FYZSVN513"
 [contracts.circuit-breaker]
 path = "contracts/security/circuit-breaker.clar"
 address = "ST3N0ZC9HBPDEBEJ1H1QFGMJF3PSNGW3FYZSVN513"
+
+[contracts.external-oracle-adapter]
+path = "contracts/oracle/external-oracle-adapter.clar"
+address = "ST3N0ZC9HBPDEBEJ1H1QFGMJF3PSNGW3FYZSVN513"
+depends_on = ["core-traits", "oracle-pricing", "defi-traits"]
 
 [contracts.oracle-aggregator-v2]
 path = "contracts/dex/oracle-aggregator-v2.clar"
@@ -518,6 +523,14 @@ address = "ST3N0ZC9HBPDEBEJ1H1QFGMJF3PSNGW3FYZSVN513"
 path = "contracts/dex/sbtc-integration.clar"
 address = "ST3N0ZC9HBPDEBEJ1H1QFGMJF3PSNGW3FYZSVN513"
 
+[contracts.sbtc-token]
+path = "contracts/mocks/mock-token.clar"
+address = "ST3N0ZC9HBPDEBEJ1H1QFGMJF3PSNGW3FYZSVN513"
+
+[contracts.clarity-bitcoin]
+path = "contracts/lib/clarity-bitcoin.clar"
+address = "ST3N0ZC9HBPDEBEJ1H1QFGMJF3PSNGW3FYZSVN513"
+
 [contracts.btc-adapter]
 path = "contracts/sbtc/btc-adapter.clar"
 address = "ST3N0ZC9HBPDEBEJ1H1QFGMJF3PSNGW3FYZSVN513"
@@ -697,3 +710,13 @@ depends_on = [
 ]
 
 # End of file
+
+[contracts.compliance-hooks]
+path = "contracts/enterprise/compliance-hooks.clar"
+address = "ST3N0ZC9HBPDEBEJ1H1QFGMJF3PSNGW3FYZSVN513"
+depends_on = ["kyc-registry"]
+
+[contracts.vault]
+path = "contracts/dex/vault.clar"
+address = "ST3N0ZC9HBPDEBEJ1H1QFGMJF3PSNGW3FYZSVN513"
+depends_on = ["sip-standards"]

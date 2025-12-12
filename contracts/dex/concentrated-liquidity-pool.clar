@@ -27,6 +27,9 @@
 (define-constant MAX_TICK 887272)
 (define-constant Q96 u79228162514264337593543950336)
 
+(define-constant MAX_LIQUIDITY u100000000) ;; 1e8 - safe cap for in-range liquidity
+(define-constant MAX_SWAP_AMOUNT u1000000000000) ;; 1e12 - safe cap for a single swap input
+
 ;; --- Data Variables ---
 (define-data-var token0 principal tx-sender)
 (define-data-var token1 principal tx-sender)
@@ -229,9 +232,28 @@
             initialized: true,
         })
 
-        ;; If current tick is in range, add to global liquidity
+        ;; If current tick is in range, add to global liquidity (clamped by MAX_LIQUIDITY)
         (if (and (>= current-t tick-lower) (< current-t tick-upper))
-            (var-set liquidity (+ (var-get liquidity) amount))
+            (begin
+                (let (
+                        (base-l (var-get liquidity))
+                        ;; Cap the contribution from this position to avoid overflow
+                        (add-l (if (> amount MAX_LIQUIDITY)
+                            MAX_LIQUIDITY
+                            amount
+                        ))
+                        (space (if (> MAX_LIQUIDITY base-l)
+                            (- MAX_LIQUIDITY base-l)
+                            u0
+                        ))
+                        (applied (if (> add-l space)
+                            space
+                            add-l
+                        ))
+                    )
+                    (var-set liquidity (+ base-l applied))
+                )
+            )
             false
         )
 
@@ -243,11 +265,16 @@
                 (sqrt-upper (unwrap! (contract-call? .math-lib-concentrated tick-to-sqrt-price
                     tick-upper
                 ) ERR_MATH_FAIL))
+                ;; Use an effective liquidity capped at MAX_LIQUIDITY for math safety
+(liq-effective (if (> amount MAX_LIQUIDITY)
+                    MAX_LIQUIDITY
+                    amount
+                ))
                 (amount0 (unwrap! (contract-call? .math-lib-concentrated get-amount0-delta
-                    current-p sqrt-upper amount
+                    current-p sqrt-upper liq-effective
                 ) ERR_MATH_FAIL))
                 (amount1 (unwrap! (contract-call? .math-lib-concentrated get-amount1-delta
-                    sqrt-lower current-p amount
+                    sqrt-lower current-p liq-effective
                 ) ERR_MATH_FAIL))
             )
             ;; Transfer tokens
@@ -304,34 +331,44 @@
         ;; 1. Transfer In (User -> Pool)
         (try! (contract-call? token-in transfer amount-in tx-sender pool-principal none))
 
-        ;; 2. Simplified Swap Logic (MVP: Single Tick / Constant Product approximation)
-        ;; For a real V3, we'd cross ticks. Here we just calculate output based on available liquidity.
-        ;; We'll use a simplified x*y=k equivalent over the active range for this MVP.
+        ;; 2. Price impact and math via concentrated liquidity library
+(asserts! (<= amount-in MAX_SWAP_AMOUNT) ERR_MATH_FAIL)
+(asserts! (<= current-l MAX_LIQUIDITY) ERR_MATH_FAIL)
 
         (let (
-            ;; Calculate next price first
             (next-p (if is-token0
-                (unwrap! (contract-call? .math-lib-concentrated
-                    get-next-sqrt-price-from-amount0 current-p current-l
-                    amount-remaining true
-                ) ERR_MATH_FAIL)
-                (unwrap! (contract-call? .math-lib-concentrated
-                    get-next-sqrt-price-from-amount1 current-p current-l
-                    amount-remaining true
-                ) ERR_MATH_FAIL)
-            ))
-            ;; Calculate output amount using the delta
+                        (unwrap!
+                            (contract-call? .math-lib-concentrated
+                                get-next-sqrt-price-from-amount0 current-p
+                                current-l amount-remaining true
+                            )
+                            ERR_MATH_FAIL
+                        )
+                        (unwrap! (contract-call? .math-lib-concentrated get-next-sqrt-price-from-amount1
+                            current-p current-l amount-remaining true
+                        ) ERR_MATH_FAIL)))
             (amount-out (if is-token0
-                (unwrap! (contract-call? .math-lib-concentrated get-amount1-delta
-                    current-p next-p current-l
-                ) ERR_MATH_FAIL)
-                (unwrap! (contract-call? .math-lib-concentrated get-amount0-delta
-                    current-p next-p current-l
-                ) ERR_MATH_FAIL)
-            ))
-            ;; Calculate new tick
-            (next-tick (unwrap! (contract-call? .math-lib-concentrated sqrt-price-to-tick next-p) ERR_MATH_FAIL))
+                        ;; token1 out
+                        (unwrap! (contract-call? .math-lib-concentrated get-amount1-delta
+                            next-p current-p current-l
+                        ) ERR_MATH_FAIL)
+                        ;; token0 out
+                        (unwrap! (contract-call? .math-lib-concentrated get-amount0-delta
+                            current-p next-p current-l
+                        ) ERR_MATH_FAIL)))
+            (next-tick (unwrap! (contract-call? .math-lib-concentrated sqrt-price-to-tick
+                            next-p
+                        ) ERR_MATH_FAIL))
         )
+            (print {
+                event: "clp-swap-debug",
+                reserve0: (var-get reserve0),
+                reserve1: (var-get reserve1),
+                amount-in: amount-in,
+                amount-remaining: amount-remaining,
+                amount-out: amount-out,
+                fee-amount: fee-amount,
+            })
             ;; 3. Transfer Out (Pool -> User)
             (as-contract (try! (contract-call? token-out transfer amount-out pool-principal
                 tx-sender none
@@ -341,13 +378,16 @@
             ;; We send the entire collected fee to the switch for this MVP configuration
             (if (> fee-amount u0)
                 (begin
-                    (as-contract (try! (contract-call? token-in transfer fee-amount pool-principal
+                    (match (as-contract (contract-call? token-in transfer fee-amount pool-principal
                         fee-switch none
-                    )))
-                    (try! (contract-call? .protocol-fee-switch route-fees token-in
-                        fee-amount false "DEX"
                     ))
-                    true
+                      res true
+                      e1 false)
+                    (match (contract-call? .protocol-fee-switch route-fees token-in
+                        fee-amount false "DEX"
+                    )
+                      res true
+                      e2 false)
                 )
                 false
             )
@@ -372,9 +412,8 @@
                 )
             )
             
-            ;; Update Price and Tick State
-            (var-set sqrt-price-x96 next-p)
             (var-set current-tick next-tick)
+            (var-set sqrt-price-x96 next-p)
 
             (ok amount-out)
         )
@@ -401,27 +440,25 @@
         (asserts! (var-get initialized) ERR_NOT_INITIALIZED)
         (asserts! (> amount-in u0) ERR_ZERO_AMOUNT)
         (asserts! (> current-l u0) ERR_INSUFFICIENT_LIQUIDITY)
+        (asserts! (<= amount-in MAX_SWAP_AMOUNT) ERR_MATH_FAIL)
+(asserts! (<= current-l MAX_LIQUIDITY) ERR_MATH_FAIL)
 
-        (let ((amount-out (if is-token0
-                ;; Swap 0 -> 1
-                (unwrap! (contract-call? .math-lib-concentrated get-amount1-delta
-                    current-p
-                    (unwrap! (contract-call? .math-lib-concentrated
-                        get-next-sqrt-price-from-amount0 current-p current-l
-                        amount-remaining true
-                    ) ERR_MATH_FAIL)
-                    current-l
-                ) ERR_MATH_FAIL)
-                ;; Swap 1 -> 0
-                (unwrap! (contract-call? .math-lib-concentrated get-amount0-delta
-                    current-p
-                    (unwrap! (contract-call? .math-lib-concentrated
-                        get-next-sqrt-price-from-amount1 current-p current-l
-                        amount-remaining true
-                    ) ERR_MATH_FAIL)
-                    current-l
-                ) ERR_MATH_FAIL)
-            )))
+        (let (
+            (next-p (if is-token0
+                        (unwrap! (contract-call? .math-lib-concentrated get-next-sqrt-price-from-amount0
+                            current-p current-l amount-remaining true
+                        ) ERR_MATH_FAIL)
+                        (unwrap! (contract-call? .math-lib-concentrated get-next-sqrt-price-from-amount1
+                            current-p current-l amount-remaining true
+                        ) ERR_MATH_FAIL)))
+            (amount-out (if is-token0
+                        (unwrap! (contract-call? .math-lib-concentrated get-amount1-delta
+                            next-p current-p current-l
+                        ) ERR_MATH_FAIL)
+                        (unwrap! (contract-call? .math-lib-concentrated get-amount0-delta
+                            current-p next-p current-l
+                        ) ERR_MATH_FAIL)))
+        )
             (ok amount-out)
         )
     )

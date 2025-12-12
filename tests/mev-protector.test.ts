@@ -1,6 +1,6 @@
 
 import { describe, it, expect, beforeEach } from 'vitest';
-import { initSimnet } from '@hirosystems/clarinet-sdk';
+import { initSimnet } from "@stacks/clarinet-sdk";
 import { Cl } from '@stacks/transactions';
 
 describe('MEV Protector', () => {
@@ -34,7 +34,7 @@ describe('MEV Protector', () => {
       [Cl.bufferFromHex(hash)],
       wallet1
     );
-    expect(result.result).toBeOk(Cl.uint(0));
+    expect(result.result).toBe(Cl.uint(0));
   });
 
   it('prevents early reveal', () => {
@@ -80,7 +80,7 @@ describe('MEV Protector', () => {
       [Cl.buffer(hash)],
       wallet1
     );
-    expect(commitResult.result).toBeOk(Cl.uint(0)); // Commitment ID 0
+    expect(commitResult.result).toBe(Cl.uint(0)); // Commitment ID 0
 
     // 2. Advance to Reveal Period (10 blocks)
     simnet.mineEmptyBlocks(10);
@@ -99,7 +99,7 @@ describe('MEV Protector', () => {
       ],
       wallet1
     );
-    expect(revealResult.result).toBeOk(Cl.uint(0)); // Batch ID 0
+    expect(revealResult.result).toBe(Cl.uint(0)); // Batch ID 0
 
     // 4. Advance to End of Batch (another 10 blocks)
     // Batch 0 ends at block 20. Current is ~11.
@@ -121,6 +121,6 @@ describe('MEV Protector', () => {
     );
     // Since mock-pool swaps 1:1, amount-out should be 1000.
     // Oracle price check should pass (1:1).
-    expect(executeResult.result).toBeOk(Cl.uint(1000));
+    expect(executeResult.result).toBe(Cl.uint(1000));
   });
 });

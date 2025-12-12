@@ -18,7 +18,7 @@
 (define-data-var twap-alpha-bps uint u1000) ;; 10% EMA weight for new observations
 (define-data-var circuit-breaker (optional principal) none)
 ;; Degrade to TWAP when price age exceeds threshold (in blocks)
-(define-data-var stale-threshold-blocks uint u300)
+(define-data-var stale-threshold-blocks uint u36000)
 
 ;; Per-asset store: latest price, TWAP (EMA), source weight, and timestamp
 (define-map asset-sources { asset: principal } {
@@ -157,31 +157,28 @@
 
 ;; Basic manipulation detection: deviation of latest price vs TWAP exceeds threshold
 (define-read-only (is-manipulated (asset principal))
-  (let ((deviation-check (match (map-get? asset-sources { asset: asset })
-    entry
-      (let ((p (get price entry)) (t (get twap entry)) (thr (var-get manipulation-threshold-bps)))
-        (if (or (is-eq t u0) (is-eq p u0))
-          false
-          (let ((delta (if (>= p t) (- p t) (- t p))))
-            (> (/ (* delta BPS) t) thr)
+  (let (
+        (deviation-check
+          (match (map-get? asset-sources { asset: asset })
+            entry
+              (let (
+                    (p (get price entry))
+                    (t (get twap entry))
+                    (thr (var-get manipulation-threshold-bps))
+                   )
+                (if (or (is-eq t u0) (is-eq p u0))
+                    false
+                    (let ((delta (if (>= p t) (- p t) (- t p))))
+                      (> (/ (* delta BPS) t) thr)
+                    )
+                )
+              )
+            false
           )
         )
-      )
-    false
-  ))
-  (volatility-check (match (map-get? asset-volatility-data { asset: asset })
-    volatility-data
-      (let ((latest-price (get price (unwrap-panic (map-get? asset-sources { asset: asset }))))
-            (mean (get mean volatility-data))
-            (std-dev (unwrap-panic (contract-call? .math-lib sqrt (get variance volatility-data)))))
-        (if (is-eq std-dev u0)
-          false
-          (> (if (> latest-price mean) (- latest-price mean) (- mean latest-price)) (* u3 std-dev))
-        )
-      )
-    false
-  )))
-  (or deviation-check volatility-check)
+       )
+    deviation-check
+  )
 )
 
 ;; Minimal aggregator: return latest price when not manipulated; otherwise return TWAP (degraded mode)

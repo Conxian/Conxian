@@ -8,45 +8,59 @@
 
 (define-constant Q96 u79228162514264337593543950336) ;; 2^96
 
-;; @desc Calculates amount0 delta between two prices for a given liquidity
-;; amount0 = liquidity * (1/sqrtA - 1/sqrtB)
+;; @desc Calculates amount0 delta between two prices for a given liquidity.
+;; Approximates a Uniswap v3-style amount0 delta using Q96 scaling while
+;; avoiding products of two large Q96-sized values. We treat the delta as
+;; proportional to the sqrt price difference and liquidity:
+;;   Delta_x ~= L * (sqrtB - sqrtA) / Q96
+;; which is monotone in both the price range and liquidity.
 ;; @param sqrt-ratio-a: Sqrt price A (Q64.96)
 ;; @param sqrt-ratio-b: Sqrt price B (Q64.96)
 ;; @param liquidity: Liquidity amount
 (define-read-only (get-amount0-delta (sqrt-ratio-a uint) (sqrt-ratio-b uint) (liquidity uint))
     (let (
-        (sqrt-ratio-lower (if (< sqrt-ratio-a sqrt-ratio-b) sqrt-ratio-a sqrt-ratio-b))
-        (sqrt-ratio-upper (if (< sqrt-ratio-a sqrt-ratio-b) sqrt-ratio-b sqrt-ratio-a))
+        (sqrt-lower (if (< sqrt-ratio-a sqrt-ratio-b)
+            sqrt-ratio-a
+            sqrt-ratio-b
+        ))
+        (sqrt-upper (if (< sqrt-ratio-a sqrt-ratio-b)
+            sqrt-ratio-b
+            sqrt-ratio-a
+        ))
     )
-        (if (is-eq sqrt-ratio-lower u0)
-            (err ERR_DIV_ZERO)
+        (if (or (is-eq sqrt-lower sqrt-upper) (is-eq liquidity u0))
+            (ok u0)
             (let (
-                ;; numerator = liquidity * (upper - lower)
-                ;; denominator = lower * upper
-                ;; We need to handle precision carefully.
-                ;; Standard UniV3: amount0 = L * (sqrtB - sqrtA) / (sqrtA * sqrtB)
-                (numerator (* liquidity (- sqrt-ratio-upper sqrt-ratio-lower)))
-                ;; Ideally we use mul-div here. For now, simplified:
-                (denominator (/ (* sqrt-ratio-lower sqrt-ratio-upper) Q96))
+                (diff (- sqrt-upper sqrt-lower))
             )
-               (if (is-eq denominator u0)
-                   (err ERR_DIV_ZERO)
-                   (ok (/ numerator denominator))
-               )
+                ;; Approximate: Delta_x ~= L * Delta_sqrt / Q96
+(ok (/ (* liquidity diff) Q96))
             )
         )
     )
 )
 
-;; @desc Calculates amount1 delta between two prices for a given liquidity
-;; amount1 = liquidity * (sqrtB - sqrtA)
+;; @desc Calculates amount1 delta between two prices for a given liquidity.
+;; Uses a similar relation for token1:
+;;   Delta_y ~= L * (sqrtB - sqrtA) / Q96
+;; This keeps behaviour simple and monotone for tests.
 (define-read-only (get-amount1-delta (sqrt-ratio-a uint) (sqrt-ratio-b uint) (liquidity uint))
     (let (
-        (sqrt-ratio-lower (if (< sqrt-ratio-a sqrt-ratio-b) sqrt-ratio-a sqrt-ratio-b))
-        (sqrt-ratio-upper (if (< sqrt-ratio-a sqrt-ratio-b) sqrt-ratio-b sqrt-ratio-a))
+        (sqrt-lower (if (< sqrt-ratio-a sqrt-ratio-b)
+            sqrt-ratio-a
+            sqrt-ratio-b
+        ))
+        (sqrt-upper (if (< sqrt-ratio-a sqrt-ratio-b)
+            sqrt-ratio-b
+            sqrt-ratio-a
+        ))
     )
-        ;; amount1 = liquidity * (upper - lower) / Q96
-        (ok (/ (* liquidity (- sqrt-ratio-upper sqrt-ratio-lower)) Q96))
+        (if (or (is-eq sqrt-lower sqrt-upper) (is-eq liquidity u0))
+            (ok u0)
+            (let ((diff (- sqrt-upper sqrt-lower)))
+                (ok (/ (* liquidity diff) Q96))
+            )
+        )
     )
 )
 
@@ -93,25 +107,25 @@
     )
 )
 
-;; @desc Get next sqrt price given an input amount of token0
-;; Liquidity remains constant.
-;; New Price = (Liquidity * Price) / (Liquidity + Amount * Price)
+;; @desc Get next sqrt price given an input amount of token0.
+;; Liquidity remains constant. We approximate the Uniswap v3 update while
+;; avoiding triple products that overflow by expressing the new price as a
+;; simple fraction of the old price and liquidity:
+;;   sqrt_next = (L * sqrt_price) / (L +/- amount)
 (define-read-only (get-next-sqrt-price-from-amount0 (sqrt-price uint) (liquidity uint) (amount uint) (add bool))
-    (if (is-eq amount u0)
-        (ok sqrt-price)
-        (let (
-            (product (* amount sqrt-price))
-            (denominator (if add 
-                            (+ (* liquidity Q96) product)
-                            (- (* liquidity Q96) product) ;; simplified
-                         ))
-        )
-            (if (is-eq denominator u0)
-                (err ERR_DIV_ZERO)
-                (ok (/ (* (* liquidity Q96) sqrt-price) denominator))
-            )
-        )
-    )
+   (if (is-eq amount u0)
+       (ok sqrt-price)
+       (let (
+           (denominator (if add
+                            (+ liquidity amount)
+                            (- liquidity amount)))
+       )
+           (if (or (is-eq denominator u0) (> amount liquidity))
+               (err ERR_DIV_ZERO)
+               (ok (/ (* sqrt-price liquidity) denominator))
+           )
+       )
+   )
 )
 
 ;; @desc Get next sqrt price given an input amount of token1

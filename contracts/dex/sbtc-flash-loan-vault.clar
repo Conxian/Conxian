@@ -32,8 +32,8 @@
 ;; Circuit breaker thresholds
 (define-constant CIRCUIT_BREAKER_THRESHOLD u5000000000) ;; 5000 tokens
 (define-constant MAX_HOURLY_VOLUME u10000000000) ;; 10000 tokens per hour
-(define-constant BLOCKS_PER_HOUR u720) ;; 144 * 5 for Nakamoto
-(define-constant REPAYMENT_DEADLINE_BLOCKS u10) ;; 10 blocks to repay
+(define-constant BLOCKS_PER_HOUR u86400) ;; 144 * 5 for Nakamoto
+(define-constant REPAYMENT_DEADLINE_BLOCKS u1200) ;; 10 blocks to repay
 
 ;; =============================================================================
 ;; DATA STRUCTURES

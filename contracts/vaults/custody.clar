@@ -56,7 +56,7 @@
 (define-data-var total-shares-minted uint u0)
 
 ;; @desc The number of blocks for the withdrawal timelock.
-(define-constant WITHDRAWAL_DELAY_BLOCKS u144)
+(define-constant WITHDRAWAL_DELAY_BLOCKS u17280)
 
 ;; --- Private Functions ---
 
@@ -67,7 +67,8 @@
   (let ((total-sbtc (var-get total-sbtc-deposited))
         (total-shares (var-get total-shares-minted)))
     (if (is-eq total-shares u0)
-        sbtc-amount
+        ;; Burn 1000 shares
+        (if (> sbtc-amount u1000) (- sbtc-amount u1000) u0)
         (/ (* sbtc-amount total-shares) total-sbtc))))
 
 ;; @desc Calculates the amount of sBTC corresponding to a given number of shares.
@@ -110,7 +111,10 @@
       (map-set share-balances recipient
         (+ (default-to u0 (map-get? share-balances recipient)) shares))
       (var-set total-sbtc-deposited (+ (var-get total-sbtc-deposited) amount))
-      (var-set total-shares-minted (+ (var-get total-shares-minted) shares))
+      (var-set total-shares-minted (+ (var-get total-shares-minted) 
+                                      (if (is-eq (var-get total-shares-minted) u0) 
+                                          (+ shares u1000) 
+                                          shares)))
       (ok shares))))
 
 ;; @desc Initiates a withdrawal. Can only be called by the sBTC vault.

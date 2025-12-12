@@ -1,4 +1,5 @@
 // @vitest-environment node
+import "dotenv/config";
 import { describe, it, expect } from 'vitest';
 import { createClient } from '@stacks/blockchain-api-client';
 

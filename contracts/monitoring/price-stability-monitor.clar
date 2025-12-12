@@ -12,7 +12,7 @@
 
 ;; Configuration
 (define-constant PRICE_DEVIATION_THRESHOLD u50000)  ;; 5%
-(define-constant VOLATILITY_WINDOW u17280)          ;; ~1 day (17280 blocks)
+(define-constant VOLATILITY_WINDOW u2073600)          ;; ~1 day (17280 blocks)
 (define-constant ADJUSTMENT_COOLDOWN u17280)        ;; ~1 day (17280 blocks)
 
 ;; State

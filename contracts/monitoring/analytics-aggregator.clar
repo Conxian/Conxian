@@ -16,7 +16,7 @@
 (define-constant PRECISION u1000000000000000000) ;; 1e18
 (define-constant BASIS_POINTS u10000) ;; 100%
 (define-constant ONE_DAY u17280) ;; u144 * 120hours
-(define-constant BLOCKS_PER_YEAR u6307200) ;; ~365 days
+(define-constant BLOCKS_PER_YEAR u756864000) ;; ~365 days
 (define-constant DAYS_PER_YEAR u365)
 
 ;; Metric types

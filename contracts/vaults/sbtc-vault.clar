@@ -127,16 +127,25 @@
 ;; --- Bitcoin Wrapping/Unwrapping ---
 
 ;; @desc Wraps BTC to sBTC.
-;; @param btc-amount uint The amount of BTC to wrap.
-;; @param btc-txid (buff 32) The Bitcoin transaction ID.
+;; @param tx-blob (buff 1024) The raw Bitcoin transaction.
+;; @param header (buff 80) The Bitcoin block header.
+;; @param proof The Merkle proof.
 ;; @returns (response uint uint) The amount of sBTC minted.
-(define-public (wrap-btc (btc-amount uint) (btc-txid (buff 32)))
-  (begin
-    (try! (check-not-paused))
-    (let ((fee (unwrap! (contract-call? .fee-manager calculate-fee "wrap" btc-amount) (err u0))))
-      (let ((net-amount (- btc-amount fee)))
-        ;; Temporarily reuse btc-txid as header-hash until full SPV wiring is implemented
-        (contract-call? .btc-bridge wrap-btc net-amount btc-txid btc-txid tx-sender)))))
+(define-public (wrap-btc (tx-blob (buff 1024)) (header (buff 80)) (proof { tx-index: uint, hashes: (list 12 (buff 32)), tree-depth: uint }) (token-trait <sip-010-ft-trait>))
+  (let ((recipient tx-sender))
+    (begin
+      (try! (check-not-paused))
+      (asserts! (is-eq (contract-of token-trait) (var-get sbtc-token-contract)) (err u2001))
+      
+      (let ((minted-amount (try! (as-contract (contract-call? .btc-bridge wrap-btc tx-blob header proof recipient token-trait)))))
+          (let ((fee (unwrap! (as-contract (contract-call? .fee-manager calculate-fee "wrap" minted-amount)) (err u0))))
+            (if (> fee u0)
+                (try! (contract-call? token-trait transfer fee recipient (var-get fee-manager-contract) none))
+                true
+            )
+            (ok (- minted-amount fee))
+         )
+      ))))
 
 ;; @desc Unwraps sBTC to BTC.
 ;; @param sbtc-amount uint The amount of sBTC to unwrap.

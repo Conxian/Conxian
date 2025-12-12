@@ -10,11 +10,11 @@
 ;; ===========================================
 ;; DATA STRUCTURES
 ;; ===========================================
-(define-constant TIMELOCK_DELAY u17280) ;; u144 * 120 blocks (approx 24 hours)
-(define-constant MIN_DELAY u144)  ;; 1 day
-(define-constant MAX_DELAY u10080) ;; 1 week
+(define-constant TIMELOCK_DELAY u2073600) ;; u144 * 120 blocks (approx 24 hours)
+(define-constant MIN_DELAY u17280)  ;; 1 day
+(define-constant MAX_DELAY u1209600) ;; 1 week
 
-(define-data-var delay uint u1440)  ;; 10 days
+(define-data-var delay uint u172800)  ;; 10 days
 
 (define-map queue 
   {tx-id: (buff 32)}

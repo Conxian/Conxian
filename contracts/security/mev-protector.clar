@@ -26,8 +26,8 @@
 (define-data-var contract-owner principal tx-sender)
 (define-data-var next-batch-id uint u0)
 (define-data-var next-commitment-id uint u0)
-(define-data-var commit-period-blocks uint u10)
-(define-data-var reveal-period-blocks uint u10)
+(define-data-var commit-period-blocks uint u1200)
+(define-data-var reveal-period-blocks uint u1200)
 
 ;; ===== Data Maps =====
 (define-map commitments
@@ -68,61 +68,7 @@
 ;; ===== Private Functions =====
 
 (define-private (pow-decimals (decimals uint))
-  (if (is-eq decimals u0)
-    u1
-    (if (is-eq decimals u1)
-      u10
-      (if (is-eq decimals u2)
-        u100
-        (if (is-eq decimals u3)
-          u1000
-          (if (is-eq decimals u4)
-            u10000
-            (if (is-eq decimals u5)
-              u100000
-              (if (is-eq decimals u6)
-                u1000000
-                (if (is-eq decimals u7)
-                  u10000000
-                  (if (is-eq decimals u8)
-                    u100000000
-                    (if (is-eq decimals u9)
-                      u1000000000
-                      (if (is-eq decimals u10)
-                        u10000000000
-                        (if (is-eq decimals u11)
-                          u100000000000
-                          (if (is-eq decimals u12)
-                            u1000000000000
-                            (if (is-eq decimals u13)
-                              u10000000000000
-                              (if (is-eq decimals u14)
-                                u100000000000000
-                                (if (is-eq decimals u15)
-                                  u1000000000000000
-                                  (if (is-eq decimals u16)
-                                    u10000000000000000
-                                    (if (is-eq decimals u17)
-                                      u100000000000000000
-                                      u1000000000000000000
-                                    )
-                                  )
-                                )
-                              )
-                            )
-                          )
-                        )
-                      )
-                    )
-                  )
-                )
-              )
-            )
-          )
-        )
-      )
-    )
-  )
+  (pow u10 decimals)
 )
 
 (define-private (check-execution-validity

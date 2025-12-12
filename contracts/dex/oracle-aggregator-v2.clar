@@ -77,7 +77,7 @@
         
         ;; Check Circuit Breaker
         (match cb-opt
-            cb (asserts! (not (unwrap-panic (contract-call? .circuit-breaker is-circuit-open))) ERR_CIRCUIT_OPEN)
+            ignored (asserts! (not (unwrap-panic (contract-call? .circuit-breaker is-circuit-open))) ERR_CIRCUIT_OPEN)
             true
         )
         

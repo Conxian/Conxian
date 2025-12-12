@@ -46,9 +46,9 @@
 (define-constant ERR_BUCKET_NOT_INITIALIZED (err u3007))
 
 ;; Default rate limits
-(define-constant DEFAULT_GLOBAL_LIMIT_PER_BLOCK u100)
-(define-constant DEFAULT_USER_LIMIT_PER_WINDOW u10)
-(define-constant DEFAULT_WINDOW_SIZE u10) 
+(define-constant DEFAULT_GLOBAL_LIMIT_PER_BLOCK u12000)
+(define-constant DEFAULT_USER_LIMIT_PER_WINDOW u1200)
+(define-constant DEFAULT_WINDOW_SIZE u1200) 
 
 ;; blocks
 (define-constant DEFAULT_BURST_LIMIT u20)

@@ -19,7 +19,7 @@
 
 ;; Price validation constants
 (define-constant MAX_PRICE_DEVIATION u100000) ;; 10% max deviation
-(define-constant MAX_STALENESS_BLOCKS u144) ;; ~24 hours (assuming 10 min blocks)
+(define-constant MAX_STALENESS_BLOCKS u17280) ;; ~24 hours (assuming 10 min blocks)
 (define-constant MIN_ORACLES_REQUIRED u2) ;; Minimum oracles for consensus
 (define-constant PRICE_PRECISION u1000000) ;; 6 decimal places
 

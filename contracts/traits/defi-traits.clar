@@ -119,7 +119,7 @@
     (response uint uint)
   )
   (wrap-btc
-    (uint (buff 32))
+    ((buff 1024) (buff 80) { tx-index: uint, hashes: (list 12 (buff 32)), tree-depth: uint } <sip-010-ft-trait>)
     (response uint uint)
   )
   (unwrap-to-btc

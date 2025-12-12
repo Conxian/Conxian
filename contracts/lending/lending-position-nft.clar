@@ -438,27 +438,45 @@
     (true u2)))                       ;; Common - standard
 
 (define-private (update-user-positions (user principal) (position-type uint) (token-id uint))
-  (let ((current-positions (default-to (list) (map-get? user-positions { user: user, position-type: position-type }))))
-    (new-positions (append current-positions (list token-id))))
-    (map-set user-positions { user: user, position-type: position-type } { token-ids: new-positions })))
+  (let (
+        (current-positions (default-to (list)
+          (map-get? user-positions { user: user, position-type: position-type })))
+        (new-positions (append current-positions (list token-id)))
+       )
+    (map-set user-positions { user: user, position-type: position-type }
+      { token-ids: new-positions })
+  )
+)
 
 (define-private (update-user-positions-on-transfer (from principal) (to principal) (position-type uint) (token-id uint))
   ;; Remove from sender
-  (let ((from-positions (default-to (list) (map-get? user-positions { user: from, position-type: position-type })))
-        (to-positions (default-to (list) (map-get? user-positions { user: to, position-type: position-type }))))
-    (new-from-positions (filter (lambda (id) (not (= id token-id))) from-positions))
-    (new-to-positions (append to-positions (list token-id))))
-    (map-set user-positions { user: from, position-type: position-type } { token-ids: new-from-positions })
-    (map-set user-positions { user: to, position-type: position-type } { token-ids: new-to-positions })))
+  (let (
+        (from-positions (default-to (list)
+          (map-get? user-positions { user: from, position-type: position-type })))
+        (to-positions (default-to (list)
+          (map-get? user-positions { user: to, position-type: position-type })))
+        (new-from-positions (filter (lambda (id) (not (= id token-id))) from-positions))
+        (new-to-positions (append to-positions (list token-id)))
+       )
+    (map-set user-positions { user: from, position-type: position-type }
+      { token-ids: new-from-positions })
+    (map-set user-positions { user: to, position-type: position-type }
+      { token-ids: new-to-positions })
+  )
+)
 
 (define-private (update-asset-positions (asset principal) (position-type uint) (amount uint))
-  (let ((current-positions (default-to { total-positions: u0, total-value: u0 } (map-get? asset-positions { asset: asset, position-type: position-type }))))
-    (map-set asset-positions 
+  (let ((current-positions
+          (default-to { total-positions: u0, total-value: u0 }
+            (map-get? asset-positions { asset: asset, position-type: position-type }))))
+    (map-set asset-positions
       { asset: asset, position-type: position-type }
-      { 
+      {
         total-positions: (+ (get total-positions current-positions) u1),
         total-value: (+ (get total-value current-positions) amount)
-      })))
+      })
+  )
+)
 
 ;; ===== Read-Only Functions =====
 

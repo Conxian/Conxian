@@ -22,8 +22,8 @@
 ;; ===== Data Variables =====
 (define-data-var owner principal tx-sender)
 (define-data-var governance-token principal tx-sender)
-(define-data-var voting-delay uint u100)
-(define-data-var voting-period uint u720)
+(define-data-var voting-delay uint u12000)
+(define-data-var voting-period uint u86400)
 (define-data-var proposal-threshold uint u100000000)
 (define-data-var next-proposal-id uint u1)
 

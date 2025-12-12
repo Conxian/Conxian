@@ -41,7 +41,7 @@ deployer = { mnemonic = "YOUR_MNEMONIC_HERE" }
 
 [contracts]
 `;
-
+  
   console.log("Generating settings/Devnet.toml...");
   console.log(devnet + devnetContracts);
 

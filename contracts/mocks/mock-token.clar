@@ -1,6 +1,7 @@
 ;; mock-token.clar
 ;; Mock ERC-20 token for testing
 
+(impl-trait .sip-standards.sip-010-ft-trait)
 
 
 ;; ===== Constants =====
@@ -13,10 +14,11 @@
 
 ;; ===== Data Variables =====
 (define-data-var name (string-ascii 32) TOKEN_NAME)
-(define-data-var symbol (string-ascii 32) TOKEN_SYMBOL)
+(define-data-var symbol (string-ascii 10) TOKEN_SYMBOL)
 (define-data-var decimals uint (to-uint TOKEN_DECIMALS))
 (define-data-var total-supply uint u0)
 (define-data-var admin principal tx-sender)
+(define-data-var token-uri (optional (string-utf8 256)) none)
 
 ;; Balances
 (define-map balances
@@ -85,7 +87,7 @@
 )
 
 (define-public (get-token-uri)
-  (ok none)
+  (ok (var-get token-uri))
 )
 
 (define-public (transfer-from

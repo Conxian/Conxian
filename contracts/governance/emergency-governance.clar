@@ -21,9 +21,9 @@
 (define-constant ACTION_UPDATE_ORACLE u6)
 
 ;; Timelock settings
-(define-constant EMERGENCY_DELAY u17280) ;; ~2 minutes for critical actions
-(define-constant STANDARD_TIMELOCK_BLOCKS u144) ;; ~2.4 hours for standard actions
-(define-constant PROPOSAL_EXPIRY_BLOCKS u1008) ;; ~16.8 hours
+(define-constant EMERGENCY_DELAY u2073600) ;; ~2 minutes for critical actions
+(define-constant STANDARD_TIMELOCK_BLOCKS u17280) ;; ~2.4 hours for standard actions
+(define-constant PROPOSAL_EXPIRY_BLOCKS u120960) ;; ~16.8 hours
 
 ;; ===== Data Variables =====
 (define-data-var contract-owner principal tx-sender)

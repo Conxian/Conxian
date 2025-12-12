@@ -1,6 +1,6 @@
 
 import { describe, it, expect, beforeEach } from 'vitest';
-import { initSimnet } from '@hirosystems/clarinet-sdk';
+import { initSimnet } from "@stacks/clarinet-sdk";
 import { Cl } from '@stacks/transactions';
 
 describe('Concentrated Liquidity Pool', () => {
@@ -52,7 +52,7 @@ describe('Concentrated Liquidity Pool', () => {
       deployer
     );
 
-    expect(result.result).toBeOk(Cl.bool(true));
+    expect(result.result).toBe(Cl.bool(true));
   });
 
   it('fails to initialize twice', () => {
@@ -125,7 +125,7 @@ describe('Concentrated Liquidity Pool', () => {
       wallet1
     );
 
-    expect(result.result).toBeOk(Cl.uint(1)); // First position ID
+    expect(result.result).toBe(Cl.uint(1)); // First position ID
   });
 
   it('gets reserves correctly', () => {
@@ -165,7 +165,7 @@ describe('Concentrated Liquidity Pool', () => {
       deployer
     );
 
-    expect(result.result).toBeOk(Cl.tuple({
+    expect(result.result).toBe(Cl.tuple({
       reserve0: Cl.uint(5000),
       reserve1: Cl.uint(3000)
     }));

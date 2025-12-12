@@ -2,8 +2,8 @@
 name = "devnet"
 
 [accounts]
-deployer = { mnemonic = "fetch outside black test wash cover just alter gag judge pillar crime" }
-wallet_1 = { mnemonic = "spoil sock coyote pact exotic only short artwork regular glory shallow endless" }
+deployer = { address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ" }
+wallet_1 = { address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ" }
 
 # Core Traits
 [[contract]]
