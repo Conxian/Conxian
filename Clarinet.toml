@@ -1,7 +1,7 @@
 [project]
 name = "Conxian"
 description = "A comprehensive, standardized Clarinet configuration for the Conxian DeFi protocol."
-clarinet_version = "3.11.0"
+clarinet_version = "3.10.0"
 epoch = "3.0"
 
 # ---------- Core Contracts ----------
@@ -40,6 +40,26 @@ address = "ST3N0ZC9HBPDEBEJ1H1QFGMJF3PSNGW3FYZSVN513"
 depends_on = ["oracle-pricing", "security-monitoring"]
 
 # ---------- Dimensional System ----------
+
+[accounts.deployer]
+balance = 100000000000000
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+
+[accounts.wallet_1]
+address = "ST1SJ3DTE5DN7X54YDH5D64R3BCB6A2AG2ZQ8YPD5"
+balance = 100000000000000
+
+[accounts.wallet_2]
+address = "ST2CY5V39NHDPWSXMW9QDT3HC3GD6Q6XX4CFRK9AG"
+balance = 100000000000000
+
+[accounts.wallet_3]
+address = "ST2JHG361ZXG51QTKY2NQCVBPPRRE2KZB1HR05NNC"
+balance = 100000000000000
+
+[accounts.wallet_4]
+address = "ST2NEB84ASENDXKYGJPQW86YXQCEFEX2ZQPG87ND"
+balance = 100000000000000
 
 [contracts.dim-metrics]
 path = "contracts/dimensional/dim-metrics.clar"

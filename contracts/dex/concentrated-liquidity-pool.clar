@@ -259,23 +259,35 @@
 
         ;; Calculate amounts to transfer
         (let (
-                (sqrt-lower (unwrap! (contract-call? .math-lib-concentrated tick-to-sqrt-price
-                    tick-lower
-                ) ERR_MATH_FAIL))
-                (sqrt-upper (unwrap! (contract-call? .math-lib-concentrated tick-to-sqrt-price
-                    tick-upper
-                ) ERR_MATH_FAIL))
+                (sqrt-lower (unwrap!
+                    (contract-call? .math-lib-concentrated tick-to-sqrt-price
+                        tick-lower
+                    )
+                    ERR_MATH_FAIL
+                ))
+                (sqrt-upper (unwrap!
+                    (contract-call? .math-lib-concentrated tick-to-sqrt-price
+                        tick-upper
+                    )
+                    ERR_MATH_FAIL
+                ))
                 ;; Use an effective liquidity capped at MAX_LIQUIDITY for math safety
-(liq-effective (if (> amount MAX_LIQUIDITY)
+                (liq-effective (if (> amount MAX_LIQUIDITY)
                     MAX_LIQUIDITY
                     amount
                 ))
-                (amount0 (unwrap! (contract-call? .math-lib-concentrated get-amount0-delta
-                    current-p sqrt-upper liq-effective
-                ) ERR_MATH_FAIL))
-                (amount1 (unwrap! (contract-call? .math-lib-concentrated get-amount1-delta
-                    sqrt-lower current-p liq-effective
-                ) ERR_MATH_FAIL))
+                (amount0 (unwrap!
+                    (contract-call? .math-lib-concentrated get-amount0-delta
+                        current-p sqrt-upper liq-effective
+                    )
+                    ERR_MATH_FAIL
+                ))
+                (amount1 (unwrap!
+                    (contract-call? .math-lib-concentrated get-amount1-delta
+                        sqrt-lower current-p liq-effective
+                    )
+                    ERR_MATH_FAIL
+                ))
             )
             ;; Transfer tokens
             (if (> amount0 u0)
@@ -332,34 +344,49 @@
         (try! (contract-call? token-in transfer amount-in tx-sender pool-principal none))
 
         ;; 2. Price impact and math via concentrated liquidity library
-(asserts! (<= amount-in MAX_SWAP_AMOUNT) ERR_MATH_FAIL)
-(asserts! (<= current-l MAX_LIQUIDITY) ERR_MATH_FAIL)
+        (asserts! (<= amount-in MAX_SWAP_AMOUNT) ERR_MATH_FAIL)
+        (asserts! (<= current-l MAX_LIQUIDITY) ERR_MATH_FAIL)
 
         (let (
-            (next-p (if is-token0
-                        (unwrap!
-                            (contract-call? .math-lib-concentrated
-                                get-next-sqrt-price-from-amount0 current-p
-                                current-l amount-remaining true
-                            )
-                            ERR_MATH_FAIL
+                (next-p (if is-token0
+                    (unwrap!
+                        (contract-call? .math-lib-concentrated
+                            get-next-sqrt-price-from-amount0 current-p
+                            current-l amount-remaining true
                         )
-                        (unwrap! (contract-call? .math-lib-concentrated get-next-sqrt-price-from-amount1
-                            current-p current-l amount-remaining true
-                        ) ERR_MATH_FAIL)))
-            (amount-out (if is-token0
-                        ;; token1 out
-                        (unwrap! (contract-call? .math-lib-concentrated get-amount1-delta
+                        ERR_MATH_FAIL
+                    )
+                    (unwrap!
+                        (contract-call? .math-lib-concentrated
+                            get-next-sqrt-price-from-amount1 current-p
+                            current-l amount-remaining true
+                        )
+                        ERR_MATH_FAIL
+                    )
+                ))
+                (amount-out (if is-token0
+                    ;; token1 out
+                    (unwrap!
+                        (contract-call? .math-lib-concentrated get-amount1-delta
                             next-p current-p current-l
-                        ) ERR_MATH_FAIL)
-                        ;; token0 out
-                        (unwrap! (contract-call? .math-lib-concentrated get-amount0-delta
+                        )
+                        ERR_MATH_FAIL
+                    )
+                    ;; token0 out
+                    (unwrap!
+                        (contract-call? .math-lib-concentrated get-amount0-delta
                             current-p next-p current-l
-                        ) ERR_MATH_FAIL)))
-            (next-tick (unwrap! (contract-call? .math-lib-concentrated sqrt-price-to-tick
-                            next-p
-                        ) ERR_MATH_FAIL))
-        )
+                        )
+                        ERR_MATH_FAIL
+                    )
+                ))
+                (next-tick (unwrap!
+                    (contract-call? .math-lib-concentrated sqrt-price-to-tick
+                        next-p
+                    )
+                    ERR_MATH_FAIL
+                ))
+            )
             (print {
                 event: "clp-swap-debug",
                 reserve0: (var-get reserve0),
@@ -381,13 +408,19 @@
                     (match (as-contract (contract-call? token-in transfer fee-amount pool-principal
                         fee-switch none
                     ))
-                      res true
-                      e1 false)
+                        res
+                        true
+                        e1
+                        false
+                    )
                     (match (contract-call? .protocol-fee-switch route-fees token-in
                         fee-amount false "DEX"
                     )
-                      res true
-                      e2 false)
+                        res
+                        true
+                        e2
+                        false
+                    )
                 )
                 false
             )
@@ -396,7 +429,7 @@
             (if is-token0
                 (begin
                     ;; Ensure we have enough token1 to pay out
-(asserts! (>= (var-get reserve1) amount-out)
+                    (asserts! (>= (var-get reserve1) amount-out)
                         ERR_INSUFFICIENT_LIQUIDITY
                     )
                     (var-set reserve0 (+ (var-get reserve0) amount-remaining))
@@ -404,14 +437,14 @@
                 )
                 (begin
                     ;; Ensure we have enough token0 to pay out
-(asserts! (>= (var-get reserve0) amount-out)
+                    (asserts! (>= (var-get reserve0) amount-out)
                         ERR_INSUFFICIENT_LIQUIDITY
                     )
                     (var-set reserve1 (+ (var-get reserve1) amount-remaining))
                     (var-set reserve0 (- (var-get reserve0) amount-out))
                 )
             )
-            
+
             (var-set current-tick next-tick)
             (var-set sqrt-price-x96 next-p)
 
@@ -441,24 +474,40 @@
         (asserts! (> amount-in u0) ERR_ZERO_AMOUNT)
         (asserts! (> current-l u0) ERR_INSUFFICIENT_LIQUIDITY)
         (asserts! (<= amount-in MAX_SWAP_AMOUNT) ERR_MATH_FAIL)
-(asserts! (<= current-l MAX_LIQUIDITY) ERR_MATH_FAIL)
+        (asserts! (<= current-l MAX_LIQUIDITY) ERR_MATH_FAIL)
 
         (let (
-            (next-p (if is-token0
-                        (unwrap! (contract-call? .math-lib-concentrated get-next-sqrt-price-from-amount0
-                            current-p current-l amount-remaining true
-                        ) ERR_MATH_FAIL)
-                        (unwrap! (contract-call? .math-lib-concentrated get-next-sqrt-price-from-amount1
-                            current-p current-l amount-remaining true
-                        ) ERR_MATH_FAIL)))
-            (amount-out (if is-token0
-                        (unwrap! (contract-call? .math-lib-concentrated get-amount1-delta
+                (next-p (if is-token0
+                    (unwrap!
+                        (contract-call? .math-lib-concentrated
+                            get-next-sqrt-price-from-amount0 current-p
+                            current-l amount-remaining true
+                        )
+                        ERR_MATH_FAIL
+                    )
+                    (unwrap!
+                        (contract-call? .math-lib-concentrated
+                            get-next-sqrt-price-from-amount1 current-p
+                            current-l amount-remaining true
+                        )
+                        ERR_MATH_FAIL
+                    )
+                ))
+                (amount-out (if is-token0
+                    (unwrap!
+                        (contract-call? .math-lib-concentrated get-amount1-delta
                             next-p current-p current-l
-                        ) ERR_MATH_FAIL)
-                        (unwrap! (contract-call? .math-lib-concentrated get-amount0-delta
+                        )
+                        ERR_MATH_FAIL
+                    )
+                    (unwrap!
+                        (contract-call? .math-lib-concentrated get-amount0-delta
                             current-p next-p current-l
-                        ) ERR_MATH_FAIL)))
-        )
+                        )
+                        ERR_MATH_FAIL
+                    )
+                ))
+            )
             (ok amount-out)
         )
     )
@@ -485,41 +534,137 @@
 ;; @param liquidity-amt Amount of liquidity to remove
 ;; @param token0-inst Token 0 contract trait
 ;; @param token1-inst Token 1 contract trait
-;; @returns (ok {amount0, amount1}) or Error
+;; @returns Error - Use decrease-liquidity instead
 (define-public (remove-liquidity
         (liquidity-amt uint)
         (token0-inst <sip-010-trait>)
         (token1-inst <sip-010-trait>)
     )
-    ;; Simplified proportional burn against total liquidity and reserves
-    (begin
+    ERR_NOT_SUPPORTED
+)
+
+;; @desc Decreases liquidity from a position.
+;; @param position-id The ID of the position
+;; @param amount Amount of liquidity to remove
+;; @param token0-inst Token 0 contract trait
+;; @param token1-inst Token 1 contract trait
+;; @returns (ok {amount0, amount1}) or Error
+(define-public (decrease-liquidity
+        (position-id uint)
+        (amount uint)
+        (token0-inst <sip-010-trait>)
+        (token1-inst <sip-010-trait>)
+    )
+    (let (
+            (position (unwrap! (map-get? positions { position-id: position-id })
+                ERR_POSITION_NOT_FOUND
+            ))
+            (owner (get owner position))
+            (tick-lower (get tick-lower position))
+            (tick-upper (get tick-upper position))
+            (current-l (get liquidity position))
+            (current-p (var-get sqrt-price-x96))
+            (current-t (var-get current-tick))
+        )
+        (asserts! (is-eq tx-sender owner) ERR_UNAUTHORIZED)
         (asserts! (var-get initialized) ERR_NOT_INITIALIZED)
-        (asserts! (> liquidity-amt u0) ERR_ZERO_AMOUNT)
-        (let (
-                (caller tx-sender)
-                (current-l (var-get liquidity))
-                (reserve0-before (var-get reserve0))
-                (reserve1-before (var-get reserve1))
-            )
-            (asserts! (> current-l u0) ERR_INSUFFICIENT_LIQUIDITY)
-            (asserts! (>= current-l liquidity-amt) ERR_INSUFFICIENT_LIQUIDITY)
-            (let (
-                    (amount0 (/ (* liquidity-amt reserve0-before) current-l))
-                    (amount1 (/ (* liquidity-amt reserve1-before) current-l))
-                )
-                ;; Transfer tokens out from the pool contract to the user
-                (try! (as-contract (contract-call? token0-inst transfer amount0 tx-sender caller none)))
-                (try! (as-contract (contract-call? token1-inst transfer amount1 tx-sender caller none)))
+        (asserts! (> amount u0) ERR_ZERO_AMOUNT)
+        (asserts! (<= amount current-l) ERR_INSUFFICIENT_LIQUIDITY)
+        (asserts! (is-eq (contract-of token0-inst) (var-get token0))
+            ERR_INVALID_TOKEN
+        )
+        (asserts! (is-eq (contract-of token1-inst) (var-get token1))
+            ERR_INVALID_TOKEN
+        )
 
-                (var-set liquidity (- current-l liquidity-amt))
-(var-set reserve0 (- reserve0-before amount0))
-(var-set reserve1 (- reserve1-before amount1))
+        ;; Update Position
+        (map-set positions { position-id: position-id }
+            (merge position { liquidity: (- current-l amount) })
+        )
 
-                (ok {
-                    amount0: amount0,
-                    amount1: amount1,
+        ;; Update Ticks
+        (map-set ticks { tick: tick-lower }
+            (let ((t (default-to {
+                    liquidity-gross: u0,
+                    liquidity-net: 0,
+                    fee-growth-outside-0-x128: u0,
+                    fee-growth-outside-1-x128: u0,
+                    initialized: false,
+                }
+                    (map-get? ticks { tick: tick-lower })
+                )))
+                (merge t {
+                    liquidity-gross: (- (get liquidity-gross t) amount),
+                    liquidity-net: (- (get liquidity-net t) (to-int amount)),
                 })
+            ))
+
+        (map-set ticks { tick: tick-upper }
+            (let ((t (default-to {
+                    liquidity-gross: u0,
+                    liquidity-net: 0,
+                    fee-growth-outside-0-x128: u0,
+                    fee-growth-outside-1-x128: u0,
+                    initialized: false,
+                }
+                    (map-get? ticks { tick: tick-upper })
+                )))
+                (merge t {
+                    liquidity-gross: (- (get liquidity-gross t) amount),
+                    liquidity-net: (+ (get liquidity-net t) (to-int amount)), ;; Subtraction of negative is addition
+                })
+            ))
+
+        ;; If current tick is in range, remove from global liquidity
+        (if (and (>= current-t tick-lower) (< current-t tick-upper))
+            (var-set liquidity (- (var-get liquidity) amount))
+            false
+        )
+
+        ;; Calculate amounts to transfer
+        (let (
+                (sqrt-lower (unwrap!
+                    (contract-call? .math-lib-concentrated tick-to-sqrt-price
+                        tick-lower
+                    )
+                    ERR_MATH_FAIL
+                ))
+                (sqrt-upper (unwrap!
+                    (contract-call? .math-lib-concentrated tick-to-sqrt-price
+                        tick-upper
+                    )
+                    ERR_MATH_FAIL
+                ))
+                (amount0 (unwrap!
+                    (contract-call? .math-lib-concentrated get-amount0-delta
+                        current-p sqrt-upper amount
+                    )
+                    ERR_MATH_FAIL
+                ))
+                (amount1 (unwrap!
+                    (contract-call? .math-lib-concentrated get-amount1-delta
+                        sqrt-lower current-p amount
+                    )
+                    ERR_MATH_FAIL
+                ))
             )
+            ;; Transfer tokens
+            (if (> amount0 u0)
+                (try! (as-contract (contract-call? token0-inst transfer amount0 tx-sender owner none)))
+                false
+            )
+            (if (> amount1 u0)
+                (try! (as-contract (contract-call? token1-inst transfer amount1 tx-sender owner none)))
+                false
+            )
+
+            (var-set reserve0 (- (var-get reserve0) amount0))
+            (var-set reserve1 (- (var-get reserve1) amount1))
+
+            (ok {
+                amount0: amount0,
+                amount1: amount1,
+            })
         )
     )
 )

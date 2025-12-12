@@ -20,8 +20,8 @@ describe('Behavior Metrics & Reputation System', () => {
     await simnet.initSession(process.cwd(), 'Clarinet.toml');
     const accounts = simnet.getAccounts();
     deployer = accounts.get('deployer')!;
-    wallet1 = accounts.get('wallet_1')!;
-    wallet2 = accounts.get('wallet_2')!;
+    wallet1 = accounts.get('wallet_1') || 'ST1SJ3DTE5DN7X54YDH5D64R3BCB6A2AG2ZQ8YPD5';
+    wallet2 = accounts.get('wallet_2') || 'ST2CY5V39NHDPWSXMW9QDT3HC3GD6Q6XX4CFRK9AG';
   });
 
   describe("Behavior Metrics Read Functions", () => {

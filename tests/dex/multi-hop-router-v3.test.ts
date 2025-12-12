@@ -12,7 +12,7 @@ let wallet1: string;
 // NOTE: The underlying multi-hop-router-v3 contract currently triggers a
 // Clarinet runtime error in this environment, so we mark this suite as
 // skipped until the router configuration is stabilized.
-describe.skip("Multi-Hop Router v3", () => {
+describe("Multi-Hop Router v3", () => {
   beforeAll(async () => {
     simnet = await initSimnet("Clarinet.toml", false, {
       trackCosts: false,
@@ -33,22 +33,22 @@ describe.skip("Multi-Hop Router v3", () => {
   it("executes a single-hop swap when pool returns amount-in", () => {
     const res = simnet.callPublicFn(
       "multi-hop-router-v3",
-      "swap-hop-1",
+      "swap-direct",
       [Cl.uint(100n), Cl.uint(50n), pool(), cxdToken(), cxdToken()],
       wallet1
     );
 
-    expect(res.result).toBeOk(Cl.uint(100));
+    expect(res.result).toEqual(Cl.ok(Cl.uint(100)));
   });
 
   it("fails slippage check when min-amount-out exceeds pool output", () => {
     const res = simnet.callPublicFn(
       "multi-hop-router-v3",
-      "swap-hop-1",
+      "swap-direct",
       [Cl.uint(100n), Cl.uint(150n), pool(), cxdToken(), cxdToken()],
       wallet1
     );
 
-    expect(res.result).toBeErr(Cl.uint(1002));
+    expect(res.result).toEqual(Cl.error(Cl.uint(4002)));
   });
 });

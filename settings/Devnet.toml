@@ -1,39 +1,84 @@
+# Conxian Devnet Configuration
+# Verified Principal: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM (Standard Devnet Deployer)
+
 [network]
 name = "devnet"
 
 [accounts]
-deployer = { address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ" }
-wallet_1 = { address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ" }
+deployer = { address = "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM" }
 
-# Core Traits
+# ---------- Traits ----------
 [[contract]]
-name = "sip-010-trait"
+name = "sip-standards"
 path = "contracts/traits/sip-standards.clar"
 deployer = "deployer"
 
 [[contract]]
-name = "pool-trait"
+name = "defi-traits"
 path = "contracts/traits/defi-traits.clar"
 deployer = "deployer"
 
-# Libraries
+# ---------- Core Libs ----------
+[[contract]]
+name = "standard-errors"
+path = "contracts/errors/standard-errors.clar"
+deployer = "deployer"
+
 [[contract]]
 name = "math-lib-concentrated"
 path = "contracts/math/math-lib-concentrated.clar"
 deployer = "deployer"
 
-# DEX Contracts
+# ---------- Tokens ----------
 [[contract]]
-name = "dex-factory-v2"
-path = "contracts/dex/dex-factory-v2.clar"
+name = "cxd-token"
+path = "contracts/tokens/cxd-token.clar"
 deployer = "deployer"
 
+[[contract]]
+name = "mock-token"
+path = "contracts/mocks/mock-token.clar"
+deployer = "deployer"
+
+# ---------- Security ----------
+[[contract]]
+name = "circuit-breaker"
+path = "contracts/security/circuit-breaker.clar"
+deployer = "deployer"
+
+[[contract]]
+name = "mev-protector"
+path = "contracts/security/mev-protector.clar"
+deployer = "deployer"
+
+# ---------- DEX Core ----------
 [[contract]]
 name = "concentrated-liquidity-pool"
 path = "contracts/dex/concentrated-liquidity-pool.clar"
 deployer = "deployer"
 
 [[contract]]
+name = "dex-factory-v2"
+path = "contracts/dex/dex-factory-v2.clar"
+deployer = "deployer"
+
+[[contract]]
 name = "multi-hop-router-v3"
 path = "contracts/dex/multi-hop-router-v3.clar"
+deployer = "deployer"
+
+# ---------- sBTC Vault ----------
+[[contract]]
+name = "fee-manager"
+path = "contracts/vaults/fee-manager.clar"
+deployer = "deployer"
+
+[[contract]]
+name = "btc-bridge"
+path = "contracts/vaults/btc-bridge.clar"
+deployer = "deployer"
+
+[[contract]]
+name = "sbtc-vault"
+path = "contracts/vaults/sbtc-vault.clar"
 deployer = "deployer"

@@ -23,7 +23,7 @@ describe('Dimensional Engine / Position Manager Integration', () => {
     await simnet.initSession(process.cwd(), 'Clarinet.toml');
     const accounts = simnet.getAccounts();
     deployer = accounts.get('deployer')!;
-    wallet1 = accounts.get('wallet_1')!;
+    wallet1 = accounts.get('wallet_1') || 'ST1SJ3DTE5DN7X54YDH5D64R3BCB6A2AG2ZQ8YPD5';
 
     // Configure oracle-aggregator-v2 with a simple price for the core asset so
     // that position-manager pricing calls succeed.

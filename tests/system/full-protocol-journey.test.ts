@@ -18,8 +18,10 @@ describe('Grand Unified System Journey', () => {
   beforeEach(async () => {
     await simnet.initSession(process.cwd(), 'Clarinet.toml');
     const accounts = simnet.getAccounts();
+    console.log('Available accounts:', [...accounts.keys()]);
     deployer = accounts.get('deployer')!;
     wallet1 = accounts.get('wallet_1')!;
+    if (!wallet1) wallet1 = 'ST1SJ3DTE5DN7X54YDH5D64R3BCB6A2AG2ZQ8YPD5';
   });
 
   const tokenCollateral = 'mock-token'; // e.g., wBTC
@@ -43,9 +45,9 @@ describe('Grand Unified System Journey', () => {
 
     simnet.callPublicFn('concentrated-liquidity-pool', 'mint', [
       Cl.standardPrincipal(deployer),
-      Cl.int(-1000),
-      Cl.int(1000),
-      Cl.uint(1000000),
+      Cl.int(-200000),
+      Cl.int(200000),
+      Cl.uint(10000000000),
       Cl.contractPrincipal(deployer, tokenCollateral),
       Cl.contractPrincipal(deployer, tokenBorrow),
     ], deployer);
@@ -80,6 +82,7 @@ describe('Grand Unified System Journey', () => {
       Cl.contractPrincipal(deployer, tokenCollateral),
       Cl.contractPrincipal(deployer, tokenBorrow),
     ], wallet1);
+    console.log('Swap Result:', swapReceipt.result);
     expect(swapReceipt.result).toBeOk(expect.anything());
 
     // --- Step 2: Register for Enterprise Features ---

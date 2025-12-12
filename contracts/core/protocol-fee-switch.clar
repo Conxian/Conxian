@@ -194,12 +194,22 @@
           sender: tx-sender,
         }))
 
-        (try! (as-contract (let ((res (contract-call? token transfer treasury-amt tx-sender (var-get treasury-address) none)))
-                             (print { event: "treasury-transfer", result: res })
-                             res)))
-        (try! (as-contract (contract-call? token transfer staking-amt tx-sender (var-get staking-address) none)))
-        (try! (as-contract (contract-call? token transfer insurance-amt tx-sender (var-get insurance-address) none)))
-        (try! (as-contract (contract-call? token transfer burn-amt tx-sender (var-get treasury-address) none)))
+        (if (> treasury-amt u0)
+            (try! (as-contract (contract-call? token transfer treasury-amt tx-sender (var-get treasury-address) none)))
+            true
+        )
+        (if (> staking-amt u0)
+            (try! (as-contract (contract-call? token transfer staking-amt tx-sender (var-get staking-address) none)))
+            true
+        )
+        (if (> insurance-amt u0)
+            (try! (as-contract (contract-call? token transfer insurance-amt tx-sender (var-get insurance-address) none)))
+            true
+        )
+        (if (> burn-amt u0)
+            (try! (as-contract (contract-call? token transfer burn-amt tx-sender (var-get treasury-address) none)))
+            true
+        )
         
         (ok fee-amount)
       )

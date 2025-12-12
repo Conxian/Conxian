@@ -25,12 +25,12 @@ describe('sBTC Vault', () => {
     const pause = simnet.callPublicFn('sbtc-vault', 'set-vault-paused', [
       Cl.bool(true),
     ], deployer);
-    expect(pause.result).toBeOk(Cl.bool(true));
+    expect(pause.result).toEqual(Cl.ok(Cl.bool(true)));
 
     const unpause = simnet.callPublicFn('sbtc-vault', 'set-vault-paused', [
       Cl.bool(false),
     ], deployer);
-    expect(unpause.result).toBeOk(Cl.bool(true));
+    expect(unpause.result).toEqual(Cl.ok(Cl.bool(true)));
   });
 
   it('exposes vault stats with a paused flag that tracks admin setting', () => {
@@ -39,7 +39,7 @@ describe('sBTC Vault', () => {
 
     const stats = simnet.callReadOnlyFn('sbtc-vault', 'get-vault-stats', [], deployer);
 
-    expect(stats.result).toBeOk(
+    expect(stats.result).toEqual(Cl.ok(
       Cl.tuple({
         'total-sbtc': Cl.uint(0),
         'total-shares': Cl.uint(0),
@@ -47,6 +47,6 @@ describe('sBTC Vault', () => {
         'share-price': Cl.uint(100_000_000),
         paused: Cl.bool(true),
       }),
-    );
+    ));
   });
 });

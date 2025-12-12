@@ -24,7 +24,11 @@ npm ci
 
 # Verify setup
 clarinet check
-npx vitest run --config ./vitest.config.enhanced.ts
+npm run test:system
+
+### Environment Troubleshooting
+If you encounter `Cannot read properties of undefined (reading 'split')` errors during tests, it is likely due to `clarinet-sdk` failing to load accounts from `Clarinet.toml` in your environment.
+The tests include fallback logic for critical accounts (`wallet_1`), but ensure your `Clarinet.toml` is valid.
 ```
 
 ## Project Structure

@@ -19,7 +19,7 @@ describe('Concentrated Liquidity Pool', () => {
     await simnet.initSession(process.cwd(), 'Clarinet.toml');
     const accounts = simnet.getAccounts();
     deployer = accounts.get('deployer')!;
-    wallet1 = accounts.get('wallet_1')!;
+    wallet1 = accounts.get('wallet_1') || 'ST1SJ3DTE5DN7X54YDH5D64R3BCB6A2AG2ZQ8YPD5';
   });
 
   const token0 = 'mock-token';
@@ -33,7 +33,7 @@ describe('Concentrated Liquidity Pool', () => {
       Cl.int(0), // Tick 0
       Cl.uint(3000), // 0.3% fee
     ], deployer);
-    expect(receipt.result).toBeOk(Cl.bool(true));
+    expect(receipt.result).toEqual(Cl.ok(Cl.bool(true)));
   });
 
   it("should allow minting a position", () => {
@@ -81,7 +81,7 @@ describe('Concentrated Liquidity Pool', () => {
       wallet1
     );
 
-    expect(receipt.result).toBeOk(Cl.uint(1)); // Position ID 1
+    expect(receipt.result).toEqual(Cl.ok(Cl.uint(1))); // Position ID 1
 
     // Verify liquidity
     const liquidity = simnet.getDataVar(
@@ -150,7 +150,7 @@ describe('Concentrated Liquidity Pool', () => {
     // eslint-disable-next-line no-console
     console.log("CLP swap receipt (pool.test.ts):", receipt.result);
 
-    expect(receipt.result).toBeOk(expect.anything()); // Should return amount out
+    expect(receipt.result).toEqual(Cl.ok(expect.anything())); // Should return amount out
 
     // Check amount out is roughly what we expect (price is 1.0, so slightly less than 1000 due to fees)
     // Fee = 0.3% = 3
@@ -189,7 +189,7 @@ describe('Concentrated Liquidity Pool', () => {
       deployer
     );
 
-    simnet.callPublicFn(
+    const mintReceipt = simnet.callPublicFn(
       "concentrated-liquidity-pool",
       "mint",
       [
@@ -202,12 +202,14 @@ describe('Concentrated Liquidity Pool', () => {
       ],
       wallet1
     );
+    const posId = (mintReceipt.result as any).value; // Should be u1
 
-    // 2. Burn
+    // 2. Burn (Decrease Liquidity)
     const receipt = simnet.callPublicFn(
       "concentrated-liquidity-pool",
-      "remove-liquidity",
+      "decrease-liquidity",
       [
+        posId,
         Cl.uint(500000), // Remove half
         Cl.contractPrincipal(deployer, token0),
         Cl.contractPrincipal(deployer, token1),
@@ -215,7 +217,7 @@ describe('Concentrated Liquidity Pool', () => {
       wallet1
     );
 
-    expect(receipt.result).toBeOk(expect.anything());
+    expect(receipt.result).toEqual(Cl.ok(expect.anything()));
 
     // Verify liquidity reduced
     const liquidity = simnet.getDataVar(
@@ -240,10 +242,29 @@ describe('Concentrated Liquidity Pool', () => {
       deployer
     );
 
+    // Need a position to call decrease-liquidity
+    simnet.callPublicFn(
+        token0, "mint", [Cl.uint(1000000000), Cl.standardPrincipal(wallet1)], deployer
+    );
+    simnet.callPublicFn(
+        token1, "mint", [Cl.uint(1000000000), Cl.standardPrincipal(wallet1)], deployer
+    );
+    simnet.callPublicFn(
+        "concentrated-liquidity-pool",
+        "mint",
+        [
+            Cl.standardPrincipal(wallet1),
+            Cl.int(-100), Cl.int(100), Cl.uint(1000000),
+            Cl.contractPrincipal(deployer, token0), Cl.contractPrincipal(deployer, token1)
+        ],
+        wallet1
+    );
+
     const receipt = simnet.callPublicFn(
       "concentrated-liquidity-pool",
-      "remove-liquidity",
+      "decrease-liquidity",
       [
+        Cl.uint(1),
         Cl.uint(0),
         Cl.contractPrincipal(deployer, token0),
         Cl.contractPrincipal(deployer, token1),
@@ -251,7 +272,7 @@ describe('Concentrated Liquidity Pool', () => {
       wallet1
     );
 
-    expect(receipt.result).toBeErr(expect.anything());
+    expect(receipt.result).toEqual(Cl.error(Cl.uint(101))); // ERR_INVALID_AMOUNT
   });
 
   it("rejects removing more liquidity than exists", () => {
@@ -303,16 +324,17 @@ describe('Concentrated Liquidity Pool', () => {
 
     const receipt = simnet.callPublicFn(
       "concentrated-liquidity-pool",
-      "remove-liquidity",
+      "decrease-liquidity",
       [
-        Cl.uint(2000000), // More than total liquidity
+        Cl.uint(1),
+        Cl.uint(2000000), // More than total liquidity in position
         Cl.contractPrincipal(deployer, token0),
         Cl.contractPrincipal(deployer, token1),
       ],
       wallet1
     );
 
-    expect(receipt.result).toBeErr(expect.anything());
+    expect(receipt.result).toEqual(Cl.error(Cl.uint(1002))); // ERR_INSUFFICIENT_LIQUIDITY
 
     // Liquidity should remain unchanged
     const after = simnet.getDataVar("concentrated-liquidity-pool", "liquidity");
