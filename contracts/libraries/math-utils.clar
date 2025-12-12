@@ -14,9 +14,14 @@
 ;; @param b: The second number.
 ;; @returns (response uint uint): The product of the two numbers, or an error code if an overflow occurs.
 (define-read-only (safe-mul (a uint) (b uint))
-  (if (<= a (div u340282366920938463463374607431768211455 b))
-      (ok (* a b))
-      (err u2000)  ;; ERR_OVERFLOW
+  (if (is-eq b u0)
+      (ok u0)
+      (let ((max-factor (/ u340282366920938463463374607431768211455 b)))
+        (if (<= a max-factor)
+            (ok (* a b))
+            (err u2000)  ;; ERR_OVERFLOW
+        )
+      )
   )
 )
 
@@ -36,10 +41,9 @@
 ;; @param percentage: The percentage to calculate.
 ;; @returns (response uint uint): The calculated percentage, or an error code.
 (define-read-only (calculate-percentage (value uint) (percentage uint))
-  (let (
-    { multiplier: (try! (safe-mul value percentage)) }
+  (let ((multiplier (try! (safe-mul value percentage))))
     (try! (safe-div multiplier PERCENTAGE_PRECISION))
-  ))
+  )
 )
 
 ;; @desc Calculates the leverage of a position.
@@ -61,14 +65,19 @@
 ;; @returns (response uint uint): The liquidation price of the position, or an error code.
 (define-read-only (calculate-liquidation-price (entry-price uint) (leverage uint) (is-long bool) (maintenance-margin uint))
   (let (
-    { 
-      margin-ratio: (try! (safe-div maintenance-margin PERCENTAGE_PRECISION))
-      leverage-ratio: (try! (safe-div u1000000 leverage))  ;; 100% / leverage
-      price-factor: (if is-long 
-                     (ok (+ u1000000 (/ (* leverage-ratio margin-ratio) u10000)))
-                     (ok (- u1000000 (/ (* leverage-ratio margin-ratio) u10000)))
-                   )
-    }
-    (try! (safe-mul entry-price (unwrap! price-factor (err u2001))))
+        (margin-ratio (try! (safe-div maintenance-margin PERCENTAGE_PRECISION)))
+        (leverage-ratio (try! (safe-div PERCENTAGE_PRECISION leverage)))
+       )
+    (let (
+          (product (try! (safe-mul leverage-ratio margin-ratio)))
+          (adjustment (try! (safe-div product PERCENTAGE_PRECISION)))
+          (base PERCENTAGE_PRECISION)
+          (factor (if is-long
+                      (+ base adjustment)
+                      (- base adjustment)))
+          (scaled-price (try! (safe-mul entry-price factor)))
+         )
+      (try! (safe-div scaled-price PERCENTAGE_PRECISION))
+    )
   )
 )

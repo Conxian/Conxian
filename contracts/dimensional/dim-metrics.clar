@@ -107,7 +107,10 @@
       metric-id: metric-id,
     } {
       value: value,
-      last-updated: (unwrap-panic (get-block-info? time (- block-height u1))),
+      last-updated: (if (> block-height u0)
+        (unwrap-panic (get-block-info? time (- block-height u1)))
+        u0
+      ),
     })
     (ok true)
   )
@@ -159,7 +162,10 @@
       metric-id: (get metric-id update),
     } {
       value: (get value update),
-      last-updated: (unwrap-panic (get-block-info? time (- block-height u1))),
+      last-updated: (if (> block-height u0)
+        (unwrap-panic (get-block-info? time (- block-height u1)))
+        u0
+      ),
     })
     (ok dim-id)
   )

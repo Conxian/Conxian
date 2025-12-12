@@ -1,6 +1,5 @@
 ;; ===== Traits =====
-;; TODO: monitoring-dashboard-trait not defined in traits folder.clar
-;; (use-trait monitoring-dashboard-trait .traits folder.monitoring-dash
+(impl-trait .defi-traits.monitoring-dashboard-trait)
 
 ;; Real-Time Monitoring Dashboard Contract
 ;; Provides comprehensive system monitoring, alerting, and metrics collection
@@ -28,7 +27,7 @@
 (define-data-var contract-owner principal tx-sender)
 (define-data-var monitoring-enabled bool true)
 (define-data-var alert-threshold-multiplier uint u150) ;; 150% of baseline
-(define-data-var retention-period uint u86400) ;; 24 hours
+(define-data-var retention-period uint u10368000) ;; 24 hours
 
 ;; ===== System Metrics Storage =====
 (define-map system-metrics

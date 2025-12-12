@@ -1,30 +1,84 @@
+# Conxian Devnet Configuration
+# Verified Principal: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM (Standard Devnet Deployer)
+
 [network]
 name = "devnet"
-deployment_fee_rate = 10
-node_rpc_address = "http://localhost:20443"
-node_p2p_address = "localhost:20444"
 
-[stacks_node]
-working_dir = "stacks-node"
-rpc_port = 20443
-p2p_port = 20444
+[accounts]
+deployer = { address = "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM" }
 
-[accounts.deployer]
-mnemonic = "twice kind fence tip hidden tilt action fragile skin nothing glory cousin green tomorrow spring wrist shed math olympic multiply hip blue scout claw"
-balance = 100_000_000_000_000
-address = "ST3PPMPR7SAY4CAKQ4ZMYC2Q9FAVBE813YWNJ4JE6"
+# ---------- Traits ----------
+[[contract]]
+name = "sip-standards"
+path = "contracts/traits/sip-standards.clar"
+deployer = "deployer"
 
-[accounts.wallet_1]
-mnemonic = "sell invite acquire kitten bamboo drastic jelly vivid peace spawn twice guilt pave pen trash pretty park cube fragile unaware remain midnight betray rebuild"
-balance = 100_000_000_000_000
-address = "ST1SJ3DTE5DN7X54YDH5D64R3BCB6A2AG2ZQ8YPD5"
+[[contract]]
+name = "defi-traits"
+path = "contracts/traits/defi-traits.clar"
+deployer = "deployer"
 
-[accounts.wallet_2]
-mnemonic = "hold excess usual excess ring elephant install account glad dry fragile donkey gaze humble truck breeze nation gasp vacuum limb head keep delay hospital"
-balance = 100_000_000_000_000
-address = "ST2NEB84ASENDXKYGJPQW86YXQCEFEX2ZQPG87ND"
+# ---------- Core Libs ----------
+[[contract]]
+name = "standard-errors"
+path = "contracts/errors/standard-errors.clar"
+deployer = "deployer"
 
-[accounts.wallet_3]
-mnemonic = "cycle puppy glare enroll cost improve round trend wrist mushroom scorpion tower claim oppose clever elephant dinosaur eight problem before frozen dune wagon high"
-balance = 100_000_000_000_000
-address = "ST2REHHS5J3CERCRBEPMGH7921Q6PYKAADT7JP2VB"
+[[contract]]
+name = "math-lib-concentrated"
+path = "contracts/math/math-lib-concentrated.clar"
+deployer = "deployer"
+
+# ---------- Tokens ----------
+[[contract]]
+name = "cxd-token"
+path = "contracts/tokens/cxd-token.clar"
+deployer = "deployer"
+
+[[contract]]
+name = "mock-token"
+path = "contracts/mocks/mock-token.clar"
+deployer = "deployer"
+
+# ---------- Security ----------
+[[contract]]
+name = "circuit-breaker"
+path = "contracts/security/circuit-breaker.clar"
+deployer = "deployer"
+
+[[contract]]
+name = "mev-protector"
+path = "contracts/security/mev-protector.clar"
+deployer = "deployer"
+
+# ---------- DEX Core ----------
+[[contract]]
+name = "concentrated-liquidity-pool"
+path = "contracts/dex/concentrated-liquidity-pool.clar"
+deployer = "deployer"
+
+[[contract]]
+name = "dex-factory-v2"
+path = "contracts/dex/dex-factory-v2.clar"
+deployer = "deployer"
+
+[[contract]]
+name = "multi-hop-router-v3"
+path = "contracts/dex/multi-hop-router-v3.clar"
+deployer = "deployer"
+
+# ---------- sBTC Vault ----------
+[[contract]]
+name = "fee-manager"
+path = "contracts/vaults/fee-manager.clar"
+deployer = "deployer"
+
+[[contract]]
+name = "btc-bridge"
+path = "contracts/vaults/btc-bridge.clar"
+deployer = "deployer"
+
+[[contract]]
+name = "sbtc-vault"
+path = "contracts/vaults/sbtc-vault.clar"
+deployer = "deployer"

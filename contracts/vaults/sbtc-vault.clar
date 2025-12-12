@@ -7,6 +7,7 @@
 (use-trait yield-aggregator-trait .yield-aggregator.yield-aggregator-trait)
 (use-trait btc-bridge-trait .btc-bridge.btc-bridge-trait)
 (use-trait fee-manager-trait .fee-manager.fee-manager-trait)
+(use-trait sip-010-ft-trait .sip-standards.sip-010-ft-trait)
 
 ;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED (err u2001))
@@ -90,41 +91,61 @@
 ;; --- Core Vault Functions ---
 
 ;; @desc Deposits sBTC into the vault.
-;; @param token-contract principal The sBTC token contract.
+;; @param token-contract <sip-010-ft-trait> The sBTC token contract.
 ;; @param amount uint The amount of sBTC to deposit.
 ;; @returns (response uint uint) The number of shares minted.
-(define-public (deposit (token-contract principal) (amount uint))
+(define-public (deposit (token-contract <sip-010-ft-trait>) (amount uint))
   (begin
     (try! (check-not-paused))
-    (contract-call? (var-get custody-contract) deposit token-contract amount tx-sender)))
+    (try! (contract-call? token-contract transfer amount tx-sender (as-contract tx-sender) none))
+    (as-contract (contract-call? .custody deposit amount tx-sender))))
 
 ;; @desc Initiates a withdrawal from the vault.
-;; @param token-contract principal The sBTC token contract.
+;; @param token-contract <sip-010-ft-trait> The sBTC token contract.
 ;; @param shares uint The number of shares to burn.
 ;; @returns (response uint uint) The amount of sBTC to be withdrawn.
-(define-public (withdraw (token-contract principal) (shares uint))
+(define-public (withdraw (shares uint))
   (begin
     (try! (check-not-paused))
-    (contract-call? (var-get custody-contract) withdraw token-contract shares tx-sender)))
+    (contract-call? .custody withdraw shares tx-sender)))
 
-;; @desc Completes a withdrawal from the vault.
-;; @param token-contract principal The sBTC token contract.
+;; @desc Completes a withdrawal after the timelock period.
+;; @param token-contract <sip-010-ft-trait> The sBTC token contract.
 ;; @returns (response uint uint) The amount of sBTC withdrawn.
-(define-public (complete-withdrawal (token-contract principal))
-  (contract-call? (var-get custody-contract) complete-withdrawal token-contract tx-sender))
+(define-public (complete-withdrawal (token-contract <sip-010-ft-trait>))
+  (let ((amount-response (try! (contract-call? .custody complete-withdrawal tx-sender))))
+    (begin
+      (try! (check-not-paused))
+      (try! (as-contract (contract-call? token-contract transfer amount-response tx-sender tx-sender
+        none
+      )))
+      (ok amount-response)
+    )
+  )
+)
 
 ;; --- Bitcoin Wrapping/Unwrapping ---
 
 ;; @desc Wraps BTC to sBTC.
-;; @param btc-amount uint The amount of BTC to wrap.
-;; @param btc-txid (buff 32) The Bitcoin transaction ID.
+;; @param tx-blob (buff 1024) The raw Bitcoin transaction.
+;; @param header (buff 80) The Bitcoin block header.
+;; @param proof The Merkle proof.
 ;; @returns (response uint uint) The amount of sBTC minted.
-(define-public (wrap-btc (btc-amount uint) (btc-txid (buff 32)))
-  (begin
-    (try! (check-not-paused))
-    (let ((fee (unwrap! (contract-call? (var-get fee-manager-contract) calculate-fee "wrap" btc-amount) (err u0))))
-      (let ((net-amount (- btc-amount fee)))
-        (contract-call? (var-get btc-bridge-contract) wrap-btc net-amount btc-txid tx-sender)))))
+(define-public (wrap-btc (tx-blob (buff 1024)) (header (buff 80)) (proof { tx-index: uint, hashes: (list 12 (buff 32)), tree-depth: uint }) (token-trait <sip-010-ft-trait>))
+  (let ((recipient tx-sender))
+    (begin
+      (try! (check-not-paused))
+      (asserts! (is-eq (contract-of token-trait) (var-get sbtc-token-contract)) (err u2001))
+      
+      (let ((minted-amount (try! (as-contract (contract-call? .btc-bridge wrap-btc tx-blob header proof recipient token-trait)))))
+          (let ((fee (unwrap! (as-contract (contract-call? .fee-manager calculate-fee "wrap" minted-amount)) (err u0))))
+            (if (> fee u0)
+                (try! (contract-call? token-trait transfer fee recipient (var-get fee-manager-contract) none))
+                true
+            )
+            (ok (- minted-amount fee))
+         )
+      ))))
 
 ;; @desc Unwraps sBTC to BTC.
 ;; @param sbtc-amount uint The amount of sBTC to unwrap.
@@ -133,9 +154,9 @@
 (define-public (unwrap-to-btc (sbtc-amount uint) (btc-address (buff 64)))
   (begin
     (try! (check-not-paused))
-    (let ((fee (unwrap! (contract-call? (var-get fee-manager-contract) calculate-fee "unwrap" sbtc-amount) (err u0))))
+    (let ((fee (unwrap! (contract-call? .fee-manager calculate-fee "unwrap" sbtc-amount) (err u0))))
       (let ((net-amount (- sbtc-amount fee)))
-        (contract-call? (var-get btc-bridge-contract) unwrap-to-btc net-amount btc-address tx-sender)))))
+        (contract-call? .btc-bridge unwrap-to-btc net-amount btc-address tx-sender)))))
 
 ;; --- Yield Generation ---
 
@@ -146,7 +167,7 @@
 (define-public (allocate-to-strategy (strategy principal) (amount uint))
   (begin
     (try! (check-is-owner))
-    (contract-call? (var-get yield-aggregator-contract) allocate-to-strategy strategy amount)))
+    (contract-call? .yield-aggregator allocate-to-strategy strategy amount)))
 
 ;; @desc Harvests yield from a strategy.
 ;; @param strategy principal The principal of the strategy contract.
@@ -154,8 +175,8 @@
 (define-public (harvest-yield (strategy principal))
   (begin
     (try! (check-is-owner))
-    (let ((gross-yield (unwrap! (contract-call? (var-get yield-aggregator-contract) harvest-yield strategy) (err u0))))
-      (let ((fee (unwrap! (contract-call? (var-get fee-manager-contract) calculate-fee "performance" gross-yield) (err u0))))
+    (let ((gross-yield (unwrap! (contract-call? .yield-aggregator harvest-yield strategy) (err u0))))
+      (let ((fee (unwrap! (contract-call? .fee-manager calculate-fee "performance" gross-yield) (err u0))))
         (ok (- gross-yield fee))))))
 
 ;; --- Read-Only Functions ---

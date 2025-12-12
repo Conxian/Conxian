@@ -156,7 +156,27 @@
   )
 ))
 
-(use-trait lending-pool-trait .defi-traits.lending-pool-trait)
+;; ===========================================
+;; LENDING POOL TRAIT (minimal)
+;; ===========================================
+(define-trait lending-pool-trait (
+  (get-health-factor
+    (principal)
+    (response uint uint)
+  )
+  (update-position
+    (principal uint)
+    (response bool uint)
+  )
+  (get-liquidation-amounts
+    (principal principal principal uint)
+    (response { collateral-to-seize: uint } uint)
+  )
+  (liquidate
+    (principal principal principal uint uint)
+    (response bool uint)
+  )
+))
 
 ;; DLC manager trait
 (define-trait dlc-manager-trait (

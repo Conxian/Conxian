@@ -113,7 +113,7 @@
 ;; @returns A response detailing the position's health status.
 ;;
 (define-public (check-position-health (position-id uint))
-  (contract-call? .risk-manager check-position-health position-id)
+  (contract-call? .risk-manager assess-position-risk position-id)
 )
 
 ;;

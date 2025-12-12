@@ -1,0 +1,14 @@
+[network]
+name = "simnet"
+
+[accounts.deployer]
+address = "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM"
+balance = 100000000000000
+
+[accounts.wallet_1]
+address = "ST1SJ3DTE5DN7X54YDH5D64R3BCB6A2AG2ZQ8YPD5"
+balance = 100000000000000
+
+[accounts.wallet_2]
+address = "ST2CY5V39NHDPWSXMW9QDT3HC3GD6Q6XX4CFRK9AG"
+balance = 100000000000000

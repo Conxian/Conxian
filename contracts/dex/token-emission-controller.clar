@@ -1,7 +1,8 @@
 ;; token-emission-controller.clar
 ;; Hard-coded emission rails with governance guards to prevent inflation abuse
 
-(use-trait sip-010-ft-mintable-trait .sip-010-trait-ft-mintable.sip-010-ft-mintable-trait)
+(use-trait ft-mintable-trait .sip-standards.ft-mintable-trait)
+(use-trait sip-010-ft-trait .sip-standards.sip-010-ft-trait)
 
 ;; --- Constants ---
 (define-constant CONTRACT_OWNER tx-sender)
@@ -14,13 +15,14 @@
 (define-constant CXTR_MAX_ANNUAL_INFLATION u10000) ;; 10% max for creator token
 
 ;; Hard caps per epoch (blocks)
-(define-constant EPOCH_BLOCKS u52560) ;; ~1 year at 1 min blocks
+(define-constant EMISSION_PERIOD u756864000) ;; 1 year in Nakamoto blocks
+(define-constant EPOCH_BLOCKS u756864000) ;; Alias for EMISSION_PERIOD
 (define-constant MAX_SINGLE_MINT_BPS u100) ;; 1% of supply max per mint
 
 ;; Governance requirements for changes
 (define-constant SUPERMAJORITY_THRESHOLD u6667) ;; 66.67% required
-(define-constant TIMELOCK_BLOCKS u20160) ;; ~2 weeks minimum delay
-(define-constant EMERGENCY_TIMELOCK u1440) ;; ~1 day for emergency reduction
+(define-constant TIMELOCK_BLOCKS u290304000) ;; ~2 weeks in Nakamoto blocks (20160 * 120)
+(define-constant EMERGENCY_TIMELOCK u20736000) ;; ~1 day in Nakamoto blocks (1440 * 120) (17280 blocks)
 
 ;; --- Errors ---
 (define-constant ERR_UNAUTHORIZED u700)
@@ -28,9 +30,9 @@
 (define-constant ERR_SINGLE_MINT_TOO_LARGE u702)
 (define-constant ERR_INVALID_TOKEN u703)
 (define-constant ERR_GOVERNANCE_THRESHOLD_NOT_MET u704)
-(define-constant ERR_TIMELOCK_ACTIVE u705)
+(define-constant ERR_TIMELOCK_ACTIVE u84600)
 (define-constant ERR_NO_PENDING_CHANGE u706)
-(define-constant ERR_TIMELOCK_NOT_ELAPSED u707)
+(define-constant ERR_TIMELOCK_NOT_ELAPSED u84840)
 (define-constant ERR_INVALID_PARAMETERS u708)
 
 ;; --- Storage ---
@@ -170,34 +172,39 @@
         true)
       false)))
 
-;; Get current token supply
-(define-private (get-token-supply (token-contract principal))
-  (match (var-get cxd-contract)
-    cxd-addr (if (is-eq token-contract cxd-addr) u1000000000
-      (match (var-get cxvg-contract)
-        cxvg-addr (if (is-eq token-contract cxvg-addr) u500000000
-          (match (var-get cxlp-contract)
-            cxlp-addr (if (is-eq token-contract cxlp-addr) u200000000
-              (match (var-get cxtr-contract)
-                cxtr-addr (if (is-eq token-contract cxtr-addr) u100000000 u0)
-                u0))
-            u0))
-        u0))
-    u0))
+;; Get current token supply from SIP-010 trait
+;; Returns the total supply by calling the token contract's get-total-supply function
+;; Returns 0 if the call fails
+(define-private (get-token-supply-from-trait (token <sip-010-ft-trait>))
+  (match (contract-call? token get-total-supply)
+    success
+    success
+    error
+    u0
+  )
+)
 
-(define-public (controlled-mint (token-contract <sip-010-ft-mintable-trait>) (recipient principal) (amount uint))
+(define-public (controlled-mint 
+    (token-mintable <ft-mintable-trait>) 
+    (token-sip010 <sip-010-ft-trait>)
+    (recipient principal) 
+    (amount uint))
   (let (
-    (token-principal (contract-of token-contract))
+    (token-principal (contract-of token-mintable))
     (current-epoch-num (var-get current-epoch))
   )
     (begin
+      ;; Verify both traits point to same contract
+(asserts! (is-eq token-principal (contract-of token-sip010))
+        (err ERR_INVALID_TOKEN)
+      )
       (asserts! (or (is-eq tx-sender (var-get contract-owner))
                     (is-some (var-get governance-contract)))
                 (err ERR_UNAUTHORIZED))
       (let ((limits (unwrap! (map-get? token-emission-limits token-principal) (err ERR_INVALID_TOKEN))))
         (maybe-advance-epoch)
         (let (
-          (current-supply (get-token-supply token-principal))
+          (current-supply (get-token-supply-from-trait token-sip010))
           (epoch-data (default-to { minted: u0, supply-at-start: current-supply }
                                   (map-get? epoch-emissions { token: token-principal, epoch: current-epoch-num })))
           (annual-cap (/ (* (get supply-at-start epoch-data) (get max-annual-bps limits)) u10000))
@@ -205,7 +212,7 @@
         )
           (asserts! (<= amount single-mint-cap) (err ERR_SINGLE_MINT_TOO_LARGE))
           (asserts! (<= (+ (get minted epoch-data) amount) annual-cap) (err ERR_EMISSION_CAP_EXCEEDED))
-          (try! (as-contract (contract-call? token-contract mint recipient amount)))
+          (try! (as-contract (contract-call? token-mintable mint amount recipient)))
           (map-set epoch-emissions { token: token-principal, epoch: current-epoch-num } {
             minted: (+ (get minted epoch-data) amount),
             supply-at-start: (get supply-at-start epoch-data)
@@ -324,4 +331,25 @@
       (ok true)
     )
   )
+)
+
+(define-read-only (get-token-emission-limits (token principal))
+  (ok (map-get? token-emission-limits token))
+)
+
+(define-read-only (get-current-epoch)
+  (ok {
+    epoch: (var-get current-epoch),
+    epoch-start-height: (var-get epoch-start-height),
+  })
+)
+
+(define-read-only (get-epoch-emissions
+    (token principal)
+    (epoch uint)
+  )
+  (ok (map-get? epoch-emissions {
+    token: token,
+    epoch: epoch,
+  }))
 )

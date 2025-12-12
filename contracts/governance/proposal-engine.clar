@@ -12,11 +12,15 @@
 ;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED (err u100))
 (define-constant ERR_PROPOSAL_NOT_FOUND (err u101))
+(define-constant PROPOSAL_DELAY u2073600) ;; u144 * 120
+(define-constant VOTING_PERIOD u14515200) ;; 1008 * 12004))
 (define-constant ERR_PROPOSAL_NOT_ACTIVE (err u103))
 (define-constant ERR_VOTING_CLOSED (err u104))
 (define-constant ERR_QUORUM_NOT_REACHED (err u106))
 (define-constant ERR_PROPOSAL_FAILED (err u107))
 (define-constant ERR_INVALID_VOTING_PERIOD (err u109))
+;; Minimum allowed quorum percentage (10% expressed in basis points of 10000)
+(define-constant MIN_QUORUM u1000)
 
 ;; --- Data Variables ---
 
@@ -29,7 +33,7 @@
 ;; @desc The principal of the governance token contract.
 (define-data-var governance-token principal .governance-token)
 ;; @desc The duration of the voting period in blocks.
-(define-data-var voting-period-blocks uint u1440)
+(define-data-var voting-period-blocks uint u172800)
 ;; @desc The percentage of the total token supply that must vote for a proposal to pass, multiplied by 100.
 (define-data-var quorum-percentage uint u5000)
 
@@ -219,7 +223,9 @@
 (define-public (set-quorum-percentage (new-quorum uint))
   (begin
     (asserts! (is-contract-owner) ERR_UNAUTHORIZED)
-    (asserts! (<= new-quorum u10000) ERR_UNAUTHORIZED)
+    ;; Enforce quorum between 10% and 100% to avoid trivially low or
+    ;; impossibly strict quorum settings.
+    (asserts! (and (>= new-quorum MIN_QUORUM) (<= new-quorum u10000)) ERR_UNAUTHORIZED)
     (var-set quorum-percentage new-quorum)
     (ok true)
   )

@@ -19,7 +19,7 @@ describe('Liquidation Manager', () => {
     await simnet.initSession(process.cwd(), 'Clarinet.toml');
     const accounts = simnet.getAccounts();
     deployer = accounts.get('deployer')!;
-    wallet1 = accounts.get('wallet_1')!;
+    wallet1 = accounts.get('wallet_1') || 'ST1SJ3DTE5DN7X54YDH5D64R3BCB6A2AG2ZQ8YPD5';
   });
 
   it('allows initial admin to set a new admin', () => {
@@ -86,5 +86,173 @@ describe('Liquidation Manager', () => {
     ], deployer);
 
     expect(res.result).toBeOk(Cl.bool(true));
+  });
+
+  it("evaluates can-liquidate-position based on whitelists and health factor", () => {
+    const lendingSystem = Cl.contractPrincipal(deployer, "mock-lending-pool");
+    const debtAsset = Cl.contractPrincipal(deployer, "cxd-token");
+    const collateralAsset = Cl.contractPrincipal(deployer, "cxlp-token");
+
+    const setLs = simnet.callPublicFn(
+      "liquidation-manager",
+      "set-lending-system",
+      [lendingSystem],
+      deployer
+    );
+    expect(setLs.result).toBeOk(Cl.bool(true));
+
+    const notWhitelisted = simnet.callPublicFn(
+      "liquidation-manager",
+      "can-liquidate-position",
+      [
+        Cl.standardPrincipal(wallet1),
+        debtAsset,
+        collateralAsset,
+        lendingSystem,
+      ],
+      wallet1
+    );
+    expect(notWhitelisted.result).toBeErr(Cl.uint(1008));
+
+    simnet.callPublicFn(
+      "liquidation-manager",
+      "whitelist-asset",
+      [debtAsset, Cl.bool(true)],
+      deployer
+    );
+    simnet.callPublicFn(
+      "liquidation-manager",
+      "whitelist-asset",
+      [collateralAsset, Cl.bool(true)],
+      deployer
+    );
+
+    const setHealthy = simnet.callPublicFn(
+      "mock-lending-pool",
+      "set-health-factor",
+      [Cl.uint(2_000_000_000_000_000_000n)],
+      deployer
+    );
+    expect(setHealthy.result).toBeOk(Cl.bool(true));
+
+    const healthy = simnet.callPublicFn(
+      "liquidation-manager",
+      "can-liquidate-position",
+      [
+        Cl.standardPrincipal(wallet1),
+        debtAsset,
+        collateralAsset,
+        lendingSystem,
+      ],
+      wallet1
+    );
+    expect(healthy.result).toBeOk(Cl.bool(false));
+
+    const setUnderwater = simnet.callPublicFn(
+      "mock-lending-pool",
+      "set-health-factor",
+      [Cl.uint(500_000_000_000_000_000n)],
+      deployer
+    );
+    expect(setUnderwater.result).toBeOk(Cl.bool(true));
+
+    const underwater = simnet.callPublicFn(
+      "liquidation-manager",
+      "can-liquidate-position",
+      [
+        Cl.standardPrincipal(wallet1),
+        debtAsset,
+        collateralAsset,
+        lendingSystem,
+      ],
+      wallet1
+    );
+    expect(underwater.result).toBeOk(Cl.bool(true));
+  });
+
+  it("executes liquidate-position with pause and slippage guards", () => {
+    const lendingSystem = Cl.contractPrincipal(deployer, "mock-lending-pool");
+    const debtAsset = Cl.contractPrincipal(deployer, "cxd-token");
+    const collateralAsset = Cl.contractPrincipal(deployer, "cxlp-token");
+
+    simnet.callPublicFn(
+      "liquidation-manager",
+      "set-lending-system",
+      [lendingSystem],
+      deployer
+    );
+
+    simnet.callPublicFn(
+      "liquidation-manager",
+      "whitelist-asset",
+      [debtAsset, Cl.bool(true)],
+      deployer
+    );
+    simnet.callPublicFn(
+      "liquidation-manager",
+      "whitelist-asset",
+      [collateralAsset, Cl.bool(true)],
+      deployer
+    );
+
+    const paused = simnet.callPublicFn(
+      "liquidation-manager",
+      "set-paused",
+      [Cl.bool(true)],
+      deployer
+    );
+    expect(paused.result).toBeOk(Cl.bool(true));
+
+    const attemptWhilePaused = simnet.callPublicFn(
+      "liquidation-manager",
+      "liquidate-position",
+      [
+        Cl.standardPrincipal(wallet1),
+        debtAsset,
+        collateralAsset,
+        Cl.uint(100n),
+        Cl.uint(200n),
+        lendingSystem,
+      ],
+      wallet1
+    );
+    expect(attemptWhilePaused.result).toBeErr(Cl.uint(1001));
+
+    simnet.callPublicFn(
+      "liquidation-manager",
+      "set-paused",
+      [Cl.bool(false)],
+      deployer
+    );
+
+    const tooStrictMaxCollateral = simnet.callPublicFn(
+      "liquidation-manager",
+      "liquidate-position",
+      [
+        Cl.standardPrincipal(wallet1),
+        debtAsset,
+        collateralAsset,
+        Cl.uint(100n),
+        Cl.uint(50n),
+        lendingSystem,
+      ],
+      wallet1
+    );
+    expect(tooStrictMaxCollateral.result).toBeErr(Cl.uint(1005));
+
+    const ok = simnet.callPublicFn(
+      "liquidation-manager",
+      "liquidate-position",
+      [
+        Cl.standardPrincipal(wallet1),
+        debtAsset,
+        collateralAsset,
+        Cl.uint(100n),
+        Cl.uint(200n),
+        lendingSystem,
+      ],
+      wallet1
+    );
+    expect(ok.result).toBeOk();
   });
 });

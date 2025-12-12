@@ -2,14 +2,20 @@
 
 ;; BTC Bridge
 ;; This contract manages the wrapping and unwrapping of BTC to sBTC.
+(use-trait sip-010-ft-trait .sip-standards.sip-010-ft-trait)
+
 (define-trait btc-bridge-trait
   (
     ;; @desc Initiates the wrapping of BTC to sBTC.
     ;; @param btc-amount uint The amount of BTC to wrap.
     ;; @param btc-txid (buff 32) The transaction ID of the BTC deposit.
+    ;; @param header-hash (buff 32) The Bitcoin block header hash.
     ;; @param recipient principal The principal to receive the minted sBTC.
     ;; @returns (response uint uint) A response containing the amount of sBTC minted or an error.
-    (wrap-btc (uint (buff 32) principal) (response uint uint))
+    (wrap-btc
+      ((buff 1024) (buff 80) { tx-index: uint, hashes: (list 12 (buff 32)), tree-depth: uint } principal <sip-010-ft-trait>)
+      (response uint uint)
+    )
 
     ;; @desc Initiates the unwrapping of sBTC to BTC.
     ;; @param sbtc-amount uint The amount of sBTC to unwrap.
@@ -26,7 +32,8 @@
 (define-map wrap-history {user: principal, timestamp: uint} {
   btc-amount: uint,
   sbtc-amount: uint,
-  fee-paid: uint
+  fee-paid: uint,
+  header-hash: (buff 32)
 })
 
 ;; @desc Stores the history of unwrap transactions.
@@ -40,22 +47,23 @@
 ;; --- Public Functions ---
 
 ;; @desc Initiates a wrap of BTC to sBTC. Can only be called by the sBTC vault.
-;; @param btc-amount uint The amount of BTC to wrap.
-;; @param btc-txid (buff 32) The Bitcoin transaction ID.
+;; @param tx-blob (buff 1024) The raw Bitcoin transaction.
+;; @param header (buff 80) The Bitcoin block header.
+;; @param proof The Merkle proof.
 ;; @param recipient principal The recipient of the sBTC.
 ;; @returns (response uint uint) The amount of sBTC minted.
-(define-public (wrap-btc (btc-amount uint) (btc-txid (buff 32)) (recipient principal))
+(define-public (wrap-btc (tx-blob (buff 1024)) (header (buff 80)) (proof { tx-index: uint, hashes: (list 12 (buff 32)), tree-depth: uint }) (recipient principal) (token-trait <sip-010-ft-trait>))
   (begin
     (asserts! (is-eq tx-sender .sbtc-vault) (err u100))
-    ;; In a real implementation, this would involve verifying the BTC transaction
-    ;; with an oracle or a federated multisig.
-    (let ((sbtc-amount btc-amount)) ;; Placeholder 1:1 conversion
+    ;; Call the trustless adapter
+    (let ((minted-amount (try! (contract-call? .btc-adapter deposit tx-blob header proof recipient token-trait))))
       (map-set wrap-history {user: recipient, timestamp: block-height} {
-        btc-amount: btc-amount,
-        sbtc-amount: sbtc-amount,
-        fee-paid: u0
+        btc-amount: minted-amount,
+        sbtc-amount: minted-amount,
+        fee-paid: u0,
+        header-hash: 0x00 ;; Placeholder
       })
-      (ok sbtc-amount))))
+      (ok minted-amount))))
 
 ;; @desc Initiates an unwrap of sBTC to BTC. Can only be called by the sBTC vault.
 ;; @param sbtc-amount uint The amount of sBTC to unwrap.

@@ -13,6 +13,7 @@
 (define-constant BAND1 u12500) ;; 1.25x  
 (define-constant BAND2 u15000) ;; 1.50x
 (define-constant BAND3 u20000) ;; 2.00x
+(define-constant BLOCKS_PER_DAY u2073600) ;; u144 * 120
 
 ;; --- Errors ---
 (define-constant ERR_UNAUTHORIZED u500)
@@ -40,7 +41,7 @@
 (define-data-var epoch-cap uint u1000000) ;; CXD cap per epoch
 
 ;; Intent collection window (blocks before settlement)
-(define-data-var intent-window uint u144) ;; ~2.4 hours
+(define-data-var intent-window uint u17280) ;; ~2.4 hours
 
 ;; --- Epoch State ---
 (define-map epoch-info

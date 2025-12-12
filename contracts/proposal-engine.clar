@@ -45,7 +45,7 @@
 ;; Data Variables
 (define-data-var contract-owner principal tx-sender)
 (define-data-var next-proposal-id uint u1)
-(define-data-var voting-period-blocks uint u100)  ;; Example: 100 blocks voting period
+(define-data-var voting-period-blocks uint u12000)  ;; Example: 100 blocks voting period
 (define-data-var quorum-percentage uint u5000)    ;; 50% quorum (50 * 100)
 
 ;; Public Functions

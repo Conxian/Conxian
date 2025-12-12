@@ -31,7 +31,7 @@
 
 ;; Vesting: 10% unlock TGE, 90% linear over 12 months
 (define-data-var cliff-block uint u0)
-(define-data-var vesting-duration uint u52560) ;; ~1 year
+(define-data-var vesting-duration uint u6307200) ;; ~1 year
 
 ;; --- Maps ---
 (define-map whitelist principal bool)

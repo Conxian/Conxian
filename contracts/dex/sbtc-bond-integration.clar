@@ -19,8 +19,8 @@
 ;; Bond parameters
 (define-constant MIN_BOND_AMOUNT u10000000000)
 (define-constant MAX_BOND_AMOUNT u500000000000)
-(define-constant MIN_MATURITY_BLOCKS u52560)
-(define-constant MAX_MATURITY_BLOCKS u262800)
+(define-constant MIN_MATURITY_BLOCKS u6307200)
+(define-constant MAX_MATURITY_BLOCKS u31536000)
 (define-constant COLLATERAL_RATIO u1200000)
 (define-constant LIQUIDATION_THRESHOLD u1100000)
 
@@ -28,7 +28,7 @@
 (define-constant BASE_YIELD_RATE u50000)
 (define-constant MAX_YIELD_RATE u200000)
 (define-constant YIELD_PRECISION u1000000)
-(define-constant ANNUAL_BLOCKS u52560)
+(define-constant ANNUAL_BLOCKS u6307200)
 (define-constant LIQUIDATION_DISCOUNT u950000)
 
 ;; DATA STRUCTURES

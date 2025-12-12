@@ -111,7 +111,28 @@
 ;; @returns A boolean indicating if the emission is allowed.
 (define-private (check-emission-allowed (amount uint))
   ;; v1 stub: emission controller integration is disabled; always allow
-  true
+  (if (not (var-get system-integration-enabled))
+    true
+    (let ((limits-response (contract-call? .token-emission-controller get-token-emission-limits .cxtr-token)))
+      (if (is-ok limits-response)
+        (match (unwrap-panic limits-response)
+          some-limits
+            (let (
+              (current-supply (var-get total-supply))
+              (max-single-mint-bps (get max-single-mint-bps some-limits))
+            )
+              ;; Allow bootstrap when supply is zero
+              (if (is-eq current-supply u0)
+                true
+                (let ((single-mint-cap (/ (* current-supply max-single-mint-bps) u10000)))
+                  (<= amount single-mint-cap)
+                )
+              )
+            )
+          true)
+        true)
+    )
+  )
 )
 
 ;; @desc Notifies the token coordinator of a transfer.
@@ -125,11 +146,7 @@
     (recipient principal)
   )
   (if (var-get system-integration-enabled)
-    (match (var-get token-coordinator)
-      coordinator-contract
-      true
-      true
-    )
+    (unwrap! (contract-call? .token-system-coordinator on-transfer amount sender recipient) true)
     true
   )
 )
@@ -143,10 +160,7 @@
     (recipient principal)
   )
   (if (var-get system-integration-enabled)
-    ;; (match (var-get token-coordinator)
-    ;;   coordinator-contract (unwrap! (contract-call? coordinator-contract on-mint amount recipient) true)
-    ;;   true)
-    true
+    (unwrap! (contract-call? .token-system-coordinator on-mint amount recipient) true)
     true
   )
 )
@@ -160,11 +174,7 @@
     (burner principal)
   )
   (if (var-get system-integration-enabled)
-    (match (var-get token-coordinator)
-      coordinator-contract
-      true
-      true
-    )
+    (unwrap! (contract-call? .token-system-coordinator on-burn amount burner) true)
     true
   )
 )

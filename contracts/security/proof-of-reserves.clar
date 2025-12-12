@@ -25,7 +25,7 @@
 (define-data-var monitoring (optional principal) none)
 
 ;; Stale threshold in blocks (e.g., 720 ~ 1 day on ~2-minute blocks)
-(define-data-var stale-threshold-blocks uint u720)
+(define-data-var stale-threshold-blocks uint u86400)
 
 ;; Per-asset attestation: Merkle root and metadata
 (define-map por-attestations { asset: principal } {

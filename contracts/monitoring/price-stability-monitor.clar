@@ -2,6 +2,7 @@
 ;; Monitors price stability and suggests parameter adjustments
 
 ;; Constants
+(define-constant ONE_DAY u17280) 
 (define-constant ERR_UNAUTHORIZED (err u1000))
 (define-constant ERR_INVALID_INTERVAL (err u1001))
 (define-constant ERR_NOT_READY (err u1002))
@@ -11,8 +12,8 @@
 
 ;; Configuration
 (define-constant PRICE_DEVIATION_THRESHOLD u50000)  ;; 5%
-(define-constant VOLATILITY_WINDOW u100)            ;; ~1 day
-(define-constant ADJUSTMENT_COOLDOWN u144)          ;; ~1 day
+(define-constant VOLATILITY_WINDOW u2073600)          ;; ~1 day (17280 blocks)
+(define-constant ADJUSTMENT_COOLDOWN u17280)        ;; ~1 day (17280 blocks)
 
 ;; State
 (define-data-var owner principal tx-sender)
@@ -37,7 +38,7 @@
 (define-public (initialize (price-initializer-principal principal) (amm-principal principal))
     (let ((caller tx-sender))
         ;; Use configured owner contract, not aggregator as contract
-        (asserts! (is-eq caller (contract-call? (var-get owner-contract) get-owner)) ERR_UNAUTHORIZED)
+        (asserts! (is-eq caller (var-get owner)) ERR_UNAUTHORIZED)
         (asserts! (not (var-get is-initialized)) ERR_ALREADY_INITIALIZED)
         (asserts! (is-contract price-initializer-principal) ERR_INVALID_PRINCIPAL)
         (asserts! (is-contract amm-principal) ERR_INVALID_PRINCIPAL)

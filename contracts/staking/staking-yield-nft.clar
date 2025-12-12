@@ -17,10 +17,14 @@
 (define-constant ERR_FARM_NOT_ACTIVE (err u11006))
 
 ;; Staking Constants
+(define-constant BLOCKS_PER_DAY u2073600)        ;; 24 hours * 120 (5s blocks)
+(define-constant BLOCKS_PER_MONTH u62208000)     ;; 30 days
+(define-constant BLOCKS_PER_YEAR u756864000)     ;; 365 days
+
 (define-constant MIN_STAKE_AMOUNT u1000000)          ;; 1 STX minimum
 (define-constant MAX_STAKE_AMOUNT u1000000000)        ;; 1000 STX maximum
-(define-constant MIN_LOCK_DURATION u100)              ;; 100 blocks minimum
-(define-constant MAX_LOCK_DURATION u100000)           ;; 100000 blocks maximum
+(define-constant MIN_LOCK_DURATION u2073600)            ;; 1 day minimum (previously u100)
+(define-constant MAX_LOCK_DURATION u7568640000)         ;; 10 years maximum (previously u100000)
 (define-constant BASE_YIELD_RATE u500)                 ;; 5% base yield rate
 (define-constant YIELD_BOOST_MULTIPLIER u1500)         ;; 1.5x yield boost multiplier
 
@@ -28,7 +32,7 @@
 (define-constant NFT_TYPE_STAKING_POSITION u1)        ;; Staking position NFT
 (define-constant NFT_TYPE_YIELD_FARM u2)             ;; Yield farming position NFT
 (define-constant NFT_TYPE_REWARD_TIER u3)            ;; Reward tier achievement NFT
-(define-constant NFT_TYPE_LOCKUP_BONUS u4)           ;; Lockup bonus certificate NFT
+(define-constant NFT_TYPE_LOCKUP_BONUS u480)           ;; Lockup bonus certificate NFT
 (define-constant NFT_TYPE_COMPOUND_REWARD u5)         ;; Compound reward multiplier NFT
 
 ;; ===== Data Variables =====
@@ -634,7 +638,9 @@
   (ok (var-get base-token-uri)))
 
 (define-read-only (get-owner (token-id uint))
-  (ok (map-get? staking-nft-metadata { token-id: token-id })))
+  (match (map-get? staking-nft-metadata { token-id: token-id })
+    nft (ok (some (get owner nft)))
+    (ok none)))
 
 (define-public (transfer (token-id uint) (sender principal) (recipient principal))
   (let ((nft-data (unwrap! (map-get? staking-nft-metadata { token-id: token-id }) ERR_POSITION_NOT_FOUND)))
@@ -701,18 +707,18 @@
             (true u0)))                   ;; No bonus for small stakes
         (lock-bonus
           (cond
-            ((>= lock-duration u50000) u300) ;; 3% bonus for long locks
-            ((>= lock-duration u10000) u150) ;; 1.5% bonus for medium locks
-            (true u50)))                     ;; 0.5% bonus for short locks
+            ((>= lock-duration BLOCKS_PER_YEAR) u300)      ;; 3% bonus for >1 year locks
+            ((>= lock-duration BLOCKS_PER_MONTH) u150)     ;; 1.5% bonus for >1 month locks
+            (true u50)))                                   ;; 0.5% bonus for short locks
        )
     (+ base-rate amount-bonus lock-bonus)))
 
 (define-private (calculate-lockup-tier (amount uint) (lock-duration uint))
   (cond
-    ((and (>= amount u50000000) (>= lock-duration u50000)) u4) ;; Elite
-    ((and (>= amount u10000000) (>= lock-duration u10000)) u3) ;; Premium
-    ((and (>= amount u1000000) (>= lock-duration u1000)) u2)   ;; Enhanced
-    (true u1)))                                                ;; Basic
+    ((and (>= amount u50000000) (>= lock-duration BLOCKS_PER_YEAR)) u4)    ;; Elite: >50 STX & >1 Year
+    ((and (>= amount u10000000) (>= lock-duration BLOCKS_PER_MONTH)) u3)   ;; Premium: >10 STX & >1 Month
+    ((and (>= amount u1000000) (>= lock-duration u120960)) u2)             ;; Enhanced: >1 STX & >1 Week (7 days)
+    (true u1)))                                                            ;; Basic
 
 (define-private (calculate-staking-visual-tier (amount uint) (lockup-tier uint))
   (cond
@@ -756,10 +762,10 @@
 (define-private (calculate-farm-tier (assets (list 5 { token: principal, amount: uint })) (duration uint))
   (let ((total-value (fold (lambda (asset acc) (+ acc (get amount asset))) assets u0)))
     (cond
-      ((and (>= total-value u100000000) (>= duration u50000)) u4) ;; Master
-      ((and (>= total-value u10000000) (>= duration u10000)) u3)   ;; Expert
-      ((and (>= total-value u1000000) (>= duration u1000)) u2)    ;; Advanced
-      (true u1))))                                                ;; Basic
+      ((and (>= total-value u100000000) (>= duration BLOCKS_PER_YEAR)) u4) ;; Master: >1 Year
+      ((and (>= total-value u10000000) (>= duration BLOCKS_PER_MONTH)) u3) ;; Expert: >1 Month
+      ((and (>= total-value u1000000) (>= duration u120960)) u2)           ;; Advanced: >1 Week
+      (true u1))))                                                         ;; Basic
 
 (define-private (get-farm-privileges (farm-tier uint))
   (match farm-tier

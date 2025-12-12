@@ -26,6 +26,10 @@
 (define-constant MODULE_STAKING "STAKING")
 (define-constant MODULE_SBTC "SBTC")
 
+;; Contract principal for this fee switch. Fees are held by this contract
+;; and routed out to recipients.
+(define-constant FEE_SWITCH_CONTRACT .protocol-fee-switch)
+
 ;; --- Data Variables ---
 (define-data-var contract-owner principal tx-sender)
 (define-data-var policy-engine principal tx-sender)
@@ -182,31 +186,29 @@
         })
 
         ;; Execute Transfers
-        ;; We assume the caller has already transferred 'fee-amount' to THIS contract 
-        ;; OR the caller is approving this contract to transferFrom them.
-        ;; For efficiency, we assume this contract holds the fees or is authorized.
-        ;; Ideally, the calling module sends the fee here, then we route it.
-        
+        ;; We assume the calling module has already transferred `fee-amount` to
+        ;; this contract, so CXD balances are held by this contract. Inside
+;; as-contract, tx-sender resolves to this contract's principal.
+(as-contract (print {
+          event: "debug-contract-tx-sender",
+          sender: tx-sender,
+        }))
+
         (if (> treasury-amt u0)
-          (try! (as-contract (contract-call? token transfer treasury-amt tx-sender (var-get treasury-address) none)))
-          true
+            (try! (as-contract (contract-call? token transfer treasury-amt tx-sender (var-get treasury-address) none)))
+            true
         )
-        
         (if (> staking-amt u0)
-          (try! (as-contract (contract-call? token transfer staking-amt tx-sender (var-get staking-address) none)))
-          true
+            (try! (as-contract (contract-call? token transfer staking-amt tx-sender (var-get staking-address) none)))
+            true
         )
-        
         (if (> insurance-amt u0)
-          (try! (as-contract (contract-call? token transfer insurance-amt tx-sender (var-get insurance-address) none)))
-          true
+            (try! (as-contract (contract-call? token transfer insurance-amt tx-sender (var-get insurance-address) none)))
+            true
         )
-        
-        ;; Burn logic (if token supports it, otherwise send to treasury)
         (if (> burn-amt u0)
-           ;; Placeholder for burn or fallback
-           (try! (as-contract (contract-call? token transfer burn-amt tx-sender (var-get treasury-address) none)))
-           true
+            (try! (as-contract (contract-call? token transfer burn-amt tx-sender (var-get treasury-address) none)))
+            true
         )
         
         (ok fee-amount)

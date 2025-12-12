@@ -13,14 +13,13 @@
 
 ;; ---------------------------------------------------------
 ;; Constants
-;; ---------------------------------------------------------
+;; ---------------------------------------------------------;; --- Constants ---
 (define-constant ERR_NO_PATH (err u4001))
 (define-constant ERR_SLIPPAGE (err u4002))
 (define-constant ERR_INVALID_HOP (err u4003))
 (define-constant ERR_UNAUTHORIZED (err u4005))
-(define-constant ERR_APPEND_FAILED (err u4004))
+(define-constant ERR_APPEND_FAILED (err u4004)) 
 
-;; ---------------------------------------------------------
 ;; Data Variables
 ;; ---------------------------------------------------------
 ;; @desc Stores a list of common base tokens (e.g., STX, xBTC, USDA) used for
@@ -32,13 +31,7 @@
 ;; Public Functions
 ;; ---------------------------------------------------------
 
-;;
-;; @desc Registers a new base token for multi-hop routing.
-;; @param token The principal of the token to be added.
-;; @returns (ok true) on success, or an error if the list is full or the caller
-;; is unauthorized.
-;; @auth contract-owner
-;;
+;; @desc Register a base token for multi-hop routing (Admin only)
 (define-public (add-base-token (token principal))
   (begin
     (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)

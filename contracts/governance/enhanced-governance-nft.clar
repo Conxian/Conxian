@@ -489,7 +489,9 @@
   (ok (var-get base-token-uri)))
 
 (define-read-only (get-owner (token-id uint))
-  (ok (map-get? governance-nft-metadata { token-id: token-id })))
+  (match (map-get? governance-nft-metadata { token-id: token-id })
+    nft (ok (some (get owner nft)))
+    (ok none)))
 
 (define-public (transfer (token-id uint) (sender principal) (recipient principal))
   (let ((nft-data (unwrap! (map-get? governance-nft-metadata { token-id: token-id }) ERR_UNAUTHORIZED)))
@@ -578,18 +580,20 @@
 
 (define-private (get-council-emergency-powers (council-type uint))
   (match council-type
-    u1 (list "protocol-emergency" "critical-updates")  ;; Core council
-    u2 (list "security-emergency" "veto-activation")   ;; Security council
+    u1 (list "protocol-emergency" "strategic-changes")  ;; Core council
+    u2 (list "risk-emergency" "compliance-freeze")   ;; Security council
     u3 (list "treasury-emergency" "fund-reallocation") ;; Treasury council
-    u4 (list "technical-emergency" "system-maintenance") ;; Technical council
+    u4 (list "technical-emergency" "security-rollback") ;; Technical council
+    u5 (list "operations-emergency" "service-degradation")
     else (list)))
 
 (define-private (get-council-responsibilities (council-type uint))
   (match council-type
     u1 (list "protocol-oversight" "strategic-direction" "community-representation")
-    u2 (list "security-audits" "risk-assessment" "vulnerability-management")
-    u3 (list "treasury-management" "budget-oversight" "financial-planning")
-    u4 (list "technical-review" "system-maintenance" "upgrade-approval")
+    u2 (list "risk-assessment" "compliance-oversight" "policy-enforcement")
+    u3 (list "treasury-management" "budget-oversight" "investment-policy")
+    u4 (list "technical-review" "system-maintenance" "security-posture")
+    u5 (list "operations-monitoring" "incident-response" "service-budget-oversight")
     else (list "general-governance")))
 
 (define-private (calculate-reputation-boost (voting-weight uint))
@@ -718,3 +722,92 @@
           emergency-contacts: (list),
           last-activity-block: block-height
         })))
+
+(define-private (update-user-governance-profile-on-council (user principal) (token-id uint))
+  (match (map-get? user-governance-profiles { user: user })
+    profile
+      (let ((current-memberships (get council-memberships profile)))
+        (map-set user-governance-profiles { user: user }
+          (merge profile {
+            council-memberships: (cons token-id current-memberships),
+            last-activity-block: block-height
+          })))
+    none
+      (map-set user-governance-profiles { user: user }
+        {
+          total-voting-weight: u0,
+          base-voting-weight: u0,
+          enhanced-weight-multiplier: u1000,
+          reputation-score: u0,
+          participation-history: (list),
+          council-memberships: (list token-id),
+          delegation-history: (list),
+          reputation-tiers: (list),
+          emergency-contacts: (list),
+          last-activity-block: block-height
+        })))
+
+(define-public (create-council-membership-nft
+  (council-type uint)
+  (council-role (string-ascii 50))
+  (voting-rights (list 10 uint))
+  (veto-power uint)
+  (veto-scope (list 5 uint))
+  (term-start uint)
+  (term-end uint))
+  (begin
+    ;; Require a strictly positive term
+    (asserts! (> term-end term-start) ERR_INVALID_PROPOSAL)
+
+    (let ((token-id (var-get next-token-id)))
+      ;; Persist council membership details
+      (map-set council-memberships
+        { token-id: token-id }
+        {
+          owner: tx-sender,
+          council-type: council-type,
+          council-role: council-role,
+          voting-rights: voting-rights,
+          veto-power: veto-power,
+          veto-scope: veto-scope,
+          emergency-powers: (get-council-emergency-powers council-type),
+          term-start: term-start,
+          term-end: term-end,
+          responsibilities: (get-council-responsibilities council-type),
+          visual-tier: u1,
+          creation-block: block-height,
+          last-activity-block: block-height
+        })
+
+      ;; Associate NFT metadata
+      (map-set governance-nft-metadata
+        { token-id: token-id }
+        {
+          owner: tx-sender,
+          nft-type: NFT_TYPE_COUNCIL_MEMBER,
+          proposal-id: none,
+          delegation-id: none,
+          reputation-badge-id: none,
+          council-membership-id: (some token-id),
+          veto-certificate-id: none,
+          quorum-booster-id: none,
+          governance-weight: u0,
+          visual-tier: u1,
+          creation-block: block-height,
+          last-activity-block: block-height
+        })
+
+      ;; Update user profile and mint NFT
+      (update-user-governance-profile-on-council tx-sender token-id)
+      (mint-nft token-id tx-sender)
+      (var-set next-token-id (+ token-id u1))
+
+      (print {
+        event: "council-membership-nft-created",
+        token-id: token-id,
+        owner: tx-sender,
+        council-type: council-type,
+        council-role: council-role
+      })
+
+      (ok token-id))))

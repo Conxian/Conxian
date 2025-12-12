@@ -4,6 +4,11 @@
 
 Conxian provides institutional-grade compliance and security infrastructure designed to meet the stringent requirements of regulated financial institutions, professional trading firms, and enterprise users. This document outlines our comprehensive compliance framework, security measures, and regulatory certifications.
 
+> **Maturity & Availability (as of 2025-12-06)**
+> - The underlying Conxian Protocol is currently in a **stabilization & alignment phase on testnet** and is **not yet production-ready for mainnet**.
+> - The controls, processes, and certifications described here represent the **target compliance and security design** for future institutional deployments.
+> - For an up-to-date view of which services are live, in pilot, or planned, see `documentation/SERVICE_CATALOG.md` and `documentation/ENTERPRISE_BUY_OVERVIEW.md`.
+
 ## Regulatory Compliance Framework
 
 ### FATF Compliance (Anti-Money Laundering)

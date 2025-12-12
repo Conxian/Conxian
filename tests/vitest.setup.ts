@@ -10,10 +10,25 @@ declare module 'vitest' {
     toBeErr(expected?: any): any;
     toBeSome(expected?: any): any;
     toBeNone(): any;
+    toBeTuple(): any;
   }
 }
 
 expect.extend({
+  toBeTuple(this: any, actual: any) {
+    const isTuple = actual && actual.type === ClarityType.Tuple;
+    if (!isTuple) {
+      return {
+        pass: false,
+        message: () => `expected value to be (tuple ...), received ${actual?.type ?? typeof actual}`,
+      };
+    }
+    return {
+      pass: true,
+      message: () => 'expected value to be Tuple',
+    };
+  },
+
   toBeOk(this: any, actual: any, expected?: any) {
     const isOk = actual && actual.type === ClarityType.ResponseOk;
     if (!isOk) {
@@ -105,4 +120,4 @@ expect.extend({
   },
 });
 
-export {};
+export { };

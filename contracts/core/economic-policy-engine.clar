@@ -7,6 +7,7 @@
 
 ;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED (err u1000))
+(define-constant BLOCKS_PER_DAY u2073600) ;; u144 * 120 for NakamotoTA
 (define-constant ERR_STALE_DATA (err u1001))
 
 ;; Thresholds

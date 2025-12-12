@@ -10,12 +10,13 @@
 ;; @constants
 (define-constant ERR_UNAUTHORIZED (err u1001))
 (define-constant ERR_INVALID_TASK (err u9004))
+(define-constant ONE_DAY u17280) ;; u144 * 120
 (define-constant ERR_TASK_NOT_READY (err u9003))
 (define-constant ERR_POSITION_NOT_PERPETUAL (err u4003))
 (define-constant ROLE_OPERATOR "ROLE_OPERATOR") ;; Added missing constant
 
 ;; @data-vars
-(define-data-var funding-interval uint u144) ;; Default to daily funding
+(define-data-var funding-interval uint u17280) ;; Default to daily funding
 (define-data-var max-funding-rate uint u100) ;; 1% max funding rate
 (define-data-var funding-rate-sensitivity uint u500) ;; 5% sensitivity
 (define-map funding-rate-history

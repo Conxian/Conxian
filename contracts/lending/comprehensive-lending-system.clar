@@ -31,6 +31,7 @@
 ;; Data Variables
 (define-data-var contract-owner principal tx-sender)
 (define-data-var protocol-fee-switch principal 'STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ.protocol-fee-switch)
+(define-data-var min-health-factor uint u10000)
 
 ;; Maps
 ;; amount: Principal balance (scaled)
@@ -56,6 +57,15 @@
   }
 )
 
+(define-map user-total-supplies
+  principal
+  uint
+)
+(define-map user-total-borrows
+  principal
+  uint
+)
+
 ;; Circuit Breaker
 (define-private (check-circuit-breaker)
   (match (contract-call? .circuit-breaker check-circuit-state LENDING_SERVICE)
@@ -65,9 +75,9 @@
   )
 )
 
-;; Public Functions
+;; Internal Core Functions
 
-(define-public (supply
+(define-private (supply-internal
     (asset <sip-010-ft-trait>)
     (amount uint)
   )
@@ -108,6 +118,10 @@
           index: supply-index,
         })
 
+        (map-set user-total-supplies sender
+          (+ (default-to u0 (map-get? user-total-supplies sender)) amount)
+        )
+
         ;; Update Global State
         (try! (contract-call? .interest-rate-model update-market-state asset-principal
           (to-int amount) 0
@@ -118,7 +132,7 @@
   )
 )
 
-(define-public (withdraw
+(define-private (withdraw-internal
     (asset <sip-010-ft-trait>)
     (amount uint)
   )
@@ -159,6 +173,14 @@
           index: supply-index,
         })
 
+        (let ((current-total (default-to u0 (map-get? user-total-supplies caller))))
+          (map-set user-total-supplies caller
+            (if (>= current-total amount)
+              (- current-total amount)
+              u0
+            ))
+        )
+
         (try! (contract-call? .interest-rate-model update-market-state asset-principal
           (- 0 (to-int amount)) 0
         ))
@@ -168,7 +190,7 @@
   )
 )
 
-(define-public (borrow
+(define-private (borrow-internal
     (asset <sip-010-ft-trait>)
     (amount uint)
   )
@@ -178,11 +200,6 @@
     )
     (asserts! (> amount u0) ERR_ZERO_AMOUNT)
     (try! (check-circuit-breaker))
-
-    ;; Health Check
-    (let ((health (unwrap! (get-health-factor caller) ERR_HEALTH_CHECK_FAILED)))
-      (asserts! (>= health u10000) ERR_INSUFFICIENT_COLLATERAL)
-    )
 
     (let ((market (unwrap!
         (contract-call? .interest-rate-model accrue-interest asset-principal)
@@ -213,6 +230,10 @@
           index: borrow-index,
         })
 
+        (map-set user-total-borrows caller
+          (+ (default-to u0 (map-get? user-total-borrows caller)) amount)
+        )
+
         ;; Update Market: Cash -amount, Borrows +amount
         (try! (contract-call? .interest-rate-model update-market-state asset-principal
           (- 0 (to-int amount)) (to-int amount)
@@ -223,7 +244,7 @@
   )
 )
 
-(define-public (repay
+(define-private (repay-internal
     (asset <sip-010-ft-trait>)
     (amount uint)
   )
@@ -270,6 +291,14 @@
             index: borrow-index,
           })
 
+          (let ((current-total (default-to u0 (map-get? user-total-borrows sender))))
+            (map-set user-total-borrows sender
+              (if (>= current-total actual-amount)
+                (- current-total actual-amount)
+                u0
+              ))
+          )
+
           ;; Update Market: Cash +amount, Borrows -amount
           (try! (contract-call? .interest-rate-model update-market-state
             asset-principal (to-int actual-amount)
@@ -282,6 +311,36 @@
   )
 )
 
+;; Public Wrappers
+
+(define-public (supply
+    (asset <sip-010-ft-trait>)
+    (amount uint)
+  )
+  (supply-internal asset amount)
+)
+
+(define-public (withdraw
+    (asset <sip-010-ft-trait>)
+    (amount uint)
+  )
+  (withdraw-internal asset amount)
+)
+
+(define-public (borrow
+    (asset <sip-010-ft-trait>)
+    (amount uint)
+  )
+  (borrow-internal asset amount)
+)
+
+(define-public (repay
+    (asset <sip-010-ft-trait>)
+    (amount uint)
+  )
+  (repay-internal asset amount)
+)
+
 ;; --- Hook Enabled Functions ---
 
 (define-public (supply-with-hook
@@ -289,15 +348,17 @@
     (amount uint)
     (hook <hook-trait>)
   )
-  (begin
-    (try! (contract-call? hook on-action "SUPPLY_PRE" tx-sender amount
-      (contract-of asset) none
-    ))
-    (let ((res (supply asset amount)))
-      (try! (contract-call? hook on-action "SUPPLY_POST" tx-sender amount
-        (contract-of asset) none
+  (let ((asset-principal (contract-of asset)))
+    (begin
+      (try! (contract-call? hook on-action "SUPPLY_PRE" tx-sender amount
+        asset-principal none
       ))
-      res
+      (let ((res (supply-internal asset amount)))
+        (try! (contract-call? hook on-action "SUPPLY_POST" tx-sender amount
+          asset-principal none
+        ))
+        res
+      )
     )
   )
 )
@@ -307,15 +368,17 @@
     (amount uint)
     (hook <hook-trait>)
   )
-  (begin
-    (try! (contract-call? hook on-action "WITHDRAW_PRE" tx-sender amount
-      (contract-of asset) none
-    ))
-    (let ((res (withdraw asset amount)))
-      (try! (contract-call? hook on-action "WITHDRAW_POST" tx-sender amount
-        (contract-of asset) none
+  (let ((asset-principal (contract-of asset)))
+    (begin
+      (try! (contract-call? hook on-action "WITHDRAW_PRE" tx-sender amount
+        asset-principal none
       ))
-      res
+      (let ((res (withdraw-internal asset amount)))
+        (try! (contract-call? hook on-action "WITHDRAW_POST" tx-sender amount
+          asset-principal none
+        ))
+        res
+      )
     )
   )
 )
@@ -325,15 +388,17 @@
     (amount uint)
     (hook <hook-trait>)
   )
-  (begin
-    (try! (contract-call? hook on-action "BORROW_PRE" tx-sender amount
-      (contract-of asset) none
-    ))
-    (let ((res (borrow asset amount)))
-      (try! (contract-call? hook on-action "BORROW_POST" tx-sender amount
-        (contract-of asset) none
+  (let ((asset-principal (contract-of asset)))
+    (begin
+      (try! (contract-call? hook on-action "BORROW_PRE" tx-sender amount
+        asset-principal none
       ))
-      res
+      (let ((res (borrow-internal asset amount)))
+        (try! (contract-call? hook on-action "BORROW_POST" tx-sender amount
+          asset-principal none
+        ))
+        res
+      )
     )
   )
 )
@@ -343,15 +408,17 @@
     (amount uint)
     (hook <hook-trait>)
   )
-  (begin
-    (try! (contract-call? hook on-action "REPAY_PRE" tx-sender amount
-      (contract-of asset) none
-    ))
-    (let ((res (repay asset amount)))
-      (try! (contract-call? hook on-action "REPAY_POST" tx-sender amount
-        (contract-of asset) none
+  (let ((asset-principal (contract-of asset)))
+    (begin
+      (try! (contract-call? hook on-action "REPAY_PRE" tx-sender amount
+        asset-principal none
       ))
-      res
+      (let ((res (repay-internal asset amount)))
+        (try! (contract-call? hook on-action "REPAY_POST" tx-sender amount
+          asset-principal none
+        ))
+        res
+      )
     )
   )
 )
@@ -451,6 +518,71 @@
 )
 
 (define-read-only (get-health-factor (user principal))
-  ;; Placeholder implementation returning a high health factor
-  (ok u20000)
+  (let (
+      (total-supply (default-to u0 (map-get? user-total-supplies user)))
+      (total-borrow (default-to u0 (map-get? user-total-borrows user)))
+    )
+    (if (is-eq total-borrow u0)
+      (ok u20000)
+      (ok (/ (* total-supply u10000) total-borrow))
+    )
+  )
+)
+
+(define-public (set-min-health-factor (new-min uint))
+  (begin
+    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
+    (var-set min-health-factor new-min)
+    (ok true)
+  )
+)
+
+(define-read-only (is-user-healthy (user principal))
+  (let ((hf (unwrap! (get-health-factor user) ERR_HEALTH_CHECK_FAILED)))
+    (ok (>= hf (var-get min-health-factor)))
+  )
+)
+
+(define-public (borrow-checked
+    (asset <sip-010-ft-trait>)
+    (amount uint)
+  )
+  (let ((caller tx-sender))
+    (let (
+        (current-supply (default-to u0 (map-get? user-total-supplies caller)))
+        (current-borrow (default-to u0 (map-get? user-total-borrows caller)))
+        (new-borrow (+ current-borrow amount))
+        (new-hf (if (is-eq new-borrow u0)
+                  u1000000
+                  (/ (* current-supply u10000) new-borrow)))
+      )
+      (if (< new-hf (var-get min-health-factor))
+        ERR_HEALTH_CHECK_FAILED
+        (borrow-internal asset amount)
+      )
+    )
+  )
+)
+
+(define-public (withdraw-checked
+    (asset <sip-010-ft-trait>)
+    (amount uint)
+  )
+  (let ((caller tx-sender))
+    (let (
+        (current-supply (default-to u0 (map-get? user-total-supplies caller)))
+        (current-borrow (default-to u0 (map-get? user-total-borrows caller)))
+        (new-supply (if (>= current-supply amount)
+                      (- current-supply amount)
+                      u0))
+        (new-hf (if (is-eq current-borrow u0)
+                  u1000000
+                  (/ (* new-supply u10000) current-borrow)))
+      )
+      (if (< new-hf (var-get min-health-factor))
+        ERR_HEALTH_CHECK_FAILED
+        (withdraw-internal asset amount)
+      )
+    )
+  )
 )

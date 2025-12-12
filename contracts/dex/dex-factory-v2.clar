@@ -7,6 +7,7 @@
 
 ;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED (err u1000))
+(define-constant ONE_DAY u17280)
 (define-constant ERR_TYPE_NOT_FOUND (err u1439))
 (define-constant ERR_POOL_ALREADY_EXISTS (err u1440))
 (define-constant ERR_INVALID_POOL (err u1441))

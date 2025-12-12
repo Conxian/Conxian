@@ -134,6 +134,7 @@
 
 (define-private (update-user-activity (user principal) (volume uint))
   (let (
+    (existing-activity (map-get? user-activity user))
     (current-activity (default-to
       {
         last-interaction: block-height,
@@ -141,10 +142,10 @@
         token-count: u0,
         reputation-score: u1000
       }
-      (map-get? user-activity user)
+      existing-activity
     ))
   )
-    (if (is-none (map-get? user-activity user))
+    (if (is-none existing-activity)
       (var-set total-users (+ (var-get total-users) u1))
       true
     )
@@ -194,18 +195,65 @@
   )
 )
 
+(define-public (on-transfer (amount uint) (sender principal) (recipient principal))
+  (begin
+    (try! (when-not-paused))
+    (try! (validate-token contract-caller))
+    (update-user-activity sender amount)
+    (update-user-activity recipient amount)
+    (ok true)
+  )
+)
+
+(define-public (on-mint (amount uint) (recipient principal))
+  (begin
+    (try! (when-not-paused))
+    (try! (validate-token contract-caller))
+    (update-user-activity recipient amount)
+    (let ((meta (unwrap-panic (map-get? token-metadata contract-caller))))
+         (map-set token-metadata contract-caller (merge meta {
+             total-supply: (+ (get total-supply meta) amount),
+             last-activity: block-height
+         }))
+    )
+    (ok true)
+  )
+)
+
+(define-public (on-burn (amount uint) (sender principal))
+  (begin
+    (try! (when-not-paused))
+    (try! (validate-token contract-caller))
+    (update-user-activity sender amount)
+    (let ((meta (unwrap-panic (map-get? token-metadata contract-caller))))
+         (map-set token-metadata contract-caller (merge meta {
+             total-supply: (if (>= (get total-supply meta) amount) (- (get total-supply meta) amount) u0),
+             last-activity: block-height
+         }))
+    )
+    (ok true)
+  )
+)
+
+(define-public (on-dimensional-yield (amount uint) (start-height uint) (end-height uint))
+    (ok true)
+)
+
 (define-public (coordinate-multi-token-operation
     (user principal)
     (tokens (list 5 principal))
     (operation-type (string-ascii 32))
     (total-value uint)
   )
-  (let ((new-op-id (+ (var-get last-operation-id) u1)))
+  (let (
+        (new-op-id (+ (var-get last-operation-id) u1))
+        (token-count (len tokens))
+       )
     (try! (when-not-paused))
     (try! (when-not-emergency))
 
-    (asserts! (>= (len tokens) u1) (err ERR_INVALID_AMOUNT))
-    (asserts! (<= (len tokens) MAX_TOKENS) (err ERR_INVALID_AMOUNT))
+    (asserts! (>= token-count u1) (err ERR_INVALID_AMOUNT))
+    (asserts! (<= token-count MAX_TOKENS) (err ERR_INVALID_AMOUNT))
 
     (map-set cross-token-operations new-op-id {
       user: user,

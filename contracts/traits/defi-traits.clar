@@ -29,6 +29,19 @@
 ))
 
 ;; ===========================================
+;; POOL FACTORY TRAIT
+;; ===========================================
+(define-trait pool-factory-trait (
+  (create-pool
+    (<sip-010-ft-trait> <sip-010-ft-trait> (optional (string-ascii 64)) uint (optional {
+      tick-spacing: uint,
+      initial-price: uint,
+    }))
+    (response principal uint)
+  )
+))
+
+;; ===========================================
 ;; FACTORY TRAIT
 ;; ===========================================
 (define-trait factory-trait (
@@ -106,7 +119,7 @@
     (response uint uint)
   )
   (wrap-btc
-    (uint (buff 32))
+    ((buff 1024) (buff 80) { tx-index: uint, hashes: (list 12 (buff 32)), tree-depth: uint } <sip-010-ft-trait>)
     (response uint uint)
   )
   (unwrap-to-btc
@@ -171,8 +184,12 @@
 ))
 
 ;; ===========================================
-;; FLASH LOAN TRAIT
+;; ROUTER TRAIT
 ;; ===========================================
+(define-trait router-trait (
+  (propose-route (principal principal uint uint uint) (response uint uint))
+  (execute-route (uint uint principal) (response uint uint))
+))
 (define-trait flash-loan-trait (
   (execute-loan
     (principal uint (optional (buff 1024)))
@@ -185,16 +202,6 @@
 (use-trait sip-009-nft-trait .sip-standards.sip-009-nft-trait)
 
 ;; ===========================================
-;; LENDING POOL TRAIT (minimal)
-;; ===========================================
-(define-trait lending-pool-trait (
-  (get-health-factor (principal) (response uint uint))
-  (update-position (principal uint) (response bool uint))
-  (get-liquidation-amounts (principal principal principal uint) (response { collateral-to-seize: uint } uint))
-  (liquidate (principal principal principal uint uint) (response bool uint))
-))
-
-;; ===========================================
 ;; STRATEGY TRAIT
 ;; ===========================================
 (define-trait strategy-trait (
@@ -203,4 +210,12 @@
   (get-total-value-locked () (response uint uint))
   (invest (uint) (response uint uint))
   (divest (uint) (response uint uint))
+))
+
+;; ===========================================
+;; MONITORING DASHBOARD TRAIT
+;; ===========================================
+(define-trait monitoring-dashboard-trait (
+  (record-metric ((string-ascii 64) uint uint) (response bool uint))
+  (trigger-alert ((string-ascii 64) (string-ascii 64) uint uint uint) (response bool uint))
 ))

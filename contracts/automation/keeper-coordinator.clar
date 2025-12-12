@@ -4,6 +4,7 @@
 ;; Traits
 (use-trait keeper-job-trait .controller-traits.keeper-job-trait)
 (use-trait circuit-breaker-trait .security-monitoring.circuit-breaker-trait)
+(use-trait automation-trait .automation-traits.automation-trait)
 
 ;; Constants
 (define-constant ERR_UNAUTHORIZED (err u6000))
@@ -28,6 +29,11 @@
 (define-data-var task-registry (list 20 uint) (list))
 (define-data-var total-tasks-executed uint u0)
 (define-data-var total-tasks-failed uint u0)
+
+;; Registry of automation targets that implement automation-trait.
+;; This keeps keeper-coordinator as a lightweight directory, while
+;; individual modules expose get-runnable-actions/execute-action.
+(define-data-var automation-registry (list 20 principal) (list))
 
 ;; Data Maps
 (define-map task-config
@@ -69,6 +75,33 @@
     )
     (ok true)
   )
+)
+
+;; @desc Register an automation target implementing automation-trait
+;; This does not execute tasks; it only tracks which contracts should be
+;; polled by off-chain Guardians for get-runnable-actions.
+(define-public (register-automation-target (target principal))
+  (begin
+    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
+    (var-set automation-registry
+      (unwrap-panic (as-max-len? (append (var-get automation-registry) target) u20))
+    )
+    (ok true)
+  )
+)
+
+;; @desc Clear all registered automation targets (owner only).
+(define-public (clear-automation-targets)
+  (begin
+    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
+    (var-set automation-registry (list))
+    (ok true)
+  )
+)
+
+;; @desc List registered automation targets.
+(define-read-only (get-automation-targets)
+  (ok (var-get automation-registry))
 )
 
 ;; @desc Configure a task

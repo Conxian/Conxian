@@ -4,13 +4,16 @@
 (define-constant ERR_UNAUTHORIZED (err u7000))
 
 (define-public (check-kyc (user principal))
-  ;; In a real implementation, this would call out to an oracle or a trusted third party to verify KYC status.
-  ;; For now, we'll just return true.
-  (ok true)
+  (let ((kyc-tier (unwrap! (contract-call? .kyc-registry get-kyc-tier user) ERR_UNAUTHORIZED)))
+    (asserts! (>= kyc-tier u1) ERR_UNAUTHORIZED)
+    (ok true)
+  )
 )
 
 (define-public (check-aml (user principal))
-  ;; In a real implementation, this would call out to an oracle or a trusted third party to check for AML flags.
-  ;; For now, we'll just return true.
-  (ok true)
+  (let ((status (unwrap! (contract-call? .kyc-registry get-identity-status user) ERR_UNAUTHORIZED)))
+    ;; Check if Sanctioned bit (0x2) is set
+    (asserts! (is-eq (mod (/ (get status-flags status) u2) u2) u0) ERR_UNAUTHORIZED)
+    (ok true)
+  )
 )

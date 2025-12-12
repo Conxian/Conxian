@@ -18,7 +18,7 @@ describe('TWAP Oracle', () => {
     await simnet.initSession(process.cwd(), 'Clarinet.toml');
     const accounts = simnet.getAccounts();
     deployer = accounts.get('deployer')!;
-    wallet1 = accounts.get('wallet_1')!;
+    wallet1 = accounts.get('wallet_1') || 'ST1SJ3DTE5DN7X54YDH5D64R3BCB6A2AG2ZQ8YPD5';
   });
 
   it('rejects update-twap from non-governance address', () => {
@@ -44,6 +44,20 @@ describe('TWAP Oracle', () => {
 
     // ERR-NO-DATA = (err u6002)
     expect(twap.result).toBeErr(Cl.uint(6002));
+  });
+
+  it("rejects update-twap with an invalid (zero) period", () => {
+    const asset = Cl.contractPrincipal(deployer, "cxd-token");
+
+    const res = simnet.callPublicFn(
+      "twap-oracle",
+      "update-twap",
+      [asset, Cl.uint(0), Cl.uint(123_456)],
+      deployer
+    );
+
+    // ERR-INVALID-PERIOD = (err u6001)
+    expect(res.result).toBeErr(Cl.uint(6001));
   });
 
   it('allows governance to update TWAP and returns last price for first sample', () => {

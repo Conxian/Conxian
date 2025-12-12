@@ -21,7 +21,9 @@
   (ok none))
 
 (define-public (transfer (token-id uint) (sender principal) (recipient principal))
-  (err u2002))
+  (if false
+    (ok true)
+    (err u2002)))
 
 (define-public (set-minter (who principal))
   (begin

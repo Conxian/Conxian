@@ -12,6 +12,7 @@
 
 ;; =============================================================================
 (define-constant CONTRACT_OWNER tx-sender)
+(define-constant ONE_DAY u17280) ;; u144 * 120 for Nakamotoer)
 (define-constant ERR_NOT_AUTHORIZED (err u2000))
 (define-constant ERR_BITCOIN_REORG_DETECTED (err u2001))
 (define-constant ERR_INSUFFICIENT_FINALITY (err u2002))
@@ -19,13 +20,13 @@
 (define-constant ERR_FRONT_RUN_DETECTED (err u2004))
 
 ;; Nakamoto timing constants (3-5 second blocks)
-(define-constant NAKAMOTO_BLOCKS_PER_MINUTE u12)
+(define-constant NAKAMOTO_BLOCKS_PER_MINUTE u1440)
 ;; 5s blocks = 12/min
-(define-constant NAKAMOTO_BLOCKS_PER_HOUR u720)
+(define-constant NAKAMOTO_BLOCKS_PER_HOUR u86400)
 ;; 60 * 12
-(define-constant NAKAMOTO_BLOCKS_PER_DAY u17280)
+(define-constant NAKAMOTO_BLOCKS_PER_DAY u2073600)
 ;; 24 * 720
-(define-constant NAKAMOTO_BLOCKS_PER_WEEK u120960)
+(define-constant NAKAMOTO_BLOCKS_PER_WEEK u14515200)
 ;; 7 * 17280
 
 ;; Bitcoin finality and security parameters
@@ -33,7 +34,7 @@
 ;; ~17 hours Bitcoin confirmations
 (define-constant BITCOIN_REORG_THRESHOLD u6)
 ;; Max acceptable reorg depth
-(define-constant MEV_PROTECTION_WINDOW u12)
+(define-constant MEV_PROTECTION_WINDOW u1440)
 ;; 1 minute protection window
 
 ;; Migration and staking parameters optimized for Nakamoto
@@ -41,17 +42,17 @@
 ;; 1 week
 (define-constant NAKAMOTO_REWARD_FREQUENCY u2880)
 ;; 4 hours (was weekly)
-(define-constant NAKAMOTO_MIGRATION_WINDOW u725760)
+(define-constant NAKAMOTO_MIGRATION_WINDOW u87091200)
 ;; 42 days
-(define-constant NAKAMOTO_WARMUP_PERIOD u2880)
+(define-constant NAKAMOTO_WARMUP_PERIOD u345600)
 ;; 4 hours (was 2 weeks)
-(define-constant NAKAMOTO_COOLDOWN_PERIOD u8640)
+(define-constant NAKAMOTO_COOLDOWN_PERIOD u1036800)
 ;; 12 hours (was 2 weeks)
 
 ;; Oracle parameters for fast blocks
 (define-constant NAKAMOTO_ORACLE_STALE_THRESHOLD u17280)
 ;; 24 hours (was u144)
-(define-constant NAKAMOTO_PRICE_UPDATE_MIN_INTERVAL u720)
+(define-constant NAKAMOTO_PRICE_UPDATE_MIN_INTERVAL u86400)
 ;; 1 hour min between updates
 
 ;; Migration timing bands optimized for Nakamoto

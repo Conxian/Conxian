@@ -13,6 +13,7 @@ The Conxian enterprise system is a suite of smart contracts designed to provide 
 * **Advanced Loan Management:** The protocol's modular design allows for the creation of specialized loan management contracts that can implement custom terms and conditions for institutional borrowers.
 * **Cross-Protocol Integration:** The modular trait system enables seamless integration with other DeFi protocols for enhanced functionality.
 * **Audit Trail:** All significant actions are logged on-chain, providing a comprehensive audit trail for transparency and compliance.
+* **Operations & Risk Dashboards:** The `conxian-operations-engine.clar` contract exposes read-only dashboards for system health, emission caps and utilization, lending health factors, MEV protection posture, insurance coverage, and cross-chain bridge activity, providing a consolidated on-chain view for enterprise monitoring and reporting.
 
 ## Getting Started: Enterprise Integration
 

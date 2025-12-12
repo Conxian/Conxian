@@ -18,7 +18,7 @@
 (define-constant ERR_NO_COOLDOWN (err u5004))
 (define-constant ERR_SLIPPAGE (err u5005))
 
-(define-constant COOLDOWN_BLOCKS u1440) ;; ~10 days (assuming 10 min blocks)
+(define-constant COOLDOWN_BLOCKS u172800) ;; ~10 days (assuming 10 min blocks)
 
 ;; --- Data Variables ---
 (define-data-var governance-contract principal tx-sender)
@@ -176,4 +176,9 @@
 
 (define-read-only (get-total-assets)
     (ok (var-get total-staked))
+)
+
+;; Get user's stake information
+(define-read-only (get-user-stake (user principal))
+    (map-get? user-stakes { user: user })
 )

@@ -2,7 +2,7 @@
 ;; @desc Tracks and rewards early supporters with opex contribution options
 
 (define-constant EARLY_LP_THRESHOLD u100) ;; First 100 LPs
-(define-constant YEAR_IN_BLOCKS u52560) ;; ~365 days (144 blocks/day)
+(define-constant YEAR_IN_BLOCKS u6307200) ;; ~365 days (144 blocks/day)
 (define-constant OPEX_SPLIT_DEFAULT u30) ;; 30% default opex contribution
 
 ;; Track early LPs

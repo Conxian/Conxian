@@ -14,9 +14,9 @@
 )
 
 ;; ===========================================
-;; PROPOSAL ENGINE TRAIT
+;; PROPOSAL REGISTRY INTERFACE
 ;; ===========================================
-(define-trait proposal-engine-trait
+(define-trait proposal-registry-interface
   (
     (create-proposal (principal (string-ascii 256) uint uint) (response uint uint))
     (get-proposal (uint) (response (optional {
@@ -30,6 +30,28 @@
     }) uint))
   )
 )
+
+;; ===========================================
+;; PROPOSAL ENGINE TRAIT
+;; ===========================================
+(define-trait proposal-engine-trait (
+  (propose
+    ((string-ascii 256) (list 10 principal) (list 10 uint) (list 10 (string-ascii 64)) (list 10 (buff 1024)) uint uint)
+    (response uint uint)
+  )
+  (vote
+    (uint bool uint)
+    (response bool uint)
+  )
+  (execute
+    (uint)
+    (response bool uint)
+  )
+  (cancel
+    (uint)
+    (response bool uint)
+  )
+))
 
 ;; ============================================
 ;; PROPOSAL TRAIT (Individual Proposal Interface)

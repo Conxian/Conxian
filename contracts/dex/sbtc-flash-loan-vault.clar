@@ -26,14 +26,14 @@
 (define-constant MAX_FLASH_LOAN_RATIO u9000) ;; 90% of available liquidity
 (define-constant MIN_FLASH_LOAN_AMOUNT u1000000) ;; 1 token minimum (6 decimals)
 (define-constant DEFAULT_FLASH_FEE u10) ;; 10 basis points (0.1%)
-(define-constant MAX_FEE_RATE u1000) ;; 10% maximum fee
+(define-constant ONE_DAY u17280) ;; u144 * 120 for Nakamoto
 (define-constant MAX_UTILIZATION u10000) ;; 100% in basis points
 
 ;; Circuit breaker thresholds
 (define-constant CIRCUIT_BREAKER_THRESHOLD u5000000000) ;; 5000 tokens
 (define-constant MAX_HOURLY_VOLUME u10000000000) ;; 10000 tokens per hour
-(define-constant BLOCKS_PER_HOUR u144) ;; ~24 hours at 1 block/10min
-(define-constant REPAYMENT_DEADLINE_BLOCKS u10) ;; 10 blocks to repay
+(define-constant BLOCKS_PER_HOUR u86400) ;; 144 * 5 for Nakamoto
+(define-constant REPAYMENT_DEADLINE_BLOCKS u1200) ;; 10 blocks to repay
 
 ;; =============================================================================
 ;; DATA STRUCTURES

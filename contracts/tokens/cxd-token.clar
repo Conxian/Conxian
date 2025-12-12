@@ -53,6 +53,8 @@
 (define-data-var token-coordinator (optional principal) none)
 ;; @var protocol-monitor The principal of the protocol monitor contract for security and operational checks.
 (define-data-var protocol-monitor (optional principal) none)
+;; @var system-controller Optional external controller implementing pause/emission policy.
+(define-data-var system-controller (optional principal) none)
 ;; @var emission-controller The principal of the emission controller contract, which governs the minting of new tokens.
 (define-data-var emission-controller (optional principal) none)
 ;; @var revenue-distributor The principal of the revenue distributor contract for sharing protocol fees.
@@ -89,12 +91,12 @@
 (define-private (safe-sub (a uint) (b uint))
   (if (>= a b) (ok (- a b)) (err ERR_SUB_UNDERFLOW)))
 
-;; @desc Checks if the system is currently paused by querying the protocol monitor.
+;; @desc Checks if the system is currently paused
 ;; @returns A boolean indicating if the system is paused.
 (define-private (check-system-pause)
   false)
 
-;; @desc Checks if a proposed mint amount is allowed by the emission controller.
+      ;; If a controller is configured, delegate pause status to it. On
 ;; @param amount The amount to be minted.
 ;; @returns A boolean indicating if the emission is allowed.
 (define-private (check-emission-allowed (amount uint))
