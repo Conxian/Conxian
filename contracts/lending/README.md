@@ -6,13 +6,13 @@ The Lending Module provides the core infrastructure for decentralized lending an
 
 ## Contracts
 
-- **`comprehensive-lending-system.clar`**: The main contract for the lending module. It manages user deposits, loans, and collateral, and integrates with other contracts to handle interest rates and liquidations.
+- **`comprehensive-lending-system.clar`**: The main contract for the lending module. It manages user deposits, loans, and collateral, and integrates with other contracts to handle interest rates and liquidations. It includes a robust health factor check system to ensure the solvency of the protocol, and it provides hook-enabled functions for extensibility.
 
-- **`interest-rate-model.clar`**: A specialized contract that calculates interest rates based on market conditions, such as the utilization rate of a given asset.
+- **`interest-rate-model.clar`**: A specialized contract that calculates interest rates based on market conditions, such as the utilization rate of a given asset. It uses a dynamic model with a "kink" to adjust rates based on borrowing demand.
 
-- **`liquidation-manager.clar`**: A contract responsible for managing the liquidation process for under-collateralized loans.
+- **`liquidation-manager.clar`**: A contract responsible for managing the liquidation process for under-collateralized loans. It provides a set of public functions for checking the health of a position and initiating liquidations.
 
-- **`lending-position-nft.clar`**: A system for representing user positions in the lending protocol as NFTs. This allows for greater flexibility and composability.
+- **`lending-position-nft.clar`**: A system for representing user positions in the lending protocol as NFTs. This allows for greater flexibility and composability. The contract supports a variety of NFT types, including borrower positions, lender positions, and liquidation events.
 
 ## Architecture
 

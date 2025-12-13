@@ -29,26 +29,31 @@
 
 ---
 
+## 📖 Modules
+
+- **[Core Module](./contracts/core/README.md)** - Protocol foundation and orchestration
+- **[DEX Module](./contracts/dex/README.md)** - Decentralized exchange functionality
+- **[Lending Module](./contracts/lending/README.md)** - Lending and borrowing infrastructure
+- **[Tokens Module](./contracts/tokens/README.md)** - Token system and emission controls
+- **[Governance Module](./contracts/governance/README.md)** - DAO and council governance
+- **[Security Module](./contracts/security/README.md)** - MEV protection and circuit breakers
+- **[Monitoring Module](./contracts/monitoring/README.md)** - Observability and analytics
+- **[Vaults Module](./contracts/vaults/README.md)** - sBTC vault and yield aggregation
+
+---
+
 ## 🏗️ Architecture & Design
 
 ### Core Architecture
 
-- **[Architecture Specification](./documentation/ARCHITECTURE_SPEC.md)** - High-level system design and module interactions
+- **[Architecture Specification](./documentation/guides/ARCHITECTURE_SPEC.md)** - High-level system design and module interactions
 - **[Architecture Deep Dive](./documentation/architecture/ARCHITECTURE.md)** - Detailed architectural decisions and patterns
-- **[Company Charter](./documentation/COMPANY_CHARTER.md)** - On-chain company model (departments, roles, and alignment under DAO + Conxian Labs)
 - **[Whitepaper](./documentation/whitepaper/Conxian-Whitepaper.md)** - Complete technical vision and protocol design
 
 ### System Components
 
-- **[Behavior Metrics System](./documentation/BEHAVIOR_METRICS.md)** - Reputation tracking and incentive system
-- **[Operations Runbook](./documentation/OPERATIONS_RUNBOOK.md)** - Operational procedures and admin controls
-- **[Regulatory Alignment](./documentation/REGULATORY_ALIGNMENT.md)** - Compliance mapping and regulatory objectives
-- **[Identity, KYC & POPIA Charter](./documentation/IDENTITY_KYC_POPIA.md)** - Identity, KYC/KYB, and data protection alignment
-- **[Guardian Network & FSCA Alignment](./documentation/GUARDIAN_NETWORK_AND_FSCA_ALIGNMENT.md)** - Guardian roles, risks, and FSCA-style alignment
-- **[Treasury & Revenue Router](./documentation/TREASURY_AND_REVENUE_ROUTER.md)** - Treasury structure and protocol revenue routing
-- **[Payroll & Rewards](./documentation/PAYROLL_AND_REWARDS.md)** - Guardian, contributor, and Labs payment design
-- **[Legal Representatives & Bounties](./documentation/LEGAL_REPRESENTATIVES_AND_BOUNTIES.md)** - Legal wrappers, advisors, and bounty incentives
-- **[Payments & Providers](./documentation/PAYMENTS_AND_PROVIDERS.md)** - External payment and banking provider integration
+- **[Operations Runbook](./documentation/guides/OPERATIONS_RUNBOOK.md)** - Operational procedures and admin controls
+- **[Regulatory Alignment](./documentation/guides/REGULATORY_ALIGNMENT.md)** - Compliance mapping and regulatory objectives
 
 ---
 
@@ -63,13 +68,11 @@
 ### Contract Development
 
 - **[Naming Standards](./NAMING_STANDARDS.md)** - Contract, token, and council naming conventions
-- **[Architecture Specification](./documentation/ARCHITECTURE_SPEC.md)** - System design and module interactions
-- **[SDK Strategy & Packages](./documentation/SDK_STRATEGY_AND_PACKAGES.md)** - SDK layout, packages, and integration points
+- **[Architecture Specification](./documentation/guides/ARCHITECTURE_SPEC.md)** - System design and module interactions
 
 ### Testing
 
-- **[Testing Framework](./documentation/TESTING_FRAMEWORK.md)** - Test infrastructure and best practices
-- **[Test Coverage Reports](./documentation/benchmarking/)** - Performance and coverage metrics
+- **[Testing Framework](./documentation/guides/TESTING_FRAMEWORK.md)** - Test infrastructure and best practices
 
 ---
 
@@ -77,14 +80,11 @@
 
 ### Protocol APIs
 
-- **[API Overview](./documentation/API_OVERVIEW.md)** - Comprehensive API surface documentation
-- **[On-Chain APIs](./documentation/api/)** - Contract function references
-- **[Deployment APIs](./documentation/deployment/)** - StacksOrbit deployment interfaces
+- **[API Overview](./documentation/guides/API_OVERVIEW.md)** - Comprehensive API surface documentation
 
 ### Integration Guides
 
 - **[Enterprise Integration](./documentation/enterprise/ONBOARDING.md)** - Enterprise integration patterns
-- **[UI Integration](./documentation/ui-default-strategies.md)** - Frontend integration guide
 
 ---
 
@@ -92,17 +92,14 @@
 
 ### Business Overview
 
-- **[Enterprise Buyer Overview](./documentation/ENTERPRISE_BUYER_OVERVIEW.md)** - Executive summary for institutional stakeholders
-- **[Service Catalog](./documentation/SERVICE_CATALOG.md)** - Available services and maturity levels
-- **[Business Value & ROI](./documentation/enterprise/BUSINESS_VALUE_ROI.md)** - Value proposition and ROI analysis
+- **[Enterprise Buyer Overview](./documentation/guides/ENTERPRISE_BUYER_OVERVIEW.md)** - Executive summary for institutional stakeholders
+- **[Service Catalog](./documentation/guides/SERVICE_CATALOG.md)** - Available services and maturity levels
 
 ### Compliance & Security
 
 - **[Compliance & Security Framework](./documentation/enterprise/COMPLIANCE_SECURITY.md)** - Security controls and compliance standards
-- **[Regulatory Alignment](./documentation/REGULATORY_ALIGNMENT.md)** - Regulatory mapping and objectives
-- **[Identity, KYC & POPIA Charter](./documentation/IDENTITY_KYC_POPIA.md)** - Identity and data protection standards (Conxian and Conxian Labs)
-- **[Payments & Providers](./documentation/PAYMENTS_AND_PROVIDERS.md)** - How Conxian Labs interacts with payment and banking providers
-- **[Security Review Process](./documentation/SECURITY_REVIEW_PROCESS.md)** - Security audit procedures
+- **[Regulatory Alignment](./documentation/guides/REGULATORY_ALIGNMENT.md)** - Regulatory mapping and objectives
+- **[Security Review Process](./documentation/guides/SECURITY_REVIEW_PROCESS.md)** - Security audit procedures
 
 ---
 
@@ -113,23 +110,17 @@
 - **[Roadmap](./ROADMAP.md)** - Development phases and milestones
 - **[Changelog](./CHANGELOG.md)** - Version history and feature tracking
 
-### Status Reports
-
-- **[TODO Audit Report](./TODO_AUDIT_REPORT.md)** - Comprehensive TODO analysis and production readiness
-- **[Benchmark Reports](./documentation/benchmarking/)** - Performance benchmarks and TPS reports
-
 ---
 
 ## 🔐 Security & Audit
 
 ### Security Documentation
 
-- **[Audit Findings](./stacks/security/audit-findings/)** - Security audit reports and remediation
 - **[Audit Checklist](./stacks/security/audit-prep/audit-checklist.md)** - Pre-audit preparation checklist
 
 ### Incident Response
 
-- **[Operations Runbook](./documentation/OPERATIONS_RUNBOOK.md)** - Incident response and emergency procedures
+- **[Operations Runbook](./documentation/guides/OPERATIONS_RUNBOOK.md)** - Incident response and emergency procedures
 
 ---
 
@@ -138,52 +129,6 @@
 ### Governance Framework
 
 - **[Governance Overview](./contracts/governance/README.md)** - Governance architecture and councils
-- **[Governance Transition](./stacks/governance/governance-transition.md)** - Governance evolution plan
-- **[Initial Parameters](./stacks/governance/initial-parameters.md)** - Bootstrap parameters
-
-### Community Resources
-
-- **[Voter Guide](./stacks/governance/community/voter-guide.md)** - How to participate in governance
-- **[Delegation Guide](./stacks/governance/community/delegation-guide.md)** - Vote delegation instructions
-- **[Proposal Template](./stacks/governance/proposal-template.md)** - How to create proposals
-
-### Proposals (CXIPs)
-
-- [CXIP-1](./stacks/governance/proposals/CXIP-1.md) through [CXIP-9](./stacks/governance/proposals/CXIP-9.md) - Conxian Improvement Proposals
-
----
-
-## 📖 Module-Specific Documentation
-
-### Core Modules
-
-- **[Core Module](./contracts/core/README.md)** - Protocol foundation and orchestration
-- **[DEX Module](./contracts/dex/README.md)** - Decentralized exchange functionality
-- **[Lending Module](./contracts/lending/README.md)** - Lending and borrowing infrastructure
-- **[Tokens Module](./contracts/tokens/README.md)** - Token system and emission controls
-
-### Supporting Modules
-
-- **[Governance Module](./contracts/governance/README.md)** - DAO and council governance
-- **[Security Module](./contracts/security/README.md)** - MEV protection and circuit breakers
-- **[Monitoring Module](./contracts/monitoring/README.md)** - Observability and analytics
-- **[Vaults Module](./contracts/vaults/README.md)** - sBTC vault and yield aggregation
-
----
-
-## 🛠️ Testing & Quality
-
-### Test Documentation
-
-- **[Testing Framework](./documentation/TESTING_FRAMEWORK.md)** - Test infrastructure overview
-- **[Strategy Testing Plan](./documentation/strategy-testing-plan.md)** - Strategy testing approach
-- **[Benchmarking Report](./documentation/benchmarking/benchmarking-report.md)** - Performance benchmarks
-
-### Test Suites
-
-- **Unit Tests**: `tests/` - Contract-level unit tests
-- **Integration Tests**: `tests/` - Cross-contract integration tests
-- **System Tests**: `tests/` - End-to-end system tests
 
 ---
 
@@ -193,26 +138,10 @@
 
 - **[Naming Standards](./NAMING_STANDARDS.md)** - Naming conventions for contracts, tokens, and councils
 - **[Contributing Guidelines](./CONTRIBUTING.md)** - Code style and contribution process
-- **[Code Review Standards](./documentation/review/)** - Review checklist and criteria
 
 ### Documentation Standards
 
-- **[Documentation README](./documentation/README.md)** - Documentation structure and guidelines
-- **[Markdown Standards](./documentation/standards/)** - Markdown formatting guidelines
-
----
-
-## 🔄 Migration & Deployment
-
-### Deployment Guides
-
-- **[Deployment Guide](./documentation/deployment/)** - Contract deployment procedures
-- **[Migration Guide](./documentation/developer/MIGRATION_GUIDE_ACCESS_CONTROL.md)** - Access control migration
-
-### Configuration
-
-- **[Deployment Plans](./deployments/)** - Network-specific deployment configurations
-- **[Wallet Configuration](./config/)** - Wallet setup for different networks
+- **[Documentation README](./documentation/guides/README.md)** - Documentation structure and guidelines
 
 ---
 
@@ -229,53 +158,6 @@
 - **GitHub**: [Anya-org/Conxian](https://github.com/Anya-org/Conxian)
 - **Issues**: [GitHub Issues](https://github.com/Anya-org/Conxian/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/Anya-org/Conxian/discussions)
-
----
-
-## 📋 Document Status Legend
-
-- ✅ **Current** - Up to date with latest codebase
-- ✅ **Current (Design)** - Complete design specification (implementation pending)
-- 🔄 **In Progress** - Being actively updated
-
-### Current Status by Document
-
-| Document | Status | Last Updated |
-|----------|--------|--------------|
-| README.md | ✅ Current | Dec 6, 2025 |
-| ROADMAP.md | ✅ Current | Dec 6, 2025 |
-| CHANGELOG.md | ✅ Current | Dec 6, 2025 |
-| TODO_AUDIT_REPORT.md | ✅ Current | Dec 7, 2025 |
-| BEHAVIOR_METRICS.md | ✅ Current | Dec 6, 2025 |
-| SERVICE_CATALOG.md | ✅ Current | Dec 6, 2025 |
-| DOCUMENTATION_INDEX.md | ✅ Current | Dec 7, 2025 |
-| GUARDIAN_NETWORK_AND_FSCA_ALIGNMENT.md | ✅ Current (Design) | Dec 7, 2025 |
-| SDK_STRATEGY_AND_PACKAGES.md | ✅ Current (Design) | Dec 7, 2025 |
-| COMPANY_CHARTER.md | ✅ Current (Design) | Dec 7, 2025 |
-| IDENTITY_KYC_POPIA.md | ✅ Current (Design) | Dec 7, 2025 |
-| TREASURY_AND_REVENUE_ROUTER.md | ✅ Current (Design) | Dec 7, 2025 |
-| PAYROLL_AND_REWARDS.md | ✅ Current (Design) | Dec 7, 2025 |
-| LEGAL_REPRESENTATIVES_AND_BOUNTIES.md | ✅ Current (Design) | Dec 7, 2025 |
-| PAYMENTS_AND_PROVIDERS.md | ✅ Current (Design) | Dec 7, 2025 |
-
----
-
-## 🔍 Finding Information
-
-### By Topic
-
-- **Architecture**: Start with [Architecture Specification](./documentation/ARCHITECTURE_SPEC.md)
-- **Development**: Start with [Developer Guide](./documentation/developer/DEVELOPER_GUIDE.md)
-- **Enterprise**: Start with [Enterprise Buyer Overview](./documentation/ENTERPRISE_BUYER_OVERVIEW.md)
-- **Security**: Start with [Compliance & Security](./documentation/enterprise/COMPLIANCE_SECURITY.md)
-- **Governance**: Start with [Governance Module](./contracts/governance/README.md)
-
-### By Role
-
-- **Developer**: Developer Guide → API Overview → Testing Framework
-- **Enterprise Buyer**: Enterprise Overview → Service Catalog → Compliance
-- **Auditor**: TODO Audit Report → Security Review Process → Audit Findings
-- **Contributor**: Contributing Guide → Naming Standards → Code Review Standards
 
 ---
 
