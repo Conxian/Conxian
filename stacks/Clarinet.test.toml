@@ -17,12 +17,12 @@ address = "ST1SJ3DTE5DN7X54YDH5D64R3BCB6A2AG2ZQ8YPD5"
 
 [contracts.dim-metrics]
 path = "../contracts/dimensional/dim-metrics.clar"
-depends_on = ["traits folder"]
+
 
 
 [contracts.mock-token]
 path = "../contracts/mocks/mock-token.clar"
-depends_on = ["traits folder"]
+
 
 
 
@@ -32,7 +32,7 @@ depends_on = ["traits folder"]
 
 [contracts.mock-oracle]
 path = "../contracts/mocks/mock-oracle.clar"
-depends_on = ["traits folder"]
+
 
 [repl.remappings]
 dimensional-oracle = ".dimensional-oracle"

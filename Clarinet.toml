@@ -1,7 +1,7 @@
 [project]
 name = "Conxian"
 description = "A comprehensive, standardized Clarinet configuration for the Conxian DeFi protocol."
-clarinet_version = "3.10.0"
+clarinet_version = "3.11.0"
 epoch = "3.0"
 
 # ---------- Core Contracts ----------
@@ -98,6 +98,23 @@ path = "contracts/marketplace/nft-marketplace.clar"
 address = "ST3N0ZC9HBPDEBEJ1H1QFGMJF3PSNGW3FYZSVN513"
 depends_on = ["defi-traits", "sip-standards"]
 
+[contracts.analytics-aggregator]
+path = "contracts/monitoring/analytics-aggregator.clar"
+address = "ST3N0ZC9HBPDEBEJ1H1QFGMJF3PSNGW3FYZSVN513"
+
+[contracts.finance-metrics]
+path = "contracts/monitoring/finance-metrics.clar"
+address = "ST3N0ZC9HBPDEBEJ1H1QFGMJF3PSNGW3FYZSVN513"
+depends_on = ["math-utilities-traits", "block-utils"]
+
+[contracts.price-stability-monitor]
+path = "contracts/monitoring/price-stability-monitor.clar"
+address = "ST3N0ZC9HBPDEBEJ1H1QFGMJF3PSNGW3FYZSVN513"
+
+[contracts.system-monitor]
+path = "contracts/monitoring/system-monitor.clar"
+address = "ST3N0ZC9HBPDEBEJ1H1QFGMJF3PSNGW3FYZSVN513"
+
 [contracts.real-time-monitoring-dashboard]
 path = "contracts/dex/real-time-monitoring-dashboard.clar"
 address = "ST3N0ZC9HBPDEBEJ1H1QFGMJF3PSNGW3FYZSVN513"
@@ -182,6 +199,10 @@ address = "ST3N0ZC9HBPDEBEJ1H1QFGMJF3PSNGW3FYZSVN513"
 
 [contracts.trait-errors]
 path = "contracts/traits/trait-errors.clar"
+address = "ST3N0ZC9HBPDEBEJ1H1QFGMJF3PSNGW3FYZSVN513"
+
+[contracts.math-utilities-traits]
+path = "contracts/traits/math-utilities.clar"
 address = "ST3N0ZC9HBPDEBEJ1H1QFGMJF3PSNGW3FYZSVN513"
 
 [contracts.pyth-traits]
@@ -363,6 +384,10 @@ address = "ST3N0ZC9HBPDEBEJ1H1QFGMJF3PSNGW3FYZSVN513"
 path = "contracts/security/conxian-insurance-fund.clar"
 address = "ST3N0ZC9HBPDEBEJ1H1QFGMJF3PSNGW3FYZSVN513"
 depends_on = ["defi-traits"]
+
+[contracts.protocol-invariant-monitor]
+path = "contracts/dex/protocol-invariant-monitor.clar"
+address = "ST3N0ZC9HBPDEBEJ1H1QFGMJF3PSNGW3FYZSVN513"
 
 [contracts.dex-factory-v2]
 path = "contracts/dex/dex-factory-v2.clar"

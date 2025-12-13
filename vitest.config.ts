@@ -2,13 +2,13 @@ import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   test: {
-    viteEnvironment: "clarinet",
+    environment: "clarinet",
+    setupFiles: ["./tests/vitest.setup.ts"],
     environmentOptions: {
       clarinet: {
-        manifest: "Clarinet.toml",
-        coverage: {
-          enabled: false,
-        },
+        manifestPath: "Clarinet.toml",
+        coverage: false,
+        costs: false,
       },
     },
     testTimeout: 300000,
