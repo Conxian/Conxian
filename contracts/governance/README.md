@@ -6,7 +6,7 @@ The Governance Module provides a comprehensive framework for decentralized decis
 
 ## Contracts
 
-- **`proposal-engine.clar`**: The core of the governance module, this contract acts as a facade for all governance-related actions. It provides a unified interface for creating proposals, casting votes, and executing the outcomes.
+- **`proposal-engine.clar`**: The core of the governance module, this contract acts as a facade for all governance-related actions. It provides a unified interface for creating proposals, casting votes, and executing the outcomes. It includes parameters for a timelock to ensure that there is a delay between when a proposal is approved and when it is executed, and a quorum to ensure that a minimum number of votes are cast for a proposal to be valid.
 
 - **`proposal-registry.clar`**: A specialized contract responsible for storing and managing all governance proposals. It handles the creation, cancellation, and execution of proposals, ensuring data integrity.
 
@@ -16,7 +16,7 @@ The Governance Module provides a comprehensive framework for decentralized decis
 
 - **`emergency-governance.clar`**: Provides a mechanism for addressing critical issues that require immediate action. This contract allows for expedited decision-making in emergency situations.
 
-- **`enhanced-governance-nft.clar`**: Implements council and role NFTs, including the Operations & Resilience Council membership tokens, aligned with the documented council taxonomy.
+- **`enhanced-governance-nft.clar`**: Implements council and role NFTs, including the Operations & Resilience Council membership tokens, aligned with the documented council taxonomy. The contract supports a variety of NFT types, including proposal-specific voting rights, delegation certificates, and reputation badges.
 
 - **`conxian-operations-engine.clar`**: An automated Operations & Resilience governance seat that reads metrics from core subsystems (token-system coordinator, circuit breaker, lending, emissions, MEV, insurance, and cross-chain bridge) and casts policy-constrained votes via `proposal-engine.clar`.
 

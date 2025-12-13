@@ -14,7 +14,7 @@ Conxian is a sophisticated DeFi yield optimization protocol on Stacks, designed 
 
 ## System Status
 
-*   **Production Readiness**: 🟢 **READY (Core Components)**
+*   **Production Readiness**: 🟡 **UNDER REVIEW**
 *   **Security**: Hardened against common vectors (Slippage, Oracle Manipulation, Unauthorized Access).
 *   **Performance**: Benchmarked at ~32ms per swap (Simulation).
 
@@ -24,25 +24,40 @@ The protocol is built on a modular architecture:
 
 ### 1. Core Layer
 
-* `conxian-protocol.clar`: Main entry point and event coordinator.
-* `conxian-token-factory.clar`: Manages token creation and standards compliance.
-* `protocol-fee-switch.clar`: Centralized fee routing (Treasury, Staking, Insurance).
+* **`dimensional-engine.clar`**: The central facade for the Core Module. It routes all calls to the specialized manager contracts, ensuring a single, secure entry point for position management, collateral handling, and risk assessment.
+* **`conxian-protocol.clar`**: The main protocol coordinator, responsible for managing protocol-wide configurations, authorized contracts, and emergency controls.
+* **`protocol-fee-switch.clar`**: A centralized switch for routing protocol fees to various destinations, such as the treasury, staking rewards, and insurance funds.
 
 ### 2. DEX Layer
 
-* `concentrated-liquidity-pool.clar`: Advanced AMM with concentrated liquidity.
-* `multi-hop-router-v3.clar`: Intelligent routing engine for optimal trade execution.
-* `mev-protector.clar`: Transaction ordering and protection mechanism.
+* **`multi-hop-router-v3.clar`**: The central routing engine for the DEX. It supports 1-hop, 2-hop, and 3-hop swaps, allowing for efficient trading across multiple liquidity pools.
+* **`concentrated-liquidity-pool.clar`**: Implements a concentrated liquidity AMM, allowing for greater capital efficiency.
+* **`dex-factory.clar`**: A facade for creating and managing liquidity pools.
 
 ### 3. Lending Layer
 
-* `comprehensive-lending-system.clar`: Main lending logic and pool management.
-* `liquidation-manager.clar`: Automated liquidation engine for protocol solvency.
+* **`comprehensive-lending-system.clar`**: The main contract for the lending module. It manages user deposits, loans, and collateral, and integrates with other contracts to handle interest rates and liquidations.
+* **`liquidation-manager.clar`**: A contract responsible for managing the liquidation process for under-collateralized loans.
 
 ### 4. Governance
 
-* `governance-token.clar`: CXG token for voting and protocol control.
-* `proposal-engine.clar`: Management of protocol improvement proposals.
+* **`proposal-engine.clar`**: The core of the governance module, this contract acts as a facade for all governance-related actions.
+* **`conxian-operations-engine.clar`**: An automated Operations & Resilience governance seat that reads metrics from core subsystems and casts policy-constrained votes.
+
+### 5. Tokens
+
+* **`cxd-token.clar`**: The primary token of the Conxian ecosystem, this contract implements the Conxian Revenue Token (CXD).
+* **`token-system-coordinator.clar`**: A contract for coordinating the interactions between the various tokens in the ecosystem.
+
+## Modules
+
+For more detailed information about each module, please refer to the `README.md` files in the `contracts` directory:
+
+* [Core Module](./contracts/core/README.md)
+* [DEX Module](./contracts/dex/README.md)
+* [Lending Module](./contracts/lending/README.md)
+* [Governance Module](./contracts/governance/README.md)
+* [Tokens Module](./contracts/tokens/README.md)
 
 ## Development Setup
 

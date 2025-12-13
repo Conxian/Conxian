@@ -6,11 +6,11 @@ The Core Module forms the foundational layer of the Conxian Protocol, orchestrat
 
 ## Contracts
 
-- **`dimensional-engine.clar`**: The central facade for the Core Module. It routes all calls to the specialized manager contracts, ensuring a single, secure entry point for position management, collateral handling, and risk assessment.
+- **`dimensional-engine.clar`**: The central facade for the Core Module. It routes all calls to the specialized manager contracts, ensuring a single, secure entry point for position management, collateral handling, and risk assessment. It delegates calls to the `position-manager`, `funding-rate-calculator`, `collateral-manager`, and `risk-manager`.
 
 - **`position-manager.clar`**: Manages the lifecycle of user positions, including opening, closing, and liquidations. It implements the `.dimensional-traits.position-manager-trait`.
 
-- **`funding-rate-calculator.clar`**: Responsible for calculating and applying funding rates for perpetual markets. It implements the `.dimensional-traits.funding-rate-calculator-trait` and uses the `.core-protocol.rbac-trait` for access control.
+- **`funding-rate-calculator.clar`**: Responsible for calculating and applying funding rates for perpetual markets. It implements the `.dimensional-traits.funding-rate-calculator-trait`.
 
 - **`collateral-manager.clar`**: Handles the deposit, withdrawal, and management of user collateral. It implements the `.dimensional-traits.collateral-manager-trait`.
 
@@ -21,6 +21,10 @@ The Core Module forms the foundational layer of the Conxian Protocol, orchestrat
 - **`operational-treasury.clar`**: Handles the protocol's operational funds, ensuring transparency and proper use of resources.
 
 - **`tier-manager.clar`**: Manages user tiers and associated benefits, providing a framework for rewarding user loyalty and engagement.
+
+- **`conxian-token-factory.clar`**: A factory for creating and managing tokens used within the Conxian ecosystem.
+
+- **`protocol-fee-switch.clar`**: A centralized switch for routing protocol fees to various destinations, such as the treasury, staking rewards, and insurance funds.
 
 ## Architecture
 
