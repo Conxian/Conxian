@@ -168,7 +168,7 @@
 
 (define-read-only (get-operations-status)
   (let (
-        (health (contract-call? .token-system-coordinator get-system-health))
+        (health (unwrap-panic (contract-call? .token-system-coordinator get-system-health)))
         (circuit-result (contract-call? .circuit-breaker is-circuit-open))
        )
     (let ((circuit-open (if (is-ok circuit-result)

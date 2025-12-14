@@ -13,7 +13,7 @@ describe("Grand Unified System Journey", () => {
     const accounts = simnet.getAccounts();
     console.log("Available accounts:", [...accounts.keys()]);
     deployer = (accounts.get("deployer") ??
-      "ST3N0ZC9HBPDEBEJ1H1QFGMJF3PSNGW3FYZSVN513") as string;
+      "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ") as string;
     wallet1 = (accounts.get("wallet_1") ??
       "ST1SJ3DTE5DN7X54YDH5D64R3BCB6A2AG2ZQ8YPD5") as string;
   });

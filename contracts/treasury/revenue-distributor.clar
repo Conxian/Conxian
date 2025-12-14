@@ -115,11 +115,11 @@
     (asserts! (is-owner) (err ERR_UNAUTHORIZED))
     (let ((current (default-to
                      { source: CONTRACT_OWNER, share-bps: u0, active: false }
-                     (map-get? fee-sources { name: name })))
+                     (map-get? fee-sources { name: name }))))
       (map-set fee-sources { name: name }
         { source: (get source current), share-bps: share-bps, active: active })
-    )
-    (ok true)))
+      (ok true))
+  ))
 
 ;; --- Core distribution primitives ---
 
@@ -194,9 +194,9 @@
     active-fee-sources: (var-get active-fee-sources)
   }))
 
-;; High-level stats helper - tests only assert that this returns *something*.
+;; High-level stats helper used by system-contracts SDK tests.
 (define-read-only (get-protocol-revenue-stats)
-  {
+  (ok {
     total-collected: (var-get total-revenue-distributed),
     total-distributed: (var-get total-revenue-distributed),
     current-epoch: u0,
@@ -204,4 +204,4 @@
     treasury-address: (var-get treasury-address),
     reserve-address: (var-get insurance-address),
     staking-contract-ref: (var-get staking-contract-ref)
-  })
+  }))

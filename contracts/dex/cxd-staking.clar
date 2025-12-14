@@ -77,8 +77,8 @@
     )
 
     ;; Notify circuit-breaker that staking path succeeded; ignore result
-    (begin
-      (contract-call? .protocol-invariant-monitor record-success "staking")
+    (let ((monitor-res (contract-call? .protocol-invariant-monitor record-success "staking")))
+      (is-ok monitor-res)
       (ok true))))
 
 ;; Complete the stake and mint notional xCXD 1:1 with staked CXD

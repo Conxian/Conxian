@@ -21,7 +21,7 @@ describe("Concentrated Liquidity Pool", () => {
     if (accounts.has("deployer")) {
       deployer = accounts.get("deployer") as string;
     } else {
-      deployer = "ST3N0ZC9HBPDEBEJ1H1QFGMJF3PSNGW3FYZSVN513";
+      deployer = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ";
       // Attempt to force set if missing in simnet context?
       // No, simnet context is immutable regarding accounts usually.
     }

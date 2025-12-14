@@ -16,7 +16,7 @@ describe('MEV Protector', () => {
     if (accounts.has('deployer')) {
       deployer = accounts.get('deployer');
     } else {
-      deployer = "ST3N0ZC9HBPDEBEJ1H1QFGMJF3PSNGW3FYZSVN513";
+      deployer = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ";
     }
 
     if (accounts.has('wallet_1')) {

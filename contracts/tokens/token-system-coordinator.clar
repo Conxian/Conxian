@@ -366,13 +366,9 @@
   (begin
     (try! (when-not-paused))
     (try! (validate-token token))
-    ;; Forward to the revenue-distributor system contract for accounting.
     (try! (contract-call? .revenue-distributor distribute-revenue token amount))
-    ;; Update token activity for monitoring purposes
     (try! (update-token-activity token amount))
-    (ok true)
-  )
-)
+    (ok true)))
 
 (define-public (emergency-pause-system)
   (begin
