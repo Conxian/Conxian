@@ -20,7 +20,8 @@ toolName: search_codebase
 
 status: success
 
-query: token-system-coordinator contract implementation and its read-only functions for health/emergency state
+query: token-system-coordinator contract implementation and its
+       read-only functions for health/emergency state
 
 toolName: search_codebase
 
@@ -120,13 +121,14 @@ Todos updated: 6 items
   - `stacks/sdk-tests/production-readiness.spec.ts`
   - `stacks/sdk-tests/security-audit.spec.ts`
   - `stacks/sdk-tests/production-deployment.spec.ts`
-- These suites are testing “Tier‑1 production” behaviors that are only partially implemented in contracts today (staking system, revenue distributor, circuit‑breaker orchestration, and some emergency flows).
+- These suites are testing “Tier‑1 production” behaviors that are only partially
+  implemented in contracts today (staking system, revenue distributor,
+  circuit‑breaker orchestration, and some emergency flows).
 
-Below I’ll map the errors you pasted to concrete root causes in the codebase and then give the requested advisory report.
-
+Below are the errors to concrete root causes in the codebase and advisory report.
 ---
 
-**1. How to Read the Specific Errors You Posted**
+**1. How to Read the Specific Errors
 
 1. **“expected value to be (ok ...) Clarity response, received true”**
 

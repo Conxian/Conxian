@@ -53,7 +53,7 @@ describe("Concentrated Liquidity Pool", () => {
       deployer
     );
 
-    expect(result.result).toBe(Cl.bool(true));
+    expect(result.result).toEqual(Cl.ok(Cl.bool(true)));
   });
 
   it("fails to initialize twice", () => {
@@ -89,7 +89,7 @@ describe("Concentrated Liquidity Pool", () => {
       deployer
     );
 
-    expect(result.result).toBeErr(Cl.uint(1001)); // ERR_ALREADY_INITIALIZED (Standardized to u1001)
+    expect(result.result).toEqual(Cl.error(Cl.uint(1001))); // ERR_ALREADY_INITIALIZED (Standardized to u1001)
   });
 
   it("adds liquidity successfully", () => {
@@ -136,7 +136,7 @@ describe("Concentrated Liquidity Pool", () => {
       wallet1
     );
 
-    expect(result.result).toBe(Cl.uint(1)); // First position ID
+    expect(result.result).toEqual(Cl.ok(Cl.uint(1))); // First position ID
   });
 
   it("gets reserves correctly", () => {
@@ -191,11 +191,13 @@ describe("Concentrated Liquidity Pool", () => {
       deployer
     );
 
-    expect(result.result).toBe(
-      Cl.tuple({
-        reserve0: Cl.uint(5000),
-        reserve1: Cl.uint(3000),
-      })
+    expect(result.result).toEqual(
+      Cl.ok(
+        Cl.tuple({
+          reserve0: Cl.uint(5000),
+          reserve1: Cl.uint(3000),
+        })
+      )
     );
   });
 });

@@ -34,7 +34,7 @@ describe('MEV Protector', () => {
       [Cl.bufferFromHex(hash)],
       wallet1
     );
-    expect(result.result).toBe(Cl.uint(0));
+    expect(result.result).toEqual(Cl.ok(Cl.uint(0)));
   });
 
   it('prevents early reveal', () => {
@@ -44,8 +44,8 @@ describe('MEV Protector', () => {
     // Try to reveal immediately
     const result = simnet.callPublicFn(
       'mev-protector',
-      'reveal-order',
-      [Cl.uint(0), Cl.bufferFromHex('0x' + '0'.repeat(256))], // Dummy payload
+      'reveal-commitment',
+      [Cl.uint(0), Cl.bufferFromHex('0x' + '0'.repeat(64))], // Dummy salt (32 bytes)
       wallet1
     );
 
@@ -80,7 +80,7 @@ describe('MEV Protector', () => {
       [Cl.buffer(hash)],
       wallet1
     );
-    expect(commitResult.result).toBe(Cl.uint(0)); // Commitment ID 0
+    expect(commitResult.result).toEqual(Cl.ok(Cl.uint(0))); // Commitment ID 0
 
     // 2. Advance to Reveal Period (10 blocks)
     simnet.mineEmptyBlocks(10);
@@ -99,7 +99,7 @@ describe('MEV Protector', () => {
       ],
       wallet1
     );
-    expect(revealResult.result).toBe(Cl.uint(0)); // Batch ID 0
+    expect(revealResult.result).toEqual(Cl.ok(Cl.uint(0))); // Batch ID 0
 
     // 4. Advance to End of Batch (another 10 blocks)
     // Batch 0 ends at block 20. Current is ~11.
@@ -121,6 +121,6 @@ describe('MEV Protector', () => {
     );
     // Since mock-pool swaps 1:1, amount-out should be 1000.
     // Oracle price check should pass (1:1).
-    expect(executeResult.result).toBe(Cl.uint(1000));
+    expect(executeResult.result).toEqual(Cl.ok(Cl.uint(1000)));
   });
 });
