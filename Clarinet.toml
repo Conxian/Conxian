@@ -91,6 +91,10 @@ path = "contracts/treasury/revenue-router.clar"
 address = "ST3N0ZC9HBPDEBEJ1H1QFGMJF3PSNGW3FYZSVN513"
 depends_on = ["allocation-policy", "conxian-vaults", "sip-standards"]
 
+[contracts.revenue-distributor]
+path = "contracts/treasury/revenue-distributor.clar"
+address = "ST3N0ZC9HBPDEBEJ1H1QFGMJF3PSNGW3FYZSVN513"
+
 # ---------- Marketplace & Monitoring ----------
 
 [contracts.nft-marketplace]
@@ -606,6 +610,10 @@ address = "ST3N0ZC9HBPDEBEJ1H1QFGMJF3PSNGW3FYZSVN513"
 
 [contracts.cxvg-token]
 path = "contracts/tokens/cxvg-token.clar"
+address = "ST3N0ZC9HBPDEBEJ1H1QFGMJF3PSNGW3FYZSVN513"
+
+[contracts.cxd-staking]
+path = "contracts/dex/cxd-staking.clar"
 address = "ST3N0ZC9HBPDEBEJ1H1QFGMJF3PSNGW3FYZSVN513"
 
 [contracts.token-system-coordinator]

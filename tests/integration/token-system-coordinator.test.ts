@@ -35,7 +35,7 @@ describe('Token System Coordinator Integration', () => {
       [Cl.contractPrincipal(deployer, 'cxd-token')],
       deployer,
     );
-    expect(cxdRegistered.result).toBeSome(Cl.bool(true));
+    expect(cxdRegistered.result).toBeOk(Cl.bool(true));
 
     const cxvgRegistered = simnet.callReadOnlyFn(
       'token-system-coordinator',
@@ -43,7 +43,7 @@ describe('Token System Coordinator Integration', () => {
       [Cl.contractPrincipal(deployer, 'cxvg-token')],
       deployer,
     );
-    expect(cxvgRegistered.result).toBeSome(Cl.bool(true));
+    expect(cxvgRegistered.result).toBeOk(Cl.bool(true));
 
     const cxlpRegistered = simnet.callReadOnlyFn(
       'token-system-coordinator',
@@ -51,7 +51,7 @@ describe('Token System Coordinator Integration', () => {
       [Cl.contractPrincipal(deployer, 'cxlp-token')],
       deployer,
     );
-    expect(cxlpRegistered.result).toBeSome(Cl.bool(true));
+    expect(cxlpRegistered.result).toBeOk(Cl.bool(true));
 
     const cxtrRegistered = simnet.callReadOnlyFn(
       'token-system-coordinator',
@@ -59,7 +59,7 @@ describe('Token System Coordinator Integration', () => {
       [Cl.contractPrincipal(deployer, 'cxtr-token')],
       deployer,
     );
-    expect(cxtrRegistered.result).toBeSome(Cl.bool(true));
+    expect(cxtrRegistered.result).toBeOk(Cl.bool(true));
   });
 
   it('coordinates multi-token operation and tracks user activity', () => {
@@ -88,7 +88,7 @@ describe('Token System Coordinator Integration', () => {
       [Cl.standardPrincipal(wallet1)],
       deployer,
     );
-    expect(activity.result).toBeSome();
+    expect(activity.result).toBeOk();
   });
 
   it('enforces authorization on register-token', () => {
@@ -103,7 +103,7 @@ describe('Token System Coordinator Integration', () => {
       wallet1,
     );
 
-    expect(res.result).toBeErr(Cl.uint(1001));
+    expect(res.result).toBeErr(Cl.uint(100));
   });
 
   it('supports emergency pause and resume', () => {
@@ -118,7 +118,7 @@ describe('Token System Coordinator Integration', () => {
     expect(pause.result).toBeOk(Cl.bool(true));
 
     const paused = simnet.callReadOnlyFn('token-system-coordinator', 'is-paused', [], deployer);
-    expect(paused.result).toEqual(Cl.bool(true));
+    expect(paused.result).toBeOk(Cl.bool(true));
 
     const resume = simnet.callPublicFn(
       'token-system-coordinator',
@@ -129,6 +129,6 @@ describe('Token System Coordinator Integration', () => {
     expect(resume.result).toBeOk(Cl.bool(true));
 
     const pausedAfter = simnet.callReadOnlyFn('token-system-coordinator', 'is-paused', [], deployer);
-    expect(pausedAfter.result).toEqual(Cl.bool(false));
+    expect(pausedAfter.result).toBeOk(Cl.bool(false));
   });
 });

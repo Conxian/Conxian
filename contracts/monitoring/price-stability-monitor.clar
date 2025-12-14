@@ -15,6 +15,10 @@
 (define-constant VOLATILITY_WINDOW u2073600)          ;; ~1 day (17280 blocks)
 (define-constant ADJUSTMENT_COOLDOWN u17280)        ;; ~1 day (17280 blocks)
 
+(define-constant PRECISION u10000)
+
+;; State
+
 ;; State
 (define-data-var owner principal tx-sender)
 (define-data-var owner-contract principal tx-sender)
@@ -87,8 +91,8 @@
             )
                 (let (
                     (history-length (len history))
-                    (average-price (if (> (len history) 0)
-                        (/ (fold sum-uint history u0) (len history))
+                    (average-price (if (> history-length u0)
+                        (/ (fold sum-uint history u0) history-length)
                         current-price))
                 )
                     (let (
@@ -104,15 +108,16 @@
                         (if (> deviation-bps PRICE_DEVIATION_THRESHOLD)
                             (begin
                                 (print {event: "price-deviation", sender: tx-sender, current: current-price, average: average-price, deviation: deviation-bps, block-height: block-height})
-                                (try! (suggest-parameter-adjustment current-price average-price min-price))
+                                (suggest-parameter-adjustment current-price average-price min-price)
+                                true
                             )
                             true
                         )
 
                         ;; Update volatility metrics
-                        (if (> history-length 1)
-                            (let ((price-change (abs-diff-uint current-price last-price)))
-                                (let ((volatility (/ (* price-change PRECISION) last-price)))
+                        (if (> history-length u1)
+                            (let ((price-change (abs-diff-uint current-price (var-get last-price))))
+                                (let ((volatility (/ (* price-change PRECISION) (var-get last-price))))
                                     (var-set volatility-history (append-capped-20 (var-get volatility-history) volatility))
                                 )
                             )
@@ -127,7 +132,7 @@
                             price-deviation: deviation-bps,
                             min-price: min-price,
                             last-updated: last-block,
-                            volatility: (if (> (len (var-get volatility-history)) 0)
+                            volatility: (if (> (len (var-get volatility-history)) u0)
                                 (/ (fold sum-uint (var-get volatility-history) u0) (len (var-get volatility-history)))
                                 u0)
                         })
@@ -147,7 +152,8 @@
 ;; @returns A response tuple with `(ok true)` if an adjustment is suggested, `(ok false)` otherwise.
 (define-private (suggest-parameter-adjustment (current uint) (average uint) (min-price uint))
     (let (
-        (deviation (/ (* (abs-diff-uint current average) u10000) average)) (current-fee u0)
+        (deviation (/ (* (abs-diff-uint current average) u10000) average))
+        (current-fee u0)
         (cooldown-over (>= (- block-height (var-get last-adjustment-block)) ADJUSTMENT_COOLDOWN))
     )
         (if (and (> deviation PRICE_DEVIATION_THRESHOLD) cooldown-over)
@@ -163,7 +169,11 @@
 
                     ;; Price is below average - consider decreasing fees or providing incentives
                     (let (
-                        (new-fee (max-uint u1000 (- current-fee u500)))
+                        (new-fee (max-uint u1000
+                            (if (< current-fee u500)
+                                u0
+                                (- current-fee u500)
+                            )))
                     )
                         (if (< new-fee current-fee)
                             (begin
@@ -176,9 +186,9 @@
                 )
 
                 (var-set last-adjustment-block block-height)
-                (ok true)
+                true
             )
-            (ok false)
+            false
         )
     )
 )
@@ -259,11 +269,11 @@
         (n (len history))
     )
         (ok {
-            current-price: (if (> n 0) (unwrap-panic (element-at history (- n 1))) u0),
-            average-price: (if (> n 0) (/ (fold sum-uint history u0) n) u0),
-            min-24h: (if (> n 0) (fold min-uint history (unwrap-panic (element-at history u0))) u0),
-            max-24h: (if (> n 0) (fold max-uint history (unwrap-panic (element-at history u0))) u0),
-            volatility: (if (> (len volatility) 0) 
+            current-price: (if (> n u0) (unwrap-panic (element-at history (- n u1))) u0),
+            average-price: (if (> n u0) (/ (fold sum-uint history u0) n) u0),
+            min-24h: (if (> n u0) (fold min-uint history (unwrap-panic (element-at history u0))) u0),
+            max-24h: (if (> n u0) (fold max-uint history (unwrap-panic (element-at history u0))) u0),
+            volatility: (if (> (len volatility) u0) 
                 (/ (fold sum-uint volatility u0) (len volatility))
                 u0),
             last-updated: block-height
