@@ -2,30 +2,37 @@
 
 ## Overview
 
-The Tokens Module provides the core token functionality for the Conxian Protocol. It includes the implementation of the Conxian Revenue Token (CXD), a SIP-010 compliant fungible token, as well as other utility tokens. The module is designed to be secure and robust, with features such as access controls, transfer restrictions, and emergency pauses.
+The Tokens Module defines the entire suite of fungible (SIP-010) and non-fungible (SIP-009) tokens that power the Conxian Protocol. It includes the primary revenue token (CXD), governance tokens, and specialized NFTs for representing economic positions.
 
-## Contracts
+## Architecture: Coordinator Facade
 
-- **`cxd-token.clar`**: The primary token of the Conxian ecosystem, this contract implements the Conxian Revenue Token (CXD). It includes functions for transferring, minting, and burning tokens, as well as for managing ownership and administrative privileges. It also includes a number of integration hooks for connecting to other contracts in the Conxian ecosystem, such as the `token-system-coordinator.clar` and the `protocol-fee-switch.clar`.
+The Tokens Module is built around a central **coordinator facade**. The `token-system-coordinator.clar` contract acts as this single, secure entry point for orchestrating actions across the various specialized token contracts. This ensures that complex, multi-token operations are handled in a consistent and secure manner.
 
-- **`cxlp-token.clar`**: A liquidity provider token representing a share in a DEX liquidity pool. This contract includes a migration mechanism to convert CXLP tokens to the primary CXD token.
+### Control Flow Diagram
 
-- **`cxs-token.clar`**: A stability token for lending and borrowing operations. This is a SIP-009 compliant non-fungible token, where each NFT represents a unique staked position in the Conxian protocol.
+```
+[User/System] -> [token-system-coordinator.clar] (Coordinator Facade)
+    |
+    |-- (distribute-revenue) --> [cxd-token.clar]
+    |-- (update-reputation) --> [cxvg-token.clar]
+    |-- (manage-lp-position) --> [cxlp-position-nft.clar]
+```
 
-- **`cxtr-token.clar`**: A treasury reserve token for protocol stability. This contract includes a merit-based rewards system for creators.
+## Core Contracts
 
-- **`cxvg-token.clar`**: A governance utility token for protocol upgrades.
+### Coordinator Facade
 
-- **`token-system-coordinator.clar`**: A contract for coordinating the interactions between the various tokens in the ecosystem. It provides a unified interface for tracking token operations, managing user reputations, and triggering revenue distribution.
+-   **`token-system-coordinator.clar`**: The central **facade** for the token ecosystem. It provides a unified interface for tracking token operations, managing user reputations, and triggering revenue distribution events across the various specialized token contracts.
 
-- **`cxd-price-initializer.clar`**: A contract for initializing the price of the CXD token.
+### Token Implementations
 
-- **`cxlp-position-nft.clar`**: A SIP-009 compliant non-fungible token that represents a user's position in a liquidity pool.
-
-## Architecture
-
-The Tokens Module is designed to be modular and extensible. The `cxd-token.clar` contract is the core component, providing the basic functionality of a SIP-010 compliant token. The other contracts in the module provide specialized functionality for liquidity provision, governance, and other aspects of the protocol. The `token-system-coordinator.clar` contract provides a unified interface for managing the interactions between the various tokens in the ecosystem.
+-   **`cxd-token.clar`**: The primary **Conxian Revenue Token (CXD)**. A SIP-010 fungible token that serves as the main utility and revenue-accruing asset of the protocol.
+-   **`cxtr-token.clar`**: The **Conxian Treasury Token (CXTR)**. A SIP-010 fungible token used for internal accounting, creator economy incentives, and long-term protocol funding.
+-   **`cxvg-token.clar`**: The **Conxian Voting Token (CXVG)**. A SIP-010 fungible token that represents voting power in the governance system.
+-   **`cxlp-token.clar`**: The **Conxian LP Token (CXLP)**. A SIP-010 fungible token that represents a user's share of a standard liquidity pool.
+-   **`cxs-token.clar`**: The **Conxian Staking Position (CXS)**. A SIP-009 non-fungible token where each NFT represents a unique staking position, with lock duration and reward tracking encoded per position.
+-   **`cxlp-position-nft.clar`**: A SIP-009 non-fungible token representing a user's position in a concentrated liquidity pool, enabling granular accounting of range, fees, and ownership.
 
 ## Status
 
-**Under Development**: The contracts in this module are currently under development and are not yet considered production-ready. While the core functionality of the `cxd-token.clar` contract is implemented, several of the integration hooks are disabled, and some of the other contracts in the module are not yet fully implemented.
+**Under Review**: The contracts in this module are currently under review. While the core token contracts are functionally complete, the `token-system-coordinator.clar` is being hardened to ensure full security and alignment with the protocol's event-driven architecture. These contracts are not yet considered production-ready.
