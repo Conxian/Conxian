@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeAll, beforeEach } from 'vitest';
 import { initSimnet, type Simnet } from '@stacks/clarinet-sdk';
 import { Cl } from '@stacks/transactions';
+import { DEPLOYER } from "../../constants";
 
 let simnet: Simnet;
 let deployer: string;

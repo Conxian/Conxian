@@ -3,9 +3,10 @@
 ;; @author Conxian Protocol
 ;; @desc This contract is the central facade for the Core Module, built on a
 ;; modular facade pattern. It acts as the single, secure entry point for all
--;; user-facing calls related to position management, collateral, and risk.
--;; It contains no business logic itself; instead, it delegates all calls to
--;; specialized manager contracts.
+
+;; user-facing calls related to position management, collateral, and risk.
+;; It contains no business logic itself; instead, it delegates all calls to
+;; specialized manager contracts.
 ;;
 
 (use-trait dimensional-trait .dimensional-traits.dimensional-trait)

@@ -1,22 +1,22 @@
 import { describe, it, expect, beforeAll, beforeEach } from 'vitest';
-import { initSimnet, type Simnet } from '@stacks/clarinet-sdk';
+import { Clarinet, initSimnet, type Simnet } from '@stacks/clarinet-sdk';
 import { Cl } from '@stacks/transactions';
+import { DEPLOYER } from "../constants";
 
 let simnet: Simnet;
 let deployer: string;
 let wallet1: string;
 let wallet2: string;
+let clarinet: Clarinet;
 
-describe('Governance Token (CXVG)', () => {
+desc ribe('Governance Token (CXVG)', () => {
   beforeAll(async () => {
-    simnet = await initSimnet('Clarinet.toml', false, {
-      trackCosts: false,
-      trackCoverage: false,
-    });
+    clarinet = await Clarinet.fromConfigFile('Clarinet.toml');
+    simnet = await initSimnet(clarinet);
   });
 
   beforeEach(async () => {
-    await simnet.initSession(process.cwd(), 'Clarinet.toml');
+    await simnet.initSession(clarinet);
     const accounts = simnet.getAccounts();
     deployer = accounts.get('deployer')!;
     wallet1 = accounts.get('wallet_1') || 'ST1SJ3DTE5DN7X54YDH5D64R3BCB6A2AG2ZQ8YPD5';

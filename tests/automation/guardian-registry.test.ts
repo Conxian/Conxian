@@ -1,7 +1,7 @@
 /// <reference path="../../vitest-clarity-matchers.d.ts" />
 import { describe, it, expect, beforeAll, beforeEach } from "vitest";
 import { initSimnet, type Simnet } from "@stacks/clarinet-sdk";
-import { Cl, ClarityType } from "@stacks/transactions";
+import { Cl } from "@stacks/transactions";
 
 let simnet: Simnet;
 let wallet1: string;
@@ -20,21 +20,48 @@ describe("Guardian Registry", () => {
   beforeEach(async () => {
     await simnet.initSession(process.cwd(), "Clarinet.toml");
     const accounts = simnet.getAccounts();
-    wallet1 = accounts.get("wallet_1")!;
-    wallet2 = accounts.get("wallet_2")!;
-    wallet3 = accounts.get("wallet_3")!;
+    wallet1 =
+      accounts.get("wallet_1") || "ST1SJ3DTE5DN7X54YDH5D64R3BCB6A2AG2ZQ8YPD5";
+    wallet2 =
+      accounts.get("wallet_2") || "ST2CY5V39NHDPWSXMW9QDT3HC3GD6Q6XX4CFRK9AG";
+    wallet3 =
+      accounts.get("wallet_3") || "ST2JHG361ZXG51QTKY2NQCVBPPRRE2KZB1HR05NNC";
     deployer = accounts.get("deployer")!;
+
+    // Mint CXD tokens to wallets for bonding (deployer is minter by default)
+    simnet.callPublicFn(
+      "cxd-token",
+      "mint",
+      [Cl.standardPrincipal(wallet1), Cl.uint(10000000)],
+      deployer
+    );
+    simnet.callPublicFn(
+      "cxd-token",
+      "mint",
+      [Cl.standardPrincipal(wallet2), Cl.uint(10000000)],
+      deployer
+    );
+    simnet.callPublicFn(
+      "cxd-token",
+      "mint",
+      [Cl.standardPrincipal(wallet3), Cl.uint(10000000)],
+      deployer
+    );
   });
 
   it("allows a principal to register as guardian with a positive bond", () => {
     const res = simnet.callPublicFn(
       "guardian-registry",
       "register-guardian",
-      [Cl.standardPrincipal(wallet1), Cl.uint(1000)],
+      [
+        Cl.standardPrincipal(wallet1),
+        Cl.uint(1000),
+        Cl.contractPrincipal(deployer, "cxd-token"),
+      ],
       wallet1
     );
 
-    expect(res.result).toEqual(Cl.ok(Cl.bool(true)));
+    expect(res.result).toBeOk(Cl.bool(true));
 
     const view = simnet.callReadOnlyFn(
       "guardian-registry",
@@ -43,25 +70,33 @@ describe("Guardian Registry", () => {
       wallet1
     );
 
-    expect(view.result).toEqual(Cl.ok(Cl.bool(true)));
+    expect(view.result).toBeOk(Cl.bool(true));
   });
 
   it("supports unbonding and deactivates when bond is zero", () => {
     simnet.callPublicFn(
       "guardian-registry",
       "register-guardian",
-      [Cl.standardPrincipal(wallet1), Cl.uint(1000)],
+      [
+        Cl.standardPrincipal(wallet1),
+        Cl.uint(1000),
+        Cl.contractPrincipal(deployer, "cxd-token"),
+      ],
       wallet1
     );
 
     const unbond = simnet.callPublicFn(
       "guardian-registry",
       "unbond-guardian",
-      [Cl.standardPrincipal(wallet1), Cl.uint(1000)],
+      [
+        Cl.standardPrincipal(wallet1),
+        Cl.uint(1000),
+        Cl.contractPrincipal(deployer, "cxd-token"),
+      ],
       wallet1
     );
 
-    expect(unbond.result).toEqual(Cl.ok(Cl.bool(true)));
+    expect(unbond.result).toBeOk(Cl.bool(true));
 
     const view = simnet.callReadOnlyFn(
       "guardian-registry",
@@ -70,7 +105,7 @@ describe("Guardian Registry", () => {
       wallet1
     );
 
-    expect(view.result).toEqual(Cl.ok(Cl.bool(false)));
+    expect(view.result).toBeOk(Cl.bool(false));
   });
 
   it("computes guardian tiers based on configurable bond thresholds", () => {
@@ -84,7 +119,11 @@ describe("Guardian Registry", () => {
     simnet.callPublicFn(
       "guardian-registry",
       "register-guardian",
-      [Cl.standardPrincipal(wallet1), Cl.uint(50)],
+      [
+        Cl.standardPrincipal(wallet1),
+        Cl.uint(50),
+        Cl.contractPrincipal(deployer, "cxd-token"),
+      ],
       wallet1
     );
 
@@ -95,12 +134,16 @@ describe("Guardian Registry", () => {
       wallet1
     );
 
-    expect(tier0.result).toEqual(Cl.ok(Cl.some(Cl.uint(0))));
+    expect(tier0.result).toBeOk(Cl.some(Cl.uint(0)));
 
     simnet.callPublicFn(
       "guardian-registry",
       "register-guardian",
-      [Cl.standardPrincipal(wallet2), Cl.uint(100)],
+      [
+        Cl.standardPrincipal(wallet2),
+        Cl.uint(100),
+        Cl.contractPrincipal(deployer, "cxd-token"),
+      ],
       wallet2
     );
 
@@ -111,12 +154,16 @@ describe("Guardian Registry", () => {
       wallet2
     );
 
-    expect(tier1.result).toEqual(Cl.ok(Cl.some(Cl.uint(1))));
+    expect(tier1.result).toBeOk(Cl.some(Cl.uint(1)));
 
     simnet.callPublicFn(
       "guardian-registry",
       "register-guardian",
-      [Cl.standardPrincipal(wallet3), Cl.uint(600)],
+      [
+        Cl.standardPrincipal(wallet3),
+        Cl.uint(600),
+        Cl.contractPrincipal(deployer, "cxd-token"),
+      ],
       wallet3
     );
 
@@ -127,14 +174,18 @@ describe("Guardian Registry", () => {
       wallet3
     );
 
-    expect(tier2.result).toEqual(Cl.ok(Cl.some(Cl.uint(2))));
+    expect(tier2.result).toBeOk(Cl.some(Cl.uint(2)));
   });
 
   it("accrues and allows guardians to claim rewards", () => {
     simnet.callPublicFn(
       "guardian-registry",
       "register-guardian",
-      [Cl.standardPrincipal(wallet1), Cl.uint(1000)],
+      [
+        Cl.standardPrincipal(wallet1),
+        Cl.uint(1000),
+        Cl.contractPrincipal(deployer, "cxd-token"),
+      ],
       wallet1
     );
 
@@ -145,7 +196,7 @@ describe("Guardian Registry", () => {
       deployer
     );
 
-    expect(credit.result).toEqual(Cl.ok(Cl.bool(true)));
+    expect(credit.result).toBeOk(Cl.bool(true));
 
     const accrued = simnet.callReadOnlyFn(
       "guardian-registry",
@@ -154,7 +205,7 @@ describe("Guardian Registry", () => {
       wallet1
     );
 
-    expect(accrued.result).toEqual(Cl.ok(Cl.uint(100)));
+    expect(accrued.result).toBeOk(Cl.uint(100));
 
     const claim = simnet.callPublicFn(
       "guardian-registry",
@@ -163,7 +214,7 @@ describe("Guardian Registry", () => {
       wallet1
     );
 
-    expect(claim.result).toEqual(Cl.ok(Cl.uint(100)));
+    expect(claim.result).toBeOk(Cl.uint(100));
 
     const accruedAfter = simnet.callReadOnlyFn(
       "guardian-registry",
@@ -172,6 +223,6 @@ describe("Guardian Registry", () => {
       wallet1
     );
 
-    expect(accruedAfter.result).toEqual(Cl.ok(Cl.uint(0)));
+    expect(accruedAfter.result).toBeOk(Cl.uint(0));
   });
 });

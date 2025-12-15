@@ -4,6 +4,9 @@ description = "A comprehensive, standardized Clarinet configuration for the Conx
 clarinet_version = "3.11.0"
 epoch = "3.0"
 
+[simnet]
+mnemonic = "cute bird surprise boring old news cake design aisle helmet choose tree"
+
 # ---------- Core Contracts ----------
 
 [contracts.ownable]
@@ -44,6 +47,11 @@ depends_on = ["oracle-pricing", "security-monitoring"]
 [accounts.deployer]
 balance = 100000000000000
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+
+# Simnet Deployer (derived from cute bird mnemonic)
+[accounts.simnet_deployer]
+balance = 100000000000000
+address = "ST1XZJPBQXFBY2XC7F6GQMJ4X64HEJ6J2W8RZ52G7"
 
 [accounts.wallet_1]
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
