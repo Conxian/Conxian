@@ -1,11 +1,11 @@
 ;;
-;; @title Multi-Hop Router v3
+;; @title Multi-Hop Router v3 (Execution Facade)
 ;; @author Conxian Protocol
-;; @desc Provides a robust and gas-efficient routing engine for executing
-;; multi-hop swaps across various liquidity pools. This contract supports 1-hop,
-;; 2-hop, and 3-hop swaps, allowing users to find the best possible exchange
-;; rates by routing trades through intermediate base tokens. The design relies on
-;; off-chain route discovery to minimize on-chain computation costs.
+;; @desc This contract is the central execution facade for the DEX module. It
+;; provides a unified and gas-efficient interface for performing swaps across
+;; one or more liquidity pools (1-hop, 2-hop, and 3-hop). The contract is
+;; responsible for executing the swap logic but relies on off-chain clients to
+;; discover the optimal trading route before execution.
 ;;
 
 (use-trait pool-trait .defi-traits.pool-trait)

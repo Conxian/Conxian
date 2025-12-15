@@ -2,28 +2,46 @@
 
 ## Overview
 
-The Governance Module provides a comprehensive framework for decentralized decision-making and protocol upgrades within the Conxian Protocol. It is designed to be secure, transparent, and flexible, allowing the community to propose, vote on, and execute changes to the protocol. The `proposal-engine.clar` contract serves as the central facade for all governance operations, delegating logic to specialized contracts for proposal management and voting. The module also includes the Conxian Operations Engine, an automated Operations & Resilience governance seat that acts as on-chain "ops staff" under DAO control.
+The Governance Module provides the framework for decentralized decision-making and protocol upgrades. It is designed to be secure, transparent, and flexible, enabling the community to propose, vote on, and execute changes. The module also features the **Conxian Operations Engine**, an automated on-chain agent that participates in governance.
 
-## Contracts
+## Architecture: Facade with Specialized Managers
 
-- **`proposal-engine.clar`**: The core of the governance module, this contract acts as a facade for all governance-related actions. It provides a unified interface for creating proposals, casting votes, and executing the outcomes. It includes parameters for a timelock to ensure that there is a delay between when a proposal is approved and when it is executed, and a quorum to ensure that a minimum number of votes are cast for a proposal to be valid.
+Following the protocol's standard architectural pattern, the Governance Module is built around a central **facade**. The `proposal-engine.clar` contract acts as this single, secure entry point for all governance-related actions, delegating specific tasks to a set of specialized manager contracts.
 
-- **`proposal-registry.clar`**: A specialized contract responsible for storing and managing all governance proposals. It handles the creation, cancellation, and execution of proposals, ensuring data integrity.
+This facade design ensures a clear and secure process for protocol governance, from proposal creation to execution.
 
-- **`voting.clar`**: Manages the voting process for all proposals. It records votes, calculates the results, and ensures that the voting rules are enforced.
+### Control Flow Diagram
 
-- **`upgrade-controller.clar`**: A contract dedicated to managing protocol upgrades. It includes features such as timelocks and multi-signature requirements to ensure the security and stability of the upgrade process.
+```
+[User/DAO] -> [proposal-engine.clar] (Facade)
+    |
+    |-- (submit-proposal) --> [proposal-registry.clar]
+    |-- (cast-vote) --> [voting.clar]
+    |-- (execute-proposal) --> [upgrade-controller.clar]
 
-- **`emergency-governance.clar`**: Provides a mechanism for addressing critical issues that require immediate action. This contract allows for expedited decision-making in emergency situations.
+[Metrics] -> [conxian-operations-engine.clar] -> [proposal-engine.clar] (Automated Vote)
+```
 
-- **`enhanced-governance-nft.clar`**: Implements council and role NFTs, including the Operations & Resilience Council membership tokens, aligned with the documented council taxonomy. The contract supports a variety of NFT types, including proposal-specific voting rights, delegation certificates, and reputation badges.
+## Core Contracts
 
-- **`conxian-operations-engine.clar`**: An automated Operations & Resilience governance seat that reads metrics from core subsystems (token-system coordinator, circuit breaker, lending, emissions, MEV, insurance, and cross-chain bridge) and casts policy-constrained votes via `proposal-engine.clar`.
+### Facade
 
-## Architecture
+-   **`proposal-engine.clar`**: The primary **facade** for the governance module. It provides a unified interface for creating proposals, casting votes, and executing the outcomes, delegating the underlying logic to the appropriate manager contracts.
 
-The Governance Module is built on a modular, facade-based architecture. The `proposal-engine.clar` contract is the single entry point for all governance interactions, which delegates calls to the appropriate specialized contracts. This separation of concerns enhances security and allows for greater flexibility in upgrading individual components of the governance system.
+### Manager Contracts
+
+-   **`proposal-registry.clar`**: A specialized contract for storing and managing all governance proposals, ensuring data integrity from creation to execution.
+-   **`voting.clar`**: Manages the entire voting process, including recording votes, calculating results, and enforcing voting rules.
+-   **`upgrade-controller.clar`**: A dedicated contract for managing protocol upgrades, incorporating security features like timelocks and multi-signature requirements.
+
+### Automated Governance Agent
+
+-   **`conxian-operations-engine.clar`**: An automated agent that holds a formal seat in the DAO. It consumes on-chain metrics from core protocol modules, aggregates them into policy-constrained votes, and participates in governance by calling the `proposal-engine.clar`.
+
+### Supporting Contracts
+
+-   **`enhanced-governance-nft.clar`**: Implements the NFT-based council and role system, allowing for sophisticated, on-chain representation of governance powers and responsibilities.
 
 ## Status
 
-**Under Review**: The contracts in this module are currently undergoing a comprehensive review to ensure correctness, security, and alignment with the modular trait architecture. While the core governance functionality is implemented, the contracts are not yet considered production-ready.
+**Under Review**: The contracts in this module are currently undergoing a comprehensive review. While the core governance functionality is implemented, the contracts are not yet considered production-ready and are being hardened to ensure full security and alignment with the protocol's architecture.
