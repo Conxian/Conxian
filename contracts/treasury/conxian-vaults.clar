@@ -3,6 +3,7 @@
 ;; Implements TREASURY_AND_REVENUE_ROUTER.md
 
 (use-trait sip-010-ft-trait .sip-standards.sip-010-ft-trait)
+(use-trait asset-trait .sip-standards.sip-010-ft-trait)
 
 (define-constant ERR_UNAUTHORIZED (err u9000))
 (define-constant ERR_INSUFFICIENT_BALANCE (err u9001))

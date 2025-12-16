@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import { Cl } from '@stacks/transactions';
-import { Simnet } from '@hirosystems/clarinet-sdk';
+import { Simnet } from "@stacks/clarinet-sdk";
 
 /**
  * Enhanced 100 Million Transaction Load Test

@@ -1,16 +1,41 @@
 # Vaults Module
 
-This module contains the contracts for the Conxian Protocol's sBTC vault, which allows users to deposit sBTC and earn yield.
+## Overview
+
+The Vaults Module provides the core infrastructure for yield-generating vaults within the Conxian Protocol. The primary implementation is the `sbtc-vault.clar`, which allows users to deposit sBTC and earn yield through a variety of automated strategies.
+
+## Architecture: Facade with Specialized Managers
+
+The Vaults Module follows the protocol's standard **facade pattern**. The `sbtc-vault.clar` contract acts as the central **facade**, providing a single, secure entry point for all user interactions with the sBTC vault. It delegates specialized tasks, such as custody, yield aggregation, and fee management, to a set of dedicated manager contracts.
+
+### Control Flow Diagram
+
+```
+[User] -> [sbtc-vault.clar] (Facade)
+    |
+    |-- (deposit) --> [custody.clar]
+    |-- (earn) --> [yield-aggregator.clar]
+    |-- (claim-fees) --> [fee-manager.clar]
+    |-- (bridge-in) --> [btc-bridge.clar]
+```
+
+## Core Contracts
+
+### Facade
+
+-   **`sbtc-vault.clar`**: The main **facade** for the sBTC vault. It handles all core user operations, including deposits, withdrawals, and yield collection, delegating the underlying logic to the appropriate manager contracts.
+
+### Manager Contracts
+
+-   **`custody.clar`**: Manages the secure custody of the sBTC and other assets deposited in the vault.
+-   **`yield-aggregator.clar`**: The core of the yield generation logic. It aggregates yield from various strategies (e.g., lending, liquidity provision) and allocates the vault's assets to optimize returns.
+-   **`fee-manager.clar`**: Manages the collection and distribution of performance and management fees for the vault.
+-   **`btc-bridge.clar`**: A specialized contract that handles the wrapping and unwrapping of BTC to and from sBTC, providing a seamless bridge for users to enter and exit the Stacks ecosystem.
+
+### Registry
+
+-   **`vault-registrar.clar`**: A central registry for all vaults within the Conxian Protocol. It stores the addresses and metadata of all official vaults, allowing for easy discovery and integration.
 
 ## Status
 
-**Nakamoto Ready**: The contracts in this module are feature-complete and compatible with Stacks Epoch 3.0.
-
-## Contracts
-
-- **`sbtc-vault.clar`**: The main entry point for the sBTC vault. This contract acts as a facade, delegating calls to the other specialized contracts in this module.
-- **`custody.clar`**: Manages the custody of the sBTC deposited in the vault.
-- **`yield-aggregator.clar`**: Aggregates yield from various strategies.
-- **`btc-bridge.clar`**: Handles the wrapping and unwrapping of BTC and sBTC.
-- **`fee-manager.clar`**: Manages the fees for the vault.
-- **`vault-registrar.clar`**: A registry for vaults.
+**Under Review**: The contracts in this module are currently under review. While the core functionality is implemented, the integration with the yield-aggregator and the fee-manager is still being hardened. These contracts are not yet considered production-ready.

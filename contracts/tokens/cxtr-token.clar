@@ -146,9 +146,11 @@
     (recipient principal)
   )
   (if (var-get system-integration-enabled)
-    (unwrap! (contract-call? .token-system-coordinator on-transfer amount sender recipient) true)
-    true
-  )
+    (match (var-get token-coordinator)
+      some-coordinator (unwrap! (contract-call? .token-system-coordinator on-transfer amount sender recipient) true)
+      true ;; if no coordinator is set, do not revert the transfer
+    )
+    true)
 )
 
 ;; @desc Notifies the token coordinator of a mint.
@@ -160,7 +162,10 @@
     (recipient principal)
   )
   (if (var-get system-integration-enabled)
-    (unwrap! (contract-call? .token-system-coordinator on-mint amount recipient) true)
+    (match (var-get token-coordinator)
+      some-coordinator (unwrap! (contract-call? .token-system-coordinator on-mint amount recipient) true)
+      true
+    )
     true
   )
 )
@@ -174,7 +179,10 @@
     (burner principal)
   )
   (if (var-get system-integration-enabled)
-    (unwrap! (contract-call? .token-system-coordinator on-burn amount burner) true)
+    (match (var-get token-coordinator)
+      some-coordinator (unwrap! (contract-call? .token-system-coordinator on-burn amount burner) true)
+      true
+    )
     true
   )
 )

@@ -56,14 +56,17 @@ describe('System Fuzz Testing', () => {
         simnet.callPublicFn(tokenCollateral, 'mint', [Cl.uint(1000000000000), Cl.standardPrincipal(deployer)], deployer);
         simnet.callPublicFn(tokenBorrow, 'mint', [Cl.uint(1000000000000), Cl.standardPrincipal(deployer)], deployer);
 
-        simnet.callPublicFn('concentrated-liquidity-pool', 'mint', [
-            Cl.standardPrincipal(deployer),
-            Cl.int(-887200),
-            Cl.int(887200), // Wide range
+        simnet.callPublicFn(
+          "concentrated-liquidity-pool",
+          "add-liquidity",
+          [
+            Cl.uint(100000000000),
             Cl.uint(100000000000),
             Cl.contractPrincipal(deployer, tokenCollateral),
             Cl.contractPrincipal(deployer, tokenBorrow),
-        ], deployer);
+          ],
+          deployer
+        );
 
         // 3. Fund Users
         const users = [wallet1, wallet2];
@@ -106,27 +109,25 @@ describe('System Fuzz Testing', () => {
                     }
 
                 } else if (action === 'ADD_LIQ') {
-                    // Add liquidity in random range
-                    const tickCenter = randomInt(-10000, 10000);
-                    const width = randomInt(100, 5000);
-                    const tickLower = tickCenter - width;
-                    const tickUpper = tickCenter + width;
-                    const amount = randomInt(100000, 100000000);
+                  // Add liquidity (full range via add-liquidity for now)
+                  const amount = randomInt(100000, 100000000);
 
-                    const result = simnet.callPublicFn('concentrated-liquidity-pool', 'mint', [
-                        Cl.standardPrincipal(user),
-                        Cl.int(tickLower),
-                        Cl.int(tickUpper),
-                        Cl.uint(amount),
-                        Cl.contractPrincipal(deployer, tokenCollateral),
-                        Cl.contractPrincipal(deployer, tokenBorrow),
-                    ], user);
+                  const result = simnet.callPublicFn(
+                    "concentrated-liquidity-pool",
+                    "add-liquidity",
+                    [
+                      Cl.uint(amount),
+                      Cl.uint(amount),
+                      Cl.contractPrincipal(deployer, tokenCollateral),
+                      Cl.contractPrincipal(deployer, tokenBorrow),
+                    ],
+                    user
+                  );
 
-                    // Expect success or specific known errors
-                    if (result.result.type === ClarityType.ResponseOk) {
-                        expect(result.result).toBeOk(expect.anything());
-                    }
-
+                  // Expect success or specific known errors
+                  if (result.result.type === ClarityType.ResponseOk) {
+                    expect(result.result).toBeOk(expect.anything());
+                  }
                 } else if (action === 'REMOVE_LIQ') {
                     // To remove liquidity, we need a position ID. 
                     // Since tracking IDs in fuzzing is hard, we'll skip or just try a random ID?

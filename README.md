@@ -2,70 +2,89 @@
 
 ## Overview
 
-Conxian is a sophisticated DeFi yield optimization protocol on Stacks, designed to automate and enhance returns from liquidity provision and yield farming. It introduces a dimensional architecture where yield sources (dimensions) are aggregated and optimized.
+Conxian is a sophisticated, multi-dimensional DeFi protocol on Stacks, designed to provide a unified, secure, and efficient ecosystem for advanced financial operations. It has been architected from the ground up to be modular, decentralized, and compliant with the latest Stacks (Nakamoto) standards.
 
-## Core Features
-
-* **Dimensional Yield Engine**: Aggregates yield from multiple sources (Lending, DEX, Stacking).
-* **Concentrated Liquidity**: Efficient capital usage with tick-based liquidity provision.
-* **MEV Protection**: Built-in protection against front-running and sandwich attacks.
-* **Enterprise Integration**: Institutional-grade features for large-scale asset management.
-* **Automated Vaults**: Hands-off yield farming with auto-compounding strategies.
+The protocol aggregates yield from multiple sources (Lending, DEX, Stacking), provides institutional-grade features for asset management, and is hardened against common security threats like MEV exploitation.
 
 ## System Status
 
-*   **Production Readiness**: 🟡 **UNDER REVIEW**
-*   **Security**: Hardened against common vectors (Slippage, Oracle Manipulation, Unauthorized Access).
-*   **Performance**: Benchmarked at ~32ms per swap (Simulation).
+-   **Production Readiness**: 🟡 **UNDER REVIEW**
+-   **Architectural Pattern**: **Facade-Based & Trait-Driven**. The system is in a stabilization phase, with all core modules refactored into a modular architecture.
+-   **Security**: Hardened against common vectors (Slippage, Oracle Manipulation, Unauthorized Access).
 
-## Architecture
+## Core Architecture: The Facade Pattern
 
-The protocol is built on a modular architecture:
+The Conxian Protocol is built on a **facade pattern**. This modern, modular architecture ensures security, maintainability, and clarity by separating concerns. Core contracts act as unified, secure entry points (**facades**) that route all user-facing calls to a network of specialized, single-responsibility **manager contracts**.
 
-### 1. Core Layer
+-   **User Interaction**: Users and external systems interact only with the facade contracts, which provide a simplified and secure API.
+-   **Delegated Logic**: Facades contain minimal business logic. Their primary role is to validate inputs and delegate the actual work to the appropriate manager contract via `contract-call?`.
+-   **Trait-Driven Interfaces**: The connections between facades and manager contracts are defined by a standardized set of traits located in the `/contracts/traits/` directory. This enforces a clean, consistent, and maintainable interface system across the entire protocol.
 
-* **`dimensional-engine.clar`**: The central facade for the Core Module. It routes all calls to the specialized manager contracts, ensuring a single, secure entry point for position management, collateral handling, and risk assessment.
-* **`conxian-protocol.clar`**: The main protocol coordinator, responsible for managing protocol-wide configurations, authorized contracts, and emergency controls.
-* **`protocol-fee-switch.clar`**: A centralized switch for routing protocol fees to various destinations, such as the treasury, staking rewards, and insurance funds.
+### 1. Core Module (`contracts/core/`)
 
-### 2. DEX Layer
+The Core Module is the heart of the protocol's dimensional trading and risk management capabilities.
 
-* **`multi-hop-router-v3.clar`**: The central routing engine for the DEX. It supports 1-hop, 2-hop, and 3-hop swaps, allowing for efficient trading across multiple liquidity pools.
-* **`concentrated-liquidity-pool.clar`**: Implements a concentrated liquidity AMM, allowing for greater capital efficiency.
-* **`dex-factory.clar`**: A facade for creating and managing liquidity pools.
+-   **`dimensional-engine.clar`**: The central **facade** for the Core Module. It routes all calls related to position management, collateral, and risk assessment to the specialized contracts below.
+-   **Manager Contracts**:
+    -   **Position Manager**: Handles the lifecycle of trading positions (open, close, modify).
+    -   **Collateral Manager**: Manages the deposit, withdrawal, and accounting of user collateral.
+    -   **Risk Manager**: Assesses position health and manages the liquidation process.
+    -   **Funding Rate Calculator**: Calculates and applies funding rates to open positions.
 
-### 3. Lending Layer
+### 2. DEX Module (`contracts/dex/`)
 
-* **`comprehensive-lending-system.clar`**: The main contract for the lending module. It manages user deposits, loans, and collateral, and integrates with other contracts to handle interest rates and liquidations.
-* **`liquidation-manager.clar`**: A contract responsible for managing the liquidation process for under-collateralized loans.
+The DEX Module provides a highly efficient and capital-aware trading environment.
 
-### 4. Governance
+-   **`multi-hop-router-v3.clar`**: The **facade** for the DEX. It finds the optimal trading path and executes swaps across multiple liquidity pools, including 1-hop, 2-hop, and 3-hop routes.
+-   **Manager Contracts**:
+    -   **`concentrated-liquidity-pool.clar`**: Implements the concentrated liquidity AMM for maximum capital efficiency.
+    -   **`dex-factory.clar`**: A factory contract for creating and managing liquidity pools.
 
-* **`proposal-engine.clar`**: The core of the governance module, this contract acts as a facade for all governance-related actions.
-* **`conxian-operations-engine.clar`**: An automated Operations & Resilience governance seat that reads metrics from core subsystems and casts policy-constrained votes.
+### 3. Lending Module (`contracts/lending/`)
 
-### 5. Tokens
+The Lending Module provides a fully collateralized and secure lending market.
 
-* **`cxd-token.clar`**: The primary token of the Conxian ecosystem, this contract implements the Conxian Revenue Token (CXD).
-* **`token-system-coordinator.clar`**: A contract for coordinating the interactions between the various tokens in the ecosystem.
+-   **`comprehensive-lending-system.clar`**: The primary **facade** for the lending module. It manages user deposits, loans, and collateral, and delegates complex operations like liquidations to specialized contracts.
+-   **Manager Contracts**:
+    -   **`liquidation-manager.clar`**: A dedicated contract responsible for managing the liquidation process for under-collateralized loans, ensuring the solvency of the protocol.
+
+### 4. Governance Module (`contracts/governance/`)
+
+The Governance Module facilitates decentralized control over the protocol.
+
+-   **`proposal-engine.clar`**: The **facade** for all governance-related actions, including proposal creation, voting, and execution.
+-   **Manager Contracts**:
+    -   **`conxian-operations-engine.clar`**: An automated "DAO Seat" that programmatically participates in governance by consuming on-chain metrics and casting policy-constrained votes.
 
 ## Modules
 
-For more detailed information about each module, please refer to the `README.md` files in the `contracts` directory:
+For more detailed information about each module's architecture and function, please refer to the `README.md` files in the `contracts` directory:
 
-* [Core Module](./contracts/core/README.md)
-* [DEX Module](./contracts/dex/README.md)
-* [Lending Module](./contracts/lending/README.md)
-* [Governance Module](./contracts/governance/README.md)
-* [Tokens Module](./contracts/tokens/README.md)
+-   [Core Module](./contracts/core/README.md)
+-   [DEX Module](./contracts/dex/README.md)
+-   [Lending Module](./contracts/lending/README.md)
+-   [Governance Module](./contracts/governance/README.md)
+-   [Tokens Module](./contracts/tokens/README.md)
+-   [Vaults Module](./contracts/vaults/README.md)
+-   [Security Module](./contracts/security/README.md)
+-   [Monitoring Module](./contracts/monitoring/README.md)
+
+## Project Documentation
+
+For a deeper understanding of the protocol's vision, architecture, and operational procedures, please refer to the following core documents:
+
+-   **[Whitepaper](./documentation/whitepaper/Conxian-Whitepaper.md)**: The complete technical vision and protocol design.
+-   **[Architecture Specification](./documentation/guides/ARCHITECTURE_SPEC.md)**: High-level system design and module interactions.
+-   **[Developer Guide](./documentation/developer/DEVELOPER_GUIDE.md)**: Comprehensive guide for developers, including setup, workflow, and contribution guidelines.
+-   **[Operations Runbook](./documentation/guides/OPERATIONS_RUNBOOK.md)**: Detailed operational procedures, administrative controls, and emergency protocols.
 
 ## Development Setup
 
 ### Prerequisites
 
-1. Clarinet 2.0+
-2. Node.js 18+
-3. Git
+1.  Clarinet 2.0+
+2.  Node.js 18+
+3.  Git
 
 ### Installation
 
@@ -85,10 +104,10 @@ npm test
 
 **Advanced Testing Suites:**
 
-*   **System End-to-End**: `npm run test:system`
-*   **Performance Benchmark**: `npm run test:performance`
-*   **Fuzz Testing**: `npm run test:fuzz`
-*   **Security Audit**: `npm run test:security`
+-   **System End-to-End**: `npm run test:system`
+-   **Performance Benchmark**: `npm run test:performance`
+-   **Fuzz Testing**: `npm run test:fuzz`
+-   **Security Audit**: `npm run test:security`
 
 ## Deployment
 
@@ -98,12 +117,12 @@ The protocol uses a staged deployment process managed by the `scripts/deploy-cor
 
 When deploying to mainnet, ensure the following principals are used or replaced with your specific addresses:
 
-| Role | Principal / Placeholder | Notes |
-|------|------------------------|-------|
-| **Devnet Deployer** | `ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM` | Standard Clarinet Devnet Address |
-| **Mainnet Deployer** | `SP1CONXIANPROTOCOLDEPLOYERADDRESS` | **ACTION REQUIRED**: Replace with your mainnet deployer address |
-| **SIP-010 Trait** | `SP3FBR2AGK5H9QBDH3EEN6DF8EK8JY7RX8QJ5SVTE` | Standard Mainnet SIP-010 Trait Contract |
-| **POX Contract** | `SP000000000000000000002Q6VF78` | Stacks Mainnet POX Contract |
+| Role                      | Principal / Placeholder             | Notes                                  |
+| ------------------------- | ----------------------------------- | -------------------------------------- |
+| **Devnet Deployer**       | `ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM` | Standard Clarinet Devnet Address       |
+| **Mainnet Deployer**      | `SP1CONXIANPROTOCOLDEPLOYERADDRESS` | **ACTION REQUIRED**: Replace with your mainnet deployer address |
+| **SIP-010 Trait**         | `SP3FBR2AGK5H9QBDH3EEN6DF8EK8JY7RX8QJ5SVTE` | Standard Mainnet SIP-010 Trait Contract |
+| **POX Contract**          | `SP000000000000000000002Q6VF78`     | Stacks Mainnet POX Contract            |
 
 ### Deployment Commands
 

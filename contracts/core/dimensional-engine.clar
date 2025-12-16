@@ -1,11 +1,12 @@
 ;;
-;; @title Dimensional Engine
+;; @title Dimensional Engine (Facade)
 ;; @author Conxian Protocol
-;; @desc This contract is the central facade for the dimensional engine, routing all
-;; user-facing calls to the appropriate specialized contracts (e.g., Position
-;; Manager, Collateral Manager). It enforces a modular architecture where this
-;; contract acts as the single entry point, simplifying user interaction and
-;; enhancing security by isolating logic.
+;; @desc This contract is the central facade for the Core Module, built on a
+;; modular facade pattern. It acts as the single, secure entry point for all
+
+;; user-facing calls related to position management, collateral, and risk.
+;; It contains no business logic itself; instead, it delegates all calls to
+;; specialized manager contracts.
 ;;
 
 (use-trait dimensional-trait .dimensional-traits.dimensional-trait)

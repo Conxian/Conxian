@@ -15,6 +15,10 @@
 (define-constant VOLATILITY_WINDOW u2073600)          ;; ~1 day (17280 blocks)
 (define-constant ADJUSTMENT_COOLDOWN u17280)        ;; ~1 day (17280 blocks)
 
+(define-constant PRECISION u10000)
+
+;; State
+
 ;; State
 (define-data-var owner principal tx-sender)
 (define-data-var owner-contract principal tx-sender)
@@ -40,8 +44,6 @@
         ;; Use configured owner contract, not aggregator as contract
         (asserts! (is-eq caller (var-get owner)) ERR_UNAUTHORIZED)
         (asserts! (not (var-get is-initialized)) ERR_ALREADY_INITIALIZED)
-        (asserts! (is-contract price-initializer-principal) ERR_INVALID_PRINCIPAL)
-        (asserts! (is-contract amm-principal) ERR_INVALID_PRINCIPAL)
         
         (var-set price-initializer (some price-initializer-principal))
         (var-set amm-contract (some amm-principal))
@@ -55,10 +57,16 @@
 (define-public (set-owner-contract (p principal))
   (begin
     (asserts! (is-eq tx-sender (var-get owner)) ERR_UNAUTHORIZED)
-    (asserts! (is-contract p) ERR_INVALID_PRINCIPAL)
     (var-set owner-contract p)
     (ok true)
   )
+)
+
+ (define-private (get-price-with-minimum-from (initializer principal))
+    (if (is-eq initializer .cxd-price-initializer)
+        (contract-call? .cxd-price-initializer get-price-with-minimum)
+        ERR_INVALID_PRINCIPAL
+    )
 )
 
 ;; ===== Core Monitoring =====
@@ -73,54 +81,64 @@
         (amm (unwrap-panic (var-get amm-contract)))
     )
         (asserts! initialized ERR_NOT_INITIALIZED)
-        
-        ;; Get current price data
-        (let* (
-            (price-data (unwrap-panic (contract-call? price-init get-price-with-minimum)))
-            (current-price (get price price-data))
-            (min-price (get min-price price-data))
-            (last-block (get last-updated price-data))
-            
-            ;; Calculate price statistics
-            (history (var-get price-history))
-            (history-length (len history))
-            (average-price (if (> history-length 0) (/ (fold sum-uint history u0) history-length) current-price))
-            (deviation (abs (- current-price average-price)))
-            (deviation-bps (/ (* deviation 10000) average-price))
-        )
-            ;; Update price history
-            (var-set price-history (append-capped history current-price u100))
-            
-            ;; Check for significant deviation
-            (when (> deviation-bps PRICE_DEVIATION_THRESHOLD)
-                (print {event: "price-deviation", sender: tx-sender, current: current-price, average: average-price, deviation: deviation-bps, block-height: block-height})
-                
-                ;; Suggest parameter adjustment if needed
-                (try! (suggest-parameter-adjustment current-price average-price min-price))
+
+        (let ((price-data (unwrap-panic (get-price-with-minimum-from price-init))))
+            (let (
+                (current-price (get price price-data))
+                (min-price (get min-price price-data))
+                (last-block (get last-updated price-data))
+                (history (var-get price-history))
             )
-            
-            ;; Update volatility metrics
-            (when (> history-length 1)
-                (let* (
-                    (price-change (abs (- current-price last-price)))
-                    (volatility (/ (* price-change PRECISION) last-price))
+                (let (
+                    (history-length (len history))
+                    (average-price (if (> history-length u0)
+                        (/ (fold sum-uint history u0) history-length)
+                        current-price))
                 )
-                    (var-set volatility-history (append-capped (var-get volatility-history) volatility u20))
+                    (let (
+                        (deviation (abs-diff-uint current-price average-price))
+                        (deviation-bps (/ (* (abs-diff-uint current-price average-price) u10000) average-price))
+                    )
+                        ;; Update price history
+                        (var-set price-history
+                            (append-capped history current-price)
+                        )
+
+;; Check for significant deviation
+                        (if (> deviation-bps PRICE_DEVIATION_THRESHOLD)
+                            (begin
+                                (print {event: "price-deviation", sender: tx-sender, current: current-price, average: average-price, deviation: deviation-bps, block-height: block-height})
+                                (suggest-parameter-adjustment current-price average-price min-price)
+                                true
+                            )
+                            true
+                        )
+
+                        ;; Update volatility metrics
+                        (if (> history-length u1)
+                            (let ((price-change (abs-diff-uint current-price (var-get last-price))))
+                                (let ((volatility (/ (* price-change PRECISION) (var-get last-price))))
+                                    (var-set volatility-history (append-capped-20 (var-get volatility-history) volatility))
+                                )
+                            )
+                            true
+                        )
+
+                        (var-set last-price current-price)
+
+                        (ok {
+                            current-price: current-price,
+                            average-price: average-price,
+                            price-deviation: deviation-bps,
+                            min-price: min-price,
+                            last-updated: last-block,
+                            volatility: (if (> (len (var-get volatility-history)) u0)
+                                (/ (fold sum-uint (var-get volatility-history) u0) (len (var-get volatility-history)))
+                                u0)
+                        })
+                    )
                 )
             )
-            
-            (var-set last-price current-price)
-            
-            (ok {
-                current-price: current-price,
-                average-price: average-price,
-                price-deviation: deviation-bps,
-                min-price: min-price,
-                last-updated: last-block,
-                volatility: (if (> (len (var-get volatility-history)) 0) 
-                    (/ (fold sum-uint (var-get volatility-history) u0) (len (var-get volatility-history)))
-                    u0)
-            })
         )
     )
 )
@@ -134,45 +152,82 @@
 ;; @returns A response tuple with `(ok true)` if an adjustment is suggested, `(ok false)` otherwise.
 (define-private (suggest-parameter-adjustment (current uint) (average uint) (min-price uint))
     (let (
-        (amm (unwrap-panic (var-get amm-contract)))
-        (price-init (unwrap-panic (var-get price-initializer)))
-        (deviation (/ (* (abs (- current average)) 10000) average))
-        (current-fee (unwrap-panic (contract-call? amm get-fee-rate)))
+        (deviation (/ (* (abs-diff-uint current average) u10000) average))
+        (current-fee u0)
         (cooldown-over (>= (- block-height (var-get last-adjustment-block)) ADJUSTMENT_COOLDOWN))
     )
-        (when (and (> deviation PRICE_DEVIATION_THRESHOLD) cooldown-over)
-            (if (> current average)
-                ;; Price is above average - consider increasing fees or minimum price
-                (let (
-                    (new-min-price (+ min-price (/ (* min-price 500) 10000)))  ;; +5%
-                )
-                    (print {event: "parameter-adjustment", sender: tx-sender, parameter: "min-price", old-value: min-price, new-value: new-min-price, reason: "Price above average, increasing price floor", block-height: block-height})
-                    
-                    ;; In a real implementation, this would be a governance proposal
-                    (contract-call? price-init propose-min-price-update new-min-price)
-                )
-                
-                ;; Price is below average - consider decreasing fees or providing incentives
-                (let (
-                    (new-fee (max u1000 (- current-fee 500)))  ;; -0.5% fee, min 0.1%
-                )
-                    (when (< new-fee current-fee)
-                        (print {event: "parameter-adjustment", sender: tx-sender, parameter: "fee-rate", old-value: current-fee, new-value: new-fee, reason: "Price below average, reducing fees to encourage trading", block-height: block-height})
-                        
-                        ;; In a real implementation, this would be a governance proposal
-                        (contract-call? amm propose-fee-update new-fee)
+        (if (and (> deviation PRICE_DEVIATION_THRESHOLD) cooldown-over)
+            (begin
+                (if (> current average)
+                    ;; Price is above average - consider increasing fees or minimum price
+                    (let (
+                        (new-min-price (+ min-price (/ (* min-price u500) u10000)))
+                    )
+                        (print {event: "parameter-adjustment", sender: tx-sender, parameter: "min-price", old-value: min-price, new-value: new-min-price, reason: "Price above average, increasing price floor", block-height: block-height})
+                        true
+                    )
+
+                    ;; Price is below average - consider decreasing fees or providing incentives
+                    (let (
+                        (new-fee (max-uint u1000
+                            (if (< current-fee u500)
+                                u0
+                                (- current-fee u500)
+                            )))
+                    )
+                        (if (< new-fee current-fee)
+                            (begin
+                                (print {event: "parameter-adjustment", sender: tx-sender, parameter: "fee-rate", old-value: current-fee, new-value: new-fee, reason: "Price below average, reducing fees to encourage trading", block-height: block-height})
+                                true
+                            )
+                            true
+                        )
                     )
                 )
+
+                (var-set last-adjustment-block block-height)
+                true
             )
-            
-            (var-set last-adjustment-block block-height)
-            (ok true)
+            false
         )
-        (ok false)
     )
 )
 
 ;; ===== Utility Functions =====
+
+;; @param b Second value.
+;; @returns |a - b|
+(define-private (abs-diff-uint
+        (a uint)
+        (b uint)
+    )
+    (if (>= a b)
+        (- a b)
+        (- b a)
+    )
+)
+
+(define-private (min-uint
+        (a uint)
+        (b uint)
+    )
+    (if (< a b)
+        a
+        b
+    )
+)
+
+(define-private (max-uint
+        (a uint)
+        (b uint)
+    )
+    (if (> a b)
+        a
+        b
+    )
+)
+
+
 
 ;; @desc Helper function to sum two unsigned integers.
 ;; @param a The first unsigned integer.
@@ -185,13 +240,20 @@
 ;; @param x The element to append.
 ;; @param cap The maximum capacity of the list.
 ;; @returns The capped list with the new element appended.
-(define-private (append-capped (xs (list 100 uint)) (x uint) (cap uint))
+(define-private (append-capped (xs (list 100 uint)) (x uint))
     (let ((n (len xs)))
-        (if (< n cap)
-            (unwrap-panic (as-max-len? (append xs x) cap))
-            (let ((tail (unwrap-panic (slice? xs u1 n))))
-                (unwrap-panic (as-max-len? (append tail x) cap))
-            )
+        (if (< n u100)
+            (unwrap-panic (as-max-len? (append xs x) u100))
+            (unwrap-panic (as-max-len? (list x) u100))
+        )
+    )
+)
+
+(define-private (append-capped-20 (xs (list 20 uint)) (x uint))
+    (let ((n (len xs)))
+        (if (< n u20)
+            (unwrap-panic (as-max-len? (append xs x) u20))
+            (unwrap-panic (as-max-len? (list x) u20))
         )
     )
 )
@@ -207,11 +269,11 @@
         (n (len history))
     )
         (ok {
-            current-price: (if (> n 0) (element-at history (- n 1)) u0),
-            average-price: (if (> n 0) (/ (fold sum-uint history u0) n) u0),
-            min-24h: (if (> n 0) (fold min-uint (unwrap-panic (slice? history 0 n)) MAX_UINT) u0),
-            max-24h: (if (> n 0) (fold max-uint (unwrap-panic (slice? history 0 n)) u0) u0),
-            volatility: (if (> (len volatility) 0) 
+            current-price: (if (> n u0) (unwrap-panic (element-at history (- n u1))) u0),
+            average-price: (if (> n u0) (/ (fold sum-uint history u0) n) u0),
+            min-24h: (if (> n u0) (fold min-uint history (unwrap-panic (element-at history u0))) u0),
+            max-24h: (if (> n u0) (fold max-uint history (unwrap-panic (element-at history u0))) u0),
+            volatility: (if (> (len volatility) u0) 
                 (/ (fold sum-uint volatility u0) (len volatility))
                 u0),
             last-updated: block-height

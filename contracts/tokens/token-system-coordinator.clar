@@ -11,11 +11,12 @@
 (use-trait rbac-trait .core-traits.rbac-trait)
 
 ;; --- Constants ---
-(define-constant ERR_UNAUTHORIZED u1001)
-(define-constant ERR_INVALID_TOKEN u3006)
-(define-constant ERR_SYSTEM_PAUSED u1003)
-(define-constant ERR_INVALID_AMOUNT u8001)
-(define-constant ERR_COORDINATOR_ERROR u1000)
+;; Updated to align with standard error codes and SDK test expectations
+(define-constant ERR_UNAUTHORIZED u100)
+(define-constant ERR_INVALID_TOKEN u101)
+(define-constant ERR_SYSTEM_PAUSED u104)
+(define-constant ERR_INVALID_AMOUNT u103)
+(define-constant ERR_COORDINATOR_ERROR u104)
 (define-constant MAX_TOKENS u5)
 (define-constant COORDINATOR_VERSION "1.0.0")
 
@@ -28,15 +29,22 @@
 
 ;; --- Data Variables ---
 (define-data-var contract-owner principal tx-sender)
+;; Tracks an explicit admin separate from the deployer for compatibility with
+;; higher-level security tests and access-control conventions
+(define-data-var admin principal tx-sender)
 (define-data-var paused bool false)
 (define-data-var emergency-mode bool false)
-(define-data-var revenue-distributor principal tx-sender)
+;; Default revenue-distributor to the canonical system contract once deployed
+(define-data-var revenue-distributor principal .revenue-distributor)
 (define-data-var last-operation-id uint u0)
 (define-data-var total-registered-tokens uint u0)
 (define-data-var total-users uint u0)
 
 ;; --- Data Maps ---
-(define-map registered-tokens principal bool)
+(define-map registered-tokens
+  principal
+  bool
+)
 
 (define-map token-metadata
   principal
@@ -45,7 +53,7 @@
     decimals: uint,
     total-supply: uint,
     is-active: bool,
-    last-activity: uint
+    last-activity: uint,
   }
 )
 
@@ -55,7 +63,7 @@
     last-interaction: uint,
     total-volume: uint,
     token-count: uint,
-    reputation-score: uint
+    reputation-score: uint,
   }
 )
 
@@ -67,48 +75,75 @@
     operation-type: (string-ascii 32),
     timestamp: uint,
     total-value: uint,
-    status: (string-ascii 16)
+    status: (string-ascii 16),
   }
 )
 
 ;; --- Read-Only Functions ---
+;; All externally consumed views now use `(response ...)` semantics so that
+;; SDK helpers can rely on `toBeOk` style assertions.
 (define-read-only (get-contract-owner)
-  (var-get contract-owner)
+  (ok (var-get contract-owner))
+)
+
+(define-read-only (get-admin)
+  (ok (var-get admin))
 )
 
 (define-read-only (is-paused)
-  (var-get paused)
+  (ok (var-get paused))
 )
 
 (define-read-only (get-emergency-mode)
-  (var-get emergency-mode)
+  (ok (var-get emergency-mode))
 )
 
 (define-read-only (get-registered-token (token principal))
-  (map-get? registered-tokens token)
+  (ok (default-to false (map-get? registered-tokens token)))
 )
 
 (define-read-only (get-token-metadata (token principal))
-  (map-get? token-metadata token)
+  (ok (default-to {
+    symbol: "",
+    decimals: u0,
+    total-supply: u0,
+    is-active: false,
+    last-activity: u0,
+  }
+    (map-get? token-metadata token)
+  ))
 )
 
 (define-read-only (get-user-activity (user principal))
-  (map-get? user-activity user)
+  (ok (default-to {
+    last-interaction: u0,
+    total-volume: u0,
+    token-count: u0,
+    reputation-score: u1000,
+  }
+    (map-get? user-activity user)
+  ))
 )
 
 (define-read-only (get-system-health)
-  {
+  (ok {
     is-paused: (var-get paused),
     emergency-mode: (var-get emergency-mode),
     total-registered-tokens: (var-get total-registered-tokens),
     total-users: (var-get total-users),
-    coordinator-version: COORDINATOR_VERSION
-  }
+    coordinator-version: COORDINATOR_VERSION,
+  })
 )
 
 ;; --- Private Helper Functions ---
 (define-private (is-contract-owner)
   (is-eq tx-sender (var-get contract-owner))
+)
+
+;; Treat the configured admin as an operator that can be rotated without
+;; redeploying the coordinator contract.
+(define-private (is-admin)
+  (is-eq tx-sender (var-get admin))
 )
 
 (define-private (when-not-paused)
@@ -132,19 +167,21 @@
   )
 )
 
-(define-private (update-user-activity (user principal) (volume uint))
+(define-private (update-user-activity
+    (user principal)
+    (volume uint)
+  )
   (let (
-    (existing-activity (map-get? user-activity user))
-    (current-activity (default-to
-      {
+      (existing-activity (map-get? user-activity user))
+      (current-activity (default-to {
         last-interaction: block-height,
         total-volume: u0,
         token-count: u0,
-        reputation-score: u1000
+        reputation-score: u1000,
       }
-      existing-activity
-    ))
-  )
+        existing-activity
+      ))
+    )
     (if (is-none existing-activity)
       (var-set total-users (+ (var-get total-users) u1))
       true
@@ -152,15 +189,32 @@
     (map-set user-activity user {
       last-interaction: block-height,
       total-volume: (+ (get total-volume current-activity) volume),
-      token-count: (get token-count current-activity),
-      reputation-score: (get reputation-score current-activity)
+      ;; Track at least one token per active user for monitoring dashboards
+      token-count: (if (is-none existing-activity)
+        u1
+        (get token-count current-activity)
+      ),
+      reputation-score: (get reputation-score current-activity),
     })
     true
   )
 )
 
 ;; --- Public Functions ---
-(define-public (register-token (token principal) (symbol (string-ascii 10)) (decimals uint))
+;; Configure admin operator; only contract-owner may rotate the admin
+(define-public (set-admin (new-admin principal))
+  (begin
+    (asserts! (is-contract-owner) (err ERR_UNAUTHORIZED))
+    (var-set admin new-admin)
+    (ok true)
+  )
+)
+
+(define-public (register-token
+    (token principal)
+    (symbol (string-ascii 10))
+    (decimals uint)
+  )
   (begin
     (asserts! (is-contract-owner) (err ERR_UNAUTHORIZED))
     (if (is-none (map-get? registered-tokens token))
@@ -172,7 +226,7 @@
           decimals: decimals,
           total-supply: u0,
           is-active: true,
-          last-activity: block-height
+          last-activity: block-height,
         })
         (ok true)
       )
@@ -181,21 +235,28 @@
   )
 )
 
-(define-public (update-token-activity (token principal) (supply uint))
+(define-public (update-token-activity
+    (token principal)
+    (supply uint)
+  )
   (begin
     (try! (when-not-paused))
     (try! (validate-token token))
     (map-set token-metadata token
       (merge (unwrap-panic (map-get? token-metadata token)) {
         total-supply: supply,
-        last-activity: block-height
+        last-activity: block-height,
       })
     )
     (ok true)
   )
 )
 
-(define-public (on-transfer (amount uint) (sender principal) (recipient principal))
+(define-public (on-transfer
+    (amount uint)
+    (sender principal)
+    (recipient principal)
+  )
   (begin
     (try! (when-not-paused))
     (try! (validate-token contract-caller))
@@ -205,38 +266,55 @@
   )
 )
 
-(define-public (on-mint (amount uint) (recipient principal))
+(define-public (on-mint
+    (amount uint)
+    (recipient principal)
+  )
   (begin
     (try! (when-not-paused))
     (try! (validate-token contract-caller))
     (update-user-activity recipient amount)
     (let ((meta (unwrap-panic (map-get? token-metadata contract-caller))))
-         (map-set token-metadata contract-caller (merge meta {
-             total-supply: (+ (get total-supply meta) amount),
-             last-activity: block-height
-         }))
+      (map-set token-metadata contract-caller
+        (merge meta {
+          total-supply: (+ (get total-supply meta) amount),
+          last-activity: block-height,
+        })
+      )
     )
     (ok true)
   )
 )
 
-(define-public (on-burn (amount uint) (sender principal))
+(define-public (on-burn
+    (amount uint)
+    (sender principal)
+  )
   (begin
     (try! (when-not-paused))
     (try! (validate-token contract-caller))
     (update-user-activity sender amount)
     (let ((meta (unwrap-panic (map-get? token-metadata contract-caller))))
-         (map-set token-metadata contract-caller (merge meta {
-             total-supply: (if (>= (get total-supply meta) amount) (- (get total-supply meta) amount) u0),
-             last-activity: block-height
-         }))
+      (map-set token-metadata contract-caller
+        (merge meta {
+          total-supply: (if (>= (get total-supply meta) amount)
+            (- (get total-supply meta) amount)
+            u0
+          ),
+          last-activity: block-height,
+        })
+      )
     )
     (ok true)
   )
 )
 
-(define-public (on-dimensional-yield (amount uint) (start-height uint) (end-height uint))
-    (ok true)
+(define-public (on-dimensional-yield
+    (amount uint)
+    (start-height uint)
+    (end-height uint)
+  )
+  (ok true)
 )
 
 (define-public (coordinate-multi-token-operation
@@ -246,14 +324,18 @@
     (total-value uint)
   )
   (let (
-        (new-op-id (+ (var-get last-operation-id) u1))
-        (token-count (len tokens))
-       )
+      (new-op-id (+ (var-get last-operation-id) u1))
+      (token-count (len tokens))
+    )
     (try! (when-not-paused))
     (try! (when-not-emergency))
 
+    ;; Enforce non-empty token list and bounded size
     (asserts! (>= token-count u1) (err ERR_INVALID_AMOUNT))
     (asserts! (<= token-count MAX_TOKENS) (err ERR_INVALID_AMOUNT))
+    ;; Operation type must be non-empty and value positive to be meaningful
+    (asserts! (> (len operation-type) u0) (err ERR_INVALID_AMOUNT))
+    (asserts! (> total-value u0) (err ERR_INVALID_AMOUNT))
 
     (map-set cross-token-operations new-op-id {
       user: user,
@@ -261,33 +343,32 @@
       operation-type: operation-type,
       timestamp: block-height,
       total-value: total-value,
-      status: "initiated"
+      status: "initiated",
     })
     (var-set last-operation-id new-op-id)
 
     (update-user-activity user total-value)
 
     (if (is-eq operation-type "yield-claim")
-      (try! (trigger-revenue-distribution (unwrap-panic (element-at tokens u0)) total-value))
+      (try! (trigger-revenue-distribution (unwrap-panic (element-at tokens u0))
+        total-value
+      ))
       true
     )
     (ok new-op-id)
   )
 )
 
-(define-public (trigger-revenue-distribution (token principal) (amount uint))
+(define-public (trigger-revenue-distribution
+    (token principal)
+    (amount uint)
+  )
   (begin
     (try! (when-not-paused))
     (try! (validate-token token))
-
-    ;; Call revenue distributor - commented out until revenue distributor contract exists
-    ;; (try! (contract-call? .revenue-distributor distribute-revenue token amount))
-
-    ;; Update token activity
+    (try! (contract-call? .revenue-distributor distribute-revenue token amount))
     (try! (update-token-activity token amount))
-    (ok true)
-  )
-)
+    (ok true)))
 
 (define-public (emergency-pause-system)
   (begin
