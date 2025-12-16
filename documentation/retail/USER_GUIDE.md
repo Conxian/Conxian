@@ -1,17 +1,17 @@
-# Welcome to Conxian: Your Complete Guide to Advanced Crypto Trading
+# Welcome to Conxian: Your Guide to a Premier DeFi Experience
 
-This guide helps you start using Conxian - a powerful decentralized exchange (DEX) and lending platform on the Stacks blockchain, secured by Bitcoin.
+This guide will walk you through Conxian, a sophisticated decentralized exchange (DEX) and lending platform on the Stacks blockchain, secured by Bitcoin. Our focus is on providing a clean, intuitive, and powerful user experience.
 
 ## What is Conxian?
 
 Conxian is a comprehensive DeFi platform that offers:
 
-- **Advanced Trading**: Swap cryptocurrencies with optimal routing and low fees
-- **Lending & Borrowing**: Earn interest by lending crypto or borrow for trading
-- **Liquidity Provision**: Provide liquidity to earn trading fees
-- **Cross-Chain Features**: Move assets between different blockchains
+- **Advanced Trading**: Swap cryptocurrencies with optimal routing and low fees through a simple, intuitive interface.
+- **Lending & Borrowing**: Earn interest by lending crypto or borrow for trading with clear, upfront information.
+- **Liquidity Provision**: Provide liquidity to earn trading fees, with easy-to-understand analytics.
+- **Cross-Chain Features**: Move assets between different blockchains seamlessly.
 
-Unlike traditional exchanges, Conxian is decentralized - you control your own funds and trades happen directly on the blockchain.
+Unlike traditional exchanges, Conxian is decentralized - you always control your own funds, and all transactions happen directly on the blockchain.
 
 ## Quick Start (2 minutes)
 
@@ -77,26 +77,37 @@ trading, lending, or providing liquidity.
 
 ### Step 2: Connect to Conxian
 
+Connecting your wallet is your gateway to the Conxian ecosystem. The process is designed to be simple and secure.
+
 ```
-🌐 Open your web browser
-🔗 Go to Conxian website
-👛 Click "Connect Wallet"
-🔍 Select your Hiro or Xverse wallet
-✅ Approve the connection
-🎉 You're ready to start!
+🌐 Open your web browser and navigate to the Conxian web application.
+👛 Click the "Connect Wallet" button, located prominently in the top-right corner.
+🔍 A modal will appear displaying supported wallets. Select your preferred wallet (e.g., Hiro or Xverse).
+✅ Approve the connection request within your wallet's interface.
+🎉 You're in! Your wallet is now securely connected, and you'll see your wallet address in the header.
 ```
 
 **Visual Guide:**
 
 ```
-[Image: Wallet connection screenshot]
-1. Click "Connect Wallet" button
-2. Choose wallet type
-3. Scan QR code or approve in wallet
-4. Success message appears
+[Image: A clean, modern modal window showing logos for multiple supported wallets like Hiro and Xverse, with clear instructions.]
 ```
 
-### Step 3: Trade Cryptocurrencies
+### Step 3: Your Personal Dashboard
+
+Once connected, you'll land on your personal dashboard. This is your central hub for viewing your portfolio, tracking your positions, and navigating the platform.
+
+**What you'll see:**
+- **Portfolio Overview:** A summary of your total assets held on Conxian.
+- **My Positions:** A breakdown of your supplied assets, borrowed assets, and liquidity pool stakes.
+- **Quick Actions:** Buttons to quickly navigate to the Swap, Lend, and Earn pages.
+
+**Visual Guide:**
+```
+[Image: A sleek dashboard view with charts showing portfolio allocation, and clear cards for different asset balances and positions.]
+```
+
+### Step 4: Trade Cryptocurrencies
 
 The trading feature lets you swap one cryptocurrency for another instantly.
 
@@ -122,26 +133,20 @@ Fee: ~0.30 STX
 **Visual Guide:**
 
 ```
-[Image: Trading interface]
-┌─────────────────────────────────────┐
-│ Sell: [100] STX                     │
-│ Buy: [0.0025] sBTC ≈ $25.00         │
-│ Fee: 0.30 STX                       │
-│ [Swap Now]                          │
-└─────────────────────────────────────┘
+[Image: A clean and simple swap interface. Two large input fields for the "from" and "to" tokens, with a clear price chart and details about the transaction fee and slippage shown below.]
 ```
 
-### Step 4: Earn Interest (Yield Vaults)
+### Step 5: Earn Interest (Yield Vaults)
 
 Yield vaults are like high-interest savings accounts for crypto. Deposit your crypto and earn interest automatically.
 
 **How it works:**
 
-1. **Find a vault** for your crypto (STX, sBTC, etc.)
-2. **Deposit crypto** - Send your crypto to the vault
-3. **Get "shares"** - Receive vault shares representing your deposit
-4. **Earn interest** - Your shares grow in value over time
-5. **Withdraw anytime** - Get your crypto back plus earned interest
+1. **Navigate to the "Earn" page** from your dashboard.
+2. **Select a vault** for your desired crypto (e.g., STX, sBTC).
+3. **Enter the amount** you wish to deposit. The interface will show you an estimate of your earnings.
+4. **Confirm the deposit** in the app and approve the transaction in your wallet.
+5. **That's it!** You'll receive vault "shares" and can track your growing interest from your dashboard.
 
 **Current Rates (Example):**
 
@@ -152,11 +157,7 @@ Yield vaults are like high-interest savings accounts for crypto. Deposit your cr
 **Visual Guide:**
 
 ```
-[Image: Vault deposit screen]
-Your Deposit: 100 STX
-Shares Received: 98.7 (after 1.3 fee)
-Current APY: 8.5%
-Estimated Monthly Earnings: ~0.71 STX
+[Image: A list of available yield vaults, each with a clear APY percentage and total value locked. The deposit modal is clean, with a simple input and clear display of fees and estimated returns.]
 ```
 
 ## Core Features Explained
@@ -226,6 +227,17 @@ STX → [Pool A] → USDA → [Pool B] → sBTC
 Rate: 2% better than direct trade
 ```
 
+### ✨ A Personalized Experience with NFT-Powered Themes
+
+As a Conxian user, you have access to a unique personalization feature. If you own a special Conxian Treasury NFT in your connected wallet, the platform's theme will automatically adapt to match the branding and colors of your NFT.
+
+**How it works:**
+- **Automatic Detection:** The app detects the NFT in your wallet upon connection.
+- **Dynamic Theming:** The UI color scheme, background, and other visual elements instantly change.
+- **User Control:** While the NFT theme is a special perk, you can always switch back to the default theme or choose from other available options in the settings menu.
+
+This feature is our way of rewarding our community and creating a more engaging and personalized DeFi experience.
+
 ## Token Guide (Simplified)
 
 | Token | What It Does | How to Get It | Current Value |
@@ -287,16 +299,26 @@ You receive: 1200 CXD
 - Use limit orders instead of market orders
 - Take profits regularly, don't hold forever
 
-## Track Your Progress
+## Track Your Progress (Activity & Dashboard)
 
-### Personal Dashboard
+### Your Personal Dashboard
+
+As mentioned in Step 3, the dashboard is your main hub. It's designed to give you a comprehensive, at-a-glance view of your financial activities on Conxian.
 
 **What to monitor:**
 
-- **Total Balance** - Your complete portfolio value
-- **Share Count** - Your ownership in vaults
-- **Interest Earned** - Total earnings over time
-- **APY** - Current annual percentage yield
+- **Total Balance:** Your complete portfolio value.
+- **Asset Allocation:** A visual breakdown of your holdings.
+- **Vault Performance:** Track your earnings and the current APY of your staked assets.
+- **Loan Health:** If you're borrowing, clearly see your health factor to manage your risk.
+
+### Transaction History
+
+Stay informed about all your activity with a dedicated transaction history.
+
+- **Real-Time Status:** See if your transactions are pending, confirmed, or have failed.
+- **Detailed Information:** Each entry includes the transaction type, amount, date, and a direct link to the Stacks explorer for verification.
+- **Easy Access:** Find your transaction history on a separate "Activity" page or via a quick-access icon in the header.
 
 ### Platform Health
 
@@ -323,10 +345,11 @@ You receive: 1200 CXD
 
 **Help Options:**
 
-1. **📖 Check this guide** - Many answers here
-2. **💬 Community Discord** - Real-time help from users
-3. **🔍 Search issues** - GitHub for technical problems
-4. **📧 Email support** - For account-specific issues
+1. **💡 In-App Tooltips:** Look for help icons throughout the app for quick explanations of key terms and features.
+2. **📖 Check this guide** - Many answers here
+3. **💬 Community Discord** - Real-time help from users
+4. **🔍 Search issues** - GitHub for technical problems
+5. **📧 Email support** - For account-specific issues
 
 **Response Times:**
 
