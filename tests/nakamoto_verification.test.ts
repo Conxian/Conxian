@@ -1,25 +1,24 @@
 
 import { describe, it, expect, beforeAll, beforeEach } from 'vitest';
-import { Clarinet, initSimnet, type Simnet } from '@stacks/clarinet-sdk';
+import { initSimnet, type Simnet } from "@stacks/clarinet-sdk";
 import { Cl } from '@stacks/transactions';
 
 let simnet: Simnet;
 let accounts: Map<string, string>;
 let deployer: string;
 let wallet1: string;
-let clarinet: Clarinet;
 
 describe('Nakamoto Architecture Verification', () => {
   beforeAll(async () => {
-    clarinet = await Clarinet.fromConfigFile('Clarinet.toml');
-    simnet = await initSimnet(clarinet);
+    simnet = await initSimnet("Clarinet.toml");
   });
 
   beforeEach(async () => {
-    await simnet.initSession(clarinet);
+    await simnet.initSession(process.cwd(), "Clarinet.toml");
     accounts = simnet.getAccounts();
     deployer = accounts.get("deployer")!;
-    wallet1 = accounts.get("wallet_1")!;
+    wallet1 =
+      accounts.get("wallet_1") ?? "ST1SJ3DTE5DN7X54YDH5D64R3BCB6A2AG2ZQ8YPD5";
   });
 
   // SKIP: sBTC wrap requires complex BTC transaction mocking not available in simnet
