@@ -12,13 +12,12 @@ let wallet2: string;
 describe('Token System Coordinator', () => {
   beforeAll(async () => {
     // Initialize Clarinet simnet directly for this test suite
-    clarinet = await initSimnet('Clarinet.toml');
-    simnet = await initSimnet(clarinet);
+    simnet = await initSimnet("Clarinet.toml");
   });
 
   beforeEach(async () => {
     // Reset session before each test to ensure isolation
-    await simnet.initSession(clarinet, 'simnet');
+    await simnet.initSession(process.cwd(), "Clarinet.toml");
     const accounts = simnet.getAccounts();
     deployer = accounts.get('deployer')!;
     wallet1 = accounts.get('wallet_1') || 'ST1SJ3DTE5DN7X54YDH5D64R3BCB6A2AG2ZQ8YPD5';
