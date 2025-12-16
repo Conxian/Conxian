@@ -1,13 +1,18 @@
 
-import { describe, it, expect, beforeEach } from "vitest";
-import { Cl, ClarityType } from "@stacks/transactions";
+import { describe, it, expect, beforeAll, beforeEach } from 'vitest';
+import { initSimnet, type Simnet } from '@stacks/clarinet-sdk';
+import { Cl, ClarityType } from '@stacks/transactions';
 
+let simnet: Simnet;
+let clarinet: any;
 let deployer: string;
 let wallet1: string;
 
-declare const simnet: any;
-
 describe("Grand Unified System Journey", () => {
+  beforeAll(async () => {
+    simnet = await initSimnet("Clarinet.toml");
+  });
+
   beforeEach(async () => {
     await simnet.initSession(process.cwd(), "Clarinet.toml");
     const accounts = simnet.getAccounts();
@@ -38,28 +43,34 @@ describe("Grand Unified System Journey", () => {
       deployer
     );
 
-    // 2. Fund the Pool (LP)
+    // 2. Fund the Pool (LP) - Mint tokens directly to the pool contract
     simnet.callPublicFn(
       tokenCollateral,
       "mint",
-      [Cl.uint(100000000000), Cl.standardPrincipal(deployer)],
+      [
+        Cl.uint(100000000000),
+        Cl.contractPrincipal(deployer, "concentrated-liquidity-pool"),
+      ],
       deployer
     );
     simnet.callPublicFn(
       tokenBorrow,
       "mint",
-      [Cl.uint(100000000000), Cl.standardPrincipal(deployer)],
+      [
+        Cl.uint(100000000000),
+        Cl.contractPrincipal(deployer, "concentrated-liquidity-pool"),
+      ],
       deployer
     );
 
+    // Initialize liquidity via add-liquidity to update reserves
+    // Note: add-liquidity uses MIN/MAX tick (full range) and updates reserves
     simnet.callPublicFn(
       "concentrated-liquidity-pool",
-      "mint",
+      "add-liquidity",
       [
-        Cl.standardPrincipal(deployer),
-        Cl.int(-200000),
-        Cl.int(200000),
-        Cl.uint(10000000000),
+        Cl.uint(10000000000), // amount0
+        Cl.uint(10000000000), // amount1
         Cl.contractPrincipal(deployer, tokenCollateral),
         Cl.contractPrincipal(deployer, tokenBorrow),
       ],
@@ -134,7 +145,7 @@ describe("Grand Unified System Journey", () => {
       ],
       wallet1
     );
-    expect(twapReceipt.result).toBeOk(Cl.uint(1)); // Order ID 1
+    expect(twapReceipt.result).toEqual(Cl.ok(Cl.uint(1))); // Order ID 1
 
     // --- Step 4: Time Travel (Simulate Block Mining) ---
     simnet.mineEmptyBlocks(20);
@@ -148,7 +159,7 @@ describe("Grand Unified System Journey", () => {
       [Cl.standardPrincipal(wallet1), Cl.uint(100)],
       wallet1
     );
-    expect(checkCompliance.result).toBeOk(Cl.bool(true));
+    expect(checkCompliance.result).toEqual(Cl.ok(Cl.bool(true)));
 
     // --- Step 6: MEV Protection (Commit-Reveal) ---
     // Commit
@@ -175,7 +186,7 @@ describe("Grand Unified System Journey", () => {
       ],
       wallet1
     );
-    expect(commitReceipt.result).toBeOk(Cl.uint(0));
+    expect(commitReceipt.result).toEqual(Cl.ok(Cl.uint(0)));
 
     // We cannot proceed to 'reveal-order' successfully without the correct hash preimage.
     // However, we have verified the system's "Commit" capability.

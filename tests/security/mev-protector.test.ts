@@ -1,12 +1,17 @@
-import { describe, it, expect, beforeEach } from "vitest";
-import { Cl } from "@stacks/transactions";
+import { describe, it, expect, beforeAll, beforeEach } from "vitest";
+import { Cl, ClarityType } from "@stacks/transactions";
+import { createHash } from "node:crypto";
+import { initSimnet, type Simnet } from "@stacks/clarinet-sdk";
 
 let deployer: string;
 let wallet1: string;
-
-declare const simnet: any;
+let simnet: Simnet;
 
 describe("MEV Protector", () => {
+  beforeAll(async () => {
+    simnet = await initSimnet("Clarinet.toml");
+  });
+
   beforeEach(async () => {
     await simnet.initSession(process.cwd(), "Clarinet.toml");
     const accounts = simnet.getAccounts();
@@ -91,11 +96,6 @@ describe("MEV Protector", () => {
       [batchId, Cl.contractPrincipal(deployer, "mock-pool")],
       wallet1
     );
-    // Expecting 4005 (BATCH_NOT_READY) because the batch isn't ready, regardless of caller.
-    // The previous test expected 4000 (UNAUTHORIZED), but the contract checks readiness first or maybe doesn't check owner?
-    // Looking at contract:
-    // (let (metadata (unwrap! (map-get? batch-metadata { batch-id: batch-id }) ERR_BATCH_NOT_READY)))
-    // If metadata is missing (which it is for a random batchId), it returns ERR_BATCH_NOT_READY (u4005).
     expect(nonOwnerExec.result).toEqual(Cl.error(Cl.uint(4005)));
 
     const ownerExec = simnet.callPublicFn(
@@ -105,5 +105,99 @@ describe("MEV Protector", () => {
       deployer
     );
     expect(ownerExec.result).toEqual(Cl.error(Cl.uint(4005)));
+  });
+
+  it("allows committing an order", () => {
+    const hash = "0x" + "0".repeat(64);
+    const result = simnet.callPublicFn(
+      "mev-protector",
+      "commit-order",
+      [Cl.bufferFromHex(hash)],
+      wallet1
+    );
+    expect(result.result).toEqual(Cl.ok(Cl.uint(0)));
+  });
+
+  it("prevents early reveal", () => {
+    const hash = "0x" + "0".repeat(64); // Dummy hash
+    simnet.callPublicFn(
+      "mev-protector",
+      "commit-order",
+      [Cl.bufferFromHex(hash)],
+      wallet1
+    );
+
+    // Try to reveal immediately
+    const result = simnet.callPublicFn(
+      "mev-protector",
+      "reveal-commitment",
+      [Cl.uint(0), Cl.bufferFromHex("0x" + "0".repeat(64))], // Dummy salt (32 bytes)
+      wallet1
+    );
+
+    expect(result.result).toBeErr(Cl.uint(4002)); // ERR_REVEAL_PERIOD_ENDED (actually wait period hasn't ended)
+  });
+
+  it("completes full batch lifecycle", () => {
+    const salt = Buffer.from("0102030405060708090a0b0c0d0e0f10", "hex"); // 16 bytes
+
+    // Define order parameters
+    const tokenIn = Cl.contractPrincipal(deployer, "cxd-token");
+    const tokenOut = Cl.contractPrincipal(deployer, "cxs-token");
+    const amountIn = Cl.uint(1000);
+    const minOut = Cl.uint(900);
+
+    // Hash salt only
+    const hash = createHash("sha256").update(salt).digest();
+
+    // 1. Commit
+    const commitResult = simnet.callPublicFn(
+      "mev-protector",
+      "commit-order",
+      [Cl.buffer(hash)],
+      wallet1
+    );
+    expect(commitResult.result).toEqual(Cl.ok(Cl.uint(0))); // Commitment ID 0
+
+    // 2. Advance to Reveal Period (10 blocks)
+    simnet.mineEmptyBlocks(10);
+
+    // 3. Reveal
+    const revealResult = simnet.callPublicFn(
+      "mev-protector",
+      "reveal-order",
+      [
+        Cl.uint(0),
+        tokenIn, // token-in-trait
+        tokenOut, // token-out
+        amountIn, // amount-in
+        minOut, // min-out
+        Cl.buffer(salt), // salt
+      ],
+      wallet1
+    );
+    expect(revealResult.result).toEqual(Cl.ok(Cl.uint(0))); // Batch ID 0
+
+    // 4. Advance to End of Batch (another 10 blocks)
+    // Batch 0 ends at block 20. Current is ~11.
+    simnet.mineEmptyBlocks(10);
+
+    // 5. Execute Batch
+    const executeResult = simnet.callPublicFn(
+      "mev-protector",
+      "execute-order-in-batch",
+      [
+        Cl.uint(0), // batch-id
+        Cl.uint(0), // order-index
+        Cl.contractPrincipal(deployer, "mock-pool"),
+        tokenIn,
+        tokenOut,
+        Cl.contractPrincipal(deployer, "oracle"),
+      ],
+      deployer // Owner
+    );
+    // Since mock-pool swaps 1:1, amount-out should be 1000.
+    // Oracle price check should pass (1:1).
+    expect(executeResult.result).toEqual(Cl.ok(Cl.uint(1000)));
   });
 });

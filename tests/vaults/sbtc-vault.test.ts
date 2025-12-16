@@ -1,18 +1,13 @@
 import { describe, it, expect, beforeAll, beforeEach } from 'vitest';
 import { initSimnet, type Simnet } from '@stacks/clarinet-sdk';
-import { Cl } from '@stacks/transactions';
+import { Cl, ClarityType } from '@stacks/transactions';
 
 let simnet: Simnet;
 let deployer: string;
 
-// Smoke tests for the sBTC vault facade. These focus on admin controls and
-// read-only stats rather than cross-contract integrations.
 describe('sBTC Vault', () => {
   beforeAll(async () => {
-    simnet = await initSimnet('Clarinet.toml', false, {
-      trackCosts: false,
-      trackCoverage: false,
-    });
+    simnet = await initSimnet('Clarinet.toml');
   });
 
   beforeEach(async () => {

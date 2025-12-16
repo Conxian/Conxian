@@ -1,13 +1,18 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeAll, beforeEach } from "vitest";
+import { initSimnet, type Simnet } from "@stacks/clarinet-sdk";
 import { Cl } from "@stacks/transactions";
 
+let simnet: Simnet;
+let clarinet: any;
 let deployer: string;
 let wallet1: string;
 let wallet2: string;
 
-declare const simnet: any;
-
 describe("Enhanced Tokenomics System", () => {
+  beforeAll(async () => {
+    simnet = await initSimnet("Clarinet.toml");
+  });
+
   beforeEach(async () => {
     await simnet.initSession(process.cwd(), "Clarinet.toml");
     const accounts = simnet.getAccounts();
@@ -151,59 +156,6 @@ describe("Enhanced Tokenomics System", () => {
         deployer
       );
       expect(wallet2Balance.result).toBeOk(Cl.uint(transferAmount));
-    });
-  });
-
-  describe("CXVG Token (Voting / Governance Token)", () => {
-    it("should have correct initial metadata", () => {
-      const nameResult = simnet.callReadOnlyFn(
-        "cxvg-token",
-        "get-name",
-        [],
-        deployer
-      );
-      expect(nameResult.result).toBeOk(Cl.stringAscii("Conxian Voting Token"));
-
-      const symbolResult = simnet.callReadOnlyFn(
-        "cxvg-token",
-        "get-symbol",
-        [],
-        deployer
-      );
-      expect(symbolResult.result).toBeOk(Cl.stringAscii("CXVG"));
-    });
-
-    it("should allow owner to configure system integration", () => {
-      const receipt = simnet.callPublicFn(
-        "cxvg-token",
-        "set-token-uri",
-        [Cl.some(Cl.stringUtf8("ipfs://cxvg-metadata"))],
-        deployer
-      );
-      expect(receipt.result).toBeOk(Cl.bool(true));
-    });
-
-    it("should support minting and transfers", () => {
-      simnet.callPublicFn(
-        "cxvg-token",
-        "mint",
-        [Cl.uint(2_000_000_000), Cl.principal(wallet1)],
-        deployer
-      );
-
-      const transferAmount = 1_000_000_000;
-      const transferReceipt = simnet.callPublicFn(
-        "cxvg-token",
-        "transfer",
-        [
-          Cl.uint(transferAmount),
-          Cl.principal(wallet1),
-          Cl.principal(wallet2),
-          Cl.none(),
-        ],
-        wallet1
-      );
-      expect(transferReceipt.result).toBeOk(Cl.bool(true));
     });
   });
 

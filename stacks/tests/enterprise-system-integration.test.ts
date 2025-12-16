@@ -22,7 +22,10 @@ d('Enterprise Loan System Integration Tests', () => {
   let accounts: Map<string, string>;
 
   beforeAll(async () => {
-    simnet = await initSimnet();
+    simnet = await initSimnet("Clarinet.toml", false, {
+      trackCosts: false,
+      trackCoverage: false,
+    });
     accounts = simnet.getAccounts();
     
     console.log('🚀 Initializing Enterprise Loan System Integration Tests');
@@ -700,19 +703,22 @@ d('Enterprise Loan System Integration Tests', () => {
 /**
  * Performance Benchmarking Tests
  */
-describe('Enterprise System Performance Benchmarks', () => {
+describe("Enterprise Loan System Integration Tests - Advanced Workflows", () => {
   let simnet: any;
   let accounts: Map<string, string>;
 
   beforeAll(async () => {
-    simnet = await initSimnet();
+    simnet = await initSimnet("Clarinet.toml", false, {
+      trackCosts: false,
+      trackCoverage: false,
+    });
     accounts = simnet.getAccounts();
   });
 
-  it('should handle concurrent loan operations efficiently', async () => {
-    const deployer = accounts.get('deployer')!;
+  it("should handle concurrent loan operations efficiently", async () => {
+    const deployer = accounts.get("deployer")!;
     const startTime = Date.now();
-    
+
     // Setup liquidity
     await simnet.callPublicFn(
       "enterprise-loan-manager",
@@ -720,20 +726,20 @@ describe('Enterprise System Performance Benchmarks', () => {
       [Cl.uint(50000000000000000000000000n)], // 50M tokens
       deployer
     );
-    
+
     // Create multiple concurrent loans
     const loanPromises = [];
     for (let i = 0; i < 5; i++) {
       const borrower = accounts.get(`wallet_${i + 1}`)!;
-      
+
       // Update credit scores
       await simnet.callPublicFn(
-        'enterprise-loan-manager',
-        'update-credit-score',
+        "enterprise-loan-manager",
+        "update-credit-score",
         [Cl.principal(borrower), Cl.uint(750 + i * 10)],
         deployer
       );
-      
+
       loanPromises.push(
         simnet.callPublicFn(
           "enterprise-loan-manager",
@@ -749,39 +755,39 @@ describe('Enterprise System Performance Benchmarks', () => {
         )
       );
     }
-    
+
     const results = await Promise.all(loanPromises);
     const endTime = Date.now();
-    
+
     // All loans should be successful
     results.forEach((result, index) => {
       expect(result.result).toBeOk(Cl.uint(index + 1));
     });
-    
+
     console.log(`✅ Created 5 concurrent loans in ${endTime - startTime}ms`);
-    console.log('✅ Concurrent loan processing performance acceptable');
+    console.log("✅ Concurrent loan processing performance acceptable");
   });
 
-  it('should optimize liquidity efficiently across multiple pools', async () => {
-    const deployer = accounts.get('deployer')!;
+  it("should optimize liquidity efficiently across multiple pools", async () => {
+    const deployer = accounts.get("deployer")!;
     const startTime = Date.now();
-    
+
     // Create multiple liquidity pools
     for (let i = 1; i <= 3; i++) {
       await simnet.callPublicFn(
-        'liquidity-optimization-engine',
-        'create-liquidity-pool',
+        "liquidity-optimization-engine",
+        "create-liquidity-pool",
         [
           Cl.uint(i),
           Cl.principal(`${deployer}.mock-token`),
           Cl.stringAscii(`Pool ${i}`),
-          Cl.stringAscii('ENTERPRISE'),
-          Cl.uint(7000 + i * 1000) // Varying target utilization
+          Cl.stringAscii("ENTERPRISE"),
+          Cl.uint(7000 + i * 1000), // Varying target utilization
         ],
         deployer
       );
     }
-    
+
     // Update all pools simultaneously
     const updatePromises = [];
     for (let i = 1; i <= 3; i++) {
@@ -799,35 +805,38 @@ describe('Enterprise System Performance Benchmarks', () => {
         )
       );
     }
-    
+
     const results = await Promise.all(updatePromises);
     const endTime = Date.now();
-    
-    results.forEach(result => {
+
+    results.forEach((result) => {
       expect(result.result).toBeOk(Cl.bool(true));
     });
-    
+
     console.log(`✅ Updated 3 liquidity pools in ${endTime - startTime}ms`);
-    console.log('✅ Multi-pool liquidity optimization performance acceptable');
+    console.log("✅ Multi-pool liquidity optimization performance acceptable");
   });
 });
 
 /**
  * Security and Edge Case Tests
  */
-describe('Enterprise System Security Tests', () => {
+describe("Enterprise Loan System Integration Tests - Stress & Edge Cases", () => {
   let simnet: any;
   let accounts: Map<string, string>;
 
   beforeAll(async () => {
-    simnet = await initSimnet();
+    simnet = await initSimnet("Clarinet.toml", false, {
+      trackCosts: false,
+      trackCoverage: false,
+    });
     accounts = simnet.getAccounts();
   });
 
-  it('should prevent unauthorized loan creation', async () => {
-    const deployer = accounts.get('deployer')!;
-    const unauthorizedUser = accounts.get('wallet_1')!;
-    
+  it("should prevent unauthorized loan creation", async () => {
+    const deployer = accounts.get("deployer")!;
+    const unauthorizedUser = accounts.get("wallet_1")!;
+
     // Try to add liquidity as non-admin
     const unauthorizedResult = simnet.callPublicFn(
       "enterprise-loan-manager",
@@ -835,16 +844,16 @@ describe('Enterprise System Security Tests', () => {
       [Cl.uint(1000000000000000000000000n)],
       unauthorizedUser // Non-admin user
     );
-    
+
     expect(unauthorizedResult.result).toBeErr(Cl.uint(7001)); // ERR_UNAUTHORIZED
-    
-    console.log('✅ Unauthorized operations properly rejected');
+
+    console.log("✅ Unauthorized operations properly rejected");
   });
 
-  it('should handle insufficient collateral scenarios', async () => {
-    const deployer = accounts.get('deployer')!;
-    const borrower = accounts.get('wallet_2')!;
-    
+  it("should handle insufficient collateral scenarios", async () => {
+    const deployer = accounts.get("deployer")!;
+    const borrower = accounts.get("wallet_2")!;
+
     // Setup liquidity and credit score
     await simnet.callPublicFn(
       "enterprise-loan-manager",
@@ -852,67 +861,72 @@ describe('Enterprise System Security Tests', () => {
       [Cl.uint(1000000000000000000000000n)],
       deployer
     );
-    await simnet.callPublicFn('enterprise-loan-manager', 'update-credit-score', [Cl.principal(borrower), Cl.uint(750)], deployer);
-    
+    await simnet.callPublicFn(
+      "enterprise-loan-manager",
+      "update-credit-score",
+      [Cl.principal(borrower), Cl.uint(750)],
+      deployer
+    );
+
     // Try to create loan with insufficient collateral
     const insufficientCollateralResult = simnet.callPublicFn(
-      'enterprise-loan-manager',
-      'create-enterprise-loan',
+      "enterprise-loan-manager",
+      "create-enterprise-loan",
       [
         Cl.uint(100000000000000000000000), // 100,000 loan
-        Cl.uint(50000000000000000000000),  // Only 50,000 collateral (50% ratio, should fail)
+        Cl.uint(50000000000000000000000), // Only 50,000 collateral (50% ratio, should fail)
         Cl.principal(`${deployer}.mock-token`),
         Cl.principal(`${deployer}.mock-token`),
-        Cl.uint(5256)
+        Cl.uint(5256),
       ],
       borrower
     );
-    
+
     expect(insufficientCollateralResult.result).toBeErr(Cl.uint(7003)); // ERR_INSUFFICIENT_COLLATERAL
-    
-    console.log('✅ Insufficient collateral properly rejected');
+
+    console.log("✅ Insufficient collateral properly rejected");
   });
 
-  it('should handle emergency scenarios gracefully', async () => {
-    const deployer = accounts.get('deployer')!;
-    
+  it("should handle emergency scenarios gracefully", async () => {
+    const deployer = accounts.get("deployer")!;
+
     // Test emergency pause
     const pauseResult = simnet.callPublicFn(
-      'liquidity-optimization-engine',
-      'emergency-pause',
+      "liquidity-optimization-engine",
+      "emergency-pause",
       [],
       deployer
     );
-    
+
     expect(pauseResult.result).toBeOk(Cl.bool(true));
-    
+
     // Test that operations are blocked when paused
     const blockedResult = simnet.callPublicFn(
-      'liquidity-optimization-engine',
-      'create-liquidity-pool',
+      "liquidity-optimization-engine",
+      "create-liquidity-pool",
       [
         Cl.uint(99),
         Cl.principal(`${deployer}.mock-token`),
-        Cl.stringAscii('Emergency Test Pool'),
-        Cl.stringAscii('TEST'),
-        Cl.uint(8000)
+        Cl.stringAscii("Emergency Test Pool"),
+        Cl.stringAscii("TEST"),
+        Cl.uint(8000),
       ],
       deployer
     );
-    
+
     expect(blockedResult.result).toBeErr(Cl.uint(10001)); // ERR_UNAUTHORIZED (system paused)
-    
+
     // Test emergency unpause
     const unpauseResult = simnet.callPublicFn(
-      'liquidity-optimization-engine',
-      'emergency-unpause',
+      "liquidity-optimization-engine",
+      "emergency-unpause",
       [],
       deployer
     );
-    
+
     expect(unpauseResult.result).toBeOk(Cl.bool(true));
-    
-    console.log('✅ Emergency pause/unpause functionality working');
+
+    console.log("✅ Emergency pause/unpause functionality working");
   });
 });
 

@@ -1,10 +1,10 @@
 import { describe, it, expect, beforeAll, beforeEach } from 'vitest';
-import { Clarinet, initSimnet, type Simnet } from '@stacks/clarinet-sdk';
+import { initSimnet, type Simnet } from '@stacks/clarinet-sdk';
 import { Cl, ClarityType } from '@stacks/transactions';
-import { DEPLOYER } from "../../constants";
+const DEPLOYER = 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM';
 
 let simnet: Simnet;
-let clarinet: Clarinet;
+let clarinet: any;
 let deployer: string;
 let wallet1: string;
 let wallet2: string;
@@ -12,13 +12,13 @@ let wallet2: string;
 describe('Token System Coordinator', () => {
   beforeAll(async () => {
     // Initialize Clarinet simnet directly for this test suite
-    clarinet = await Clarinet.fromConfigFile('Clarinet.toml');
+    clarinet = await initSimnet('Clarinet.toml');
     simnet = await initSimnet(clarinet);
   });
 
   beforeEach(async () => {
     // Reset session before each test to ensure isolation
-    await simnet.initSession(clarinet);
+    await simnet.initSession(clarinet, 'simnet');
     const accounts = simnet.getAccounts();
     deployer = accounts.get('deployer')!;
     wallet1 = accounts.get('wallet_1') || 'ST1SJ3DTE5DN7X54YDH5D64R3BCB6A2AG2ZQ8YPD5';

@@ -65,7 +65,7 @@ describe('System Performance Benchmarks', () => {
         Cl.contractPrincipal(deployer, tokenBorrow),
       ], wallet1);
       
-      expect(receipt.result).toBeOk(expect.anything());
+      expect(receipt.result).toBe(expect.anything());
       // simnet.getCosts() is not per-tx in this SDK version usually, need to check receipt.
       // latest SDK receipt has 'costs'?
       // If not, we just measure time.

@@ -1,22 +1,19 @@
-
 import { describe, it, expect, beforeAll, beforeEach } from 'vitest';
-import { Clarinet, initSimnet, type Simnet } from '@stacks/clarinet-sdk';
+import { initSimnet, type Simnet } from '@stacks/clarinet-sdk';
 import { Cl, ClarityType } from '@stacks/transactions';
 
 let simnet: Simnet;
 let deployer: string;
 let wallet1: string;
 let wallet2: string; // Attacker
-let clarinet: Clarinet;
 
 describe('Security Attack Vectors', () => {
   beforeAll(async () => {
-    clarinet = await Clarinet.fromConfigFile('Clarinet.toml');
-    simnet = await initSimnet(clarinet);
+    simnet = await initSimnet('Clarinet.toml');
   });
 
   beforeEach(async () => {
-    await simnet.initSession(clarinet);
+    await simnet.initSession(process.cwd(), 'Clarinet.toml');
     const accounts = simnet.getAccounts();
     deployer = accounts.get('deployer')!;
     wallet1 = accounts.get('wallet_1')!;

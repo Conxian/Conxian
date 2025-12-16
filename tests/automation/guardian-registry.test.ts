@@ -11,14 +11,11 @@ let deployer: string;
 
 describe("Guardian Registry", () => {
   beforeAll(async () => {
-    simnet = await initSimnet("Clarinet.toml", false, {
-      trackCosts: false,
-      trackCoverage: false,
-    });
+    simnet = await initSimnet("Clarinet.toml");
   });
 
   beforeEach(async () => {
-    await simnet.initSession(process.cwd(), "Clarinet.toml");
+    await simnet.initSession("0", "0");
     const accounts = simnet.getAccounts();
     wallet1 =
       accounts.get("wallet_1") || "ST1SJ3DTE5DN7X54YDH5D64R3BCB6A2AG2ZQ8YPD5";
