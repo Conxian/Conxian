@@ -1,5 +1,7 @@
 # Conxian Protocol
 
+> **For a comprehensive overview of our vision, business goals, and strategic roadmap, please see our [Strategic Overview](./documentation/STRATEGIC_OVERVIEW.md).**
+
 ## Overview
 
 Conxian is a sophisticated, multi-dimensional DeFi protocol on Stacks, designed to provide a unified, secure, and efficient ecosystem for advanced financial operations. It has been architected from the ground up to be modular, decentralized, and compliant with the latest Stacks (Nakamoto) standards.
@@ -8,9 +10,9 @@ The protocol aggregates yield from multiple sources (Lending, DEX, Stacking), pr
 
 ## System Status
 
--   **Production Readiness**: 🟡 **UNDER REVIEW**
--   **Architectural Pattern**: **Facade-Based & Trait-Driven**. The system is in a stabilization phase, with all core modules refactored into a modular architecture.
--   **Security**: Hardened against common vectors (Slippage, Oracle Manipulation, Unauthorized Access).
+-   **Maturity Level**: 🔵 **Technical Alpha (Testnet)**
+-   **Architectural Pattern**: Facade-Based & Trait-Driven
+-   **Next Steps**: Comprehensive testing, third-party security audits, and preparation for mainnet.
 
 ## Core Architecture: The Facade Pattern
 
@@ -71,12 +73,12 @@ For more detailed information about each module's architecture and function, ple
 
 ## Project Documentation
 
-For a deeper understanding of the protocol's vision, architecture, and operational procedures, please refer to the following core documents:
+For a deeper understanding of the protocol's vision, architecture, and operational procedures, we recommend starting with these documents:
 
+-   **[Strategic Overview](./documentation/STRATEGIC_OVERVIEW.md)**: Our vision, business goals, current status, and strategic roadmap.
 -   **[Whitepaper](./documentation/whitepaper/Conxian-Whitepaper.md)**: The complete technical vision and protocol design.
--   **[Architecture Specification](./documentation/guides/ARCHITECTURE_SPEC.md)**: High-level system design and module interactions.
--   **[Developer Guide](./documentation/developer/DEVELOPER_GUIDE.md)**: Comprehensive guide for developers, including setup, workflow, and contribution guidelines.
--   **[Operations Runbook](./documentation/guides/OPERATIONS_RUNBOOK.md)**: Detailed operational procedures, administrative controls, and emergency protocols.
+-   **[Architecture Specification](./documentation/guides/ARCHITECTURE_SPEC.md)**: A high-level overview of the system design and module interactions.
+-   **[Developer Guide](./documentation/developer/DEVELOPER_GUIDE.md)**: A comprehensive guide for developers.
 
 ## Development Setup
 
