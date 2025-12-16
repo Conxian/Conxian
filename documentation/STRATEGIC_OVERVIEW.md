@@ -8,9 +8,9 @@
 
 Conxian is a sophisticated, multi-dimensional DeFi protocol architected on the Stacks blockchain, designed to bridge the gap between retail and institutional finance. Our vision is to create a unified, secure, and efficient ecosystem for advanced financial operations, leveraging the finality of Bitcoin through the Nakamoto release.
 
-The protocol is engineered with a modular, facade-based architecture that prioritizes security, decentralization, and regulatory alignment. While the on-chain components are currently in a **technical alpha** stage on testnet, the long-term vision is to deliver a production-ready, institutional-grade financial platform.
+The protocol is engineered with a proven **facade-based, trait-driven architecture** that prioritizes security, decentralization, and regulatory alignment. The on-chain components are currently in a **technical alpha** stage on testnet, with a long-term vision to deliver a production-ready, institutional-grade financial platform that is fully compliant with the Stacks Nakamoto upgrade.
 
-This document provides a transparent overview of our strategic direction, business value, current capabilities, and future roadmap.
+This document provides a transparent overview of our strategic direction, business value, core architecture, current capabilities, and future roadmap.
 
 ## 2. The Conxian Vision: Unifying Retail and Enterprise DeFi
 
@@ -18,9 +18,19 @@ Our core mission is to address the critical challenges limiting the growth of de
 
 -   **Fragmented Ecosystems**: We provide a unified platform with a DEX, lending, and advanced financial primitives to combat liquidity fragmentation.
 -   **Bridging Two Worlds**: We are building a system that offers the permissionless accessibility of retail DeFi while providing the compliance, security, and sophisticated tooling required for institutional adoption.
--   **Future-Proof Architecture**: Our trait-driven, modular design allows for continuous innovation and adaptation to the evolving DeFi landscape.
+-   **Future-Proof Architecture**: Our trait-driven, modular design allows for continuous innovation and adaptation to the evolving DeFi landscape and the upcoming Stacks Nakamoto upgrade.
 
-## 3. Core Business Value Proposition
+## 3. Core Architecture: The Facade Pattern
+
+The Conxian Protocol is built on a **facade pattern**. This modern, modular architecture ensures security, maintainability, and clarity by separating concerns. Core contracts act as unified, secure entry points (**facades**) that route all user-facing calls to a network of specialized, single-responsibility **manager contracts**.
+
+-   **User Interaction**: Users and external systems interact only with the facade contracts, which provide a simplified and secure API.
+-   **Delegated Logic**: Facades contain minimal business logic. Their primary role is to validate inputs and delegate the actual work to the appropriate manager contract via `contract-call?`.
+-   **Trait-Driven Interfaces**: The connections between facades and manager contracts are defined by a standardized set of traits. This enforces a clean, consistent, and maintainable interface system across the entire protocol.
+
+This architectural choice is the foundation of our strategy, enabling both the rapid development of retail features and the careful, secure construction of our enterprise offerings.
+
+## 4. Core Business Value Proposition
 
 Conxian is designed to deliver quantifiable value to both retail and institutional users through three primary drivers:
 
@@ -28,25 +38,27 @@ Conxian is designed to deliver quantifiable value to both retail and institution
 -   **Reduced Operational Overhead**: By automating complex financial processes such as settlement, collateral management, and governance, Conxian dramatically reduces the need for manual intervention, leading to significant cost savings.
 -   **New Revenue Opportunities**: The protocol unlocks novel yield generation strategies, arbitrage opportunities, and access to a wider range of digital assets, creating new income streams for our users.
 
-## 4. Target Markets
+## 5. Target Markets
 
-### 4.1 Retail DeFi
+### 5.1 Retail DeFi
 -   **For the everyday user**, Conxian offers a comprehensive suite of DeFi tools, including an efficient DEX, lending and borrowing services, and opportunities to participate in yield farming and staking.
 
-### 4.2 Enterprise & Institutional
+### 5.2 Enterprise & Institutional
 -   **For sophisticated clients**, such as asset managers, trading firms, and financial institutions, Conxian provides a pathway to engage with DeFi in a secure and compliant manner. Our enterprise-focused features are designed to include:
     -   Tiered access controls and on-chain permissions.
     -   Hooks for KYC/AML and other compliance integrations.
     -   Advanced order types and sophisticated risk management tools.
     -   A robust governance framework that mirrors traditional corporate structures.
 
-## 5. Current Status and Service Maturity
+## 6. Current Status and Service Maturity
 
-Transparency is a core principle of the Conxian project. It is crucial for all stakeholders to understand the current maturity of our services.
+Transparency is a core principle of the Conxian project. It is crucial for all stakeholders to understand the current maturity of our services, which are built on the core architecture described above.
 
--   **Conxian DeFi Protocol (On-Chain)**: **Technical Alpha**. The smart contracts are deployed on testnet and are undergoing continuous development, testing, and refinement. They are not yet audited or ready for mainnet deployment.
--   **Enterprise Platform**: **Planned/In-Design**. The features described in our enterprise documentation (including compliance integrations, advanced analytics, and dedicated support) represent our target architecture. These services are not yet implemented.
--   **Governance**: **In-Development**. The core components of our governance system are in place, but the full, multi-council vision with its automated "DAO Seat" is still under development.
+-   **Retail DeFi Services (Core, DEX, Lending)**: **Technical Alpha**. The core retail modules are implemented with a sound, facade-based architecture. The contracts are deployed on testnet and are undergoing continuous development and testing. They are not yet audited or ready for mainnet deployment, and require updates for full Nakamoto compliance.
+
+-   **Enterprise Platform**: **Prototype**. The foundational elements for enterprise-grade services exist in prototype form (`enterprise-api.clar`). This includes proof-of-concept implementations for tiered accounts, compliance checks, and advanced order types. This component is not yet integrated into the decentralized facade architecture and represents an early-stage implementation of our long-term vision.
+
+-   **Governance**: **In-Development**. The core components of our governance system are in place, including a `proposal-engine.clar` facade. However, the full, multi-council vision with its automated "DAO Seat" (`conxian-operations-engine.clar`) is still under active development and represents our target architecture for decentralized governance.
 
 For a detailed breakdown of service maturity, please refer to the `documentation/guides/SERVICE_CATALOG.md`.
 
