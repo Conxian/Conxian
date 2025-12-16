@@ -15,43 +15,41 @@ The phases below incorporate the agreed recommendations around:
   domains.
 - NFT-based position representations and service vaults.
 
-## Phase 1: Stabilization, Documentation & Alignment (In Progress)
+## Phase 0: Technical Alpha & Nakamoto Alignment (Current Phase)
 
-- **Objective**: Create a solid, audit-ready foundation by ensuring that all
-  existing code, tests, and documentation are consistent, secure, and aligned
-  with the modular architecture.
+- **Objective**: Solidify the protocol's foundation by aligning all core components with the modular, facade-based architecture and ensuring full compliance with the upcoming Stacks Nakamoto upgrade. This phase is about building a stable, future-proof base for all subsequent development.
 
 - **Key Activities**:
-  - **Contract correctness & compilation**
-    - Maintain a clean `clarinet check` across all modules (tokens, lending,
-      DEX, governance, risk, oracle, monitoring).
-    - Keep temporary stubs (e.g., simplified health factor, basic controller
-      hooks) clearly documented for later hardening.
-  - **Testing infrastructure**
-    - Harden the Vitest-based test harness and ensure reliable execution of
-      unit, integration, and system tests (e.g., full-system fee/insurance
-      flows).
-    - Maintain custom matchers and utilities for Clarity responses.
-    - Extend coverage across lending, risk, liquidation, DEX, vaults, yield,
-      and automation modules, prioritizing conservative, audit-style scenarios.
-  - **Documentation alignment**
-    - Keep `OPERATIONS_RUNBOOK.md` and `REGULATORY_ALIGNMENT.md` synchronized
-      with code changes and test coverage, especially for critical paths
-      (lending, DEX, fee routing, insurance, circuit breaker, oracle).
-    - Maintain `IDENTITY_KYC_POPIA.md` as the single source of truth for
-      identity, KYC/KYB and POPIA alignment, and
-      `TREASURY_AND_REVENUE_ROUTER.md` as the reference for protocol revenue
-      routing and vault design.
-    - Maintain `NAMING_STANDARDS.md` as the single source of truth for token,
-      council, and contract naming.
-  - **Security & monitoring basics**
-    - Ensure MEV protection, circuit breaker, token-system coordinator, and
-      oracle modules are wired and covered by tests at least at the basic
-      happy-path and key failure-mode level.
-    - Add baseline incident and invariant tests around liquidation, pause
-      controls, and critical failure modes.
+  - **Nakamoto Compliance**:
+    - Audit all contracts for dependencies on `block-height` for time-based logic and rescale constants to align with faster block times.
+    - Transition long-term logic to `burn-block-height` where appropriate.
+    - Deprecate the custom BTC bridge and integrate the official, native sBTC protocol.
+  - **Architectural Alignment**:
+    - Refactor the `enterprise-api.clar` from a prototype into a true facade, delegating logic to specialized manager contracts.
+    - Solidify the `proposal-engine.clar` as the central facade for governance and clearly define the interfaces for its manager contracts.
+  - **Documentation Overhaul**:
+    - Complete the comprehensive documentation alignment to ensure all `README.md` files and strategic documents accurately reflect the current state and target architecture of the protocol.
+  - **Testing Enhancements**:
+    - Configure the test environment to simulate Nakamoto block times.
+    - Expand test coverage to validate the refactored enterprise and governance modules.
 
-## Phase 2: Feature Completion, Governance Architecture & Testing (Planned)
+## Phase 1: Feature Hardening & Security (Planned)
+
+- **Objective**: Move the protocol from a "Technical Alpha" to a "Beta" stage by hardening all existing features, expanding security measures, and preparing for a formal audit.
+
+- **Key Activities**:
+  - **Contract Hardening**:
+    - Implement a production-grade `get-health-factor` in the lending module.
+    - Complete the core math for the `concentrated-liquidity-pool.clar`.
+    - Harden all temporary stubs and controller hooks identified in Phase 0.
+  - **Testing Infrastructure**:
+    - Achieve comprehensive test coverage for all core modules, including economic and security stress tests.
+    - Harden the Vitest-based test harness for reliable execution of all test suites.
+  - **Security & Monitoring**:
+    - Implement and test advanced security features, including MEV protection, a robust circuit breaker, and oracle failure modes.
+    - Prepare detailed architecture diagrams and threat models for an external security review.
+
+## Phase 2: Advanced Governance & Feature Completion (Planned)
 
 - **Objective**: Finish core protocol features and complete the governance /
   operational architecture so that Conxian can operate with a clear "board and
