@@ -147,3 +147,10 @@
     (on-dimensional-yield (uint uint uint) (response bool uint))
   )
 )
+
+;; Protocol support trait
+(define-trait protocol-support-trait
+  (
+    (is-protocol-paused () (response bool uint))
+  )
+)

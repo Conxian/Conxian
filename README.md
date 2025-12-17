@@ -22,6 +22,10 @@ The Conxian Protocol is built on a **facade pattern**. This modern, modular arch
 -   **Delegated Logic**: Facades contain minimal business logic. Their primary role is to validate inputs and delegate the actual work to the appropriate manager contract via `contract-call?`.
 -   **Trait-Driven Interfaces**: The connections between facades and manager contracts are defined by a standardized set of traits located in the `/contracts/traits/` directory. This enforces a clean, consistent, and maintainable interface system across the entire protocol.
 
+### The Protocol Coordinator
+
+While the facade pattern decentralizes the logic of individual modules, the Conxian Protocol is unified by a central coordinator contract: `conxian-protocol.clar`. This critical contract serves as the single source of truth for protocol-wide state and provides a global layer of security and control, including a system-wide emergency pause feature.
+
 ### 1. Core Module (`contracts/core/`)
 
 The Core Module is the heart of the protocol's dimensional trading and risk management capabilities.
@@ -134,6 +138,7 @@ When deploying to mainnet, ensure the following principals are used or replaced 
 | ------------------------- | ----------------------------------- | -------------------------------------- |
 | **Devnet Deployer**       | `ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM` | Standard Clarinet Devnet Address       |
 | **Mainnet Deployer**      | `SP1CONXIANPROTOCOLDEPLOYERADDRESS` | **ACTION REQUIRED**: Replace with your mainnet deployer address |
+| **Protocol Coordinator**  | `SP1CONXIANPROTOCOLCOORDINATOR`   | **ACTION REQUIRED**: Replace with the address of the deployed `conxian-protocol.clar` contract |
 | **SIP-010 Trait**         | `SP3FBR2AGK5H9QBDH3EEN6DF8EK8JY7RX8QJ5SVTE` | Standard Mainnet SIP-010 Trait Contract |
 | **POX Contract**          | `SP000000000000000000002Q6VF78`     | Stacks Mainnet POX Contract            |
 

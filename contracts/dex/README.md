@@ -43,6 +43,22 @@ The DEX supports multiple AMM models to cater to different asset types and liqui
 -   **`stable-swap-pool.clar`**: An AMM designed for low-slippage trades between stablecoins and other similarly priced assets.
 -   **`weighted-swap-pool.clar`**: A flexible pool that supports up to eight tokens with custom weights, ideal for creating index-like token baskets.
 
+## Additional Contracts
+
+The DEX module currently contains a number of additional contracts that are not part of the core DEX functionality. These contracts are likely remnants of a previous, more monolithic architecture and should be refactored into their own modules in the future.
+
+-   **Yield & Staking:** `auto-compounder.clar`, `cxd-staking.clar`, `enhanced-yield-strategy.clar`, `yield-distribution-engine.clar`
+-   **Bonding & Issuance:** `bond-factory.clar`, `bond-issuance-system.clar`, `bond-token.clar`, `cxd-bonding-curve-amm.clar`
+-   **sBTC Integration:** `sbtc-bond-integration.clar`, `sbtc-flash-loan-extension.clar`, `sbtc-flash-loan-vault.clar`, `sbtc-integration.clar`, `sbtc-lending-integration.clar`, `sbtc-oracle-adapter.clar`
+-   **Enterprise & Lending:** `enterprise-loan-manager.clar`
+-   **Migration & Legacy:** `cxlp-migration-queue.clar`, `legacy-adapter.clar`, `migration-manager.clar`
+-   **Advanced Features & Infrastructure:** `batch-auction.clar`, `cross-protocol-integrator.clar`, `distributed-cache-manager.clar`, `liquidity-optimization-engine.clar`, `memory-pool-management.clar`, `nakamoto-compatibility.clar`, `on-chain-router-helper.clar`, `predictive-scaling-system.clar`, `protocol-invariant-monitor.clar`, `route-manager.clar`, `timelock-controller.clar`, `token-emission-controller.clar`, `transaction-batch-processor.clar`
+-   **Monitoring & Oracles:** `manipulation-detector.clar`, `monitoring-dashboard.clar`, `oracle-aggregator-v2.clar`, `oracle.clar`, `performance-optimizer.clar`, `real-time-monitoring-dashboard.clar`
+-   **Registries & Templates:** `dex-registrar.clar`, `pool-implementation-registry.clar`, `pool-template.clar`, `pool-type-registry.clar`
+-   **Other:** `cxvg-utility.clar`, `factory-trait.clar`, `liquidity-manager.clar`, `liquidity-provider.clar`, `price-impact-calculator.clar`, `rebalancing-rules.clar`, `vault.clar`
+
 ## Status
 
 **Under Review**: The contracts in this module are currently undergoing a comprehensive review. While the core swapping functionality in `multi-hop-router-v3.clar` is stable, the surrounding factory and registry contracts are being refined to ensure full alignment with the protocol's modular architecture. These contracts are not yet considered production-ready.
+
+**Recommendation:** The DEX module should be refactored to separate the concerns of the additional contracts into their own modules. This will improve the modularity and maintainability of the protocol.
