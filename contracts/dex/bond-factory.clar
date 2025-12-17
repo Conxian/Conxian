@@ -202,8 +202,8 @@
 ;; --- Enhanced Maturity Periods: TradFi + DeFi + Innovation ---
 ;; Based on Stacks Nakamoto Block Time (~5 seconds)
 ;; 1 day = 86400 seconds / 5 = 17280 blocks
-(define-constant BLOCKS_PER_DAY u2073600)
-(define-constant BLOCKS_PER_YEAR u756864000) ;; 365 * 17280
+(define-constant BLOCKS_PER_DAY u17280)
+(define-constant BLOCKS_PER_YEAR u6307200) ;; 365 * 17280
 
 ;; DeFi Ultra-Short (Flash Bonds) - High frequency / Intraday
 (define-constant MATURITY_FLASH u720)          ;; ~1 hour (720 blocks)
@@ -233,9 +233,9 @@
 (define-constant MATURITY_ALGORITHMIC u1)      ;; Dynamic maturity based on on-chain conditions
 
 ;; @desc Minimum bond duration in blocks (~1 hour for flash bonds).
-(define-constant MIN_BOND_DURATION u86400)
+(define-constant MIN_BOND_DURATION u720)
 ;; @desc Maximum bond duration in blocks (~30 years).
-(define-constant MAX_BOND_DURATION u22705920000)
+(define-constant MAX_BOND_DURATION u189216000)
 ;; @desc Bond status: active.
 (define-constant BOND_STATUS_ACTIVE "active")
 ;; @desc Bond status: matured.
