@@ -124,39 +124,29 @@
   )
 )
 
-;; --- Bitcoin Wrapping/Unwrapping ---
+;; --- sBTC Deposit/Withdrawal ---
 
-;; @desc Wraps BTC to sBTC.
-;; @param tx-blob (buff 1024) The raw Bitcoin transaction.
-;; @param header (buff 80) The Bitcoin block header.
-;; @param proof The Merkle proof.
-;; @returns (response uint uint) The amount of sBTC minted.
-(define-public (wrap-btc (tx-blob (buff 1024)) (header (buff 80)) (proof { tx-index: uint, hashes: (list 12 (buff 32)), tree-depth: uint }) (token-trait <sip-010-ft-trait>))
-  (let ((recipient tx-sender))
-    (begin
-      (try! (check-not-paused))
-      (asserts! (is-eq (contract-of token-trait) (var-get sbtc-token-contract)) (err u2001))
-      
-      (let ((minted-amount (try! (as-contract (contract-call? .btc-bridge wrap-btc tx-blob header proof recipient token-trait)))))
-          (let ((fee (unwrap! (as-contract (contract-call? .fee-manager calculate-fee "wrap" minted-amount)) (err u0))))
-            (if (> fee u0)
-                (try! (contract-call? token-trait transfer fee recipient (var-get fee-manager-contract) none))
-                true
-            )
-            (ok (- minted-amount fee))
-         )
-      ))))
-
-;; @desc Unwraps sBTC to BTC.
-;; @param sbtc-amount uint The amount of sBTC to unwrap.
-;; @param btc-address (buff 64) The destination BTC address.
-;; @returns (response uint uint) The amount of BTC to be sent.
-(define-public (unwrap-to-btc (sbtc-amount uint) (btc-address (buff 64)))
+;; @desc Deposits sBTC into the vault.
+;; @param amount uint The amount of sBTC to deposit.
+;; @returns (response uint uint) The amount of sBTC deposited.
+(define-public (sbtc-deposit (amount uint))
   (begin
     (try! (check-not-paused))
-    (let ((fee (unwrap! (contract-call? .fee-manager calculate-fee "unwrap" sbtc-amount) (err u0))))
-      (let ((net-amount (- sbtc-amount fee)))
-        (contract-call? .btc-bridge unwrap-to-btc net-amount btc-address tx-sender)))))
+    (let ((fee (unwrap! (contract-call? .fee-manager calculate-fee "deposit" amount) (err u0))))
+      (let ((net-amount (- amount fee)))
+        (try! (as-contract (contract-call? .sbtc-token transfer net-amount tx-sender (as-contract tx-sender) none)))
+        (as-contract (contract-call? .btc-bridge sbtc-deposit net-amount tx-sender))))))
+
+;; @desc Withdraws sBTC from the vault.
+;; @param amount uint The amount of sBTC to withdraw.
+;; @returns (response uint uint) The amount of sBTC withdrawn.
+(define-public (sbtc-withdraw (amount uint))
+  (begin
+    (try! (check-not-paused))
+    (let ((fee (unwrap! (contract-call? .fee-manager calculate-fee "withdraw" amount) (err u0))))
+      (let ((net-amount (- amount fee)))
+        (try! (as-contract (contract-call? .btc-bridge sbtc-withdraw net-amount tx-sender)))
+        (as-contract (contract-call? .sbtc-token transfer net-amount (as-contract tx-sender) tx-sender none))))))
 
 ;; --- Yield Generation ---
 

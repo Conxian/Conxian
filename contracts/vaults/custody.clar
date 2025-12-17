@@ -55,8 +55,8 @@
 ;; @desc Stores the total number of shares minted.
 (define-data-var total-shares-minted uint u0)
 
-;; @desc The number of blocks for the withdrawal timelock.
-(define-constant WITHDRAWAL_DELAY_BLOCKS u17280)
+;; @desc The number of blocks for the withdrawal timelock. (Nakamoto-adjusted: 12 days * 17280 blocks/day)
+(define-constant WITHDRAWAL_DELAY_BLOCKS u207360)
 
 ;; --- Private Functions ---
 

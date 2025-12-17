@@ -14,8 +14,8 @@
 ;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED (err u100))
 (define-constant ERR_PROPOSAL_NOT_FOUND (err u101))
-(define-constant PROPOSAL_DELAY u2073600) ;; u144 * 120
-(define-constant VOTING_PERIOD u14515200) ;; 1008 * 12004))
+(define-constant PROPOSAL_DELAY u17280) ;; Nakamoto-adjusted: 1 day (144 blocks * 120)
+(define-constant VOTING_PERIOD u120960) ;; Nakamoto-adjusted: 7 days (1008 blocks * 120)
 (define-constant ERR_PROPOSAL_NOT_ACTIVE (err u103))
 (define-constant ERR_VOTING_CLOSED (err u104))
 (define-constant ERR_QUORUM_NOT_REACHED (err u106))

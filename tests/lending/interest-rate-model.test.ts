@@ -158,4 +158,54 @@ describe('Interest Rate Model', () => {
     ], deployer);
     expect(after.result).toBeSome();
   });
+
+  it('accurately calculates interest with Nakamoto-adjusted BLOCKS_PER_YEAR', () => {
+    const setLs = simnet.callPublicFn('interest-rate-model', 'set-lending-system-contract', [
+      Cl.standardPrincipal(deployer),
+    ], deployer);
+    expect(setLs.result).toBeOk(Cl.bool(true));
+
+    const init = simnet.callPublicFn('interest-rate-model', 'initialize-market', [
+      asset(),
+    ], deployer);
+    expect(init.result).toBeOk(Cl.bool(true));
+
+    const setModel = simnet.callPublicFn('interest-rate-model', 'set-interest-rate-model', [
+      asset(),
+      Cl.uint(100000000000000000), // 10% base rate
+      Cl.uint(0),
+      Cl.uint(0),
+      Cl.uint(1000000000000000000),
+    ], deployer);
+    expect(setModel.result).toBeOk(Cl.bool(true));
+
+    // Set some initial cash and borrows
+    simnet.callPublicFn('interest-rate-model', 'update-market-state', [
+      asset(),
+      Cl.int(1000000),
+      Cl.int(500000),
+    ], deployer);
+
+    // Advance the block height by one year
+    simnet.mineEmptyBlocks(6307200);
+
+    const accrue = simnet.callPublicFn('interest-rate-model', 'accrue-interest', [
+      asset(),
+    ], deployer);
+    expect(accrue.result).toBeOk();
+
+    const after = simnet.callReadOnlyFn('interest-rate-model', 'get-market-info', [
+      asset(),
+    ], deployer);
+
+    const marketState = Cl.unwrap(after.result);
+    if (marketState.type === ClarityType.OptionalSome) {
+      const marketData = marketState.value.data;
+      // After one year, the total borrows should be approximately 550,000 (500,000 principal + 50,000 interest)
+      expect(marketData['total-borrows'].value).toBeGreaterThan(549000n);
+      expect(marketData['total-borrows'].value).toBeLessThan(551000n);
+    } else {
+      throw new Error('Market state not found');
+    }
+  });
 });
