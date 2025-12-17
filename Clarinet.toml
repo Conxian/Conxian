@@ -469,9 +469,34 @@ address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 path = "contracts/mocks/mock-lending-pool.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
-[contracts.enterprise-api]
-path = "contracts/enterprise/enterprise-api.clar"
+[contracts.enterprise-traits]
+path = "contracts/traits/enterprise-traits.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+
+[contracts.institutional-account-manager]
+path = "contracts/enterprise/institutional-account-manager.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+depends_on = ["enterprise-traits"]
+
+[contracts.compliance-manager]
+path = "contracts/enterprise/compliance-manager.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+depends_on = ["enterprise-traits", "institutional-account-manager"]
+
+[contracts.advanced-order-manager]
+path = "contracts/enterprise/advanced-order-manager.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+depends_on = ["enterprise-traits"]
+
+[contracts.enterprise-facade]
+path = "contracts/enterprise/enterprise-facade.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+depends_on = [
+    "enterprise-traits",
+    "institutional-account-manager",
+    "compliance-manager",
+    "advanced-order-manager",
+]
 
 [contracts.enterprise-loan-manager]
 path = "contracts/enterprise/enterprise-loan-manager.clar"

@@ -60,7 +60,7 @@
     "@stacks/transactions": "^7.2.0",
     "@types/elliptic": "^6.4.18",
     "@types/node": "^24.5.2",
-    "@vitest/coverage-v8": "latest",
+    "@vitest/coverage-v8": "4.0.15",
     "artillery": "^2.0.26",
     "chokidar-cli": "3.0.0",
     "ts-node": "^10.9.2",
