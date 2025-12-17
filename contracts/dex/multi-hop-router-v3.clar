@@ -57,6 +57,16 @@
 ;; @param token-out A principal implementing the sip-010-trait for the output token.
 ;; @returns The amount of the output token received.
 ;;
+(define-data-var swap-manager principal tx-sender)
+
+(define-public (set-swap-manager (manager principal))
+  (begin
+    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
+    (var-set swap-manager manager)
+    (ok true)
+  )
+)
+
 (define-public (swap-direct
     (amount-in uint)
     (min-amount-out uint)
@@ -66,10 +76,7 @@
   )
   (begin
     (asserts! (not (is-protocol-paused)) ERR_PROTOCOL_PAUSED)
-    (let ((amount-out (try! (contract-call? pool swap amount-in token-in token-out))))
-      (asserts! (>= amount-out min-amount-out) ERR_SLIPPAGE)
-      (ok amount-out)
-    )
+    (contract-call? (var-get swap-manager) swap-direct amount-in min-amount-out pool token-in token-out)
   )
 )
 
@@ -96,13 +103,7 @@
   )
   (begin
     (asserts! (not (is-protocol-paused)) ERR_PROTOCOL_PAUSED)
-    (let (
-      (amt1 (try! (contract-call? pool1 swap amount-in token-in token-base)))
-      (amt2 (try! (contract-call? pool2 swap amt1 token-base token-out)))
-    )
-      (asserts! (>= amt2 min-amount-out) ERR_SLIPPAGE)
-      (ok amt2)
-    )
+    (contract-call? (var-get swap-manager) swap-2-hop amount-in min-amount-out pool1 token-in token-base pool2 token-out)
   )
 )
 
@@ -133,14 +134,7 @@
   )
   (begin
     (asserts! (not (is-protocol-paused)) ERR_PROTOCOL_PAUSED)
-    (let (
-      (amt1 (try! (contract-call? pool1 swap amount-in token-in token-base1)))
-      (amt2 (try! (contract-call? pool2 swap amt1 token-base1 token-base2)))
-      (amt3 (try! (contract-call? pool3 swap amt2 token-base2 token-out)))
-    )
-      (asserts! (>= amt3 min-amount-out) ERR_SLIPPAGE)
-      (ok amt3)
-    )
+    (contract-call? (var-get swap-manager) swap-3-hop amount-in min-amount-out pool1 token-in token-base1 pool2 token-base2 pool3 token-out)
   )
 )
 

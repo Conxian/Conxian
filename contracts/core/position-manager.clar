@@ -18,6 +18,7 @@
 (define-constant ERR_POSITION_NOT_ACTIVE (err u4003))
 
 ;; @data-vars
+(define-data-var collateral-manager principal .collateral-manager)
 (define-data-var next-position-id uint u0)
 (define-map positions
   { id: uint }
@@ -70,6 +71,14 @@
     (take-profit (optional uint))
   )
   (let (
+      (collateral-balance (unwrap! (contract-call? (var-get collateral-manager) get-balance tx-sender) (err u2003)))
+      (fee-rate (unwrap! (contract-call? (var-get collateral-manager) get-protocol-fee-rate) (err u2004)))
+      (fee (* collateral fee-rate))
+      (total-cost (+ collateral fee))
+    )
+    (asserts! (>= collateral-balance total-cost) (err u2003))
+    (try! (contract-call? (var-get collateral-manager) withdraw-funds total-cost asset))
+    (let (
       (position-id (var-get next-position-id))
       (current-time block-height)
       (price (try! (get-price asset)))
@@ -188,7 +197,7 @@
         ) }
         ))
     )
-
+    (try! (as-contract (contract-call? (var-get collateral-manager) deposit-funds total-returned asset)))
     (ok {
       collateral-returned: total-returned,
       pnl: pnl,

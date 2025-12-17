@@ -405,9 +405,14 @@ address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 path = "contracts/dex/dex-factory-v2.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
+[contracts.swap-manager]
+path = "contracts/dex/swap-manager.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+
 [contracts.multi-hop-router-v3]
 path = "contracts/dex/multi-hop-router-v3.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+depends_on = ["swap-manager"]
 
 [contracts.on-chain-router-helper]
 path = "contracts/dex/on-chain-router-helper.clar"
@@ -775,10 +780,6 @@ address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 path = "contracts/vaults/yield-aggregator.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
-[contracts.btc-bridge]
-path = "contracts/vaults/btc-bridge.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-
 [contracts.fee-manager]
 path = "contracts/vaults/fee-manager.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
@@ -791,7 +792,6 @@ depends_on = [
     "defi-traits",
     "custody",
     "yield-aggregator",
-    "btc-bridge",
     "fee-manager",
 ]
 
