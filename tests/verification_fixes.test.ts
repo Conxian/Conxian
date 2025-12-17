@@ -1,19 +1,25 @@
 
-import { describe, it, expect, beforeAll } from 'vitest';
-import { initSimnet } from '@stacks/clarinet-sdk';
-import { Cl } from '@stacks/transactions';
+import { describe, it, expect, beforeAll, beforeEach } from 'vitest';
+import { initSimnet, type Simnet } from '@stacks/clarinet-sdk';
+import { Cl, ClarityType } from '@stacks/transactions';
 
-let simnet: any;
-let accounts: any;
+let simnet: Simnet;
 let deployer: string;
 let wallet1: string;
 
 describe('Verification Fixes', () => {
   beforeAll(async () => {
-    simnet = await initSimnet();
-    accounts = simnet.getAccounts();
+    simnet = await initSimnet('Clarinet.toml');
+  });
+
+  beforeEach(async () => {
+    await simnet.initSession(process.cwd(), 'Clarinet.toml');
+    const accounts = simnet.getAccounts();
+    console.log("Accounts available:", [...accounts.keys()]);
     deployer = accounts.get("deployer")!;
-    wallet1 = accounts.get("wallet_1")!;
+    wallet1 =
+      accounts.get("wallet_1") || "ST1SJ3DTE5DN7X54YDH5D64R3BCB6A2AG2ZQ8YPD5";
+    console.log("Wallet1:", wallet1);
   });
 
   it('Vault: First deposit burns 1000 shares', () => {

@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll, beforeEach } from 'vitest';
 import { initSimnet, type Simnet } from '@stacks/clarinet-sdk';
-import { Cl } from '@stacks/transactions';
+import { Cl, ClarityType } from '@stacks/transactions';
 
 let simnet: Simnet;
 let deployer: string;
@@ -9,14 +9,11 @@ let wallet1: string;
 // Simple DEX factory tests: focus on registry behavior and error codes.
 describe('DEX Factory V2', () => {
   beforeAll(async () => {
-    simnet = await initSimnet('Clarinet.toml', false, {
-      trackCosts: false,
-      trackCoverage: false,
-    });
+    simnet = await initSimnet('Clarinet.toml');
   });
 
   beforeEach(async () => {
-    await simnet.initSession(process.cwd(), 'Clarinet.toml');
+    await simnet.initSession('0', '0');
     const accounts = simnet.getAccounts();
     deployer = accounts.get('deployer')!;
     wallet1 = accounts.get('wallet_1') || 'ST1SJ3DTE5DN7X54YDH5D64R3BCB6A2AG2ZQ8YPD5';

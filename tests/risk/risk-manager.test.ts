@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll, beforeEach } from 'vitest';
 import { initSimnet, type Simnet } from '@stacks/clarinet-sdk';
-import { Cl } from '@stacks/transactions';
+import { Cl, ClarityType } from '@stacks/transactions';
 
 let simnet: Simnet;
 let deployer: string;
@@ -8,18 +8,15 @@ let wallet1: string;
 
 describe('Risk Manager', () => {
   beforeAll(async () => {
-    simnet = await initSimnet('Clarinet.toml', false, {
-      trackCosts: false,
-      trackCoverage: false,
-    });
+    simnet = await initSimnet('Clarinet.toml');
   });
 
   beforeEach(async () => {
     await simnet.initSession(process.cwd(), 'Clarinet.toml');
     const accounts = simnet.getAccounts();
     deployer = accounts.get('deployer')!;
-    // Fallback for wallet_1 if simnet fails to load it (environment issue)
-    wallet1 = accounts.get('wallet_1') || 'ST1SJ3DTE5DN7X54YDH5D64R3BCB6A2AG2ZQ8YPD5';
+    wallet1 =
+      accounts.get("wallet_1") ?? "ST1SJ3DTE5DN7X54YDH5D64R3BCB6A2AG2ZQ8YPD5";
   });
 
   describe('authorization guards', () => {
@@ -79,7 +76,7 @@ describe('Risk Manager', () => {
 
       // Expecting failure because position #1 doesn't exist in the fresh position-manager
       // ERR_INVALID_PARAMETERS = u1005
-      expect(res.result).toBeErr(Cl.uint(1005)); 
+      expect(res.result).toBeErr(Cl.uint(1005));
     });
 
     it('returns static liquidation result from liquidate-position', () => {

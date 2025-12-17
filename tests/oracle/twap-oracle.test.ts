@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll, beforeEach } from 'vitest';
 import { initSimnet, type Simnet } from '@stacks/clarinet-sdk';
-import { Cl } from '@stacks/transactions';
+import { Cl, ClarityType } from '@stacks/transactions';
 
 let simnet: Simnet;
 let deployer: string;
@@ -8,17 +8,15 @@ let wallet1: string;
 
 describe('TWAP Oracle', () => {
   beforeAll(async () => {
-    simnet = await initSimnet('Clarinet.toml', false, {
-      trackCosts: false,
-      trackCoverage: false,
-    });
+    simnet = await initSimnet('Clarinet.toml');
   });
 
   beforeEach(async () => {
     await simnet.initSession(process.cwd(), 'Clarinet.toml');
     const accounts = simnet.getAccounts();
     deployer = accounts.get('deployer')!;
-    wallet1 = accounts.get('wallet_1') || 'ST1SJ3DTE5DN7X54YDH5D64R3BCB6A2AG2ZQ8YPD5';
+    wallet1 =
+      accounts.get("wallet_1") ?? "ST1SJ3DTE5DN7X54YDH5D64R3BCB6A2AG2ZQ8YPD5";
   });
 
   it('rejects update-twap from non-governance address', () => {

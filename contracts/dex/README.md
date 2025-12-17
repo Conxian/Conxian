@@ -2,42 +2,47 @@
 
 ## Overview
 
-The DEX Module provides the core functionality for decentralized exchange operations within the Conxian Protocol. It is designed to be modular and gas-efficient, with a focus on providing robust and secure swapping capabilities. The primary contract in this module is the `multi-hop-router-v3.clar`, which serves as the main entry point for executing trades.
+The DEX Module provides a highly efficient and capital-aware decentralized exchange. It is architected to be flexible and extensible, supporting multiple pool types and optimized trading routes. The module separates the concerns of trade execution, pool creation, and liquidity management into distinct, specialized contracts.
 
-## Contracts
+## Architecture: Execution Facade & Factories
 
-### Core Components
+The DEX module uses a variation of the facade pattern. The `multi-hop-router-v3.clar` acts as the **execution facade**, providing a single, secure entry point for all swap operations. The creation and management of liquidity pools are handled by dedicated **factory** and **registry** contracts.
 
-- **`multi-hop-router-v3.clar`**: The central routing engine for the DEX. It supports 1-hop, 2-hop, and 3-hop swaps, allowing for efficient trading across multiple liquidity pools. The router relies on off-chain clients to discover the optimal trading routes, which are then executed on-chain.
+This separation ensures that the core trading logic remains clean and gas-efficient, while the administrative overhead of pool management is handled by a separate set of contracts.
 
-- **`dex-factory.clar`**: A facade for creating and managing liquidity pools. It delegates the logic for pool creation and registration to a suite of specialized registry contracts, providing a single entry point for pool management.
+### Control Flow Diagram
 
-- **`on-chain-router-helper.clar`**: A helper contract that replaces the legacy pathfinder. It provides read-only functions to verify off-chain routes, check liquidity availability, and validate token connectivity before execution.
+```
+[User] -> [multi-hop-router-v3.clar] (Execution Facade)
+    |
+    |-- (swap) --> [concentrated-liquidity-pool.clar]
+    |-- (swap) --> [stable-swap-pool.clar]
+    |-- (swap) --> [weighted-swap-pool.clar]
+
+[LP] -> [dex-factory.clar] (Admin Facade)
+    |
+    |-- (create-pool) --> [pool-registry.clar]
+```
+
+## Core Contracts
+
+### Execution Facade
+
+-   **`multi-hop-router-v3.clar`**: The central **facade** for trade execution. It provides a unified interface for performing swaps across one or more liquidity pools (1-hop, 2-hop, and 3-hop). It is responsible for routing the trade through the correct sequence of pools to achieve the optimal price.
+
+### Administrative Facades & Factories
+
+-   **`dex-factory.clar`**: The primary **facade** for creating and managing liquidity pools. It provides a single entry point for liquidity providers to create new pools, and it delegates the registration logic to the appropriate registry contracts.
+-   **`pool-registry.clar`**: A central registry that stores the addresses and metadata of all official liquidity pools, ensuring the router can discover and interact with them.
 
 ### Pool Implementations
 
-- **`concentrated-liquidity-pool.clar`**: Implements a concentrated liquidity AMM, allowing for greater capital efficiency. This contract is the primary pool implementation for volatile asset pairs.
+The DEX supports multiple AMM models to cater to different asset types and liquidity strategies:
 
-- **`stable-swap-pool.clar`**: An implementation of a stable swap AMM, designed for low-slippage trades between stablecoins and other similarly priced assets.
-
-- **`weighted-swap-pool.clar`**: A flexible pool implementation that supports up to eight tokens with custom weights, allowing for the creation of token baskets and other unique liquidity pools.
-
-### Oracles
-
-- **`oracle-aggregator-v2.clar`**: A sophisticated oracle aggregator that provides reliable price feeds for a variety of assets. It is a critical component of the DEX, providing the price information necessary for swaps and other operations.
-
-### Other Important Contracts
-
-- **`vault.clar`**: A contract for creating and managing token vaults. Vaults can be used for a variety of purposes, such as yield farming and liquidity provision.
-
-- **`auto-compounder.clar`**: A contract that automates the process of compounding rewards from liquidity provision and other yield-bearing activities.
-
-- **`bond-factory.clar`**: A factory for creating and managing bond tokens. Bond tokens can be used to represent a variety of debt instruments.
-
-## Architecture
-
-The DEX Module is designed to be flexible and extensible. The `multi-hop-router-v3.clar` is the core component, providing the execution logic for swaps. The router is designed to be agnostic to the underlying pool implementation, allowing it to be used with a variety of pool types. The `dex-factory.clar` provides a unified interface for creating and managing pools, while the various pool implementations provide the specific logic for different types of liquidity pools.
+-   **`concentrated-liquidity-pool.clar`**: The primary implementation for volatile asset pairs. It allows for greater capital efficiency by enabling liquidity providers to concentrate their capital within specific price ranges.
+-   **`stable-swap-pool.clar`**: An AMM designed for low-slippage trades between stablecoins and other similarly priced assets.
+-   **`weighted-swap-pool.clar`**: A flexible pool that supports up to eight tokens with custom weights, ideal for creating index-like token baskets.
 
 ## Status
 
-**Under Review**: The contracts in this module are currently undergoing a comprehensive review to ensure correctness, security, and alignment with the modular trait architecture. While the core swapping functionality is implemented in the `multi-hop-router-v3.clar`, other contracts in this module are not yet considered production-ready.
+**Under Review**: The contracts in this module are currently undergoing a comprehensive review. While the core swapping functionality in `multi-hop-router-v3.clar` is stable, the surrounding factory and registry contracts are being refined to ensure full alignment with the protocol's modular architecture. These contracts are not yet considered production-ready.

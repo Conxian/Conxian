@@ -2,22 +2,36 @@
 
 ## Overview
 
-The Lending Module provides the core infrastructure for decentralized lending and borrowing within the Conxian Protocol. It is designed to be a secure and robust system for managing multi-asset collateral, algorithmic interest rates, and enterprise-grade lending operations. The central component of this module is the `comprehensive-lending-system.clar` contract, which handles all the core logic for supply, borrow, repay, and liquidation operations.
+The Lending Module provides the core infrastructure for decentralized lending and borrowing within the Conxian Protocol. It is designed as a secure, multi-asset system for managing collateral, algorithmic interest rates, and orderly liquidations.
 
-## Contracts
+## Architecture: Facade with Specialized Managers
 
-- **`comprehensive-lending-system.clar`**: The main contract for the lending module. It manages user deposits, loans, and collateral, and integrates with other contracts to handle interest rates and liquidations. It includes a robust health factor check system to ensure the solvency of the protocol, and it provides hook-enabled functions for extensibility.
+The Lending Module follows the same **facade pattern** as the other core components of the protocol. The `comprehensive-lending-system.clar` contract acts as the central **facade**, providing a single, secure entry point for all lending and borrowing operations. It delegates specialized tasks, such as interest rate calculations and liquidations, to dedicated manager contracts.
 
-- **`interest-rate-model.clar`**: A specialized contract that calculates interest rates based on market conditions, such as the utilization rate of a given asset. It uses a dynamic model with a "kink" to adjust rates based on borrowing demand.
+This design simplifies user interaction, enhances security by centralizing entry points, and improves maintainability by separating distinct business logic into modular components.
 
-- **`liquidation-manager.clar`**: A contract responsible for managing the liquidation process for under-collateralized loans. It provides a set of public functions for checking the health of a position and initiating liquidations.
+### Control Flow Diagram
 
-- **`lending-position-nft.clar`**: A system for representing user positions in the lending protocol as NFTs. This allows for greater flexibility and composability. The contract supports a variety of NFT types, including borrower positions, lender positions, and liquidation events.
+```
+[User] -> [comprehensive-lending-system.clar] (Facade)
+    |
+    |-- (calculate-interest) --> [interest-rate-model.clar]
+    |-- (liquidate-loan) --> [liquidation-manager.clar]
+    |-- (mint-position) --> [lending-position-nft.clar]
+```
 
-## Architecture
+## Core Contracts
 
-The Lending Module is designed with a modular architecture, where the `comprehensive-lending-system.clar` contract acts as the central hub, coordinating with other specialized contracts to perform its functions. This separation of concerns enhances security and allows for greater flexibility in upgrading individual components.
+### Facade
+
+-   **`comprehensive-lending-system.clar`**: The main **facade** for the lending module. It manages all core user operations, including deposits, loans, and collateral management. It integrates with the manager contracts below to handle specialized logic.
+
+### Manager Contracts
+
+-   **`interest-rate-model.clar`**: A specialized contract that calculates borrowing interest rates based on market conditions, primarily the utilization rate of a given asset pool.
+-   **`liquidation-manager.clar`**: A dedicated contract responsible for managing the entire liquidation process for under-collateralized loans, ensuring the solvency of the protocol.
+-   **`lending-position-nft.clar`**: An NFT contract that represents user positions in the lending protocol as unique SIP-009 NFTs. This enhances the composability and transferability of lending and borrowing positions.
 
 ## Status
 
-**Under Review**: The contracts in this module are currently under review and are not yet considered production-ready. The core functionality is implemented, including a conservative `get-health-factor` implementation and optional health-factor-based guardrails (`borrow-checked` and `withdraw-checked`). These metrics are also wired into the Conxian Operations Engine for monitoring, but parameters and cross-module tests are still being hardened.
+**Under Review**: The contracts in this module are currently under review and are not yet considered production-ready. The core functionality is implemented, including a conservative `get-health-factor` check and optional guardrails (`borrow-checked` and `withdraw-checked`). These metrics are also wired into the Conxian Operations Engine for monitoring, but parameters and cross-module tests are still being hardened.
