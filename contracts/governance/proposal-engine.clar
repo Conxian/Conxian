@@ -97,7 +97,6 @@
 (define-public (vote
     (proposal-id uint)
     (support bool)
-    (votes-cast uint)
   )
   (begin
     (asserts! (not (is-protocol-paused)) ERR_PROTOCOL_PAUSED)
@@ -106,23 +105,17 @@
         proposal (begin
           (asserts! (is-eq (get executed proposal) false) ERR_VOTING_CLOSED)
         (asserts! (is-eq (get canceled proposal) false) ERR_VOTING_CLOSED)
-        (asserts! (>= block-height (get start-block proposal))
+        (asserts! (>= burn-block-height (get start-block proposal))
           ERR_PROPOSAL_NOT_ACTIVE
         )
-        (asserts! (<= block-height (get end-block proposal)) ERR_VOTING_CLOSED)
-        (asserts!
-          (is-ok (contract-call? .governance-token has-voting-power tx-sender))
-          ERR_UNAUTHORIZED
-        )
-        (try! (contract-call? .governance-voting vote proposal-id support votes-cast
-          tx-sender
-        ))
+        (asserts! (<= burn-block-height (get end-block proposal)) ERR_VOTING_CLOSED)
+
+        (try! (contract-call? .voting vote proposal-id support tx-sender))
         (print {
           event: "vote-cast",
           proposal-id: proposal-id,
           voter: tx-sender,
-          support: support,
-          votes: votes-cast,
+          support: support
         })
         (ok true)
       )
@@ -147,7 +140,7 @@
         )
         (begin
           (asserts! (is-eq tx-sender (get proposer proposal)) ERR_UNAUTHORIZED)
-          (asserts! (>= block-height (get end-block proposal))
+          (asserts! (>= burn-block-height (get end-block proposal))
             ERR_PROPOSAL_NOT_ACTIVE
           )
           (asserts! (not (get executed proposal)) ERR_VOTING_CLOSED)

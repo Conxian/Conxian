@@ -5,7 +5,6 @@
 (use-trait vault-trait .defi-traits.vault-trait)
 (use-trait custody-trait .custody.custody-trait)
 (use-trait yield-aggregator-trait .yield-aggregator.yield-aggregator-trait)
-(use-trait btc-bridge-trait .btc-bridge.btc-bridge-trait)
 (use-trait fee-manager-trait .fee-manager.fee-manager-trait)
 (use-trait sip-010-ft-trait .sip-standards.sip-010-ft-trait)
 
@@ -24,8 +23,6 @@
 (define-data-var custody-contract principal .custody)
 ;; @desc The principal of the yield aggregator contract.
 (define-data-var yield-aggregator-contract principal .yield-aggregator)
-;; @desc The principal of the BTC bridge contract.
-(define-data-var btc-bridge-contract principal .btc-bridge)
 ;; @desc The principal of the fee manager contract.
 (define-data-var fee-manager-contract principal .fee-manager)
 ;; @desc The principal of the sBTC token contract.
@@ -70,14 +67,6 @@
     (var-set yield-aggregator-contract contract)
     (ok true)))
 
-;; @desc Sets the BTC bridge contract address.
-;; @param contract principal The new BTC bridge contract principal.
-;; @returns (response bool uint) `(ok true)` on success.
-(define-public (set-btc-bridge-contract (contract principal))
-  (begin
-    (try! (check-is-owner))
-    (var-set btc-bridge-contract contract)
-    (ok true)))
 
 ;; @desc Sets the fee manager contract address.
 ;; @param contract principal The new fee manager contract principal.
@@ -135,7 +124,7 @@
     (let ((fee (unwrap! (contract-call? .fee-manager calculate-fee "deposit" amount) (err u0))))
       (let ((net-amount (- amount fee)))
         (try! (as-contract (contract-call? .sbtc-token transfer net-amount tx-sender (as-contract tx-sender) none)))
-        (as-contract (contract-call? .btc-bridge sbtc-deposit net-amount tx-sender))))))
+        (ok net-amount)))))
 
 ;; @desc Withdraws sBTC from the vault.
 ;; @param amount uint The amount of sBTC to withdraw.
@@ -145,7 +134,6 @@
     (try! (check-not-paused))
     (let ((fee (unwrap! (contract-call? .fee-manager calculate-fee "withdraw" amount) (err u0))))
       (let ((net-amount (- amount fee)))
-        (try! (as-contract (contract-call? .btc-bridge sbtc-withdraw net-amount tx-sender)))
         (as-contract (contract-call? .sbtc-token transfer net-amount (as-contract tx-sender) tx-sender none))))))
 
 ;; --- Yield Generation ---

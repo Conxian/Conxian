@@ -33,6 +33,8 @@
 ;; --- Data Storage ---
 
 ;; @desc Stores the details of each vote, keyed by a tuple of proposal ID and voter principal.
+(use-trait sip-010-ft-trait .sip-standards.sip-010-ft-trait)
+
 (define-map votes
   {
     proposal-id: uint,
@@ -43,11 +45,46 @@
     votes: uint
   })
 
+(define-map locks principal {
+    amount: uint,
+    unlock-burn-height: uint
+})
+
 ;; Contract references
 (define-data-var proposal-engine-contract (optional principal) none)
 (define-data-var contract-owner principal tx-sender)
+(define-data-var governance-token principal .governance-token)
 
 ;; --- Public Functions ---
+
+(define-constant ERR_INSUFFICIENT_LOCKED_TOKENS (err u106))
+(define-constant LOCK_PERIOD_BLOCKS u100) ;; Example lock period, ~2 weeks in burn blocks
+
+(define-read-only (get-voting-power (voter principal))
+    (match (map-get? locks voter)
+        lock-info
+        (if (>= burn-block-height (get unlock-burn-height lock-info))
+            u0 ;; Lock expired
+            (get amount lock-info)
+        )
+        u0
+    )
+)
+
+(define-public (lock-tokens (amount uint))
+    (begin
+        (asserts! (> amount u0) (err ERR_INSUFFICIENT_LOCKED_TOKENS))
+
+        ;; Transfer tokens to this contract for custody
+        (try! (contract-call? (var-get governance-token) transfer amount tx-sender (as-contract tx-sender) none))
+
+        (map-set locks tx-sender {
+            amount: (+ (get-voting-power tx-sender) amount),
+            unlock-burn-height: (+ burn-block-height LOCK_PERIOD_BLOCKS)
+        })
+        (ok true)
+    )
+)
 
 (define-public (set-proposal-engine-contract (contract principal))
   (begin
@@ -63,32 +100,21 @@
 ;; @param votes-cast uint The number of votes being cast.
 ;; @param voter principal The principal of the user casting the vote.
 ;; @returns (response bool uint) `(ok true)` if the vote is successfully cast, otherwise an error.
-(define-public (vote (proposal-id uint) (support bool) (votes-cast uint) (voter principal))
-  (begin
-    (asserts!
-      (is-eq tx-sender
-        (unwrap! (var-get proposal-engine-contract) (err ERR_UNAUTHORIZED))
-      )
-      (err ERR_UNAUTHORIZED)
-    )
+(define-public (vote (proposal-id uint) (support bool) (voter principal))
+  (let ((voting-power (get-voting-power voter)))
     (begin
-      (asserts!
-        (is-none (map-get? votes {
-          proposal-id: proposal-id,
-          voter: voter,
-        }))
-        (err ERR_ALREADY_VOTED)
-      )
+        (asserts! (is-eq tx-sender (unwrap! (var-get proposal-engine-contract) (err ERR_UNAUTHORIZED))))
+        (asserts! (> voting-power u0) (err ERR_INSUFFICIENT_LOCKED_TOKENS))
 
-      (map-set votes {
-        proposal-id: proposal-id,
-        voter: voter,
-      } {
-        support: support,
-        votes: votes-cast,
-      })
-      (ok true)
-    )))
+        (asserts! (is-none (map-get? votes { proposal-id: proposal-id, voter: voter })) (err ERR_ALREADY_VOTED))
+
+        (map-set votes { proposal-id: proposal-id, voter: voter } {
+            support: support,
+            votes: voting-power
+        })
+        (ok true)
+    )
+))
 
 ;; --- Read-Only Functions ---
 
@@ -98,3 +124,17 @@
 ;; @returns (response (optional { ... }) uint) An optional tuple containing the vote details.
 (define-read-only (get-vote (proposal-id uint) (voter principal))
   (ok (map-get? votes { proposal-id: proposal-id, voter: voter })))
+
+(define-public (unlock-tokens)
+    (let ((lock-info (unwrap! (map-get? locks tx-sender) (err u0))))
+        (begin
+            (asserts! (>= burn-block-height (get unlock-burn-height lock-info)) (err u0))
+
+            ;; Transfer tokens back to owner
+            (try! (as-contract (contract-call? (var-get governance-token) transfer (get amount lock-info) tx-sender tx-sender none)))
+
+            (map-delete locks tx-sender)
+            (ok true)
+        )
+    )
+)

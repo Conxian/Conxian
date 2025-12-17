@@ -50,12 +50,26 @@
     )
 )
 
-;; @desc Verify a Bitcoin transaction has achieved finality
+;; @desc Verify a Bitcoin transaction has achieved finality by checking against burnchain data.
 ;; @param header: The Bitcoin block header containing the tx
 (define-read-only (verify-finality (header (buff 80)))
-    ;; In a real implementation, we would parse the header to get the height or check burn-header-hash
-    ;; For now, we assume the caller checks the burn height in the logic
-    (ok true) 
+    (let (
+        ;; Assumes .clarity-bitcoin has functions to parse header.
+        (header-height (unwrap! (contract-call? .clarity-bitcoin get-height header) ERR_INVALID_TX))
+        (header-hash (unwrap! (contract-call? .clarity-bitcoin get-block-hash header) ERR_INVALID_TX))
+
+        ;; Get the canonical hash for that height from the burnchain state.
+        (burn-block-info (unwrap! (get-burn-block-info? header-height) ERR_INVALID_TX))
+        (canonical-hash (get header-hash burn-block-info))
+    )
+        ;; 1. Ensure the provided header matches the canonical chain.
+        (asserts! (is-eq header-hash canonical-hash) ERR_INVALID_TX)
+
+        ;; 2. Ensure the block is deep enough for finality.
+        (asserts! (>= (- burn-block-height header-height) BTC_FINALITY_BLOCKS) ERR_NOT_CONFIRMED)
+
+        (ok true)
+    )
 )
 
 ;; @desc Process a deposit from Bitcoin (Mint sBTC)
@@ -77,10 +91,13 @@
         (was-mined (contract-call? .clarity-bitcoin was-tx-mined? block-header tx-blob proof))
         (amount (contract-call? .clarity-bitcoin get-out-value tx-blob))
     )
-        ;; 1. Verify Inclusion
+        ;; 1. Verify finality of the Bitcoin block.
+        (try! (verify-finality block-header))
+
+        ;; 2. Verify Inclusion
         (asserts! was-mined ERR_VERIFICATION_FAILED)
 
-        ;; 2. Check if already processed
+        ;; 3. Check if already processed
         (asserts! (is-none (map-get? processed-txs { txid: tx-id }))
             ERR_ALREADY_PROCESSED
         )

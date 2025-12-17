@@ -130,8 +130,8 @@
       (let ((sbtc-amount (calculate-sbtc-from-shares shares)))
         (map-set withdrawal-requests recipient {
           amount: sbtc-amount,
-          requested-at: block-height,
-          unlock-at: (+ block-height WITHDRAWAL_DELAY_BLOCKS),
+          requested-at: burn-block-height,
+          unlock-at: (+ burn-block-height WITHDRAWAL_DELAY_BLOCKS),
           btc-address: 0x00
         })
         (map-set share-balances recipient (- user-shares shares))
@@ -146,7 +146,7 @@
   (begin
     (asserts! (is-eq tx-sender .sbtc-vault) (err u100))
     (let ((request (unwrap! (map-get? withdrawal-requests recipient) (err u2001))))
-      (asserts! (>= block-height (get unlock-at request)) (err u2005))
+      (asserts! (>= burn-block-height (get unlock-at request)) (err u2005))
       (let ((amount (get amount request)))
         (map-delete withdrawal-requests recipient)
         (var-set total-sbtc-deposited (- (var-get total-sbtc-deposited) amount))
