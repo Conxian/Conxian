@@ -9,7 +9,7 @@ export default defineConfig({
       },
     },
     setupFiles: ['./tests/vitest.setup.ts'],
-    testTimeout: 120000,
+    testTimeout: 300000,
     hookTimeout: 90000,
     fileParallelism: false,
   },

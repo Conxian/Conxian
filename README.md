@@ -58,6 +58,16 @@ The Governance Module facilitates decentralized control over the protocol.
 -   **Manager Contracts**:
     -   **`conxian-operations-engine.clar`**: An automated "DAO Seat" that programmatically participates in governance by consuming on-chain metrics and casting policy-constrained votes.
 
+### 5. Enterprise Module (`contracts/enterprise/`)
+
+The Enterprise Module provides institutional-grade financial tooling.
+
+-   **`enterprise-facade.clar`**: The **facade** for all enterprise-related actions, including institutional account management, compliance, and advanced order types.
+-   **Manager Contracts**:
+    -   **`institutional-account-manager.clar`**: Manages the lifecycle of institutional accounts.
+    -   **`compliance-manager.clar`**: Manages KYC/AML and other regulatory requirements.
+    -   **`advanced-order-manager.clar`**: Manages sophisticated order types like TWAP and Iceberg orders.
+
 ## Modules
 
 For more detailed information about each module's architecture and function, please refer to the `README.md` files in the `contracts` directory:
@@ -66,6 +76,7 @@ For more detailed information about each module's architecture and function, ple
 -   [DEX Module](./contracts/dex/README.md)
 -   [Lending Module](./contracts/lending/README.md)
 -   [Governance Module](./contracts/governance/README.md)
+-   [Enterprise Module](./contracts/enterprise/README.md)
 -   [Tokens Module](./contracts/tokens/README.md)
 -   [Vaults Module](./contracts/vaults/README.md)
 -   [Security Module](./contracts/security/README.md)

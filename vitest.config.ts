@@ -8,7 +8,6 @@ export default defineConfig({
         manifestPath: "Clarinet.toml",
       },
     },
-    setupFiles: ["./tests/vitest.setup.ts"],
     testTimeout: 120000,
     hookTimeout: 90000,
     pool: "threads",
