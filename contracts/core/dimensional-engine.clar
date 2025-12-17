@@ -14,11 +14,19 @@
 (use-trait collateral-manager-trait .dimensional-traits.collateral-manager-trait)
 (use-trait risk-manager-trait .dimensional-traits.risk-manager-trait)
 (use-trait rbac-trait .core-traits.rbac-trait)
+(use-trait protocol-support-trait .core-traits.protocol-support-trait)
+
+(define-constant ERR_PROTOCOL_PAUSED (err u5001))
 
 (define-data-var position-manager principal tx-sender)
 (define-data-var funding-rate-calculator principal tx-sender)
 (define-data-var collateral-manager principal tx-sender)
 (define-data-var risk-manager principal tx-sender)
+(define-data-var protocol-coordinator principal tx-sender)
+
+(define-private (is-protocol-paused)
+  (contract-call? (var-get protocol-coordinator) is-protocol-paused)
+)
 
 ;;
 ;; @desc Opens a new trading position by delegating the call to the Position
@@ -34,16 +42,19 @@
 ;; @returns A response indicating success or an error code.
 ;;
 (define-public (open-position (asset principal) (collateral uint) (leverage uint) (is-long bool) (stop-loss (optional uint)) (take-profit (optional uint)))
-  (let (
-    (collateral-balance (unwrap! (contract-call? .collateral-manager get-balance tx-sender) (err u2003)))
-    (fee-rate (unwrap! (contract-call? .collateral-manager get-protocol-fee-rate) (err u2004)))
-    (fee (* collateral fee-rate))
-    (total-cost (+ collateral fee))
-  )
-    (asserts! (>= collateral-balance total-cost) (err u2003))
-    (try! (contract-call? .collateral-manager withdraw-funds total-cost asset))
-    (contract-call? .position-manager open-position asset
-      collateral leverage is-long stop-loss take-profit
+  (begin
+    (asserts! (not (is-protocol-paused)) ERR_PROTOCOL_PAUSED)
+    (let (
+      (collateral-balance (unwrap! (contract-call? .collateral-manager get-balance tx-sender) (err u2003)))
+      (fee-rate (unwrap! (contract-call? .collateral-manager get-protocol-fee-rate) (err u2004)))
+      (fee (* collateral fee-rate))
+      (total-cost (+ collateral fee))
+    )
+      (asserts! (>= collateral-balance total-cost) (err u2003))
+      (try! (contract-call? .collateral-manager withdraw-funds total-cost asset))
+      (contract-call? .position-manager open-position asset
+        collateral leverage is-long stop-loss take-profit
+      )
     )
   )
 )
@@ -56,14 +67,17 @@
 ;; @returns The result of the close operation, including collateral returned.
 ;;
 (define-public (close-position (position-id uint) (asset principal) (slippage (optional uint)))
-  (let (
-    (result (try! (contract-call? .position-manager close-position position-id slippage)))
-    (collateral-returned (get collateral-returned result))
-  )
-    (try! (as-contract (contract-call? .collateral-manager deposit-funds
-      collateral-returned asset
-    )))
-    (ok result)
+  (begin
+    (asserts! (not (is-protocol-paused)) ERR_PROTOCOL_PAUSED)
+    (let (
+      (result (try! (contract-call? .position-manager close-position position-id slippage)))
+      (collateral-returned (get collateral-returned result))
+    )
+      (try! (as-contract (contract-call? .collateral-manager deposit-funds
+        collateral-returned asset
+      )))
+      (ok result)
+    )
   )
 )
 
@@ -83,8 +97,11 @@
 ;; @returns A response indicating success or failure.
 ;;
 (define-public (apply-funding-to-position (position-owner principal) (position-id uint))
-  (contract-call? .funding-rate-calculator apply-funding-to-position
-    position-owner position-id
+  (begin
+    (asserts! (not (is-protocol-paused)) ERR_PROTOCOL_PAUSED)
+    (contract-call? .funding-rate-calculator apply-funding-to-position
+      position-owner position-id
+    )
   )
 )
 
@@ -95,7 +112,10 @@
 ;; @returns A response indicating success or failure.
 ;;
 (define-public (deposit-funds (amount uint) (token principal))
-  (contract-call? .collateral-manager deposit-funds amount token)
+  (begin
+    (asserts! (not (is-protocol-paused)) ERR_PROTOCOL_PAUSED)
+    (contract-call? .collateral-manager deposit-funds amount token)
+  )
 )
 
 ;;
@@ -105,7 +125,10 @@
 ;; @returns A response indicating success or failure.
 ;;
 (define-public (withdraw-funds (amount uint) (token principal))
-  (contract-call? .collateral-manager withdraw-funds amount token)
+  (begin
+    (asserts! (not (is-protocol-paused)) ERR_PROTOCOL_PAUSED)
+    (contract-call? .collateral-manager withdraw-funds amount token)
+  )
 )
 
 ;;
@@ -124,7 +147,10 @@
 ;; @returns A response indicating the outcome of the liquidation.
 ;;
 (define-public (liquidate-position (position-id uint) (liquidator principal))
-  (contract-call? .risk-manager liquidate-position position-id liquidator)
+  (begin
+    (asserts! (not (is-protocol-paused)) ERR_PROTOCOL_PAUSED)
+    (contract-call? .risk-manager liquidate-position position-id liquidator)
+  )
 )
 
 ;;
@@ -163,4 +189,18 @@
 ;;
 (define-read-only (get-protocol-fee-rate)
   (ok u30)
+)
+
+(define-data-var contract-owner principal tx-sender)
+
+(define-private (is-contract-owner)
+  (is-eq tx-sender (var-get contract-owner))
+)
+
+(define-public (set-protocol-coordinator (new-coordinator principal))
+  (begin
+    (asserts! (is-contract-owner) (err u1000))
+    (var-set protocol-coordinator new-coordinator)
+    (ok true)
+  )
 )

@@ -10,6 +10,7 @@
 
 (use-trait pool-trait .defi-traits.pool-trait)
 (use-trait sip-010-trait .sip-standards.sip-010-ft-trait)
+(use-trait protocol-support-trait .core-traits.protocol-support-trait)
 
 ;; ---------------------------------------------------------
 ;; Constants
@@ -18,7 +19,8 @@
 (define-constant ERR_SLIPPAGE (err u4002))
 (define-constant ERR_INVALID_HOP (err u4003))
 (define-constant ERR_UNAUTHORIZED (err u4005))
-(define-constant ERR_APPEND_FAILED (err u4004)) 
+(define-constant ERR_APPEND_FAILED (err u4004))
+(define-constant ERR_PROTOCOL_PAUSED (err u5001))
 
 ;; Data Variables
 ;; ---------------------------------------------------------
@@ -26,6 +28,11 @@
 ;; constructing multi-hop routes. Managed by the contract owner.
 (define-data-var base-tokens (list 10 principal) (list))
 (define-data-var contract-owner principal tx-sender)
+(define-data-var protocol-coordinator principal tx-sender)
+
+(define-private (is-protocol-paused)
+  (contract-call? (var-get protocol-coordinator) is-protocol-paused)
+)
 
 ;; ---------------------------------------------------------
 ;; Public Functions
@@ -57,9 +64,12 @@
     (token-in <sip-010-trait>)
     (token-out <sip-010-trait>)
   )
-  (let ((amount-out (try! (contract-call? pool swap amount-in token-in token-out))))
-    (asserts! (>= amount-out min-amount-out) ERR_SLIPPAGE)
-    (ok amount-out)
+  (begin
+    (asserts! (not (is-protocol-paused)) ERR_PROTOCOL_PAUSED)
+    (let ((amount-out (try! (contract-call? pool swap amount-in token-in token-out))))
+      (asserts! (>= amount-out min-amount-out) ERR_SLIPPAGE)
+      (ok amount-out)
+    )
   )
 )
 
@@ -84,12 +94,15 @@
     (pool2 <pool-trait>)
     (token-out <sip-010-trait>)
   )
-  (let (
-    (amt1 (try! (contract-call? pool1 swap amount-in token-in token-base)))
-    (amt2 (try! (contract-call? pool2 swap amt1 token-base token-out)))
-  )
-    (asserts! (>= amt2 min-amount-out) ERR_SLIPPAGE)
-    (ok amt2)
+  (begin
+    (asserts! (not (is-protocol-paused)) ERR_PROTOCOL_PAUSED)
+    (let (
+      (amt1 (try! (contract-call? pool1 swap amount-in token-in token-base)))
+      (amt2 (try! (contract-call? pool2 swap amt1 token-base token-out)))
+    )
+      (asserts! (>= amt2 min-amount-out) ERR_SLIPPAGE)
+      (ok amt2)
+    )
   )
 )
 
@@ -118,13 +131,16 @@
     (pool3 <pool-trait>)
     (token-out <sip-010-trait>)
   )
-  (let (
-    (amt1 (try! (contract-call? pool1 swap amount-in token-in token-base1)))
-    (amt2 (try! (contract-call? pool2 swap amt1 token-base1 token-base2)))
-    (amt3 (try! (contract-call? pool3 swap amt2 token-base2 token-out)))
-  )
-    (asserts! (>= amt3 min-amount-out) ERR_SLIPPAGE)
-    (ok amt3)
+  (begin
+    (asserts! (not (is-protocol-paused)) ERR_PROTOCOL_PAUSED)
+    (let (
+      (amt1 (try! (contract-call? pool1 swap amount-in token-in token-base1)))
+      (amt2 (try! (contract-call? pool2 swap amt1 token-base1 token-base2)))
+      (amt3 (try! (contract-call? pool3 swap amt2 token-base2 token-out)))
+    )
+      (asserts! (>= amt3 min-amount-out) ERR_SLIPPAGE)
+      (ok amt3)
+    )
   )
 )
 
@@ -138,3 +154,14 @@
 ;; low transaction fees.
 ;;
 
+(define-private (is-contract-owner)
+  (is-eq tx-sender (var-get contract-owner))
+)
+
+(define-public (set-protocol-coordinator (new-coordinator principal))
+  (begin
+    (asserts! (is-contract-owner) (err u1000))
+    (var-set protocol-coordinator new-coordinator)
+    (ok true)
+  )
+)

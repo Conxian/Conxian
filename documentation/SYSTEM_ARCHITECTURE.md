@@ -40,37 +40,57 @@ The facade pattern provides a simple, unified interface to a more complex underl
 -   **Improved Maintainability**: The separation of concerns makes the system far easier to understand, debug, and upgrade. A change to the `position-manager.clar` contract, for example, is isolated from the logic in the `collateral-manager.clar`, reducing the risk of unintended side effects.
 -   **Increased Clarity**: The architecture provides a clear and logical map of the system. Developers can immediately understand the high-level functionality by reviewing the facade, and then dive into the specific implementation details in the relevant manager contract.
 
-## 3. High-Level System Diagram
+## 3. The Protocol Coordinator: `conxian-protocol.clar`
 
-The Conxian Protocol is composed of several core modules, each with its own facade. These modules are designed to be highly cohesive and loosely coupled, interacting with each other through their public, trait-defined interfaces.
+While the facade pattern decentralizes the logic of individual modules, the Conxian Protocol is unified by a central coordinator contract: `conxian-protocol.clar`. This critical contract serves as the single source of truth for protocol-wide state and provides a global layer of security and control.
+
+### 3.1 Key Responsibilities
+
+-   **Emergency Pause**: The coordinator implements a global `emergency-paused` flag. When this flag is active, all state-changing functions in the module facades are disabled, providing a single switch to halt the protocol in a critical situation.
+-   **Contract Registry**: The coordinator maintains a registry of authorized contracts, ensuring that only verified and approved components can interact with the core system.
+-   **Protocol-Wide Configuration**: The coordinator manages global configuration parameters, such as fee rates and collateralization ratios, providing a centralized point of control for these key variables.
+
+### 3.2 Integration with Facades
+
+All module facades are integrated with the protocol coordinator. They use the `protocol-support-trait` to check the `is-protocol-paused` status before executing any state-changing logic. This ensures that the global emergency pause is respected across the entire system.
+
+## 4. High-Level System Diagram
+
+The Conxian Protocol is composed of several core modules, each with its own facade, all of which are connected to the central protocol coordinator. These modules are designed to be highly cohesive and loosely coupled, interacting with each other through their public, trait-defined interfaces.
 
 ```
-+--------------------------------------------------------------------------+
-|                            Conxian Protocol                              |
-|                                                                          |
-|    +-----------------+      +----------------+      +-----------------+  |
-|    |   Core Module   |      |   DEX Module   |      |  Lending Module |  |
-|    |    (Facade)     |      |    (Facade)    |      |     (Facade)    |  |
-|    +-------+---------+      +-------+--------+      +--------+--------+  |
-|            |                      |                        |             |
-|    +-------v---------+      +-------v--------+      +--------v--------+  |
-|    | Manager         |      | Manager        |      | Manager         |  |
-|    | Contracts       |      | Contracts      |      | Contracts       |  |
-|    +-----------------+      +----------------+      +-----------------+  |
-|                                                                          |
-|    +---------------------+    +----------------------+                   |
-|    |  Governance Module  |    |  Enterprise Module   |                   |
-|    |       (Facade)      |    |  (Facade - Target)   |                   |
-|    +----------+----------+    +----------+-----------+                   |
-|               |                         |                                |
-|    +----------v----------+    +----------v-----------+                   |
-|    | Manager Contracts   |    | Manager Contracts    |                   |
-|    +---------------------+    +----------------------+                   |
-|                                                                          |
-+--------------------------------------------------------------------------+
++----------------------------------------------------------------------------------+
+|                                Conxian Protocol                                  |
+|                                                                                  |
+|    +--------------------------------------------------------------------------+  |
+|    |                        Protocol Coordinator                              |  |
+|    |                       (conxian-protocol.clar)                              |  |
+|    +----------------------------------^----------------------------------------+  |
+|                                       |                                          |
+|    +-----------------+                |                 +-----------------+      |
+|    |   Core Module   |----------------+-----------------|   DEX Module    |      |
+|    |    (Facade)     |                |                 |    (Facade)     |      |
+|    +-------+---------+      +---------+--------+        +--------+--------+      |
+|            |              |  Lending Module  |                 |               |
+|            |              |     (Facade)     |                 |               |
+|    +-------v---------+      +------------------+        +--------v--------+      |
+|    | Manager         |                                  | Manager         |      |
+|    | Contracts       |      +---------------------+     | Contracts       |      |
+|    +-----------------+      |  Governance Module  |     +-----------------+      |
+|                             |       (Facade)      |                            |
+|    +----------------------+ +----------+----------+     +----------------------+ |
+|    |  Enterprise Module   |            |               |  Manager Contracts   | |
+|    |  (Facade - Target)   |            |               +----------------------+ |
+|    +----------+-----------+ +----------v----------+                            |
+|               |            | Manager Contracts   |                            |
+|    +----------v-----------+ +---------------------+                            |
+|    | Manager Contracts    |                                                  |
+|    +----------------------+                                                  |
+|                                                                                  |
++----------------------------------------------------------------------------------+
 ```
 
-## 4. Module Breakdown
+## 5. Module Breakdown
 
 For a detailed understanding of each module's specific architecture and functionality, please refer to their individual `README.md` files:
 
@@ -80,7 +100,7 @@ For a detailed understanding of each module's specific architecture and function
 -   **[Governance Module](./contracts/governance/README.md)**: Provides the framework for decentralized decision-making and protocol upgrades.
 -   **[Enterprise Module](./contracts/enterprise/README.md)**: Provides compliant, institutional-grade financial tooling.
 
-## 5. Architectural Goals: Nakamoto Compliance
+## 6. Architectural Goals: Nakamoto Compliance
 
 A primary architectural goal of the Conxian Protocol is to be fully compliant with the upcoming Stacks Nakamoto upgrade. This means that all contracts are being reviewed and designed to:
 

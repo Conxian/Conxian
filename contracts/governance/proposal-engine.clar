@@ -9,6 +9,8 @@
 ;; allowing individual components to be upgraded independently.
 ;;
 
+(use-trait protocol-support-trait .core-traits.protocol-support-trait)
+
 ;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED (err u100))
 (define-constant ERR_PROPOSAL_NOT_FOUND (err u101))
@@ -19,6 +21,7 @@
 (define-constant ERR_QUORUM_NOT_REACHED (err u106))
 (define-constant ERR_PROPOSAL_FAILED (err u107))
 (define-constant ERR_INVALID_VOTING_PERIOD (err u109))
+(define-constant ERR_PROTOCOL_PAUSED (err u5001))
 ;; Minimum allowed quorum percentage (10% expressed in basis points of 10000)
 (define-constant MIN_QUORUM u1000)
 
@@ -36,6 +39,11 @@
 (define-data-var voting-period-blocks uint u172800)
 ;; @desc The percentage of the total token supply that must vote for a proposal to pass, multiplied by 100.
 (define-data-var quorum-percentage uint u5000)
+(define-data-var protocol-coordinator principal tx-sender)
+
+(define-private (is-protocol-paused)
+  (contract-call? (var-get protocol-coordinator) is-protocol-paused)
+)
 
 ;; --- Authorization ---
 
@@ -64,9 +72,11 @@
     (start-block uint)
     (end-block uint)
   )
-  (let ((proposal-id (try! (contract-call? .proposal-registry create-proposal tx-sender description
-      start-block end-block
-    ))))
+  (begin
+    (asserts! (not (is-protocol-paused)) ERR_PROTOCOL_PAUSED)
+    (let ((proposal-id (try! (contract-call? .proposal-registry create-proposal tx-sender description
+        start-block end-block
+      ))))
     (print {
       event: "proposal-created",
       proposal-id: proposal-id,
@@ -75,6 +85,7 @@
       end-block: end-block,
     })
     (ok proposal-id)
+   )
   )
 )
 
@@ -88,10 +99,12 @@
     (support bool)
     (votes-cast uint)
   )
-  (let ((maybe-proposal (try! (contract-call? .proposal-registry get-proposal proposal-id))))
-    (match maybe-proposal
-      proposal (begin
-        (asserts! (is-eq (get executed proposal) false) ERR_VOTING_CLOSED)
+  (begin
+    (asserts! (not (is-protocol-paused)) ERR_PROTOCOL_PAUSED)
+    (let ((maybe-proposal (try! (contract-call? .proposal-registry get-proposal proposal-id))))
+      (match maybe-proposal
+        proposal (begin
+          (asserts! (is-eq (get executed proposal) false) ERR_VOTING_CLOSED)
         (asserts! (is-eq (get canceled proposal) false) ERR_VOTING_CLOSED)
         (asserts! (>= block-height (get start-block proposal))
           ERR_PROPOSAL_NOT_ACTIVE
@@ -114,6 +127,7 @@
         (ok true)
       )
       ERR_PROPOSAL_NOT_FOUND
+      )
     )
   )
 )
@@ -122,9 +136,11 @@
 ;; @param proposal-id uint The ID of the proposal.
 ;; @returns (response bool uint) `(ok true)` on success.
 (define-public (execute (proposal-id uint))
-  (let ((maybe-proposal (try! (contract-call? .proposal-registry get-proposal proposal-id))))
-    (match maybe-proposal
-      proposal (let (
+  (begin
+    (asserts! (not (is-protocol-paused)) ERR_PROTOCOL_PAUSED)
+    (let ((maybe-proposal (try! (contract-call? .proposal-registry get-proposal proposal-id))))
+      (match maybe-proposal
+        proposal (let (
           (total-votes (+ (get for-votes proposal) (get against-votes proposal)))
           (governance-token-supply (unwrap! (contract-call? .governance-token get-total-supply) (err u999)))
           (quorum (/ (* total-votes u10000) governance-token-supply))
@@ -153,6 +169,7 @@
         )
       )
       ERR_PROPOSAL_NOT_FOUND
+      )
     )
   )
 )
@@ -161,10 +178,12 @@
 ;; @param proposal-id uint The ID of the proposal.
 ;; @returns (response bool uint) `(ok true)` on success.
 (define-public (cancel (proposal-id uint))
-  (let ((maybe-proposal (try! (contract-call? .proposal-registry get-proposal proposal-id))))
-    (match maybe-proposal
-      proposal (begin
-        (asserts!
+  (begin
+    (asserts! (not (is-protocol-paused)) ERR_PROTOCOL_PAUSED)
+    (let ((maybe-proposal (try! (contract-call? .proposal-registry get-proposal proposal-id))))
+      (match maybe-proposal
+        proposal (begin
+          (asserts!
           (or (is-eq tx-sender (get proposer proposal)) (is-contract-owner))
           ERR_UNAUTHORIZED
         )
@@ -179,6 +198,7 @@
         (ok true)
       )
       ERR_PROPOSAL_NOT_FOUND
+      )
     )
   )
 )
@@ -238,6 +258,14 @@
   (begin
     (asserts! (is-contract-owner) ERR_UNAUTHORIZED)
     (var-set contract-owner new-owner)
+    (ok true)
+  )
+)
+
+(define-public (set-protocol-coordinator (new-coordinator principal))
+  (begin
+    (asserts! (is-contract-owner) (err u1000))
+    (var-set protocol-coordinator new-coordinator)
     (ok true)
   )
 )

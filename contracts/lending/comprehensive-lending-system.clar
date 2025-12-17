@@ -15,6 +15,7 @@
 (use-trait circuit-breaker-trait .security-monitoring.circuit-breaker-trait)
 (use-trait hook-trait .defi-traits.hook-trait)
 (use-trait fee-manager-trait .defi-traits.fee-manager-trait)
+(use-trait protocol-support-trait .core-traits.protocol-support-trait)
 
 ;; Constants
 (define-constant ERR_UNAUTHORIZED (err u1000))
@@ -25,6 +26,7 @@
 (define-constant ERR_HEALTH_CHECK_FAILED (err u1005))
 (define-constant ERR_CIRCUIT_BREAKER_OPEN (err u1006))
 (define-constant ERR_INTEREST_ACCRUAL_FAILED (err u1007))
+(define-constant ERR_PROTOCOL_PAUSED (err u5001))
 (define-constant LENDING_SERVICE "lending-core")
 (define-constant PRECISION u1000000000000000000)
 
@@ -32,6 +34,11 @@
 (define-data-var contract-owner principal tx-sender)
 (define-data-var protocol-fee-switch principal 'STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ.protocol-fee-switch)
 (define-data-var min-health-factor uint u10000)
+(define-data-var protocol-coordinator principal tx-sender)
+
+(define-private (is-protocol-paused)
+  (contract-call? (var-get protocol-coordinator) is-protocol-paused)
+)
 
 ;; Maps
 ;; amount: Principal balance (scaled)
@@ -86,6 +93,7 @@
       (sender tx-sender)
     )
     (asserts! (> amount u0) ERR_ZERO_AMOUNT)
+    (asserts! (not (is-protocol-paused)) ERR_PROTOCOL_PAUSED)
     (try! (check-circuit-breaker))
 
     ;; Accrue Interest
@@ -141,6 +149,7 @@
       (caller tx-sender)
     )
     (asserts! (> amount u0) ERR_ZERO_AMOUNT)
+    (asserts! (not (is-protocol-paused)) ERR_PROTOCOL_PAUSED)
     (try! (check-circuit-breaker))
 
     (let ((market (unwrap!
@@ -199,6 +208,7 @@
       (caller tx-sender)
     )
     (asserts! (> amount u0) ERR_ZERO_AMOUNT)
+    (asserts! (not (is-protocol-paused)) ERR_PROTOCOL_PAUSED)
     (try! (check-circuit-breaker))
 
     (let ((market (unwrap!
@@ -253,6 +263,7 @@
       (sender tx-sender)
     )
     (asserts! (> amount u0) ERR_ZERO_AMOUNT)
+    (asserts! (not (is-protocol-paused)) ERR_PROTOCOL_PAUSED)
     (try! (check-circuit-breaker))
 
     (let ((market (unwrap!
@@ -584,5 +595,17 @@
         (withdraw-internal asset amount)
       )
     )
+  )
+)
+
+(define-private (is-contract-owner)
+  (is-eq tx-sender (var-get contract-owner))
+)
+
+(define-public (set-protocol-coordinator (new-coordinator principal))
+  (begin
+    (asserts! (is-contract-owner) (err u1000))
+    (var-set protocol-coordinator new-coordinator)
+    (ok true)
   )
 )

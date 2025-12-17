@@ -2,6 +2,8 @@
 ;; This contract serves as the central coordination point for the Conxian Protocol,
 ;; managing protocol-wide configuration, authorized contracts, and emergency controls.
 
+(use-trait protocol-support-trait .core-traits.protocol-support-trait)
+
 ;; @constants
 ;; @var ERR_UNAUTHORIZED: The caller is not authorized to perform this action.
 (define-constant ERR_UNAUTHORIZED (err u1001))
@@ -213,6 +215,10 @@
 ;; @returns (optional { ... }): A tuple containing the event details, or none if not found.
 (define-read-only (get-protocol-event (event-id uint))
   (map-get? protocol-events { event-id: event-id })
+)
+
+(define-read-only (is-protocol-paused)
+  (ok (var-get emergency-paused))
 )
 
 ;; --- Initialization ---
