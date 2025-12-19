@@ -1,4 +1,5 @@
 import { defineConfig } from 'vitest/config';
+import { vitestSetupFilePath } from '@stacks/clarinet-sdk/vitest';
 
 export default defineConfig({
   test: {
@@ -7,7 +8,10 @@ export default defineConfig({
     testTimeout: 120000,
     hookTimeout: 60000,
     fileParallelism: false,
-    setupFiles: ["./tests/vitest.setup.ts"],
+    setupFiles: [vitestSetupFilePath, "./tests/vitest.setup.ts"],
+    env: {
+      CLARINET_MANIFEST_PATH: "./Clarinet.toml"
+    },
     coverage: {
       reporter: ["text", "json", "html"],
       include: ["contracts/security/*.clar"],
