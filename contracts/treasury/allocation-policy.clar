@@ -92,6 +92,6 @@
     legal: u0,
     grants: u0,
   }
-    ;; Default to Treasury (map-get? allocations source-tag)
+    (map-get? allocations source-tag)
   )
 )

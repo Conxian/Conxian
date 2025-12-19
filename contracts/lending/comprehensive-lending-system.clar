@@ -45,16 +45,6 @@
 ;; Maps
 ;; amount: Principal balance (scaled)
 ;; index: Index at last update (informational, strictly we just need principal)
-(define-map user-supplies
-  {
-    user: principal,
-    asset: principal,
-  }
-  {
-    amount: uint,
-    index: uint,
-  }
-)
 (define-map user-borrows
   {
     user: principal,
@@ -66,10 +56,6 @@
   }
 )
 
-(define-map user-total-supplies
-  principal
-  uint
-)
 (define-map user-total-borrows
   principal
   uint
@@ -97,48 +83,8 @@
     (asserts! (> amount u0) ERR_ZERO_AMOUNT)
     (asserts! (not (is-protocol-paused)) ERR_PROTOCOL_PAUSED)
     (try! (check-circuit-breaker))
-
-    ;; Accrue Interest
-    (let ((market (unwrap!
-        (contract-call? .interest-rate-model accrue-interest asset-principal)
-        ERR_INTEREST_ACCRUAL_FAILED
-      )))
-      (let (
-          (supply-index (get supply-index market))
-          (current-supply (default-to {
-            amount: u0,
-            index: supply-index,
-          }
-            (map-get? user-supplies {
-              user: sender,
-              asset: asset-principal,
-            })
-          ))
-          (old-amount (get amount current-supply))
-          ;; Calculate delta principal: amount / index
-          (delta-principal (/ (* amount PRECISION) supply-index))
-          (new-principal (+ old-amount delta-principal))
-        )
-        (try! (contract-call? asset transfer amount sender (as-contract tx-sender) none))
-        (map-set user-supplies {
-          user: sender,
-          asset: asset-principal,
-        } {
-          amount: new-principal,
-          index: supply-index,
-        })
-
-        (map-set user-total-supplies sender
-          (+ (default-to u0 (map-get? user-total-supplies sender)) amount)
-        )
-
-        ;; Update Global State
-        (try! (contract-call? .interest-rate-model update-market-state asset-principal
-          (to-int amount) 0
-        ))
-        (ok true)
-      )
-    )
+    (try! (contract-call? asset transfer amount sender (as-contract tx-sender) none))
+    (contract-call? .lending-manager deposit asset-principal amount sender)
   )
 )
 
