@@ -227,15 +227,18 @@
   (map-set protocol-config { key: "max-slippage" } {
     value: u1000,
     updated-at: block-height,
-  }) ;; 10% max slippage
+  })
+  ;; 10% max slippage
   (map-set protocol-config { key: "min-liquidity" } {
     value: u1000000,
     updated-at: block-height,
-  }) ;; 1M min liquidity
+  })
+  ;; 1M min liquidity
   (map-set protocol-config { key: "emergency-delay" } {
     value: u1008,
     updated-at: block-height,
-  }) ;; ~1 week in blocks
+  })
+  ;; ~1 week in blocks
 
   ;; Log initialization
   (log-protocol-event "protocol-initialized" "Conxian Protocol v1 initialized")

@@ -27,13 +27,15 @@
 ;; @desc Get the owner of the contract.
 ;; @returns (response principal uint): The principal of the contract owner.
 (define-read-only (get-owner)
-  (ok (var-get contract-owner)))
+  (ok (var-get contract-owner))
+)
 
 ;; @desc Check if a principal is the owner of the contract.
 ;; @param who: The principal to check.
 ;; @returns (response bool uint): True if the principal is the owner, false otherwise.
 (define-read-only (is-owner (who principal))
-  (ok (is-eq who (var-get contract-owner))))
+  (ok (is-eq who (var-get contract-owner)))
+)
 
 ;; @desc Transfer ownership of the contract to a new address.
 ;; @param new-owner: The address of the new owner.
@@ -42,14 +44,20 @@
   (begin
     (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_NOT_OWNER)
     (var-set pending-owner (some new-owner))
-    (ok true)))
+    (ok true)
+  )
+)
 
 ;; @desc Accept ownership of the contract.
 ;; @returns (response bool uint): An `ok` response with `true` on success, or an error code.
 (define-public (accept-ownership)
   (begin
     (asserts! (is-some (var-get pending-owner)) ERR_NO_PENDING_OWNER)
-    (asserts! (is-eq tx-sender (unwrap-panic (var-get pending-owner))) ERR_NOT_PENDING_OWNER)
+    (asserts! (is-eq tx-sender (unwrap-panic (var-get pending-owner)))
+      ERR_NOT_PENDING_OWNER
+    )
     (var-set contract-owner tx-sender)
     (var-set pending-owner none)
-    (ok true)))
+    (ok true)
+  )
+)

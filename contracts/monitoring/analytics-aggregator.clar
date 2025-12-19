@@ -51,8 +51,8 @@
 ;; ===== Metric Storage =====
 
 ;; Traditional Finance Metrics
-(define-map financial-metrics 
-  uint 
+(define-map financial-metrics
+  uint
   {
     gross-revenue: uint,
     operating-expenses: uint,
@@ -70,12 +70,13 @@
     roa: uint,
     revenue-per-user: uint,
     revenue-per-tvl: uint,
-    period: uint
-  })
+    period: uint,
+  }
+)
 
 ;; DeFi-Specific Metrics
-(define-map defi-metrics 
-  uint 
+(define-map defi-metrics
+  uint
   {
     real-yield: uint,
     nominal-yield: uint,
@@ -91,78 +92,85 @@
     revenue-to-tvl: uint,
     utilization-rate: uint,
     treasury-to-tvl: uint,
-    period: uint
-  })
+    period: uint,
+  }
+)
 
 ;; Per-asset TVL
-(define-map asset-tvl 
-  principal 
+(define-map asset-tvl
+  principal
   {
     amount: uint,
     usd-value: uint,
-    last-updated: uint
-  })
+    last-updated: uint,
+  }
+)
 
 ;; Per-pool metrics
-(define-map pool-metrics 
-  principal 
+(define-map pool-metrics
+  principal
   {
     tvl: uint,
     volume-24h: uint,
     fee-revenue-24h: uint,
     apy: uint,
     utilization: uint,
-    last-updated: uint
-  })
+    last-updated: uint,
+  }
+)
 
 ;; Per-vault metrics
-(define-map vault-metrics 
-  principal 
+(define-map vault-metrics
+  principal
   {
     total-assets: uint,
     total-shares: uint,
     apy: uint,
     performance-fee: uint,
-    last-harvest: uint
-  })
+    last-harvest: uint,
+  }
+)
 
 ;; Historical snapshots (daily)
-(define-map daily-snapshots 
-  uint 
+(define-map daily-snapshots
+  uint
   {
     date: uint,
     tvl: uint,
     volume: uint,
     users: uint,
     transactions: uint,
-    avg-apy: uint
-  })
+    avg-apy: uint,
+  }
+)
 
 ;; User analytics
-(define-map user-metrics 
-  principal 
+(define-map user-metrics
+  principal
   {
     total-deposits: uint,
     total-withdrawals: uint,
     total-fees-paid: uint,
     total-rewards-earned: uint,
-    last-active: uint
-  })
+    last-active: uint,
+  }
+)
 
 ;; Protocol revenue tracking
-(define-map revenue-metrics 
-  uint 
+(define-map revenue-metrics
+  uint
   {
     trading-fees: uint,
     performance-fees: uint,
     liquidation-fees: uint,
     flash-loan-fees: uint,
-    total-revenue: uint
-  })
+    total-revenue: uint,
+  }
+)
 
 ;; Risk Metrics
-(define-map risk-metrics 
-  uint 
+(define-map risk-metrics
+  uint
   {
     volatility: uint,
     downside-volatility: uint,
@@ -178,12 +186,13 @@
     concentration-ratio: uint,
     bid-ask-spread: uint,
     liquidity-score: uint,
-    period: uint
-  })
+    period: uint,
+  }
+)
 
 ;; User Acquisition & Retention Metrics
-(define-map user-cohort-metrics 
-  uint 
+(define-map user-cohort-metrics
+  uint
   {
     new-users: uint,
     total-active-users: uint,
@@ -201,12 +210,13 @@
     avg-transactions-per-user: uint,
     power-user-percentage: uint,
     whale-percentage: uint,
-    period: uint
-  })
+    period: uint,
+  }
+)
 
 ;; Treasury & Sustainability Metrics
-(define-map treasury-metrics 
-  uint 
+(define-map treasury-metrics
+  uint
   {
     treasury-balance: uint,
     protocol-owned-liquidity: uint,
@@ -221,51 +231,70 @@
     solvency-ratio: uint,
     capital-deployed: uint,
     treasury-yield: uint,
-    period: uint
-  })
+    period: uint,
+  }
+)
 
 ;; ===== Authorization =====
 (define-private (check-is-owner)
-  (ok (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)))
+  (ok (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED))
+)
 
 (define-private (check-is-updater)
-  (ok (asserts! (or (is-eq tx-sender (var-get contract-owner))
-                    (is-eq tx-sender (var-get metrics-updater)))
-                ERR_UNAUTHORIZED)))
+  (ok (asserts!
+    (or
+      (is-eq tx-sender (var-get contract-owner))
+      (is-eq tx-sender (var-get metrics-updater))
+    )
+    ERR_UNAUTHORIZED
+  ))
+)
 
 (define-private (is-analytics-enabled)
-  (var-get analytics-enabled))
+  (var-get analytics-enabled)
+)
 
 ;; ===== Configuration =====
 (define-public (set-analytics-enabled (enabled bool))
   (begin
     (try! (check-is-owner))
-    (ok (var-set analytics-enabled enabled))))
+    (ok (var-set analytics-enabled enabled))
+  )
+)
 
 (define-public (set-metrics-updater (updater principal))
   (begin
     (try! (check-is-owner))
-    (ok (var-set metrics-updater updater))))
+    (ok (var-set metrics-updater updater))
+  )
+)
 
 ;; ===== Update Functions =====
-(define-public (update-asset-tvl (asset principal) (amount uint) (usd-value uint))
+(define-public (update-asset-tvl
+    (asset principal)
+    (amount uint)
+    (usd-value uint)
+  )
   (begin
     (try! (check-is-updater))
     (asserts! (is-analytics-enabled) ERR_UNAUTHORIZED)
     (map-set asset-tvl asset {
       amount: amount,
       usd-value: usd-value,
-      last-updated: block-height
+      last-updated: block-height,
     })
-    (ok true)))
+    (ok true)
+  )
+)
 
 (define-public (update-pool-metrics
-  (pool principal)
-  (tvl uint)
-  (volume-24h uint)
-  (fee-revenue-24h uint)
-  (apy uint)
-  (utilization uint))
+    (pool principal)
+    (tvl uint)
+    (volume-24h uint)
+    (fee-revenue-24h uint)
+    (apy uint)
+    (utilization uint)
+  )
   (begin
     (try! (check-is-updater))
     (asserts! (is-analytics-enabled) ERR_UNAUTHORIZED)
@@ -275,16 +304,19 @@
       fee-revenue-24h: fee-revenue-24h,
       apy: apy,
       utilization: utilization,
-      last-updated: block-height
+      last-updated: block-height,
     })
-    (ok true)))
+    (ok true)
+  )
+)
 
 (define-public (update-vault-metrics
-  (vault principal)
-  (total-assets uint)
-  (total-shares uint)
-  (apy uint)
-  (performance-fee uint))
+    (vault principal)
+    (total-assets uint)
+    (total-shares uint)
+    (apy uint)
+    (performance-fee uint)
+  )
   (begin
     (try! (check-is-updater))
     (asserts! (is-analytics-enabled) ERR_UNAUTHORIZED)
@@ -293,69 +325,83 @@
       total-shares: total-shares,
       apy: apy,
       performance-fee: performance-fee,
-      last-harvest: block-height
+      last-harvest: block-height,
     })
-    (ok true)))
+    (ok true)
+  )
+)
 
 (define-public (record-user-activity
-  (user principal)
-  (deposit-amount uint)
-  (withdrawal-amount uint)
-  (fees-paid uint)
-  (rewards-earned uint))
+    (user principal)
+    (deposit-amount uint)
+    (withdrawal-amount uint)
+    (fees-paid uint)
+    (rewards-earned uint)
+  )
   (begin
     (try! (check-is-updater))
     (asserts! (is-analytics-enabled) ERR_UNAUTHORIZED)
     (match (map-get? user-metrics user)
-      existing
-      (map-set user-metrics user {
+      existing (map-set user-metrics user {
         total-deposits: (+ (get total-deposits existing) deposit-amount),
         total-withdrawals: (+ (get total-withdrawals existing) withdrawal-amount),
         total-fees-paid: (+ (get total-fees-paid existing) fees-paid),
         total-rewards-earned: (+ (get total-rewards-earned existing) rewards-earned),
-        last-active: block-height
+        last-active: block-height,
       })
       (map-set user-metrics user {
         total-deposits: deposit-amount,
         total-withdrawals: withdrawal-amount,
         total-fees-paid: fees-paid,
         total-rewards-earned: rewards-earned,
-        last-active: block-height
+        last-active: block-height,
       })
     )
-    (ok true)))
+    (ok true)
+  )
+)
 
 ;; ===== Read-Only Functions =====
 (define-read-only (get-analytics-status)
   {
     enabled: (var-get analytics-enabled),
     owner: (var-get contract-owner),
-    updater: (var-get metrics-updater)
-  })
+    updater: (var-get metrics-updater),
+  }
+)
 
 (define-read-only (get-asset-tvl (asset principal))
-  (map-get? asset-tvl asset))
+  (map-get? asset-tvl asset)
+)
 
 (define-read-only (get-pool-metrics (pool principal))
-  (map-get? pool-metrics pool))
+  (map-get? pool-metrics pool)
+)
 
 (define-read-only (get-vault-metrics (vault principal))
-  (map-get? vault-metrics vault))
+  (map-get? vault-metrics vault)
+)
 
 (define-read-only (get-user-metrics (user principal))
-  (map-get? user-metrics user))
+  (map-get? user-metrics user)
+)
 
 (define-read-only (get-financial-metrics (period uint))
-  (map-get? financial-metrics period))
+  (map-get? financial-metrics period)
+)
 
 (define-read-only (get-defi-metrics (period uint))
-  (map-get? defi-metrics period))
+  (map-get? defi-metrics period)
+)
 
 (define-read-only (get-risk-metrics (period uint))
-  (map-get? risk-metrics period))
+  (map-get? risk-metrics period)
+)
 
 (define-read-only (get-user-cohort-metrics (period uint))
-  (map-get? user-cohort-metrics period))
+  (map-get? user-cohort-metrics period)
+)
 
 (define-read-only (get-treasury-metrics (period uint))
-  (map-get? treasury-metrics period))
+  (map-get? treasury-metrics period)
+)

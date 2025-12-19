@@ -30,7 +30,10 @@
 (define-data-var next-distribution-id uint u1)
 
 ;; Authorized revenue reporters / collectors
-(define-map authorized-collectors principal bool)
+(define-map authorized-collectors
+  principal
+  bool
+)
 
 ;; Registered fee sources by tag
 (define-map fee-sources
@@ -38,21 +41,28 @@
   {
     source: principal,
     share-bps: uint,
-    active: bool
-  })
+    active: bool,
+  }
+)
 
 ;; --- Internal helpers ---
 (define-private (is-owner)
-  (is-eq tx-sender (var-get contract-owner)))
+  (is-eq tx-sender (var-get contract-owner))
+)
 
 (define-private (is-admin-or-owner)
-  (or (is-eq tx-sender (var-get contract-owner))
-      (is-eq tx-sender (var-get admin))))
+  (or
+    (is-eq tx-sender (var-get contract-owner))
+    (is-eq tx-sender (var-get admin))
+  )
+)
 
 (define-private (when-not-paused)
   (if (var-get paused)
     (err ERR_INVALID_AMOUNT)
-    (ok true)))
+    (ok true)
+  )
+)
 
 ;; --- Admin functions ---
 
@@ -61,65 +71,95 @@
   (begin
     (asserts! (is-owner) (err ERR_UNAUTHORIZED))
     (var-set admin new-admin)
-    (ok true)))
+    (ok true)
+  )
+)
 
 ;; Configure treasury and insurance sinks
 (define-public (set-treasury-address (addr principal))
   (begin
     (asserts! (is-owner) (err ERR_UNAUTHORIZED))
     (var-set treasury-address addr)
-    (ok true)))
+    (ok true)
+  )
+)
 
 (define-public (set-insurance-address (addr principal))
   (begin
     (asserts! (is-owner) (err ERR_UNAUTHORIZED))
     (var-set insurance-address addr)
-    (ok true)))
+    (ok true)
+  )
+)
 
 ;; Expose staking contract principal for system stats
 (define-public (set-staking-contract-ref (staking principal))
   (begin
     (asserts! (is-owner) (err ERR_UNAUTHORIZED))
     (var-set staking-contract-ref (some staking))
-    (ok true)))
+    (ok true)
+  )
+)
 
 ;; Authorize or revoke revenue collectors
-(define-public (authorize-collector (collector principal) (enabled bool))
+(define-public (authorize-collector
+    (collector principal)
+    (enabled bool)
+  )
   (begin
     (asserts! (is-owner) (err ERR_UNAUTHORIZED))
     (map-set authorized-collectors collector enabled)
-    (ok true)))
+    (ok true)
+  )
+)
 
 ;; Register a fee source used by DEX / vaults
 (define-public (register-fee-source
     (name (string-ascii 32))
     (source principal)
-    (share-bps uint))
+    (share-bps uint)
+  )
   (begin
     (asserts! (is-owner) (err ERR_UNAUTHORIZED))
     (let ((existing (map-get? fee-sources { name: name })))
       (if (is-none existing)
         (var-set active-fee-sources (+ (var-get active-fee-sources) u1))
-        true)
-      (map-set fee-sources { name: name }
-        { source: source, share-bps: share-bps, active: true })
+        true
+      )
+      (map-set fee-sources { name: name } {
+        source: source,
+        share-bps: share-bps,
+        active: true,
+      })
     )
-    (ok true)))
+    (ok true)
+  )
+)
 
 ;; Update existing fee source configuration
 (define-public (update-fee-source
     (name (string-ascii 32))
     (active bool)
-    (share-bps uint))
+    (share-bps uint)
+  )
   (begin
     (asserts! (is-owner) (err ERR_UNAUTHORIZED))
-    (let ((current (default-to
-                     { source: CONTRACT_OWNER, share-bps: u0, active: false }
-                     (map-get? fee-sources { name: name }))))
-      (map-set fee-sources { name: name }
-        { source: (get source current), share-bps: share-bps, active: active })
-      (ok true))
-  ))
+    (let ((current (default-to {
+        source: CONTRACT_OWNER,
+        share-bps: u0,
+        active: false,
+      }
+        (map-get? fee-sources { name: name })
+      )))
+      (map-set fee-sources { name: name } {
+        source: (get source current),
+        share-bps: share-bps,
+        active: active,
+      })
+      (ok true)
+    )
+  )
+)
 
 ;; --- Core distribution primitives ---
 
@@ -127,19 +167,34 @@
 (define-private (record-distribution (amount uint))
   (let ((dist-id (var-get next-distribution-id)))
     (var-set next-distribution-id (+ dist-id u1))
-    (var-set total-revenue-distributed (+ (var-get total-revenue-distributed) amount))
+    (var-set total-revenue-distributed
+      (+ (var-get total-revenue-distributed) amount)
+    )
     (var-set last-distribution block-height)
-    dist-id))
+    dist-id
+  )
+)
 
 ;; Public entrypoint used directly by SDK tests and token-system-coordinator
-(define-public (distribute-revenue (token principal) (amount uint))
+(define-public (distribute-revenue
+    (token principal)
+    (amount uint)
+  )
   (begin
     (try! (when-not-paused))
     (asserts! (is-owner) (err ERR_UNAUTHORIZED))
     (asserts! (> amount u0) (err ERR_INVALID_AMOUNT))
     (let ((dist-id (record-distribution amount)))
-      (print { event: "revenue-distribution", token: token, amount: amount, id: dist-id })
-      (ok dist-id))))
+      (print {
+        event: "revenue-distribution",
+        token: token,
+        amount: amount,
+        id: dist-id,
+      })
+      (ok dist-id)
+    )
+  )
+)
 
 ;; --- Trait implementation (core-traits.revenue-distributor-trait) ---
 
@@ -148,40 +203,66 @@
 (define-public (distribute
     (recipient principal)
     (amount uint)
-    (token principal))
+    (token principal)
+  )
   (begin
     (try! (when-not-paused))
     (asserts! (is-admin-or-owner) (err ERR_UNAUTHORIZED))
     (asserts! (> amount u0) (err ERR_INVALID_AMOUNT))
     (let ((dist-id (record-distribution amount)))
-      (print { event: "trait-distribute", recipient: recipient, token: token, amount: amount, id: dist-id })
-      (ok true))))
+      (print {
+        event: "trait-distribute",
+        recipient: recipient,
+        token: token,
+        amount: amount,
+        id: dist-id,
+      })
+      (ok true)
+    )
+  )
+)
 
 (define-public (report-revenue
     (source principal)
     (amount uint)
-    (token principal))
+    (token principal)
+  )
   (begin
     (try! (when-not-paused))
     (asserts!
-      (or (is-admin-or-owner)
-          (default-to false (map-get? authorized-collectors source)))
-      (err ERR_UNAUTHORIZED))
+      (or
+        (is-admin-or-owner)
+        (default-to false (map-get? authorized-collectors source))
+      )
+      (err ERR_UNAUTHORIZED)
+    )
     (asserts! (> amount u0) (err ERR_INVALID_AMOUNT))
     (let ((dist-id (record-distribution amount)))
-      (print { event: "report-revenue", source: source, token: token, amount: amount, id: dist-id })
-      (ok true))))
+      (print {
+        event: "report-revenue",
+        source: source,
+        token: token,
+        amount: amount,
+        id: dist-id,
+      })
+      (ok true)
+    )
+  )
+)
 
 (define-public (set-recipient (recipient principal))
   (begin
     (asserts! (is-owner) (err ERR_UNAUTHORIZED))
     (var-set treasury-address recipient)
-    (ok true)))
+    (ok true)
+  )
+)
 
 ;; --- Read-only views ---
 
 (define-read-only (get-total-revenue-distributed)
-  (ok (var-get total-revenue-distributed)))
+  (ok (var-get total-revenue-distributed))
+)
 
 ;; System health view used heavily in production-readiness SDK suite
 (define-read-only (get-system-health)
@@ -191,8 +272,9 @@
     last-distribution: (var-get last-distribution),
     treasury-address: (var-get treasury-address),
     insurance-address: (var-get insurance-address),
-    active-fee-sources: (var-get active-fee-sources)
-  }))
+    active-fee-sources: (var-get active-fee-sources),
+  })
+)
 
 ;; High-level stats helper used by system-contracts SDK tests.
 (define-read-only (get-protocol-revenue-stats)
@@ -203,5 +285,6 @@
     pending-distribution: u0,
     treasury-address: (var-get treasury-address),
     reserve-address: (var-get insurance-address),
-    staking-contract-ref: (var-get staking-contract-ref)
-  }))
+    staking-contract-ref: (var-get staking-contract-ref),
+  })
+)

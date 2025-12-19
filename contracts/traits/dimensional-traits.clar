@@ -19,7 +19,7 @@
       last-updated: uint,
       stop-loss: (optional uint),
       take-profit: (optional uint),
-      is-active: bool
+      is-active: bool,
     })
       uint
     )
@@ -30,7 +30,13 @@
   )
   (liquidate-position
     (uint principal)
-    (response (tuple (collateral-returned uint) (reward uint)) uint)
+    (
+      response       {
+      collateral-returned: uint,
+      reward: uint,
+    }
+      uint
+    )
   )
   (get-protocol-stats
     ()

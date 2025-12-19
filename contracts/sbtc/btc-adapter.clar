@@ -23,53 +23,55 @@
 
 ;; --- Data Maps ---
 (define-map processed-txs
-    { txid: (buff 32) }
-    {
-        processed: bool,
-        block-height: uint,
-        recipient: principal,
-        amount: uint,
-    }
+  { txid: (buff 32) }
+  {
+    processed: bool,
+    block-height: uint,
+    recipient: principal,
+    amount: uint,
+  }
 )
 
 ;; --- Public Functions ---
 
 (define-public (set-contract-owner (new-owner principal))
-    (begin
-        (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
-        (var-set contract-owner new-owner)
-        (ok true)
-    )
+  (begin
+    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
+    (var-set contract-owner new-owner)
+    (ok true)
+  )
 )
 
 (define-public (set-sbtc-token (token principal))
-    (begin
-        (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
-        (var-set sbtc-token token)
-        (ok true)
-    )
+  (begin
+    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
+    (var-set sbtc-token token)
+    (ok true)
+  )
 )
 
 ;; @desc Verify a Bitcoin transaction has achieved finality by checking against burnchain data.
 ;; @param header: The Bitcoin block header containing the tx
 (define-read-only (verify-finality (header (buff 80)))
-    (let (
-        ;; Assumes .clarity-bitcoin has functions to parse header.
-        (header-height (unwrap! (contract-call? .clarity-bitcoin get-height header) ERR_INVALID_TX))
-        (header-hash (unwrap! (contract-call? .clarity-bitcoin get-block-hash header) ERR_INVALID_TX))
-
-        ;; Get the canonical hash for that height from the burnchain state.
-        (burn-block-info (unwrap! (get-burn-block-info? header-height) ERR_INVALID_TX))
-        (canonical-hash (get header-hash burn-block-info))
+  (let (
+      ;; Assumes .clarity-bitcoin has functions to parse header.
+      (header-height (unwrap! (contract-call? .clarity-bitcoin get-height header) ERR_INVALID_TX))
+      (header-hash (unwrap! (contract-call? .clarity-bitcoin get-block-hash header)
+        ERR_INVALID_TX
+      ))
+      ;; Get the canonical hash for that height from the burnchain state.
+      (canonical-hash (unwrap! (get-burn-block-info? header-hash header-height) ERR_INVALID_TX))
     )
-        ;; 1. Ensure the provided header matches the canonical chain.
-        (asserts! (is-eq header-hash canonical-hash) ERR_INVALID_TX)
+    ;; 1. Ensure the provided header matches the canonical chain.
+    (asserts! (is-eq header-hash canonical-hash) ERR_INVALID_TX)
 
-        ;; 2. Ensure the block is deep enough for finality.
-        (asserts! (>= (- burn-block-height header-height) BTC_FINALITY_BLOCKS) ERR_NOT_CONFIRMED)
-
-        (ok true)
+    ;; 2. Ensure the block is deep enough for finality.
+    (asserts! (>= (- burn-block-height header-height) BTC_FINALITY_BLOCKS)
+      ERR_NOT_CONFIRMED
     )
+
+    (ok true)
+  )
 )
 
 ;; @desc Process a deposit from Bitcoin (Mint sBTC)
@@ -80,48 +82,52 @@
 ;; @param recipient: The Stacks recipient
 ;; @param token: The sBTC token contract
 (define-public (deposit
-        (tx-blob (buff 1024))
-        (block-header (buff 80))
-        (proof { tx-index: uint, hashes: (list 12 (buff 32)), tree-depth: uint })
-        (recipient principal)
-        (token <sip-010-ft-trait>)
+    (tx-blob (buff 1024))
+    (block-header (buff 80))
+    (proof {
+      tx-index: uint,
+      hashes: (list 12 (buff 32)),
+      tree-depth: uint,
+    })
+    (recipient principal)
+    (token <sip-010-ft-trait>)
+  )
+  (let (
+      (tx-id (contract-call? .clarity-bitcoin get-txid tx-blob))
+      (was-mined (contract-call? .clarity-bitcoin was-tx-mined? block-header tx-blob proof))
+      (amount (contract-call? .clarity-bitcoin get-out-value tx-blob))
     )
-    (let (
-        (tx-id (contract-call? .clarity-bitcoin get-txid tx-blob))
-        (was-mined (contract-call? .clarity-bitcoin was-tx-mined? block-header tx-blob proof))
-        (amount (contract-call? .clarity-bitcoin get-out-value tx-blob))
+    ;; 1. Verify finality of the Bitcoin block.
+    (try! (verify-finality block-header))
+
+    ;; 2. Verify Inclusion
+    (asserts! was-mined ERR_VERIFICATION_FAILED)
+
+    ;; 3. Check if already processed
+    (asserts! (is-none (map-get? processed-txs { txid: tx-id }))
+      ERR_ALREADY_PROCESSED
     )
-        ;; 1. Verify finality of the Bitcoin block.
-        (try! (verify-finality block-header))
 
-        ;; 2. Verify Inclusion
-        (asserts! was-mined ERR_VERIFICATION_FAILED)
+    ;; 3. Verify amount (sanity check)
+    (asserts! (> amount u0) ERR_INVALID_AMOUNT)
 
-        ;; 3. Check if already processed
-        (asserts! (is-none (map-get? processed-txs { txid: tx-id }))
-            ERR_ALREADY_PROCESSED
-        )
+    ;; 4. Mint sBTC (currently modeled as transfer from pre-funded contract)
+    (try! (as-contract (contract-call? token transfer amount tx-sender recipient none)))
 
-        ;; 3. Verify amount (sanity check)
-        (asserts! (> amount u0) ERR_INVALID_AMOUNT)
+    ;; 5. Mark as processed
+    (map-set processed-txs { txid: tx-id } {
+      processed: true,
+      block-height: block-height,
+      recipient: recipient,
+      amount: amount,
+    })
 
-        ;; 4. Mint sBTC (currently modeled as transfer from pre-funded contract)
-        (try! (as-contract (contract-call? token transfer amount tx-sender recipient none)))
-
-        ;; 5. Mark as processed
-        (map-set processed-txs { txid: tx-id } {
-            processed: true,
-            block-height: block-height,
-            recipient: recipient,
-            amount: amount,
-        })
-
-        (print {
-            event: "btc-deposit",
-            tx-id: tx-id,
-            amount: amount,
-            recipient: recipient
-        })
-        (ok amount)
-    )
+    (print {
+      event: "btc-deposit",
+      tx-id: tx-id,
+      amount: amount,
+      recipient: recipient,
+    })
+    (ok amount)
+  )
 )

@@ -37,7 +37,9 @@
 (define-data-var protocol-coordinator principal tx-sender)
 
 (define-private (is-protocol-paused)
-  (contract-call? (var-get protocol-coordinator) is-protocol-paused)
+  (default-to true
+    (get result (contract-call? .conxian-protocol is-protocol-paused))
+  )
 )
 
 ;; Maps
@@ -421,8 +423,8 @@
   )
   (let ((asset-principal (contract-of asset)))
     (begin
-      (try! (contract-call? hook on-action "REPAY_PRE" tx-sender amount
-        asset-principal none
+      (try! (contract-call? hook on-action "REPAY_PRE" tx-sender amount asset-principal
+        none
       ))
       (let ((res (repay-internal asset amount)))
         (try! (contract-call? hook on-action "REPAY_POST" tx-sender amount
@@ -564,8 +566,9 @@
         (current-borrow (default-to u0 (map-get? user-total-borrows caller)))
         (new-borrow (+ current-borrow amount))
         (new-hf (if (is-eq new-borrow u0)
-                  u1000000
-                  (/ (* current-supply u10000) new-borrow)))
+          u1000000
+          (/ (* current-supply u10000) new-borrow)
+        ))
       )
       (if (< new-hf (var-get min-health-factor))
         ERR_HEALTH_CHECK_FAILED
@@ -584,11 +587,13 @@
         (current-supply (default-to u0 (map-get? user-total-supplies caller)))
         (current-borrow (default-to u0 (map-get? user-total-borrows caller)))
         (new-supply (if (>= current-supply amount)
-                      (- current-supply amount)
-                      u0))
+          (- current-supply amount)
+          u0
+        ))
         (new-hf (if (is-eq current-borrow u0)
-                  u1000000
-                  (/ (* new-supply u10000) current-borrow)))
+          u1000000
+          (/ (* new-supply u10000) current-borrow)
+        ))
       )
       (if (< new-hf (var-get min-health-factor))
         ERR_HEALTH_CHECK_FAILED

@@ -25,16 +25,16 @@
 (define-constant ONE u1)
 (define-constant WAD u1000000)
 
-(define-constant DEFAULT-LTV u700000)             ;; 70% in 1e6 scale
-(define-constant DEFAULT-LIQ-THRESHOLD u750000)   ;; 75%
-(define-constant DEFAULT-LIQ-PENALTY u100000)     ;; 10%
-(define-constant DEFAULT-RESERVE-FACTOR u200000)  ;; 20%
-(define-constant FLASH-LOAN-FEE u120)             ;; 12 bps (0.12% of 1e6 = 1200, but using 1e4 scale); keep raw bps consumer-defined
+(define-constant DEFAULT-LTV u700000) ;; 70% in 1e6 scale
+(define-constant DEFAULT-LIQ-THRESHOLD u750000) ;; 75%
+(define-constant DEFAULT-LIQ-PENALTY u100000) ;; 10%
+(define-constant DEFAULT-RESERVE-FACTOR u200000) ;; 20%
+(define-constant FLASH-LOAN-FEE u120) ;; 12 bps (0.12% of 1e6 = 1200, but using 1e4 scale); keep raw bps consumer-defined
 
 ;; Oracle parameters
-(define-constant MAX-PRICE-DEVIATION u200000)     ;; 20% max price deviation (1e6 scale)
-(define-constant ORACLE-STALE-THRESHOLD u17280)   ;; ~24 hours (Nakamoto blocks)
-(define-constant MIN-CONFIRMATION-BLOCKS u720)      ;; Min confirmations for peg-in
+(define-constant MAX-PRICE-DEVIATION u200000) ;; 20% max price deviation (1e6 scale)
+(define-constant ORACLE-STALE-THRESHOLD u17280) ;; ~24 hours (Nakamoto blocks)
+(define-constant MIN-CONFIRMATION-BLOCKS u720) ;; Min confirmations for peg-in
 
 ;; =============================================================================
 ;; STORAGE
@@ -46,17 +46,17 @@
 (define-map asset-config
   { token: principal }
   {
-    ltv: uint,                     ;; Loan-to-value ratio (1e6)
-    liquidation-threshold: uint,   ;; Liquidation threshold (1e6)
-    liquidation-penalty: uint,     ;; Liquidation penalty (1e6)
-    reserve-factor: uint,          ;; Reserve factor (1e6)
-    borrow-cap: (optional uint),   ;; Maximum borrow amount (token units)
-    supply-cap: (optional uint),   ;; Maximum supply amount (token units)
+    ltv: uint, ;; Loan-to-value ratio (1e6)
+    liquidation-threshold: uint, ;; Liquidation threshold (1e6)
+    liquidation-penalty: uint, ;; Liquidation penalty (1e6)
+    reserve-factor: uint, ;; Reserve factor (1e6)
+    borrow-cap: (optional uint), ;; Maximum borrow amount (token units)
+    supply-cap: (optional uint), ;; Maximum supply amount (token units)
     active: bool,
     supply-enabled: bool,
     borrow-enabled: bool,
     flash-loan-enabled: bool,
-    bond-enabled: bool
+    bond-enabled: bool,
   }
 )
 
@@ -65,22 +65,22 @@
   {
     primary-oracle: principal,
     secondary-oracle: (optional principal),
-    last-price: uint,               ;; Price with 8 decimals
+    last-price: uint, ;; Price with 8 decimals
     last-update-block: uint,
     price-deviation-threshold: uint,
-    circuit-breaker-active: bool
+    circuit-breaker-active: bool,
   }
 )
 
 (define-map interest-rate-config
   { asset: principal }
   {
-    base-rate: uint,          ;; per block (1e6 scale)
-    slope1: uint,             ;; per block (1e6 scale)
-    slope2: uint,             ;; per block (1e6 scale)
-    jump-multiplier: uint,    ;; per block (1e6 scale)
-    kink1: uint,              ;; utilization (1e6)
-    kink2: uint               ;; utilization (1e6)
+    base-rate: uint, ;; per block (1e6 scale)
+    slope1: uint, ;; per block (1e6 scale)
+    slope2: uint, ;; per block (1e6 scale)
+    jump-multiplier: uint, ;; per block (1e6 scale)
+    kink1: uint, ;; utilization (1e6)
+    kink2: uint, ;; utilization (1e6)
   }
 )
 
@@ -89,22 +89,22 @@
   {
     total-supply: uint,
     total-borrows: uint,
-    supply-rate: uint,         ;; per block (1e6)
-    borrow-rate: uint,         ;; per block (1e6)
-    utilization-rate: uint,    ;; 1e6 scale
+    supply-rate: uint, ;; per block (1e6)
+    borrow-rate: uint, ;; per block (1e6)
+    utilization-rate: uint, ;; 1e6 scale
     last-accrual-block: uint,
-    reserve-balance: uint
+    reserve-balance: uint,
   }
 )
 
 (define-map risk-status
   { asset: principal }
   {
-    risk-level: uint,          ;; 1-5
+    risk-level: uint, ;; 1-5
     volatility-index: uint,
     liquidity-score: uint,
     peg-stability: uint,
-    last-risk-update: uint
+    last-risk-update: uint,
   }
 )
 
@@ -116,7 +116,8 @@
   (match (var-get contract-owner)
     owner-principal (if (is-eq tx-sender owner-principal)
       (ok true)
-      ERR-NOT-AUTHORIZED)
+      ERR-NOT-AUTHORIZED
+    )
     ERR-NOT-INITIALIZED
   )
 )
@@ -125,12 +126,21 @@
   (map-get? interest-rate-config { asset: asset })
 )
 
-(define-read-only (checked-mul (a uint) (b uint))
+(define-read-only (checked-mul
+    (a uint)
+    (b uint)
+  )
   (ok (* a b))
 )
 
-(define-read-only (checked-div (a uint) (b uint))
-  (if (is-eq b u0) (ok u0) (ok (/ a b)))
+(define-read-only (checked-div
+    (a uint)
+    (b uint)
+  )
+  (if (is-eq b u0)
+    (ok u0)
+    (ok (/ a b))
+  )
 )
 
 ;; =============================================================================
@@ -156,8 +166,9 @@
 (define-read-only (get-asset-price (asset principal))
   (match (get-oracle-config asset)
     cfg (if (< (- block-height (get last-update-block cfg)) ORACLE-STALE-THRESHOLD)
-          (ok (get last-price cfg))
-          ERR-ORACLE-STALE)
+      (ok (get last-price cfg))
+      ERR-ORACLE-STALE
+    )
     ERR-ASSET-NOT-FOUND
   )
 )
@@ -169,7 +180,10 @@
   )
 )
 
-(define-read-only (calculate-collateral-value (token principal) (amount uint))
+(define-read-only (calculate-collateral-value
+    (token principal)
+    (amount uint)
+  )
   (match (get-asset-config token)
     config (match (get-asset-price token)
       price (ok (/ (* (* amount price) (get ltv config)) WAD))
@@ -179,7 +193,10 @@
   )
 )
 
-(define-read-only (calculate-liquidation-threshold (token principal) (amount uint))
+(define-read-only (calculate-liquidation-threshold
+    (token principal)
+    (amount uint)
+  )
   (match (get-asset-config token)
     config (match (get-asset-price token)
       price (ok (/ (* (* amount price) (get liquidation-threshold config)) WAD))
@@ -192,9 +209,9 @@
 (define-read-only (get-utilization-rate (asset principal))
   (match (get-asset-metrics asset)
     metrics (let (
-      (ts (get total-supply metrics))
-      (tb (get total-borrows metrics))
-    )
+        (ts (get total-supply metrics))
+        (tb (get total-borrows metrics))
+      )
       (if (is-eq ts u0)
         (ok u0)
         (ok (/ (* tb WAD) ts))
@@ -206,8 +223,7 @@
 
 (define-read-only (calculate-interest-rates (asset principal))
   (match (get-interest-rate-config asset)
-    rate-cfg
-      (let (
+    rate-cfg (let (
         (utilization (unwrap! (get-utilization-rate asset) ERR-ASSET-NOT-FOUND))
         (base (get base-rate rate-cfg))
         (s1 (get slope1 rate-cfg))
@@ -216,26 +232,28 @@
         (k1 (get kink1 rate-cfg))
         (k2 (get kink2 rate-cfg))
       )
-        (let (
-          (borrow-rate
-            (if (<= utilization k1)
-              (+ base (/ (* utilization s1) WAD))
-              (if (<= utilization k2)
-                (+ base (+ (/ (* k1 s1) WAD)
-                           (/ (* (- utilization k1) s2) WAD)))
-                (+ base
-                   (+ (/ (* k1 s1) WAD)
-                      (+ (/ (* (- k2 k1) s2) WAD)
-                         (/ (* (- utilization k2) jump) WAD))))))
-          )
-          (reserve-factor
-            (match (get-asset-config asset)
-              cfg (get reserve-factor cfg)
-              u0))
+      (let (
+          (borrow-rate (if (<= utilization k1)
+            (+ base (/ (* utilization s1) WAD))
+            (if (<= utilization k2)
+              (+ base (+ (/ (* k1 s1) WAD) (/ (* (- utilization k1) s2) WAD)))
+              (+ base
+                (+ (/ (* k1 s1) WAD)
+                  (+ (/ (* (- k2 k1) s2) WAD) (/ (* (- utilization k2) jump) WAD))
+                ))
+            )
+          ))
+          (reserve-factor (match (get-asset-config asset)
+            cfg (get reserve-factor cfg)
+            u0
+          ))
         )
-          (ok { borrow-rate: borrow-rate, reserve-factor: reserve-factor })
-        )
+        (ok {
+          borrow-rate: borrow-rate,
+          reserve-factor: reserve-factor,
+        })
       )
+    )
     ERR-ASSET-NOT-FOUND
   )
 )

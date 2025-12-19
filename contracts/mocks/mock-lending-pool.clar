@@ -18,7 +18,10 @@
   (ok (var-get health-factor))
 )
 
-(define-public (update-position (borrower principal) (delta uint))
+(define-public (update-position
+    (borrower principal)
+    (delta uint)
+  )
   (ok true)
 )
 

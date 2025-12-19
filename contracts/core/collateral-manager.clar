@@ -12,25 +12,38 @@
 (define-constant ERR_INSUFFICIENT_BALANCE (err u2003))
 
 ;; @data-vars
-(define-map internal-balances principal uint)
+(define-map internal-balances
+  principal
+  uint
+)
 
 ;; --- Public Functions ---
-(define-public (deposit-funds (amount uint) (token principal))
+(define-public (deposit-funds
+    (amount uint)
+    (token principal)
+  )
   (begin
     (asserts! (> amount u0) ERR_INVALID_AMOUNT)
-    (let ((user tx-sender)
-          (current-balance (default-to u0 (map-get? internal-balances user))))
+    (let (
+        (user tx-sender)
+        (current-balance (default-to u0 (map-get? internal-balances user)))
+      )
       (map-set internal-balances user (+ current-balance amount))
       (ok true)
     )
   )
 )
 
-(define-public (withdraw-funds (amount uint) (token principal))
+(define-public (withdraw-funds
+    (amount uint)
+    (token principal)
+  )
   (begin
     (asserts! (> amount u0) ERR_INVALID_AMOUNT)
-    (let ((user tx-sender)
-          (current-balance (default-to u0 (map-get? internal-balances user))))
+    (let (
+        (user tx-sender)
+        (current-balance (default-to u0 (map-get? internal-balances user)))
+      )
       (asserts! (>= current-balance amount) ERR_INSUFFICIENT_BALANCE)
       (map-set internal-balances user (- current-balance amount))
       (ok true)

@@ -3,7 +3,6 @@
 
 (impl-trait .sip-standards.sip-010-ft-trait)
 
-
 ;; ===== Constants =====
 (define-constant TOKEN_NAME "Mock Token")
 (define-constant TOKEN_SYMBOL "MOCK")
@@ -43,7 +42,7 @@
     (memo (optional (buff 34)))
   )
   (begin
-    (asserts! 
+    (asserts!
       (or (is-eq tx-sender sender) (is-eq tx-sender (as-contract tx-sender)))
       ERR_UNAUTHORIZED
     )
@@ -59,7 +58,10 @@
       (map-set balances recipient (+ recipient-balance amount))
 
       (match memo
-        m (begin (print m) (ok true))
+        m (begin
+          (print m)
+          (ok true)
+        )
         (ok true)
       )
     )
@@ -128,8 +130,12 @@
       (map-set balances sender (- sender-balance amount))
       (map-set balances recipient (+ recipient-balance amount))
       (match memo
-        m (begin (print m) true)
-        true)
+        m (begin
+          (print m)
+          true
+        )
+        true
+      )
       (ok true)
     )
   )
@@ -152,7 +158,10 @@
     )
 
     (match memo
-      m (begin (print m) true)
+      m (begin
+        (print m)
+        true
+      )
       true
     )
 

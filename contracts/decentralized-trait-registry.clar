@@ -27,23 +27,35 @@
 (define-data-var governance-contract principal tx-sender)
 
 ;; Maps trait names to their definitions (e.g., {name: (string-ascii 64), description: (string-ascii 256)})
-(define-map trait-interfaces (string-ascii 64) {
-  name: (string-ascii 64),
-  description: (string-ascii 256)
-})
+(define-map trait-interfaces
+  (string-ascii 64)
+  {
+    name: (string-ascii 64),
+    description: (string-ascii 256),
+  }
+)
 
 ;; Stores all registered implementations for a given trait interface
 ;; Key: {trait-name: (string-ascii 64), implementation-principal: principal}
 ;; Value: {version: uint, status: (string-ascii 16)} ;; status: "pending", "active", "deprecated"
-(define-map trait-implementations {trait-name: (string-ascii 64), implementation-principal: principal} {
-  version: uint,
-  status: (string-ascii 16)
-})
+(define-map trait-implementations
+  {
+    trait-name: (string-ascii 64),
+    implementation-principal: principal,
+  }
+  {
+    version: uint,
+    status: (string-ascii 16),
+  }
+)
 
 ;; Stores the currently active implementation for each trait interface
 ;; Key: (string-ascii 64) ;; trait-name
 ;; Value: principal ;; active-implementation-principal
-(define-map active-trait-implementations (string-ascii 64) principal)
+(define-map active-trait-implementations
+  (string-ascii 64)
+  principal
+)
 
 ;; Stores pending trait upgrade proposals awaiting DAO approval
 ;; Key: uint ;; proposal-id (from DAO)
@@ -52,11 +64,14 @@
 ;;   new-implementation-principal: principal,
 ;;   new-version: uint
 ;; }
-(define-map pending-trait-upgrades uint {
-  trait-name: (string-ascii 64),
-  new-implementation-principal: principal,
-  new-version: uint
-})
+(define-map pending-trait-upgrades
+  uint
+  {
+    trait-name: (string-ascii 64),
+    new-implementation-principal: principal,
+    new-version: uint,
+  }
+)
 
 ;; --- Private Helper Functions ---
 ;; (define-private (is-dao-caller)
@@ -69,11 +84,19 @@
 ;; @param trait-name The name of the trait interface.
 ;; @param description A brief description of the trait.
 ;; @returns (response bool uint) True if successful, or an error.
-(define-public (register-trait-interface (trait-name (string-ascii 64)) (description (string-ascii 256)))
+(define-public (register-trait-interface
+    (trait-name (string-ascii 64))
+    (description (string-ascii 256))
+  )
   (begin
     (asserts! (is-eq tx-sender (var-get contract-owner)) (err ERR_UNAUTHORIZED))
-    (asserts! (not (is-some (map-get? trait-interfaces trait-name))) (err ERR_TRAIT_ALREADY_REGISTERED))
-    (map-set trait-interfaces trait-name {name: trait-name, description: description})
+    (asserts! (not (is-some (map-get? trait-interfaces trait-name)))
+      (err ERR_TRAIT_ALREADY_REGISTERED)
+    )
+    (map-set trait-interfaces trait-name {
+      name: trait-name,
+      description: description,
+    })
     (ok true)
   )
 )
@@ -83,10 +106,16 @@
 ;; @param implementation-principal The principal of the contract implementing the trait.
 ;; @param version The version of this implementation.
 ;; @returns (response bool uint) True if successful, or an error.
-(define-public (register-trait-implementation (trait-name (string-ascii 64)) (implementation-principal principal) (version uint))
+(define-public (register-trait-implementation
+    (trait-name (string-ascii 64))
+    (implementation-principal principal)
+    (version uint)
+  )
   (begin
     (asserts! (is-eq tx-sender (var-get contract-owner)) (err ERR_UNAUTHORIZED))
-    (asserts! (is-some (map-get? trait-interfaces trait-name)) (err ERR_TRAIT_NOT_FOUND))
+    (asserts! (is-some (map-get? trait-interfaces trait-name))
+      (err ERR_TRAIT_NOT_FOUND)
+    )
     (asserts!
       (not (is-some (map-get? trait-implementations {
         trait-name: trait-name,
@@ -110,11 +139,21 @@
 ;; @param trait-name The name of the trait interface.
 ;; @param implementation-principal The principal of the contract implementing the trait to activate.
 ;; @returns (response bool uint) True if successful, or an error.
-(define-public (activate-trait-implementation (trait-name (string-ascii 64)) (implementation-principal principal))
+(define-public (activate-trait-implementation
+    (trait-name (string-ascii 64))
+    (implementation-principal principal)
+  )
   (begin
-    (asserts! (is-eq tx-sender (var-get governance-contract)) (err ERR_NOT_GOVERNANCE_CONTRACT))
-    (asserts! (is-some (map-get? trait-interfaces trait-name)) (err ERR_TRAIT_NOT_FOUND))
-    (let ((impl-data (map-get? trait-implementations {trait-name: trait-name, implementation-principal: implementation-principal})))
+    (asserts! (is-eq tx-sender (var-get governance-contract))
+      (err ERR_NOT_GOVERNANCE_CONTRACT)
+    )
+    (asserts! (is-some (map-get? trait-interfaces trait-name))
+      (err ERR_TRAIT_NOT_FOUND)
+    )
+    (let ((impl-data (map-get? trait-implementations {
+        trait-name: trait-name,
+        implementation-principal: implementation-principal,
+      })))
       (asserts! (is-some impl-data) (err ERR_IMPLEMENTATION_NOT_FOUND))
       (asserts!
         (is-eq (get status (unwrap! impl-data ERR_INTERNAL_STATE_ERROR))
@@ -125,9 +164,13 @@
 
       ;; Deactivate current active implementation if exists
       (if (is-some (map-get? active-trait-implementations trait-name))
-        (let ((current-active-impl (unwrap! (map-get? active-trait-implementations trait-name) ERR_INTERNAL_STATE_ERROR)))
-          (map-set trait-implementations
-            {trait-name: trait-name, implementation-principal: current-active-impl}
+        (let ((current-active-impl (unwrap! (map-get? active-trait-implementations trait-name)
+            ERR_INTERNAL_STATE_ERROR
+          )))
+          (map-set trait-implementations {
+            trait-name: trait-name,
+            implementation-principal: current-active-impl,
+          }
             (merge
               (unwrap!
                 (map-get? trait-implementations {
@@ -135,10 +178,8 @@
                   implementation-principal: current-active-impl,
                 })
                 ERR_INTERNAL_STATE_ERROR
-              )
-              {status: "deprecated"}
-            )
-          )
+              ) { status: "deprecated" }
+            ))
         )
         true
       )
@@ -160,13 +201,23 @@
 ;; @returns (response bool uint) True if successful, or an error.
 (define-public (deactivate-trait-implementation (trait-name (string-ascii 64)))
   (begin
-    (asserts! (is-eq tx-sender (var-get governance-contract)) (err ERR_NOT_GOVERNANCE_CONTRACT))
-    (asserts! (is-some (map-get? trait-interfaces trait-name)) (err ERR_TRAIT_NOT_FOUND))
-    (asserts! (is-some (map-get? active-trait-implementations trait-name)) (err ERR_NOT_ACTIVE))
+    (asserts! (is-eq tx-sender (var-get governance-contract))
+      (err ERR_NOT_GOVERNANCE_CONTRACT)
+    )
+    (asserts! (is-some (map-get? trait-interfaces trait-name))
+      (err ERR_TRAIT_NOT_FOUND)
+    )
+    (asserts! (is-some (map-get? active-trait-implementations trait-name))
+      (err ERR_NOT_ACTIVE)
+    )
 
-    (let ((current-active-impl (unwrap! (map-get? active-trait-implementations trait-name) ERR_INTERNAL_STATE_ERROR)))
-      (map-set trait-implementations
-        {trait-name: trait-name, implementation-principal: current-active-impl}
+    (let ((current-active-impl (unwrap! (map-get? active-trait-implementations trait-name)
+        ERR_INTERNAL_STATE_ERROR
+      )))
+      (map-set trait-implementations {
+        trait-name: trait-name,
+        implementation-principal: current-active-impl,
+      }
         (merge
           (unwrap!
             (map-get? trait-implementations {
@@ -174,10 +225,8 @@
               implementation-principal: current-active-impl,
             })
             ERR_INTERNAL_STATE_ERROR
-          )
-          {status: "deprecated"}
-        )
-      )
+          ) { status: "deprecated" }
+        ))
       (map-delete active-trait-implementations trait-name)
       (ok true)
     )
@@ -190,12 +239,24 @@
 ;; @param new-implementation-principal The principal of the new contract implementing the trait.
 ;; @param new-version The version of the new implementation.
 ;; @returns (response bool uint) True if successful, or an error.
-(define-public (propose-trait-upgrade (proposal-id uint) (trait-name (string-ascii 64)) (new-implementation-principal principal) (new-version uint))
+(define-public (propose-trait-upgrade
+    (proposal-id uint)
+    (trait-name (string-ascii 64))
+    (new-implementation-principal principal)
+    (new-version uint)
+  )
   (begin
-    (asserts! (is-eq tx-sender (var-get governance-contract)) (err ERR_NOT_GOVERNANCE_CONTRACT))
-    (asserts! (is-some (map-get? trait-interfaces trait-name)) (err ERR_TRAIT_NOT_FOUND))
+    (asserts! (is-eq tx-sender (var-get governance-contract))
+      (err ERR_NOT_GOVERNANCE_CONTRACT)
+    )
+    (asserts! (is-some (map-get? trait-interfaces trait-name))
+      (err ERR_TRAIT_NOT_FOUND)
+    )
     ;; Check if the new implementation is already registered and pending or active
-    (let ((new-impl-data (map-get? trait-implementations {trait-name: trait-name, implementation-principal: new-implementation-principal})))
+    (let ((new-impl-data (map-get? trait-implementations {
+        trait-name: trait-name,
+        implementation-principal: new-implementation-principal,
+      })))
       (asserts! (is-some new-impl-data) (err ERR_IMPLEMENTATION_NOT_FOUND))
       (asserts!
         (is-eq (get status (unwrap! new-impl-data ERR_INTERNAL_STATE_ERROR))
@@ -203,13 +264,13 @@
         )
         (err ERR_ALREADY_ACTIVE)
       )
-;; Should be pending to be proposed for upgrade
+      ;; Should be pending to be proposed for upgrade
     )
 
     (map-set pending-trait-upgrades proposal-id {
       trait-name: trait-name,
       new-implementation-principal: new-implementation-principal,
-      new-version: new-version
+      new-version: new-version,
     })
     (ok true)
   )
@@ -220,9 +281,11 @@
 ;; @returns (response bool uint) True if successful, or an error.
 (define-public (finalize-trait-upgrade (proposal-id uint))
   (begin
-    (asserts! (is-eq tx-sender (var-get governance-contract)) (err ERR_NOT_GOVERNANCE_CONTRACT))
+    (asserts! (is-eq tx-sender (var-get governance-contract))
+      (err ERR_NOT_GOVERNANCE_CONTRACT)
+    )
     ;; Temporary simplification to isolate syntax error
-(ok true)
+    (ok true)
   )
 )
 
@@ -276,7 +339,7 @@
   (begin
     (try! (register-trait-interface "rbac-trait" "Role-Based Access Control Trait"))
     (try! (register-trait-implementation "rbac-trait" .roles u1))
-(try! (activate-trait-implementation "rbac-trait" .roles))
+    (try! (activate-trait-implementation "rbac-trait" .roles))
     (ok true)
   )
 )

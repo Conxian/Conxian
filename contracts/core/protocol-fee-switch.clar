@@ -17,7 +17,7 @@
 (define-constant ERR_INVALID_RECIPIENT (err u1003))
 
 ;; Max total fee (100%)
-(define-constant MAX_BPS u10000) 
+(define-constant MAX_BPS u10000)
 
 ;; Module Identifiers
 (define-constant MODULE_DEX "DEX")
@@ -37,15 +37,18 @@
 ;; Fee Configurations per Module
 ;; Key: Module Name
 ;; Value: Base Fee in BPS (e.g., 30 = 0.3%)
-(define-map module-fees (string-ascii 32) uint)
+(define-map module-fees
+  (string-ascii 32)
+  uint
+)
 
 ;; Fee Split Configurations
 ;; Where does the collected fee go?
 ;; Total shares must sum to 10000 (100%)
-(define-data-var treasury-share-bps uint u2000)   ;; 20% to Ops/Treasury
-(define-data-var staking-share-bps uint u6000)    ;; 60% to veToken Stakers
-(define-data-var insurance-share-bps uint u2000)  ;; 20% to Insurance Fund
-(define-data-var burn-share-bps uint u0)          ;; 0% Burn (Optional)
+(define-data-var treasury-share-bps uint u2000) ;; 20% to Ops/Treasury
+(define-data-var staking-share-bps uint u6000) ;; 60% to veToken Stakers
+(define-data-var insurance-share-bps uint u2000) ;; 20% to Insurance Fund
+(define-data-var burn-share-bps uint u0) ;; 0% Burn (Optional)
 
 ;; Recipients
 (define-data-var treasury-address principal tx-sender)
@@ -79,45 +82,54 @@
   )
 )
 
-(define-public (set-module-fee (module (string-ascii 32)) (fee-bps uint))
+(define-public (set-module-fee
+    (module (string-ascii 32))
+    (fee-bps uint)
+  )
   (begin
     (asserts! (is-authorized) ERR_UNAUTHORIZED)
     (asserts! (<= fee-bps MAX_BPS) ERR_INVALID_FEE)
     (map-set module-fees module fee-bps)
-    (print { event: "fee-updated", module: module, new-fee: fee-bps })
-    (ok true)
-  )
-)
-
-(define-public (set-fee-splits 
-    (treasury uint) 
-    (staking uint) 
-    (insurance uint) 
-    (burn uint)
-  )
-  (begin
-    (asserts! (is-authorized) ERR_UNAUTHORIZED)
-    (asserts! (is-eq (+ (+ (+ treasury staking) insurance) burn) MAX_BPS) ERR_INVALID_SHARE)
-    
-    (var-set treasury-share-bps treasury)
-    (var-set staking-share-bps staking)
-    (var-set insurance-share-bps insurance)
-    (var-set burn-share-bps burn)
-    
-    (print { 
-      event: "splits-updated", 
-      treasury: treasury, 
-      staking: staking, 
-      insurance: insurance, 
-      burn: burn 
+    (print {
+      event: "fee-updated",
+      module: module,
+      new-fee: fee-bps,
     })
     (ok true)
   )
 )
 
-(define-public (set-recipients 
-    (treasury principal) 
-    (staking principal) 
+(define-public (set-fee-splits
+    (treasury uint)
+    (staking uint)
+    (insurance uint)
+    (burn uint)
+  )
+  (begin
+    (asserts! (is-authorized) ERR_UNAUTHORIZED)
+    (asserts! (is-eq (+ (+ (+ treasury staking) insurance) burn) MAX_BPS)
+      ERR_INVALID_SHARE
+    )
+
+    (var-set treasury-share-bps treasury)
+    (var-set staking-share-bps staking)
+    (var-set insurance-share-bps insurance)
+    (var-set burn-share-bps burn)
+
+    (print {
+      event: "splits-updated",
+      treasury: treasury,
+      staking: staking,
+      insurance: insurance,
+      burn: burn,
+    })
+    (ok true)
+  )
+)
+
+(define-public (set-recipients
+    (treasury principal)
+    (staking principal)
     (insurance principal)
   )
   (begin
@@ -137,15 +149,20 @@
 )
 
 ;; @desc Get the effective fee rate for a user (applying tier discounts)
-(define-read-only (get-effective-fee-rate (user principal) (module (string-ascii 32)))
-  (let (
-    (base-rate (default-to u0 (map-get? module-fees module)))
-    ;; Call tier-manager for discount. If it fails (e.g. not deployed), default to 0 discount.
-    (discount (match (contract-call? .tier-manager get-discount user)
-      d d
-      err-val u0
-    ))
+(define-read-only (get-effective-fee-rate
+    (user principal)
+    (module (string-ascii 32))
   )
+  (let (
+      (base-rate (default-to u0 (map-get? module-fees module)))
+      ;; Call tier-manager for discount. If it fails (e.g. not deployed), default to 0 discount.
+      (discount (match (contract-call? .tier-manager get-discount user)
+        d
+        d
+        err-val
+        u0
+      ))
+    )
     (ok (/ (* base-rate (- MAX_BPS discount)) MAX_BPS))
   )
 )
@@ -155,62 +172,76 @@
 ;; @param amount: The total amount to calculate fee from (or the raw fee amount depending on context)
 ;; @param is-total: If true, 'amount' is the transaction size and we calculate fee using effective rate. 
 ;;                  If false, 'amount' is the already-collected fee to be split.
-(define-public (route-fees (token <sip-010-trait>) (amount uint) (is-total bool) (module (string-ascii 32)))
-  (let (
-    (sender tx-sender)
-    (fee-amount (if is-total 
-      (let ((rate (unwrap-panic (get-effective-fee-rate sender module))))
-        (/ (* amount rate) MAX_BPS))
-      amount
-    ))
+(define-public (route-fees
+    (token <sip-010-trait>)
+    (amount uint)
+    (is-total bool)
+    (module (string-ascii 32))
   )
+  (let (
+      (sender tx-sender)
+      (fee-amount (if is-total
+        (let ((rate (unwrap-panic (get-effective-fee-rate sender module))))
+          (/ (* amount rate) MAX_BPS)
+        )
+        amount
+      ))
+    )
     (if (> fee-amount u0)
       (let (
-        (treasury-amt (/ (* fee-amount (var-get treasury-share-bps)) MAX_BPS))
-        (staking-amt (/ (* fee-amount (var-get staking-share-bps)) MAX_BPS))
-        (insurance-amt (/ (* fee-amount (var-get insurance-share-bps)) MAX_BPS))
-        ;; Burn is remainder to avoid dust
-        (burn-amt (- fee-amount (+ (+ treasury-amt staking-amt) insurance-amt)))
-      )
+          (treasury-amt (/ (* fee-amount (var-get treasury-share-bps)) MAX_BPS))
+          (staking-amt (/ (* fee-amount (var-get staking-share-bps)) MAX_BPS))
+          (insurance-amt (/ (* fee-amount (var-get insurance-share-bps)) MAX_BPS))
+          ;; Burn is remainder to avoid dust
+          (burn-amt (- fee-amount (+ (+ treasury-amt staking-amt) insurance-amt)))
+        )
         ;; Emit Reporting Event
         (print {
-            event: "fee-routed",
-            module: module,
-            token: (contract-of token),
-            total-fee: fee-amount,
-            treasury: treasury-amt,
-            staking: staking-amt,
-            insurance: insurance-amt,
-            burn: burn-amt,
-            timestamp: block-height
+          event: "fee-routed",
+          module: module,
+          token: (contract-of token),
+          total-fee: fee-amount,
+          treasury: treasury-amt,
+          staking: staking-amt,
+          insurance: insurance-amt,
+          burn: burn-amt,
+          timestamp: block-height,
         })
 
         ;; Execute Transfers
         ;; We assume the calling module has already transferred `fee-amount` to
         ;; this contract, so CXD balances are held by this contract. Inside
-;; as-contract, tx-sender resolves to this contract's principal.
-(as-contract (print {
+        ;; as-contract, tx-sender resolves to this contract's principal.
+        (as-contract (print {
           event: "debug-contract-tx-sender",
           sender: tx-sender,
         }))
 
         (if (> treasury-amt u0)
-            (try! (as-contract (contract-call? token transfer treasury-amt tx-sender (var-get treasury-address) none)))
-            true
+          (try! (as-contract (contract-call? token transfer treasury-amt tx-sender
+            (var-get treasury-address) none
+          )))
+          true
         )
         (if (> staking-amt u0)
-            (try! (as-contract (contract-call? token transfer staking-amt tx-sender (var-get staking-address) none)))
-            true
+          (try! (as-contract (contract-call? token transfer staking-amt tx-sender
+            (var-get staking-address) none
+          )))
+          true
         )
         (if (> insurance-amt u0)
-            (try! (as-contract (contract-call? token transfer insurance-amt tx-sender (var-get insurance-address) none)))
-            true
+          (try! (as-contract (contract-call? token transfer insurance-amt tx-sender
+            (var-get insurance-address) none
+          )))
+          true
         )
         (if (> burn-amt u0)
-            (try! (as-contract (contract-call? token transfer burn-amt tx-sender (var-get treasury-address) none)))
-            true
+          (try! (as-contract (contract-call? token transfer burn-amt tx-sender
+            (var-get treasury-address) none
+          )))
+          true
         )
-        
+
         (ok fee-amount)
       )
       (ok u0) ;; No fee to route

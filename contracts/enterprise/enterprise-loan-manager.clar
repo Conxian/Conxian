@@ -11,7 +11,10 @@
 (define-data-var next-bond-id uint u1)
 (define-data-var emergency-reserve uint u0)
 
-(define-map credit-scores principal uint)
+(define-map credit-scores
+  principal
+  uint
+)
 (define-map loans
   uint
   {
@@ -45,7 +48,10 @@
   })
 )
 
-(define-read-only (calculate-loan-terms (borrower principal) (requested uint))
+(define-read-only (calculate-loan-terms
+    (borrower principal)
+    (requested uint)
+  )
   (ok {
     eligible: true,
     interest-rate: u500,
@@ -54,7 +60,10 @@
   })
 )
 
-(define-public (update-credit-score (borrower principal) (score uint))
+(define-public (update-credit-score
+    (borrower principal)
+    (score uint)
+  )
   (begin
     (asserts! (is-owner) (err ERR_UNAUTHORIZED))
     (map-set credit-scores borrower score)
@@ -70,7 +79,9 @@
     (duration uint)
   )
   (begin
-    (asserts! (>= collateral (/ (* amount u12000) u10000)) (err ERR_INSUFFICIENT_COLLATERAL))
+    (asserts! (>= collateral (/ (* amount u12000) u10000))
+      (err ERR_INSUFFICIENT_COLLATERAL)
+    )
     (asserts! (>= (var-get liquidity-available) amount) (err ERR_UNAUTHORIZED))
     (let ((loan-id (var-get next-loan-id)))
       (var-set next-loan-id (+ loan-id u1))
@@ -88,13 +99,16 @@
   )
 )
 
-(define-public (make-loan-payment (loan-id uint) (payment uint))
+(define-public (make-loan-payment
+    (loan-id uint)
+    (payment uint)
+  )
   (begin
     (match (map-get? loans loan-id)
       loan (begin
-        (map-set loans loan-id (merge loan {
-          total-interest-paid: (+ (get total-interest-paid loan) payment)
-        }))
+        (map-set loans loan-id
+          (merge loan { total-interest-paid: (+ (get total-interest-paid loan) payment) })
+        )
         (ok true)
       )
       (err u0)

@@ -21,19 +21,25 @@
 (define-data-var next-position-id uint u0)
 (define-data-var transfers-enabled bool false)
 
-(define-map position-owners uint principal)
+(define-map position-owners
+  uint
+  principal
+)
 (define-map positions
   uint
   {
     pool-id: uint,
     cxlp-amount: uint,
     created-at: uint,
-    last-updated-at: uint
+    last-updated-at: uint,
   }
 )
 
 ;; Optional metadata URIs per position, used to satisfy SIP-009 get-token-uri.
-(define-map token-uris uint (optional (string-utf8 256)))
+(define-map token-uris
+  uint
+  (optional (string-utf8 256))
+)
 
 ;; --- Private Helpers ---
 
@@ -42,7 +48,8 @@
 )
 
 (define-private (check-system-pause)
-  false)
+  false
+)
 
 ;; --- Admin Functions ---
 
@@ -50,19 +57,25 @@
   (begin
     (asserts! (is-owner tx-sender) (err ERR_UNAUTHORIZED))
     (var-set contract-owner new-owner)
-    (ok true)))
+    (ok true)
+  )
+)
 
 (define-public (enable-transfers)
   (begin
     (asserts! (is-owner tx-sender) (err ERR_UNAUTHORIZED))
     (var-set transfers-enabled true)
-    (ok true)))
+    (ok true)
+  )
+)
 
 (define-public (disable-transfers)
   (begin
     (asserts! (is-owner tx-sender) (err ERR_UNAUTHORIZED))
     (var-set transfers-enabled false)
-    (ok true)))
+    (ok true)
+  )
+)
 
 ;; --- Position Lifecycle ---
 
@@ -82,7 +95,9 @@
       ;; Transfer CXLP from the user to this contract.
       ;; CXLP.transfer enforces tx-sender == sender. Here, tx-sender == owner,
       ;; so we can call transfer directly from the owner to this contract.
-      (try! (contract-call? .cxlp-token transfer cxlp-amount owner .cxlp-position-nft none))
+      (try! (contract-call? .cxlp-token transfer cxlp-amount owner .cxlp-position-nft
+        none
+      ))
 
       (var-set next-position-id position-id)
       (map-set position-owners position-id owner)
@@ -90,7 +105,7 @@
         pool-id: pool-id,
         cxlp-amount: cxlp-amount,
         created-at: block-height,
-        last-updated-at: block-height
+        last-updated-at: block-height,
       })
       (print {
         event: "cxlp-position-created",
@@ -99,28 +114,30 @@
         pool-id: pool-id,
         cxlp-amount: cxlp-amount,
       })
-      (ok position-id))))
+      (ok position-id)
+    )
+  )
+)
 
 ;; Closes an LP position, transferring the recorded CXLP amount back from this
 ;; contract to the recorded owner. Callable by the owner or contract-owner.
 (define-public (close-position (position-id uint))
   (let (
-        (owner (unwrap! (map-get? position-owners position-id) (err ERR_NO_SUCH_POSITION)))
-        (position (unwrap! (map-get? positions position-id) (err ERR_NO_SUCH_POSITION)))
-       )
+      (owner (unwrap! (map-get? position-owners position-id) (err ERR_NO_SUCH_POSITION)))
+      (position (unwrap! (map-get? positions position-id) (err ERR_NO_SUCH_POSITION)))
+    )
     (begin
-      (asserts! (or (is-owner tx-sender) (is-eq tx-sender owner)) (err ERR_NOT_OWNER))
+      (asserts! (or (is-owner tx-sender) (is-eq tx-sender owner))
+        (err ERR_NOT_OWNER)
+      )
       (asserts! (not (check-system-pause)) (err ERR_TRANSFER_DISABLED))
 
       ;; Transfer CXLP back from this contract to the owner.
       ;; Inside as-contract, tx-sender becomes .cxlp-position-nft, which must
       ;; match the sender argument for CXLP.transfer.
-      (try! (as-contract
-              (contract-call? .cxlp-token transfer
-                (get cxlp-amount position)
-                .cxlp-position-nft
-                owner
-                none)))
+      (try! (as-contract (contract-call? .cxlp-token transfer (get cxlp-amount position)
+        .cxlp-position-nft owner none
+      )))
 
       (map-delete position-owners position-id)
       (map-delete positions position-id)
@@ -130,7 +147,10 @@
         owner: owner,
         cxlp-amount: (get cxlp-amount position),
       })
-      (ok true))))
+      (ok true)
+    )
+  )
+)
 
 ;; --- SIP-009-style Interface (minimal) ---
 
@@ -152,24 +172,32 @@
         from: sender,
         to: recipient,
       })
-      (ok true))))
+      (ok true)
+    )
+  )
+)
 
 ;; --- Read-Only Views ---
 
 (define-read-only (get-position (position-id uint))
-  (map-get? positions position-id))
+  (map-get? positions position-id)
+)
 
 ;; SIP-009: get-owner(token-id)
 (define-read-only (get-owner (position-id uint))
-  (ok (map-get? position-owners position-id)))
+  (ok (map-get? position-owners position-id))
+)
 
 ;; SIP-009: get-last-token-id()
 (define-read-only (get-last-token-id)
-  (ok (var-get next-position-id)))
+  (ok (var-get next-position-id))
+)
 
 ;; SIP-009: get-token-uri(token-id)
 (define-read-only (get-token-uri (position-id uint))
-  (ok (default-to none (map-get? token-uris position-id))))
+  (ok (default-to none (map-get? token-uris position-id)))
+)
 
 (define-read-only (get-transfers-enabled)
-  (ok (var-get transfers-enabled)))
+  (ok (var-get transfers-enabled))
+)

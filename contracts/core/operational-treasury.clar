@@ -21,7 +21,11 @@
 (define-data-var rolling-burn-rate uint u0) ;; Avg spend per 100 blocks
 
 ;; Allowances for Keepers/Oracles
-(define-map authorized-spenders principal uint) ;; spender -> daily limit
+(define-map authorized-spenders
+  principal
+  uint
+)
+;; spender -> daily limit
 
 ;; --- Authorization ---
 (define-private (is-owner)
@@ -49,7 +53,10 @@
   )
 )
 
-(define-public (set-spender-limit (spender principal) (limit uint))
+(define-public (set-spender-limit
+    (spender principal)
+    (limit uint)
+  )
   (begin
     (asserts! (is-authorized) ERR_UNAUTHORIZED)
     (map-set authorized-spenders spender limit)
@@ -66,26 +73,24 @@
 
 ;; @desc Withdraw funds for operations (Keepers/Oracles)
 (define-public (withdraw-stx (amount uint))
-  (let (
-    (limit (default-to u0 (map-get? authorized-spenders tx-sender)))
-  )
+  (let ((limit (default-to u0 (map-get? authorized-spenders tx-sender))))
     (asserts! (> limit u0) ERR_UNAUTHORIZED)
     (asserts! (<= amount limit) ERR_LIMIT_EXCEEDED)
-    
+
     ;; Update burn tracking (Simplified moving average)
     (let (
-      (current-burn (var-get rolling-burn-rate))
-      (blocks-diff (- block-height (var-get last-spend-block)))
-    )
+        (current-burn (var-get rolling-burn-rate))
+        (blocks-diff (- block-height (var-get last-spend-block)))
+      )
       (if (> blocks-diff u0)
         (var-set rolling-burn-rate (/ (+ current-burn amount) u2)) ;; Simple smoothing
         true
       )
     )
-    
+
     (var-set last-spend-block block-height)
     (var-set total-stx-spent (+ (var-get total-stx-spent) amount))
-    
+
     (as-contract (stx-transfer? amount tx-sender tx-sender))
   )
 )
@@ -98,9 +103,9 @@
 
 (define-read-only (get-runway)
   (let (
-    (balance (stx-get-balance (as-contract tx-sender)))
-    (burn (var-get rolling-burn-rate))
-  )
+      (balance (stx-get-balance (as-contract tx-sender)))
+      (burn (var-get rolling-burn-rate))
+    )
     (if (> burn u0)
       (ok (/ balance burn))
       (ok u999999) ;; Infinite runway

@@ -42,31 +42,52 @@
 ;; --- Public Functions ---
 (define-public (update-funding-rate (asset principal))
   (begin
-    (asserts! (is-eq (unwrap! (check-role ROLE_OPERATOR) ERR_UNAUTHORIZED) true) ERR_UNAUTHORIZED)
+    (asserts! (is-eq (unwrap! (check-role ROLE_OPERATOR) ERR_UNAUTHORIZED) true)
+      ERR_UNAUTHORIZED
+    )
     (let (
         (current-time block-height)
-        (last-update (default-to { timestamp: u0, cumulative-funding: 0 }
+        (last-update (default-to {
+          timestamp: u0,
+          cumulative-funding: 0,
+        }
           (map-get? last-funding-update { asset: asset })
         ))
       )
-      (asserts! (>= (- current-time (get timestamp last-update)) (var-get funding-interval)) ERR_TASK_NOT_READY)
+      (asserts!
+        (>= (- current-time (get timestamp last-update))
+          (var-get funding-interval)
+        )
+        ERR_TASK_NOT_READY
+      )
       (let (
           (index-price (try! (contract-call? .oracle-aggregator-v2 get-real-time-price asset)))
-          (twap (try! (contract-call? .oracle-aggregator-v2 get-twap asset (var-get funding-interval))))
+          (twap (try! (contract-call? .oracle-aggregator-v2 get-twap asset
+            (var-get funding-interval)
+          )))
           (open-interest (unwrap! (get-open-interest asset) ERR_TASK_NOT_READY))
           (oi-long (get long open-interest))
           (oi-short (get short open-interest))
           (premium (calculate-premium index-price twap))
           (funding-rate (calculate-funding-rate premium oi-long oi-short))
-          (capped-rate (max (min funding-rate (to-int (var-get max-funding-rate))) (- 0 (to-int (var-get max-funding-rate)))))
+          (capped-rate (max (min funding-rate (to-int (var-get max-funding-rate)))
+            (- 0 (to-int (var-get max-funding-rate)))
+          ))
           (new-cumulative (+ (get cumulative-funding last-update) capped-rate))
         )
-        (map-set funding-rate-history { asset: asset, timestamp: current-time }
-          { rate: capped-rate, index-price: index-price, open-interest-long: oi-long, open-interest-short: oi-short }
-        )
-        (map-set last-funding-update { asset: asset }
-          { timestamp: current-time, cumulative-funding: new-cumulative }
-        )
+        (map-set funding-rate-history {
+          asset: asset,
+          timestamp: current-time,
+        } {
+          rate: capped-rate,
+          index-price: index-price,
+          open-interest-long: oi-long,
+          open-interest-short: oi-short,
+        })
+        (map-set last-funding-update { asset: asset } {
+          timestamp: current-time,
+          cumulative-funding: new-cumulative,
+        })
         (ok {
           funding-rate: capped-rate,
           index-price: index-price,
@@ -96,28 +117,30 @@
       )
       (let ((funding-payment (/ (* (to-int size) funding-rate) 10000)))
         (let ((abs-payment (abs funding-payment)))
-          (let ((maybe-payment (some u1))) ;; Debug fix for to-uint
-             (let ((payment-uint (unwrap! maybe-payment (err u5000)))) ;; Handle conversion
-          (let ((new-collateral (if (> funding-payment 0)
-              (- (get collateral position) payment-uint)
-              (+ (get collateral position) payment-uint)
-            )))
-            (try! (contract-call? .position-manager update-position position-id
-              (some new-collateral) none none none
-            ))
-            (ok {
-              funding-rate: funding-rate,
-              funding-payment: funding-payment,
-              new-collateral: new-collateral,
-              timestamp: current-time,
-            })
+          (let ((maybe-payment (some u1)))
+            ;; Debug fix for to-uint
+            (let ((payment-uint (unwrap! maybe-payment (err u5000))))
+              ;; Handle conversion
+              (let ((new-collateral (if (> funding-payment 0)
+                  (- (get collateral position) payment-uint)
+                  (+ (get collateral position) payment-uint)
+                )))
+                (try! (contract-call? .position-manager update-position position-id
+                  (some new-collateral) none none none
+                ))
+                (ok {
+                  funding-rate: funding-rate,
+                  funding-payment: funding-payment,
+                  new-collateral: new-collateral,
+                  timestamp: current-time,
+                })
+              )
+            )
           )
         )
       )
     )
   )
-)
-)
 )
 
 ;; --- Private Functions ---

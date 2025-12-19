@@ -78,6 +78,12 @@ address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 [contracts.kyc-registry]
 path = "contracts/identity/kyc-registry.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+depends_on = ["identity-badge"]
+
+[contracts.identity-badge]
+path = "contracts/identity/identity-badge.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+depends_on = ["sip-standards"]
 
 [contracts.legal-representative-registry]
 path = "contracts/governance/legal-representative-registry.clar"
@@ -135,10 +141,12 @@ depends_on = ["defi-traits"]
 [contracts.risk-manager]
 path = "contracts/risk/risk-manager.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+depends_on = ["position-manager"]
 
 [contracts.funding-rate-calculator]
 path = "contracts/core/funding-rate-calculator.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+depends_on = ["position-manager"]
 
 [contracts.dimensional-engine]
 path = "contracts/core/dimensional-engine.clar"
@@ -584,6 +592,9 @@ depends_on = [
     "mev-protection-nft",
     "insurance-protection-nft",
     "bridge-nft",
+    "comprehensive-lending-system",
+    "token-system-coordinator",
+    "circuit-breaker",
 ]
 
 [contracts.mev-protection-nft]
@@ -726,6 +737,12 @@ address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 depends_on = ["governance-token"]
 
 
+[contracts.founder-vesting]
+path = "contracts/governance/founder-vesting.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+depends_on = ["sip-standards"]
+
+
 [contracts.dlc-manager]
 path = "contracts/sbtc/dlc-manager.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
@@ -775,6 +792,11 @@ address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 [contracts.custody]
 path = "contracts/vaults/custody.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+
+[contracts.btc-bridge]
+path = "contracts/vaults/btc-bridge.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+depends_on = ["clarity-bitcoin"]
 
 [contracts.yield-aggregator]
 path = "contracts/vaults/yield-aggregator.clar"

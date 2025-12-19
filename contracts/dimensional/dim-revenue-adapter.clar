@@ -149,17 +149,26 @@
     (asserts! (> total-yield u0) (err ERR_INVALID_AMOUNT))
 
     ;; Check system operational status
-    (asserts! (unwrap! (match (var-get protocol-monitor)
-      monitor-principal
-      (begin
-        (asserts! (is-eq (contract-of monitor-trait) monitor-principal) (err ERR_UNAUTHORIZED))
-        (let ((paused (unwrap! (contract-call? monitor-trait is-paused) (err ERR_SYSTEM_PAUSED))))
-          (asserts! (not paused) (err ERR_SYSTEM_PAUSED))
+    (asserts!
+      (unwrap!
+        (match (var-get protocol-monitor)
+          monitor-principal (begin
+            (asserts! (is-eq (contract-of monitor-trait) monitor-principal)
+              (err ERR_UNAUTHORIZED)
+            )
+            (let ((paused (unwrap! (contract-call? monitor-trait is-paused)
+                (err ERR_SYSTEM_PAUSED)
+              )))
+              (asserts! (not paused) (err ERR_SYSTEM_PAUSED))
+              (ok true)
+            )
+          )
           (ok true)
         )
+        (err ERR_UNAUTHORIZED)
       )
-      (ok true)
-    ) (err ERR_UNAUTHORIZED)) (err ERR_UNAUTHORIZED))
+      (err ERR_UNAUTHORIZED)
+    )
 
     ;; Calculate revenue splits
     (let (
@@ -294,7 +303,8 @@
         (unwrap! (var-get governance-contract) (err ERR_GOVERNANCE_CALL))
       )
       (err ERR_UNAUTHORIZED)
-    ) ;; Only owner can report for now
+    )
+    ;; Only owner can report for now
     (asserts! (> coupon-amount u0) (err ERR_INVALID_AMOUNT))
 
     ;; Route a portion of bond coupons to token holders

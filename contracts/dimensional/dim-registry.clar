@@ -31,84 +31,148 @@
     principal: principal,
     type: (string-ascii 32),
     metadata: (optional (string-utf8 256)),
-    active: bool
+    active: bool,
   }
 )
 (define-data-var next-node-id uint u1)
 
 ;; Dimension weights registry
-(define-map dimension-weights {dim-id: uint} {weight: uint})
+(define-map dimension-weights
+  { dim-id: uint }
+  { weight: uint }
+)
 
 ;; Oracle registry
-(define-map registered-oracles principal bool)
+(define-map registered-oracles
+  principal
+  bool
+)
 ;; Component to dimension mapping
-(define-map component-dimensions principal uint)
+(define-map component-dimensions
+  principal
+  uint
+)
 ;; Authorized registrars (e.g., factory contracts)
-(define-map authorized-registrars principal bool)
+(define-map authorized-registrars
+  principal
+  bool
+)
 
 ;; Deterministic token ordering map: admin-managed order indices
-(define-map token-order {token: principal} uint)
+(define-map token-order
+  { token: principal }
+  uint
+)
 
 (define-public (set-contract-owner (new-owner principal))
   (begin
     (asserts! (is-eq tx-sender (var-get contract-owner)) (err ERR_UNAUTHORIZED))
     (var-set contract-owner new-owner)
-    (ok true)))
+    (ok true)
+  )
+)
 
 (define-public (set-oracle-principal (new-oracle principal))
   (begin
     (asserts! (is-eq tx-sender (var-get contract-owner)) (err ERR_UNAUTHORIZED))
     (var-set oracle-principal new-oracle)
-    (ok true)))
+    (ok true)
+  )
+)
 
 ;; Allow the owner to authorize or revoke a registrar principal
-(define-public (set-registrar (registrar principal) (authorized bool))
+(define-public (set-registrar
+    (registrar principal)
+    (authorized bool)
+  )
   (begin
     (asserts! (is-eq tx-sender (var-get contract-owner)) (err ERR_UNAUTHORIZED))
     (if authorized
-      (begin (map-set authorized-registrars registrar true) (ok true))
-      (begin (map-delete authorized-registrars registrar) (ok true)))))
+      (begin
+        (map-set authorized-registrars registrar true)
+        (ok true)
+      )
+      (begin
+        (map-delete authorized-registrars registrar)
+        (ok true)
+      )
+    )
+  )
+)
 
 ;; Trait implementation functions
-(define-public (register-dimension (id uint) (weight uint))
+(define-public (register-dimension
+    (id uint)
+    (weight uint)
+  )
   (begin
     (asserts! (is-eq tx-sender (var-get contract-owner)) (err ERR_UNAUTHORIZED))
-    (asserts! (is-none (map-get? dimension-weights {dim-id: id})) (err ERR_DIMENSION_EXISTS))
+    (asserts! (is-none (map-get? dimension-weights { dim-id: id }))
+      (err ERR_DIMENSION_EXISTS)
+    )
     (asserts! (> weight u0) (err ERR_INVALID_WEIGHT))
-    (map-set dimension-weights {dim-id: id} {weight: weight})
-    (ok id)))
+    (map-set dimension-weights { dim-id: id } { weight: weight })
+    (ok id)
+  )
+)
 
-(define-public (update-dimension-weight (dim-id uint) (new-weight uint))
+(define-public (update-dimension-weight
+    (dim-id uint)
+    (new-weight uint)
+  )
   (begin
     (asserts! (is-eq tx-sender (var-get oracle-principal)) (err ERR_UNAUTHORIZED))
-    (asserts! (is-some (map-get? dimension-weights {dim-id: dim-id})) (err ERR_DIMENSION_NOT_FOUND))
+    (asserts! (is-some (map-get? dimension-weights { dim-id: dim-id }))
+      (err ERR_DIMENSION_NOT_FOUND)
+    )
     (asserts! (> new-weight u0) (err ERR_INVALID_WEIGHT))
-    (map-set dimension-weights {dim-id: dim-id} {weight: new-weight})
-    (ok true)))
+    (map-set dimension-weights { dim-id: dim-id } { weight: new-weight })
+    (ok true)
+  )
+)
 
 (define-read-only (get-dimension-weight (id uint))
-  (ok (default-to u0 (get weight (map-get? dimension-weights {dim-id: id})))))
+  (ok (default-to u0 (get weight (map-get? dimension-weights { dim-id: id }))))
+)
 
 ;; Register a component as a new dimension with an auto-assigned id
-(define-public (register-component (component principal) (weight uint))
+(define-public (register-component
+    (component principal)
+    (weight uint)
+  )
   (begin
     (asserts!
-      (or (is-eq tx-sender (var-get contract-owner))
-          (default-to false (map-get? authorized-registrars tx-sender)))
-      (err ERR_UNAUTHORIZED))
+      (or
+        (is-eq tx-sender (var-get contract-owner))
+        (default-to false (map-get? authorized-registrars tx-sender))
+      )
+      (err ERR_UNAUTHORIZED)
+    )
     (asserts! (> weight u0) (err ERR_INVALID_WEIGHT))
-    (asserts! (is-none (map-get? component-dimensions component)) (err ERR_DIMENSION_EXISTS))
+    (asserts! (is-none (map-get? component-dimensions component))
+      (err ERR_DIMENSION_EXISTS)
+    )
     (let ((id (var-get next-dim-id)))
-      (asserts! (is-none (map-get? dimension-weights {dim-id: id})) (err ERR_DIMENSION_EXISTS))
-      (map-set dimension-weights {dim-id: id} {weight: weight})
+      (asserts! (is-none (map-get? dimension-weights { dim-id: id }))
+        (err ERR_DIMENSION_EXISTS)
+      )
+      (map-set dimension-weights { dim-id: id } { weight: weight })
       (map-set component-dimensions component id)
       (var-set next-dim-id (+ id u1))
-      (ok id))))
+      (ok id)
+    )
+  )
+)
 
 (define-read-only (get-node (node-id uint))
-  (ok (map-get? registered-nodes { id: node-id })))
+  (ok (map-get? registered-nodes { id: node-id }))
+)
 
-(define-public (register-node (node-principal principal) (node-type (string-ascii 32)) (metadata (optional (string-utf8 256))))
+(define-public (register-node
+    (node-principal principal)
+    (node-type (string-ascii 32))
+    (metadata (optional (string-utf8 256)))
+  )
   (begin
     (asserts! (is-eq tx-sender (var-get contract-owner)) (err ERR_UNAUTHORIZED))
     (let ((id (var-get next-node-id)))
@@ -116,18 +180,28 @@
         principal: node-principal,
         type: node-type,
         metadata: metadata,
-        active: true
+        active: true,
       })
       (var-set next-node-id (+ id u1))
-      (ok id))))
+      (ok id)
+    )
+  )
+)
 
-(define-public (update-node-status (node-id uint) (active bool))
+(define-public (update-node-status
+    (node-id uint)
+    (active bool)
+  )
   (begin
     (asserts! (is-eq tx-sender (var-get contract-owner)) (err ERR_UNAUTHORIZED))
-    (let ((node (unwrap! (map-get? registered-nodes { id: node-id }) (err ERR_NODE_NOT_FOUND))))
+    (let ((node (unwrap! (map-get? registered-nodes { id: node-id })
+        (err ERR_NODE_NOT_FOUND)
+      )))
       (map-set registered-nodes { id: node-id } (merge node { active: active }))
-      (ok true))))
-
+      (ok true)
+    )
+  )
+)
 
 ;; Add missing get-registered-oracles function to match trait
 (define-read-only (get-registered-oracles)
@@ -140,37 +214,67 @@
 (define-public (register-oracle (oracle principal))
   (begin
     (asserts! (is-eq tx-sender (var-get contract-owner)) (err ERR_UNAUTHORIZED))
-    (asserts! (not (default-to false (map-get? registered-oracles oracle))) (err ERR_ORACLE_EXISTS))
+    (asserts! (not (default-to false (map-get? registered-oracles oracle)))
+      (err ERR_ORACLE_EXISTS)
+    )
     (map-set registered-oracles oracle true)
-    (ok true)))
+    (ok true)
+  )
+)
 
 (define-public (unregister-oracle (oracle principal))
   (begin
     (asserts! (is-eq tx-sender (var-get contract-owner)) (err ERR_UNAUTHORIZED))
-    (asserts! (default-to false (map-get? registered-oracles oracle)) (err ERR_ORACLE_NOT_FOUND))
+    (asserts! (default-to false (map-get? registered-oracles oracle))
+      (err ERR_ORACLE_NOT_FOUND)
+    )
     (map-delete registered-oracles oracle)
-    (ok true)))
+    (ok true)
+  )
+)
 
 (define-read-only (is-oracle-registered (oracle principal))
-  (ok (default-to false (map-get? registered-oracles oracle))))
+  (ok (default-to false (map-get? registered-oracles oracle)))
+)
 
 (define-read-only (get-all-dimensions)
-  (ok (list)))
+  (ok (list))
+)
 
 ;; === Deterministic Token Ordering ===
 
-(define-public (set-token-order (token principal) (order-index uint))
+(define-public (set-token-order
+    (token principal)
+    (order-index uint)
+  )
   (begin
     (asserts! (is-eq tx-sender (var-get contract-owner)) (err ERR_UNAUTHORIZED))
-    (map-set token-order {token: token} order-index)
-    (ok true)))
+    (map-set token-order { token: token } order-index)
+    (ok true)
+  )
+)
 
 (define-read-only (get-token-order (token principal))
-  (ok (default-to u0 (map-get? token-order {token: token}))))
+  (ok (default-to u0 (map-get? token-order { token: token })))
+)
 
-(define-read-only (order-pair (a principal) (b principal))
-  (let ((ia (default-to u0 (map-get? token-order {token: a})))
-        (ib (default-to u0 (map-get? token-order {token: b}))))
+(define-read-only (order-pair
+    (a principal)
+    (b principal)
+  )
+  (let (
+      (ia (default-to u0 (map-get? token-order { token: a })))
+      (ib (default-to u0 (map-get? token-order { token: b })))
+    )
     (ok (if (<= ia ib)
-          (tuple (base a) (quote b))
-          (tuple (base b) (quote a))))))
+      {
+        base: a,
+        quote: b,
+      }
+      {
+        base: b,
+        quote: a,
+      }
+    ))
+  )
+)

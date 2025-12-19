@@ -8,8 +8,8 @@
 
 ;; Roles
 (define-constant ROLE_PRIMARY_WRAPPER u1) ;; e.g. Conxian Labs (ZA)
-(define-constant ROLE_LOCAL_COUNSEL u2)   ;; Law firm
-(define-constant ROLE_POLICY_ADVISOR u3)  ;; Individual/Entity advisor
+(define-constant ROLE_LOCAL_COUNSEL u2) ;; Law firm
+(define-constant ROLE_POLICY_ADVISOR u3) ;; Individual/Entity advisor
 
 ;; Status
 (define-constant STATUS_ACTIVE u1)
@@ -29,7 +29,7 @@
     bonded-stake: uint,
     reputation-score: uint,
     meta-hash: (buff 32), ;; IPFS hash of engagement letter / details
-    updated-at: uint
+    updated-at: uint,
   }
 )
 
@@ -70,15 +70,15 @@
   )
   (begin
     (asserts! (is-contract-owner) ERR_UNAUTHORIZED)
-    
+
     ;; If setting a primary wrapper, verify uniqueness or update index
     (if (is-eq role ROLE_PRIMARY_WRAPPER)
       (begin
-         (match (map-get? primary-region-wrapper region)
-           existing-rep (asserts! (is-eq existing-rep rep) ERR_DUPLICATE_WRAPPER)
-           (map-set primary-region-wrapper region rep)
-         )
-         true
+        (match (map-get? primary-region-wrapper region)
+          existing-rep (asserts! (is-eq existing-rep rep) ERR_DUPLICATE_WRAPPER)
+          (map-set primary-region-wrapper region rep)
+        )
+        true
       )
       true
     )
@@ -90,7 +90,7 @@
       bonded-stake: u0, ;; Bond handled by separate staking contract if needed
       reputation-score: u0,
       meta-hash: meta-hash,
-      updated-at: block-height
+      updated-at: block-height,
     })
 
     (print {
@@ -98,21 +98,29 @@
       rep: rep,
       region: region,
       role: role,
-      status: status
+      status: status,
     })
     (ok true)
   )
 )
 
-(define-public (update-status (rep principal) (status uint))
+(define-public (update-status
+    (rep principal)
+    (status uint)
+  )
   (begin
     (asserts! (is-contract-owner) ERR_UNAUTHORIZED)
     (match (map-get? legal-representatives rep)
       data
-        (begin
-          (map-set legal-representatives rep (merge data { status: status, updated-at: block-height }))
-          (ok true)
+      (begin
+        (map-set legal-representatives rep
+          (merge data {
+            status: status,
+            updated-at: block-height,
+          })
         )
+        (ok true)
+      )
       ERR_INVALID_ROLE ;; Rep not found
     )
   )
@@ -130,10 +138,10 @@
 
 (define-read-only (is-active-wrapper (rep principal))
   (match (map-get? legal-representatives rep)
-    data (and 
-           (is-eq (get role data) ROLE_PRIMARY_WRAPPER)
-           (is-eq (get status data) STATUS_ACTIVE)
-         )
+    data (and
+      (is-eq (get role data) ROLE_PRIMARY_WRAPPER)
+      (is-eq (get status data) STATUS_ACTIVE)
+    )
     false
   )
 )

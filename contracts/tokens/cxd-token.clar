@@ -34,9 +34,15 @@
 ;; --- Data Variables and Maps ---
 
 ;; @var balances A map storing the token balance for each principal.
-(define-map balances principal uint)
+(define-map balances
+  principal
+  uint
+)
 ;; @var minters A map of principals who are authorized to mint new tokens.
-(define-map minters principal bool)
+(define-map minters
+  principal
+  bool
+)
 ;; @var contract-owner The principal of the contract owner, with administrative privileges.
 (define-data-var contract-owner principal tx-sender)
 ;; @var decimals The number of decimal places for the token.
@@ -74,59 +80,94 @@
 ;; @param who The principal to check.
 ;; @returns A boolean indicating if the principal is the owner.
 (define-private (is-owner (who principal))
-  (is-eq who (var-get contract-owner)))
+  (is-eq who (var-get contract-owner))
+)
 
 ;; @desc Safely adds two unsigned integers, returning an error on overflow.
 ;; @param a The first unsigned integer.
 ;; @param b The second unsigned integer.
 ;; @returns A response containing the sum or an error.
-(define-private (safe-add (a uint) (b uint))
+(define-private (safe-add
+    (a uint)
+    (b uint)
+  )
   (let ((result (+ a b)))
-    (if (>= result a) (ok result) (err ERR_OVERFLOW))))
+    (if (>= result a)
+      (ok result)
+      (err ERR_OVERFLOW)
+    )
+  )
+)
 
 ;; @desc Safely subtracts two unsigned integers, returning an error on underflow.
 ;; @param a The first unsigned integer.
 ;; @param b The second unsigned integer.
 ;; @returns A response containing the difference or an error.
-(define-private (safe-sub (a uint) (b uint))
-  (if (>= a b) (ok (- a b)) (err ERR_SUB_UNDERFLOW)))
+(define-private (safe-sub
+    (a uint)
+    (b uint)
+  )
+  (if (>= a b)
+    (ok (- a b))
+    (err ERR_SUB_UNDERFLOW)
+  )
+)
 
 ;; @desc Checks if the system is currently paused
 ;; @returns A boolean indicating if the system is paused.
 (define-private (check-system-pause)
-  false)
+  false
+)
 
-      ;; If a controller is configured, delegate pause status to it. On
+;; If a controller is configured, delegate pause status to it. On
 ;; @param amount The amount to be minted.
 ;; @returns A boolean indicating if the emission is allowed.
 (define-private (check-emission-allowed (amount uint))
-  true)
+  true
+)
 
 ;; @desc Notifies the token coordinator of a transfer.
 ;; @param amount The amount transferred.
 ;; @param sender The sender of the transfer.
 ;; @param recipient The recipient of the transfer.
 ;; @returns A boolean indicating if the notification was successful.
-(define-private (notify-transfer (amount uint) (sender principal) (recipient principal))
-  (and (var-get system-integration-enabled)
-       (var-get transfer-hooks-enabled)
-       true))
+(define-private (notify-transfer
+    (amount uint)
+    (sender principal)
+    (recipient principal)
+  )
+  (and
+    (var-get system-integration-enabled)
+    (var-get transfer-hooks-enabled)
+    true
+  )
+)
 
 ;; @desc Notifies the token coordinator of a mint.
 ;; @param amount The amount minted.
 ;; @param recipient The recipient of the minted tokens.
 ;; @returns A boolean indicating if the notification was successful.
-(define-private (notify-mint (amount uint) (recipient principal))
-  (and (var-get system-integration-enabled)
-       true))
+(define-private (notify-mint
+    (amount uint)
+    (recipient principal)
+  )
+  (and
+    (var-get system-integration-enabled)
+    true
+  )
+)
 
 ;; @desc Notifies the token coordinator of a burn.
 ;; @param amount The amount burned.
 ;; @param sender The principal from whom the tokens were burned.
 ;; @returns A boolean indicating if the notification was successful.
-(define-private (notify-burn (amount uint) (sender principal))
+(define-private (notify-burn
+    (amount uint)
+    (sender principal)
+  )
   ;; v1 stub: integration hooks are disabled; always report success
-  true)
+  true
+)
 
 ;; --- Configuration Functions (Owner Only) ---
 
@@ -137,7 +178,9 @@
   (begin
     (asserts! (is-owner tx-sender) (err ERR_UNAUTHORIZED))
     (var-set protocol-monitor (some contract-address))
-    (ok true)))
+    (ok true)
+  )
+)
 
 ;; @desc Sets the emission controller contract address.
 ;; @param contract-address The principal of the emission controller contract.
@@ -146,7 +189,9 @@
   (begin
     (asserts! (is-owner tx-sender) (err ERR_UNAUTHORIZED))
     (var-set emission-controller (some contract-address))
-    (ok true)))
+    (ok true)
+  )
+)
 
 ;; @desc Sets the revenue distributor contract address.
 ;; @param contract-address The principal of the revenue distributor contract.
@@ -155,7 +200,9 @@
   (begin
     (asserts! (is-owner tx-sender) (err ERR_UNAUTHORIZED))
     (var-set revenue-distributor (some contract-address))
-    (ok true)))
+    (ok true)
+  )
+)
 
 ;; @desc Sets the staking contract address.
 ;; @param contract-address The principal of the staking contract.
@@ -164,7 +211,9 @@
   (begin
     (asserts! (is-owner tx-sender) (err ERR_UNAUTHORIZED))
     (var-set staking-contract-ref (some contract-address))
-    (ok true)))
+    (ok true)
+  )
+)
 
 ;; @desc Sets the token coordinator contract address.
 ;; @param contract-address The principal of the token coordinator contract.
@@ -173,7 +222,9 @@
   (begin
     (asserts! (is-owner tx-sender) (err ERR_UNAUTHORIZED))
     (var-set token-coordinator (some contract-address))
-    (ok true)))
+    (ok true)
+  )
+)
 
 ;; @desc Enables system integration.
 ;; @returns A response indicating success or failure.
@@ -181,7 +232,9 @@
   (begin
     (asserts! (is-owner tx-sender) (err ERR_UNAUTHORIZED))
     (var-set system-integration-enabled true)
-    (ok true)))
+    (ok true)
+  )
+)
 
 ;; @desc Disables system integration.
 ;; @returns A response indicating success or failure.
@@ -189,7 +242,9 @@
   (begin
     (asserts! (is-owner tx-sender) (err ERR_UNAUTHORIZED))
     (var-set system-integration-enabled false)
-    (ok true)))
+    (ok true)
+  )
+)
 
 ;; @desc Sets whether transfer hooks are enabled.
 ;; @param enabled A boolean indicating if transfer hooks are enabled.
@@ -198,7 +253,9 @@
   (begin
     (asserts! (is-owner tx-sender) (err ERR_UNAUTHORIZED))
     (var-set transfer-hooks-enabled enabled)
-    (ok true)))
+    (ok true)
+  )
+)
 
 ;; @desc Completes the initialization of the contract.
 ;; @returns A response indicating success or failure.
@@ -206,7 +263,9 @@
   (begin
     (asserts! (is-owner tx-sender) (err ERR_UNAUTHORIZED))
     (var-set initialization-complete true)
-    (ok true)))
+    (ok true)
+  )
+)
 
 ;; --- Read-Only Functions ---
 
@@ -215,21 +274,28 @@
 (define-read-only (is-system-paused)
   (if (var-get system-integration-enabled)
     (match (var-get protocol-monitor)
-      monitor false  ;; In read-only context, we can't make contract calls
-      false)
-    false))
+      monitor
+      false ;; In read-only context, we can't make contract calls
+      false
+    )
+    false
+  )
+)
 
 ;; @desc Checks if the contract is fully initialized.
 ;; @returns A boolean indicating if the contract is fully initialized.
 (define-read-only (is-fully-initialized)
   (and
     (var-get system-integration-enabled)
-    (var-get initialization-complete)))
+    (var-get initialization-complete)
+  )
+)
 
 ;; @desc Gets the contract owner.
 ;; @returns The principal of the contract owner.
 (define-read-only (get-owner)
-  (ok (var-get contract-owner)))
+  (ok (var-get contract-owner))
+)
 
 ;; @desc Gets information about the system integration.
 ;; @returns A tuple containing information about the system integration.
@@ -242,14 +308,16 @@
     protocol-monitor: (var-get protocol-monitor),
     emission-controller: (var-get emission-controller),
     revenue-distributor: (var-get revenue-distributor),
-    staking-contract: (var-get staking-contract-ref)
-  }))
+    staking-contract: (var-get staking-contract-ref),
+  })
+)
 
 ;; @desc Checks if a principal is a minter.
 ;; @param who The principal to check.
 ;; @returns A boolean indicating if the principal is a minter.
 (define-read-only (is-minter (who principal))
-  (default-to false (map-get? minters who)))
+  (default-to false (map-get? minters who))
+)
 
 ;; --- Ownership Functions ---
 
@@ -260,7 +328,9 @@
   (begin
     (asserts! (is-owner tx-sender) (err ERR_UNAUTHORIZED))
     (var-set contract-owner new-owner)
-    (ok true)))
+    (ok true)
+  )
+)
 
 ;; @desc Renounces ownership of the contract.
 ;; @returns A response indicating success or failure.
@@ -268,19 +338,27 @@
   (begin
     (asserts! (is-owner tx-sender) (err ERR_UNAUTHORIZED))
     (var-set contract-owner tx-sender)
-    (ok true)))
+    (ok true)
+  )
+)
 
 ;; @desc Sets a principal as a minter.
 ;; @param who The principal to set as a minter.
 ;; @param enabled A boolean indicating if the principal is a minter.
 ;; @returns A response indicating success or failure.
-(define-public (set-minter (who principal) (enabled bool))
+(define-public (set-minter
+    (who principal)
+    (enabled bool)
+  )
   (begin
     (asserts! (is-owner tx-sender) (err ERR_UNAUTHORIZED))
     (if enabled
       (map-set minters who true)
-      (map-delete minters who))
-    (ok true)))
+      (map-delete minters who)
+    )
+    (ok true)
+  )
+)
 
 ;; --- SIP-010 Interface ---
 
@@ -290,7 +368,12 @@
 ;; @param recipient The recipient of the tokens.
 ;; @param memo An optional memo for the transfer.
 ;; @returns A response indicating success or failure.
-(define-public (transfer (amount uint) (sender principal) (recipient principal) (memo (optional (buff 34))))
+(define-public (transfer
+    (amount uint)
+    (sender principal)
+    (recipient principal)
+    (memo (optional (buff 34)))
+  )
   (begin
     (asserts! (is-eq tx-sender sender) (err ERR_UNAUTHORIZED))
     (asserts! (not (check-system-pause)) (err ERR_SYSTEM_PAUSED))
@@ -298,12 +381,19 @@
     (let ((sender-bal (default-to u0 (map-get? balances sender))))
       (asserts! (>= sender-bal amount) (err ERR_NOT_ENOUGH_BALANCE))
 
-      (map-set balances sender (unwrap! (safe-sub sender-bal amount) (err ERR_SUB_UNDERFLOW)))
+      (map-set balances sender
+        (unwrap! (safe-sub sender-bal amount) (err ERR_SUB_UNDERFLOW))
+      )
 
       (let ((rec-bal (default-to u0 (map-get? balances recipient))))
-        (map-set balances recipient (unwrap! (safe-add rec-bal amount) (err ERR_OVERFLOW))))
+        (map-set balances recipient
+          (unwrap! (safe-add rec-bal amount) (err ERR_OVERFLOW))
+        )
+      )
 
-      (asserts! (notify-transfer amount sender recipient) (err ERR_TRANSFER_HOOK_FAILED))
+      (asserts! (notify-transfer amount sender recipient)
+        (err ERR_TRANSFER_HOOK_FAILED)
+      )
       (ok true)
     )
   )
@@ -313,32 +403,38 @@
 ;; @param who The principal to get the balance of.
 ;; @returns The balance of the principal.
 (define-read-only (get-balance (who principal))
-  (ok (default-to u0 (map-get? balances who))))
+  (ok (default-to u0 (map-get? balances who)))
+)
 
 ;; @desc Gets the total supply of the token.
 ;; @returns The total supply of the token.
 (define-read-only (get-total-supply)
-  (ok (var-get total-supply)))
+  (ok (var-get total-supply))
+)
 
 ;; @desc Gets the number of decimals for the token.
 ;; @returns The number of decimals for the token.
 (define-read-only (get-decimals)
-  (ok (var-get decimals)))
+  (ok (var-get decimals))
+)
 
 ;; @desc Gets the name of the token.
 ;; @returns The name of the token.
 (define-read-only (get-name)
-  (ok (var-get name)))
+  (ok (var-get name))
+)
 
 ;; @desc Gets the symbol of the token.
 ;; @returns The symbol of the token.
 (define-read-only (get-symbol)
-  (ok (var-get symbol)))
+  (ok (var-get symbol))
+)
 
 ;; @desc Gets the token URI.
 ;; @returns The token URI.
 (define-read-only (get-token-uri)
-  (ok (var-get token-uri)))
+  (ok (var-get token-uri))
+)
 
 ;; @desc Sets the token URI.
 ;; @param new-uri The new token URI.
@@ -347,7 +443,9 @@
   (begin
     (asserts! (is-owner tx-sender) (err ERR_UNAUTHORIZED))
     (var-set token-uri new-uri)
-    (ok true)))
+    (ok true)
+  )
+)
 
 ;; --- Mint/Burn Functions ---
 
@@ -355,21 +453,31 @@
 ;; @param recipient The recipient of the new tokens.
 ;; @param amount The amount of tokens to mint.
 ;; @returns A response indicating success or failure.
-(define-public (mint (recipient principal) (amount uint))
+(define-public (mint
+    (recipient principal)
+    (amount uint)
+  )
   (begin
-    (asserts! (or (is-owner tx-sender) (is-minter tx-sender)) (err ERR_UNAUTHORIZED))
+    (asserts! (or (is-owner tx-sender) (is-minter tx-sender))
+      (err ERR_UNAUTHORIZED)
+    )
     (asserts! (not (check-system-pause)) (err ERR_SYSTEM_PAUSED))
     (asserts! (check-emission-allowed amount) (err ERR_EMISSION_LIMIT_EXCEEDED))
-    
+
     (var-set total-supply
       (unwrap! (safe-add (var-get total-supply) amount) (err ERR_OVERFLOW))
     )
-    
+
     (let ((bal (default-to u0 (map-get? balances recipient))))
-      (map-set balances recipient (unwrap! (safe-add bal amount) (err ERR_OVERFLOW))))
-    
+      (map-set balances recipient
+        (unwrap! (safe-add bal amount) (err ERR_OVERFLOW))
+      )
+    )
+
     (asserts! (notify-mint amount recipient) (err ERR_TRANSFER_HOOK_FAILED))
-    (ok true)))
+    (ok true)
+  )
+)
 
 ;; @desc Burns tokens from the sender.
 ;; @param amount The amount of tokens to burn.
@@ -377,14 +485,19 @@
 (define-public (burn (amount uint))
   (begin
     (asserts! (not (check-system-pause)) (err ERR_SYSTEM_PAUSED))
-    
+
     (let ((bal (default-to u0 (map-get? balances tx-sender))))
       (asserts! (>= bal amount) (err ERR_NOT_ENOUGH_BALANCE))
-      (map-set balances tx-sender (unwrap! (safe-sub bal amount) (err ERR_SUB_UNDERFLOW))))
-    
+      (map-set balances tx-sender
+        (unwrap! (safe-sub bal amount) (err ERR_SUB_UNDERFLOW))
+      )
+    )
+
     (var-set total-supply
       (unwrap! (safe-sub (var-get total-supply) amount) (err ERR_SUB_UNDERFLOW))
     )
-    
+
     (asserts! (notify-burn amount tx-sender) (err ERR_TRANSFER_HOOK_FAILED))
-    (ok true)))
+    (ok true)
+  )
+)

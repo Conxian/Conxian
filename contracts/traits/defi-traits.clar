@@ -6,16 +6,28 @@
 ;; FEE MANAGER TRAIT
 ;; ===========================================
 (define-trait fee-manager-trait (
-  (get-fee-rate ((string-ascii 32)) (response uint uint))
-  (get-effective-fee-rate (principal (string-ascii 32)) (response uint uint))
-  (route-fees (<sip-010-ft-trait> uint bool (string-ascii 32)) (response uint uint))
+  (get-fee-rate
+    ((string-ascii 32))
+    (response uint uint)
+  )
+  (get-effective-fee-rate
+    (principal (string-ascii 32))
+    (response uint uint)
+  )
+  (route-fees
+    (<sip-010-ft-trait> uint bool (string-ascii 32))
+    (response uint uint)
+  )
 ))
 
 ;; ===========================================
 ;; HOOK TRAIT
 ;; ===========================================
 (define-trait hook-trait (
-  (on-action ((string-ascii 32) principal uint principal (optional uint)) (response bool uint))
+  (on-action
+    ((string-ascii 32) principal uint principal (optional uint))
+    (response bool uint)
+  )
 ))
 
 ;; ===========================================
@@ -119,7 +131,14 @@
     (response uint uint)
   )
   (wrap-btc
-    ((buff 1024) (buff 80) { tx-index: uint, hashes: (list 12 (buff 32)), tree-depth: uint } <sip-010-ft-trait>)
+    (
+      (buff 1024)       (buff 80)       {
+      tx-index: uint,
+      hashes: (list 12 (buff 32)),
+      tree-depth: uint,
+    }
+      <sip-010-ft-trait>
+    )
     (response uint uint)
   )
   (unwrap-to-btc
@@ -187,8 +206,14 @@
 ;; ROUTER TRAIT
 ;; ===========================================
 (define-trait router-trait (
-  (propose-route (principal principal uint uint uint) (response uint uint))
-  (execute-route (uint uint principal) (response uint uint))
+  (propose-route
+    (principal principal uint uint uint)
+    (response uint uint)
+  )
+  (execute-route
+    (uint uint principal)
+    (response uint uint)
+  )
 ))
 (define-trait flash-loan-trait (
   (execute-loan
@@ -205,17 +230,38 @@
 ;; STRATEGY TRAIT
 ;; ===========================================
 (define-trait strategy-trait (
-  (get-apy () (response uint uint))
-  (get-risk-score () (response uint uint))
-  (get-total-value-locked () (response uint uint))
-  (invest (uint) (response uint uint))
-  (divest (uint) (response uint uint))
+  (get-apy
+    ()
+    (response uint uint)
+  )
+  (get-risk-score
+    ()
+    (response uint uint)
+  )
+  (get-total-value-locked
+    ()
+    (response uint uint)
+  )
+  (invest
+    (uint)
+    (response uint uint)
+  )
+  (divest
+    (uint)
+    (response uint uint)
+  )
 ))
 
 ;; ===========================================
 ;; MONITORING DASHBOARD TRAIT
 ;; ===========================================
 (define-trait monitoring-dashboard-trait (
-  (record-metric ((string-ascii 64) uint uint) (response bool uint))
-  (trigger-alert ((string-ascii 64) (string-ascii 64) uint uint uint) (response bool uint))
+  (record-metric
+    ((string-ascii 64) uint uint)
+    (response bool uint)
+  )
+  (trigger-alert
+    ((string-ascii 64) (string-ascii 64) uint uint uint)
+    (response bool uint)
+  )
 ))

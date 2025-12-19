@@ -71,66 +71,73 @@
     (take-profit (optional uint))
   )
   (let (
-      (collateral-balance (unwrap! (contract-call? (var-get collateral-manager) get-balance tx-sender) (err u2003)))
-      (fee-rate (unwrap! (contract-call? (var-get collateral-manager) get-protocol-fee-rate) (err u2004)))
+      (collateral-balance (unwrap!
+        (contract-call? (var-get collateral-manager) get-balance tx-sender)
+        (err u2003)
+      ))
+      (fee-rate (unwrap!
+        (contract-call? (var-get collateral-manager) get-protocol-fee-rate)
+        (err u2004)
+      ))
       (fee (* collateral fee-rate))
       (total-cost (+ collateral fee))
     )
     (asserts! (>= collateral-balance total-cost) (err u2003))
     (try! (contract-call? (var-get collateral-manager) withdraw-funds total-cost asset))
     (let (
-      (position-id (var-get next-position-id))
-      (current-time block-height)
-      (price (try! (get-price asset)))
-      (position-size (* collateral leverage))
-      (current-oi (default-to {
-        long: u0,
-        short: u0,
+        (position-id (var-get next-position-id))
+        (current-time block-height)
+        (price (try! (get-price asset)))
+        (position-size (* collateral leverage))
+        (current-oi (default-to {
+          long: u0,
+          short: u0,
+        }
+          (map-get? open-interest { asset: asset })
+        ))
+      )
+      (map-set positions { id: position-id } {
+        owner: tx-sender,
+        asset: asset,
+        collateral: collateral,
+        size: position-size,
+        entry-price: price,
+        leverage: leverage,
+        is-long: is-long,
+        funding-rate: 0,
+        last-updated: current-time,
+        stop-loss: stop-loss,
+        take-profit: take-profit,
+        is-active: true,
+      })
+      (map-set user-positions {
+        user: tx-sender,
+        asset: asset,
+        position-id: position-id,
       }
-        (map-get? open-interest { asset: asset })
-      ))
-    )
-    (map-set positions { id: position-id } {
-      owner: tx-sender,
-      asset: asset,
-      collateral: collateral,
-      size: position-size,
-      entry-price: price,
-      leverage: leverage,
-      is-long: is-long,
-      funding-rate: 0,
-      last-updated: current-time,
-      stop-loss: stop-loss,
-      take-profit: take-profit,
-      is-active: true,
-    })
-    (map-set user-positions {
-      user: tx-sender,
-      asset: asset,
-      position-id: position-id,
-    }
-      true
-    )
-    (map-set active-positions {
-      asset: asset,
-      is-long: is-long,
-      position-id: position-id,
-    }
-      true
-    )
-
-    ;; Update Open Interest
-    (if is-long
-      (map-set open-interest { asset: asset }
-        (merge current-oi { long: (+ (get long current-oi) position-size) })
+        true
       )
-      (map-set open-interest { asset: asset }
-        (merge current-oi { short: (+ (get short current-oi) position-size) })
+      (map-set active-positions {
+        asset: asset,
+        is-long: is-long,
+        position-id: position-id,
+      }
+        true
       )
-    )
 
-    (var-set next-position-id (+ position-id u1))
-    (ok position-id)
+      ;; Update Open Interest
+      (if is-long
+        (map-set open-interest { asset: asset }
+          (merge current-oi { long: (+ (get long current-oi) position-size) })
+        )
+        (map-set open-interest { asset: asset }
+          (merge current-oi { short: (+ (get short current-oi) position-size) })
+        )
+      )
+
+      (var-set next-position-id (+ position-id u1))
+      (ok position-id)
+    )
   )
 )
 
@@ -197,7 +204,9 @@
         ) }
         ))
     )
-    (try! (as-contract (contract-call? (var-get collateral-manager) deposit-funds total-returned asset)))
+    (try! (as-contract (contract-call? (var-get collateral-manager) deposit-funds total-returned
+      asset
+    )))
     (ok {
       collateral-returned: total-returned,
       pnl: pnl,
@@ -233,8 +242,14 @@
     (let (
         (new-collateral (default-to (get collateral position) collateral))
         (new-leverage (default-to (get leverage position) leverage))
-        (new-stop-loss (if (is-some stop-loss) stop-loss (get stop-loss position)))
-        (new-take-profit (if (is-some take-profit) take-profit (get take-profit position)))
+        (new-stop-loss (if (is-some stop-loss)
+          stop-loss
+          (get stop-loss position)
+        ))
+        (new-take-profit (if (is-some take-profit)
+          take-profit
+          (get take-profit position)
+        ))
       )
       (map-set positions { id: position-id }
         (merge position {

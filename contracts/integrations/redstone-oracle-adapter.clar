@@ -13,41 +13,50 @@
 (define-data-var contract-owner principal tx-sender)
 (define-constant redstone-contract-principal .redstone-oracle-mock)
 
-(define-map asset-ids principal (buff 32))
+(define-map asset-ids
+  principal
+  (buff 32)
+)
 
 ;; --- Admin Functions ---
 
-(define-public (set-asset-id (asset principal) (id (buff 32)))
-    (begin
-        (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
-        (map-set asset-ids asset id)
-        (ok true)
-    )
+(define-public (set-asset-id
+    (asset principal)
+    (id (buff 32))
+  )
+  (begin
+    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
+    (map-set asset-ids asset id)
+    (ok true)
+  )
 )
 
 ;; --- Oracle Trait Implementation ---
 
 (define-public (get-price (asset principal))
-    (let (
-        (id (unwrap! (map-get? asset-ids asset) ERR_ASSET_NOT_MAPPED))
-        (price-data (try! (contract-call? .redstone-oracle-mock get-price-data id)))
+  (let (
+      (id (unwrap! (map-get? asset-ids asset) ERR_ASSET_NOT_MAPPED))
+      (price-data (try! (contract-call? .redstone-oracle-mock get-price-data id)))
     )
-        (ok (get price price-data))
-    )
+    (ok (get price price-data))
+  )
 )
 
 (define-public (get-price-with-timestamp (asset principal))
-    (let (
-        (id (unwrap! (map-get? asset-ids asset) ERR_ASSET_NOT_MAPPED))
-        (price-data (try! (contract-call? .redstone-oracle-mock get-price-data id)))
+  (let (
+      (id (unwrap! (map-get? asset-ids asset) ERR_ASSET_NOT_MAPPED))
+      (price-data (try! (contract-call? .redstone-oracle-mock get-price-data id)))
     )
-        (ok {
-            price: (get price price-data),
-            timestamp: (get timestamp price-data)
-        })
-    )
+    (ok {
+      price: (get price price-data),
+      timestamp: (get timestamp price-data),
+    })
+  )
 )
 
-(define-public (update-price (asset principal) (price uint))
-    ERR_NOT_SUPPORTED
+(define-public (update-price
+    (asset principal)
+    (price uint)
+  )
+  ERR_NOT_SUPPORTED
 )

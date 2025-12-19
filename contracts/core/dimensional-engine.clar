@@ -25,7 +25,7 @@
 (define-data-var protocol-coordinator principal tx-sender)
 
 (define-private (is-protocol-paused)
-  (contract-call? (var-get protocol-coordinator) is-protocol-paused)
+  (contract-call? .conxian-protocol is-protocol-paused)
 )
 
 ;;
@@ -41,10 +41,19 @@
 ;; position to secure gains.
 ;; @returns A response indicating success or an error code.
 ;;
-(define-public (open-position (asset principal) (collateral uint) (leverage uint) (is-long bool) (stop-loss (optional uint)) (take-profit (optional uint)))
+(define-public (open-position
+    (asset principal)
+    (collateral uint)
+    (leverage uint)
+    (is-long bool)
+    (stop-loss (optional uint))
+    (take-profit (optional uint))
+  )
   (begin
     (asserts! (not (is-protocol-paused)) ERR_PROTOCOL_PAUSED)
-    (contract-call? (var-get position-manager) open-position asset collateral leverage is-long stop-loss take-profit)
+    (contract-call? .position-manager open-position asset collateral leverage
+      is-long stop-loss take-profit
+    )
   )
 )
 
@@ -55,10 +64,14 @@
 ;; @param slippage An optional slippage tolerance for the closing price.
 ;; @returns The result of the close operation, including collateral returned.
 ;;
-(define-public (close-position (position-id uint) (asset principal) (slippage (optional uint)))
+(define-public (close-position
+    (position-id uint)
+    (asset principal)
+    (slippage (optional uint))
+  )
   (begin
     (asserts! (not (is-protocol-paused)) ERR_PROTOCOL_PAUSED)
-    (contract-call? (var-get position-manager) close-position position-id asset slippage)
+    (contract-call? .position-manager close-position position-id asset slippage)
   )
 )
 
@@ -68,7 +81,7 @@
 ;; @returns A response indicating success or failure.
 ;;
 (define-public (update-funding-rate (asset principal))
-  (contract-call? (var-get funding-rate-calculator) update-funding-rate asset)
+  (contract-call? .funding-rate-calculator update-funding-rate asset)
 )
 
 ;;
@@ -77,10 +90,13 @@
 ;; @param position-id The unique identifier of the position.
 ;; @returns A response indicating success or failure.
 ;;
-(define-public (apply-funding-to-position (position-owner principal) (position-id uint))
+(define-public (apply-funding-to-position
+    (position-owner principal)
+    (position-id uint)
+  )
   (begin
     (asserts! (not (is-protocol-paused)) ERR_PROTOCOL_PAUSED)
-    (contract-call? (var-get funding-rate-calculator) apply-funding-to-position
+    (contract-call? .funding-rate-calculator apply-funding-to-position
       position-owner position-id
     )
   )
@@ -92,10 +108,13 @@
 ;; @param token The principal of the token being deposited.
 ;; @returns A response indicating success or failure.
 ;;
-(define-public (deposit-funds (amount uint) (token principal))
+(define-public (deposit-funds
+    (amount uint)
+    (token principal)
+  )
   (begin
     (asserts! (not (is-protocol-paused)) ERR_PROTOCOL_PAUSED)
-    (contract-call? (var-get collateral-manager) deposit-funds amount token)
+    (contract-call? .collateral-manager deposit-funds amount token)
   )
 )
 
@@ -105,10 +124,13 @@
 ;; @param token The principal of the token being withdrawn.
 ;; @returns A response indicating success or failure.
 ;;
-(define-public (withdraw-funds (amount uint) (token principal))
+(define-public (withdraw-funds
+    (amount uint)
+    (token principal)
+  )
   (begin
     (asserts! (not (is-protocol-paused)) ERR_PROTOCOL_PAUSED)
-    (contract-call? (var-get collateral-manager) withdraw-funds amount token)
+    (contract-call? .collateral-manager withdraw-funds amount token)
   )
 )
 
@@ -118,7 +140,7 @@
 ;; @returns A response detailing the position's health status.
 ;;
 (define-public (check-position-health (position-id uint))
-  (contract-call? (var-get risk-manager) assess-position-risk position-id)
+  (contract-call? .risk-manager assess-position-risk position-id)
 )
 
 ;;
@@ -127,10 +149,13 @@
 ;; @param liquidator The principal of the entity performing the liquidation.
 ;; @returns A response indicating the outcome of the liquidation.
 ;;
-(define-public (liquidate-position (position-id uint) (liquidator principal))
+(define-public (liquidate-position
+    (position-id uint)
+    (liquidator principal)
+  )
   (begin
     (asserts! (not (is-protocol-paused)) ERR_PROTOCOL_PAUSED)
-    (contract-call? (var-get risk-manager) liquidate-position position-id liquidator)
+    (contract-call? .risk-manager liquidate-position position-id liquidator)
   )
 )
 
@@ -141,8 +166,14 @@
 ;; @param new-liquidation-threshold The new threshold for liquidation.
 ;; @returns A response indicating success or failure.
 ;;
-(define-public (set-risk-parameters (new-max-leverage uint) (new-maintenance-margin uint) (new-liquidation-threshold uint))
-  (contract-call? (var-get risk-manager) set-risk-parameters new-max-leverage new-maintenance-margin new-liquidation-threshold)
+(define-public (set-risk-parameters
+    (new-max-leverage uint)
+    (new-maintenance-margin uint)
+    (new-liquidation-threshold uint)
+  )
+  (contract-call? .risk-manager set-risk-parameters new-max-leverage
+    new-maintenance-margin new-liquidation-threshold
+  )
 )
 
 ;;
@@ -151,8 +182,11 @@
 ;; @param max-reward The maximum reward for a successful liquidation.
 ;; @returns A response indicating success or failure.
 ;;
-(define-public (set-liquidation-rewards (min-reward uint) (max-reward uint))
-  (contract-call? (var-get risk-manager) set-liquidation-rewards min-reward max-reward)
+(define-public (set-liquidation-rewards
+    (min-reward uint)
+    (max-reward uint)
+  )
+  (contract-call? .risk-manager set-liquidation-rewards min-reward max-reward)
 )
 
 ;;
@@ -161,7 +195,7 @@
 ;; @returns A response indicating success or failure.
 ;;
 (define-public (set-insurance-fund (fund principal))
-  (contract-call? (var-get risk-manager) set-insurance-fund fund)
+  (contract-call? .risk-manager set-insurance-fund fund)
 )
 
 ;;

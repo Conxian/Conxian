@@ -47,38 +47,69 @@
     (source-tag (string-ascii 32))
   )
   (let (
-    ;; 1. Get Allocation Policy
-    (policy (contract-call? .allocation-policy get-allocation source-tag))
-    
-    ;; 2. Calculate Splits
-    (treasury-share (/ (* amount (get treasury policy)) BPS_TOTAL))
-    (guardian-share (/ (* amount (get guardian policy)) BPS_TOTAL))
-    (risk-share (/ (* amount (get risk policy)) BPS_TOTAL))
-    (ops-share (/ (* amount (get ops policy)) BPS_TOTAL))
-    (legal-share (/ (* amount (get legal policy)) BPS_TOTAL))
-    (grants-share (/ (* amount (get grants policy)) BPS_TOTAL))
-    
-    ;; 3. Handle dust (add to treasury)
-    (total-distributed (+ treasury-share (+ guardian-share (+ risk-share (+ ops-share (+ legal-share grants-share))))))
-    (dust (- amount total-distributed))
-    (final-treasury (+ treasury-share dust))
-  )
+      ;; 1. Get Allocation Policy
+      (policy (contract-call? .allocation-policy get-allocation source-tag))
+      ;; 2. Calculate Splits
+      (treasury-share (/ (* amount (get treasury policy)) BPS_TOTAL))
+      (guardian-share (/ (* amount (get guardian policy)) BPS_TOTAL))
+      (risk-share (/ (* amount (get risk policy)) BPS_TOTAL))
+      (ops-share (/ (* amount (get ops policy)) BPS_TOTAL))
+      (legal-share (/ (* amount (get legal policy)) BPS_TOTAL))
+      (grants-share (/ (* amount (get grants policy)) BPS_TOTAL))
+      ;; 3. Handle dust (add to treasury)
+      (total-distributed (+ treasury-share
+        (+ guardian-share
+          (+ risk-share (+ ops-share (+ legal-share grants-share)))
+        )))
+      (dust (- amount total-distributed))
+      (final-treasury (+ treasury-share dust))
+    )
     (asserts! (> amount u0) ERR_INVALID_AMOUNT)
 
     ;; 4. Pull funds from sender to this contract
-    (try! (contract-call? asset-trait transfer amount tx-sender (as-contract tx-sender) none))
-    
+    (try! (contract-call? asset-trait transfer amount tx-sender (as-contract tx-sender)
+      none
+    ))
+
     ;; 5. Deposit to Vaults (as-contract to approve transfers from router)
-    (as-contract
-      (begin
-        (if (> final-treasury u0) (try! (contract-call? .conxian-vaults deposit VAULT_TREASURY asset-trait final-treasury)) false)
-        (if (> guardian-share u0) (try! (contract-call? .conxian-vaults deposit VAULT_GUARDIAN_REWARDS asset-trait guardian-share)) false)
-        (if (> risk-share u0) (try! (contract-call? .conxian-vaults deposit VAULT_RISK_RESERVE asset-trait risk-share)) false)
-        (if (> ops-share u0) (try! (contract-call? .conxian-vaults deposit VAULT_OPS_LABS asset-trait ops-share)) false)
-        (if (> legal-share u0) (try! (contract-call? .conxian-vaults deposit VAULT_LEGAL_BOUNTIES asset-trait legal-share)) false)
-        (if (> grants-share u0) (try! (contract-call? .conxian-vaults deposit VAULT_GRANTS asset-trait grants-share)) false)
-        (ok true)
+    (as-contract (begin
+      (if (> final-treasury u0)
+        (try! (contract-call? .conxian-vaults deposit VAULT_TREASURY asset-trait
+          final-treasury
+        ))
+        false
       )
-    )
+      (if (> guardian-share u0)
+        (try! (contract-call? .conxian-vaults deposit VAULT_GUARDIAN_REWARDS
+          asset-trait guardian-share
+        ))
+        false
+      )
+      (if (> risk-share u0)
+        (try! (contract-call? .conxian-vaults deposit VAULT_RISK_RESERVE asset-trait
+          risk-share
+        ))
+        false
+      )
+      (if (> ops-share u0)
+        (try! (contract-call? .conxian-vaults deposit VAULT_OPS_LABS asset-trait
+          ops-share
+        ))
+        false
+      )
+      (if (> legal-share u0)
+        (try! (contract-call? .conxian-vaults deposit VAULT_LEGAL_BOUNTIES asset-trait
+          legal-share
+        ))
+        false
+      )
+      (if (> grants-share u0)
+        (try! (contract-call? .conxian-vaults deposit VAULT_GRANTS asset-trait
+          grants-share
+        ))
+        false
+      )
+      (ok true)
+    ))
   )
 )

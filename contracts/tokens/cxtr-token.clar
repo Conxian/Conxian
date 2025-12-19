@@ -113,24 +113,27 @@
   ;; v1 stub: emission controller integration is disabled; always allow
   (if (not (var-get system-integration-enabled))
     true
-    (let ((limits-response (contract-call? .token-emission-controller get-token-emission-limits .cxtr-token)))
+    (let ((limits-response (contract-call? .token-emission-controller get-token-emission-limits
+        .cxtr-token
+      )))
       (if (is-ok limits-response)
         (match (unwrap-panic limits-response)
-          some-limits
-            (let (
+          some-limits (let (
               (current-supply (var-get total-supply))
               (max-single-mint-bps (get max-single-mint-bps some-limits))
             )
-              ;; Allow bootstrap when supply is zero
-              (if (is-eq current-supply u0)
-                true
-                (let ((single-mint-cap (/ (* current-supply max-single-mint-bps) u10000)))
-                  (<= amount single-mint-cap)
-                )
+            ;; Allow bootstrap when supply is zero
+            (if (is-eq current-supply u0)
+              true
+              (let ((single-mint-cap (/ (* current-supply max-single-mint-bps) u10000)))
+                (<= amount single-mint-cap)
               )
             )
-          true)
-        true)
+          )
+          true
+        )
+        true
+      )
     )
   )
 )
@@ -147,10 +150,17 @@
   )
   (if (var-get system-integration-enabled)
     (match (var-get token-coordinator)
-      some-coordinator (unwrap! (contract-call? .token-system-coordinator on-transfer amount sender recipient) true)
+      some-coordinator
+      (unwrap!
+        (contract-call? .token-system-coordinator on-transfer amount sender
+          recipient
+        )
+        true
+      )
       true ;; if no coordinator is set, do not revert the transfer
     )
-    true)
+    true
+  )
 )
 
 ;; @desc Notifies the token coordinator of a mint.
@@ -163,7 +173,10 @@
   )
   (if (var-get system-integration-enabled)
     (match (var-get token-coordinator)
-      some-coordinator (unwrap! (contract-call? .token-system-coordinator on-mint amount recipient) true)
+      some-coordinator (unwrap!
+        (contract-call? .token-system-coordinator on-mint amount recipient)
+        true
+      )
       true
     )
     true
@@ -180,7 +193,9 @@
   )
   (if (var-get system-integration-enabled)
     (match (var-get token-coordinator)
-      some-coordinator (unwrap! (contract-call? .token-system-coordinator on-burn amount burner) true)
+      some-coordinator (unwrap! (contract-call? .token-system-coordinator on-burn amount burner)
+        true
+      )
       true
     )
     true

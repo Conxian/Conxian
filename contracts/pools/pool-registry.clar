@@ -21,7 +21,7 @@
     pool-address: principal,
     created-at: uint,
     creator: principal,
-    is-active: bool
+    is-active: bool,
   }
 )
 
@@ -48,7 +48,7 @@
       pool-address: pool-address,
       created-at: block-height,
       creator: tx-sender,
-      is-active: true
+      is-active: true,
     })
 
     (var-set next-pool-id (+ pool-id u1))

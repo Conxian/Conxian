@@ -18,19 +18,28 @@
 (define-data-var total-staked-cxd uint u0)
 
 ;; Per-user pending stake amount (simplified single-position model)
-(define-map user-pending-stake principal uint)
+(define-map user-pending-stake
+  principal
+  uint
+)
 
 ;; Pending revenue per user (token-agnostic; tests only use CXD)
-(define-map user-pending-revenue principal uint)
+(define-map user-pending-revenue
+  principal
+  uint
+)
 
 ;; --- Internal helpers ---
 (define-private (is-owner)
-  (is-eq tx-sender (var-get contract-owner)))
+  (is-eq tx-sender (var-get contract-owner))
+)
 
 (define-private (when-not-paused)
   (if (var-get paused)
     (err ERR_INVALID_AMOUNT)
-    (ok true)))
+    (ok true)
+  )
+)
 
 ;; --- Public admin functions ---
 
@@ -39,28 +48,36 @@
   (begin
     (asserts! (is-owner) (err ERR_UNAUTHORIZED))
     (var-set contract-owner new-owner)
-    (ok true)))
+    (ok true)
+  )
+)
 
 ;; Configure CXD token reference
 (define-public (set-cxd-contract (token principal))
   (begin
     (asserts! (is-owner) (err ERR_UNAUTHORIZED))
     (var-set cxd-token token)
-    (ok true)))
+    (ok true)
+  )
+)
 
 ;; Pause staking operations
 (define-public (pause-contract)
   (begin
     (asserts! (is-owner) (err ERR_UNAUTHORIZED))
     (var-set paused true)
-    (ok true)))
+    (ok true)
+  )
+)
 
 ;; Resume staking operations
 (define-public (unpause-contract)
   (begin
     (asserts! (is-owner) (err ERR_UNAUTHORIZED))
     (var-set paused false)
-    (ok true)))
+    (ok true)
+  )
+)
 
 ;; --- Staking workflow ---
 
@@ -79,27 +96,38 @@
     ;; Notify circuit-breaker that staking path succeeded; ignore result
     (let ((monitor-res (contract-call? .protocol-invariant-monitor record-success "staking")))
       (is-ok monitor-res)
-      (ok true))))
+      (ok true)
+    )
+  )
+)
 
 ;; Complete the stake and mint notional xCXD 1:1 with staked CXD
 (define-public (complete-stake)
   (let ((pending (default-to u0 (map-get? user-pending-stake tx-sender))))
     (asserts! (> pending u0) (err ERR_INVALID_AMOUNT))
     (map-set user-pending-stake tx-sender u0)
-    (ok pending)))
+    (ok pending)
+  )
+)
 
 ;; --- Revenue distribution hooks ---
 
 ;; Record new revenue allocated to CXD stakers
-(define-public (distribute-revenue (amount uint) (token principal))
+(define-public (distribute-revenue
+    (amount uint)
+    (token principal)
+  )
   (begin
     (asserts! (is-owner) (err ERR_UNAUTHORIZED))
     (asserts! (> amount u0) (err ERR_INVALID_AMOUNT))
     ;; In this minimal implementation all revenue is attributed to a single
     ;; staker cohort; SDK tests only assert that wallet_1 can later claim it.
     (let ((current (default-to u0 (map-get? user-pending-revenue tx-sender))))
-      (map-set user-pending-revenue tx-sender (+ current amount)))
-    (ok true)))
+      (map-set user-pending-revenue tx-sender (+ current amount))
+    )
+    (ok true)
+  )
+)
 
 ;; Claim accumulated revenue for the caller
 (define-public (claim-revenue (token principal))
@@ -108,7 +136,11 @@
       (ok u0)
       (begin
         (map-set user-pending-revenue tx-sender u0)
-        (ok owed)))))
+        (ok owed)
+      )
+    )
+  )
+)
 
 ;; --- Read-only views ---
 
@@ -117,5 +149,6 @@
   (ok {
     total-supply: (var-get total-staked-cxd),
     total-staked-cxd: (var-get total-staked-cxd),
-    exchange-rate: u1000000
-  }))
+    exchange-rate: u1000000,
+  })
+)
