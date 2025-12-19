@@ -36,23 +36,60 @@
 (define-constant ERR_REWARDS_CLAIMED (err u4003))
 
 ;; Getter functions for read-only access
-(define-read-only (get-err-unauthorized) ERR_UNAUTHORIZED)
-(define-read-only (get-err-invalid-amount) ERR_INVALID_AMOUNT)
-(define-read-only (get-err-not-found) ERR_NOT_FOUND)
-(define-read-only (get-err-already-exists) ERR_ALREADY_EXISTS)
-(define-read-only (get-err-paused) ERR_PAUSED)
-(define-read-only (get-err-invalid-input) ERR_INVALID_INPUT)
-(define-read-only (get-err-pool-not-found) ERR_POOL_NOT_FOUND)
-(define-read-only (get-err-pool-already-exists) ERR_POOL_ALREADY_EXISTS)
-(define-read-only (get-err-insufficient-liquidity) ERR_INSUFFICIENT_LIQUIDITY)
-(define-read-only (get-err-slippage-too-high) ERR_SLIPPAGE_TOO_HIGH)
-(define-read-only (get-err-invalid-token-pair) ERR_INVALID_TOKEN_PAIR)
-(define-read-only (get-err-dimension-not-configured) ERR_DIMENSION_NOT_CONFIGURED)
-(define-read-only (get-err-position-not-found) ERR_POSITION_NOT_FOUND)
-(define-read-only (get-err-invalid-leverage) ERR_INVALID_LEVERAGE)
-(define-read-only (get-err-margin-call) ERR_MARGIN_CALL)
-(define-read-only (get-err-position-closed) ERR_POSITION_CLOSED)
-(define-read-only (get-err-oracle-failure) ERR_ORACLE_FAILURE)
-(define-read-only (get-err-stale-price) ERR_STALE_PRICE)
-(define-read-only (get-err-invalid-price-range) ERR_INVALID_PRICE_RANGE)
-
+(define-read-only (get-err-unauthorized)
+  ERR_UNAUTHORIZED
+)
+(define-read-only (get-err-invalid-amount)
+  ERR_INVALID_AMOUNT
+)
+(define-read-only (get-err-not-found)
+  ERR_NOT_FOUND
+)
+(define-read-only (get-err-already-exists)
+  ERR_ALREADY_EXISTS
+)
+(define-read-only (get-err-paused)
+  ERR_PAUSED
+)
+(define-read-only (get-err-invalid-input)
+  ERR_INVALID_INPUT
+)
+(define-read-only (get-err-pool-not-found)
+  ERR_POOL_NOT_FOUND
+)
+(define-read-only (get-err-pool-already-exists)
+  ERR_POOL_ALREADY_EXISTS
+)
+(define-read-only (get-err-insufficient-liquidity)
+  ERR_INSUFFICIENT_LIQUIDITY
+)
+(define-read-only (get-err-slippage-too-high)
+  ERR_SLIPPAGE_TOO_HIGH
+)
+(define-read-only (get-err-invalid-token-pair)
+  ERR_INVALID_TOKEN_PAIR
+)
+(define-read-only (get-err-dimension-not-configured)
+  ERR_DIMENSION_NOT_CONFIGURED
+)
+(define-read-only (get-err-position-not-found)
+  ERR_POSITION_NOT_FOUND
+)
+(define-read-only (get-err-invalid-leverage)
+  ERR_INVALID_LEVERAGE
+)
+(define-read-only (get-err-margin-call)
+  ERR_MARGIN_CALL
+)
+(define-read-only (get-err-position-closed)
+  ERR_POSITION_CLOSED
+)
+(define-read-only (get-err-oracle-failure)
+  ERR_ORACLE_FAILURE
+)
+(define-read-only (get-err-stale-price)
+  ERR_STALE_PRICE
+)
+(define-read-only (get-err-invalid-price-range)
+  ERR_INVALID_PRICE_RANGE
+)

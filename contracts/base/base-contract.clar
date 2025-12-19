@@ -14,8 +14,6 @@
   (ok (asserts! (not (var-get reentrancy-guard)) ERR_REENTRANCY))
 )
 
-
-
 ;; @data-vars
 ;; @var circuit-breaker-contract: The principal of the circuit breaker contract.
 (define-data-var circuit-breaker-contract (optional principal) none)
@@ -98,10 +96,13 @@
 ;; @param a: The first number.
 ;; @param b: The second number.
 ;; @returns (response uint uint): The product of the two numbers, or an error code if an overflow occurs.
-(define-private (safe-mul (a uint) (b uint))
-  (let 
-    ((result (* a b)))
-    (asserts! (or (is-eq a u0) (is-eq (/ result a) b)) (err u2000)) ;; ERR_OVERFLOW
+(define-private (safe-mul
+    (a uint)
+    (b uint)
+  )
+  (let ((result (* a b)))
+    (asserts! (or (is-eq a u0) (is-eq (/ result a) b)) (err u2000))
+    ;; ERR_OVERFLOW
     (ok result)
   )
 )
@@ -110,7 +111,10 @@
 ;; @param a: The numerator.
 ;; @param b: The denominator.
 ;; @returns (response uint uint): The quotient of the two numbers, or an error code if the denominator is zero.
-(define-private (safe-div (a uint) (b uint))
+(define-private (safe-div
+    (a uint)
+    (b uint)
+  )
   (if (is-eq b u0)
     (err u2002) ;; ERR_DIVISION_BY_ZERO
     (ok (/ a b))

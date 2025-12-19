@@ -15,11 +15,21 @@
 (define-data-var max-liquidation-reward uint u1000)
 (define-data-var insurance-fund principal tx-sender)
 
-(define-public (set-risk-parameters (new-max-leverage uint) (new-maintenance-margin uint) (new-liquidation-threshold uint))
+(define-public (set-risk-parameters
+    (new-max-leverage uint)
+    (new-maintenance-margin uint)
+    (new-liquidation-threshold uint)
+  )
   (begin
     (try! (check-role "ROLE_ADMIN"))
-    (asserts! (and (>= new-max-leverage MIN_LEVERAGE) (<= new-max-leverage u5000)) ERR_INVALID_PARAMETERS)
-    (asserts! (and (> new-maintenance-margin u0) (< new-maintenance-margin u10000)) ERR_INVALID_PARAMETERS)
+    (asserts!
+      (and (>= new-max-leverage MIN_LEVERAGE) (<= new-max-leverage u5000))
+      ERR_INVALID_PARAMETERS
+    )
+    (asserts!
+      (and (> new-maintenance-margin u0) (< new-maintenance-margin u10000))
+      ERR_INVALID_PARAMETERS
+    )
     (asserts!
       (and (> new-liquidation-threshold new-maintenance-margin) (<= new-liquidation-threshold u10000))
       ERR_INVALID_PARAMETERS
@@ -31,7 +41,10 @@
   )
 )
 
-(define-public (set-liquidation-rewards (min-reward uint) (max-reward uint))
+(define-public (set-liquidation-rewards
+    (min-reward uint)
+    (max-reward uint)
+  )
   (begin
     (try! (check-role "ROLE_ADMIN"))
     (asserts!
@@ -48,11 +61,14 @@
   )
 )
 
-(define-public (liquidate-position (position-id uint) (liquidator principal))
+(define-public (liquidate-position
+    (position-id uint)
+    (liquidator principal)
+  )
   (ok {
     liquidated: true,
     reward: u0,
-    repaid: u0
+    repaid: u0,
   })
 )
 
@@ -64,16 +80,24 @@
   )
 )
 
-(define-read-only (calculate-liquidation-price (position {entry-price: uint, leverage: uint, is-long: bool}))
+(define-read-only (calculate-liquidation-price (position {
+  entry-price: uint,
+  leverage: uint,
+  is-long: bool,
+}))
   (let (
-    (m-margin (var-get maintenance-margin))
-    (entry-price (get entry-price position))
-    (leverage (get leverage position))
-    (is-long (get is-long position))
-  )
+      (m-margin (var-get maintenance-margin))
+      (entry-price (get entry-price position))
+      (leverage (get leverage position))
+      (is-long (get is-long position))
+    )
     (if is-long
-      (ok (* entry-price (/ (+ (- (* leverage u10000) u10000) m-margin) (* leverage u10000))))
-      (ok (* entry-price (/ (- (+ (* leverage u10000) u10000) m-margin) (* leverage u10000))))
+      (ok (* entry-price
+        (/ (+ (- (* leverage u10000) u10000) m-margin) (* leverage u10000))
+      ))
+      (ok (* entry-price
+        (/ (- (+ (* leverage u10000) u10000) m-margin) (* leverage u10000))
+      ))
     )
   )
 )
@@ -89,26 +113,36 @@
 
 (define-public (assess-position-risk (position-id uint))
   (let (
-    (position (unwrap! (contract-call? .position-manager get-position position-id)
-      ERR_INVALID_PARAMETERS
-    ))
-    (collateral (get collateral position))
-    (size (get size position))
-    (entry-price (get entry-price position))
-    (threshold (var-get liquidation-threshold))
-    (health-factor (if (is-eq size u0) u1000000 (/ (* collateral threshold) size)))
-    (liquidation-price (unwrap! (calculate-liquidation-price {
-        entry-price: entry-price,
-        leverage: (get leverage position),
-        is-long: (get is-long position)
-      }) ERR_INVALID_PARAMETERS))
-  )
+      (position (unwrap! (contract-call? .position-manager get-position position-id)
+        ERR_INVALID_PARAMETERS
+      ))
+      (collateral (get collateral position))
+      (size (get size position))
+      (entry-price (get entry-price position))
+      (threshold (var-get liquidation-threshold))
+      (health-factor (if (is-eq size u0)
+        u1000000
+        (/ (* collateral threshold) size)
+      ))
+      (liquidation-price (unwrap!
+        (calculate-liquidation-price {
+          entry-price: entry-price,
+          leverage: (get leverage position),
+          is-long: (get is-long position),
+        })
+        ERR_INVALID_PARAMETERS
+      ))
+    )
     (ok {
       health-factor: health-factor,
       liquidation-price: liquidation-price,
       risk-level: (if (> health-factor u15000)
-                    "LOW"
-                    (if (> health-factor u11000) "MEDIUM" "HIGH"))
+        "LOW"
+        (if (> health-factor u11000)
+          "MEDIUM"
+          "HIGH"
+        )
+      ),
     })
   )
 )

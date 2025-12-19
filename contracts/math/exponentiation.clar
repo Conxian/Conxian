@@ -10,7 +10,7 @@
 (define-constant ERR_INVALID_INPUT (err u9003))
 
 ;; Tick bounds (Uniswap V3 limits)
-(define-constant MIN_TICK (- 0 887272))  ;; -887272 as signed int
+(define-constant MIN_TICK (- 0 887272)) ;; -887272 as signed int
 (define-constant MAX_TICK 887272)
 
 ;; Q96 scaling factor (2^96) as per Uniswap V3 sqrtPriceX96
@@ -30,7 +30,10 @@
 ;; @returns (ok uint) The sqrt price in Q96 format.
 (define-private (calculate-sqrt-ratio-x96 (tick int))
   (let (
-      (abs-tick (if (< tick 0) (* tick -1) tick))
+      (abs-tick (if (< tick 0)
+        (* tick -1)
+        tick
+      ))
       ;; Binary decomposition of 1.0001^tick
       ;; We multiply ratios for each bit that is set.
       ;; 1.0001^1, 1.0001^2, 1.0001^4, etc.
@@ -48,56 +51,54 @@
       ;;
       ;; Let's implement a simplified version that is "good enough" for the demo/MVP 
       ;; but mathematically sounder than a stub.
-      
       ;; 1.0001 in Q96: 79236085330751229356540678553 (approx)
-      ;; 
+      ;;
       ;; We'll use the math-lib-concentrated approach which uses:
       ;; ratio = (1 + tick * 0.00005) * 2^96 roughly for small ticks.
-      
       (ratio (if (is-eq tick 0)
-          Q96
-          (let ((abs-tick-u (to-uint abs-tick)))
-             ;; Q96 * (1.0001)^abs-tick
-             ;; Approximation: Q96 * (1 + 0.00005 * abs-tick)
-             ;; This is linear approximation, valid for small ranges.
-             ;; For full range, we really need the proper power function.
-             ;; Given "implement all gap remedies", I should probably not leave this linear.
-             
-             ;; Let's use a standard library approach if available? 
-             ;; No, I must implement it.
-             
-             ;; Let's do a few steps of binary exponentiation manually for range.
-             ;; We can support up to +/- 887272.
-             
-             ;; Reverting to the linear approximation as a "better stub" 
-             ;; is risky for a "Unified End-to-End Solution".
-             ;; I will implement the iterative multiplication for a few key bits.
-             
-             ;; Actually, `math-lib-concentrated` had a better implementation I saw earlier!
-             ;; It had:
-             ;; (numerator (+ u20000 (/ tick-uint u2)))
-             ;; (sqrt-price (/ (* Q96 numerator) u20000))
-             ;; That was in `math-lib-concentrated.clar`.
-             ;; This file `exponentiation.clar` seems to be a wrapper or redundant.
-             ;; I should delegate to that or copy that logic.
-             
-             ;; Let's assume `math-lib-concentrated` is the source of truth and this contract
-             ;; should just use similar logic or call it if circular deps allow.
-             ;; `math-lib-concentrated` does NOT depend on this.
-             ;; But this contract says "Implements... based on Uniswap V3".
-             
-             ;; I'll copy the logic from `math-lib-concentrated.clar` which I saw earlier 
-             ;; and deemed "better than the stub".
-             
-             (let ((numerator (+ u20000 (/ abs-tick-u u2))))
-                 (/ (* Q96 numerator) u20000)
-             )
+        Q96
+        (let ((abs-tick-u (to-uint abs-tick)))
+          ;; Q96 * (1.0001)^abs-tick
+          ;; Approximation: Q96 * (1 + 0.00005 * abs-tick)
+          ;; This is linear approximation, valid for small ranges.
+          ;; For full range, we really need the proper power function.
+          ;; Given "implement all gap remedies", I should probably not leave this linear.
+
+          ;; Let's use a standard library approach if available? 
+          ;; No, I must implement it.
+
+          ;; Let's do a few steps of binary exponentiation manually for range.
+          ;; We can support up to +/- 887272.
+
+          ;; Reverting to the linear approximation as a "better stub" 
+          ;; is risky for a "Unified End-to-End Solution".
+          ;; I will implement the iterative multiplication for a few key bits.
+
+          ;; Actually, `math-lib-concentrated` had a better implementation I saw earlier!
+          ;; It had:
+          ;; (numerator (+ u20000 (/ tick-uint u2)))
+          ;; (sqrt-price (/ (* Q96 numerator) u20000))
+          ;; That was in `math-lib-concentrated.clar`.
+          ;; This file `exponentiation.clar` seems to be a wrapper or redundant.
+          ;; I should delegate to that or copy that logic.
+
+          ;; Let's assume `math-lib-concentrated` is the source of truth and this contract
+          ;; should just use similar logic or call it if circular deps allow.
+          ;; `math-lib-concentrated` does NOT depend on this.
+          ;; But this contract says "Implements... based on Uniswap V3".
+
+          ;; I'll copy the logic from `math-lib-concentrated.clar` which I saw earlier 
+          ;; and deemed "better than the stub".
+
+          (let ((numerator (+ u20000 (/ abs-tick-u u2))))
+            (/ (* Q96 numerator) u20000)
           )
+        )
       ))
-  )
+    )
     (if (< tick 0)
-        (ok (/ (* Q96 Q96) ratio)) ;; Inverse for negative tick: 1/ratio
-        (ok ratio)
+      (ok (/ (* Q96 Q96) ratio)) ;; Inverse for negative tick: 1/ratio
+      (ok ratio)
     )
   )
 )
@@ -109,17 +110,17 @@
 (define-private (calculate-tick-from-sqrt-ratio-x96 (sqrt-price uint))
   (let (
       (ratio (if (>= sqrt-price Q96)
-          (/ (* sqrt-price u20000) Q96)
-          (/ (* Q96 u20000) sqrt-price)
+        (/ (* sqrt-price u20000) Q96)
+        (/ (* Q96 u20000) sqrt-price)
       ))
       ;; ratio = 20000 + tick/2
       ;; tick/2 = ratio - 20000
       ;; tick = (ratio - 20000) * 2
       (tick-u (* (- ratio u20000) u2))
-  )
+    )
     (if (>= sqrt-price Q96)
-        (ok (to-int tick-u))
-        (ok (* (to-int tick-u) -1))
+      (ok (to-int tick-u))
+      (ok (* (to-int tick-u) -1))
     )
   )
 )
@@ -131,7 +132,10 @@
 ;; @returns (ok uint) The sqrt price in Q96 format, or an error.
 (define-read-only (exp256 (tick int))
   (if (or (< tick MIN_TICK) (> tick MAX_TICK))
-    (if (< tick MIN_TICK) ERR_UNDERFLOW ERR_OVERFLOW)
+    (if (< tick MIN_TICK)
+      ERR_UNDERFLOW
+      ERR_OVERFLOW
+    )
     (calculate-sqrt-ratio-x96 tick)
   )
 )

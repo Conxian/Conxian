@@ -31,7 +31,7 @@
 (define-data-var protocol-coordinator principal tx-sender)
 
 (define-private (is-protocol-paused)
-  (contract-call? (var-get protocol-coordinator) is-protocol-paused)
+  (contract-call? .conxian-protocol is-protocol-paused)
 )
 
 ;; ---------------------------------------------------------
@@ -42,7 +42,10 @@
 (define-public (add-base-token (token principal))
   (begin
     (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
-    (var-set base-tokens (unwrap! (as-max-len? (append (var-get base-tokens) token) u10) ERR_APPEND_FAILED))
+    (var-set base-tokens
+      (unwrap! (as-max-len? (append (var-get base-tokens) token) u10)
+        ERR_APPEND_FAILED
+      ))
     (ok true)
   )
 )
@@ -76,7 +79,9 @@
   )
   (begin
     (asserts! (not (is-protocol-paused)) ERR_PROTOCOL_PAUSED)
-    (contract-call? (var-get swap-manager) swap-direct amount-in min-amount-out pool token-in token-out)
+    (contract-call? .swap-manager swap-direct amount-in min-amount-out pool
+      token-in token-out
+    )
   )
 )
 
@@ -103,7 +108,9 @@
   )
   (begin
     (asserts! (not (is-protocol-paused)) ERR_PROTOCOL_PAUSED)
-    (contract-call? (var-get swap-manager) swap-2-hop amount-in min-amount-out pool1 token-in token-base pool2 token-out)
+    (contract-call? .swap-manager swap-2-hop amount-in min-amount-out pool1
+      token-in token-base pool2 token-out
+    )
   )
 )
 
@@ -134,7 +141,9 @@
   )
   (begin
     (asserts! (not (is-protocol-paused)) ERR_PROTOCOL_PAUSED)
-    (contract-call? (var-get swap-manager) swap-3-hop amount-in min-amount-out pool1 token-in token-base1 pool2 token-base2 pool3 token-out)
+    (contract-call? .swap-manager swap-3-hop amount-in min-amount-out pool1
+      token-in token-base1 pool2 token-base2 pool3 token-out
+    )
   )
 )
 

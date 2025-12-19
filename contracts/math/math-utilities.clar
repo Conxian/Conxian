@@ -9,21 +9,31 @@
 
 ;; --- Fixed Point Math V2 Implementation ---
 
-(define-public (fixed-point-pow-rational-i (numerator uint) (denominator uint) (exponent int) (precision uint))
+(define-public (fixed-point-pow-rational-i
+    (numerator uint)
+    (denominator uint)
+    (exponent int)
+    (precision uint)
+  )
   (begin
     (asserts! (> denominator u0) ERR_DIVISION_BY_ZERO)
     (asserts! (>= precision u0) ERR_INVALID_INPUT)
-    
+
     ;; Simplified implementation - return precision for now
     (ok precision)
   )
 )
 
-(define-public (fixed-point-log-rational-i (numerator uint) (denominator uint) (value (response uint uint)) (precision uint))
+(define-public (fixed-point-log-rational-i
+    (numerator uint)
+    (denominator uint)
+    (value (response uint uint))
+    (precision uint)
+  )
   (begin
     (asserts! (> denominator u0) ERR_DIVISION_BY_ZERO)
     (asserts! (>= precision u0) ERR_INVALID_INPUT)
-    
+
     ;; Simplified implementation - return 0 for now
     (ok u0)
   )
@@ -32,7 +42,7 @@
 (define-public (fixed-point-sqrt (value uint))
   (begin
     (asserts! (>= value u0) ERR_INVALID_INPUT)
-    
+
     ;; Simplified square root
     (ok value)
   )
@@ -48,7 +58,7 @@
 (define-public (fixed-point-ln (value uint))
   (begin
     (asserts! (> value u0) ERR_INVALID_INPUT)
-    
+
     ;; Simplified natural logarithm
     (ok u0)
   )

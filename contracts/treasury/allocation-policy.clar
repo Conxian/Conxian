@@ -19,7 +19,7 @@
     risk: uint,
     ops: uint,
     legal: uint,
-    grants: uint
+    grants: uint,
   }
 )
 
@@ -52,19 +52,21 @@
   )
   (begin
     (asserts! (is-contract-owner) ERR_UNAUTHORIZED)
-    
+
     ;; Validate sum = 10000
-    (asserts! (is-eq (+ treasury guardian risk ops legal grants) BPS_TOTAL) ERR_INVALID_ALLOCATION)
-    
+    (asserts! (is-eq (+ treasury guardian risk ops legal grants) BPS_TOTAL)
+      ERR_INVALID_ALLOCATION
+    )
+
     (map-set allocations source-tag {
       treasury: treasury,
       guardian: guardian,
       risk: risk,
       ops: ops,
       legal: legal,
-      grants: grants
+      grants: grants,
     })
-    
+
     (print {
       event: "allocation-set",
       source: source-tag,
@@ -73,7 +75,7 @@
       risk: risk,
       ops: ops,
       legal: legal,
-      grants: grants
+      grants: grants,
     })
     (ok true)
   )
@@ -82,8 +84,14 @@
 ;; --- Read Only ---
 
 (define-read-only (get-allocation (source-tag (string-ascii 32)))
-  (default-to 
-    { treasury: u10000, guardian: u0, risk: u0, ops: u0, legal: u0, grants: u0 } ;; Default to Treasury
-    (map-get? allocations source-tag)
+  (default-to {
+    treasury: u10000,
+    guardian: u0,
+    risk: u0,
+    ops: u0,
+    legal: u0,
+    grants: u0,
+  }
+    ;; Default to Treasury (map-get? allocations source-tag)
   )
 )

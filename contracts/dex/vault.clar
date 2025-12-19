@@ -38,232 +38,472 @@
 (define-data-var token-system-coordinator principal .token-system-coordinator)
 
 ;; Maps
-(define-map vault-balances principal uint) ;; asset -> total balance
-(define-map vault-shares principal uint) ;; asset -> total shares
-(define-map vault-caps principal uint) ;; asset -> max deposit cap
-(define-map user-shares (tuple (user principal) (asset principal)) uint)
-(define-map supported-assets principal bool)
-(define-map asset-strategies principal principal) ;; asset -> strategy contract
+(define-map vault-balances
+  principal
+  uint
+)
+;; asset -> total balance
+(define-map vault-shares
+  principal
+  uint
+)
+;; asset -> total shares
+(define-map vault-caps
+  principal
+  uint
+)
+;; asset -> max deposit cap
+(define-map user-shares
+  {
+    user: principal,
+    asset: principal,
+  }
+  uint
+)
+(define-map supported-assets
+  principal
+  bool
+)
+(define-map asset-strategies
+  principal
+  principal
+)
+;; asset -> strategy contract
 
 ;; Enhanced tokenomics integration maps
-(define-map collected-fees principal uint) ;; asset -> accumulated protocol fees
-(define-map performance-metrics principal (tuple (total-volume uint) (total-fees uint)))
+(define-map collected-fees
+  principal
+  uint
+)
+;; asset -> accumulated protocol fees
+(define-map performance-metrics
+  principal
+  {
+    total-volume: uint,
+    total-fees: uint,
+  }
+)
 
 (define-map service-budgets
-  { asset: principal, service-type: (string-ascii 32) }
+  {
+    asset: principal,
+    service-type: (string-ascii 32),
+  }
   {
     period-start: uint,
     period-length: uint,
     max-amount: uint,
-    spent: uint
-  })
+    spent: uint,
+  }
+)
 
 ;; Read-only functions
-(define-public (get-admin) (ok (var-get admin)))
-(define-read-only (is-paused) (ok (var-get paused)))
-(define-read-only (get-deposit-fee) (ok (var-get deposit-fee-bps)))
-(define-read-only (get-withdrawal-fee) (ok (var-get withdrawal-fee-bps)))
-(define-read-only (get-revenue-share) (ok (var-get revenue-share-bps)))
-(define-read-only (get-total-balance (asset principal)) (ok (default-to u0 (map-get? vault-balances asset))))
-(define-read-only (get-total-shares (asset principal)) (ok (default-to u0 (map-get? vault-shares asset))))
-(define-read-only (get-user-shares (user principal) (asset principal)) (ok (default-to u0 (map-get? user-shares (tuple (user user) (asset asset))))))
-(define-read-only (get-vault-cap (asset principal)) (ok (default-to u0 (map-get? vault-caps asset))))
-(define-read-only (is-asset-supported (asset principal)) (default-to false (map-get? supported-assets asset)))
-(define-read-only (get-strategy (token-contract principal)) (ok (map-get? asset-strategies token-contract)))
-(define-read-only (get-apy (token-contract principal)) (ok u800)) ;; 8% APY
-(define-read-only (get-tvl (token-contract principal)) (ok (default-to u0 (map-get? vault-balances token-contract))))
+(define-public (get-admin)
+  (ok (var-get admin))
+)
+(define-read-only (is-paused)
+  (ok (var-get paused))
+)
+(define-read-only (get-deposit-fee)
+  (ok (var-get deposit-fee-bps))
+)
+(define-read-only (get-withdrawal-fee)
+  (ok (var-get withdrawal-fee-bps))
+)
+(define-read-only (get-revenue-share)
+  (ok (var-get revenue-share-bps))
+)
+(define-read-only (get-total-balance (asset principal))
+  (ok (default-to u0 (map-get? vault-balances asset)))
+)
+(define-read-only (get-total-shares (asset principal))
+  (ok (default-to u0 (map-get? vault-shares asset)))
+)
+(define-read-only (get-user-shares
+    (user principal)
+    (asset principal)
+  )
+  (ok (default-to u0 (map-get? user-shares {
+    user: user,
+    asset: asset,
+  })
+  ))
+)
+(define-read-only (get-vault-cap (asset principal))
+  (ok (default-to u0 (map-get? vault-caps asset)))
+)
+(define-read-only (is-asset-supported (asset principal))
+  (default-to false (map-get? supported-assets asset))
+)
+(define-read-only (get-strategy (token-contract principal))
+  (ok (map-get? asset-strategies token-contract))
+)
+(define-read-only (get-apy (token-contract principal))
+  (ok u800)
+)
+;; 8% APY
+(define-read-only (get-tvl (token-contract principal))
+  (ok (default-to u0 (map-get? vault-balances token-contract)))
+)
 
-(define-read-only (get-service-budget (asset principal) (service-type (string-ascii 32)))
-  (ok (map-get? service-budgets { asset: asset, service-type: service-type })))
+(define-read-only (get-service-budget
+    (asset principal)
+    (service-type (string-ascii 32))
+  )
+  (ok (map-get? service-budgets {
+    asset: asset,
+    service-type: service-type,
+  }))
+)
 
 ;; Private functions
-(define-private (is-admin (user principal)) (is-eq user (var-get admin)))
+(define-private (is-admin (user principal))
+  (is-eq user (var-get admin))
+)
 
-(define-private (calculate-shares (asset principal) (amount uint))
-  (let ((total-balance (unwrap-panic (get-total-balance asset)))
-        (total-shares (unwrap-panic (get-total-shares asset))))
+(define-private (calculate-shares
+    (asset principal)
+    (amount uint)
+  )
+  (let (
+      (total-balance (unwrap-panic (get-total-balance asset)))
+      (total-shares (unwrap-panic (get-total-shares asset)))
+    )
     (if (is-eq total-shares u0)
-        ;; First deposit: burn 1000 shares (dead shares) to prevent inflation attack
-        (if (> amount u1000) (- amount u1000) u0)
-        (/ (* amount total-shares) total-balance))))
-
-(define-private (calculate-amount (asset principal) (shares uint))
-  (let ((total-balance (unwrap-panic (get-total-balance asset)))
-        (total-shares (unwrap-panic (get-total-shares asset))))
-    (if (is-eq total-shares u0)
+      ;; First deposit: burn 1000 shares (dead shares) to prevent inflation attack
+      (if (> amount u1000)
+        (- amount u1000)
         u0
-        (/ (* shares total-balance) total-shares))))
+      )
+      (/ (* amount total-shares) total-balance)
+    )
+  )
+)
 
-(define-private (calculate-fee (amount uint) (fee-bps uint))
-  (/ (* amount fee-bps) MAX_BPS))
+(define-private (calculate-amount
+    (asset principal)
+    (shares uint)
+  )
+  (let (
+      (total-balance (unwrap-panic (get-total-balance asset)))
+      (total-shares (unwrap-panic (get-total-shares asset)))
+    )
+    (if (is-eq total-shares u0)
+      u0
+      (/ (* shares total-balance) total-shares)
+    )
+  )
+)
 
-(define-private (notify-protocol-monitor (event (string-ascii 32)) (data (tuple (asset principal) (amount uint))))
+(define-private (calculate-fee
+    (amount uint)
+    (fee-bps uint)
+  )
+  (/ (* amount fee-bps) MAX_BPS)
+)
+
+(define-private (notify-protocol-monitor
+    (event (string-ascii 32))
+    (data {
+      asset: principal,
+      amount: uint,
+    })
+  )
   ;; Simplified monitoring - just return true for now
-  (and (var-get monitor-enabled) true))
+  (and (var-get monitor-enabled) true)
+)
 
-(define-private (validate-strategy (strategy <strategy-trait>) (expected principal))
-  (is-eq (contract-of strategy) expected))
+(define-private (validate-strategy
+    (strategy <strategy-trait>)
+    (expected principal)
+  )
+  (is-eq (contract-of strategy) expected)
+)
 
 ;; Core vault functions
-(define-public (deposit (asset-trait <sip-010-ft-trait>) (amount uint))
-  (let ((user tx-sender)
-        (asset (contract-of asset-trait))
-        (fee (calculate-fee amount (var-get deposit-fee-bps)))
-        (net-amount (- amount fee))
-        (shares (calculate-shares asset net-amount))
-        (current-balance (unwrap! (get-total-balance asset) ERR_INVALID_ASSET))
-        (current-shares (unwrap! (get-total-shares asset) ERR_INVALID_ASSET))
-        (vault-cap (unwrap! (get-vault-cap asset) ERR_INVALID_ASSET))
-        (user-current-shares (unwrap! (get-user-shares user asset) ERR_INVALID_ASSET)))
-    
+(define-public (deposit
+    (asset-trait <sip-010-ft-trait>)
+    (amount uint)
+  )
+  (let (
+      (user tx-sender)
+      (asset (contract-of asset-trait))
+      (fee (calculate-fee amount (var-get deposit-fee-bps)))
+      (net-amount (- amount fee))
+      (shares (calculate-shares asset net-amount))
+      (current-balance (unwrap! (get-total-balance asset) ERR_INVALID_ASSET))
+      (current-shares (unwrap! (get-total-shares asset) ERR_INVALID_ASSET))
+      (vault-cap (unwrap! (get-vault-cap asset) ERR_INVALID_ASSET))
+      (user-current-shares (unwrap! (get-user-shares user asset) ERR_INVALID_ASSET))
+    )
     ;; Validations
     (asserts! (not (var-get paused)) ERR_PAUSED)
     (asserts! (> amount u0) ERR_INVALID_AMOUNT)
     (asserts! (is-asset-supported asset) ERR_INVALID_ASSET)
-    (asserts! (or (is-eq vault-cap u0) (<= (+ current-balance net-amount) vault-cap)) ERR_CAP_EXCEEDED)
-    
+    (asserts!
+      (or (is-eq vault-cap u0) (<= (+ current-balance net-amount) vault-cap))
+      ERR_CAP_EXCEEDED
+    )
+
     ;; Transfer tokens from user to vault
     (try! (contract-call? asset-trait transfer amount user (as-contract tx-sender) none))
-    
+
     ;; Update vault state
     (map-set vault-balances asset (+ current-balance net-amount))
-    (map-set vault-shares asset (+ current-shares (if (is-eq current-shares u0) (+ shares u1000) shares)))
-    (map-set user-shares (tuple (user user) (asset asset)) (+ user-current-shares shares))
-    
+    (map-set vault-shares asset
+      (+ current-shares
+        (if (is-eq current-shares u0)
+          (+ shares u1000)
+          shares
+        ))
+    )
+    (map-set user-shares {
+      user: user,
+      asset: asset,
+    }
+      (+ user-current-shares shares)
+    )
+
     ;; Handle protocol fees
     (if (> fee u0)
-        (begin
-          (map-set collected-fees asset (+ (default-to u0 (map-get? collected-fees asset)) fee))
-          (if (var-get emission-enabled)
-            (try! (contract-call? .token-system-coordinator trigger-revenue-distribution asset fee))
-            true)
-          true)
-        true)
-    
-    ;; Notify monitoring system
-    (notify-protocol-monitor "deposit" (tuple (asset asset) (amount net-amount)))
-    
-    ;; Emit event
-    (print (tuple (event "vault-deposit") (user user) (asset asset) (amount amount) (shares shares) (fee fee)))
-    (ok (tuple (shares shares) (fee fee)))))
+      (begin
+        (map-set collected-fees asset
+          (+ (default-to u0 (map-get? collected-fees asset)) fee)
+        )
+        (if (var-get emission-enabled)
+          (try! (contract-call? .token-system-coordinator trigger-revenue-distribution
+            asset fee
+          ))
+          true
+        )
+        true
+      )
+      true
+    )
 
-(define-public (withdraw (asset-trait <sip-010-ft-trait>) (shares uint))
-  (let ((user tx-sender)
-        (asset (contract-of asset-trait))
-        (amount (calculate-amount asset shares))
-        (fee (calculate-fee amount (var-get withdrawal-fee-bps)))
-        (net-amount (- amount fee))
-        (current-balance (unwrap! (get-total-balance asset) ERR_INVALID_ASSET))
-        (current-shares (unwrap! (get-total-shares asset) ERR_INVALID_ASSET))
-        (user-current-shares (unwrap! (get-user-shares user asset) ERR_INVALID_ASSET)))
-    
+    ;; Notify monitoring system
+    (notify-protocol-monitor "deposit" {
+      asset: asset,
+      amount: net-amount,
+    })
+
+    ;; Emit event
+    (print {
+      event: "vault-deposit",
+      user: user,
+      asset: asset,
+      amount: amount,
+      shares: shares,
+      fee: fee,
+    })
+    (ok {
+      shares: shares,
+      fee: fee,
+    })
+  )
+)
+
+(define-public (withdraw
+    (asset-trait <sip-010-ft-trait>)
+    (shares uint)
+  )
+  (let (
+      (user tx-sender)
+      (asset (contract-of asset-trait))
+      (amount (calculate-amount asset shares))
+      (fee (calculate-fee amount (var-get withdrawal-fee-bps)))
+      (net-amount (- amount fee))
+      (current-balance (unwrap! (get-total-balance asset) ERR_INVALID_ASSET))
+      (current-shares (unwrap! (get-total-shares asset) ERR_INVALID_ASSET))
+      (user-current-shares (unwrap! (get-user-shares user asset) ERR_INVALID_ASSET))
+    )
     ;; Validations
     (asserts! (not (var-get paused)) ERR_PAUSED)
     (asserts! (> shares u0) ERR_INVALID_AMOUNT)
     (asserts! (>= user-current-shares shares) ERR_INSUFFICIENT_BALANCE)
     (asserts! (>= current-balance amount) ERR_INSUFFICIENT_BALANCE)
-    
+
     ;; Update vault state
     (map-set vault-balances asset (- current-balance amount))
     (map-set vault-shares asset (- current-shares shares))
-    (map-set user-shares (tuple (user user) (asset asset)) (- user-current-shares shares))
-    
+    (map-set user-shares {
+      user: user,
+      asset: asset,
+    }
+      (- user-current-shares shares)
+    )
+
     ;; Handle protocol fees
     (if (> fee u0)
-        (begin
-          (map-set collected-fees asset (+ (default-to u0 (map-get? collected-fees asset)) fee))
-          (if (var-get emission-enabled)
-            (try! (contract-call? .token-system-coordinator trigger-revenue-distribution asset fee))
-            true)
-          true)
-        true)
-    
-    ;; Transfer tokens to user
-    (try! (contract-call? asset-trait transfer net-amount (as-contract tx-sender) user none))
-    
-    ;; Notify monitoring system
-    (notify-protocol-monitor "withdraw" (tuple (asset asset) (amount net-amount)))
-    
-    ;; Emit event
-    (print (tuple (event "vault-withdraw") (user user) (asset asset) (amount net-amount) (shares shares) (fee fee)))
-    (ok (tuple (amount net-amount) (fee fee)))))
+      (begin
+        (map-set collected-fees asset
+          (+ (default-to u0 (map-get? collected-fees asset)) fee)
+        )
+        (if (var-get emission-enabled)
+          (try! (contract-call? .token-system-coordinator trigger-revenue-distribution
+            asset fee
+          ))
+          true
+        )
+        true
+      )
+      true
+    )
 
-(define-public (withdraw-from-strategy (asset-trait <sip-010-ft-trait>) (shares uint) (strategy-arg <strategy-trait>))
-  (let ((user tx-sender)
-        (asset (contract-of asset-trait))
-        (amount (calculate-amount asset shares))
-        (fee (calculate-fee amount (var-get withdrawal-fee-bps)))
-        (net-amount (- amount fee))
-        (current-balance (unwrap! (get-total-balance asset) ERR_INVALID_ASSET))
-        (current-shares (unwrap! (get-total-shares asset) ERR_INVALID_ASSET))
-        (user-current-shares (unwrap! (get-user-shares user asset) ERR_INVALID_ASSET)))
-    
+    ;; Transfer tokens to user
+    (try! (contract-call? asset-trait transfer net-amount (as-contract tx-sender) user
+      none
+    ))
+
+    ;; Notify monitoring system
+    (notify-protocol-monitor "withdraw" {
+      asset: asset,
+      amount: net-amount,
+    })
+
+    ;; Emit event
+    (print {
+      event: "vault-withdraw",
+      user: user,
+      asset: asset,
+      amount: net-amount,
+      shares: shares,
+      fee: fee,
+    })
+    (ok {
+      amount: net-amount,
+      fee: fee,
+    })
+  )
+)
+
+(define-public (withdraw-from-strategy
+    (asset-trait <sip-010-ft-trait>)
+    (shares uint)
+    (strategy-arg <strategy-trait>)
+  )
+  (let (
+      (user tx-sender)
+      (asset (contract-of asset-trait))
+      (amount (calculate-amount asset shares))
+      (fee (calculate-fee amount (var-get withdrawal-fee-bps)))
+      (net-amount (- amount fee))
+      (current-balance (unwrap! (get-total-balance asset) ERR_INVALID_ASSET))
+      (current-shares (unwrap! (get-total-shares asset) ERR_INVALID_ASSET))
+      (user-current-shares (unwrap! (get-user-shares user asset) ERR_INVALID_ASSET))
+    )
     ;; Validations
     (asserts! (not (var-get paused)) ERR_PAUSED)
     (asserts! (> shares u0) ERR_INVALID_AMOUNT)
     (asserts! (>= user-current-shares shares) ERR_INSUFFICIENT_BALANCE)
     (asserts! (>= current-balance amount) ERR_INSUFFICIENT_BALANCE)
-    
+
     ;; Withdraw from strategy
     (try! (match (map-get? asset-strategies asset)
-      strategy-principal
-        (begin
-          (asserts! (is-eq (contract-of strategy-arg) strategy-principal) ERR_UNAUTHORIZED)
-          (let ((withdraw-result (try! (contract-call? strategy-arg divest amount))))
-            (asserts! (>= withdraw-result amount) ERR_STRATEGY_FAILED)
-            (ok true)))
-      ERR_INVALID_ASSET))
-    
+      strategy-principal (begin
+        (asserts! (is-eq (contract-of strategy-arg) strategy-principal)
+          ERR_UNAUTHORIZED
+        )
+        (let ((withdraw-result (try! (contract-call? strategy-arg divest amount))))
+          (asserts! (>= withdraw-result amount) ERR_STRATEGY_FAILED)
+          (ok true)
+        )
+      )
+      ERR_INVALID_ASSET
+    ))
+
     ;; Update vault state
     (map-set vault-balances asset (- current-balance amount))
     (map-set vault-shares asset (- current-shares shares))
-    (map-set user-shares (tuple (user user) (asset asset)) (- user-current-shares shares))
-    
+    (map-set user-shares {
+      user: user,
+      asset: asset,
+    }
+      (- user-current-shares shares)
+    )
+
     ;; Handle protocol fees
     (if (> fee u0)
-        (begin
-          (map-set collected-fees asset (+ (default-to u0 (map-get? collected-fees asset)) fee))
-          (if (var-get emission-enabled)
-            (try! (contract-call? .token-system-coordinator trigger-revenue-distribution asset fee))
-            true)
-          true)
-        true)
-    
-    ;; Transfer tokens to user
-    (try! (contract-call? asset-trait transfer net-amount (as-contract tx-sender) user none))
-    
-    ;; Notify monitoring system
-    (notify-protocol-monitor "withdraw-from-strategy" (tuple (asset asset) (amount net-amount)))
-    
-    ;; Emit event
-    (print (tuple (event "vault-withdraw-from-strategy") (user user) (asset asset) (amount net-amount) (shares shares) (fee fee)))
-    (ok (tuple (amount net-amount) (fee fee)))))
+      (begin
+        (map-set collected-fees asset
+          (+ (default-to u0 (map-get? collected-fees asset)) fee)
+        )
+        (if (var-get emission-enabled)
+          (try! (contract-call? .token-system-coordinator trigger-revenue-distribution
+            asset fee
+          ))
+          true
+        )
+        true
+      )
+      true
+    )
 
-(define-public (flash-loan (amount uint) (recipient principal))
-  (let ((asset-principal 'SP000000000000000000002Q6VF78) ;; STX for flash loans
-        (fee (calculate-fee amount u30))) ;; 0.3% flash loan fee
+    ;; Transfer tokens to user
+    (try! (contract-call? asset-trait transfer net-amount (as-contract tx-sender) user
+      none
+    ))
+
+    ;; Notify monitoring system
+    (notify-protocol-monitor "withdraw-from-strategy" {
+      asset: asset,
+      amount: net-amount,
+    })
+
+    ;; Emit event
+    (print {
+      event: "vault-withdraw-from-strategy",
+      user: user,
+      asset: asset,
+      amount: net-amount,
+      shares: shares,
+      fee: fee,
+    })
+    (ok {
+      amount: net-amount,
+      fee: fee,
+    })
+  )
+)
+
+(define-public (flash-loan
+    (amount uint)
+    (recipient principal)
+  )
+  (let (
+      (asset-principal 'SP000000000000000000002Q6VF78) ;; STX for flash loans
+      (fee (calculate-fee amount u30))
+    )
+    ;; 0.3% flash loan fee
     (asserts! (not (var-get paused)) ERR_PAUSED)
     (asserts! (> amount u0) ERR_INVALID_AMOUNT)
-    
+
     ;; Implementation would include flash loan callback pattern
     ;; For now, return success to satisfy trait
-    (ok true)))
+    (ok true)
+  )
+)
 
 ;; Enhanced tokenomics integration functions
 (define-public (collect-protocol-fees (asset principal))
   (let ((collected (default-to u0 (map-get? collected-fees asset))))
     (asserts! (is-admin tx-sender) ERR_UNAUTHORIZED)
     (asserts! (> collected u0) ERR_INVALID_AMOUNT)
-    
+
     ;; Reset collected fees
     (map-set collected-fees asset u0)
-    
+
     ;; Notify revenue distributor
     (if (var-get emission-enabled)
-      (try! (contract-call? .token-system-coordinator trigger-revenue-distribution asset collected))
-      true)
-    
-    (ok collected)))
+      (try! (contract-call? .token-system-coordinator trigger-revenue-distribution
+        asset collected
+      ))
+      true
+    )
+
+    (ok collected)
+  )
+)
 
 ;; Administrative functions
 (define-public (set-deposit-fee (new-fee-bps uint))
@@ -271,149 +511,236 @@
     (asserts! (is-admin tx-sender) ERR_UNAUTHORIZED)
     (asserts! (<= new-fee-bps u500) ERR_INVALID_AMOUNT) ;; Max 5%
     (var-set deposit-fee-bps new-fee-bps)
-    (ok true)))
+    (ok true)
+  )
+)
 
 (define-public (set-withdrawal-fee (new-fee-bps uint))
   (begin
     (asserts! (is-admin tx-sender) ERR_UNAUTHORIZED)
     (asserts! (<= new-fee-bps u1000) ERR_INVALID_AMOUNT) ;; Max 10%
     (var-set withdrawal-fee-bps new-fee-bps)
-    (ok true)))
+    (ok true)
+  )
+)
 
-(define-public (set-vault-cap (asset principal) (new-cap uint))
+(define-public (set-vault-cap
+    (asset principal)
+    (new-cap uint)
+  )
   (begin
     (asserts! (is-admin tx-sender) ERR_UNAUTHORIZED)
     (map-set vault-caps asset new-cap)
-    (ok true)))
+    (ok true)
+  )
+)
 
 (define-public (set-paused (pause bool))
   (begin
     (asserts! (is-admin tx-sender) ERR_UNAUTHORIZED)
     (var-set paused pause)
-    (print (tuple (event "vault-pause-changed") (paused pause)))
-    (ok true)))
+    (print {
+      event: "vault-pause-changed",
+      paused: pause,
+    })
+    (ok true)
+  )
+)
 
 (define-public (set-revenue-share (new-share-bps uint))
   (begin
     (asserts! (is-admin tx-sender) ERR_UNAUTHORIZED)
     (asserts! (<= new-share-bps u5000) ERR_INVALID_AMOUNT) ;; Max 50%
     (var-set revenue-share-bps new-share-bps)
-    (ok true)))
+    (ok true)
+  )
+)
 
-(define-public (update-integration-settings (settings (tuple (monitor-enabled bool) (emission-enabled bool))))
+(define-public (update-integration-settings (settings {
+  monitor-enabled: bool,
+  emission-enabled: bool,
+}))
   (begin
     (asserts! (is-admin tx-sender) ERR_UNAUTHORIZED)
     (var-set monitor-enabled (get monitor-enabled settings))
     (var-set emission-enabled (get emission-enabled settings))
-    (ok true)))
+    (ok true)
+  )
+)
 
 (define-public (transfer-admin (new-admin principal))
   (begin
     (asserts! (is-admin tx-sender) ERR_UNAUTHORIZED)
     (var-set admin new-admin)
-    (print (tuple (event "admin-transferred") (old-admin tx-sender) (new-admin new-admin)))
-    (ok true)))
+    (print {
+      event: "admin-transferred",
+      old-admin: tx-sender,
+      new-admin: new-admin,
+    })
+    (ok true)
+  )
+)
 
-(define-public (add-supported-asset (asset principal) (strategy-contract principal))
+(define-public (add-supported-asset
+    (asset principal)
+    (strategy-contract principal)
+  )
   (begin
     (asserts! (is-admin tx-sender) ERR_UNAUTHORIZED)
     (map-set supported-assets asset true)
     (map-set asset-strategies asset strategy-contract)
-    (ok true)))
+    (ok true)
+  )
+)
 
-(define-public (emergency-withdraw (asset-trait <sip-010-ft-trait>) (amount uint) (recipient principal))
+(define-public (emergency-withdraw
+    (asset-trait <sip-010-ft-trait>)
+    (amount uint)
+    (recipient principal)
+  )
   (let ((asset (contract-of asset-trait)))
     (begin
       (asserts! (is-admin tx-sender) ERR_UNAUTHORIZED)
       (asserts! (> amount u0) ERR_INVALID_AMOUNT)
-      
+
       ;; Emergency withdrawal - transfer assets directly
-      (try! (contract-call? asset-trait transfer amount (as-contract tx-sender) recipient none))
-      
+      (try! (contract-call? asset-trait transfer amount (as-contract tx-sender)
+        recipient none
+      ))
+
       ;; Update vault balance
       (let ((current-balance (default-to u0 (map-get? vault-balances asset))))
-        (map-set vault-balances asset (if (>= current-balance amount) (- current-balance amount) u0)))
-      
-      (print (tuple (event "emergency-withdraw") (asset asset) (amount amount) (recipient recipient)))
-      (ok amount))))
+        (map-set vault-balances asset
+          (if (>= current-balance amount)
+            (- current-balance amount)
+            u0
+          ))
+      )
 
-(define-public (rebalance-vault (asset principal) (strategy-arg <strategy-trait>))
+      (print {
+        event: "emergency-withdraw",
+        asset: asset,
+        amount: amount,
+        recipient: recipient,
+      })
+      (ok amount)
+    )
+  )
+)
+
+(define-public (rebalance-vault
+    (asset principal)
+    (strategy-arg <strategy-trait>)
+  )
   (begin
     (asserts! (is-admin tx-sender) ERR_UNAUTHORIZED)
     (asserts! (is-asset-supported asset) ERR_INVALID_ASSET)
-    
+
     ;; Rebalancing logic - withdraw from strategy and redeploy
     (match (map-get? asset-strategies asset)
-      strategy-principal
-        (begin
-          (asserts! (is-eq (contract-of strategy-arg) strategy-principal) ERR_UNAUTHORIZED)
-          (let ((total-balance (default-to u0 (map-get? vault-balances asset))))
-            ;; Withdraw all from strategy
-            (try! (contract-call? strategy-arg divest total-balance))
-            ;; Redeploy to strategy
-            (try! (contract-call? strategy-arg invest total-balance))
-            (print (tuple (event "vault-rebalanced") (asset asset) (amount total-balance)))
-            (ok true)))
-      ERR_INVALID_ASSET)))
+      strategy-principal (begin
+        (asserts! (is-eq (contract-of strategy-arg) strategy-principal)
+          ERR_UNAUTHORIZED
+        )
+        (let ((total-balance (default-to u0 (map-get? vault-balances asset))))
+          ;; Withdraw all from strategy
+          (try! (contract-call? strategy-arg divest total-balance))
+          ;; Redeploy to strategy
+          (try! (contract-call? strategy-arg invest total-balance))
+          (print {
+            event: "vault-rebalanced",
+            asset: asset,
+            amount: total-balance,
+          })
+          (ok true)
+        )
+      )
+      ERR_INVALID_ASSET
+    )
+  )
+)
 
 (define-public (set-service-budget
-  (asset principal)
-  (service-type (string-ascii 32))
-  (period-start uint)
-  (period-length uint)
-  (max-amount uint))
+    (asset principal)
+    (service-type (string-ascii 32))
+    (period-start uint)
+    (period-length uint)
+    (max-amount uint)
+  )
   (begin
     (asserts! (is-admin tx-sender) ERR_UNAUTHORIZED)
     (asserts! (> max-amount u0) ERR_INVALID_AMOUNT)
-    (map-set service-budgets
-      { asset: asset, service-type: service-type }
-      {
-        period-start: period-start,
-        period-length: period-length,
-        max-amount: max-amount,
-        spent: u0
-      })
-    (ok true)))
+    (map-set service-budgets {
+      asset: asset,
+      service-type: service-type,
+    } {
+      period-start: period-start,
+      period-length: period-length,
+      max-amount: max-amount,
+      spent: u0,
+    })
+    (ok true)
+  )
+)
 
 (define-public (pay-service
-  (asset-trait <sip-010-ft-trait>)
-  (amount uint)
-  (recipient principal)
-  (service-type (string-ascii 32)))
-  (let ((asset (contract-of asset-trait))
-        (current-balance (default-to u0 (map-get? vault-balances asset))))
+    (asset-trait <sip-010-ft-trait>)
+    (amount uint)
+    (recipient principal)
+    (service-type (string-ascii 32))
+  )
+  (let (
+      (asset (contract-of asset-trait))
+      (current-balance (default-to u0 (map-get? vault-balances asset)))
+    )
     (begin
       (asserts! (is-admin tx-sender) ERR_UNAUTHORIZED)
       (asserts! (> amount u0) ERR_INVALID_AMOUNT)
       (asserts! (>= current-balance amount) ERR_INSUFFICIENT_BALANCE)
-      (match (map-get? service-budgets { asset: asset, service-type: service-type })
-        budget
-          (let ((start (get period-start budget))
-                (len (get period-length budget))
-                (max-amt (get max-amount budget))
-                (spent (get spent budget)))
-            (let ((effective-budget
-                    (if (and (> len u0) (>= (- block-height start) len))
-                      {
-                        period-start: block-height,
-                        period-length: len,
-                        max-amount: max-amt,
-                        spent: u0
-                      }
-                      budget)))
-              (let ((new-spent (+ (get spent effective-budget) amount)))
-                (asserts! (<= new-spent max-amt) ERR_CAP_EXCEEDED)
-                (map-set service-budgets
-                  { asset: asset, service-type: service-type }
-                  (merge effective-budget { spent: new-spent }))
-                (try! (contract-call? asset-trait transfer amount (as-contract tx-sender) recipient none))
-                (map-set vault-balances asset (- current-balance amount))
-                (print (tuple
-                  (event "service-payment")
-                  (asset asset)
-                  (amount amount)
-                  (recipient recipient)
-                  (service-type service-type)))
-                (ok amount))))
-        ERR_INVALID_ASSET))))
-
+      (match (map-get? service-budgets {
+        asset: asset,
+        service-type: service-type,
+      })
+        budget (let (
+            (start (get period-start budget))
+            (len (get period-length budget))
+            (max-amt (get max-amount budget))
+            (spent (get spent budget))
+          )
+          (let ((effective-budget (if (and (> len u0) (>= (- block-height start) len))
+              {
+                period-start: block-height,
+                period-length: len,
+                max-amount: max-amt,
+                spent: u0,
+              }
+              budget
+            )))
+            (let ((new-spent (+ (get spent effective-budget) amount)))
+              (asserts! (<= new-spent max-amt) ERR_CAP_EXCEEDED)
+              (map-set service-budgets {
+                asset: asset,
+                service-type: service-type,
+              }
+                (merge effective-budget { spent: new-spent })
+              )
+              (try! (contract-call? asset-trait transfer amount (as-contract tx-sender)
+                recipient none
+              ))
+              (map-set vault-balances asset (- current-balance amount))
+              (print {
+                event: "service-payment",
+                asset: asset,
+                amount: amount,
+                recipient: recipient,
+                service-type: service-type,
+              })
+              (ok amount)
+            )
+          )
+        )
+        ERR_INVALID_ASSET
+      )
+    )
+  )
+)

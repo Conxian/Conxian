@@ -13,7 +13,18 @@
 ;; Data Maps
 ;; Stores TWAP data for a given asset and period
 ;; { asset: principal, period: uint } { last-price: uint, last-timestamp: uint, cumulative-price: uint, samples: uint }
-(define-map twap-data { asset: principal, period: uint } { last-price: uint, last-timestamp: uint, cumulative-price: uint, samples: uint })
+(define-map twap-data
+  {
+    asset: principal,
+    period: uint,
+  }
+  {
+    last-price: uint,
+    last-timestamp: uint,
+    cumulative-price: uint,
+    samples: uint,
+  }
+)
 
 ;; Data Variables
 ;; Contract owner
@@ -55,44 +66,45 @@
 ;; @param period The time period for the TWAP calculation (in seconds).
 ;; @param current-price The current price of the asset.
 ;; @returns A response with ok on success, or an error.
-(define-public (update-twap (asset principal) (period uint) (current-price uint))
+(define-public (update-twap
+    (asset principal)
+    (period uint)
+    (current-price uint)
+  )
   (begin
     (try! (is-governance))
     (asserts! (> period u0) ERR-INVALID-PERIOD)
 
-    (let
-      ;; Use block-height directly instead of get-block-info? time, to avoid
-      ;; UnwrapFailure in environments where block timestamps are unavailable.
-      ((current-block-height block-height)
-       (key { asset: asset, period: period })
-       (existing-data (map-get? twap-data key))
+    (let (
+        (current-block-height block-height)
+        (key {
+          asset: asset,
+          period: period,
+        })
+        (existing-data (map-get? twap-data key))
       )
       (if (is-some existing-data)
-        (let
-          ((data (unwrap! existing-data (err u0)))
-           (last-price (get last-price data))
-           (last-timestamp (get last-timestamp data))
-           (cumulative-price (get cumulative-price data))
-           (samples (get samples data))
-           (time-elapsed (- current-block-height last-timestamp))
+        (let (
+            (data (unwrap! existing-data (err u0)))
+            (last-price (get last-price data))
+            (last-timestamp (get last-timestamp data))
+            (cumulative-price (get cumulative-price data))
+            (samples (get samples data))
+            (time-elapsed (- current-block-height last-timestamp))
           )
-          (map-set twap-data key
-            {
-              last-price: current-price,
-              last-timestamp: current-block-height,
-              cumulative-price: (+ cumulative-price (* last-price time-elapsed)),
-              samples: (+ samples u1)
-            }
-          )
-        )
-        (map-set twap-data key
-          {
+          (map-set twap-data key {
             last-price: current-price,
             last-timestamp: current-block-height,
-            cumulative-price: u0,
-            samples: u0
-          }
+            cumulative-price: (+ cumulative-price (* last-price time-elapsed)),
+            samples: (+ samples u1),
+          })
         )
+        (map-set twap-data key {
+          last-price: current-price,
+          last-timestamp: current-block-height,
+          cumulative-price: u0,
+          samples: u0,
+        })
       )
     )
     (print {
@@ -135,19 +147,25 @@
 ;; @param asset The principal of the asset.
 ;; @param period The time period for the TWAP calculation (in seconds).
 ;; @returns A response with the TWAP on success, or an error.
-(define-read-only (get-twap (asset principal) (period uint))
-  (let
-    ((key { asset: asset, period: period })
-     (data (unwrap! (map-get? twap-data key) ERR-NO-DATA))
+(define-read-only (get-twap
+    (asset principal)
+    (period uint)
+  )
+  (let (
+      (key {
+        asset: asset,
+        period: period,
+      })
+      (data (unwrap! (map-get? twap-data key) ERR-NO-DATA))
     )
-    (let
-      ((last-price (get last-price data))
-       (last-timestamp (get last-timestamp data))
-       (cumulative-price (get cumulative-price data))
-       (samples (get samples data))
-       ;; Use block-height as a stand-in for time for TWAP in this environment.
-       (current-block-height block-height)
-       (time-elapsed (- current-block-height last-timestamp))
+    (let (
+        (last-price (get last-price data))
+        (last-timestamp (get last-timestamp data))
+        (cumulative-price (get cumulative-price data))
+        (samples (get samples data))
+        ;; Use block-height as a stand-in for time for TWAP in this environment.
+        (current-block-height block-height)
+        (time-elapsed (- current-block-height last-timestamp))
       )
       (if (> samples u0)
         (ok (/ (+ cumulative-price (* last-price time-elapsed)) (+ samples u1)))

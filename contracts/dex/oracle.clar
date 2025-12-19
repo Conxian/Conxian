@@ -15,11 +15,11 @@
 (define-constant ERR_INVALID_PRICE (err u1004))
 
 ;; @constant PRICE_STALE_THRESHOLD (* u60 u60 u24) - The threshold in blocks after which a price is considered stale (24 hours).
-(define-constant PRICE_STALE_THRESHOLD (* u60 u60 u24))  ;; 24 hours in blocks (assuming 1 block/2s)
+(define-constant PRICE_STALE_THRESHOLD (* u60 u60 u24)) ;; 24 hours in blocks (assuming 1 block/2s)
 ;; @constant MIN_PRICE u100 - The minimum allowed price (1e-16).
-(define-constant MIN_PRICE u100)  ;; $0.0000000000000001 (1e-16)
+(define-constant MIN_PRICE u100) ;; $0.0000000000000001 (1e-16)
 ;; @constant MAX_PRICE (* u1000000000000000000 u1000000) - The maximum allowed price ($1M with 18 decimals).
-(define-constant MAX_PRICE (* u1000000000000000000 u1000000))  ;; $1M with 18 decimals
+(define-constant MAX_PRICE (* u1000000000000000000 u1000000)) ;; $1M with 18 decimals
 
 ;; --- Data Variables ---
 ;; @var admin principal - The principal of the contract administrator.
@@ -28,7 +28,10 @@
 ;; --- Data Maps ---
 ;; @map asset-prices { asset: principal } { price: uint }
 ;; Stores the current price for each asset.
-(define-map asset-prices { asset: principal } { price: uint })
+(define-map asset-prices
+  { asset: principal }
+  { price: uint }
+)
 
 ;; --- Public Functions ---
 
@@ -49,7 +52,10 @@
 ;; @param price uint - The new price of the asset.
 ;; @returns (response bool uint) - (ok true) on success, (err ERR_UNAUTHORIZED) if the caller is not the admin.
 ;; @events (print (ok true))
-(define-public (set-price (asset principal) (price uint))
+(define-public (set-price
+    (asset principal)
+    (price uint)
+  )
   (begin
     (asserts! (is-eq tx-sender (var-get admin)) ERR_UNAUTHORIZED)
     (map-set asset-prices { asset: asset } { price: price })

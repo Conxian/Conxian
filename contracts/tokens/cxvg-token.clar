@@ -35,33 +35,39 @@
 ;; @desc Get the name of the token.
 ;; @returns The name of the token.
 (define-read-only (get-name)
-  (ok (var-get token-name)))
+  (ok (var-get token-name))
+)
 
 ;; @desc Get the symbol of the token.
 ;; @returns The symbol of the token.
 (define-read-only (get-symbol)
-  (ok (var-get token-symbol)))
+  (ok (var-get token-symbol))
+)
 
 ;; @desc Get the number of decimals for the token.
 ;; @returns The number of decimals for the token.
 (define-read-only (get-decimals)
-  (ok (var-get token-decimals)))
+  (ok (var-get token-decimals))
+)
 
 ;; @desc Get the total supply of the token.
 ;; @returns The total supply of the token.
 (define-read-only (get-total-supply)
-  (ok (ft-get-supply cxvg-token)))
+  (ok (ft-get-supply cxvg-token))
+)
 
 ;; @desc Get the token URI.
 ;; @returns The token URI.
 (define-read-only (get-token-uri)
-  (ok (var-get token-uri)))
+  (ok (var-get token-uri))
+)
 
 ;; @desc Get the balance of a principal.
 ;; @param owner The principal to check the balance of.
 ;; @returns The balance of the principal.
 (define-read-only (get-balance (owner principal))
-  (ok (ft-get-balance cxvg-token owner)))
+  (ok (ft-get-balance cxvg-token owner))
+)
 
 ;; @desc Transfer tokens from one principal to another.
 ;; @param amount The amount of tokens to transfer.
@@ -69,10 +75,17 @@
 ;; @param recipient The recipient of the tokens.
 ;; @param memo An optional memo for the transfer.
 ;; @returns A response indicating success or failure.
-(define-public (transfer (amount uint) (sender principal) (recipient principal) (memo (optional (buff 34))))
+(define-public (transfer
+    (amount uint)
+    (sender principal)
+    (recipient principal)
+    (memo (optional (buff 34)))
+  )
   (begin
     (asserts! (is-eq tx-sender sender) (err ERR-NOT-AUTHORIZED))
-    (ft-transfer? cxvg-token amount sender recipient)))
+    (ft-transfer? cxvg-token amount sender recipient)
+  )
+)
 
 ;; --- Mint/Burn Functions ---
 
@@ -80,19 +93,29 @@
 ;; @param amount The amount of tokens to mint.
 ;; @param recipient The recipient of the new tokens.
 ;; @returns A response indicating success or failure.
-(define-public (mint (amount uint) (recipient principal))
+(define-public (mint
+    (amount uint)
+    (recipient principal)
+  )
   (begin
     (asserts! (is-eq tx-sender (var-get contract-owner)) (err ERR-NOT-AUTHORIZED))
-    (ft-mint? cxvg-token amount recipient)))
+    (ft-mint? cxvg-token amount recipient)
+  )
+)
 
 ;; @desc Burn tokens.
 ;; @param amount The amount of tokens to burn.
 ;; @param sender The sender of the tokens to burn.
 ;; @returns A response indicating success or failure.
-(define-public (burn (amount uint) (sender principal))
+(define-public (burn
+    (amount uint)
+    (sender principal)
+  )
   (begin
     (asserts! (is-eq tx-sender sender) (err ERR-NOT-AUTHORIZED))
-    (ft-burn? cxvg-token amount sender)))
+    (ft-burn? cxvg-token amount sender)
+  )
+)
 
 ;; --- Admin Functions ---
 
@@ -103,7 +126,9 @@
   (begin
     (asserts! (is-eq tx-sender (var-get contract-owner)) (err ERR-NOT-AUTHORIZED))
     (var-set token-uri new-uri)
-    (ok true)))
+    (ok true)
+  )
+)
 
 ;; @desc Transfer contract ownership.
 ;; @param new-owner The address of the new owner.
@@ -112,9 +137,12 @@
   (begin
     (asserts! (is-eq tx-sender (var-get contract-owner)) (err ERR-NOT-AUTHORIZED))
     (var-set contract-owner new-owner)
-    (ok true)))
+    (ok true)
+  )
+)
 
 ;; @desc Get the contract owner.
 ;; @returns The principal of the contract owner.
 (define-read-only (get-contract-owner)
-  (ok (var-get contract-owner)))
+  (ok (var-get contract-owner))
+)

@@ -26,7 +26,7 @@
     tier: uint,
     expiry: uint,
     discount-bps: uint,
-    api-credits: uint
+    api-credits: uint,
   }
 )
 
@@ -36,7 +36,7 @@
   {
     price-usd: uint, ;; In cents
     discount-bps: uint,
-    api-limit: uint
+    api-limit: uint,
   }
 )
 
@@ -68,30 +68,37 @@
 )
 
 ;; @desc Configure a tier's pricing and limits
-(define-public (configure-tier (tier-id uint) (price uint) (discount uint) (limit uint))
+(define-public (configure-tier
+    (tier-id uint)
+    (price uint)
+    (discount uint)
+    (limit uint)
+  )
   (begin
     (asserts! (or (is-owner) (is-policy-engine)) ERR_UNAUTHORIZED)
     (map-set tier-config tier-id {
       price-usd: price,
       discount-bps: discount,
-      api-limit: limit
+      api-limit: limit,
     })
     (ok true)
   )
 )
 
 ;; @desc Grant a tier to a user (e.g., after payment)
-(define-public (grant-tier (user principal) (tier-id uint) (duration uint))
+(define-public (grant-tier
+    (user principal)
+    (tier-id uint)
+    (duration uint)
+  )
   (begin
     (asserts! (is-owner) ERR_UNAUTHORIZED) ;; Or payment contract
-    (let (
-      (config (unwrap! (map-get? tier-config tier-id) ERR_INVALID_TIER))
-    )
+    (let ((config (unwrap! (map-get? tier-config tier-id) ERR_INVALID_TIER)))
       (map-set user-tiers user {
         tier: tier-id,
         expiry: (+ block-height duration),
         discount-bps: (get discount-bps config),
-        api-credits: (get api-limit config)
+        api-credits: (get api-limit config),
       })
       (ok true)
     )
@@ -101,23 +108,32 @@
 ;; --- Public Read ---
 
 (define-read-only (get-user-tier (user principal))
-  (let (
-    (info (default-to { tier: TIER_FREE, expiry: u0, discount-bps: u0, api-credits: u0 } (map-get? user-tiers user)))
-  )
+  (let ((info (default-to {
+      tier: TIER_FREE,
+      expiry: u0,
+      discount-bps: u0,
+      api-credits: u0,
+    }
+      (map-get? user-tiers user)
+    )))
     (if (< (get expiry info) block-height)
-      (ok { tier: TIER_FREE, expiry: u0, discount-bps: u0, api-credits: u0 }) ;; Expired -> Free
+      (ok {
+        tier: TIER_FREE,
+        expiry: u0,
+        discount-bps: u0,
+        api-credits: u0,
+      })
+      ;; Expired -> Free
       (ok info)
     )
   )
 )
 
 (define-read-only (get-discount (user principal))
-  (let (
-    (info (unwrap-panic (get-user-tier user)))
-  )
+  (let ((info (unwrap-panic (get-user-tier user))))
     (if true
-        (ok (get discount-bps info))
-        (err u0) ;; Unreachable, forces type inference
+      (ok (get discount-bps info))
+      (err u0) ;; Unreachable, forces type inference
     )
   )
 )

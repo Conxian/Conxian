@@ -20,11 +20,20 @@
 
 ;; Roles
 (define-data-var contract-owner principal tx-sender)
-(define-map authorized-spenders { vault-id: uint, spender: principal } bool)
+(define-map authorized-spenders
+  {
+    vault-id: uint,
+    spender: principal,
+  }
+  bool
+)
 
 ;; Vault Balances: (vault-id, asset) -> amount
-(define-map vault-balances 
-  { vault-id: uint, asset: principal } 
+(define-map vault-balances
+  {
+    vault-id: uint,
+    asset: principal,
+  }
   uint
 )
 
@@ -34,8 +43,16 @@
   (is-eq tx-sender (var-get contract-owner))
 )
 
-(define-private (is-authorized-spender (vault-id uint) (spender principal))
-  (default-to false (map-get? authorized-spenders { vault-id: vault-id, spender: spender }))
+(define-private (is-authorized-spender
+    (vault-id uint)
+    (spender principal)
+  )
+  (default-to false
+    (map-get? authorized-spenders {
+      vault-id: vault-id,
+      spender: spender,
+    })
+  )
 )
 
 ;; --- Admin ---
@@ -48,10 +65,19 @@
   )
 )
 
-(define-public (set-authorized-spender (vault-id uint) (spender principal) (enabled bool))
+(define-public (set-authorized-spender
+    (vault-id uint)
+    (spender principal)
+    (enabled bool)
+  )
   (begin
     (asserts! (is-contract-owner) ERR_UNAUTHORIZED)
-    (map-set authorized-spenders { vault-id: vault-id, spender: spender } enabled)
+    (map-set authorized-spenders {
+      vault-id: vault-id,
+      spender: spender,
+    }
+      enabled
+    )
     (ok true)
   )
 )
@@ -68,20 +94,32 @@
     (amount uint)
   )
   (let (
-    (asset-contract (contract-of asset-trait))
-    (current-bal (default-to u0 (map-get? vault-balances { vault-id: vault-id, asset: asset-contract })))
-  )
+      (asset-contract (contract-of asset-trait))
+      (current-bal (default-to u0
+        (map-get? vault-balances {
+          vault-id: vault-id,
+          asset: asset-contract,
+        })
+      ))
+    )
     ;; Transfer tokens from sender to this contract
-    (try! (contract-call? asset-trait transfer amount tx-sender (as-contract tx-sender) none))
-    
+    (try! (contract-call? asset-trait transfer amount tx-sender (as-contract tx-sender)
+      none
+    ))
+
     ;; Update ledger
-    (map-set vault-balances { vault-id: vault-id, asset: asset-contract } (+ current-bal amount))
-    
+    (map-set vault-balances {
+      vault-id: vault-id,
+      asset: asset-contract,
+    }
+      (+ current-bal amount)
+    )
+
     (print {
       event: "deposit",
       vault-id: vault-id,
       asset: asset-contract,
-      amount: amount
+      amount: amount,
     })
     (ok true)
   )
@@ -99,28 +137,40 @@
     (recipient principal)
   )
   (let (
-    (asset-contract (contract-of asset-trait))
-    (current-bal (default-to u0 (map-get? vault-balances { vault-id: vault-id, asset: asset-contract })))
-  )
+      (asset-contract (contract-of asset-trait))
+      (current-bal (default-to u0
+        (map-get? vault-balances {
+          vault-id: vault-id,
+          asset: asset-contract,
+        })
+      ))
+    )
     ;; Check Authorization
-    (asserts! (or (is-contract-owner) (is-authorized-spender vault-id tx-sender)) ERR_UNAUTHORIZED)
-    
+    (asserts! (or (is-contract-owner) (is-authorized-spender vault-id tx-sender))
+      ERR_UNAUTHORIZED
+    )
+
     ;; Check Balance
     (asserts! (>= current-bal amount) ERR_INSUFFICIENT_BALANCE)
-    
+
     ;; Update ledger
-    (map-set vault-balances { vault-id: vault-id, asset: asset-contract } (- current-bal amount))
-    
+    (map-set vault-balances {
+      vault-id: vault-id,
+      asset: asset-contract,
+    }
+      (- current-bal amount)
+    )
+
     ;; Transfer tokens to recipient
     (as-contract (try! (contract-call? asset-trait transfer amount tx-sender recipient none)))
-    
+
     (print {
       event: "withdraw",
       vault-id: vault-id,
       asset: asset-contract,
       amount: amount,
       recipient: recipient,
-      spender: tx-sender
+      spender: tx-sender,
     })
     (ok true)
   )
@@ -134,21 +184,44 @@
     (amount uint)
   )
   (let (
-    (src-bal (default-to u0 (map-get? vault-balances { vault-id: from-vault-id, asset: asset })))
-    (dst-bal (default-to u0 (map-get? vault-balances { vault-id: to-vault-id, asset: asset })))
-  )
-    (asserts! (or (is-contract-owner) (is-authorized-spender from-vault-id tx-sender)) ERR_UNAUTHORIZED)
+      (src-bal (default-to u0
+        (map-get? vault-balances {
+          vault-id: from-vault-id,
+          asset: asset,
+        })
+      ))
+      (dst-bal (default-to u0
+        (map-get? vault-balances {
+          vault-id: to-vault-id,
+          asset: asset,
+        })
+      ))
+    )
+    (asserts!
+      (or (is-contract-owner) (is-authorized-spender from-vault-id tx-sender))
+      ERR_UNAUTHORIZED
+    )
     (asserts! (>= src-bal amount) ERR_INSUFFICIENT_BALANCE)
-    
-    (map-set vault-balances { vault-id: from-vault-id, asset: asset } (- src-bal amount))
-    (map-set vault-balances { vault-id: to-vault-id, asset: asset } (+ dst-bal amount))
-    
+
+    (map-set vault-balances {
+      vault-id: from-vault-id,
+      asset: asset,
+    }
+      (- src-bal amount)
+    )
+    (map-set vault-balances {
+      vault-id: to-vault-id,
+      asset: asset,
+    }
+      (+ dst-bal amount)
+    )
+
     (print {
       event: "vault-transfer",
       from-vault: from-vault-id,
       to-vault: to-vault-id,
       asset: asset,
-      amount: amount
+      amount: amount,
     })
     (ok true)
   )
@@ -156,6 +229,14 @@
 
 ;; --- Read Only ---
 
-(define-read-only (get-vault-balance (vault-id uint) (asset principal))
-  (default-to u0 (map-get? vault-balances { vault-id: vault-id, asset: asset }))
+(define-read-only (get-vault-balance
+    (vault-id uint)
+    (asset principal)
+  )
+  (default-to u0
+    (map-get? vault-balances {
+      vault-id: vault-id,
+      asset: asset,
+    })
+  )
 )

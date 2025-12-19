@@ -137,11 +137,9 @@
 
     ;; Calculate liquidation amounts
     (match (calculate-liquidation-amounts borrower debt-asset collateral-asset
-      debt-amount
-      lending-system-ref
+      debt-amount lending-system-ref
     )
-      amounts
-      (let ((collateral-to-seize (get collateral-to-seize amounts)))
+      amounts (let ((collateral-to-seize (get collateral-to-seize amounts)))
         (asserts! (<= collateral-to-seize max-collateral-amount) (err u1005))
         ;; ERR_SLIPPAGE_TOO_HIGH
 
@@ -196,13 +194,11 @@
       (lsys (unwrap! (var-get lending-system) (err u1008))) ;; ERR_ASSET_NOT_WHITELISTED
     )
     (asserts! (is-eq (contract-of lending-system-ref) lsys) (err u1002))
-    (match (contract-call? lending-system-ref get-liquidation-amounts borrower debt-asset collateral-asset debt-amount)
-      amounts
-      (ok {
-        collateral-to-seize: (get collateral-to-seize amounts)
-      })
-      err
-      (err err)
+    (match (contract-call? lending-system-ref get-liquidation-amounts borrower
+      debt-asset collateral-asset debt-amount
+    )
+      amounts (ok { collateral-to-seize: (get collateral-to-seize amounts) })
+      err (err err)
     )
   )
 )

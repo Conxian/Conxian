@@ -32,11 +32,13 @@
 
 ;; @desc Asserts that the transaction sender is the contract owner.
 (define-private (check-is-owner)
-  (ok (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)))
+  (ok (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED))
+)
 
 ;; @desc Asserts that the vault is not paused.
 (define-private (check-not-paused)
-  (ok (asserts! (not (var-get vault-paused)) ERR_VAULT_PAUSED)))
+  (ok (asserts! (not (var-get vault-paused)) ERR_VAULT_PAUSED))
+)
 
 ;; --- Admin Functions ---
 
@@ -47,7 +49,9 @@
   (begin
     (try! (check-is-owner))
     (var-set vault-paused paused)
-    (ok true)))
+    (ok true)
+  )
+)
 
 ;; @desc Sets the custody contract address.
 ;; @param contract principal The new custody contract principal.
@@ -56,7 +60,9 @@
   (begin
     (try! (check-is-owner))
     (var-set custody-contract contract)
-    (ok true)))
+    (ok true)
+  )
+)
 
 ;; @desc Sets the yield aggregator contract address.
 ;; @param contract principal The new yield aggregator contract principal.
@@ -65,8 +71,9 @@
   (begin
     (try! (check-is-owner))
     (var-set yield-aggregator-contract contract)
-    (ok true)))
-
+    (ok true)
+  )
+)
 
 ;; @desc Sets the fee manager contract address.
 ;; @param contract principal The new fee manager contract principal.
@@ -75,7 +82,9 @@
   (begin
     (try! (check-is-owner))
     (var-set fee-manager-contract contract)
-    (ok true)))
+    (ok true)
+  )
+)
 
 ;; --- Core Vault Functions ---
 
@@ -83,11 +92,18 @@
 ;; @param token-contract <sip-010-ft-trait> The sBTC token contract.
 ;; @param amount uint The amount of sBTC to deposit.
 ;; @returns (response uint uint) The number of shares minted.
-(define-public (deposit (token-contract <sip-010-ft-trait>) (amount uint))
+(define-public (deposit
+    (token-contract <sip-010-ft-trait>)
+    (amount uint)
+  )
   (begin
     (try! (check-not-paused))
-    (try! (contract-call? token-contract transfer amount tx-sender (as-contract tx-sender) none))
-    (as-contract (contract-call? .custody deposit amount tx-sender))))
+    (try! (contract-call? token-contract transfer amount tx-sender
+      (as-contract tx-sender) none
+    ))
+    (as-contract (contract-call? .custody deposit amount tx-sender))
+  )
+)
 
 ;; @desc Initiates a withdrawal from the vault.
 ;; @param token-contract <sip-010-ft-trait> The sBTC token contract.
@@ -96,7 +112,9 @@
 (define-public (withdraw (shares uint))
   (begin
     (try! (check-not-paused))
-    (contract-call? .custody withdraw shares tx-sender)))
+    (contract-call? .custody withdraw shares tx-sender)
+  )
+)
 
 ;; @desc Completes a withdrawal after the timelock period.
 ;; @param token-contract <sip-010-ft-trait> The sBTC token contract.
@@ -121,10 +139,18 @@
 (define-public (sbtc-deposit (amount uint))
   (begin
     (try! (check-not-paused))
-    (let ((fee (unwrap! (contract-call? .fee-manager calculate-fee "deposit" amount) (err u0))))
+    (let ((fee (unwrap! (contract-call? .fee-manager calculate-fee "deposit" amount)
+        (err u0)
+      )))
       (let ((net-amount (- amount fee)))
-        (try! (as-contract (contract-call? .sbtc-token transfer net-amount tx-sender (as-contract tx-sender) none)))
-        (ok net-amount)))))
+        (try! (as-contract (contract-call? .sbtc-token transfer net-amount tx-sender
+          (as-contract tx-sender) none
+        )))
+        (ok net-amount)
+      )
+    )
+  )
+)
 
 ;; @desc Withdraws sBTC from the vault.
 ;; @param amount uint The amount of sBTC to withdraw.
@@ -132,9 +158,17 @@
 (define-public (sbtc-withdraw (amount uint))
   (begin
     (try! (check-not-paused))
-    (let ((fee (unwrap! (contract-call? .fee-manager calculate-fee "withdraw" amount) (err u0))))
+    (let ((fee (unwrap! (contract-call? .fee-manager calculate-fee "withdraw" amount)
+        (err u0)
+      )))
       (let ((net-amount (- amount fee)))
-        (as-contract (contract-call? .sbtc-token transfer net-amount (as-contract tx-sender) tx-sender none))))))
+        (as-contract (contract-call? .sbtc-token transfer net-amount (as-contract tx-sender)
+          tx-sender none
+        ))
+      )
+    )
+  )
+)
 
 ;; --- Yield Generation ---
 
@@ -142,10 +176,15 @@
 ;; @param strategy principal The principal of the strategy contract.
 ;; @param amount uint The amount of sBTC to allocate.
 ;; @returns (response bool uint) `(ok true)` on success.
-(define-public (allocate-to-strategy (strategy principal) (amount uint))
+(define-public (allocate-to-strategy
+    (strategy principal)
+    (amount uint)
+  )
   (begin
     (try! (check-is-owner))
-    (contract-call? .yield-aggregator allocate-to-strategy strategy amount)))
+    (contract-call? .yield-aggregator allocate-to-strategy strategy amount)
+  )
+)
 
 ;; @desc Harvests yield from a strategy.
 ;; @param strategy principal The principal of the strategy contract.
@@ -154,8 +193,15 @@
   (begin
     (try! (check-is-owner))
     (let ((gross-yield (unwrap! (contract-call? .yield-aggregator harvest-yield strategy) (err u0))))
-      (let ((fee (unwrap! (contract-call? .fee-manager calculate-fee "performance" gross-yield) (err u0))))
-        (ok (- gross-yield fee))))))
+      (let ((fee (unwrap!
+          (contract-call? .fee-manager calculate-fee "performance" gross-yield)
+          (err u0)
+        )))
+        (ok (- gross-yield fee))
+      )
+    )
+  )
+)
 
 ;; --- Read-Only Functions ---
 
@@ -168,5 +214,6 @@
     total-shares: u0,
     total-yield: u0,
     share-price: u100000000,
-    paused: (var-get vault-paused)
-  }))
+    paused: (var-get vault-paused),
+  })
+)

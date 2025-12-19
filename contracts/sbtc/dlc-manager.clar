@@ -19,14 +19,14 @@
 (define-data-var authorized-lending-contract principal tx-sender) ;; The contract allowed to trigger liquidations
 
 ;; --- Data Maps ---
-(define-map dlcs 
-  { dlc-uuid: (buff 32) } 
-  { 
+(define-map dlcs
+  { dlc-uuid: (buff 32) }
+  {
     owner: principal,
     value-locked: uint,
     loan-id: uint,
     status: (string-ascii 20),
-    closing-price: (optional uint)
+    closing-price: (optional uint),
   }
 )
 
@@ -40,65 +40,72 @@
   )
 )
 
-(define-public (register-dlc (dlc-uuid (buff 32)) (value-locked uint) (owner principal) (loan-id uint))
+(define-public (register-dlc
+    (dlc-uuid (buff 32))
+    (value-locked uint)
+    (owner principal)
+    (loan-id uint)
+  )
   (begin
     ;; Only authorized contracts (e.g. the lending pool) or the DLC oracle system can register
     ;; For v1, we allow the owner to register, but in prod this should be gated by the DLC oracle signature verification
     (asserts! (is-none (map-get? dlcs { dlc-uuid: dlc-uuid })) ERR_DLC_EXISTS)
-    
+
     (map-set dlcs { dlc-uuid: dlc-uuid } {
       owner: owner,
       value-locked: value-locked,
       loan-id: loan-id,
       status: STATUS_OPEN,
-      closing-price: none
+      closing-price: none,
     })
-    
+
     (print {
       event: "dlc-registered",
       dlc-uuid: dlc-uuid,
       owner: owner,
-      value-locked: value-locked
+      value-locked: value-locked,
     })
     (ok true)
   )
 )
 
 (define-public (close-dlc (dlc-uuid (buff 32)))
-  (let (
-    (dlc (unwrap! (map-get? dlcs { dlc-uuid: dlc-uuid }) ERR_DLC_NOT_FOUND))
-  )
+  (let ((dlc (unwrap! (map-get? dlcs { dlc-uuid: dlc-uuid }) ERR_DLC_NOT_FOUND)))
     ;; Only authorized contract can close (e.g. upon repayment)
-    (asserts! (is-eq tx-sender (var-get authorized-lending-contract)) ERR_UNAUTHORIZED)
+    (asserts! (is-eq tx-sender (var-get authorized-lending-contract))
+      ERR_UNAUTHORIZED
+    )
     (asserts! (is-eq (get status dlc) STATUS_OPEN) ERR_INVALID_STATE)
 
     (map-set dlcs { dlc-uuid: dlc-uuid } (merge dlc { status: STATUS_CLOSED }))
-    
+
     (print {
       event: "dlc-closed",
-      dlc-uuid: dlc-uuid
+      dlc-uuid: dlc-uuid,
     })
     (ok true)
   )
 )
 
 (define-public (liquidate-dlc (dlc-uuid (buff 32)))
-  (let (
-    (dlc (unwrap! (map-get? dlcs { dlc-uuid: dlc-uuid }) ERR_DLC_NOT_FOUND))
-  )
+  (let ((dlc (unwrap! (map-get? dlcs { dlc-uuid: dlc-uuid }) ERR_DLC_NOT_FOUND)))
     ;; Only authorized contract (Liquidation Engine) can trigger this
-    (asserts! (is-eq tx-sender (var-get authorized-lending-contract)) ERR_UNAUTHORIZED)
+    (asserts! (is-eq tx-sender (var-get authorized-lending-contract))
+      ERR_UNAUTHORIZED
+    )
     (asserts! (is-eq (get status dlc) STATUS_OPEN) ERR_INVALID_STATE)
 
     ;; In a real system, this would emit an event picked up by the DLC Oracle/Attestors
     ;; to broadcast the liquidation transaction to Bitcoin L1.
-    
-    (map-set dlcs { dlc-uuid: dlc-uuid } (merge dlc { status: STATUS_LIQUIDATED }))
-    
+
+    (map-set dlcs { dlc-uuid: dlc-uuid }
+      (merge dlc { status: STATUS_LIQUIDATED })
+    )
+
     (print {
       event: "dlc-liquidated",
       dlc-uuid: dlc-uuid,
-      info: "Attestors should broadcast liquidation tx"
+      info: "Attestors should broadcast liquidation tx",
     })
     (ok true)
   )

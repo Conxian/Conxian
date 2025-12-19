@@ -9,13 +9,17 @@
 
 ;; KYC Tiers (aligned with IDENTITY_KYC_POPIA.md)
 (define-constant TIER_UNVERIFIED u0)
-(define-constant TIER_BASIC u1)       ;; Natural persons, basic KYC
+(define-constant TIER_BASIC u1) ;; Natural persons, basic KYC
 (define-constant TIER_PROFESSIONAL u2) ;; Pro operators / Institutions, Enhanced KYC/KYB
-(define-constant TIER_REGULATED u3)    ;; Licensed Banks/Funds
+(define-constant TIER_REGULATED u3) ;; Licensed Banks/Funds
 
 ;; Roles
 (define-data-var contract-owner principal tx-sender)
-(define-map attestors principal bool) ;; Principals authorized to update KYC status
+(define-map attestors
+  principal
+  bool
+)
+;; Principals authorized to update KYC status
 
 ;; Identity Store
 (define-map identity-status
@@ -25,9 +29,12 @@
     status-flags: uint, ;; Bitmask for flags (0x1=Review, 0x2=Sanctioned, 0x4=Institutional)
     region-code: (string-ascii 3), ;; ISO 3166-1 alpha-3 (e.g. "ZAF", "USA")
     updated-at: uint,
-    updated-by: principal
+    updated-by: principal,
   }
 )
+
+;; Badge Integration
+(define-data-var badge-token principal .identity-badge)
 
 ;; --- Authorization ---
 
@@ -53,10 +60,21 @@
   )
 )
 
-(define-public (set-attestor (attestor principal) (enabled bool))
+(define-public (set-attestor
+    (attestor principal)
+    (enabled bool)
+  )
   (begin
     (asserts! (is-contract-owner) ERR_UNAUTHORIZED)
     (map-set attestors attestor enabled)
+    (ok true)
+  )
+)
+
+(define-public (set-badge-token (token principal))
+  (begin
+    (asserts! (is-contract-owner) ERR_UNAUTHORIZED)
+    (var-set badge-token token)
     (ok true)
   )
 )
@@ -68,7 +86,7 @@
 ;; @param tier The KYC tier (0-3)
 ;; @param flags Status bitmask
 ;; @param region Region code (e.g. "ZAF")
-(define-public (set-identity-status 
+(define-public (set-identity-status
     (subject principal)
     (tier uint)
     (flags uint)
@@ -77,21 +95,26 @@
   (begin
     (asserts! (is-authorized) ERR_UNAUTHORIZED)
     (asserts! (<= tier TIER_REGULATED) ERR_INVALID_TIER)
-    
+
     (map-set identity-status subject {
       tier: tier,
       status-flags: flags,
       region-code: region,
       updated-at: block-height,
-      updated-by: tx-sender
+      updated-by: tx-sender,
     })
-    
+
+    ;; Manage Identity Badge
+    (if (> tier TIER_UNVERIFIED)
+      (unwrap-panic (contract-call? (var-get badge-token) mint subject))
+      (unwrap-panic (contract-call? (var-get badge-token) burn subject))
+    )
     (print {
       event: "identity-updated",
       subject: subject,
       tier: tier,
       flags: flags,
-      region: region
+      region: region,
     })
     (ok true)
   )
@@ -110,10 +133,11 @@
   )
 )
 
-(define-read-only (is-tier-or-higher (subject principal) (required-tier uint))
-  (let (
-    (user-tier (default-to TIER_UNVERIFIED (get-kyc-tier-simple subject)))
+(define-read-only (is-tier-or-higher
+    (subject principal)
+    (required-tier uint)
   )
+  (let ((user-tier (default-to TIER_UNVERIFIED (get-kyc-tier-simple subject))))
     (>= user-tier required-tier)
   )
 )

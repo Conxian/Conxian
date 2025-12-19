@@ -132,6 +132,9 @@
     ;; Update community contribution tracking
     (try! (update-community-contribution contributor amount))
 
+    ;; Transfer STX to contract
+    (try! (stx-transfer? amount tx-sender (as-contract tx-sender)))
+
     ;; Process 50/50 split allocation
     (var-set launch-fund-allocation (+ (var-get launch-fund-allocation) launch-portion))
     (var-set opex-fund-allocation (+ (var-get opex-fund-allocation) opex-portion))

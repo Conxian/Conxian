@@ -368,7 +368,9 @@
     (try! (validate-token token))
     (try! (contract-call? .revenue-distributor distribute-revenue token amount))
     (try! (update-token-activity token amount))
-    (ok true)))
+    (ok true)
+  )
+)
 
 (define-public (emergency-pause-system)
   (begin
@@ -398,6 +400,64 @@
   (begin
     (asserts! (is-contract-owner) (err ERR_UNAUTHORIZED))
     (var-set emergency-mode false)
+    (ok true)
+  )
+)
+
+;; --- Genesis Distribution ---
+
+(define-constant GENESIS_SUPPLY_CXD u100000000000000) ;; 100M CXD
+(define-constant GENESIS_SUPPLY_CXVG u10000000000000) ;; 10M CXVG
+
+;; Allocation Splits (BPS)
+(define-constant ALLOC_FOUNDER u1500) ;; 15%
+(define-constant ALLOC_TREASURY u3000) ;; 30%
+(define-constant ALLOC_COMMUNITY u5500) ;; 55%
+
+(define-data-var distribution-complete bool false)
+
+(define-public (distribute-genesis-supply
+    (founder-vesting principal)
+    (treasury principal)
+  )
+  (let (
+      (founder-amt-cxd (/ (* GENESIS_SUPPLY_CXD ALLOC_FOUNDER) u10000))
+      (treasury-amt-cxd (/ (* GENESIS_SUPPLY_CXD ALLOC_TREASURY) u10000))
+      (community-amt-cxd (/ (* GENESIS_SUPPLY_CXD ALLOC_COMMUNITY) u10000))
+      (founder-amt-cxvg (/ (* GENESIS_SUPPLY_CXVG ALLOC_FOUNDER) u10000))
+      (treasury-amt-cxvg (/ (* GENESIS_SUPPLY_CXVG ALLOC_TREASURY) u10000))
+      ;; Community CXVG might be minted via liquidity mining, not pre-mine
+    )
+    (asserts! (is-contract-owner) (err ERR_UNAUTHORIZED))
+    (asserts! (not (var-get distribution-complete)) (err u105))
+    ;; ERR_ALREADY_DISTRIBUTED
+
+    ;; 1. Founder Allocation (Vested)
+    (try! (contract-call? .cxd-token mint founder-vesting founder-amt-cxd))
+    (try! (contract-call? founder-vesting add-vesting-allocation .cxd-token
+      founder-amt-cxd
+    ))
+
+    (try! (contract-call? .cxvg-token mint founder-amt-cxvg founder-vesting))
+    (try! (contract-call? founder-vesting add-vesting-allocation .cxvg-token
+      founder-amt-cxvg
+    ))
+
+    ;; 2. Treasury Allocation
+    (try! (contract-call? .cxd-token mint treasury treasury-amt-cxd))
+    (try! (contract-call? .cxvg-token mint treasury-amt-cxvg treasury))
+
+    ;; 3. Community/Liquidity (Held by coordinator or separate distributor)
+    (try! (contract-call? .cxd-token mint tx-sender community-amt-cxd))
+
+    (var-set distribution-complete true)
+    (print {
+      event: "genesis-distribution",
+      founder-vesting: founder-vesting,
+      treasury: treasury,
+      cxd-founder: founder-amt-cxd,
+      cxd-treasury: treasury-amt-cxd,
+    })
     (ok true)
   )
 )

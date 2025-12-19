@@ -2,21 +2,16 @@
 
 ;; Fee Manager
 ;; This contract manages all fees for the sBTC vault.
-(define-trait fee-manager-trait
-  (
-    ;; @desc Calculates the fee for a given operation.
-    ;; @param operation (string-ascii 64) The operation for which to calculate the fee.
-    ;; @param amount uint The amount on which the fee is calculated.
-    ;; @returns (response uint uint) A response containing the calculated fee or an error.
-    (calculate-fee ((string-ascii 64) uint) (response uint uint))
-
-    ;; @desc Sets the fee for a given operation.
-    ;; @param operation (string-ascii 64) The operation for which to set the fee.
-    ;; @param fee-bps uint The new fee in basis points.
-    ;; @returns (response bool uint) A response indicating success or an error.
-    (set-fee ((string-ascii 64) uint) (response bool uint))
+(define-trait fee-manager-trait (
+  (calculate-fee
+    ((string-ascii 64) uint)
+    (response uint uint)
   )
-)
+  (set-fee
+    ((string-ascii 64) uint)
+    (response bool uint)
+  )
+))
 
 ;; --- Data Storage ---
 
@@ -35,7 +30,10 @@
 ;; @param operation (string-ascii 64) The operation ("wrap", "unwrap", "performance", "management").
 ;; @param amount uint The amount to calculate the fee on.
 ;; @returns (response uint uint) The calculated fee.
-(define-public (calculate-fee (operation (string-ascii 64)) (amount uint))
+(define-public (calculate-fee
+    (operation (string-ascii 64))
+    (amount uint)
+  )
   (begin
     (asserts! (is-eq tx-sender .sbtc-vault) (err u100))
     (if (is-eq operation "wrap")
@@ -46,21 +44,48 @@
           (ok (/ (* amount (var-get performance-fee-bps)) u10000))
           (if (is-eq operation "management")
             (ok (/ (* amount (var-get management-fee-bps)) u10000))
-            (err u3001)))))))
+            (err u3001)
+          )
+        )
+      )
+    )
+  )
+)
 
 ;; @desc Sets the fee for a given operation. Can only be called by the sBTC vault.
 ;; @param operation (string-ascii 64) The operation ("wrap", "unwrap", "performance", "management").
 ;; @param fee-bps uint The new fee in basis points.
 ;; @returns (response bool uint) `(ok true)` on success.
-(define-public (set-fee (operation (string-ascii 64)) (fee-bps uint))
+(define-public (set-fee
+    (operation (string-ascii 64))
+    (fee-bps uint)
+  )
   (begin
     (asserts! (is-eq tx-sender .sbtc-vault) (err u100))
     (if (is-eq operation "wrap")
-      (begin (var-set wrap-fee-bps fee-bps) (ok true))
+      (begin
+        (var-set wrap-fee-bps fee-bps)
+        (ok true)
+      )
       (if (is-eq operation "unwrap")
-        (begin (var-set unwrap-fee-bps fee-bps) (ok true))
+        (begin
+          (var-set unwrap-fee-bps fee-bps)
+          (ok true)
+        )
         (if (is-eq operation "performance")
-          (begin (var-set performance-fee-bps fee-bps) (ok true))
+          (begin
+            (var-set performance-fee-bps fee-bps)
+            (ok true)
+          )
           (if (is-eq operation "management")
-            (begin (var-set management-fee-bps fee-bps) (ok true))
-            (err u3001)))))))
+            (begin
+              (var-set management-fee-bps fee-bps)
+              (ok true)
+            )
+            (err u3001)
+          )
+        )
+      )
+    )
+  )
+)

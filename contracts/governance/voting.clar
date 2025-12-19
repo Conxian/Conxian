@@ -2,29 +2,22 @@
 
 ;; Voting
 ;; This contract manages voting on proposals.
-(define-trait voting-trait
-  (
-    ;; @desc Casts a vote on a proposal.
-    ;; @param proposal-id uint The ID of the proposal to vote on.
-    ;; @param support bool Whether the vote is for or against the proposal.
-    ;; @param votes uint The number of votes to cast.
-    ;; @param voter principal The address of the voter.
-    ;; @returns (response bool uint) `(ok true)` on success.
-    (vote (uint bool uint principal) (response bool uint))
-
-    ;; @desc Retrieves a vote on a proposal by a specific voter.
-    ;; @param proposal-id uint The ID of the proposal.
-    ;; @param voter principal The address of the voter.
-    ;; @returns (response (optional { ... }) uint) The vote details.
-    (get-vote (uint principal)
-      (response (optional {
-        support: bool,
-        votes: uint,
-      })
-        uint
-      ))
+(define-trait voting-trait (
+  (vote
+    (uint bool uint principal)
+    (response bool uint)
   )
-)
+  (get-vote
+    (uint principal)
+    (
+      response       (optional {
+      support: bool,
+      votes: uint,
+    })
+      uint
+    )
+  )
+))
 
 ;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED u100)
@@ -38,17 +31,21 @@
 (define-map votes
   {
     proposal-id: uint,
-    voter: principal
+    voter: principal,
   }
   {
     support: bool,
-    votes: uint
-  })
+    votes: uint,
+  }
+)
 
-(define-map locks principal {
+(define-map locks
+  principal
+  {
     amount: uint,
-    unlock-burn-height: uint
-})
+    unlock-burn-height: uint,
+  }
+)
 
 ;; Contract references
 (define-data-var proposal-engine-contract (optional principal) none)
@@ -61,29 +58,30 @@
 (define-constant LOCK_PERIOD_BLOCKS u100) ;; Example lock period, ~2 weeks in burn blocks
 
 (define-read-only (get-voting-power (voter principal))
-    (match (map-get? locks voter)
-        lock-info
-        (if (>= burn-block-height (get unlock-burn-height lock-info))
-            u0 ;; Lock expired
-            (get amount lock-info)
-        )
-        u0
+  (match (map-get? locks voter)
+    lock-info (if (>= burn-block-height (get unlock-burn-height lock-info))
+      u0 ;; Lock expired
+      (get amount lock-info)
     )
+    u0
+  )
 )
 
 (define-public (lock-tokens (amount uint))
-    (begin
-        (asserts! (> amount u0) (err ERR_INSUFFICIENT_LOCKED_TOKENS))
+  (begin
+    (asserts! (> amount u0) (err ERR_INSUFFICIENT_LOCKED_TOKENS))
 
-        ;; Transfer tokens to this contract for custody
-        (try! (contract-call? (var-get governance-token) transfer amount tx-sender (as-contract tx-sender) none))
+    ;; Transfer tokens to this contract for custody
+    (try! (contract-call? .governance-token transfer amount tx-sender
+      (as-contract tx-sender) none
+    ))
 
-        (map-set locks tx-sender {
-            amount: (+ (get-voting-power tx-sender) amount),
-            unlock-burn-height: (+ burn-block-height LOCK_PERIOD_BLOCKS)
-        })
-        (ok true)
-    )
+    (map-set locks tx-sender {
+      amount: (+ (get-voting-power tx-sender) amount),
+      unlock-burn-height: (+ burn-block-height LOCK_PERIOD_BLOCKS),
+    })
+    (ok true)
+  )
 )
 
 (define-public (set-proposal-engine-contract (contract principal))
@@ -100,21 +98,37 @@
 ;; @param votes-cast uint The number of votes being cast.
 ;; @param voter principal The principal of the user casting the vote.
 ;; @returns (response bool uint) `(ok true)` if the vote is successfully cast, otherwise an error.
-(define-public (vote (proposal-id uint) (support bool) (voter principal))
+(define-public (vote
+    (proposal-id uint)
+    (support bool)
+    (voter principal)
+  )
   (let ((voting-power (get-voting-power voter)))
     (begin
-        (asserts! (is-eq tx-sender (unwrap! (var-get proposal-engine-contract) (err ERR_UNAUTHORIZED))))
-        (asserts! (> voting-power u0) (err ERR_INSUFFICIENT_LOCKED_TOKENS))
+      (asserts! (is-eq tx-sender
+        (unwrap! (var-get proposal-engine-contract) (err ERR_UNAUTHORIZED))
+      ))
+      (asserts! (> voting-power u0) (err ERR_INSUFFICIENT_LOCKED_TOKENS))
 
-        (asserts! (is-none (map-get? votes { proposal-id: proposal-id, voter: voter })) (err ERR_ALREADY_VOTED))
+      (asserts!
+        (is-none (map-get? votes {
+          proposal-id: proposal-id,
+          voter: voter,
+        }))
+        (err ERR_ALREADY_VOTED)
+      )
 
-        (map-set votes { proposal-id: proposal-id, voter: voter } {
-            support: support,
-            votes: voting-power
-        })
-        (ok true)
+      (map-set votes {
+        proposal-id: proposal-id,
+        voter: voter,
+      } {
+        support: support,
+        votes: voting-power,
+      })
+      (ok true)
     )
-))
+  )
+)
 
 ;; --- Read-Only Functions ---
 
@@ -122,19 +136,30 @@
 ;; @param proposal-id uint The ID of the proposal.
 ;; @param voter principal The principal of the voter.
 ;; @returns (response (optional { ... }) uint) An optional tuple containing the vote details.
-(define-read-only (get-vote (proposal-id uint) (voter principal))
-  (ok (map-get? votes { proposal-id: proposal-id, voter: voter })))
+(define-read-only (get-vote
+    (proposal-id uint)
+    (voter principal)
+  )
+  (ok (map-get? votes {
+    proposal-id: proposal-id,
+    voter: voter,
+  }))
+)
 
 (define-public (unlock-tokens)
-    (let ((lock-info (unwrap! (map-get? locks tx-sender) (err u0))))
-        (begin
-            (asserts! (>= burn-block-height (get unlock-burn-height lock-info)) (err u0))
+  (let ((lock-info (unwrap! (map-get? locks tx-sender) (err u0))))
+    (begin
+      (asserts! (>= burn-block-height (get unlock-burn-height lock-info))
+        (err u0)
+      )
 
-            ;; Transfer tokens back to owner
-            (try! (as-contract (contract-call? (var-get governance-token) transfer (get amount lock-info) tx-sender tx-sender none)))
+      ;; Transfer tokens back to owner
+      (try! (as-contract (contract-call? .governance-token transfer (get amount lock-info) tx-sender
+        tx-sender none
+      )))
 
-            (map-delete locks tx-sender)
-            (ok true)
-        )
+      (map-delete locks tx-sender)
+      (ok true)
     )
+  )
 )

@@ -49,11 +49,20 @@
 ;; @var token-uri The URI for the token's metadata.
 (define-data-var token-uri (optional (string-utf8 256)) none)
 ;; @var balances A map of principal balances.
-(define-map balances principal uint)
+(define-map balances
+  principal
+  uint
+)
 ;; @var minters A map of principals authorized to mint tokens.
-(define-map minters principal bool)
+(define-map minters
+  principal
+  bool
+)
 ;; @var balance-since A map that tracks the block height at which a principal's balance was last updated.
-(define-map balance-since principal uint)
+(define-map balance-since
+  principal
+  uint
+)
 ;; @var migration-queue-contract The principal of the migration queue contract.
 (define-data-var migration-queue-contract (optional principal) none)
 ;; @var cxd-contract The principal of the CXD token contract.
@@ -65,9 +74,18 @@
 ;; @var epoch-cap-cxd The maximum amount of CXD that can be minted in an epoch.
 (define-data-var epoch-cap-cxd uint u0)
 ;; @var epoch-minted A map that tracks the amount of CXD minted in each epoch.
-(define-map epoch-minted uint uint)
+(define-map epoch-minted
+  uint
+  uint
+)
 ;; @var epoch-user-minted A map that tracks the amount of CXD minted by each user in each epoch.
-(define-map epoch-user-minted { epoch: uint, who: principal } uint)
+(define-map epoch-user-minted
+  {
+    epoch: uint,
+    who: principal,
+  }
+  uint
+)
 ;; @var user-base-cap-cxd The base user capacity for CXD minting.
 (define-data-var user-base-cap-cxd uint u0)
 ;; @var user-duration-factor The duration factor for user capacity calculation.
@@ -101,25 +119,37 @@
 ;; @param a The first number.
 ;; @param b The second number.
 ;; @returns The sum of the two numbers, or an error on overflow.
-(define-private (safe-add (a uint) (b uint))
+(define-private (safe-add
+    (a uint)
+    (b uint)
+  )
   (let ((result (+ a b)))
     (if (>= result a)
       (ok result)
-      (err ERR_OVERFLOW))))
+      (err ERR_OVERFLOW)
+    )
+  )
+)
 
 ;; @desc Safely subtracts two unsigned integers.
 ;; @param a The first number.
 ;; @param b The second number.
 ;; @returns The difference of the two numbers, or an error on underflow.
-(define-private (safe-sub (a uint) (b uint))
+(define-private (safe-sub
+    (a uint)
+    (b uint)
+  )
   (if (>= a b)
     (ok (- a b))
-    (err ERR_SUB_UNDERFLOW)))
+    (err ERR_SUB_UNDERFLOW)
+  )
+)
 
 ;; @desc Checks if the system is paused.
 ;; @returns A boolean indicating if the system is paused.
 (define-private (check-system-pause)
-  false)
+  false
+)
 
 ;; @desc Performs a mid-year auto-adjustment of the epoch cap.
 ;; @returns A boolean indicating if an adjustment was made.
@@ -130,7 +160,12 @@
       (last (var-get last-midyear-adjustment))
       (override (var-get epoch-override))
     )
-    (if (and (> mb u0) (> bps u0) (is-eq override false) (>= (- block-height last) mb))
+    (if (and
+        (> mb u0)
+        (> bps u0)
+        (is-eq override false)
+        (>= (- block-height last) mb)
+      )
       (begin
         (var-set epoch-cap-cxd (/ (* (var-get epoch-cap-cxd) bps) u10000))
         (var-set last-midyear-adjustment block-height)
@@ -138,7 +173,8 @@
       )
       false
     )
-  ))
+  )
+)
 
 ;; --- Read-Only Functions ---
 
@@ -146,13 +182,15 @@
 ;; @param who The principal to check.
 ;; @returns A boolean indicating if the principal is the owner.
 (define-read-only (is-owner (who principal))
-  (is-eq who (var-get contract-owner)))
+  (is-eq who (var-get contract-owner))
+)
 
 ;; @desc Checks if a principal is a minter.
 ;; @param who The principal to check.
 ;; @returns A boolean indicating if the principal is a minter.
 (define-read-only (is-minter (who principal))
-  (default-to false (map-get? minters who)))
+  (default-to false (map-get? minters who))
+)
 
 ;; @desc Returns the current epoch index since the migration start.
 ;; @returns The current epoch index, or an error.
@@ -166,7 +204,8 @@
       (asserts! (>= block-height start) (err ERR_MIGRATION_NOT_STARTED))
       (ok (/ (- block-height start) len))
     )
-  ))
+  )
+)
 
 ;; @desc Returns the current migration band.
 ;; @returns The current migration band, or an error.
@@ -179,35 +218,53 @@
       (asserts! (> len u0) (err ERR_MIGRATION_NOT_SET))
       (asserts! (>= block-height start) (err ERR_MIGRATION_NOT_STARTED))
       (let ((band (/ (- block-height start) len)))
-        (ok (if (>= band u3) u3 band))
+        (ok (if (>= band u3)
+          u3
+          band
+        ))
       )
     )
-  ))
+  )
+)
 
 ;; @desc Returns the multiplier for a given migration band.
 ;; @param band The migration band.
 ;; @returns The multiplier for the given migration band.
 (define-read-only (band-multiplier (band uint))
   (ok (if (is-eq band u0)
-        BAND0
-        (if (is-eq band u1)
-          BAND1
-          (if (is-eq band u2)
-            BAND2
-            BAND3)))))
+    BAND0
+    (if (is-eq band u1)
+      BAND1
+      (if (is-eq band u2)
+        BAND2
+        BAND3
+      )
+    )
+  ))
+)
 
 ;; @desc Gets the amount of CXD minted in an epoch.
 ;; @param epoch The epoch to get the minted amount for.
 ;; @returns The amount of CXD minted in the epoch.
 (define-read-only (get-epoch-minted (epoch uint))
-  (default-to u0 (map-get? epoch-minted epoch)))
+  (default-to u0 (map-get? epoch-minted epoch))
+)
 
 ;; @desc Gets the amount of CXD minted by a user in an epoch.
 ;; @param epoch The epoch to get the minted amount for.
 ;; @param who The principal of the user.
 ;; @returns The amount of CXD minted by the user in the epoch.
-(define-read-only (get-user-epoch-minted (epoch uint) (who principal))
-  (default-to u0 (map-get? epoch-user-minted { epoch: epoch, who: who })))
+(define-read-only (get-user-epoch-minted
+    (epoch uint)
+    (who principal)
+  )
+  (default-to u0
+    (map-get? epoch-user-minted {
+      epoch: epoch,
+      who: who,
+    })
+  )
+)
 
 ;; @desc Gets the block height at which a user's balance was last updated.
 ;; @param who The principal of the user.
@@ -218,7 +275,8 @@
       (start (var-get migration-start-height))
     )
     (default-to (default-to block-height start) maybe-since)
-  ))
+  )
+)
 
 ;; @desc Gets the epoch capacity for a user.
 ;; @param who The principal of the user.
@@ -232,8 +290,12 @@
       (duration (- block-height since))
       (calc (+ base (* factor duration)))
     )
-    (ok (if (> calc max-cap) max-cap calc))
-  ))
+    (ok (if (> calc max-cap)
+      max-cap
+      calc
+    ))
+  )
+)
 
 ;; --- Admin Functions ---
 
@@ -245,18 +307,23 @@
     (asserts! (is-owner tx-sender) (err ERR_UNAUTHORIZED))
     (var-set contract-owner new-owner)
     (ok true)
-  ))
+  )
+)
 
 ;; @desc Sets or unsets a principal as a minter.
 ;; @param who The principal to set or unset.
 ;; @param enabled `true` to enable, `false` to disable.
 ;; @returns A response indicating success or failure.
-(define-public (set-minter (who principal) (enabled bool))
+(define-public (set-minter
+    (who principal)
+    (enabled bool)
+  )
   (begin
     (asserts! (is-owner tx-sender) (err ERR_UNAUTHORIZED))
     (map-set minters who enabled)
     (ok true)
-  ))
+  )
+)
 
 ;; @desc Sets the protocol monitor contract.
 ;; @param contract-address The address of the protocol monitor contract.
@@ -266,7 +333,8 @@
     (asserts! (is-owner tx-sender) (err ERR_UNAUTHORIZED))
     (var-set protocol-monitor (some contract-address))
     (ok true)
-  ))
+  )
+)
 
 ;; @desc Sets the migration queue contract.
 ;; @param queue The address of the migration queue contract.
@@ -276,14 +344,19 @@
     (asserts! (is-owner tx-sender) (err ERR_UNAUTHORIZED))
     (var-set migration-queue-contract (some queue))
     (ok true)
-  ))
+  )
+)
 
 ;; @desc Configures the migration from CXLP to CXD.
 ;; @param cxd The address of the CXD token contract.
 ;; @param start-height The block height at which the migration starts.
 ;; @param epoch-len The length of each epoch in blocks.
 ;; @returns A response indicating success or failure.
-(define-public (configure-migration (cxd principal) (start-height uint) (epoch-len uint))
+(define-public (configure-migration
+    (cxd principal)
+    (start-height uint)
+    (epoch-len uint)
+  )
   (begin
     (asserts! (is-owner tx-sender) (err ERR_UNAUTHORIZED))
     (asserts! (> epoch-len u0) (err ERR_MIGRATION_NOT_SET))
@@ -291,7 +364,8 @@
     (var-set migration-start-height (some start-height))
     (var-set epoch-length epoch-len)
     (ok true)
-  ))
+  )
+)
 
 ;; @desc Sets liquidity parameters for the token.
 ;; @param epoch-cap The epoch cap.
@@ -301,7 +375,14 @@
 ;; @param midyear The midyear adjustment blocks.
 ;; @param adjust-bps The midyear adjustment basis points.
 ;; @returns A response indicating success or failure.
-(define-public (set-liquidity-params (epoch-cap uint) (user-base uint) (user-factor uint) (user-max uint) (midyear uint) (adjust-bps uint))
+(define-public (set-liquidity-params
+    (epoch-cap uint)
+    (user-base uint)
+    (user-factor uint)
+    (user-max uint)
+    (midyear uint)
+    (adjust-bps uint)
+  )
   (begin
     (asserts! (is-owner tx-sender) (err ERR_UNAUTHORIZED))
     (var-set epoch-cap-cxd epoch-cap)
@@ -311,7 +392,8 @@
     (var-set midyear-blocks midyear)
     (var-set midyear-adjust-bps adjust-bps)
     (ok true)
-  ))
+  )
+)
 
 ;; @desc Sets the epoch override.
 ;; @param value `true` to enable, `false` to disable.
@@ -321,12 +403,14 @@
     (asserts! (is-owner tx-sender) (err ERR_UNAUTHORIZED))
     (var-set epoch-override value)
     (ok true)
-  ))
+  )
+)
 
 ;; @desc Triggers a mid-year auto-adjustment.
 ;; @returns `(ok true)` if an adjustment was made, `(ok false)` otherwise.
 (define-public (auto-adjust)
-  (ok (maybe-auto-adjust)))
+  (ok (maybe-auto-adjust))
+)
 
 ;; --- SIP-010 Interface ---
 
@@ -336,17 +420,22 @@
 ;; @param recipient The recipient of the tokens.
 ;; @param memo An optional memo for the transfer.
 ;; @returns A response indicating success or failure.
-(define-public (transfer (amount uint) (sender principal) (recipient principal) (memo (optional (buff 34))))
+(define-public (transfer
+    (amount uint)
+    (sender principal)
+    (recipient principal)
+    (memo (optional (buff 34)))
+  )
   (begin
     (asserts! (is-eq tx-sender sender) (err ERR_UNAUTHORIZED))
     (asserts! (not (check-system-pause)) (err ERR_SYSTEM_PAUSED))
-    
+
     (let ((sender-bal (default-to u0 (map-get? balances sender))))
       (asserts! (>= sender-bal amount) (err ERR_NOT_ENOUGH_BALANCE))
       (map-set balances sender
         (unwrap! (safe-sub sender-bal amount) (err ERR_SUB_UNDERFLOW))
       )
-      
+
       (let ((rec-bal (default-to u0 (map-get? balances recipient))))
         (map-set balances recipient
           (unwrap! (safe-add rec-bal amount) (err ERR_OVERFLOW))
@@ -356,38 +445,45 @@
     )
     ;; v1 stub: migration queue hook is disabled; transfer logic above is final
     (ok true)
-  ))
+  )
+)
 
 ;; @desc Gets the balance of a principal.
 ;; @param who The principal to get the balance of.
 ;; @returns The balance of the principal.
 (define-read-only (get-balance (who principal))
-  (ok (default-to u0 (map-get? balances who))))
+  (ok (default-to u0 (map-get? balances who)))
+)
 
 ;; @desc Gets the total supply of the token.
 ;; @returns The total supply of the token.
 (define-read-only (get-total-supply)
-  (ok (var-get total-supply)))
+  (ok (var-get total-supply))
+)
 
 ;; @desc Gets the number of decimals for the token.
 ;; @returns The number of decimals for the token.
 (define-read-only (get-decimals)
-  (ok (var-get decimals)))
+  (ok (var-get decimals))
+)
 
 ;; @desc Gets the name of the token.
 ;; @returns The name of the token.
 (define-read-only (get-name)
-  (ok (var-get name)))
+  (ok (var-get name))
+)
 
 ;; @desc Gets the symbol of the token.
 ;; @returns The symbol of the token.
 (define-read-only (get-symbol)
-  (ok (var-get symbol)))
+  (ok (var-get symbol))
+)
 
 ;; @desc Gets the token URI.
 ;; @returns The token URI.
 (define-read-only (get-token-uri)
-  (ok (var-get token-uri)))
+  (ok (var-get token-uri))
+)
 
 ;; @desc Sets the token URI.
 ;; @param new-uri The new token URI.
@@ -397,7 +493,8 @@
     (asserts! (is-owner tx-sender) (err ERR_UNAUTHORIZED))
     (var-set token-uri new-uri)
     (ok true)
-  ))
+  )
+)
 
 ;; --- Mint/Burn ---
 
@@ -405,25 +502,31 @@
 ;; @param recipient The recipient of the new tokens.
 ;; @param amount The amount of tokens to mint.
 ;; @returns A response indicating success or failure.
-(define-public (mint (recipient principal) (amount uint))
+(define-public (mint
+    (recipient principal)
+    (amount uint)
+  )
   (begin
-    (asserts! (or (is-owner tx-sender) (is-minter tx-sender)) (err ERR_UNAUTHORIZED))
+    (asserts! (or (is-owner tx-sender) (is-minter tx-sender))
+      (err ERR_UNAUTHORIZED)
+    )
     (asserts! (not (check-system-pause)) (err ERR_SYSTEM_PAUSED))
-    
+
     (var-set total-supply
       (unwrap! (safe-add (var-get total-supply) amount) (err ERR_OVERFLOW))
     )
-    
+
     (let ((bal (default-to u0 (map-get? balances recipient))))
       (map-set balances recipient
         (unwrap! (safe-add bal amount) (err ERR_OVERFLOW))
       )
       (map-set balance-since recipient block-height)
     )
-    
+
     true
     (ok true)
-  ))
+  )
+)
 
 ;; @desc Burns tokens from the sender.
 ;; @param amount The amount of tokens to burn.
@@ -431,16 +534,20 @@
 (define-public (burn (amount uint))
   (begin
     (asserts! (not (check-system-pause)) (err ERR_SYSTEM_PAUSED))
-    
+
     (let ((bal (default-to u0 (map-get? balances tx-sender))))
       (asserts! (>= bal amount) (err ERR_NOT_ENOUGH_BALANCE))
-      (map-set balances tx-sender (unwrap! (safe-sub bal amount) (err ERR_SUB_UNDERFLOW))))
-    
+      (map-set balances tx-sender
+        (unwrap! (safe-sub bal amount) (err ERR_SUB_UNDERFLOW))
+      )
+    )
+
     (var-set total-supply
       (unwrap! (safe-sub (var-get total-supply) amount) (err ERR_SUB_UNDERFLOW))
     )
     (ok true)
-  ))
+  )
+)
 
 ;; --- Migration: CXLP -> CXD ---
 
@@ -449,7 +556,11 @@
 ;; @param recipient The recipient of the CXD tokens.
 ;; @param cxd-contract-param The address of the CXD token contract.
 ;; @returns The amount of CXD minted.
-(define-public (migrate-to-cxd (amount uint) (recipient principal) (cxd-contract-param principal))
+(define-public (migrate-to-cxd
+    (amount uint)
+    (recipient principal)
+    (cxd-contract-param principal)
+  )
   (let (
       (start (unwrap! (var-get migration-start-height) (err ERR_MIGRATION_NOT_SET)))
       (len (var-get epoch-length))
@@ -463,14 +574,14 @@
       (asserts! (>= block-height start) (err ERR_MIGRATION_NOT_STARTED))
       (asserts! (is-eq cxd-stored cxd-contract-param) (err ERR_CXD_MISMATCH))
       (asserts! (>= sender-bal amount) (err ERR_NOT_ENOUGH_BALANCE))
-      
+
       (map-set balances tx-sender
         (unwrap! (safe-sub sender-bal amount) (err ERR_SUB_UNDERFLOW))
       )
-(var-set total-supply
+      (var-set total-supply
         (unwrap! (safe-sub (var-get total-supply) amount) (err ERR_SUB_UNDERFLOW))
       )
-      
+
       (let (
           (band (unwrap! (current-band) (err u999)))
           (mult (unwrap! (band-multiplier band) (err ERR_OVERFLOW)))

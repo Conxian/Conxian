@@ -13,62 +13,86 @@
 
 ;; --- WAD Operations (1e18) ---
 
-(define-read-only (mul-wad (x uint) (y uint))
-    (let ((product (* x y)))
-        (if (is-eq product u0)
-            (ok u0)
-            (ok (/ (+ product HALF_WAD) WAD))
-        )
+(define-read-only (mul-wad
+    (x uint)
+    (y uint)
+  )
+  (let ((product (* x y)))
+    (if (is-eq product u0)
+      (ok u0)
+      (ok (/ (+ product HALF_WAD) WAD))
     )
+  )
 )
 
-(define-read-only (div-wad (x uint) (y uint))
-    (begin
-        (asserts! (> y u0) ERR_MATH_DIVISION_BY_ZERO)
-        (ok (/ (+ (* x WAD) (/ y u2)) y))
-    )
+(define-read-only (div-wad
+    (x uint)
+    (y uint)
+  )
+  (begin
+    (asserts! (> y u0) ERR_MATH_DIVISION_BY_ZERO)
+    (ok (/ (+ (* x WAD) (/ y u2)) y))
+  )
 )
 
 ;; --- RAY Operations (1e27) ---
 
-(define-read-only (mul-ray (x uint) (y uint))
-    (let ((product (* x y)))
-        (if (is-eq product u0)
-            (ok u0)
-            (ok (/ (+ product HALF_RAY) RAY))
-        )
+(define-read-only (mul-ray
+    (x uint)
+    (y uint)
+  )
+  (let ((product (* x y)))
+    (if (is-eq product u0)
+      (ok u0)
+      (ok (/ (+ product HALF_RAY) RAY))
     )
+  )
 )
 
-(define-read-only (div-ray (x uint) (y uint))
-    (begin
-        (asserts! (> y u0) ERR_MATH_DIVISION_BY_ZERO)
-        (ok (/ (+ (* x RAY) (/ y u2)) y))
-    )
+(define-read-only (div-ray
+    (x uint)
+    (y uint)
+  )
+  (begin
+    (asserts! (> y u0) ERR_MATH_DIVISION_BY_ZERO)
+    (ok (/ (+ (* x RAY) (/ y u2)) y))
+  )
 )
 
 ;; --- Conversions ---
 
 (define-read-only (wad-to-ray (x uint))
-    (* x u1000000000)
+  (* x u1000000000)
 )
 
 (define-read-only (ray-to-wad (x uint))
-    (/ (+ x u500000000) u1000000000)
+  (/ (+ x u500000000) u1000000000)
 )
 
 ;; --- Utilities ---
 
-(define-read-only (min (x uint) (y uint))
-    (if (<= x y) x y)
+(define-read-only (min
+    (x uint)
+    (y uint)
+  )
+  (if (<= x y)
+    x
+    y
+  )
 )
 
-(define-read-only (max (x uint) (y uint))
-    (if (>= x y) x y)
+(define-read-only (max
+    (x uint)
+    (y uint)
+  )
+  (if (>= x y)
+    x
+    y
+  )
 )
 
 (define-read-only (sqrt (x uint))
-    ;; Babylonian method implementation or similar
-    ;; Stub for standard lib
-    (ok x) 
+  ;; Babylonian method implementation or similar
+  ;; Stub for standard lib
+  (ok x)
 )

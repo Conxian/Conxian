@@ -25,8 +25,14 @@
 
 (define-data-var bridge-system (optional principal) none)
 
-(define-map auto-support-proposals uint bool)
-(define-map auto-abstain-proposals uint bool)
+(define-map auto-support-proposals
+  uint
+  bool
+)
+(define-map auto-abstain-proposals
+  uint
+  bool
+)
 
 ;; ===========================================
 ;; BEHAVIOR METRICS & REPUTATION SYSTEM
@@ -148,7 +154,7 @@
     lending-system: (var-get lending-system),
     mev-system: (var-get mev-system),
     insurance-system: (var-get insurance-system),
-    bridge-system: (var-get bridge-system)
+    bridge-system: (var-get bridge-system),
   }
 )
 
@@ -160,7 +166,7 @@
     devex-policy: u0,
     opex-policy: u0,
     capex-policy: u0,
-    invex-policy: u0
+    invex-policy: u0,
   }
 )
 
@@ -168,12 +174,13 @@
 
 (define-read-only (get-operations-status)
   (let (
-        (health (unwrap-panic (contract-call? .token-system-coordinator get-system-health)))
-        (circuit-result (contract-call? .circuit-breaker is-circuit-open))
-       )
+      (health (unwrap-panic (contract-call? .token-system-coordinator get-system-health)))
+      (circuit-result (contract-call? .circuit-breaker is-circuit-open))
+    )
     (let ((circuit-open (if (is-ok circuit-result)
-                            (unwrap-panic circuit-result)
-                            false)))
+        (unwrap-panic circuit-result)
+        false
+      )))
       {
         is-paused: (get is-paused health),
         emergency-mode: (get emergency-mode health),
@@ -456,40 +463,46 @@
 ;; verification would require a static NFT contract; for now we require both
 ;; contract and token-id to be set before allowing automated votes.
 (define-private (has-operations-seat)
-  (and (is-some (var-get governance-nft-contract))
-       (is-some (var-get operations-council-token-id)))
+  (and
+    (is-some (var-get governance-nft-contract))
+    (is-some (var-get operations-council-token-id))
+  )
 )
 
 ;; --- Evaluation & Voting ---
 
 (define-read-only (evaluate-proposal (proposal-id uint))
   (let ((ops (get-operations-status)))
-    (if (or (get is-paused ops) (get emergency-mode ops) (get circuit-open ops))
+    (if (or
+        (get is-paused ops)
+        (get emergency-mode ops)
+        (get circuit-open ops)
+      )
       (ok {
         support: false,
         abstain: true,
-        reason-code: u1   ;; SYSTEM_STRESSED
+        reason-code: u1, ;; SYSTEM_STRESSED
       })
       (let (
-            (support-flag (default-to false (map-get? auto-support-proposals proposal-id)))
-            (abstain-flag (default-to false (map-get? auto-abstain-proposals proposal-id)))
-           )
+          (support-flag (default-to false (map-get? auto-support-proposals proposal-id)))
+          (abstain-flag (default-to false (map-get? auto-abstain-proposals proposal-id)))
+        )
         (if support-flag
           (ok {
             support: true,
             abstain: false,
-            reason-code: u2
+            reason-code: u2,
           })
           (if abstain-flag
             (ok {
               support: false,
               abstain: true,
-              reason-code: u3
+              reason-code: u3,
             })
             (ok {
               support: false,
               abstain: true,
-              reason-code: u0
+              reason-code: u0,
             })
           )
         )
@@ -500,14 +513,23 @@
 
 ;; First safe execute-vote: only forwards a vote when the system is healthy.
 ;; The caller supplies support and votes-cast; the engine enforces ops guardrails.
-(define-public (execute-vote (proposal-id uint) (support bool) (votes-cast uint))
+(define-public (execute-vote
+    (proposal-id uint)
+    (support bool)
+    (votes-cast uint)
+  )
   (let ((ops (get-operations-status)))
-    (if (or (get is-paused ops) (get emergency-mode ops) (get circuit-open ops))
+    (if (or
+        (get is-paused ops)
+        (get emergency-mode ops)
+        (get circuit-open ops)
+      )
       (ok false)
       (if (not (has-operations-seat))
         (ok false)
         (as-contract (contract-call? .proposal-engine vote proposal-id support votes-cast))
-      ))
+      )
+    )
   )
 )
 
@@ -597,7 +619,10 @@
   )
 )
 
-(define-public (set-auto-support-proposal (proposal-id uint) (enabled bool))
+(define-public (set-auto-support-proposal
+    (proposal-id uint)
+    (enabled bool)
+  )
   (begin
     (asserts! (is-contract-owner) ERR_UNAUTHORIZED)
     (if enabled
@@ -608,7 +633,10 @@
   )
 )
 
-(define-public (set-auto-abstain-proposal (proposal-id uint) (enabled bool))
+(define-public (set-auto-abstain-proposal
+    (proposal-id uint)
+    (enabled bool)
+  )
   (begin
     (asserts! (is-contract-owner) ERR_UNAUTHORIZED)
     (if enabled

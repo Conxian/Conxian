@@ -3,8 +3,8 @@
 ;; Production-grade: Includes Proposer/Executor Role Access Control
 
 ;; Constants
-(define-constant MIN_DELAY u10368000)  ;; 24 hours in seconds
-(define-constant MAX_DELAY u311040000)  ;; 30 days in seconds
+(define-constant MIN_DELAY u10368000) ;; 24 hours in seconds
+(define-constant MAX_DELAY u311040000) ;; 30 days in seconds
 
 ;; Operation status
 (define-constant OP_UNSET u0)
@@ -30,20 +30,29 @@
 (define-data-var currentId uint u0)
 
 ;; Roles
-(define-map proposers principal bool)
-(define-map executors principal bool)
+(define-map proposers
+  principal
+  bool
+)
+(define-map executors
+  principal
+  bool
+)
 
 ;; Data maps
-(define-map operations uint {
-  target: principal,
-  value: uint,
-  data: (buff 1024),
-  predecessor: (optional uint),
-  timestamp: uint,
-  description: (string-utf8 500),
-  proposer: principal,
-  status: uint
-})
+(define-map operations
+  uint
+  {
+    target: principal,
+    value: uint,
+    data: (buff 1024),
+    predecessor: (optional uint),
+    timestamp: uint,
+    description: (string-utf8 500),
+    proposer: principal,
+    status: uint,
+  }
+)
 
 ;; ===== Authorization Helpers =====
 
@@ -61,11 +70,11 @@
 
 ;; ===== Core Functions =====
 
-(define-public (schedule 
-    (target principal) 
-    (value uint) 
-    (data (buff 1024)) 
-    (predecessor (optional uint)) 
+(define-public (schedule
+    (target principal)
+    (value uint)
+    (data (buff 1024))
+    (predecessor (optional uint))
     (delay uint)
     (description (string-utf8 500))
   )
@@ -81,7 +90,7 @@
     ;; Input validation
     (asserts! (>= delay (var-get minDelay)) ERR_DELAY_TOO_SHORT)
     (asserts! (<= delay MAX_DELAY) ERR_DELAY_TOO_LONG)
-    
+
     ;; Create operation
     (map-set operations operation-id {
       target: target,
@@ -91,21 +100,21 @@
       timestamp: timestamp,
       description: description,
       proposer: caller,
-      status: OP_PENDING
+      status: OP_PENDING,
     })
-    
+
     ;; Update current ID
     (var-set currentId operation-id)
-    
+
     ;; Emit event
     (print {
       event: "operation-scheduled",
       operation-id: operation-id,
       target: target,
       timestamp: timestamp,
-      description: description
+      description: description,
     })
-    
+
     (ok operation-id)
   )
 )
@@ -121,60 +130,63 @@
 
     ;; Check operation status
     (asserts! (is-eq (get status operation) OP_PENDING) ERR_OPERATION_NOT_PENDING)
-    
+
     ;; Check timestamp
     (asserts! (>= current-time (get timestamp operation)) ERR_OPERATION_NOT_READY)
-    
+
     ;; Check predecessor if exists
     (match (get predecessor operation)
-      pred-id (asserts! (unwrap! (is-operation-done pred-id) ERR_PREDECESSOR_NOT_FOUND) ERR_PREDECESSOR_NOT_DONE)
+      pred-id (asserts! (unwrap! (is-operation-done pred-id) ERR_PREDECESSOR_NOT_FOUND)
+        ERR_PREDECESSOR_NOT_DONE
+      )
       true
     )
-    
+
     ;; Mark as done before execution to prevent reentrancy
     (map-set operations operation-id (merge operation { status: OP_DONE }))
-    
+
     ;; Emit event
     (print {
       event: "operation-executed",
       operation-id: operation-id,
-      target: (get target operation)
+      target: (get target operation),
     })
-    
+
     ;; NOTE: In Clarity, we cannot arbitrarily "execute" the binary data buffer.
     ;; The executor must manually perform the call that matches the intention,
     ;; or this contract must act as a proxy for specific known function calls.
     ;; For this production implementation, we assume the "execution" is the
     ;; act of marking it DONE, and the off-chain executor then performs the
     ;; privileged action if the target contract checks `timelock-controller` state.
-    
+
     (ok true)
   )
 )
 
 (define-public (cancel (operation-id uint))
-  (let (
-      (operation (unwrap! (map-get? operations operation-id) ERR_OPERATION_NOT_FOUND))
-    )
+  (let ((operation (unwrap! (map-get? operations operation-id) ERR_OPERATION_NOT_FOUND)))
     ;; Only admin or proposer can cancel
-    (asserts! (or 
-      (is-admin tx-sender)
-      (is-eq tx-sender (get proposer operation))
-    ) ERR_UNAUTHORIZED)
-    
+    (asserts!
+      (or
+        (is-admin tx-sender)
+        (is-eq tx-sender (get proposer operation))
+      )
+      ERR_UNAUTHORIZED
+    )
+
     ;; Can only cancel pending operations
     (asserts! (is-eq (get status operation) OP_PENDING) ERR_CANNOT_CANCEL)
-    
+
     ;; Update status
     (map-set operations operation-id (merge operation { status: OP_CANCELED }))
-    
+
     ;; Emit event
     (print {
       event: "operation-canceled",
       operation-id: operation-id,
-      by: tx-sender
+      by: tx-sender,
     })
-    
+
     (ok true)
   )
 )
@@ -258,15 +270,15 @@
     (asserts! (is-eq tx-sender (var-get admin)) ERR_UNAUTHORIZED)
     (asserts! (>= new-delay MIN_DELAY) ERR_DELAY_TOO_SHORT)
     (asserts! (<= new-delay MAX_DELAY) ERR_DELAY_TOO_LONG)
-    
+
     (var-set minDelay new-delay)
-    
+
     (print {
       event: "min-delay-updated",
       old-delay: (var-get minDelay),
-      new-delay: new-delay
+      new-delay: new-delay,
     })
-    
+
     (ok true)
   )
 )
@@ -274,15 +286,15 @@
 (define-public (update-admin (new-admin principal))
   (begin
     (asserts! (is-eq tx-sender (var-get admin)) ERR_UNAUTHORIZED)
-    
+
     (var-set admin new-admin)
-    
+
     (print {
       event: "admin-updated",
       old-admin: tx-sender,
-      new-admin: new-admin
+      new-admin: new-admin,
     })
-    
+
     (ok true)
   )
 )

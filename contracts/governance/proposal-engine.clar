@@ -77,15 +77,15 @@
     (let ((proposal-id (try! (contract-call? .proposal-registry create-proposal tx-sender description
         start-block end-block
       ))))
-    (print {
-      event: "proposal-created",
-      proposal-id: proposal-id,
-      proposer: tx-sender,
-      start-block: start-block,
-      end-block: end-block,
-    })
-    (ok proposal-id)
-   )
+      (print {
+        event: "proposal-created",
+        proposal-id: proposal-id,
+        proposer: tx-sender,
+        start-block: start-block,
+        end-block: end-block,
+      })
+      (ok proposal-id)
+    )
   )
 )
 
@@ -104,22 +104,24 @@
       (match maybe-proposal
         proposal (begin
           (asserts! (is-eq (get executed proposal) false) ERR_VOTING_CLOSED)
-        (asserts! (is-eq (get canceled proposal) false) ERR_VOTING_CLOSED)
-        (asserts! (>= burn-block-height (get start-block proposal))
-          ERR_PROPOSAL_NOT_ACTIVE
-        )
-        (asserts! (<= burn-block-height (get end-block proposal)) ERR_VOTING_CLOSED)
+          (asserts! (is-eq (get canceled proposal) false) ERR_VOTING_CLOSED)
+          (asserts! (>= burn-block-height (get start-block proposal))
+            ERR_PROPOSAL_NOT_ACTIVE
+          )
+          (asserts! (<= burn-block-height (get end-block proposal))
+            ERR_VOTING_CLOSED
+          )
 
-        (try! (contract-call? .voting vote proposal-id support tx-sender))
-        (print {
-          event: "vote-cast",
-          proposal-id: proposal-id,
-          voter: tx-sender,
-          support: support
-        })
-        (ok true)
-      )
-      ERR_PROPOSAL_NOT_FOUND
+          (try! (contract-call? .voting vote proposal-id support tx-sender))
+          (print {
+            event: "vote-cast",
+            proposal-id: proposal-id,
+            voter: tx-sender,
+            support: support,
+          })
+          (ok true)
+        )
+        ERR_PROPOSAL_NOT_FOUND
       )
     )
   )
@@ -134,34 +136,36 @@
     (let ((maybe-proposal (try! (contract-call? .proposal-registry get-proposal proposal-id))))
       (match maybe-proposal
         proposal (let (
-          (total-votes (+ (get for-votes proposal) (get against-votes proposal)))
-          (governance-token-supply (unwrap! (contract-call? .governance-token get-total-supply) (err u999)))
-          (quorum (/ (* total-votes u10000) governance-token-supply))
+            (total-votes (+ (get for-votes proposal) (get against-votes proposal)))
+            (governance-token-supply (unwrap! (contract-call? .governance-token get-total-supply)
+              (err u999)
+            ))
+            (quorum (/ (* total-votes u10000) governance-token-supply))
+          )
+          (begin
+            (asserts! (is-eq tx-sender (get proposer proposal)) ERR_UNAUTHORIZED)
+            (asserts! (>= burn-block-height (get end-block proposal))
+              ERR_PROPOSAL_NOT_ACTIVE
+            )
+            (asserts! (not (get executed proposal)) ERR_VOTING_CLOSED)
+            (asserts! (not (get canceled proposal)) ERR_VOTING_CLOSED)
+            (asserts! (> (get for-votes proposal) (get against-votes proposal))
+              ERR_PROPOSAL_FAILED
+            )
+            (asserts! (>= quorum (var-get quorum-percentage))
+              ERR_QUORUM_NOT_REACHED
+            )
+            (try! (contract-call? .proposal-registry set-executed proposal-id))
+            (print {
+              event: "proposal-executed",
+              proposal-id: proposal-id,
+              votes-for: (get for-votes proposal),
+              votes-against: (get against-votes proposal),
+            })
+            (ok true)
+          )
         )
-        (begin
-          (asserts! (is-eq tx-sender (get proposer proposal)) ERR_UNAUTHORIZED)
-          (asserts! (>= burn-block-height (get end-block proposal))
-            ERR_PROPOSAL_NOT_ACTIVE
-          )
-          (asserts! (not (get executed proposal)) ERR_VOTING_CLOSED)
-          (asserts! (not (get canceled proposal)) ERR_VOTING_CLOSED)
-          (asserts! (> (get for-votes proposal) (get against-votes proposal))
-            ERR_PROPOSAL_FAILED
-          )
-          (asserts! (>= quorum (var-get quorum-percentage))
-            ERR_QUORUM_NOT_REACHED
-          )
-          (try! (contract-call? .proposal-registry set-executed proposal-id))
-          (print {
-            event: "proposal-executed",
-            proposal-id: proposal-id,
-            votes-for: (get for-votes proposal),
-            votes-against: (get against-votes proposal),
-          })
-          (ok true)
-        )
-      )
-      ERR_PROPOSAL_NOT_FOUND
+        ERR_PROPOSAL_NOT_FOUND
       )
     )
   )
@@ -177,20 +181,20 @@
       (match maybe-proposal
         proposal (begin
           (asserts!
-          (or (is-eq tx-sender (get proposer proposal)) (is-contract-owner))
-          ERR_UNAUTHORIZED
+            (or (is-eq tx-sender (get proposer proposal)) (is-contract-owner))
+            ERR_UNAUTHORIZED
+          )
+          (asserts! (not (get executed proposal)) ERR_VOTING_CLOSED)
+          (asserts! (not (get canceled proposal)) ERR_VOTING_CLOSED)
+          (try! (contract-call? .proposal-registry set-canceled proposal-id))
+          (print {
+            event: "proposal-canceled",
+            proposal-id: proposal-id,
+            canceled-by: tx-sender,
+          })
+          (ok true)
         )
-        (asserts! (not (get executed proposal)) ERR_VOTING_CLOSED)
-        (asserts! (not (get canceled proposal)) ERR_VOTING_CLOSED)
-        (try! (contract-call? .proposal-registry set-canceled proposal-id))
-        (print {
-          event: "proposal-canceled",
-          proposal-id: proposal-id,
-          canceled-by: tx-sender,
-        })
-        (ok true)
-      )
-      ERR_PROPOSAL_NOT_FOUND
+        ERR_PROPOSAL_NOT_FOUND
       )
     )
   )
@@ -238,7 +242,9 @@
     (asserts! (is-contract-owner) ERR_UNAUTHORIZED)
     ;; Enforce quorum between 10% and 100% to avoid trivially low or
     ;; impossibly strict quorum settings.
-    (asserts! (and (>= new-quorum MIN_QUORUM) (<= new-quorum u10000)) ERR_UNAUTHORIZED)
+    (asserts! (and (>= new-quorum MIN_QUORUM) (<= new-quorum u10000))
+      ERR_UNAUTHORIZED
+    )
     (var-set quorum-percentage new-quorum)
     (ok true)
   )

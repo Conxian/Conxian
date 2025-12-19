@@ -130,27 +130,45 @@
 ))
 
 ;; Revenue distributor trait
-(define-trait revenue-distributor-trait
-  (
-    (distribute (principal uint principal) (response bool uint))
-    (report-revenue (principal uint principal) (response bool uint))
-    (set-recipient (principal) (response bool uint))
+(define-trait revenue-distributor-trait (
+  (distribute
+    (principal uint principal)
+    (response bool uint)
   )
-)
+  (report-revenue
+    (principal uint principal)
+    (response bool uint)
+  )
+  (set-recipient
+    (principal)
+    (response bool uint)
+  )
+))
 
 ;; Token coordinator trait
-(define-trait token-coordinator-trait
-  (
-    (on-transfer (uint principal principal) (response bool uint))
-    (on-mint (uint principal) (response bool uint))
-    (on-burn (uint principal) (response bool uint))
-    (on-dimensional-yield (uint uint uint) (response bool uint))
+(define-trait token-coordinator-trait (
+  (on-transfer
+    (uint principal principal)
+    (response bool uint)
   )
-)
+  (on-mint
+    (uint principal)
+    (response bool uint)
+  )
+  (on-burn
+    (uint principal)
+    (response bool uint)
+  )
+  (on-dimensional-yield
+    (uint uint uint)
+    (response bool uint)
+  )
+))
 
 ;; Protocol support trait
-(define-trait protocol-support-trait
-  (
-    (is-protocol-paused () (response bool uint))
+(define-trait protocol-support-trait (
+  (is-protocol-paused
+    ()
+    (response bool uint)
   )
-)
+))

@@ -31,7 +31,13 @@
 
 ;; @data-vars
 ;; @var roles: A map of principals to their roles.
-(define-map roles {who: principal, role: (string-ascii 32)} bool)
+(define-map roles
+  {
+    who: principal,
+    role: (string-ascii 32),
+  }
+  bool
+)
 
 ;; ===========================================
 ;; Public functions
@@ -41,14 +47,21 @@
 ;; @param who: The principal to grant the role to.
 ;; @param role: The role to grant.
 ;; @returns (response bool uint): An `ok` response with `true` on success, or an error code.
-(define-public (assign-role (role (string-ascii 32)) (who principal))
+(define-public (assign-role
+    (role (string-ascii 32))
+    (who principal)
+  )
   (begin
     ;; Only the contract owner can grant roles
     (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_NOT_OWNER)
-    
+
     ;; Set the role for the address
-    (map-set roles { who: who, role: role } true)
-    
+    (map-set roles {
+      who: who,
+      role: role,
+    } true
+    )
+
     (ok true)
   )
 )
@@ -57,14 +70,20 @@
 ;; @param who: The principal to revoke the role from.
 ;; @param role: The role to revoke.
 ;; @returns (response bool uint): An `ok` response with `true` on success, or an error code.
-(define-public (revoke-role (role (string-ascii 32)) (who principal))
+(define-public (revoke-role
+    (role (string-ascii 32))
+    (who principal)
+  )
   (begin
     ;; Only the contract owner can revoke roles
     (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_NOT_OWNER)
-    
+
     ;; Remove the role from address
-    (map-delete roles { who: who, role: role })
-    
+    (map-delete roles {
+      who: who,
+      role: role,
+    })
+
     (ok true)
   )
 )
@@ -73,8 +92,15 @@
 ;; @param who: The principal to check.
 ;; @param role: The role to check for.
 ;; @returns (response bool uint): An `ok` response with `true` if the principal has the role, `false` otherwise.
-(define-public (has-role (role (string-ascii 32)) (who principal))
-  (ok (default-to false (map-get? roles { who: who, role: role })))
+(define-public (has-role
+    (role (string-ascii 32))
+    (who principal)
+  )
+  (ok (default-to false (map-get? roles {
+    who: who,
+    role: role,
+  })
+  ))
 )
 
 ;; @desc Initialize the access control contract.
@@ -103,20 +129,24 @@
 ;; @param who: The principal to grant the admin role to.
 ;; @returns (response bool uint): An `ok` response with `true` on success, or an error code.
 (define-public (grant-admin (who principal))
-  (assign-role ROLE_ADMIN who))
+  (assign-role ROLE_ADMIN who)
+)
 
 ;; @desc Revoke the admin role from a principal.
 ;; @param who: The principal to revoke the admin role from.
 ;; @returns (response bool uint): An `ok` response with `true` on success, or an error code.
 (define-public (revoke-admin (who principal))
-  (revoke-role ROLE_ADMIN who))
+  (revoke-role ROLE_ADMIN who)
+)
 
 ;; @desc Check if a principal has the admin role.
 ;; @param who: The principal to check.
 ;; @returns (response bool uint): An `ok` response with `true` if the principal has the admin role, `false` otherwise.
 (define-public (is-admin (who principal))
-  (has-role ROLE_ADMIN who))
+  (has-role ROLE_ADMIN who)
+)
 
 ;; Trait method stub to satisfy rbac-trait
 (define-public (get-role-principal (role (string-ascii 32)))
-  (ok none))
+  (ok none)
+)

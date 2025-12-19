@@ -138,7 +138,6 @@
   (ok (asserts! (is-eq tx-sender (var-get governance-address)) ERR_UNAUTHORIZED))
 )
 
-
 ;; ===== Helper Functions for NFT Calculations =====
 
 ;; Calculate rarity score based on contribution amount and NFT type
@@ -503,7 +502,6 @@
     (ok position-id)
   )
 )
-
 
 ;; ===== Bounty Management Functions =====
 
