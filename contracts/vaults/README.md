@@ -16,7 +16,7 @@ The Vaults Module follows the protocol's standard **facade pattern**. The `sbtc-
     |-- (deposit) --> [custody.clar]
     |-- (earn) --> [yield-aggregator.clar]
     |-- (claim-fees) --> [fee-manager.clar]
-    |-- (bridge-in) --> [btc-bridge.clar]
+    |-- (bridge-in) --> [btc-adapter.clar]
 ```
 
 ## Core Contracts
@@ -30,7 +30,7 @@ The Vaults Module follows the protocol's standard **facade pattern**. The `sbtc-
 -   **`custody.clar`**: Manages the secure custody of the sBTC and other assets deposited in the vault.
 -   **`yield-aggregator.clar`**: The core of the yield generation logic. It aggregates yield from various strategies (e.g., lending, liquidity provision) and allocates the vault's assets to optimize returns.
 -   **`fee-manager.clar`**: Manages the collection and distribution of performance and management fees for the vault.
--   **`btc-bridge.clar`**: A specialized contract that handles the wrapping and unwrapping of BTC to and from sBTC, providing a seamless bridge for users to enter and exit the Stacks ecosystem.
+-   **`btc-adapter.clar`**: (Located in `contracts/sbtc/`) A specialized contract that handles the trustless verification of Bitcoin transactions, providing a seamless bridge for users to enter and exit the Stacks ecosystem.
 
 ### Registry
 
