@@ -1,14 +1,13 @@
 import { defineConfig } from 'vitest/config';
+import { vitestSetupFilePath } from '@stacks/clarinet-sdk/vitest';
 
 export default defineConfig({
   test: {
-    environment: 'clarinet',
-    environmentOptions: {
-      clarinet: {
-        manifestPath: 'Clarinet.toml',
-      },
+    environment: 'node',
+    setupFiles: [vitestSetupFilePath, './tests/vitest.setup.ts'],
+    env: {
+      CLARINET_MANIFEST_PATH: 'Clarinet.toml',
     },
-    setupFiles: ['./tests/vitest.setup.ts'],
     testTimeout: 300000,
     hookTimeout: 90000,
     fileParallelism: false,
