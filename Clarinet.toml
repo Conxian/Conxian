@@ -527,6 +527,11 @@ address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 path = "contracts/lending/comprehensive-lending-system.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
+[contracts.lending-manager]
+path = "contracts/lending/lending-manager.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+depends_on = ["comprehensive-lending-system"]
+
 [contracts.liquidation-manager]
 path = "contracts/lending/liquidation-manager.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
@@ -579,16 +584,7 @@ address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 [contracts.proposal-engine]
 path = "contracts/governance/proposal-engine.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["proposal-execution-manager-trait"]
-
-[contracts.proposal-execution-manager-trait]
-path = "contracts/governance/proposal-execution-manager-trait.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-
-[contracts.proposal-execution-manager]
-path = "contracts/governance/proposal-execution-manager.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["proposal-execution-manager-trait"]
+depends_on = []
 
 [contracts.proposal-registry]
 path = "contracts/governance/proposal-registry.clar"
@@ -802,11 +798,6 @@ address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 [contracts.custody]
 path = "contracts/vaults/custody.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-
-[contracts.btc-bridge]
-path = "contracts/vaults/btc-bridge.clar"
-address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["clarity-bitcoin"]
 
 [contracts.yield-aggregator]
 path = "contracts/vaults/yield-aggregator.clar"

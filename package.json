@@ -4,7 +4,7 @@
   "type": "module",
   "description": "Conxian is a sophisticated DeFi yield optimization protocol on Stacks, designed to automate and enhance returns from liquidity provision and yield farming.",
   "scripts": {
-    "test": "vitest run --config vitest.config.ts",
+    "test": "vitest run --config vitest.config.enhanced.ts",
     "test:node": "vitest run --config vitest.config.node.ts",
     "test:tokens": "node tests/cx-tokens-simple.test.js",
     "test:watch": "vitest --watch --config vitest.config.enhanced.ts",

@@ -60,7 +60,7 @@
         ERR_INVALID_TX
       ))
       ;; Get the canonical hash for that height from the burnchain state.
-      (canonical-hash (unwrap! (get-burn-block-info? header-hash header-height) ERR_INVALID_TX))
+      (canonical-hash (unwrap! (get-burn-block-info header-hash header-height) ERR_INVALID_TX))
     )
     ;; 1. Ensure the provided header matches the canonical chain.
     (asserts! (is-eq header-hash canonical-hash) ERR_INVALID_TX)
