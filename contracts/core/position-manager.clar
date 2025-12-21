@@ -72,18 +72,18 @@
   )
   (let (
       (collateral-balance (unwrap!
-        (contract-call? (var-get collateral-manager) get-balance tx-sender)
+        (contract-call? .collateral-manager get-balance tx-sender)
         (err u2003)
       ))
       (fee-rate (unwrap!
-        (contract-call? (var-get collateral-manager) get-protocol-fee-rate)
+        (contract-call? .collateral-manager get-protocol-fee-rate)
         (err u2004)
       ))
       (fee (* collateral fee-rate))
       (total-cost (+ collateral fee))
     )
     (asserts! (>= collateral-balance total-cost) (err u2003))
-    (try! (contract-call? (var-get collateral-manager) withdraw-funds total-cost asset))
+    (try! (contract-call? .collateral-manager withdraw-funds total-cost asset))
     (let (
         (position-id (var-get next-position-id))
         (current-time block-height)
@@ -204,7 +204,7 @@
         ) }
         ))
     )
-    (try! (as-contract (contract-call? (var-get collateral-manager) deposit-funds total-returned
+    (try! (as-contract (contract-call? .collateral-manager deposit-funds total-returned
       asset
     )))
     (ok {

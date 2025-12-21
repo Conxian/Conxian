@@ -20,6 +20,13 @@ describe('Enterprise Facade', () => {
     const accounts = simnet.getAccounts();
     deployer = accounts.get('deployer')!;
     wallet1 = accounts.get('wallet_1') || 'ST1SJ3DTE5DN7X54YDH5D64R3BCB6A2AG2ZQ8YPD5';
+
+    simnet.callPublicFn(
+      "enterprise-facade",
+      "set-enterprise-active",
+      [Cl.bool(true)],
+      deployer
+    );
   });
 
   const token0 = 'mock-token';

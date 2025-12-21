@@ -1,12 +1,12 @@
 ;; Conxian DEX Factory V2 - DIMENSIONAL INTEGRATION (Refactored)
 ;; This contract acts as a facade, delegating logic to specialized registry contracts.
 
-(use-trait sip-010-ft-trait .defi-traits.sip-010-ft-trait)
 ;; (use-trait factory-trait .dex-traits.factory-trait) ;; Removed: Unused and invalid path
 (use-trait access-control-trait .core-traits.rbac-trait)
 (use-trait circuit-breaker-trait .security-monitoring.circuit-breaker-trait)
 (use-trait dim-registry-trait .dimensional-traits.dim-registry-trait)
 (use-trait pool-trait .dex-traits.pool-trait)
+(use-trait sip-010-ft-trait .sip-standards.sip-010-ft-trait)
 (use-trait pool-type-registry-trait .pool-type-registry.pool-type-registry-trait)
 (use-trait pool-implementation-registry-trait .pool-implementation-registry.pool-implementation-registry-trait)
 (use-trait pool-registry-trait .pool-registry.pool-registry-trait)

@@ -66,7 +66,7 @@ def fix_clarity_code(code):
     return code
 
 if __name__ == "__main__":
-    filepath = "contracts/enterprise/enterprise-api.clar"
+    filepath = "contracts/enterprise/enterprise-facade.clar"
     with open(filepath, 'r') as f:
         original_code = f.read()
 

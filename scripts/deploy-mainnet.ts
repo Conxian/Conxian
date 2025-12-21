@@ -24,7 +24,10 @@ async function main() {
   await deployContract('lending/comprehensive-lending-system.clar', 'comprehensive-lending-system');
 
   // Enterprise & Yield
-  await deployContract('enterprise/enterprise-api.clar', 'enterprise-api');
+  await deployContract(
+    "enterprise/enterprise-facade.clar",
+    "enterprise-facade"
+  );
   await deployContract('yield/yield-optimizer.clar', 'yield-optimizer');
 
   console.log('Deployment complete.');

@@ -25,7 +25,12 @@
 (define-data-var protocol-coordinator principal tx-sender)
 
 (define-private (is-protocol-paused)
-  (contract-call? .conxian-protocol is-protocol-paused)
+  (match (contract-call? .conxian-protocol is-protocol-paused)
+    paused
+    paused
+    err
+    true
+  )
 )
 
 ;;

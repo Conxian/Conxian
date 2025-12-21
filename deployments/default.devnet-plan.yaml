@@ -505,10 +505,10 @@ plan:
             anchor-block-only: true
             clarity-version: 3
         - contract-publish:
-            contract-name: enterprise-api
+            contract-name: enterprise-facade
             expected-sender: ST32CN8SBRJ0A5CQA0589VM1QFV6XFNCVD98Q9799
             cost: 43160
-            path: "contracts\\enterprise\\enterprise-api.clar"
+            path: "contracts\\enterprise\\enterprise-facade.clar"
             anchor-block-only: true
             clarity-version: 3
         - contract-publish:

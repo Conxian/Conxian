@@ -7,7 +7,7 @@ let simnet: Simnet;
 let deployer: string;
 let wallet1: string;
 
-describe('Enterprise API', () => {
+describe('Enterprise Facade', () => {
   beforeAll(async () => {
     simnet = await initSimnet('Clarinet.toml', false, {
       trackCosts: false,
@@ -20,6 +20,10 @@ describe('Enterprise API', () => {
     const accounts = simnet.getAccounts();
     deployer = accounts.get('deployer')!;
     wallet1 = accounts.get('wallet_1') || 'ST1SJ3DTE5DN7X54YDH5D64R3BCB6A2AG2ZQ8YPD5';
+
+    simnet.callPublicFn('enterprise-facade', 'set-enterprise-active', [
+      Cl.bool(true),
+    ], deployer);
   });
 
   const token0 = 'mock-token';
@@ -27,14 +31,14 @@ describe('Enterprise API', () => {
 
   it('should submit a TWAP order', () => {
       // 1. Register Account
-      simnet.callPublicFn('enterprise-api', 'register-account', [
+      simnet.callPublicFn('enterprise-facade', 'register-account', [
           Cl.standardPrincipal(wallet1),
           Cl.uint(1),
           Cl.uint(1000000000), // Daily limit
       ], deployer);
 
       // 2. Submit TWAP
-      const receipt = simnet.callPublicFn('enterprise-api', 'submit-twap-order', [
+      const receipt = simnet.callPublicFn('enterprise-facade', 'submit-twap-order', [
           Cl.contractPrincipal(deployer, token0),
           Cl.contractPrincipal(deployer, token1),
           Cl.uint(100000), // Total
@@ -47,14 +51,14 @@ describe('Enterprise API', () => {
 
   it('should submit an Iceberg order', () => {
        // 1. Register Account
-       simnet.callPublicFn('enterprise-api', 'register-account', [
+       simnet.callPublicFn('enterprise-facade', 'register-account', [
           Cl.standardPrincipal(wallet1),
           Cl.uint(1),
           Cl.uint(1000000000), // Daily limit
       ], deployer);
       
       // 2. Submit Iceberg
-      const receipt = simnet.callPublicFn('enterprise-api', 'submit-iceberg-order', [
+      const receipt = simnet.callPublicFn('enterprise-facade', 'submit-iceberg-order', [
           Cl.contractPrincipal(deployer, token0),
           Cl.contractPrincipal(deployer, token1),
           Cl.uint(100000), // Total

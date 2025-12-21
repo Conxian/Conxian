@@ -122,7 +122,14 @@ describe("Grand Unified System Journey", () => {
 
     // --- Step 2: Register for Enterprise Features ---
     simnet.callPublicFn(
-      "enterprise-api",
+      "enterprise-facade",
+      "set-enterprise-active",
+      [Cl.bool(true)],
+      deployer
+    );
+
+    simnet.callPublicFn(
+      "enterprise-facade",
       "register-account",
       [
         Cl.standardPrincipal(wallet1),
@@ -134,7 +141,7 @@ describe("Grand Unified System Journey", () => {
 
     // --- Step 3: Submit TWAP Order (Future Execution) ---
     const twapReceipt = simnet.callPublicFn(
-      "enterprise-api",
+      "enterprise-facade",
       "submit-twap-order",
       [
         Cl.contractPrincipal(deployer, tokenCollateral),
@@ -152,14 +159,14 @@ describe("Grand Unified System Journey", () => {
 
     // --- Step 5: Check Compliance (Should pass after time) ---
     // The TWAP order is "active". In a real system, a keeper would execute it.
-    // We can verify the enterprise API state is correct.
+    // We can verify the enterprise facade state is correct.
     const checkCompliance = simnet.callPublicFn(
-      "enterprise-api",
-      "check-compliance",
-      [Cl.standardPrincipal(wallet1), Cl.uint(100)],
+      "compliance-manager",
+      "check-kyc-compliance",
+      [Cl.standardPrincipal(wallet1)],
       wallet1
     );
-    expect(checkCompliance.result).toEqual(Cl.ok(Cl.bool(true)));
+    expect(checkCompliance.result).toBeOk(Cl.bool(true));
 
     // --- Step 6: MEV Protection (Commit-Reveal) ---
     // Commit
