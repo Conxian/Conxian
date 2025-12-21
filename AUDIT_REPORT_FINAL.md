@@ -8,7 +8,7 @@
 
 A comprehensive audit of the Conxian Finance system has been conducted. While the architecture is robust and follows "Tier 1" DeFi patterns, **CRITICAL GAPS** and **SECURITY VULNERABILITIES** were identified that must be addressed before mainnet deployment.
 
-Most notably, the "Enhanced" system shows significant performance degradation compared to baseline, and critical compliance hooks are currently implemented as non-functional stubs.
+Most notably, the "Enhanced" system shows significant performance degradation compared to baseline, and critical policy hooks (e.g., KYC/AML gating) are currently implemented as non-functional stubs.
 
 **Overall Status:** 🔴 **NOT READY FOR MAINNET**
 
@@ -28,9 +28,9 @@ Most notably, the "Enhanced" system shows significant performance degradation co
     * **Risk:** If the intended circuit breaker is different from the hardcoded one, the system may fail to protect against price manipulation or panic if the hardcoded contract is in a bad state.
     * **Remediation:** Use `contract-call?` with the dynamic principal (passed as a trait argument) or consistently use the hardcoded dependency.
 
-3. **Compliance Bypass (`compliance-hooks.clar`)**
+3. **Policy Enforcement Bypass (`compliance-hooks.clar`)**
     * **Issue:** The `check-kyc` and `check-aml` functions are stubs that always return `(ok true)`.
-    * **Risk:** Regulatory non-compliance. Enterprise features relying on this will fail to enforce KYC/AML.
+    * **Risk:** Potential regulatory exposure. Enterprise features relying on this will fail to enforce required KYC/AML gating.
     * **Remediation:** Integrate with a real on-chain identity provider or oracle (e.g., the `kyc-registry` which exists but is not fully wired).
 
 ### Medium Severity
@@ -63,9 +63,9 @@ Most notably, the "Enhanced" system shows significant performance degradation co
 
 ---
 
-## 4. Compliance & Infrastructure
+## 4. Policy Hooks & Infrastructure
 
-* **Compliance:** As noted, compliance hooks are stubs. `kyc-registry.clar` exists but is not enforced by the enterprise module hooks.
+* **Policy hooks (KYC/AML):** As noted, policy hooks are stubs. `kyc-registry.clar` exists but is not enforced by the enterprise module hooks.
 * **Infrastructure:**
   * `default.devnet-plan.yaml` specifies `clarity-version: 1`.
   * **Remediation:** Update deployment plans to use **Clarity Version 2 or 3** to leverage latest Stacks features and optimizations.
@@ -77,7 +77,7 @@ Most notably, the "Enhanced" system shows significant performance degradation co
 | Priority | Task | Component | Action |
 | :--- | :--- | :--- | :--- |
 | **P0** | Fix Inflation Attack | `vault.clar` | Implement Dead Shares / Virtual Offset. |
-| **P0** | Implement Compliance | `compliance-hooks.clar` | Wire up `kyc-registry` or external oracle. |
+| **P0** | Implement Policy Checks (KYC/AML) | `compliance-hooks.clar` | Wire up `kyc-registry` or external oracle. |
 | **P0** | Fix Circuit Breaker | `oracle-aggregator-v2.clar` | Correct dynamic dispatch logic. |
 | **P1** | Optimize Performance | `mev-protector.clar` | Optimize math; Profile slow contracts. |
 | **P1** | Upgrade Clarity Version | Deployment | Update to Clarity 2/3. |

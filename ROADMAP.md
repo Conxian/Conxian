@@ -17,15 +17,15 @@ The phases below incorporate the agreed recommendations around:
 
 ## Phase 0: Technical Alpha & Nakamoto Alignment (Current Phase)
 
-- **Objective**: Solidify the protocol's foundation by aligning all core components with the modular, facade-based architecture and ensuring full compliance with the upcoming Stacks Nakamoto upgrade. This phase is about building a stable, future-proof base for all subsequent development.
+- **Objective**: Solidify the protocol's foundation by aligning all core components with the modular, facade-based architecture and ensuring full compatibility with the upcoming Stacks Nakamoto upgrade. This phase is about building a stable, future-proof base for all subsequent development.
 
 - **Key Activities**:
-  - **Nakamoto Compliance**:
+  - **Nakamoto Compatibility**:
     - Audit all contracts for dependencies on `block-height` for time-based logic and rescale constants to align with faster block times.
     - Transition long-term logic to `burn-block-height` where appropriate.
     - Deprecate the custom BTC bridge and integrate the official, native sBTC protocol.
   - **Architectural Alignment**:
-    - Refactor the `enterprise-api.clar` from a prototype into a true facade, delegating logic to specialized manager contracts.
+    - Refactor the `enterprise-facade.clar` from a prototype into a true facade, delegating logic to specialized manager contracts.
     - Solidify the `proposal-engine.clar` as the central facade for governance and clearly define the interfaces for its manager contracts.
   - **Documentation Overhaul**:
     - Complete the comprehensive documentation alignment to ensure all `README.md` files and strategic documents accurately reflect the current state and target architecture of the protocol.
@@ -35,7 +35,7 @@ The phases below incorporate the agreed recommendations around:
 
 ## Phase 1: Feature Hardening & Security (Planned)
 
-- **Objective**: Move the protocol from a "Technical Alpha" to a "Beta" stage by hardening all existing features, expanding security measures, and preparing for a formal audit.
+- **Objective**: Move the protocol from a "Technical Alpha" to a "Beta" stage by hardening all existing features, expanding security measures, , launching full retail mainnet and preparing for a formal audit for enterprise 
 
 - **Key Activities**:
   - **Contract Hardening**:

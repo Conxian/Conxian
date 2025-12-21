@@ -88,7 +88,7 @@ These components together ensure that **critical actions** (liquidations, bridge
 - **Risk**: Guardian identity or personal data is mishandled.
 - **Controls**:
   - On-chain contracts **never store PII**; they only reference principals and KYC tier flags.
-  - Off-chain systems (Conxian Labs + partners) store KYC data under POPIA-compliant policies and expose only **tiered status** on-chain.
+  - Off-chain systems (Conxian Labs + partners) store KYC data under POPIA-aligned policies and expose only **tiered status** on-chain.
 
 ---
 
@@ -125,9 +125,9 @@ The design aligns with key FSCA/IFWG themes:
 
 ---
 
-## 5. Where Off-Chain Governance & Compliance Plug In
+## 5. Where Off-Chain Governance & Policy Plug In
 
-Off-chain governance and compliance primarily act through:
+Off-chain governance and policy primarily act through:
 
 - **Identity and Tiering**
   - KYC/KYB decisions and sanctions/adverse media screening are performed off-chain.
@@ -139,7 +139,7 @@ Off-chain governance and compliance primarily act through:
     - Map the applicant to a guardian tier and allowed roles.
     - Trigger on-chain registration and bonding.
   - Offboarding is initiated when:
-    - Compliance status changes (e.g. sanctions, licence loss).
+    - Policy status changes (e.g. sanctions, licence loss).
     - Guardian breaches operational or economic thresholds.
 
 - **Policy and Parameter Governance**
@@ -153,7 +153,7 @@ Off-chain governance and compliance primarily act through:
 
 ## 6. Contract-Level Mapping
 
-This section links core guardian-related contracts to their compliance roles:
+This section links core guardian-related contracts to their policy/control roles:
 
 - **`guardian-registry.clar`**
   - Encodes **who is a guardian**, how much they have at risk, and their reward accrual.

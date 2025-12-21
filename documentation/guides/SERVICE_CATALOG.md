@@ -39,18 +39,18 @@ This catalog summarizes the main services provided by the Conxian ecosystem (on-
 - **Status**: **Developer / pilot UI**, aligned with current testnet contract set.
 - **SLA**: No production SLA; dependent on Hiro API and hosting provider availability.
 
-### 1.3 Enterprise Compliance & Analytics Platform (Planned)
+### 1.3 Enterprise Policy & Analytics Platform (Status: Planned)
 
-- **Description**: Off-chain services for AML/KYC integration, sanctions screening, GDPR data export, portfolio risk analytics, and audit reporting.
+- **Description**: Off-chain services for AML/KYC integration, sanctions screening, GDPR-aligned data export, portfolio risk analytics, and audit reporting.
 - **Current implementation**:
   - Design and example code in `COMPLIANCE_SECURITY.md` and `BUSINESS_VALUE_ROI.md`.
   - No production REST API or hosted service in this repository.
 - **Target capabilities**:
-  - AML/Travel Rule checks, OFAC/PEP screening.
-  - GDPR data export and erasure workflows.
+  - AML and Travel Rule-aligned control workflows, sanctions/PEP screening integration hooks.
+  - Privacy and GDPR-aligned data export and erasure workflows.
   - Portfolio and transaction risk scoring APIs.
   - Real-time audit dashboards and historical reports.
-- **Status**: **Target architecture / in design**.
+- **Status**: **Planned / target architecture (in design)**.
 - **SLA**: To be defined prior to any production rollout.
 
 ### 1.4 Enterprise Support Programme (Planned)
@@ -125,7 +125,7 @@ As of 2025-12-06:
 - Conxian DeFi Protocol: **Technical Alpha (testnet)**.
 - Conxian Portal (UI): **Technical Alpha (testnet)**.
 - StacksOrbit Deployment Service: **Stable tool**, but not a hosted SaaS.
-- Enterprise Compliance & Analytics Platform: **Planned**.
+- Enterprise Policy & Analytics Platform: **Planned**.
 - Enterprise Support Programme: **Planned**.
 
 ---

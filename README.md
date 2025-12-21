@@ -4,7 +4,7 @@
 
 ## Overview
 
-Conxian is a sophisticated, multi-dimensional DeFi protocol on Stacks, designed to provide a unified, secure, and efficient ecosystem for advanced financial operations. It has been architected from the ground up to be modular, decentralized, and compliant with the latest Stacks (Nakamoto) standards.
+Conxian is a sophisticated, multi-dimensional DeFi protocol on Stacks, designed to provide a unified, secure, and efficient ecosystem for advanced financial operations. It has been architected from the ground up to be modular, decentralized, and compatible with the latest Stacks (Nakamoto) standards.
 
 The protocol aggregates yield from multiple sources (Lending, DEX, Stacking), provides institutional-grade features for asset management, and is hardened against common security threats like MEV exploitation.
 
@@ -64,12 +64,12 @@ The Governance Module facilitates decentralized control over the protocol.
 
 ### 5. Enterprise Module (`contracts/enterprise/`)
 
-The Enterprise Module provides institutional-grade financial tooling.
+The Enterprise Module provides institutional-grade financial tooling (Status: Prototype/Planned).
 
--   **`enterprise-facade.clar`**: The **facade** for all enterprise-related actions, including institutional account management, compliance, and advanced order types.
+-   **`enterprise-facade.clar`**: The **facade** for all enterprise-related actions, including institutional account management, policy checks (e.g., KYC status checks), and advanced order types.
 -   **Manager Contracts**:
     -   **`institutional-account-manager.clar`**: Manages the lifecycle of institutional accounts.
-    -   **`compliance-manager.clar`**: Manages KYC/AML and other regulatory requirements.
+    -   **`compliance-manager.clar`**: Provides policy checks (e.g., KYC status checks) and integration points for institution-defined control workflows (Status: Prototype/Planned).
     -   **`advanced-order-manager.clar`**: Manages sophisticated order types like TWAP and Iceberg orders.
 
 ## Modules

@@ -8,7 +8,8 @@
 To establish Conxian as the premier "Institutional-Grade"
 DeFi protocol on Stacks, characterized by:
 
-* **Regulatory Compliance:** Built-in KYC/AML hooks and transaction monitoring.
+* **Policy hooks and monitoring (Status: Prototype):** Built-in KYC status check
+  hooks and transaction monitoring primitives.
 * **Predictable Execution:** MEV protection and transparent routing.
 * **Unified Architecture:** A single, cohesive codebase where all components
   (DEX, Lending, Governance) share common traits and security standards.
@@ -28,7 +29,7 @@ DeFi protocol on Stacks, characterized by:
 
 * **Objective:** Verify and activate the "Enterprise" features.
 * **Action Items:**
-  * **Audit `enterprise-api`:** Verify that `compliance-hooks` are blocking non-KYC'd addresses in the `swap` function of the CLP.
+  * **Audit `enterprise-facade`:** Verify that `compliance-hooks` are blocking non-KYC'd addresses in the `swap` function of the CLP.
   * **MEV Integration:** Benchmark the latency impact of the `mev-protector` commit-reveal scheme. Optimize if >2 blocks.
   * **Circuit Breakers:** Implement automated pause triggers for extreme price volatility (referencing `oracle-aggregator-v2`).
 
@@ -44,13 +45,13 @@ DeFi protocol on Stacks, characterized by:
 
 ```mermaid
 graph TD
-    User[Institutional User] -->|1. KYC Check| EntAPI[Enterprise API]
+    User[Institutional User] -->|1. KYC Check| EntFacade[Enterprise Facade]
     User -->|2. Swap Request| Router[Multi-Hop Router V3]
     
     subgraph "Core Execution Layer"
         Router -->|Direct| Pool[Concentrated Liquidity Pool]
         Router -->|Multi-Hop| Pool
-        Pool -->|3. Compliance Hook| EntAPI
+        Pool -->|3. Compliance Hook| EntFacade
         Pool -->|4. Fee Logic| FeeSwitch[Protocol Fee Switch]
     end
     

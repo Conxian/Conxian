@@ -217,11 +217,11 @@ This enables global operations while keeping the core architecture and contracts
   - Every revenue routing operation.
   - Every allocation policy change.
   - Significant vault withdrawals.
-- Off‑chain analytics, accounting and tax tools consume these events to build ledgers for Conxian Labs and any regional entities.
+ - Off‑chain analytics, accounting and tax tools consume these events to build ledgers for Conxian Labs and any regional entities.
 
 ---
 
-## 6. Identity, KYC/KYB and Compliance Hooks
+## 6. Identity, KYC/KYB and Policy Hooks
 
 - Access to certain reward streams or bounties may require minimum **KYC/KYB tiers**, as defined in the Identity, KYC & POPIA Charter.
   - Guardian rewards: typically Tier 1 or 2.
@@ -231,7 +231,7 @@ This enables global operations while keeping the core architecture and contracts
   - On‑chain KYC/KYB tiers and flags.
   - Role checks managed by governance and Operations.
 
-This ties financial flows and operations to the same identity and compliance framework used across Conxian.
+This ties financial flows and operations to the same identity and policy/control framework used across Conxian.
 
 ---
 

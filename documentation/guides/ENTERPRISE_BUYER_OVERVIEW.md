@@ -5,7 +5,7 @@ This document is for institutional buyers, procurement teams, risk/compliance of
 > **Honest Status (as of 2025-12-06)**
 >
 > - The Conxian Protocol is in a **stabilization & alignment phase on testnet** and is **not yet production-ready**.
-> - All ROI, compliance, and support descriptions reflect **target design** rather than an already-operational regulated platform.
+> - All ROI, policy/assurance, and support descriptions reflect **target design** rather than an already-operational regulated platform.
 > - Any live production deployment will follow external audits, jurisdiction-specific legal review, and updated documentation.
 
 ## 1. What Conxian Is
@@ -29,10 +29,10 @@ High-level service categories (see `SERVICE_CATALOG.md` for details):
 - **Conxian DeFi Protocol (On-Chain)** – smart contracts providing trading, lending, derivatives, governance, and risk primitives.
 - **Conxian Portal (Web UI)** – reference interface for interacting with the protocol on testnet.
 - **StacksOrbit Deployment Service** – tooling for deploying and monitoring Stacks contracts, including Conxian.
-- **Enterprise Compliance & Analytics Platform (Planned)** – off-chain services for AML/KYC integration, sanctions screening, GDPR workflows, risk analytics, and audit reporting.
+- **Enterprise Policy & Analytics Platform (Status: Planned)** – off-chain services for AML/KYC integration, sanctions screening, GDPR-aligned workflows, risk analytics, and audit reporting.
 - **Enterprise Support Programme (Planned)** – structured support tiers and SLAs.
 
-## 3. Security & Compliance Posture
+## 3. Security & Policy/Assurance Posture
 
 See `documentation/enterprise/COMPLIANCE_SECURITY.md` for full details. Key points:
 
@@ -70,7 +70,7 @@ For a technical mapping of these elements to regulatory-style objectives, see `R
 - **Guardian & Automation SDK (Planned)**: TypeScript SDK and reference Guardian client built
   on the same stack as Conxian_UI, enabling institutions to run their own bonded Guardians
   that monitor metrics via Hiro Core API and execute automated on-chain actions.
-- **Planned enterprise REST APIs**: Compliance, analytics, and audit-oriented endpoints
+- **Planned enterprise REST APIs**: Policy, analytics, and audit-oriented endpoints
   described conceptually in `COMPLIANCE_SECURITY.md` and more concretely in
   `API_OVERVIEW.md`.
 
