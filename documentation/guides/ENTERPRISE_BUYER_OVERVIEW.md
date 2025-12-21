@@ -17,10 +17,10 @@ This document is for institutional buyers, procurement teams, risk/compliance of
 For a detailed technical view, see:
 
 - `README.md` and `documentation/architecture/ARCHITECTURE.md` (system architecture).
-- `documentation/REGULATORY_ALIGNMENT.md` (mapping to regulatory-style objectives).
-- `documentation/OPERATIONS_RUNBOOK.md` (incident procedures and operational controls).
-- `documentation/SERVICE_CATALOG.md` (service inventory and maturity levels).
-- `documentation/API_OVERVIEW.md` (API surfaces and planned REST services).
+- `documentation/guides/REGULATORY_ALIGNMENT.md` (mapping to regulatory-style objectives).
+- `documentation/guides/OPERATIONS_RUNBOOK.md` (incident procedures and operational controls).
+- `documentation/guides/SERVICE_CATALOG.md` (service inventory and maturity levels).
+- `documentation/guides/API_OVERVIEW.md` (API surfaces and planned REST services).
 
 ## 2. Services & Scope
 
@@ -37,10 +37,10 @@ High-level service categories (see `SERVICE_CATALOG.md` for details):
 See `documentation/enterprise/COMPLIANCE_SECURITY.md` for full details. Key points:
 
 - **Frameworks referenced**: FATF, OFAC, GDPR, SOC 2, ISO 27001, MiCA-style requirements.
-- **Certifications**:
-  - SOC 2 Type II: In progress (target Q1 2026).
-  - ISO 27001: In progress (target Q2 2026).
-  - PCI DSS: Planned (target Q3 2026).
+- **Assurance & certification roadmap (targets)**:
+  - SOC 2 Type II: Target Q1 2026 (subject to third-party assessment scope)
+  - ISO 27001: Target Q2 2026 (subject to third-party assessment scope)
+  - PCI DSS: Target Q3 2026 (subject to third-party assessment scope)
 - **Controls (design)**:
   - Multi-layer security (network, application, data, key management).
   - AML transaction monitoring and sanctions screening.

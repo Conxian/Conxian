@@ -8,7 +8,7 @@ Conxian Protocol offers institutional-grade DeFi infrastructure with measurable 
 >
 > - The Conxian Protocol is in a **stabilization & alignment phase on testnet** and is **not yet production-ready for mainnet**.
 > - This ROI analysis describes a **target institutional platform design** rather than an already-operational regulated service.
-> - For a current view of services and status, see `documentation/SERVICE_CATALOG.md` and `documentation/ENTERPRISE_BUY_OVERVIEW.md`.
+> - For a current view of services and status, see `documentation/guides/SERVICE_CATALOG.md` and `documentation/guides/ENTERPRISE_BUYER_OVERVIEW.md`.
 
 ## Value Proposition Framework
 
@@ -155,18 +155,18 @@ Year 3 Net: $2.6M (260% ROI)
 - Professional integration services
 - Comprehensive testing environments
 - Rollback capabilities
- 
+
 #### Regulatory Alignment & Policy Risk
- 
+
  **Probability**: Low (15%)
  **Impact**: High
  **Mitigation**:
- 
- - Pre-implementation regulatory review
- - Policy-as-code integration (Status: Planned)
- - Continuous monitoring and auditing
- - Regulatory reporting automation (Status: Planned)
- 
+
+- Pre-implementation regulatory review
+- Policy-as-code integration (Status: Planned)
+- Continuous monitoring and auditing
+- Regulatory reporting automation (Status: Planned)
+
 #### Market Volatility Risk
 
 **Probability**: Medium (40%)
@@ -208,12 +208,12 @@ Year 3 Net: $2.6M (260% ROI)
 
  **Investment**: $750K
  **Deliverables**:
- 
- - Basic integration setup
- - Policy & control framework implementation (Status: Planned)
- - Pilot trading strategies
- - Staff training and onboarding
- 
+
+- Basic integration setup
+- Policy & control framework implementation (Status: Planned)
+- Pilot trading strategies
+- Staff training and onboarding
+
 **Expected ROI**: Break-even by month 3
 
 ### Phase 2: Optimization (Months 4-6)
@@ -290,7 +290,7 @@ Year 3 Net: $2.6M (260% ROI)
 ### Enterprise Support
 
 - **Dedicated account management** for each institution
-- **24/7 technical support** with <2 hour response times
+- **Target 24/7 technical support** with target <2 hour response times (Status: Planned; subject to contract)
 - **Custom integration services** for unique requirements
 - Implementation guidance for policy integrations and operational controls
 

@@ -16,7 +16,7 @@ it is not a statement of regulatory compliance or certification.
 > - The controls, processes, and certifications described here represent the
   **target compliance and security design** for future institutional deployments.
 > - For an up-to-date view of which services are live, in pilot, or planned, see:
-`documentation/SERVICE_CATALOG.md` and `documentation/ENTERPRISE_BUY_OVERVIEW.md`.
+`documentation/guides/SERVICE_CATALOG.md` and `documentation/guides/ENTERPRISE_BUYER_OVERVIEW.md`.
 
 ## Policy & Control Framework (Status: Planned)
 
@@ -135,7 +135,7 @@ app.post('/api/gdpr/export', async (req, res) => {
 - **Change Management**: Formal change approval processes
 - **Risk Mitigation**: Regular risk assessments and controls
 - **Logical Access**: Secure authentication and authorization
-- **System Operations**: 24/7 monitoring and incident response
+- **System Operations**: Target 24/7 monitoring and incident response (Status: Planned)
 
 #### Availability Criteria
 
@@ -207,7 +207,7 @@ app.post('/api/gdpr/export', async (req, res) => {
 
 #### Incident Response Plan
 
-1. **Detection**: 24/7 monitoring and automated alerting
+1. **Detection**: Target 24/7 monitoring and automated alerting (Status: Planned)
 2. **Assessment**: Rapid triage and impact assessment
 3. **Containment**: Immediate isolation of affected systems
 4. **Recovery**: Restored systems from clean backups
@@ -222,19 +222,19 @@ app.post('/api/gdpr/export', async (req, res) => {
 
 #### Response Times
 
-- **Critical**: Response within 15 minutes, resolution within 4 hours
-- **High**: Response within 1 hour, resolution within 24 hours
-- **Medium**: Response within 4 hours, resolution within 72 hours
-- **Low**: Response within 24 hours, best effort resolution
+- **Critical**: Target response within 15 minutes; target resolution within 4 hours (Status: Planned; subject to contract)
+- **High**: Target response within 1 hour; target resolution within 24 hours (Status: Planned; subject to contract)
+- **Medium**: Target response within 4 hours; target resolution within 72 hours (Status: Planned; subject to contract)
+- **Low**: Target response within 24 hours; best-effort resolution (Status: Planned; subject to contract)
 
 ### Penetration Testing & Audits
 
 #### Regular Security Assessments
 
-- **Quarterly Penetration Testing**: External security firms
-- **Annual Comprehensive Audit**: Full security assessment
-- **Continuous Vulnerability Scanning**: Automated security monitoring
-- **Code Review**: Security-focused code reviews for all changes
+- **Quarterly Penetration Testing**: Target quarterly penetration testing by external security firms (Status: Planned; subject to contract)
+- **Annual Comprehensive Audit**: Target annual comprehensive audit (Status: Planned; subject to contract)
+- **Continuous Vulnerability Scanning**: Target continuous vulnerability scanning (Status: Planned)
+- **Code Review**: Security-focused code reviews for all changes (Status: Planned)
 
 #### Audit Findings Tracking
 
@@ -347,22 +347,22 @@ const multiSigTransaction = {
 
 ## Assurance and certification roadmap (Status: Planned)
 
-### Current Certifications
+### Certification Targets
 
-- **SOC 2 Type II**: In Progress (Expected Q1 2026)
-- **ISO 27001**: In Progress (Expected Q2 2026)
-- **PCI DSS**: Planned for Q3 2026
+- **SOC 2 Type II**: Target Q1 2026 (subject to third-party assessment scope)
+- **ISO 27001**: Target Q2 2026 (subject to third-party assessment scope)
+- **PCI DSS**: Target Q3 2026 (subject to third-party assessment scope)
 - **FATF-aligned AML control mapping**: Planned
 
 ### Third-Party Audit Reports
 
-- **Security Audits**: Quarterly by leading blockchain security firms
-- **Control assessments**: Periodic independent assessments (Status: Planned)
-- **Performance Audits**: Monthly system performance and availability audits
+- **Security Audits**: Target quarterly audits by external blockchain security firms (Status: Planned; subject to contract)
+- **Control assessments**: Target periodic independent assessments (Status: Planned; subject to contract)
+- **Performance Audits**: Target monthly performance and availability audits (Status: Planned; subject to contract)
 
 ### Audit Report Access
 
-Enterprise clients receive access to:
+Enterprise clients may receive access to (Status: Planned; subject to contract):
 
 - Real-time audit dashboard
 - Historical audit reports
@@ -373,23 +373,23 @@ Enterprise clients receive access to:
 
 ### Dedicated Support Channels
 
-- **Enterprise Portal**: 24/7 self-service knowledge base
-- **Priority Support**: < 2 hour response time for critical issues
-- **Dedicated Account Manager**: Single point of contact for all needs
-- **Technical Account Team**: Specialized blockchain and DeFi expertise
+- **Enterprise Portal**: Target 24/7 self-service knowledge base (Status: Planned)
+- **Priority Support**: Target < 2 hour response time for critical issues (Status: Planned; subject to contract)
+- **Dedicated Account Manager**: Target single point of contact for all needs (Status: Planned; subject to contract)
+- **Technical Account Team**: Target specialized blockchain and DeFi expertise (Status: Planned; subject to contract)
 
 ### Service Level Agreements
 
-- **System Availability**: 99.9% uptime guarantee
-- **Incident Response**: < 15 minutes for critical security incidents
-- **Feature Requests**: 30-day review period for enterprise feature requests
-- **Custom Integrations**: Dedicated development resources for custom needs
+- **System Availability**: Target 99.9% uptime (Status: Planned; subject to contract)
+- **Incident Response**: Target < 15 minutes for critical security incidents (Status: Planned; subject to contract)
+- **Feature Requests**: Target 30-day review period for enterprise feature requests (Status: Planned; subject to contract)
+- **Custom Integrations**: Target dedicated development resources for custom needs (Status: Planned; subject to contract)
 
 ### Communication Protocols
 
-- **Security Advisories**: Immediate notification of security updates
-- **Maintenance Windows**: Scheduled 48 hours in advance
-- **Emergency Communications**: Multiple channels for critical updates
-- **Regulatory Updates**: Proactive communication of regulatory changes
+- **Security Advisories**: Target immediate notification of security updates (Status: Planned; subject to contract)
+- **Maintenance Windows**: Target 48 hours notice for scheduled maintenance windows (Status: Planned; subject to contract)
+- **Emergency Communications**: Target multiple channels for critical updates (Status: Planned; subject to contract)
+- **Regulatory Updates**: Target proactive communication of regulatory changes (Status: Planned; subject to contract)
 
 This security and policy-control roadmap is intended to support institutional deployments when paired with an institution's compliance program, third-party assessments, and ongoing operational governance (Status: Planned).

@@ -329,8 +329,7 @@ Traits:
 
 Docs:
 
-- `documentation/ANALYTICS_METRICS_GUIDE.md`
-- `documentation/SECURITY_REVIEW_PROCESS.md`
+- `documentation/guides/metrics-dashboard-spec.md`
 - `documentation/security/SECURITY.md`
 
 **DApp impact**
@@ -437,7 +436,7 @@ this section focuses on Conxians own view of readiness.
   - Lending and liquidation flows.  
   - Circuit breaker and MEV protection.
 - Coverage and stability remain below target;
-    see `documentation/TESTING_FRAMEWORK.md`
+    see `documentation/developer/DEVELOPER_GUIDE.md`
     and `ROADMAP.md` for current metrics and goals.
 
 ---

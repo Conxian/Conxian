@@ -148,8 +148,8 @@ It is **not** legal advice, but a technical alignment guide to support audits, i
 
 - **Artifacts**
   - `README.md`, `ROADMAP.md`.
-  - `SECURITY_REVIEW_PROCESS.md`.
-  - Test framework documentation.
+  - `documentation/security/SECURITY.md`.
+  - `documentation/developer/DEVELOPER_GUIDE.md`, `documentation/reports/TEST_SUITE_CONSOLIDATION_REPORT.md`.
 - **Key practices**
   - Targeted coverage thresholds (80%+ general, 95%+ critical).
   - Dimension-based test suites (DEX, Lending, Governance, Oracle, Risk, Dimensional Core).

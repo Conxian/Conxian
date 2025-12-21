@@ -98,11 +98,13 @@ Connecting your wallet is your gateway to the Conxian ecosystem. The process is 
 Once connected, you'll land on your personal dashboard. This is your central hub for viewing your portfolio, tracking your positions, and navigating the platform.
 
 **What you'll see:**
+
 - **Portfolio Overview:** A summary of your total assets held on Conxian.
 - **My Positions:** A breakdown of your supplied assets, borrowed assets, and liquidity pool stakes.
 - **Quick Actions:** Buttons to quickly navigate to the Swap, Lend, and Earn pages.
 
 **Visual Guide:**
+
 ```
 [Image: A sleek dashboard view with charts showing portfolio allocation, and clear cards for different asset balances and positions.]
 ```
@@ -232,6 +234,7 @@ Rate: 2% better than direct trade
 As a Conxian user, you have access to a unique personalization feature. If you own a special Conxian Treasury NFT in your connected wallet, the platform's theme will automatically adapt to match the branding and colors of your NFT.
 
 **How it works:**
+
 - **Automatic Detection:** The app detects the NFT in your wallet upon connection.
 - **Dynamic Theming:** The UI color scheme, background, and other visual elements instantly change.
 - **User Control:** While the NFT theme is a special perk, you can always switch back to the default theme or choose from other available options in the settings menu.
@@ -353,9 +356,9 @@ Stay informed about all your activity with a dedicated transaction history.
 
 **Response Times:**
 
-- Community help: Usually within 1 hour
-- Official support: Within 24 hours
-- Urgent security: Within 2 hours
+- Community help: Best-effort; response times vary
+- Official support: Best-effort; response times vary
+- Urgent security: Best-effort escalation; response times vary
 
 ## Success Strategies
 
@@ -595,7 +598,7 @@ A: Blockchain transactions need to be verified by the network, which takes time.
 A: Decentralized Finance - financial services without banks, running on blockchain.
 
 **Q: How is DeFi different from traditional finance?**
-A: No intermediaries, operates 24/7, global access, and you control your assets.
+A: No intermediaries, operates continuously, global access, and you control your assets.
 
 **Q: What makes Conxian special?**
 A: Multi-dimensional approach, Bitcoin security, user-friendly design, and strong community.
@@ -717,6 +720,7 @@ Conxian works great on mobile! Here's everything you need to know for the best m
 ### Mobile Wallets Setup
 
 **Xverse Wallet (Recommended for Mobile):**
+
 1. **Download:** Search "Xverse" in App Store or Google Play
 2. **Create Wallet:** Tap "Create a new wallet"
 3. **Secure Backup:** Write down your 12-word recovery phrase
@@ -724,6 +728,7 @@ Conxian works great on mobile! Here's everything you need to know for the best m
 5. **Add Funds:** Transfer STX and other crypto from exchanges
 
 **Why Xverse?**
+
 - Native mobile experience
 - Built-in browser for DeFi apps
 - Stacks ecosystem integration
@@ -732,11 +737,13 @@ Conxian works great on mobile! Here's everything you need to know for the best m
 ### Mobile Browser Access
 
 **Best Mobile Browsers:**
+
 - **Safari** (iOS) - Most compatible
 - **Chrome** (Android) - Fast and reliable
 - **Firefox** - Privacy-focused option
 
 **Browser Settings:**
+
 - Enable JavaScript (required)
 - Allow pop-ups for wallet connections
 - Use desktop mode if interface seems cramped
@@ -744,6 +751,7 @@ Conxian works great on mobile! Here's everything you need to know for the best m
 ### Mobile Trading Experience
 
 **Touch-Optimized Interface:**
+
 ```
 ┌─────────────────────────────┐
 │ 🔄 Swap                    │
@@ -758,6 +766,7 @@ Conxian works great on mobile! Here's everything you need to know for the best m
 ```
 
 **Mobile Trading Tips:**
+
 - Use thumb-friendly buttons
 - Swipe to switch between tokens
 - Long-press for quick actions
@@ -766,6 +775,7 @@ Conxian works great on mobile! Here's everything you need to know for the best m
 ### Mobile Vault Management
 
 **Deposit on Mobile:**
+
 1. **Tap "Earn" tab**
 2. **Select vault** (STX, sBTC, etc.)
 3. **Enter amount** or tap "Max"
@@ -773,6 +783,7 @@ Conxian works great on mobile! Here's everything you need to know for the best m
 5. **Confirm** with wallet signature
 
 **Mobile Dashboard:**
+
 - **Balance cards** with touch-to-expand
 - **APY meters** with color coding
 - **Quick actions** (Deposit/Withdraw)
@@ -781,17 +792,20 @@ Conxian works great on mobile! Here's everything you need to know for the best m
 ### Mobile Security Best Practices
 
 **Biometric Security:**
+
 - Enable fingerprint/face unlock
 - Use strong PIN as backup
 - Never share biometric data
 
 **Mobile-Specific Security:**
+
 - Use secure WiFi networks only
 - Avoid public charging stations
 - Enable app lock with timeout
 - Keep device updated
 
 **Wallet Backup on Mobile:**
+
 - Screenshot recovery phrase (then delete!)
 - Write on paper immediately
 - Store in secure location
@@ -800,12 +814,14 @@ Conxian works great on mobile! Here's everything you need to know for the best m
 ### Mobile Notifications & Alerts
 
 **Enable Notifications:**
+
 - Price alerts for your holdings
 - APY changes in vaults
 - Governance proposal deadlines
 - Security announcements
 
 **Notification Types:**
+
 - 📈 **Price Alerts:** When assets hit target prices
 - 💰 **Yield Updates:** APY changes or bonus rewards
 - 🗳️ **Governance:** New proposals or voting deadlines
@@ -814,12 +830,14 @@ Conxian works great on mobile! Here's everything you need to know for the best m
 ### Mobile Performance Tips
 
 **Optimize Speed:**
+
 - Close other apps to free memory
 - Use fast internet connection
 - Clear browser cache weekly
 - Update wallet and browser regularly
 
 **Battery & Data Usage:**
+
 - Wallet apps use minimal battery
 - Transactions use small data amounts
 - Background sync can be disabled
@@ -830,6 +848,7 @@ Conxian works great on mobile! Here's everything you need to know for the best m
 **Common Mobile Issues:**
 
 **Wallet Won't Connect:**
+
 ```
 1. Force close browser app
 2. Restart wallet app
@@ -839,6 +858,7 @@ Conxian works great on mobile! Here's everything you need to know for the best m
 ```
 
 **Transaction Stuck:**
+
 ```
 1. Check wallet for pending tx
 2. Wait 5-10 minutes
@@ -847,6 +867,7 @@ Conxian works great on mobile! Here's everything you need to know for the best m
 ```
 
 **App Crashing:**
+
 ```
 1. Restart device
 2. Update wallet app
@@ -855,6 +876,7 @@ Conxian works great on mobile! Here's everything you need to know for the best m
 ```
 
 **Slow Loading:**
+
 ```
 1. Check internet speed
 2. Close other apps
@@ -865,12 +887,14 @@ Conxian works great on mobile! Here's everything you need to know for the best m
 ### Mobile Gestures & Shortcuts
 
 **Touch Gestures:**
+
 - **Swipe down** to refresh balances
 - **Long press** on tokens for quick actions
 - **Double tap** to maximize charts
 - **Pinch** to zoom on graphs
 
 **Quick Actions:**
+
 - **Hold wallet address** to copy instantly
 - **Shake device** to refresh all data
 - **Volume buttons** for quick navigation (future feature)
@@ -878,12 +902,14 @@ Conxian works great on mobile! Here's everything you need to know for the best m
 ### Mobile Accessibility
 
 **For All Users:**
+
 - Large touch targets (44pt minimum)
 - High contrast mode available
 - Voice-over/screen reader support
 - Adjustable text size
 
 **For Visual Impairments:**
+
 - Audio feedback for actions
 - Haptic feedback for confirmations
 - Large print options
@@ -892,12 +918,14 @@ Conxian works great on mobile! Here's everything you need to know for the best m
 ### Mobile Community Access
 
 **Mobile Discord:**
+
 - Optimized mobile app
 - Push notifications for mentions
 - Voice channels for calls
 - Mobile-specific channels
 
 **Mobile Forums:**
+
 - Responsive design
 - Touch-friendly posting
 - Image upload from camera
@@ -906,6 +934,7 @@ Conxian works great on mobile! Here's everything you need to know for the best m
 ### Mobile Future Features
 
 **Coming Soon:**
+
 - **Native Mobile App** - Dedicated Conxian app
 - **Mobile Staking** - One-tap staking actions
 - **NFC Integration** - Tap-to-connect features
@@ -913,6 +942,7 @@ Conxian works great on mobile! Here's everything you need to know for the best m
 - **Biometric Trading** - Face/Touch ID for trades
 
 **Beta Features:**
+
 - Mobile governance voting
 - Push notification alerts
 - Mobile portfolio tracker
@@ -921,31 +951,36 @@ Conxian works great on mobile! Here's everything you need to know for the best m
 ### Mobile Support
 
 **Mobile-Specific Help:**
+
 - **📱 Mobile FAQ** - Device-specific questions
 - **📞 Phone Support** - Voice assistance for mobile users
 - **💬 Live Chat** - Mobile-optimized chat support
 - **📧 Email** - Detailed mobile troubleshooting
 
 **Support Hours:**
-- Mobile support: 24/7 via chat
+
+- Mobile support: Best-effort via chat (availability may vary)
 - Phone support: Business hours
-- Emergency: Always available
+- Emergency: Best-effort escalation (availability may vary)
 
 ### Mobile Resources
 
 **Mobile Learning:**
+
 - **📱 Mobile Tutorials** - Step-by-step video guides
 - **📊 Mobile Calculator** - Fee and yield calculators
 - **📰 Mobile News** - Crypto news optimized for mobile
 - **📈 Mobile Charts** - Interactive price charts
 
 **Mobile Tools:**
+
 - **Portfolio Tracker** - Real-time balance monitoring
 - **Price Alerts** - Custom notification setup
 - **Yield Calculator** - Mobile APY projections
 - **Tax Tools** - Mobile tax reporting helpers
 
 **Mobile Tools:**
+
 - **Portfolio Tracker** - Real-time balance monitoring
 - **Price Alerts** - Custom notification setup
 - **Yield Calculator** - Mobile APY projections
@@ -960,6 +995,7 @@ Conxian is more than a platform - it's a community! Here's how to connect, learn
 ### Getting Started with Community
 
 **Why Join the Community?**
+
 - **Learn from others** - Get tips from experienced users
 - **Get help fast** - Community support for quick questions
 - **Shape the platform** - Your voice matters in governance
@@ -969,6 +1005,7 @@ Conxian is more than a platform - it's a community! Here's how to connect, learn
 ### Community Channels
 
 #### 🌟 Discord Server (Primary Hub)
+
 **Join Link:** [discord.gg/conxian](https://discord.gg/conxian)
 
 **Server Structure:**
@@ -1000,6 +1037,7 @@ Conxian is more than a platform - it's a community! Here's how to connect, learn
 ```
 
 **Discord Tips:**
+
 - **Introduce yourself** in #welcome when you join
 - **Read the rules** before posting
 - **Use appropriate channels** for your questions
@@ -1007,9 +1045,11 @@ Conxian is more than a platform - it's a community! Here's how to connect, learn
 - **Stay active** to build your reputation
 
 #### 📱 Twitter/X
+
 **Follow:** [@ConxianProtocol](https://twitter.com/ConxianProtocol)
 
 **What to Expect:**
+
 - **Daily updates** on platform developments
 - **Market insights** and analysis
 - **Community highlights** and success stories
@@ -1017,9 +1057,11 @@ Conxian is more than a platform - it's a community! Here's how to connect, learn
 - **Live AMAs** with the team
 
 #### 📖 Forum (In-Depth Discussions)
+
 **Link:** [forum.conxian.com](https://forum.conxian.com)
 
 **Forum Categories:**
+
 - **Beginner Guides** - Learn the basics
 - **Advanced Strategies** - Expert discussions
 - **Technical Support** - Detailed troubleshooting
@@ -1029,28 +1071,35 @@ Conxian is more than a platform - it's a community! Here's how to connect, learn
 ### Community Roles & Levels
 
 #### Getting Started
+
 **New Member:** Everyone starts here
+
 - Access to basic channels
 - Can ask questions and learn
 - Limited posting in advanced channels
 
 **Active Member:** After 2 weeks of participation
+
 - Unlocks advanced channels
 - Can participate in governance discussions
 - Eligible for community rewards
 
 #### Advanced Roles
+
 **Power User:** High activity and helpful contributions
+
 - Exclusive channels and features
 - Priority support access
 - Governance voting power boosts
 
 **Community Champion:** Top contributors
+
 - Direct communication with team
 - Beta feature access
 - Special recognition and rewards
 
 **Ambassador:** Community leaders
+
 - Official representative status
 - Event hosting privileges
 - Revenue sharing opportunities
@@ -1058,7 +1107,9 @@ Conxian is more than a platform - it's a community! Here's how to connect, learn
 ### Learning & Education
 
 #### 📚 Educational Resources
+
 **Community Academy:**
+
 - **Weekly Workshops** - Learn DeFi concepts
 - **Strategy Sessions** - Trading and yield strategies
 - **Technical Deep Dives** - Advanced platform features
@@ -1074,14 +1125,18 @@ Basics       Strategies   Optimization
 ```
 
 #### 🎥 Video Content
+
 **YouTube Channel:** [Conxian Academy](https://youtube.com/conxian)
+
 - **Tutorial Series** - Step-by-step guides
 - **Strategy Videos** - Advanced techniques
 - **Live Streams** - Real-time Q&A sessions
 - **Market Updates** - Weekly analysis
 
 #### 📖 Blog & Articles
+
 **Medium Publication:** [@ConxianProtocol](https://medium.com/conxian)
+
 - **Educational Articles** - DeFi concepts explained
 - **Strategy Guides** - Practical earning methods
 - **Platform Updates** - New features and improvements
@@ -1090,32 +1145,39 @@ Basics       Strategies   Optimization
 ### Contributing to Community
 
 #### Ways to Contribute
+
 **Help Others:**
+
 - Answer questions in support channels
 - Create helpful guides and tutorials
 - Share your successful strategies
 - Welcome new community members
 
 **Content Creation:**
+
 - Write blog posts or tutorials
 - Create educational videos
 - Design infographics or memes
 - Host community events
 
 **Platform Improvement:**
+
 - Report bugs and suggest features
 - Test beta features and provide feedback
 - Participate in governance voting
 - Help moderate community spaces
 
 #### Recognition & Rewards
+
 **Community Badges:**
+
 - 🏆 **Helper** - For helping others
 - 📝 **Educator** - For creating content
 - 🛡️ **Guardian** - For reporting issues
 - 🎯 **Strategist** - For sharing strategies
 
 **Reward System:**
+
 - **XP Points** - Earned through participation
 - **Token Rewards** - CXTR tokens for contributions
 - **Exclusive Access** - Beta features and events
@@ -1124,6 +1186,7 @@ Basics       Strategies   Optimization
 ### Community Events
 
 #### Regular Events
+
 **Weekly Schedule:**
 
 - **Monday:** Market analysis and predictions
@@ -1134,6 +1197,7 @@ Basics       Strategies   Optimization
 - **Weekend:** Casual discussions and fun
 
 #### Special Events
+
 **Monthly AMAs:** Ask the team anything
 
 **Quarterly Conferences:** Virtual meetups
@@ -1147,6 +1211,7 @@ Basics       Strategies   Optimization
 ### Support System
 
 #### Multi-Level Support
+
 **Level 1 - Community Support:**
 
 - Discord channels for quick questions
@@ -1166,12 +1231,15 @@ Basics       Strategies   Optimization
 - Priority feature requests
 
 #### Getting Help Effectively
+
 **Before Asking:**
+
 - Check FAQ and guides first
 - Search Discord/forum history
 - Include relevant details (screenshots, error messages)
 
 **How to Ask for Help:**
+
 ```
 ❌ Bad: "Help! It's not working!"
 ✅ Good: "Hi! I'm trying to deposit STX to a vault. I get an error after confirming in wallet. Here's a screenshot: [image]. Using Hiro wallet on Chrome."
@@ -1180,6 +1248,7 @@ Basics       Strategies   Optimization
 ### Community Guidelines
 
 #### Code of Conduct
+
 **Be Respectful:**
 
 - Treat everyone with kindness
@@ -1202,6 +1271,7 @@ Basics       Strategies   Optimization
 - Correct misinformation politely
 
 #### Content Policies
+
 **Allowed:**
 
 - Educational content and discussions
@@ -1219,6 +1289,7 @@ Basics       Strategies   Optimization
 ### Success Stories
 
 #### Community Member Highlights
+
 **Sarah's Journey:**
 *"Started with $50, learned from community, now earning $200/month in yield!"*
 
@@ -1231,6 +1302,7 @@ Basics       Strategies   Optimization
 ### Future Community Features
 
 #### Planned Improvements
+
 **Enhanced Platform:**
 
 - **In-App Community** - Direct community access from platform

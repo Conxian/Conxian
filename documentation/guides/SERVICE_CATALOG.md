@@ -81,10 +81,10 @@ This catalog summarizes the main services provided by the Conxian ecosystem (on-
 ### 2.2 Operations, Identity & Regulatory Alignment
 
 - **Docs**:
-  - `documentation/OPERATIONS_RUNBOOK.md` – incident playbooks and SOPs for core contracts.
-  - `documentation/REGULATORY_ALIGNMENT.md` – mapping contracts/tests to regulatory-style objectives.
-  - `documentation/IDENTITY_KYC_POPIA.md` – identity, KYC/KYB and POPIA alignment charter (Conxian and Conxian Labs).
-  - `documentation/TREASURY_AND_REVENUE_ROUTER.md` – protocol treasury and revenue routing design.
+  - `documentation/guides/OPERATIONS_RUNBOOK.md` – incident playbooks and SOPs for core contracts.
+  - `documentation/guides/REGULATORY_ALIGNMENT.md` – mapping contracts/tests to regulatory-style objectives.
+  - `documentation/guides/IDENTITY_KYC_POPIA.md` – identity, KYC/KYB and POPIA alignment charter (Conxian and Conxian Labs).
+  - `documentation/guides/TREASURY_AND_REVENUE_ROUTER.md` – protocol treasury and revenue routing design.
 - **Description**: Internal knowledge base for operations, risk, compliance, and treasury teams.
 - **Status**: **Living documentation**, updated alongside contract changes and governance decisions.
 
