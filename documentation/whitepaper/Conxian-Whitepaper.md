@@ -10,7 +10,7 @@ mainnet)
 Conxian is a comprehensive Bitcoin‑anchored, multi‑dimensional DeFi protocol
 deployed on Stacks (Nakamoto). The protocol has undergone a significant
 architectural refactoring to create a more modular, decentralized, and
-Nakamoto-compliant system. This new architecture unifies **concentrated
+Nakamoto-compatible system. This new architecture unifies **concentrated
 liquidity pools**, **advanced multi-hop routing**, **multi-source oracle
 aggregation**, **enterprise-grade lending**, **comprehensive MEV protection**,
 **yield strategy automation**, and a **multi-council governance model with an
@@ -32,7 +32,7 @@ Conxian protocol remains at the forefront of decentralized finance.
   mechanisms.
 - **Cross-chain complexity** requires unified settlement with Bitcoin finality
   guarantees.
-- **Institutional adoption** demands enterprise compliance without compromising
+- **Institutional adoption** demands institutional-grade controls and policy integration hooks (Status: Prototype/Planned) without compromising
   retail accessibility.
 - **Monitoring gaps** leave protocols vulnerable to manipulation and operational
   failures.
@@ -59,7 +59,7 @@ modular, decentralized contracts.
 - **Safety‑first defaults**: Pausable guards, circuit-breakers, and explicit
   error codes are used throughout the system to protect against unforeseen
   events.
-- **Compliance without compromise**: Modular enterprise controls allow for
+- **Policy integrations without compromise**: Modular enterprise controls and policy hooks (Status: Prototype/Planned) allow for
   institutional adoption without compromising the permissionless nature of the
   retail-facing components.
 
@@ -102,12 +102,11 @@ The Conxian protocol is organized into a series of specialized layers, each cont
 
 #### 4. Enterprise Integration Suite
 
-*Implemented in `enterprise-api.clar` & `enterprise-loan-manager.clar`*
+*Implemented in `enterprise-facade.clar` & `enterprise-loan-manager.clar`*
 
 - **Tiered Accounts**: Institutional-grade access controls with specific
   privilege levels.
-- **Compliance Hooks**: Integration points for KYC/AML providers (optional for
-  retail, mandatory for institutions).
+- **Policy Hooks**: Integration points for KYC/AML providers and institution-defined gating/reporting workflows (Status: Prototype/Planned).
 - **Advanced Orders**: Support for TWAP, VWAP, and Iceberg orders.
 
 #### 5. Yield Automation Layer
@@ -255,8 +254,11 @@ ensure the long-term stability of the ecosystem.
   triggered in the event of a black swan event or other unforeseen market
   conditions. These circuit breakers can pause critical functions of the
   protocol to protect user funds.
-- **Rate Limiting**: To prevent market manipulation and other forms of abuse, the protocol includesrate-limiting mechanisms on key functions.
-- **Role-Based Access Control**: The protocol uses a robust role-based,   access control (RBAC) system to ensure that only authorized addresses can perform critical administrative functions.
+- **Rate Limiting**: To prevent market manipulation and other forms of abuse,
+the protocol includesrate-limiting mechanisms on key functions.
+- **Role-Based Access Control**: The protocol uses a robust role-based,
+  access control (RBAC) system to ensure that only authorized addresses
+  can perform critical administrative functions.
 
 ## 6. Roadmap & Implementation Status
 
@@ -295,10 +297,10 @@ production-ready**.
   governance bootstrapping, and incident processes are complete.
 - **Enterprise Service Hardening**: Implementation and validation of
   enterprise-focused credit lines, bond/opex loan patterns, bridge and
-  asset-protection vaults, and compliance/analytics APIs aligned with the
+  asset-protection vaults, and policy/analytics APIs aligned with the
   documented service catalog.
 - **Cross-Chain Expansion**: Integration with other Bitcoin L2s where
-  consistent with the protocol's risk and compliance framework.
+  consistent with the protocol's risk and control framework.
 
 ## 7. Conclusion
 

@@ -6,58 +6,58 @@ This is the central documentation hub for the Conxian DeFi platform. All documen
 
 ### 🛍️ For Retail Users
 
-- [`retail/USER_GUIDE.md`](./retail/USER_GUIDE.md) - **Complete user guide and onboarding**
-- [`guides/01-vault.md`](./guides/01-vault.md) - **Vault operations guide**
-- [`guides/02-governance.md`](./guides/02-governance.md) - **Governance participation guide**
-- [`guides/03-dex.md`](./guides/03-dex.md) - **DEX trading guide**
-- [`guides/04-tokens.md`](./guides/04-tokens.md) - **Token management guide**
+- [`retail/USER_GUIDE.md`](../retail/USER_GUIDE.md) - **Complete user guide and onboarding**
+- [`guides/01-vault.md`](./01-vault.md) - **Vault operations guide**
+- [`guides/02-governance.md`](./02-governance.md) - **Governance participation guide**
+- [`guides/03-dex.md`](./03-dex.md) - **DEX trading guide**
+- [`guides/04-tokens.md`](./04-tokens.md) - **Token management guide**
 
 ### 🏢 For Enterprise & Institutions
 
-- [`enterprise/ONBOARDING.md`](./enterprise/ONBOARDING.md) - **Technical guide for developers and institutions**
-- [`enterprise/BUSINESS_VALUE_ROI.md`](./enterprise/BUSINESS_VALUE_ROI.md) - **Business value analysis and ROI**
-- [`enterprise/COMPLIANCE_SECURITY.md`](./enterprise/COMPLIANCE_SECURITY.md) - **Compliance and security framework**
+- [`enterprise/ONBOARDING.md`](../enterprise/ONBOARDING.md) - **Technical guide for developers and institutions**
+- [`enterprise/BUSINESS_VALUE_ROI.md`](../enterprise/BUSINESS_VALUE_ROI.md) - **Business value analysis and ROI**
+- [`enterprise/COMPLIANCE_SECURITY.md`](../enterprise/COMPLIANCE_SECURITY.md) - **Compliance and security framework**
 
 ### 👨‍💻 For Developers
 
-- [`developer/DEVELOPER_GUIDE.md`](./developer/DEVELOPER_GUIDE.md) - **Development setup and contributing**
-- [`developer/MIGRATION_GUIDE_ACCESS_CONTROL.md`](./developer/MIGRATION_GUIDE_ACCESS_CONTROL.md) - **Access control migration guide**
+- [`developer/DEVELOPER_GUIDE.md`](../developer/DEVELOPER_GUIDE.md) - **Development setup and contributing**
+- [`developer/MIGRATION_GUIDE_ACCESS_CONTROL.md`](../developer/MIGRATION_GUIDE_ACCESS_CONTROL.md) - **Access control migration guide**
 
 ### 🏗️ Architecture & Design
 
-- [`architecture/ARCHITECTURE.md`](./architecture/ARCHITECTURE.md) - **System architecture and design**
-- [`architecture/adr/`](./architecture/adr/) - **Architecture decision records**
-- [`architecture/CONXIAN_DAPPS_MAP.md`](./architecture/CONXIAN_DAPPS_MAP.md) - **DApps & on-chain module mapping**
-- [`whitepaper/Conxian-Whitepaper.md`](./whitepaper/Conxian-Whitepaper.md) - **Technical whitepaper**
+- [`architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md) - **System architecture and design**
+- [`architecture/adr/`](../architecture/adr/) - **Architecture decision records**
+- [`architecture/CONXIAN_DAPPS_MAP.md`](../architecture/CONXIAN_DAPPS_MAP.md) - **DApps & on-chain module mapping**
+- [`whitepaper/Conxian-Whitepaper.md`](../whitepaper/Conxian-Whitepaper.md) - **Technical whitepaper**
 
 ### 🔒 Security & Compliance
 
-- [`security/SECURITY.md`](./security/SECURITY.md) - **Security features and audit information**
+- [`security/SECURITY.md`](../security/SECURITY.md) - **Security features and audit information**
 
 ### 📖 Guides & References
 
-- [`guides/liquidation-flow.md`](./guides/liquidation-flow.md) - **Liquidation process guide**
-- [`guides/oracle-integration.md`](./guides/oracle-integration.md) - **Oracle integration guide**
-- [`guides/services-overview.md`](./guides/services-overview.md) - **Services offered & unique positioning overview**
-- [`ANALYTICS_METRICS_GUIDE.md`](./ANALYTICS_METRICS_GUIDE.md) - **Analytics and metrics guide**
-- [`GITHUB_SECRETS.md`](./GITHUB_SECRETS.md) - **GitHub secrets configuration**
+- [`guides/liquidation-flow.md`](./liquidation-flow.md) - **Liquidation process guide**
+- [`guides/oracle-integration.md`](./oracle-integration.md) - **Oracle integration guide**
+- [`guides/services-overview.md`](./services-overview.md) - **Services offered & unique positioning overview**
+- [`metrics-dashboard-spec.md`](./metrics-dashboard-spec.md) - **Analytics and metrics guide**
+- [`deployment`](../deployment) - **GitHub secrets configuration**
 - [`strategy-defaults.md`](./strategy-defaults.md) - **Strategy defaults documentation**
 - [`strategy-testing-plan.md`](./strategy-testing-plan.md) - **Strategy testing plan**
 
 ### 📊 Project Management
 
-- [`project-management/STATUS.md`](./project-management/STATUS.md) - **High-level status and planning**
-- [`../ROADMAP.md`](../ROADMAP.md) - **Protocol roadmap and phased goals**
+- [`reports/SYSTEM_READINESS_LATEST.md`](../reports/SYSTEM_READINESS_LATEST.md) - **High-level status and planning**
+- [`../../ROADMAP.md`](../../ROADMAP.md) - **Protocol roadmap and phased goals**
 
 ## 🎯 Quick Navigation
 
 | I want to... | Read this |
 |---------------|-----------|
-| Get started as a retail user | [Retail User Guide](./retail/USER_GUIDE.md) |
-| Integrate as an institution | [Enterprise Onboarding](./enterprise/ONBOARDING.md) |
-| Understand the system architecture | [Architecture](./architecture/ARCHITECTURE.md) |
-| Contribute code | [Developer Guide](./developer/DEVELOPER_GUIDE.md) |
-| Review security | [Security](./security/SECURITY.md) |
+| Get started as a retail user | [Retail User Guide](../retail/USER_GUIDE.md) |
+| Integrate as an institution | [Enterprise Onboarding](../enterprise/ONBOARDING.md) |
+| Understand the system architecture | [Architecture](../architecture/ARCHITECTURE.md) |
+| Contribute code | [Developer Guide](../developer/DEVELOPER_GUIDE.md) |
+| Review security | [Security](../security/SECURITY.md) |
 
 ## 🗂️ File Organization
 
@@ -103,9 +103,9 @@ When adding new documentation:
 
 ## 🔗 Related Resources
 
-- **📖 Main Project README**: [`../README.md`](../README.md)
-- **⚙️ Configuration**: [`../Clarinet.toml`](../Clarinet.toml)
-- **📊 Project Status**: [`project-management/STATUS.md`](./project-management/STATUS.md)
+- **📖 Main Project README**: [`../../README.md`](../../README.md)
+- **⚙️ Configuration**: [`../../Clarinet.toml`](../../Clarinet.toml)
+- **📊 Project Status**: [`reports/SYSTEM_READINESS_LATEST.md`](../reports/SYSTEM_READINESS_LATEST.md)
 
 ---
 

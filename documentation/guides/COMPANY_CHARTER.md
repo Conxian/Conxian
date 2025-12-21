@@ -40,7 +40,7 @@ This document complements:
 - Conxian Labs (expected to be incorporated under South African law) is the primary off-chain legal and operational entity for Conxian.
 - Responsibilities include:
   - Running off-chain infrastructure and deployments.
-  - Orchestrating KYC/KYB and POPIA-compliant data processing.
+  - Orchestrating KYC/KYB and POPIA-aligned data processing.
   - Managing relationships with regulators, KYC vendors, payment providers, and auditors.
   - Operating off-chain accounting, payroll, and reporting based on on-chain data.
 - Conxian Labs acts on behalf of the DAO but is **not** a substitute for DAO governance.
@@ -137,7 +137,7 @@ Conxian follows the standards defined in `IDENTITY_KYC_POPIA.md`.
   - No PII stored or emitted.
 - Off-chain (primarily Conxian Labs):
   - Runs KYC/KYB workflows using selected providers.
-  - Manages POPIA-compliant data storage, retention, and rights.
+  - Manages POPIA-aligned data storage, retention, and rights.
 
 All departments consume identity tiers via shared registry interfaces rather than vendor-specific details.
 

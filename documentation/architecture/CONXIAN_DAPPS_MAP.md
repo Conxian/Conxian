@@ -1,6 +1,10 @@
 # Conxian DApps & Module Mapping
 
-> **Purpose:** This document maps the Conxian protocols on-chain modules and traits to user-facing DApps and flows (DEX, Lending, Governance, Vaults, Enterprise, Monitoring). It is the primary reference for understanding which contracts back which products, and how they are grouped for deployment and testing.
+> **Purpose:** This document maps the Conxian protocols on-chain modules and
+traits to user-facing DApps and flows (DEX, Lending, Governance, Vaults,
+Enterprise, Monitoring). It is the primary reference for understanding
+which contracts back which products, and how they are grouped for deployment
+and testing.
 
 _Last updated: November 29, 2025_
 
@@ -8,7 +12,8 @@ _Last updated: November 29, 2025_
 
 ## 1. Overview
 
-Conxian is a modular, multi-dimensional DeFi protocol on Stacks. The codebase is organized around:
+Conxian is a modular, multi-dimensional DeFi protocol on Stacks.
+The codebase is organized around:
 
 - **Core engine** (dimensional engine + collateral manager)
 - **Product modules** (DEX, Lending, Governance, Vaults)
@@ -55,7 +60,8 @@ This document does **not** replace the whitepaper or ARCHITECTURE.md. Instead, i
 
 - **DEX:** route computation, pool graph, liquidity metrics.
 - **Lending:** collateral accounting, portfolio-level metrics.
-- **Analytics UI:** key performance and dimensional metrics exposed via monitoring contracts.
+- **Analytics UI:** key performance and dimensional metrics 
+          exposed via monitoring contracts.
 
 ---
 
@@ -134,10 +140,11 @@ User flows (as referenced by documentation and Conxian_UI):
 
 **Lending engine:**
 
-- `contracts/lending/comprehensive-lending-system.clar` → `comprehensive-lending-system`  
-  _Central orchestrator for lending flows._
+- `contracts/lending/comprehensive-lending-system.clar` →
+  `comprehensive-lending-system` _Central orchestrator for lending flows._
 - `contracts/lending/interest-rate-model.clar` → `interest-rate-model`
-- `contracts/lending/liquidation-manager.clar` → `liquidation-manager` (depends on `comprehensive-lending-system`).
+- `contracts/lending/liquidation-manager.clar` → `liquidation-manager`
+  (depends on `comprehensive-lending-system`).
 
 **Risk engine:**
 
@@ -149,7 +156,7 @@ User flows (as referenced by documentation and Conxian_UI):
 **Enterprise lending & integrations:**
 
 - `contracts/enterprise/enterprise-loan-manager.clar` → `enterprise-loan-manager`
-- `contracts/enterprise/enterprise-api.clar` → `enterprise-api`
+- `contracts/enterprise/enterprise-facade.clar` → `enterprise-facade`
 - Governance and policy integration:  
   - `contracts/governance/lending-protocol-governance.clar` → `lending-protocol-governance`
 
@@ -279,9 +286,12 @@ Traits:
 
 ### 7.3 DApp & Product Impact
 
-- **DEX:** slippage/price impact, MEV-aware routing, and pool health are driven by oracle + risk data.  
-- **Lending:** collateralization, margin calls, and liquidations rely on consistent oracle + risk calculations.  
-- **Enterprise:** institutional credit frameworks depend on risk metrics and invariant monitoring.
+- **DEX:** slippage/price impact, MEV-aware routing, and pool health are driven
+           by oracle + risk data.  
+- **Lending:** collateralization, margin calls, and liquidations rely on
+           consistent oracle + risk calculations.  
+- **Enterprise:** institutional credit frameworks depend on risk metrics and
+           invariant monitoring.
 
 ---
 
@@ -319,26 +329,26 @@ Traits:
 
 Docs:
 
-- `documentation/ANALYTICS_METRICS_GUIDE.md`
-- `documentation/SECURITY_REVIEW_PROCESS.md`
+- `documentation/guides/metrics-dashboard-spec.md`
 - `documentation/security/SECURITY.md`
 
 **DApp impact**
 
-- Analytics dashboards and monitoring tools (on-chain + off-chain) rely on these contracts to surface KPIs and invariants for:
+- Analytics dashboards and monitoring tools (on-chain + off-chain) rely on these
+  contracts to surface KPIs and invariants for:
   - DEX pools and routing.
   - Lending portfolios and vaults.
-  - Enterprise and compliance oversight.
+  - Enterprise and policy/assurance oversight.
 
 ---
 
-## 9. Enterprise & Compliance
+## 9. Enterprise & Policy
 
 ### 9.1 Enterprise Module
 
 **Contracts**
 
-- `enterprise-api` → `contracts/enterprise/enterprise-api.clar`
+- `enterprise-facade` → `contracts/enterprise/enterprise-facade.clar`
 - `enterprise-loan-manager` → `contracts/enterprise/enterprise-loan-manager.clar`
 
 Docs:
@@ -351,12 +361,14 @@ Docs:
 
 - Provide structured entry points for institutional participants.  
 - Coordinate enterprise loan products and policy enforcement.  
-- Integrate with external compliance and risk tooling while keeping core protocol decentralized.
+- Integrate with external policy/assurance and risk tooling while keeping core protocol decentralized.
 
 ### 9.2 Legal & Regulatory Alignment
 
 - Designed for alignment with FSCA/IFWG/Markaicode-style requirements.  
-- Future work: explicit compliance hooks (e.g. KYB/KYC attestations, risk disclosures) integrated via traits rather than hard-coded policies.
+- Future work: explicit policy hooks
+  (e.g. KYB/KYC attestations, risk disclosures)
+  integrated via traits rather than hard-coded policies.
 
 ---
 
@@ -379,11 +391,13 @@ As of November 27, 2025, the primary trait set includes:
 - `trait-errors` → `contracts/traits/trait-errors.clar`
 - Additional specialized traits: `queue-traits`, `controller-traits`.
 
-These are the **single source of truth** for all contract interfaces used by Conxian products and DApps.
+These are the **single source of truth** for all contract interfaces used by
+Conxian products and DApps.
 
 ### 10.2 How DApps Should Use Traits
 
-- Frontend and integration code (e.g. Conxian_UI) should rely on **ABI and behavior defined by these traits**, not ad-hoc assumptions.  
+- Frontend and integration code (e.g. Conxian_UI) should rely on
+**ABI and behavior defined by these traits**, not ad-hoc assumptions.
 - When adding new features or modules:
   - First update or add traits under `contracts/traits/`.
   - Then implement or extend contracts to conform to those traits.
@@ -393,19 +407,26 @@ These are the **single source of truth** for all contract interfaces used by Con
 
 ## 11. Deployment & Testing Considerations (Conxian View)
 
-> Full, cross-repo deployment mapping (including StacksOrbit) is documented separately; this section focuses on Conxians own view of readiness.
+> Full, cross-repo deployment mapping:
+(including StacksOrbit) is documented separately;
+this section focuses on Conxians own view of readiness.
 
 ### 11.1 Manifest & Remappings
 
 - `Clarinet.toml` defines:
   - All core, module, and trait contracts with addresses and dependencies.  
-  - `remap.contracts` entries (e.g. `dex-router`, `oracle-aggregator-v2`, `risk-manager`, `mev-protector`, `cxd-token`) used heavily in tests and integration tooling.
+  - `remap.contracts` entries
+  (e.g. `dex-router`, `oracle-aggregator-v2`, `risk-manager`, `mev-protector`,  
+    `cxd-token`) used heavily in tests and integration tooling.
 
 ### 11.2 Current Compilation Status (High-Level)
 
-- Global manifest is **syntactically clean** in the design baseline, but current local runs may still surface:
-  - Trait/semantic mismatches in **risk, lending, enterprise, token, and MEV-helper** modules.  
-  - Occasional syntax regressions when editing math or advanced routing contracts (e.g. `exponentiation`, `math-lib-*`, or router variants).
+- Global manifest is **syntactically clean** in the design baseline, but
+  current local runs may still surface:
+- Trait/semantic mismatches in
+  **risk, lending, enterprise, token, and MEV-helper** modules.  
+- Occasional syntax regressions when editing math or
+  advanced routing contracts (e.g. `exponentiation`, `math-lib-*`, or router variants).
 
 ### 11.3 Testing
 
@@ -414,7 +435,9 @@ These are the **single source of truth** for all contract interfaces used by Con
   - DEX routing & concentrated liquidity.  
   - Lending and liquidation flows.  
   - Circuit breaker and MEV protection.
-- Coverage and stability remain below target; see `documentation/TESTING_FRAMEWORK.md` and `ROADMAP.md` for current metrics and goals.
+- Coverage and stability remain below target;
+    see `documentation/developer/DEVELOPER_GUIDE.md`
+    and `ROADMAP.md` for current metrics and goals.
 
 ---
 
@@ -422,15 +445,20 @@ These are the **single source of truth** for all contract interfaces used by Con
 
 - **Frontend / UX teams (e.g. Conxian_UI)**
   - Use this map to know which contracts back which UI routes and KPIs.
-  - When designing new screens, anchor them to explicit modules and traits from this document.
+  - When designing new screens, anchor them to explicit modules and traits
+    from this document.
 
 - **Protocol engineers**
-  - Use this as a checklist when 
+  - Use this as a checklist when
     - adding new contracts to `Clarinet.toml`,  
     - updating traits, or  
     - adjusting deployment/test plans.
 
 - **DevOps / tooling (e.g. StacksOrbit integration)**
-  - Use this map to define deployment categories and monitoring views that align with actual DApp surfaces.
+  - Use this map to define deployment categories and monitoring views that
+    align with actual DApp surfaces.
 
-This document should evolve alongside the architecture and is intended to remain tightly coupled to `Clarinet.toml`, the traits in `contracts/traits/`, and the top-level DApp surfaces described in `documentation/README.md` and the whitepaper.
+This document should evolve alongside the architecture and is intended to remain
+tightly coupled to `Clarinet.toml`, the traits in `contracts/traits/`,
+and the top-level DApp surfaces described in `documentation/README.md`
+and the whitepaper.

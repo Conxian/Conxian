@@ -114,7 +114,7 @@ Conxian defines abstract KYC tiers that can be satisfied by different providers 
 
 - Businesses, fintechs and other service providers that integrate with Conxian are onboarded under the same tiered KYC/KYB model.
 - KYB for these entities is performed off‑chain by Conxian Labs and its partners, and only the resulting tier and status flags are reflected on‑chain.
-- Third‑party applications can rely on Conxian’s on‑chain KYC/KYB tiers as a shared signal when enforcing their own compliance and access rules.
+- Third‑party applications can rely on Conxian’s on‑chain KYC/KYB tiers as a shared signal when enforcing their own policy and access rules.
 
 Exact requirements per tier are defined and updated by the Operations & Compliance function, in consultation with legal counsel and regulators.
 
@@ -128,8 +128,8 @@ The Conxian off‑chain stack (Operations backend) is responsible for:
 
 - Integrating with one or more **KYC/KYB API providers** (e.g. crypto‑friendly global tools and Africa‑focused vendors).
 - Optionally integrating with **decentralised identity / verifiable credential / ZK** providers.
-- Storing KYC/KYB artefacts under POPIA‑compliant controls (encrypted storage, strict access control, retention policies).
-- Deriving an internal **risk/compliance decision**:
+- Storing KYC/KYB artefacts under controls that align with POPIA (encrypted storage, strict access control, retention policies).
+- Deriving an internal **risk/policy decision**:
   - Assign `kyc-tier` and flags for each subject.
   - Decide which credentials or on‑chain attestations to issue.
 
@@ -174,7 +174,7 @@ Contracts across the ecosystem depend on **these generic signals**, not on vendo
 
 - DAO and Operations Engine policies define:
   - Which proposals require certain KYC tiers for proposers or executors.
-  - How guardian roles are granted or revoked based on identity/compliance status.
+  - How guardian roles are granted or revoked based on identity/policy status.
 - All on‑chain role changes and KYC‑tier changes must emit events to enable external monitoring and audit.
 
 ---
@@ -184,6 +184,7 @@ Contracts across the ecosystem depend on **these generic signals**, not on vendo
 When evaluating KYC/KYB or identity providers (centralised or decentralised), Conxian applies at least the following criteria:
 
 - **Regulatory and Jurisdictional Fit**
+  - Support for South African IDs and data protection regulations.
   - Support for South African IDs and POPIA‑compatible processing.
   - Ability to support FSCA/IFWG expectations for DeFi and virtual assets.
 

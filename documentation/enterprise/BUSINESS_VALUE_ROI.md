@@ -2,13 +2,13 @@
 
 ## Executive Summary
 
-Conxian Protocol offers institutional-grade DeFi infrastructure with measurable ROI improvements across trading efficiency, capital utilization, and operational cost reduction. This analysis demonstrates how enterprise adoption delivers 3-5x better economics compared to traditional finance while maintaining regulatory compliance.
+Conxian Protocol offers institutional-grade DeFi infrastructure with measurable ROI improvements across trading efficiency, capital utilization, and operational cost reduction. This analysis demonstrates how enterprise adoption delivers 3-5x better economics compared to traditional finance while supporting policy integrations (e.g., KYC status checks) and monitoring primitives (Status: Prototype).
 
 > **Maturity & Availability (as of 2025-12-06)**
 >
 > - The Conxian Protocol is in a **stabilization & alignment phase on testnet** and is **not yet production-ready for mainnet**.
 > - This ROI analysis describes a **target institutional platform design** rather than an already-operational regulated service.
-> - For a current view of services and status, see `documentation/SERVICE_CATALOG.md` and `documentation/ENTERPRISE_BUY_OVERVIEW.md`.
+> - For a current view of services and status, see `documentation/guides/SERVICE_CATALOG.md` and `documentation/guides/ENTERPRISE_BUYER_OVERVIEW.md`.
 
 ## Value Proposition Framework
 
@@ -69,7 +69,7 @@ monitoring and execution off human runbooks and into automated, policy-driven fl
 ```
 Implementation Costs:
 ├── Technology Integration: $500K (APIs, infrastructure)
-├── Compliance Setup: $300K (KYC/AML integration)
+├── Policy Setup: $300K (KYC/AML integration)
 ├── Staff Training: $150K (blockchain/DeFi education)
 ├── Security Audit: $200K (third-party assessment)
 └── Total Year 1 Cost: $1.15M
@@ -133,10 +133,12 @@ Year 3 Net: $2.6M (260% ROI)
 
 | Feature | Competing Protocols | Conxian Advantage |
 |---------|---------------------|-------------------|
-| Compliance | Basic KYC | Full institutional compliance |
+| Policy controls | Basic KYC | Tiered limits + KYC status checks
+  (Status: Prototype) |
 | Security | Smart contract audits | Multi-layer security + insurance |
 | Scalability | Network congestion issues | Optimized gas usage + batching |
-| Integration | Limited APIs | Full enterprise API suite |
+| Integration | Limited APIs | Standardized on-chain traits + facade entrypoints
+  (Status: Prototype) |
 | Support | Community forums | Dedicated enterprise support |
 
 ## Risk Assessment & Mitigation
@@ -154,16 +156,16 @@ Year 3 Net: $2.6M (260% ROI)
 - Comprehensive testing environments
 - Rollback capabilities
 
-#### Regulatory Compliance Risk
+#### Regulatory Alignment & Policy Risk
 
-**Probability**: Low (15%)
-**Impact**: High
-**Mitigation**:
+ **Probability**: Low (15%)
+ **Impact**: High
+ **Mitigation**:
 
 - Pre-implementation regulatory review
-- Compliance-as-code integration
+- Policy-as-code integration (Status: Planned)
 - Continuous monitoring and auditing
-- Regulatory reporting automation
+- Regulatory reporting automation (Status: Planned)
 
 #### Market Volatility Risk
 
@@ -204,11 +206,11 @@ Year 3 Net: $2.6M (260% ROI)
 
 ### Phase 1: Foundation (Months 1-3)
 
-**Investment**: $750K
-**Deliverables**:
+ **Investment**: $750K
+ **Deliverables**:
 
 - Basic integration setup
-- Compliance framework implementation
+- Policy & control framework implementation (Status: Planned)
 - Pilot trading strategies
 - Staff training and onboarding
 
@@ -220,7 +222,7 @@ Year 3 Net: $2.6M (260% ROI)
 **Deliverables**:
 
 - Advanced strategy implementation
-- Full compliance automation
+- Policy automation and monitoring (Status: Planned)
 - Performance monitoring setup
 - Process optimization
 
@@ -265,7 +267,7 @@ Year 3 Net: $2.6M (260% ROI)
 
 - **Speed**: T+0 settlement vs T+2
 - **Transparency**: Real-time position visibility
-- **Compliance**: Automated regulatory reporting
+- **Policy & reporting**: Automated regulatory reporting (Status: Planned)
 - **Innovation**: Access to new DeFi strategies
 - **Competitive Advantage**: Lower cost structure
 
@@ -273,24 +275,24 @@ Year 3 Net: $2.6M (260% ROI)
 
 ### Technology Leadership
 
-- **First institutional-grade DeFi protocol** with full compliance
+- Target institutional-grade DeFi protocol with policy hooks and monitoring (Status: Prototype)
 - **Multi-dimensional architecture** supporting complex strategies
 - **Bitcoin-anchored settlement** with sub-second finality
 - **Advanced MEV protection** ensuring fair execution
 
-### Compliance Excellence
+### Policy & Control Capabilities (Status: Planned)
 
-- **FATF-compliant** transaction monitoring
-- **OFAC sanctions screening** with real-time updates
-- **GDPR-compliant** data handling and privacy
-- **SOC 2 framework** for operational security
+- Transaction monitoring controls aligned to Travel Rule workflows
+- Sanctions screening integration hooks (via third-party lists)
+- Privacy-aware off-chain data handling for KYC artifacts and reporting
+- Operational control framework mapping aligned to SOC 2 categories
 
 ### Enterprise Support
 
 - **Dedicated account management** for each institution
-- **24/7 technical support** with <2 hour response times
+- **Target 24/7 technical support** with target <2 hour response times (Status: Planned; subject to contract)
 - **Custom integration services** for unique requirements
-- **Regulatory guidance** and compliance assistance
+- Implementation guidance for policy integrations and operational controls
 
 ## Getting Started
 
@@ -305,7 +307,7 @@ Year 3 Net: $2.6M (260% ROI)
 
 - Limited integration scope
 - Test trading strategies
-- Compliance validation
+- Policy/control validation (Status: Planned)
 - Performance monitoring
 
 ### Full Implementation (Month 3-6)
@@ -317,14 +319,14 @@ Year 3 Net: $2.6M (260% ROI)
 
 ## Conclusion
 
-Conxian Protocol delivers compelling ROI for institutional adoption through superior capital efficiency, reduced trading costs, operational automation, and new revenue streams. The 139% 3-year ROI, with payback in 18 months, demonstrates clear financial benefits while the enterprise-grade compliance and security framework ensures regulatory compliance.
+Conxian Protocol delivers compelling ROI for institutional adoption through superior capital efficiency, reduced trading costs, operational automation, and new revenue streams. The 139% 3-year ROI, with payback in 18 months, demonstrates clear financial benefits. The enterprise-focused design emphasizes security and a policy-integration surface (Status: Prototype) that can support an institution's compliance program, but does not itself constitute regulatory compliance.
 
 Institutions adopting Conxian can expect:
 
 - **60-80% reduction** in trading costs
 - **70-85% improvement** in operational efficiency
 - **8-12% additional revenue** from yield generation
-- **Enterprise-grade security** and compliance
+- **Enterprise-grade security** and a policy-integration surface (Status: Prototype)
 - **Competitive advantage** through technological leadership
 
 For a personalized ROI analysis or pilot program discussion, contact our enterprise sales team.
