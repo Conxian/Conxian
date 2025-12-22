@@ -829,3 +829,12 @@ depends_on = ["kyc-registry"]
 path = "contracts/dex/vault.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 depends_on = ["sip-standards"]
+
+[contracts.yield-token]
+path = "contracts/tokens/yield-token.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+
+[contracts.protocol-coordinator]
+path = "contracts/core/protocol-coordinator.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+depends_on = ["yield-token", "governance-token", "defi-traits"]

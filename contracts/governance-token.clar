@@ -18,6 +18,7 @@
 (define-data-var token-uri (optional (string-utf8 256)) none)
 
 (define-data-var contract-owner principal tx-sender)
+(define-data-var minter-contract principal tx-sender)
 (define-data-var total-delegated uint u0)
 
 ;; Data Maps
@@ -265,13 +266,22 @@
   u0
 )
 
-;; Mint and Burn (for contract owner only)
+;; Administrative Functions
+(define-public (set-minter (new-minter principal))
+  (begin
+    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
+    (var-set minter-contract new-minter)
+    (ok true)
+  )
+)
+
+;; Mint and Burn (for minter contract only)
 (define-public (mint
     (amount uint)
     (recipient principal)
   )
   (begin
-    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
+    (asserts! (is-eq tx-sender (var-get minter-contract)) ERR_UNAUTHORIZED)
     (var-set token-supply (+ (var-get token-supply) amount))
     (map-set token-balances { account: recipient } { amount: (+ (unwrap! (get-balance recipient) ERR_UNAUTHORIZED) amount) })
     (unwrap-panic (update-voting-power recipient))
@@ -289,7 +299,7 @@
     (owner principal)
   )
   (begin
-    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
+    (asserts! (is-eq tx-sender (var-get minter-contract)) ERR_UNAUTHORIZED)
     (let ((owner-balance (unwrap! (get-balance owner) ERR_UNAUTHORIZED)))
       (asserts! (>= owner-balance amount) ERR_INSUFFICIENT_FUNDS)
       (var-set token-supply (- (var-get token-supply) amount))
