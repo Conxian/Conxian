@@ -435,7 +435,7 @@ path = "contracts/dex/oracle.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
 [contracts.token-emission-controller]
-path = "contracts/dex/token-emission-controller.clar"
+path = "contracts/yield/token-emission-controller.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
 [contracts.pool-template]
@@ -643,7 +643,7 @@ path = "contracts/risk/liquidation-engine.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
 [contracts.sbtc-integration]
-path = "contracts/dex/sbtc-integration.clar"
+path = "contracts/sbtc/sbtc-integration.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
 [contracts.sbtc-token]
@@ -687,7 +687,7 @@ path = "contracts/tokens/cxvg-token.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
 [contracts.cxd-staking]
-path = "contracts/dex/cxd-staking.clar"
+path = "contracts/yield/cxd-staking.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
 [contracts.token-system-coordinator]

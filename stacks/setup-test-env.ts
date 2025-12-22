@@ -1,22 +1,12 @@
-// setup-test-env.ts
+// stacks/setup-test-env.ts
+import { Simnet } from '@stacks/clarinet-sdk';
 import { resolve } from 'path';
 
-// Configure Clarinet SDK options for test environment
 const manifestPath = resolve(__dirname, '../Clarinet.toml');
 
-globalThis.options = {
-  clarinet: {
-    manifestPath,
-    initBeforeEach: true,
-    coverage: false,
-    coverageFilename: 'coverage.lcov',
-    costs: false,
-    costsFilename: 'costs.json',
-    includeBootContracts: false,
-    bootContractsPath: '',
-  },
-};
+const simnet = new Simnet({
+  manifestPath: manifestPath,
+  defaultSender: 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM',
+});
 
-globalThis.testEnvironment = 'clarinet';
-globalThis.coverageReports = [];
-globalThis.costsReports = [];
+globalThis.simnet = simnet;
