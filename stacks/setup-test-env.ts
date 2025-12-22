@@ -2,7 +2,7 @@
 import { resolve } from 'path';
 
 // Configure Clarinet SDK options for test environment
-const manifestPath = resolve(__dirname, 'Clarinet.toml');
+const manifestPath = resolve(__dirname, '../Clarinet.toml');
 
 globalThis.options = {
   clarinet: {

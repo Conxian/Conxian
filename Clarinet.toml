@@ -523,14 +523,19 @@ address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 path = "contracts/dex/liquidity-optimization-engine.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
+[contracts.lending-manager-trait]
+path = "contracts/lending/lending-manager-trait.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+
 [contracts.comprehensive-lending-system]
 path = "contracts/lending/comprehensive-lending-system.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+depends_on = ["lending-manager-trait"]
 
 [contracts.lending-manager]
 path = "contracts/lending/lending-manager.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["comprehensive-lending-system"]
+depends_on = ["lending-manager-trait", "sip-standards"]
 
 [contracts.liquidation-manager]
 path = "contracts/lending/liquidation-manager.clar"
@@ -590,10 +595,18 @@ depends_on = ["cxvg-token"]
 [contracts.proposal-engine]
 path = "contracts/governance/proposal-engine.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["voting", "proposal-registry"]
+depends_on = ["voting", "proposal-registry", "proposal-executor"]
 
 [contracts.proposal-registry]
 path = "contracts/governance/proposal-registry.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+
+[contracts.upgrade-controller]
+path = "contracts/governance/upgrade-controller.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+
+[contracts.proposal-executor]
+path = "contracts/governance/proposal-executor.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
 [contracts.conxian-operations-engine]
