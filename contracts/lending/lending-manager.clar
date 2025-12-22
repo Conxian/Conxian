@@ -1,70 +1,134 @@
 ;; lending-manager.clar
+;;
+;; This contract houses the core business logic for the Lending Module,
+;; implementing the lending-manager-trait. It manages the state and operations
+;; for user supplies, borrows, and repayments, while the main facade contract
+;; handles user interaction and delegates calls to this manager.
+;;
+
+(impl-trait .lending-manager-trait.lending-manager-trait)
 (use-trait sip-010-ft-trait .sip-standards.sip-010-ft-trait)
 
-(define-constant ERR_ZERO_AMOUNT (err u1004))
-(define-constant ERR_INTEREST_ACCRUAL_FAILED (err u1007))
+;; Constants
+(define-constant ERR_UNAUTHORIZED (err u2000))
+(define-constant ERR_INVALID_ASSET (err u2001))
+(define-constant ERR_INSUFFICIENT_BALANCE (err u2002))
+(define-constant ERR_ZERO_AMOUNT (err u2004))
+(define-constant ERR_INTEREST_ACCRUAL_FAILED (err u2007))
 (define-constant PRECISION u1000000000000000000)
 
-;; Data Maps - Moved from comprehensive-lending-system
-(define-map user-supplies
-  {
-    user: principal,
-    asset: principal,
-  }
-  {
-    amount: uint,
-    index: uint,
-  }
-)
-(define-map user-total-supplies
-  principal
-  uint
-)
+;; Data Variables
+(define-data-var contract-owner principal tx-sender)
 
-(define-trait lending-manager-trait
-  (
-    (deposit (principal uint principal) (response bool uint))
+;; Maps
+(define-map user-borrows { user: principal, asset: principal } { amount: uint, index: uint })
+(define-map user-supplies { user: principal, asset: principal } { amount: uint, index: uint })
+(define-map user-total-borrows principal uint)
+(define-map user-total-supplies principal uint)
+
+;; --- Internal Core Functions ---
+
+(define-public (supply (asset <sip-010-ft-trait>) (amount uint))
+  (let ((asset-principal (contract-of asset)) (sender tx-sender))
+    (asserts! (> amount u0) ERR_ZERO_AMOUNT)
+    (try! (contract-call? asset transfer amount sender (as-contract tx-sender) none))
+    (let ((market (unwrap! (contract-call? .interest-rate-model accrue-interest asset-principal) ERR_INTEREST_ACCRUAL_FAILED)))
+      (let ((supply-index (get supply-index market))
+            (current-supply (default-to { amount: u0, index: supply-index } (map-get? user-supplies { user: sender, asset: asset-principal })))
+            (old-principal (get amount current-supply))
+            (delta-principal (/ (* amount PRECISION) supply-index))
+            (new-principal (+ old-principal delta-principal)))
+        (map-set user-supplies { user: sender, asset: asset-principal } { amount: new-principal, index: supply-index })
+        (map-set user-total-supplies sender (+ (default-to u0 (map-get? user-total-supplies sender)) amount))
+        (try! (contract-call? .interest-rate-model update-market-state asset-principal (to-int amount) 0))
+        (ok true)
+      )
+    )
   )
 )
 
-(define-public (deposit (asset-principal principal) (amount uint) (sender principal))
-  (begin
+(define-public (withdraw (asset <sip-010-ft-trait>) (amount uint))
+  (let ((asset-principal (contract-of asset)) (caller tx-sender))
     (asserts! (> amount u0) ERR_ZERO_AMOUNT)
-
-    ;; Accrue Interest - This is a call to another contract
-    (let ((market (unwrap!
-        (contract-call? .interest-rate-model accrue-interest asset-principal)
-        ERR_INTEREST_ACCRUAL_FAILED
-      )))
-      (let (
-          (supply-index (get supply-index market))
-          (current-supply (default-to {
-            amount: u0,
-            index: supply-index,
-          }
-            (map-get? user-supplies {
-              user: sender,
-              asset: asset-principal,
-            })
-          ))
-          (old-amount (get amount current-supply))
-          (delta-principal (/ (* amount PRECISION) supply-index))
-          (new-principal (+ old-amount delta-principal))
-        )
-        (map-set user-supplies {
-          user: sender,
-          asset: asset-principal,
-        } {
-          amount: new-principal,
-          index: supply-index,
-        })
-        (map-set user-total-supplies sender
-          (+ (default-to u0 (map-get? user-total-supplies sender)) amount)
-        )
-        (try! (contract-call? .interest-rate-model update-market-state asset-principal
-          (to-int amount) 0
-        ))
+    (let ((market (unwrap! (contract-call? .interest-rate-model accrue-interest asset-principal) ERR_INTEREST_ACCRUAL_FAILED)))
+      (let ((supply-index (get supply-index market))
+            (current-supply (unwrap! (map-get? user-supplies { user: caller, asset: asset-principal }) ERR_INSUFFICIENT_BALANCE))
+            (current-principal (get amount current-supply))
+            (remove-principal (/ (* amount PRECISION) supply-index)))
+        (asserts! (>= current-principal remove-principal) ERR_INSUFFICIENT_BALANCE)
+        (try! (as-contract (contract-call? asset transfer amount tx-sender caller none)))
+        (map-set user-supplies { user: caller, asset: asset-principal } { amount: (- current-principal remove-principal), index: supply-index })
+        (let ((current-total (default-to u0 (map-get? user-total-supplies caller))))
+          (map-set user-total-supplies caller (if (>= current-total amount) (- current-total amount) u0)))
+        (try! (contract-call? .interest-rate-model update-market-state asset-principal (- 0 (to-int amount)) 0))
         (ok true)
+      )
+    )
+  )
+)
+
+(define-public (borrow (asset <sip-010-ft-trait>) (amount uint))
+  (let ((asset-principal (contract-of asset)) (caller tx-sender))
+    (asserts! (> amount u0) ERR_ZERO_AMOUNT)
+    (let ((market (unwrap! (contract-call? .interest-rate-model accrue-interest asset-principal) ERR_INTEREST_ACCRUAL_FAILED)))
+      (let ((borrow-index (get borrow-index market))
+            (current-borrow (default-to { amount: u0, index: borrow-index } (map-get? user-borrows { user: caller, asset: asset-principal })))
+            (old-principal (get amount current-borrow))
+            (delta-principal (/ (* amount PRECISION) borrow-index))
+            (new-principal (+ old-principal delta-principal)))
+        (try! (as-contract (contract-call? asset transfer amount tx-sender caller none)))
+        (map-set user-borrows { user: caller, asset: asset-principal } { amount: new-principal, index: borrow-index })
+        (map-set user-total-borrows caller (+ (default-to u0 (map-get? user-total-borrows caller)) amount))
+        (try! (contract-call? .interest-rate-model update-market-state asset-principal (- 0 (to-int amount)) (to-int amount)))
+        (ok true)
+      )
+    )
+  )
+)
+
+(define-public (repay (asset <sip-010-ft-trait>) (amount uint))
+  (let ((asset-principal (contract-of asset)) (sender tx-sender))
+    (asserts! (> amount u0) ERR_ZERO_AMOUNT)
+    (let ((market (unwrap! (contract-call? .interest-rate-model accrue-interest asset-principal) ERR_INTEREST_ACCRUAL_FAILED)))
+      (let ((borrow-index (get borrow-index market))
+            (current-borrow (unwrap! (map-get? user-borrows { user: sender, asset: asset-principal }) ERR_INSUFFICIENT_BALANCE))
+            (current-principal (get amount current-borrow))
+            (repay-principal (/ (* amount PRECISION) borrow-index)))
+        (let ((actual-repay-principal (if (> repay-principal current-principal) current-principal repay-principal))
+              (actual-amount (/ (* actual-repay-principal borrow-index) PRECISION)))
+          (try! (contract-call? asset transfer actual-amount sender (as-contract tx-sender) none))
+          (map-set user-borrows { user: sender, asset: asset-principal } { amount: (- current-principal actual-repay-principal), index: borrow-index })
+          (let ((current-total (default-to u0 (map-get? user-total-borrows sender))))
+            (map-set user-total-borrows sender (if (>= current-total actual-amount) (- current-total actual-amount) u0)))
+          (try! (contract-call? .interest-rate-model update-market-state asset-principal (to-int actual-amount) (- 0 (to-int actual-amount))))
+          (ok true)
+        )
+      )
+    )
+  )
+)
+
+;; --- Read-Only Functions ---
+
+(define-read-only (get-user-borrow-balance (user principal) (asset principal))
+  (let ((borrow-data (default-to { amount: u0, index: u0 } (map-get? user-borrows { user: user, asset: asset }))))
+    (if (is-eq (get amount borrow-data) u0)
+      (ok (some u0))
+      (match (contract-call? .interest-rate-model get-market-info asset)
+        market-info (ok (some (/ (* (get amount borrow-data) (get borrow-index market-info)) PRECISION)))
+        (ok (some (/ (* (get amount borrow-data) (get index borrow-data)) PRECISION)))
+      )
+    )
+  )
+)
+
+(define-read-only (get-user-supply-balance (user principal) (asset principal))
+  (let ((supply-data (default-to { amount: u0, index: u0 } (map-get? user-supplies { user: user, asset: asset }))))
+    (if (is-eq (get amount supply-data) u0)
+      (ok (some u0))
+      (match (contract-call? .interest-rate-model get-market-info asset)
+        market-info (ok (some (/ (* (get amount supply-data) (get supply-index market-info)) PRECISION)))
+        (ok (some (/ (* (get amount supply-data) (get index supply-data)) PRECISION)))
       )
     )
   )

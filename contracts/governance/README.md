@@ -6,7 +6,7 @@ The Governance Module provides the framework for decentralized decision-making a
 
 ## Architecture: Facade with Specialized Managers
 
-Following the protocol's standard architectural pattern, the Governance Module is built around a central **facade**. The `proposal-engine.clar` contract acts as this single, secure entry point for all governance-related actions, delegating specific tasks to a set of specialized manager contracts.
+Following the protocol's standard architectural pattern, the Governance Module is built around a central **facade**. The `proposal-engine.clar` contract acts as this single, secure entry point for all governance-related actions, delegating all logic to a set of specialized manager contracts.
 
 This facade design ensures a clear and secure process for protocol governance, from proposal creation to execution.
 
@@ -17,7 +17,7 @@ This facade design ensures a clear and secure process for protocol governance, f
     |
     |-- (submit-proposal) --> [proposal-registry.clar]
     |-- (cast-vote) --> [voting.clar]
-    |-- (execute-proposal) --> [upgrade-controller.clar]
+    |-- (execute-proposal) --> [proposal-executor.clar]
 
 [Metrics] -> [conxian-operations-engine.clar] -> [proposal-engine.clar] (Automated Vote)
 ```
@@ -26,13 +26,14 @@ This facade design ensures a clear and secure process for protocol governance, f
 
 ### Facade
 
--   **`proposal-engine.clar`**: The primary **facade** for the governance module. It provides a unified interface for creating proposals, casting votes, and executing the outcomes, delegating the underlying logic to the appropriate manager contracts.
+-   **`proposal-engine.clar`**: The primary **facade** for the governance module. It provides a unified interface for creating proposals, casting votes, and executing the outcomes, delegating all underlying logic to the appropriate manager contracts. It contains no business logic itself.
 
 ### Manager Contracts
 
 -   **`proposal-registry.clar`**: A specialized contract for storing and managing all governance proposals, ensuring data integrity from creation to execution.
 -   **`voting.clar`**: Manages the entire voting process, including recording votes, calculating results, and enforcing voting rules.
--   **`upgrade-controller.clar`**: A dedicated contract for managing protocol upgrades, incorporating security features like timelocks and multi-signature requirements.
+-   **`proposal-executor.clar`**: A dedicated contract for executing general governance proposals after they have passed.
+-   **`upgrade-controller.clar`**: A dedicated contract for managing the execution of sensitive protocol upgrades, incorporating security features like timelocks and multi-signature requirements.
 
 ### Automated Governance Agent
 

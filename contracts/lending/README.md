@@ -6,7 +6,7 @@ The Lending Module provides the core infrastructure for decentralized lending an
 
 ## Architecture: Facade with Specialized Managers
 
-The Lending Module follows the same **facade pattern** as the other core components of the protocol. The `comprehensive-lending-system.clar` contract acts as the central **facade**, providing a single, secure entry point for all lending and borrowing operations. It delegates specialized tasks, such as interest rate calculations and liquidations, to dedicated manager contracts.
+The Lending Module follows a pure **facade pattern**. The `comprehensive-lending-system.clar` contract acts as the central **facade**, providing a single, secure entry point for all lending and borrowing operations. All business logic and state are delegated to a network of specialized manager contracts.
 
 This design simplifies user interaction, enhances security by centralizing entry points, and improves maintainability by separating distinct business logic into modular components.
 
@@ -15,6 +15,7 @@ This design simplifies user interaction, enhances security by centralizing entry
 ```
 [User] -> [comprehensive-lending-system.clar] (Facade)
     |
+    |-- (supply, borrow, etc.) --> [lending-manager.clar]
     |-- (calculate-interest) --> [interest-rate-model.clar]
     |-- (liquidate-loan) --> [liquidation-manager.clar]
     |-- (mint-position) --> [lending-position-nft.clar]
@@ -24,10 +25,11 @@ This design simplifies user interaction, enhances security by centralizing entry
 
 ### Facade
 
--   **`comprehensive-lending-system.clar`**: The main **facade** for the lending module. It manages all core user operations, including deposits, loans, and collateral management. It integrates with the manager contracts below to handle specialized logic.
+-   **`comprehensive-lending-system.clar`**: The main **facade** for the lending module. It contains no business logic and delegates all calls to the appropriate manager contracts.
 
 ### Manager Contracts
 
+-   **`lending-manager.clar`**: The core logic contract for the lending module. It manages all user operations, including deposits, loans, and collateral management.
 -   **`interest-rate-model.clar`**: A specialized contract that calculates borrowing interest rates based on market conditions, primarily the utilization rate of a given asset pool.
 -   **`liquidation-manager.clar`**: A dedicated contract responsible for managing the entire liquidation process for under-collateralized loans, ensuring the solvency of the protocol.
 -   **`lending-position-nft.clar`**: An NFT contract that represents user positions in the lending protocol as unique SIP-009 NFTs. This enhances the composability and transferability of lending and borrowing positions.
