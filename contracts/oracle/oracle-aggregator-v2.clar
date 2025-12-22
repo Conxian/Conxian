@@ -18,7 +18,7 @@
 (define-data-var twap-alpha-bps uint u1000) ;; 10% EMA weight for new observations
 (define-data-var circuit-breaker (optional principal) none)
 ;; Degrade to TWAP when price age exceeds threshold (in blocks)
-(define-data-var stale-threshold-blocks uint u36000)
+(define-data-var stale-threshold-blocks uint u4320000)
 
 ;; Per-asset store: latest price, TWAP (EMA), source weight, and timestamp
 (define-map asset-sources { asset: principal } {

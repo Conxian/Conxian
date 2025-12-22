@@ -12,10 +12,10 @@
 ;; ==================== CONSTANTS ====================
 
 ;; Bitcoin finality threshold (standard is 6 confirmations)
-(define-constant BTC_FINALITY_BLOCKS u720)
+(define-constant BTC_FINALITY_BLOCKS u86400)
 
 ;; Expected fast block time in Nakamoto (seconds)
-(define-constant NAKAMOTO_BLOCK_TIME u600)
+(define-constant NAKAMOTO_BLOCK_TIME u72000)
 
 ;; ==================== TENURE FUNCTIONS ====================
 ;; Nakamoto introduced "tenures" - periods where a single miner produces blocks

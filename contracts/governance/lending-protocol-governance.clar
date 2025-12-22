@@ -21,11 +21,11 @@
 (define-constant PRECISION u1000000000000000000) ;; 18 decimals
 
 ;; Governance parameters
-(define-data-var voting-delay uint u120960) ;; ~1 week in blocks
-(define-data-var voting-period uint u241920) ;; ~2 weeks in blocks
+(define-data-var voting-delay uint u14515200) ;; ~1 week in blocks
+(define-data-var voting-period uint u29030400) ;; ~2 weeks in blocks
 (define-data-var quorum-threshold uint u40000000000000000) ;; 4% of total supply
 (define-data-var proposal-threshold uint u10000000000000000000000) ;; 10K tokens to propose
-(define-data-var execution-delay uint u172800) ;; ~1 day timelock
+(define-data-var execution-delay uint u20736000) ;; ~1 day timelock
 
 ;; Roles
 (define-constant ROLE_GOVERNOR 0x474f5645524e4f52000000000000000000000000000000000000000000000000) ;; GOVERNOR in hex
@@ -44,8 +44,8 @@
 (define-constant PROPOSAL_ACTIVE u2)
 (define-constant PROPOSAL_SUCCEEDED u3)
 (define-constant PROPOSAL_QUEUED u4)
-(define-constant PROPOSAL_DELAY u2073600) ;; u144 * 120
-(define-constant VOTING_PERIOD u14515200) ;; 1008 * 120 (1 week)
+(define-constant PROPOSAL_DELAY u248832000) ;; u144 * 120
+(define-constant VOTING_PERIOD u1741824000) ;; 1008 * 120 (1 week)
 (define-constant PROPOSAL_EXECUTED u6)
 (define-constant PROPOSAL_CANCELLED u7)
 

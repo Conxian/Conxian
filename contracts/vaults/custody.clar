@@ -56,7 +56,7 @@
 (define-data-var total-shares-minted uint u0)
 
 ;; @desc The number of blocks for the withdrawal timelock. (Nakamoto-adjusted: 12 days * 17280 blocks/day)
-(define-constant WITHDRAWAL_DELAY_BLOCKS u207360)
+(define-constant WITHDRAWAL_DELAY_BLOCKS u24883200)
 
 ;; --- Private Functions ---
 

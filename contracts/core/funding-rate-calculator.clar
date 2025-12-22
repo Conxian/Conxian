@@ -16,7 +16,7 @@
 (define-constant ROLE_OPERATOR "ROLE_OPERATOR") ;; Added missing constant
 
 ;; @data-vars
-(define-data-var funding-interval uint u17280) ;; Default to daily funding
+(define-data-var funding-interval uint u2073600) ;; Default to daily funding
 (define-data-var max-funding-rate uint u100) ;; 1% max funding rate
 (define-data-var funding-rate-sensitivity uint u500) ;; 5% sensitivity
 (define-map funding-rate-history

@@ -17,7 +17,7 @@
 (define-data-var owner principal tx-sender)
 (define-data-var oracle-contract principal tx-sender) ;; Oracle contract for price feeds
 (define-data-var dimensional-engine-contract principal tx-sender) ;; Dimensional engine contract
-(define-data-var funding-interval uint u17280) ;; Default to daily funding
+(define-data-var funding-interval uint u2073600) ;; Default to daily funding
 (define-data-var max-funding-rate uint u100) ;; 1% max funding rate
 (define-data-var funding-rate-sensitivity uint u500) ;; 5% sensitivity
 

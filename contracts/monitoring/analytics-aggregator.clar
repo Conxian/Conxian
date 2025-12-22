@@ -16,7 +16,7 @@
 (define-constant PRECISION u1000000000000000000) ;; 1e18
 (define-constant BASIS_POINTS u10000) ;; 100%
 (define-constant ONE_DAY u17280) ;; Nakamoto-adjusted: (24 * 60 * 60) / 5
-(define-constant BLOCKS_PER_YEAR u6307200) ;; Nakamoto-adjusted: 365 * 17280
+(define-constant BLOCKS_PER_YEAR u756864000) ;; Nakamoto-adjusted: 365 * 17280
 (define-constant DAYS_PER_YEAR u365)
 
 ;; Metric types

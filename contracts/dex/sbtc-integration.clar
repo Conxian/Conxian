@@ -34,7 +34,7 @@
 ;; Oracle parameters
 (define-constant MAX-PRICE-DEVIATION u200000) ;; 20% max price deviation (1e6 scale)
 (define-constant ORACLE-STALE-THRESHOLD u17280) ;; ~24 hours (Nakamoto blocks)
-(define-constant MIN-CONFIRMATION-BLOCKS u720) ;; Min confirmations for peg-in
+(define-constant MIN-CONFIRMATION-BLOCKS u86400) ;; Min confirmations for peg-in
 
 ;; =============================================================================
 ;; STORAGE

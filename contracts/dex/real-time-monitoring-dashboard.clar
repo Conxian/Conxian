@@ -27,7 +27,7 @@
 (define-data-var contract-owner principal tx-sender)
 (define-data-var monitoring-enabled bool true)
 (define-data-var alert-threshold-multiplier uint u150) ;; 150% of baseline
-(define-data-var retention-period uint u10368000) ;; 24 hours
+(define-data-var retention-period uint u1244160000) ;; 24 hours
 
 ;; ===== System Metrics Storage =====
 (define-map system-metrics

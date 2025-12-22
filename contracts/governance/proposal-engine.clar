@@ -14,8 +14,8 @@
 ;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED (err u100))
 (define-constant ERR_PROPOSAL_NOT_FOUND (err u101))
-(define-constant PROPOSAL_DELAY u17280) ;; Nakamoto-adjusted: 1 day (144 blocks * 120)
-(define-constant VOTING_PERIOD u120960) ;; Nakamoto-adjusted: 7 days (1008 blocks * 120)
+(define-constant PROPOSAL_DELAY u2073600) ;; Nakamoto-adjusted: 1 day (144 blocks * 120)
+(define-constant VOTING_PERIOD u14515200) ;; Nakamoto-adjusted: 7 days (1008 blocks * 120)
 (define-constant ERR_PROPOSAL_NOT_ACTIVE (err u103))
 (define-constant ERR_VOTING_CLOSED (err u104))
 (define-constant ERR_QUORUM_NOT_REACHED (err u106))
@@ -36,7 +36,7 @@
 ;; @desc The principal of the governance token contract.
 (define-data-var governance-token principal .governance-token)
 ;; @desc The duration of the voting period in blocks.
-(define-data-var voting-period-blocks uint u172800)
+(define-data-var voting-period-blocks uint u20736000)
 ;; @desc The percentage of the total token supply that must vote for a proposal to pass, multiplied by 100.
 (define-data-var quorum-percentage uint u5000)
 (define-data-var protocol-coordinator principal tx-sender)
