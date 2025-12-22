@@ -25,12 +25,7 @@
 (define-data-var protocol-coordinator principal tx-sender)
 
 (define-private (is-protocol-paused)
-  (match (contract-call? .conxian-protocol is-protocol-paused)
-    paused
-    paused
-    err
-    true
-  )
+  (unwrap! (contract-call? .conxian-protocol is-protocol-paused) true)
 )
 
 ;;
@@ -76,7 +71,7 @@
   )
   (begin
     (asserts! (not (is-protocol-paused)) ERR_PROTOCOL_PAUSED)
-    (contract-call? .position-manager close-position position-id asset slippage)
+    (contract-call? .position-manager close-position position-id slippage)
   )
 )
 

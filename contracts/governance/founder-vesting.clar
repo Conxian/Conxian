@@ -15,8 +15,8 @@
 (define-constant ERR_VESTING_NOT_STARTED (err u8002))
 
 ;; Vesting Parameters (Standard 4-year vesting, 1-year cliff)
-(define-constant VESTING_DURATION u2102400) ;; ~4 years (blocks)
-(define-constant CLIFF_DURATION u525600) ;; ~1 year (blocks)
+(define-constant VESTING_DURATION u25228800) ;; 4 years in Nakamoto blocks (6,307,200 * 4)
+(define-constant CLIFF_DURATION u6307200) ;; 1 year in Nakamoto blocks (5s blocks)
 
 ;; --- Data Variables ---
 (define-data-var founder-address principal tx-sender)
@@ -86,7 +86,7 @@
       (current-height block-height)
       (start (var-get start-block))
     )
-    (if (< current-height (+ start CLIFF_DURATION))
+    (ok (if (< current-height (+ start CLIFF_DURATION))
       u0 ;; In Cliff
       (if (>= current-height (+ start VESTING_DURATION))
         (- total claimed) ;; Fully Vested
@@ -100,14 +100,14 @@
           )
         )
       )
-    )
+    ))
   )
 )
 
 (define-public (claim (token <sip-010-trait>))
   (let (
       (token-contract (contract-of token))
-      (claimable (get-claimable-amount token-contract))
+      (claimable (unwrap! (get-claimable-amount token-contract) ERR_NOTHING_TO_CLAIM))
       (schedule (unwrap! (map-get? vesting-schedule token-contract) ERR_NOTHING_TO_CLAIM))
     )
     (asserts! (is-eq tx-sender (var-get founder-address)) ERR_UNAUTHORIZED)

@@ -433,13 +433,13 @@
     ;; ERR_ALREADY_DISTRIBUTED
 
     ;; 1. Founder Allocation (Vested)
-    (try! (contract-call? .cxd-token mint founder-vesting founder-amt-cxd))
-    (try! (contract-call? founder-vesting add-vesting-allocation .cxd-token
+    (try! (contract-call? .cxd-token mint .founder-vesting founder-amt-cxd))
+    (try! (contract-call? .founder-vesting add-vesting-allocation .cxd-token
       founder-amt-cxd
     ))
 
-    (try! (contract-call? .cxvg-token mint founder-amt-cxvg founder-vesting))
-    (try! (contract-call? founder-vesting add-vesting-allocation .cxvg-token
+    (try! (contract-call? .cxvg-token mint founder-amt-cxvg .founder-vesting))
+    (try! (contract-call? .founder-vesting add-vesting-allocation .cxvg-token
       founder-amt-cxvg
     ))
 

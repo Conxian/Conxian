@@ -1,0 +1,20 @@
+;; compliance-trait.trait
+;; Core compliance trait for regulated DeFi operations
+;; Implements FATF Travel Rule, sanctions screening, and compliance reporting
+
+(define-trait compliance-trait
+  ;; Travel Rule compliance
+  (transfer-with-travel-rule (sender principal recipient principal amount uint transfer-id (string 256)) (response bool uint))
+
+  ;; Sanctions screening
+  (check-sanctions (address principal) (response bool (string 256)))
+
+  ;; Compliance reporting
+  (report-transaction (tx-data (string 1024)) (response bool uint))
+
+  ;; KYC/AML verification
+  (verify-kyc (user principal verification-level uint) (response bool uint))
+
+  ;; Compliance status
+  (is-compliant (user principal) (response bool))
+)

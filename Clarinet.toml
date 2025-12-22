@@ -540,6 +540,7 @@ depends_on = ["comprehensive-lending-system"]
 [contracts.keeper-coordinator]
 path = "contracts/automation/keeper-coordinator.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+depends_on = ["controller-traits", "security-monitoring", "automation-traits"]
 
 [contracts.guardian-registry]
 path = "contracts/automation/guardian-registry.clar"
@@ -581,10 +582,15 @@ address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 path = "contracts/pools/tiered-pools.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
+[contracts.voting]
+path = "contracts/governance/voting.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+depends_on = ["cxvg-token"]
+
 [contracts.proposal-engine]
 path = "contracts/governance/proposal-engine.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = []
+depends_on = ["voting", "proposal-registry"]
 
 [contracts.proposal-registry]
 path = "contracts/governance/proposal-registry.clar"
@@ -818,7 +824,31 @@ depends_on = [
     "fee-manager",
 ]
 
-# End of file
+# ---------- Stacks Native Automation ----------
+[contracts.block-automation-manager]
+path = "contracts/automation/block-automation-manager.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+
+[contracts.native-stacking-operator]
+path = "contracts/automation/native-stacking-operator.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+
+[contracts.native-multisig-controller]
+path = "contracts/automation/native-multisig-controller.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+
+[contracts.stacks-native-launch-script]
+path = "contracts/automation/stacks-native-launch-script.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+
+[contracts.migration-adapter]
+path = "contracts/automation/migration-adapter.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+
+# ---------- Legacy Contracts (Being Phased Out) ----------
+# Legacy contracts are now properly integrated in their original sections
+
+# ---------- End of file ----------
 
 [contracts.compliance-hooks]
 path = "contracts/enterprise/compliance-hooks.clar"
@@ -829,3 +859,8 @@ depends_on = ["kyc-registry"]
 path = "contracts/dex/vault.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 depends_on = ["sip-standards"]
+
+[contracts.self-launch-coordinator]
+path = "contracts/self-launch-coordinator.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+depends_on = ["cxvg-token", "position-factory"]

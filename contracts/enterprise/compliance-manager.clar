@@ -19,11 +19,11 @@
 )
 
 (define-public (check-kyc-compliance (account principal))
-  (let ((info (unwrap!
-      (contract-call? .institutional-account-manager get-account-details account)
-      ERR_UNAUTHORIZED
+  (let ((tier (unwrap!
+      (contract-call? .kyc-registry get-kyc-tier account)
+      ERR_COMPLIANCE_FAIL
     )))
-    (asserts! (get kyc-verified info) ERR_COMPLIANCE_FAIL)
+    (asserts! (>= tier u1) ERR_COMPLIANCE_FAIL)
     (ok true)
   )
 )

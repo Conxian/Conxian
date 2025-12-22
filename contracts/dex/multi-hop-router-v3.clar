@@ -26,7 +26,7 @@
 ;; @desc Checks if the protocol is paused.
 ;; @returns A boolean indicating if the protocol is paused.
 (define-private (is-protocol-paused)
-  (contract-call? (var-get protocol-coordinator) is-protocol-paused)
+  (unwrap! (contract-call? .conxian-protocol is-protocol-paused) true)
 )
 
 ;; @desc Sets the contract owner.
@@ -78,7 +78,9 @@
   )
   (begin
     (asserts! (not (is-protocol-paused)) ERR-PROTOCOL-PAUSED)
-    (contract-call? (var-get swap-manager) swap-direct amount-in min-amount-out pool token-in token-out)
+    (contract-call? .swap-manager swap-direct amount-in min-amount-out pool
+      token-in token-out
+    )
   )
 )
 
@@ -102,7 +104,9 @@
   )
   (begin
     (asserts! (not (is-protocol-paused)) ERR-PROTOCOL-PAUSED)
-    (contract-call? (var-get swap-manager) swap-2-hop amount-in min-amount-out pool1 token-in token-base pool2 token-out)
+    (contract-call? .swap-manager swap-2-hop amount-in min-amount-out pool1
+      token-in token-base pool2 token-out
+    )
   )
 )
 
@@ -130,6 +134,8 @@
   )
   (begin
     (asserts! (not (is-protocol-paused)) ERR-PROTOCOL-PAUSED)
-    (contract-call? (var-get swap-manager) swap-3-hop amount-in min-amount-out pool1 token-in token-base1 pool2 token-base2 pool3 token-out)
+    (contract-call? .swap-manager swap-3-hop amount-in min-amount-out pool1
+      token-in token-base1 pool2 token-base2 pool3 token-out
+    )
   )
 )

@@ -37,9 +37,7 @@
 (define-data-var protocol-coordinator principal tx-sender)
 
 (define-private (is-protocol-paused)
-  (default-to true
-    (get result (contract-call? .conxian-protocol is-protocol-paused))
-  )
+  (unwrap! (contract-call? .conxian-protocol is-protocol-paused) true)
 )
 
 ;; Maps
@@ -107,7 +105,7 @@
       (let (
           (supply-index (get supply-index market))
           (current-supply (unwrap!
-            (map-get? user-supplies {
+            (map-get? user-borrows {
               user: caller,
               asset: asset-principal,
             })

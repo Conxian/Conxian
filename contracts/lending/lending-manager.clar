@@ -23,7 +23,7 @@
 
 (define-trait lending-manager-trait
   (
-    (deposit (asset-principal principal) (amount uint) (sender principal) (response bool uint))
+    (deposit (principal uint principal) (response bool uint))
   )
 )
 

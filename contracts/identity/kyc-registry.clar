@@ -106,8 +106,14 @@
 
     ;; Manage Identity Badge
     (if (> tier TIER_UNVERIFIED)
-      (unwrap-panic (contract-call? .identity-badge mint subject))
-(unwrap-panic (contract-call? .identity-badge burn subject))
+      (begin
+        (unwrap-panic (contract-call? .identity-badge mint subject))
+        true
+      )
+      (begin
+        (unwrap-panic (contract-call? .identity-badge burn subject))
+        true
+      )
     )
     (print {
       event: "identity-updated",

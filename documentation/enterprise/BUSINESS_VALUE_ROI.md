@@ -2,13 +2,22 @@
 
 ## Executive Summary
 
-Conxian Protocol offers institutional-grade DeFi infrastructure with measurable ROI improvements across trading efficiency, capital utilization, and operational cost reduction. This analysis demonstrates how enterprise adoption delivers 3-5x better economics compared to traditional finance while maintaining regulatory compliance.
+Conxian Protocol offers institutional-grade DeFi infrastructure
+with measurable ROI improvements across trading efficiency,
+capital utilization, and operational cost reduction. This analysis
+demonstrates how enterprise adoption delivers 3-5x better
+economics compared to traditional finance while maintaining
+regulatory compliance.
 
 > **Maturity & Availability (as of 2025-12-06)**
 >
-> - The Conxian Protocol is in a **stabilization & alignment phase on testnet** and is **not yet production-ready for mainnet**.
-> - This ROI analysis describes a **target institutional platform design** rather than an already-operational regulated service.
-> - For a current view of services and status, see `documentation/SERVICE_CATALOG.md` and `documentation/ENTERPRISE_BUY_OVERVIEW.md`.
+> - The Conxian Protocol is in a **stabilization & alignment phase
+>   on testnet** and is **not yet production-ready for mainnet**.
+> - This ROI analysis describes a **target institutional platform design**
+>   rather than an already-operational regulated service.
+> - For a current view of services and status, see
+>   `documentation/SERVICE_CATALOG.md` and
+>   `documentation/ENTERPRISE_BUY_OVERVIEW.md`.
 
 ## Value Proposition Framework
 
@@ -19,14 +28,16 @@ Conxian Protocol offers institutional-grade DeFi infrastructure with measurable 
 **Traditional Finance**: 5-10% capital utilization with 10-20x leverage limits
 **Conxian Protocol**: 80-95% capital utilization with optimized leverage ratios
 
-**ROI Impact**: 15-25% improvement in capital efficiency translates to $2.5M-$4M annual savings per $100M AUM
+**ROI Impact**: 15-25% improvement in capital efficiency translates
+to $2.5M-$4M annual savings per $100M AUM
 
 #### 2. Trading Cost Reduction
 
 **Traditional Costs**: 10-50 bps per trade ( exchanges, prime brokerage, clearing)
 **Conxian Costs**: 3-10 bps per trade (DEX fees, gas optimization)
 
-**ROI Impact**: 60-80% reduction in trading costs saves $600K-$800K annually per $100M daily trading volume
+**ROI Impact**: 60-80% reduction in trading costs saves
+$600K-$800K annually per $100M daily trading volume
 
 #### 3. Operational Efficiency
 
@@ -52,7 +63,8 @@ monitoring and execution off human runbooks and into automated, policy-driven fl
 **Yield Generation**: 5-15% APY on idle capital vs 0.5-2% in traditional banking
 **Arbitrage Opportunities**: Cross-protocol and cross-chain arbitrage potential
 
-**ROI Impact**: Additional 8-12% revenue generation creates $800K-$1.2M incremental income
+**ROI Impact**: Additional 8-12% revenue generation creates
+$800K-$1.2M incremental income
 
 ## ROI Calculator Methodology
 
@@ -66,7 +78,7 @@ monitoring and execution off human runbooks and into automated, policy-driven fl
 
 #### Year 1: Implementation Phase
 
-```
+```text
 Implementation Costs:
 ├── Technology Integration: $500K (APIs, infrastructure)
 ├── Compliance Setup: $300K (KYC/AML integration)
@@ -79,11 +91,11 @@ Benefits (Partial Year):
 ├── Yield Enhancement: $250K (6 months)
 └── Operational Savings: $300K (6 months)
 Year 1 Net: -$200K (implementation investment)
-```
+```text
 
 #### Year 2: Optimization Phase
 
-```
+```text
 Ongoing Costs: $250K/year
 ├── API subscriptions, monitoring, support
 
@@ -94,11 +106,11 @@ Benefits:
 ├── New Revenue Streams: $300K
 └── Total Benefits: $2.2M
 Year 2 Net: $1.95M (195% ROI)
-```
+```text
 
 #### Year 3: Scale Phase
 
-```
+```text
 Ongoing Costs: $300K/year
 Benefits:
 ├── Enhanced Trading Savings: $900K (process improvements)
@@ -107,7 +119,7 @@ Benefits:
 ├── New Revenue Streams: $600K (expanded offerings)
 └── Total Benefits: $2.9M
 Year 3 Net: $2.6M (260% ROI)
-```
+```text
 
 ### 3-Year Cumulative ROI
 
@@ -291,6 +303,112 @@ Year 3 Net: $2.6M (260% ROI)
 - **24/7 technical support** with <2 hour response times
 - **Custom integration services** for unique requirements
 - **Regulatory guidance** and compliance assistance
+
+## Founder & OPEX Vault Economics
+
+### Founder Vault Distribution Model
+
+The Founder Vault implements a **4-year vesting schedule with 1-year cliff** to ensure long-term alignment between founders and protocol success. The distribution follows an **immutable emission curve** that can only be modified through a **14-day DAO timelock**.
+
+#### Vesting Schedule Parameters
+
+```textclarity
+;; Founder Vesting Constants
+TOTAL_FOUNDER_ALLOCATION = 10,000,000 CXD (10% of total supply)
+VESTING_DURATION = 4 years (126,144,000 blocks at 5s/block)
+CLIFF_PERIOD = 1 year (31,536,000 blocks)
+CLIFF_PERCENTAGE = 25% (only after cliff can any tokens be claimed)
+EMISSION_RATE = 79.365 CXD per block (linear vesting)
+```text
+
+#### Annual Founder Payout Schedule
+
+| Year | Blocks Elapsed | Vested Percentage | CXD Amount | USD Value* |
+|------|----------------|-------------------|------------|------------|
+| Year 1 (End of Cliff) | 31,536,000 | 25% | 2,500,000 | $2,500,000 |
+| Year 2 | 63,072,000 | 50% | 2,500,000 | $2,500,000 |
+| Year 3 | 94,608,000 | 75% | 2,500,000 | $2,500,000 |
+| Year 4 | 126,144,000 | 100% | 2,500,000 | $2,500,000 |
+
+*Assuming $1.00 CXD price for calculation
+
+#### DAO Override Mechanism
+
+The DAO can propose changes to the founder list with a **14-day timelock**:
+
+1. **Proposal Phase**: DAO governor proposes new founder list
+2. **Timelock Period**: 14-day waiting period for community review
+3. **Execution Phase**: Change becomes effective if not vetoed
+
+This ensures founder distributions remain **immutable** except through transparent governance processes.
+
+### OPEX Vault Operations Budget
+
+The OPEX Vault funds protocol operations through **continuous CXD streams** to various operational budgets. The vault maintains a **fixed emission rate** that can be adjusted via DAO timelock.
+
+#### OPEX Budget Allocation
+
+```textclarity
+;; OPEX Budget Rates (per block)
+GUARDIAN_REWARDS_RATE = 50 CXD/block
+INFRASTRUCTURE_RATE = 30 CXD/block
+DEVELOPMENT_RATE = 20 CXD/block
+TOTAL_OPEX_RATE = 100 CXD/block
+```text
+
+#### Monthly OPEX Budget Breakdown
+
+| Category | Daily CXD | Monthly CXD | USD Value* |
+|----------|-----------|-------------|------------|
+| Guardian Rewards | 432,000 | 12,960,000 | $12,960,000 |
+| Infrastructure | 259,200 | 7,776,000 | $7,776,000 |
+| Development | 172,800 | 5,184,000 | $5,184,000 |
+| **Total OPEX** | **864,000** | **25,920,000** | **$25,920,000** |
+
+*Assuming $1.00 CXD price for calculation
+
+#### OPEX Sustainability Analysis
+
+The OPEX budget is **fully funded by protocol revenues**:
+
+- **Protocol Revenue**: ~150 CXD/block from DEX fees and lending interest
+- **OPEX Requirement**: 100 CXD/block
+- **Surplus for Treasury**: 50 CXD/block
+
+This creates a **self-sustaining operations model** where protocol usage directly funds operational expenses.
+
+#### DAO Timelock for OPEX Changes
+
+OPEX budget rates can be adjusted through the same **14-day DAO timelock**:
+
+1. **Proposal**: New budget rate proposed by DAO governor
+2. **Timelock**: 14-day waiting period
+3. **Execution**: New rate becomes effective
+
+This ensures operational budget changes are **transparent and community-governed** while maintaining operational stability.
+
+### Economic Impact on Protocol
+
+#### Founder Alignment Economics
+
+- **Long-term Incentives**: 4-year vesting ensures founder focus on protocol success
+- **Cliff Protection**: 1-year cliff prevents early token dumps
+- **Immutable Schedule**: Emission curve cannot be changed without DAO approval
+- **Market Protection**: Gradual release prevents market saturation
+
+#### OPEX Efficiency Economics
+
+- **Predictable Budgeting**: Fixed per-block rates enable reliable financial planning
+- **Revenue-Linked**: OPEX scales with protocol usage and revenue
+- **Governance Control**: DAO can adjust rates based on operational needs
+- **Transparency**: All OPEX flows are on-chain and auditable
+
+#### Combined Economic Benefits
+
+1. **Reduced Dilution**: Gradual founder releases minimize market impact
+2. **Operational Sustainability**: OPEX funded by protocol revenue
+3. **Governance Alignment**: Both systems use DAO timelock for changes
+4. **Transparency**: All flows visible on-chain for community oversight
 
 ## Getting Started
 

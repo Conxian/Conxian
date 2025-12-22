@@ -1,6 +1,7 @@
 ;; keeper-coordinator.clar
 ;; Automation system for executing scheduled tasks in the Conxian protocol.
 
+
 ;; Traits
 (use-trait keeper-job-trait .controller-traits.keeper-job-trait)
 (use-trait circuit-breaker-trait .security-monitoring.circuit-breaker-trait)
@@ -22,6 +23,9 @@
 (define-constant TASK_BOND_COUPON_PROCESS u6)
 (define-constant TASK_METRICS_UPDATE u7)
 (define-constant TASK_AUTOMATION_MANAGER u8)
+(define-constant TASK_EPOCH_TRANSITION u9)
+(define-constant TASK_AUTO_CONVERSION u10)
+(define-constant TASK_OPEX_REPAYMENT u11)
 
 ;; Data Variables
 (define-data-var contract-owner principal tx-sender)
@@ -29,6 +33,9 @@
 (define-data-var task-registry (list 20 uint) (list))
 (define-data-var total-tasks-executed uint u0)
 (define-data-var total-tasks-failed uint u0)
+(define-data-var gamification-manager principal tx-sender)
+(define-data-var points-oracle principal tx-sender)
+(define-data-var self-launch-coordinator principal tx-sender)
 
 ;; Registry of automation targets that implement automation-trait.
 ;; This keeps keeper-coordinator as a lightweight directory, while
@@ -150,6 +157,41 @@
   (ok true)
 )
 
+;; Gamification Tasks
+(define-private (execute-epoch-transition (epoch-id uint))
+  (begin
+    (try! (contract-call? .points-oracle finalize-epoch (- epoch-id u1)))
+    (try! (contract-call? .gamification-manager initialize-epoch epoch-id block-height
+      (+ block-height u518400) u45833 u45833
+    ))
+    (try! (contract-call? .points-oracle start-epoch epoch-id))
+    (ok true)
+  )
+)
+
+(define-private (execute-auto-conversion (epoch uint))
+  (begin
+    ;; Auto-convert unclaimed rewards after claim window
+    ;; Real implementation would batch process users
+    (print {
+      event: "auto-conversion-triggered",
+      epoch: epoch,
+    })
+    (ok true)
+  )
+)
+
+(define-private (execute-opex-repayment)
+  (begin
+    ;; Check OPEX loan repayment conditions
+    (try! (contract-call? (var-get self-launch-coordinator) check-automatic-repayment))
+    (ok true)
+  )
+)
+
+;; @desc Execute a batch of ready tasks.
+;; @returns (response {tasks-attempted: uint, block: uint, keeper: principal} uint)
+
 ;; @desc Execute a batch of ready tasks.
 ;; @returns (response {tasks-attempted: uint, block: uint, keeper: principal} uint)
 (define-public (execute-batch-tasks)
@@ -161,5 +203,30 @@
       block: block-height,
       keeper: tx-sender,
     })
+  )
+)
+
+;; Admin Functions for Gamification
+(define-public (set-gamification-manager (manager principal))
+  (begin
+    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
+    (var-set gamification-manager manager)
+    (ok true)
+  )
+)
+
+(define-public (set-points-oracle (oracle principal))
+  (begin
+    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
+    (var-set points-oracle oracle)
+    (ok true)
+  )
+)
+
+(define-public (set-self-launch-coordinator (coordinator principal))
+  (begin
+    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
+    (var-set self-launch-coordinator coordinator)
+    (ok true)
   )
 )

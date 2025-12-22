@@ -50,7 +50,7 @@
 ;; Contract references
 (define-data-var proposal-engine-contract (optional principal) none)
 (define-data-var contract-owner principal tx-sender)
-(define-data-var governance-token principal .governance-token)
+(define-data-var governance-token principal .cxvg-token)
 
 ;; --- Public Functions ---
 
@@ -72,15 +72,18 @@
     (asserts! (> amount u0) (err ERR_INSUFFICIENT_LOCKED_TOKENS))
 
     ;; Transfer tokens to this contract for custody
-    (try! (contract-call? .governance-token transfer amount tx-sender
+    (match (contract-call? .cxvg-token transfer amount tx-sender
       (as-contract tx-sender) none
-    ))
-
-    (map-set locks tx-sender {
-      amount: (+ (get-voting-power tx-sender) amount),
-      unlock-burn-height: (+ burn-block-height LOCK_PERIOD_BLOCKS),
-    })
-    (ok true)
+    )
+      success (begin
+        (map-set locks tx-sender {
+          amount: (+ (get-voting-power tx-sender) amount),
+          unlock-burn-height: (+ burn-block-height LOCK_PERIOD_BLOCKS),
+        })
+        (ok true)
+      )
+      error (err ERR_INSUFFICIENT_LOCKED_TOKENS)
+    )
   )
 )
 
@@ -154,7 +157,7 @@
       )
 
       ;; Transfer tokens back to owner
-      (try! (as-contract (contract-call? .governance-token transfer (get amount lock-info) tx-sender
+      (try! (as-contract (contract-call? .cxvg-token transfer (get amount lock-info) tx-sender
         tx-sender none
       )))
 

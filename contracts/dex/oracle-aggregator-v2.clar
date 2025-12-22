@@ -16,7 +16,6 @@
 
 ;; --- Data Variables ---
 (define-data-var contract-owner principal tx-sender)
-(define-data-var circuit-breaker-contract (optional principal) none)
 
 ;; --- Maps ---
 (define-map asset-data
@@ -44,13 +43,6 @@
   )
 )
 
-(define-public (set-circuit-breaker (cb principal))
-  (begin
-    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
-    (var-set circuit-breaker-contract (some cb))
-    (ok true)
-  )
-)
 
 ;; Standard function (deprecated or for boolean trust)
 (define-public (register-oracle
@@ -82,17 +74,13 @@
         ERR_UNAUTHORIZED
       ))
       (current-data (map-get? asset-data { asset: asset }))
-      (cb-opt (var-get circuit-breaker-contract))
     )
     (asserts! (get trusted oracle-info) ERR_UNAUTHORIZED)
 
     ;; Check Circuit Breaker
-    (match cb-opt
-      ignored (asserts!
-        (not (unwrap-panic (contract-call? .circuit-breaker is-circuit-open)))
-        ERR_CIRCUIT_OPEN
-      )
-      true
+    (asserts!
+      (not (unwrap-panic (contract-call? .circuit-breaker is-circuit-open)))
+      ERR_CIRCUIT_OPEN
     )
 
     ;; Check manipulation (simple deviation check)

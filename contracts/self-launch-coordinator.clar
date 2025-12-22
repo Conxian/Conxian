@@ -42,7 +42,7 @@
 ;; OPEX loan configuration constants
 (define-constant OPEX_LOAN_MIN_YEARS u5)              ;; 5 years minimum
 (define-constant OPEX_LOAN_MAX_YEARS u8)              ;; 8 years maximum  
-(define-constant OPEX_LOAN_BLOCKS_PER_YEAR u756864000)     ;; ~6,307,200 blocks/year (Nakamoto 5s blocks)
+(define-constant OPEX_LOAN_BLOCKS_PER_YEAR u6307200) ;; 6,307,200 blocks/year (Nakamoto 5s blocks)
 (define-constant OPEX_LOAN_SUCCESS_MULTIPLIER u1500)  ;; 1.5x success multiplier
 
 ;; Repayment trigger thresholds
@@ -158,12 +158,12 @@
       (try! (check-phase-advancement new-total-funding current-phase))
 
       ;; Mint governance tokens based on contribution
-      (try! (contract-call? 'STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ.cxvg-token mint tokens-to-mint contributor))
+      (try! (contract-call? .cxvg-token mint tokens-to-mint contributor))
 
       ;; Mint differentiated NFTs based on contribution type
       (if (>= launch-portion MIN_CONTRIBUTION)
-        (try! (contract-call? 'STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ.position-factory create-launch-lp-nft contributor launch-portion))
-        (try! (contract-call? 'STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ.position-factory create-normal-lp-nft contributor opex-portion)))
+        (try! (contract-call? .position-factory create-launch-lp-nft contributor launch-portion))
+        (try! (contract-call? .position-factory create-normal-lp-nft contributor opex-portion)))
 
       ;; Execute automated deployments if budget allows
       (try! (execute-autonomous-deployments launch-portion))
@@ -305,7 +305,7 @@
 
 ;; Generate deployment transaction ID (simplified)
 (define-private (generate-tx-id)
-  (concat "0x" (to-ascii (unwrap-panic (to-uint block-height))))
+  (concat "0x" (unwrap-panic (to-uint block-height)))
 )
 
 ;; Update community contribution tracking
@@ -351,23 +351,20 @@
 ;; Get community contribution stats
 (define-read-only (get-community-stats)
   (let (
-    (total-contributors (len (map-keys community-contributions)))
     (total-funding (var-get total-funding-received))
   )
     {
-      total-contributors: total-contributors,
+      total-contributors: u0,
       total-funding: total-funding,
-      average-contribution: (if (> total-contributors u0)
-                            (/ total-funding total-contributors)
-                            u0),
-      top-contributors: (get-top-contributors u5)
+      average-contribution: u0,
+      top-contributors: (list)
     }
   )
 )
 (define-private (get-top-contributors (limit uint))
   (begin
-    ;; Simplified - just get first contributors without sorting
-    (let ((all-contributors (map-keys community-contributions)))
+    ;; Simplified - return empty list as map-keys is not available
+    (let ((all-contributors (list)))
       (take-first all-contributors limit)
     )
   ))
@@ -601,7 +598,7 @@
     (map-set phase-requirements PHASE_FULLY_OPERATIONAL {
       min-funding: u25000000000,
       max-funding: u50000000000,
-      required-contracts: (list .self-launch-coordinator .predictive-scaling-system .automation-keeper-coordinator),
+      required-contracts: (list .self-launch-coordinator .predictive-scaling-system .block-automation-manager),
       estimated-gas: u5000000,
       community-support: u30
     })
@@ -893,5 +890,22 @@
     (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
     (var-set contract-owner new-owner)
     (ok true)
+  )
+)
+
+;; Allow founder to claim launch fund allocation (50% of contributions)
+(define-public (claim-launch-funds)
+  (let ((available (var-get launch-fund-allocation)))
+    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
+    (asserts! (> available u0) ERR_INSUFFICIENT_BALANCE)
+    (try! (as-contract (stx-transfer? available tx-sender (var-get contract-owner))))
+    (var-set launch-fund-allocation u0)
+    (print {
+      event: "launch-funds-claimed",
+      amount: available,
+      recipient: (var-get contract-owner),
+      timestamp: block-height,
+    })
+    (ok available)
   )
 )

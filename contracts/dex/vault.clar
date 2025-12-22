@@ -172,7 +172,14 @@
     (if (is-eq total-shares u0)
       ;; First deposit: burn 1000 shares (dead shares) to prevent inflation attack
       (if (> amount u1000)
-        (- amount u1000)
+        (begin
+          ;; Mint 1000 dead shares to burn address
+          (map-set user-shares {
+            user: 'ST000000000000000000002AMW42H,
+            asset: asset
+          } u1000)
+          (- amount u1000)
+        )
         u0
       )
       (/ (* amount total-shares) total-balance)
