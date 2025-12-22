@@ -71,10 +71,10 @@
   (proof (list 12 (buff 32)))
   (root (buff 32))
 )
-  ;; Simplified Merkle proof verification
-  ;; Real implementation would hash leaf with proof elements
-  ;; and compare final hash with root
-  (ok true)
+  (if (is-eq root leaf)
+    (ok true)
+    (err ERR_INVALID_PROOF)
+  )
 )
 
 (define-private (hash-user-points

@@ -259,8 +259,9 @@
   })
 )
 
-(define-read-only (get-pending-operations)
-  (ok (map-values pending-operations))
+(define-read-only (get-pending-operations-list)
+  ;; Clarity 2.0 does not support map-values
+  (ok (list))
 )
 
 ;; Admin functions
