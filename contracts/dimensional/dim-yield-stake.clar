@@ -9,19 +9,19 @@
 ;; ===== Constants =====
 ;; Standardized Conxian error codes (800-range for dimensional modules)
 (define-constant ERR_UNAUTHORIZED u800)
-(define-constant ERR_LOCKUP_NOT_EXPIRED u97560)
+(define-constant ERR_LOCKUP_NOT_EXPIRED u11707200)
 (define-constant ERR_NO_STAKE_FOUND u814)
 (define-constant ERR_INVALID_AMOUNT u801)
 (define-constant ONE_DAY u17280)
 (define-constant ERR_DIMENSION_NOT_CONFIGURED u815)
 (define-constant ERR_METRIC_NOT_FOUND u816)
-(define-constant ERR_INVALID_LOCK_PERIOD u98040)
+(define-constant ERR_INVALID_LOCK_PERIOD u11764800)
 (define-constant ERR_TRANSFER_FAILED u818)
 
-(define-constant BLOCKS_PER_YEAR u756864000) ;; 52560 * 120
+(define-constant BLOCKS_PER_YEAR u90823680000) ;; 52560 * 120
 (define-constant PRECISION u10000)
-(define-constant MIN_LOCK_PERIOD u2073600) ;; ~1 day
-(define-constant MAX_LOCK_PERIOD u3784320000) ;; ~5 years (262800 * 120)
+(define-constant MIN_LOCK_PERIOD u248832000) ;; ~1 day
+(define-constant MAX_LOCK_PERIOD u454118400000) ;; ~5 years (262800 * 120)
 
 ;; ===== Utility Functions =====
 (define-read-only (max

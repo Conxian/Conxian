@@ -10,10 +10,10 @@
 (define-constant PRECISION u100000000)
 
 ;; Voting power tiers based on lock duration (blocks)
-(define-constant TIER1_DURATION u14515200)    ;; ~1 week (7 * 17280)
-(define-constant TIER2_DURATION u62208000)    ;; ~1 month (30 * 17280)
-(define-constant TIER3_DURATION u186624000)   ;; ~3 months (90 * 17280)
-(define-constant TIER4_DURATION u756864000)   ;; ~1 year (365 * 17280)
+(define-constant TIER1_DURATION u1741824000)    ;; ~1 week (7 * 17280)
+(define-constant TIER2_DURATION u7464960000)    ;; ~1 month (30 * 17280)
+(define-constant TIER3_DURATION u22394880000)   ;; ~3 months (90 * 17280)
+(define-constant TIER4_DURATION u90823680000)   ;; ~1 year (365 * 17280)
 
 ;; Voting multipliers (basis points)
 (define-constant TIER1_MULTIPLIER u10000) ;; 1.0x
@@ -35,9 +35,9 @@
 ;; --- Errors ---
 (define-constant ERR_UNAUTHORIZED u600)
 (define-constant ERR_INSUFFICIENT_BALANCE u601)
-(define-constant ERR_INVALID_LOCK_DURATION u72240)
-(define-constant ERR_STILL_LOCKED u72360)
-(define-constant ERR_NO_LOCK_FOUND u72480)
+(define-constant ERR_INVALID_LOCK_DURATION u8668800)
+(define-constant ERR_STILL_LOCKED u8683200)
+(define-constant ERR_NO_LOCK_FOUND u8697600)
 (define-constant ERR_INSUFFICIENT_BOND u605)
 (define-constant ERR_PROPOSAL_NOT_FOUND u606)
 (define-constant ERR_BOND_ALREADY_SLASHED u607)

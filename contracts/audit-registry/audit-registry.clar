@@ -30,7 +30,7 @@
 ;; @var min-stake-amount: The minimum stake amount required to submit an audit.
 (define-data-var min-stake-amount uint u100000000) ;; 100 STX in microSTX
 ;; @var voting-period: The length of the voting period in blocks.
-(define-data-var voting-period uint u1209600) ;; ~7 days in blocks
+(define-data-var voting-period uint u145152000) ;; ~7 days in blocks
 ;; @var dao-contract: The principal of the DAO contract.
 (define-data-var dao-contract (optional principal) none)
 ;; @var quorum-threshold: The quorum threshold for a vote to pass, in basis points.

@@ -15,14 +15,14 @@
 (define-constant CXTR_MAX_ANNUAL_INFLATION u10000) ;; 10% max for creator token
 
 ;; Hard caps per epoch (blocks)
-(define-constant EMISSION_PERIOD u756864000) ;; 1 year in Nakamoto blocks
-(define-constant EPOCH_BLOCKS u756864000) ;; Alias for EMISSION_PERIOD
+(define-constant EMISSION_PERIOD u90823680000) ;; 1 year in Nakamoto blocks
+(define-constant EPOCH_BLOCKS u90823680000) ;; Alias for EMISSION_PERIOD
 (define-constant MAX_SINGLE_MINT_BPS u100) ;; 1% of supply max per mint
 
 ;; Governance requirements for changes
 (define-constant SUPERMAJORITY_THRESHOLD u6667) ;; 66.67% required
-(define-constant TIMELOCK_BLOCKS u290304000) ;; ~2 weeks in Nakamoto blocks (20160 * 120)
-(define-constant EMERGENCY_TIMELOCK u20736000) ;; ~1 day in Nakamoto blocks (1440 * 120) (17280 blocks)
+(define-constant TIMELOCK_BLOCKS u34836480000) ;; ~2 weeks in Nakamoto blocks (20160 * 120)
+(define-constant EMERGENCY_TIMELOCK u2488320000) ;; ~1 day in Nakamoto blocks (1440 * 120) (17280 blocks)
 
 ;; --- Errors ---
 (define-constant ERR_UNAUTHORIZED u700)
@@ -30,9 +30,9 @@
 (define-constant ERR_SINGLE_MINT_TOO_LARGE u702)
 (define-constant ERR_INVALID_TOKEN u703)
 (define-constant ERR_GOVERNANCE_THRESHOLD_NOT_MET u704)
-(define-constant ERR_TIMELOCK_ACTIVE u84600)
+(define-constant ERR_TIMELOCK_ACTIVE u10152000)
 (define-constant ERR_NO_PENDING_CHANGE u706)
-(define-constant ERR_TIMELOCK_NOT_ELAPSED u84840)
+(define-constant ERR_TIMELOCK_NOT_ELAPSED u10180800)
 (define-constant ERR_INVALID_PARAMETERS u708)
 
 ;; --- Storage ---

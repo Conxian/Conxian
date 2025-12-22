@@ -85,11 +85,11 @@
 ;; ======================
 (define-constant ERR_PROPOSAL_NOT_FOUND u6000) ;; The specified proposal was not found.
 (define-constant ERR_PROPOSAL_ACTIVE u6001) ;; The specified proposal is active.
-(define-constant ERR_VOTING_PERIOD_ENDED u720240) ;; The voting period for the specified proposal has ended.
+(define-constant ERR_VOTING_PERIOD_ENDED u86428800) ;; The voting period for the specified proposal has ended.
 (define-constant ERR_INSUFFICIENT_VOTING_POWER u6003) ;; The voter has insufficient voting power.
 (define-constant ERR_QUORUM_NOT_REACHED u6004) ;; The quorum for the specified proposal was not reached.
 (define-constant ERR_PROPOSAL_EXECUTED u6005) ;; The specified proposal has already been executed.
-(define-constant ERR_VOTING_DELAY u720720) ;; The voting delay has not passed.
+(define-constant ERR_VOTING_DELAY u86486400) ;; The voting delay has not passed.
 
 ;; ======================
 ;; LIQUIDITY & POOLS, AND ACCESS CONTROL (7000-7999)
@@ -118,7 +118,7 @@
 (define-constant ERR_INVALID_ADDRESS u8006) ;; The specified address is invalid.
 (define-constant ERR_INVALID_AMOUNT u8007) ;; The specified amount is invalid.
 (define-constant ERR_INVALID_TIMESTAMP u8008) ;; The specified timestamp is invalid.
-(define-constant ERR_INVALID_DURATION u961080) ;; The specified duration is invalid.
+(define-constant ERR_INVALID_DURATION u115329600) ;; The specified duration is invalid.
 (define-constant ERR_INVALID_RATE u8010) ;; The specified rate is invalid.
 
 ;; ======================

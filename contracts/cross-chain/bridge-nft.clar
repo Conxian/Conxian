@@ -21,7 +21,7 @@
 ;; Bridge Constants
 (define-constant BRIDGE_FEE_BPS u300) ;; 3% bridge fee
 (define-constant MIN_BRIDGE_AMOUNT u1000000) ;; 1 STX minimum
-(define-constant BRIDGE_TIMEOUT_BLOCKS u14400000) ;; 120,000 blocks timeout (Nakamoto)
+(define-constant BRIDGE_TIMEOUT_BLOCKS u1728000000) ;; 120,000 blocks timeout (Nakamoto)
 (define-constant MAX_BRIDGE_AMOUNT u1000000000) ;; 1000 STX maximum
 
 ;; Chain Identifiers

@@ -20,13 +20,13 @@
 (define-constant ERR_FRONT_RUN_DETECTED (err u2004))
 
 ;; Nakamoto timing constants (3-5 second blocks)
-(define-constant NAKAMOTO_BLOCKS_PER_MINUTE u1440)
+(define-constant NAKAMOTO_BLOCKS_PER_MINUTE u172800)
 ;; 5s blocks = 12/min
-(define-constant NAKAMOTO_BLOCKS_PER_HOUR u86400)
+(define-constant NAKAMOTO_BLOCKS_PER_HOUR u10368000)
 ;; 60 * 12
-(define-constant NAKAMOTO_BLOCKS_PER_DAY u2073600)
+(define-constant NAKAMOTO_BLOCKS_PER_DAY u248832000)
 ;; 24 * 720
-(define-constant NAKAMOTO_BLOCKS_PER_WEEK u14515200)
+(define-constant NAKAMOTO_BLOCKS_PER_WEEK u1741824000)
 ;; 7 * 17280
 
 ;; Bitcoin finality and security parameters
@@ -34,7 +34,7 @@
 ;; ~17 hours Bitcoin confirmations
 (define-constant BITCOIN_REORG_THRESHOLD u6)
 ;; Max acceptable reorg depth
-(define-constant MEV_PROTECTION_WINDOW u1440)
+(define-constant MEV_PROTECTION_WINDOW u172800)
 ;; 1 minute protection window
 
 ;; Migration and staking parameters optimized for Nakamoto
@@ -42,17 +42,17 @@
 ;; 1 week
 (define-constant NAKAMOTO_REWARD_FREQUENCY u2880)
 ;; 4 hours (was weekly)
-(define-constant NAKAMOTO_MIGRATION_WINDOW u87091200)
+(define-constant NAKAMOTO_MIGRATION_WINDOW u10450944000)
 ;; 42 days
-(define-constant NAKAMOTO_WARMUP_PERIOD u345600)
+(define-constant NAKAMOTO_WARMUP_PERIOD u41472000)
 ;; 4 hours (was 2 weeks)
-(define-constant NAKAMOTO_COOLDOWN_PERIOD u1036800)
+(define-constant NAKAMOTO_COOLDOWN_PERIOD u124416000)
 ;; 12 hours (was 2 weeks)
 
 ;; Oracle parameters for fast blocks
 (define-constant NAKAMOTO_ORACLE_STALE_THRESHOLD u17280)
 ;; 24 hours (was u144)
-(define-constant NAKAMOTO_PRICE_UPDATE_MIN_INTERVAL u86400)
+(define-constant NAKAMOTO_PRICE_UPDATE_MIN_INTERVAL u10368000)
 ;; 1 hour min between updates
 
 ;; Migration timing bands optimized for Nakamoto

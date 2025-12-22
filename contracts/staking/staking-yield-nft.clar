@@ -17,14 +17,14 @@
 (define-constant ERR_FARM_NOT_ACTIVE (err u11006))
 
 ;; Staking Constants
-(define-constant BLOCKS_PER_DAY u2073600)        ;; 24 hours * 120 (5s blocks)
-(define-constant BLOCKS_PER_MONTH u62208000)     ;; 30 days
-(define-constant BLOCKS_PER_YEAR u756864000)     ;; 365 days
+(define-constant BLOCKS_PER_DAY u248832000)        ;; 24 hours * 120 (5s blocks)
+(define-constant BLOCKS_PER_MONTH u7464960000)     ;; 30 days
+(define-constant BLOCKS_PER_YEAR u90823680000)     ;; 365 days
 
 (define-constant MIN_STAKE_AMOUNT u1000000)          ;; 1 STX minimum
 (define-constant MAX_STAKE_AMOUNT u1000000000)        ;; 1000 STX maximum
-(define-constant MIN_LOCK_DURATION u2073600)            ;; 1 day minimum (previously u100)
-(define-constant MAX_LOCK_DURATION u7568640000)         ;; 10 years maximum (previously u100000)
+(define-constant MIN_LOCK_DURATION u248832000)            ;; 1 day minimum (previously u100)
+(define-constant MAX_LOCK_DURATION u908236800000)         ;; 10 years maximum (previously u100000)
 (define-constant BASE_YIELD_RATE u500)                 ;; 5% base yield rate
 (define-constant YIELD_BOOST_MULTIPLIER u1500)         ;; 1.5x yield boost multiplier
 
@@ -32,7 +32,7 @@
 (define-constant NFT_TYPE_STAKING_POSITION u1)        ;; Staking position NFT
 (define-constant NFT_TYPE_YIELD_FARM u2)             ;; Yield farming position NFT
 (define-constant NFT_TYPE_REWARD_TIER u3)            ;; Reward tier achievement NFT
-(define-constant NFT_TYPE_LOCKUP_BONUS u480)           ;; Lockup bonus certificate NFT
+(define-constant NFT_TYPE_LOCKUP_BONUS u57600)           ;; Lockup bonus certificate NFT
 (define-constant NFT_TYPE_COMPOUND_REWARD u5)         ;; Compound reward multiplier NFT
 
 ;; ===== Data Variables =====

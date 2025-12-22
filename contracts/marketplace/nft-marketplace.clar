@@ -23,8 +23,8 @@
 
 ;; Marketplace Constants
 (define-constant MARKETPLACE_FEE_BPS u250) ;; 2.5% marketplace fee
-(define-constant MIN_LISTING_DURATION u12000) ;; 100 blocks minimum
-(define-constant MAX_LISTING_DURATION u1200000) ;; 10000 blocks maximum
+(define-constant MIN_LISTING_DURATION u1440000) ;; 100 blocks minimum
+(define-constant MAX_LISTING_DURATION u144000000) ;; 10000 blocks maximum
 (define-constant MIN_BID_INCREMENT u100) ;; 1% minimum bid increment
 
 ;; NFT Type Constants

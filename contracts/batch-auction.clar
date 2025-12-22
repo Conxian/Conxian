@@ -15,7 +15,7 @@
 ;; ===== Data Variables =====
 (define-data-var contract-owner principal tx-sender)
 (define-data-var next-auction-id uint u0)
-(define-data-var auction-duration-blocks uint u1200)
+(define-data-var auction-duration-blocks uint u144000)
 (define-data-var contract-enabled bool true)
 
 ;; ===== Data Maps =====

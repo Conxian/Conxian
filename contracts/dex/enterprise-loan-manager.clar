@@ -49,7 +49,7 @@
 (define-constant BOND_YIELD_PREMIUM u200) ;; 2% additional yield
 
 ;; Time constants
-(define-constant BLOCKS_PER_YEAR u6307200)
+(define-constant BLOCKS_PER_YEAR u756864000)
 (define-constant MAX_LOAN_DURATION (* BLOCKS_PER_YEAR u10)) ;; 10 years max
 
 ;; Precision

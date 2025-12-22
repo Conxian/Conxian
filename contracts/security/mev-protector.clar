@@ -26,8 +26,8 @@
 (define-data-var contract-owner principal tx-sender)
 (define-data-var next-batch-id uint u0)
 (define-data-var next-commitment-id uint u0)
-(define-data-var commit-period-blocks uint u10)
-(define-data-var reveal-period-blocks uint u10)
+(define-data-var commit-period-blocks uint u1200)
+(define-data-var reveal-period-blocks uint u1200)
 
 ;; ===== Data Maps =====
 (define-map commitments

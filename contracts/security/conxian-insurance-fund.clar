@@ -18,7 +18,7 @@
 (define-constant ERR_NO_COOLDOWN (err u5004))
 (define-constant ERR_SLIPPAGE (err u5005))
 
-(define-constant COOLDOWN_BLOCKS u172800) ;; ~10 days (assuming 10 min blocks)
+(define-constant COOLDOWN_BLOCKS u20736000) ;; ~10 days (assuming 10 min blocks)
 
 ;; --- Data Variables ---
 (define-data-var governance-contract principal tx-sender)

@@ -24,9 +24,9 @@
 (define-constant BASE_PREMIUM_RATE u200) ;; 2% base premium rate
 (define-constant MIN_COVERAGE_AMOUNT u1000000) ;; 1 STX minimum coverage
 (define-constant MAX_COVERAGE_AMOUNT u100000000) ;; 1000 STX maximum coverage
-(define-constant MIN_POLICY_DURATION u14400000) ;; 120,000 blocks minimum (Nakamoto)
-(define-constant MAX_POLICY_DURATION u1440000000) ;; 12,000,000 blocks maximum (Nakamoto)
-(define-constant CLAIM_WAITING_PERIOD u1440000) ;; 12,000 blocks waiting period (Nakamoto)
+(define-constant MIN_POLICY_DURATION u1728000000) ;; 120,000 blocks minimum (Nakamoto)
+(define-constant MAX_POLICY_DURATION u172800000000) ;; 12,000,000 blocks maximum (Nakamoto)
+(define-constant CLAIM_WAITING_PERIOD u172800000) ;; 12,000 blocks waiting period (Nakamoto)
 (define-constant DEDUCTIBLE_PERCENTAGE u1000) ;; 10% deductible
 
 ;; Insurance NFT Types

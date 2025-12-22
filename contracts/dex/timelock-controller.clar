@@ -3,8 +3,8 @@
 ;; Production-grade: Includes Proposer/Executor Role Access Control
 
 ;; Constants
-(define-constant MIN_DELAY u10368000) ;; 24 hours in seconds
-(define-constant MAX_DELAY u311040000) ;; 30 days in seconds
+(define-constant MIN_DELAY u1244160000) ;; 24 hours in seconds
+(define-constant MAX_DELAY u37324800000) ;; 30 days in seconds
 
 ;; Operation status
 (define-constant OP_UNSET u0)
