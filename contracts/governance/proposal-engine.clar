@@ -43,7 +43,7 @@
 
 (define-private (is-protocol-paused)
   (match (contract-call? .conxian-protocol is-protocol-paused)
-    paused paused
+    paused (unwrap-panic paused)
     err true
   )
 )

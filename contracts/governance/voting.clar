@@ -110,8 +110,9 @@
     (begin
       (asserts! (is-eq tx-sender
         (unwrap! (var-get proposal-engine-contract) (err ERR_UNAUTHORIZED))
-      ))
-      (asserts! (> voting-power u0) (err ERR_INSUFFICIENT_LOCKED_TOKENS))
+      ) (err ERR_UNAUTHORIZED))
+      ;; ERR_INSUFFICIENT_LOCKED_TOKENS is already (err u106), not (err (err u106))
+      (asserts! (> voting-power u0) ERR_INSUFFICIENT_LOCKED_TOKENS)
 
       (asserts!
         (is-none (map-get? votes {

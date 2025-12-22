@@ -54,7 +54,24 @@
   }
 )
 
+;; User supplies map (for tracking user supply positions)
+(define-map user-supplies
+  {
+    user: principal,
+    asset: principal,
+  }
+  {
+    amount: uint,
+    index: uint,
+  }
+)
+
 (define-map user-total-borrows
+  principal
+  uint
+)
+
+(define-map user-total-supplies
   principal
   uint
 )

@@ -2,6 +2,8 @@
 ;; Compatibility layer for transitioning from guardian system to Stacks native architecture
 ;; Provides backward compatibility during migration period
 
+(use-trait sip-010-ft-trait .defi-traits.sip-010-ft-trait)
+
 (define-constant ERR_UNAUTHORIZED (err u9000))
 (define-constant ERR_MIGRATION_COMPLETE (err u9001))
 
@@ -94,15 +96,17 @@
 ;; Migrate guardian to native system
 (define-public (migrate-guardian-to-native (guardian principal))
   (begin
-    (asserts! (var-get migration-active) ERR_UNIGRATION_COMPLETE)
+    (asserts! (var-get migration-active) ERR_MIGRATION_COMPLETE)
     
     (let ((legacy-data (map-get? legacy-guardians guardian)))
-      (if (some? legacy_data)
-        (let ((data (unwrap! legacy_data false)))
+      (if (is-some legacy-data)
+        (let ((data (unwrap-panic legacy-data)))
           (if (not (get migrated-to-native data))
             (begin
-              ;; Register as native operator
-              (try! (contract-call? (var-get native-stacking-operator) register-operator guardian))
+              ;; Register as native operator - use hardcoded contract
+(try! (contract-call? .native-stacking-operator register-operator
+                guardian
+              ))
               
               ;; Update legacy record
               (map-set legacy-guardians guardian
@@ -123,7 +127,7 @@
               })
               (ok true)
             )
-            (ok {already-migrated: true})
+            (ok { already-migrated: true })
           )
         )
         (err ERR_UNAUTHORIZED)
@@ -139,10 +143,12 @@
   )
   (begin
     (if use-native
-      ;; Use native automation system
+      ;; Use native automation system - use hardcoded contract
       (begin
         (asserts! (var-get native-automation-active) ERR_UNAUTHORIZED)
-        (contract-call? (var-get block-automation-manager) execute-authorized-operation operation-id)
+        (contract-call? .block-automation-manager execute-authorized-operation
+          operation-id
+        )
       )
       ;; Use legacy guardian system
       (begin
@@ -162,13 +168,9 @@
 
 ;; Check if legacy guardian is valid
 (define-private (is-valid-legacy-guardian (guardian principal))
-  (let ((guardian-data (map-get? legacy-guardians guardian)))
-    (if (some? guardian_data)
-      (let ((data (unwrap! guardian_data false)))
-        (and (get active data) (> (get bonded-cxd data) u0))
-      )
-      false
-    )
+  (match (map-get? legacy-guardians guardian)
+    guardian-data (and (get active guardian-data) (> (get bonded-cxd guardian-data) u0))
+    false
   )
 )
 
@@ -261,28 +263,30 @@
 )
 
 (define-private (migrate-guardian-helper (guardian principal) (result bool))
-  (and result
-       (let ((legacy-data (map-get? legacy-guardians guardian)))
-         (if (some? legacy_data)
-           (let ((data (unwrap! legacy_data false)))
-             (if (not (get migrated-to-native data))
-               (begin
-                 (try! (contract-call? (var-get native-stacking-operator) register-operator guardian))
-                 (map-set legacy-guardians guardian
-                   (merge data {migrated-to-native: true})
-                 )
-                 (map-set migration-status guardian {
-                   guardian-migrated: true,
-                   native-operator-registered: true,
-                   migration-date: block-height,
-                 })
-                 true
-               )
-               true
-             )
-           )
-           true
-         )
-       )
+  (if (not result) 
+    false
+    (match (map-get? legacy-guardians guardian)
+      legacy-data (if (not (get migrated-to-native legacy-data))
+        (begin
+          ;; Use hardcoded contract reference
+          (match (contract-call? .native-stacking-operator register-operator guardian)
+            success (begin
+              (map-set legacy-guardians guardian
+                (merge legacy-data {migrated-to-native: true})
+              )
+              (map-set migration-status guardian {
+                guardian-migrated: true,
+                native-operator-registered: true,
+                migration-date: block-height,
+              })
+              true
+            )
+            error false
+          )
+        )
+        true
+      )
+      true
+    )
   )
 )

@@ -513,6 +513,7 @@
 
 ;; First safe execute-vote: only forwards a vote when the system is healthy.
 ;; The caller supplies support and votes-cast; the engine enforces ops guardrails.
+;; NOTE: proposal-engine integration pending - returns stub for now
 (define-public (execute-vote
     (proposal-id uint)
     (support bool)
@@ -527,7 +528,18 @@
       (ok false)
       (if (not (has-operations-seat))
         (ok false)
-        (as-contract (contract-call? .proposal-engine vote proposal-id support votes-cast))
+        ;; TODO: Wire to proposal-engine when governance is fully deployed
+        ;; (as-contract (contract-call? .proposal-engine vote proposal-id support votes-cast))
+        (begin
+          (print {
+            event: "vote-requested",
+            proposal-id: proposal-id,
+            support: support,
+            votes-cast: votes-cast,
+            status: "pending-proposal-engine-integration"
+          })
+          (ok true)
+        )
       )
     )
   )

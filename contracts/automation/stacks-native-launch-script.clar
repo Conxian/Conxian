@@ -23,7 +23,7 @@
     ;; Deploy CXS staking NFT
     (print {event: "deploying-cxs-nft"})
     
-    (ok {tokens-deployed: true})
+    (ok true)
   )
 )
 
@@ -41,7 +41,7 @@
     ;; Set minimum stake requirement (1000 STX)
     (print {event: "setting: min-operator-stake-1000-stx"})
     
-    (ok {operators-setup: true})
+    (ok true)
   )
 )
 
@@ -63,7 +63,7 @@
     ;; Register automation targets
     (print {event: "registering-automation-targets"})
     
-    (ok {automation-setup: true})
+    (ok true)
   )
 )
 
@@ -81,7 +81,7 @@
     ;; Register initial signers
     (print {event: "registering-initial-signers"})
     
-    (ok {multisig-setup: true})
+    (ok true)
   )
 )
 
@@ -101,7 +101,7 @@
     ;; Initialize circuit breaker with block-based triggers
     (print {event: "initializing-circuit-breaker"})
     
-    (ok {dex-launched: true})
+    (ok true)
   )
 )
 
@@ -121,7 +121,7 @@
     ;; Initialize insurance fund integration
     (print {event: "initializing-insurance-fund"})
     
-    (ok {lending-launched: true})
+    (ok true)
   )
 )
 
@@ -164,7 +164,7 @@
     ;; Initialize revenue router with allocation policy
     (print {event: "configuring-revenue-router"})
     
-    (ok {treasury-setup: true})
+    (ok true)
   )
 )
 
@@ -184,7 +184,7 @@
     ;; Connect to native multi-sig controller
     (print {event: "connecting-multisig-controller"})
     
-    (ok {governance-launched: true})
+    (ok true)
   )
 )
 

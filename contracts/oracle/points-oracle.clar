@@ -166,12 +166,8 @@
   )
     (asserts! (is-eq tx-sender (var-get contract-owner)) ERR_UNAUTHORIZED)
     
-    ;; Notify gamification manager to finalize
-    (try! (contract-call? (var-get gamification-manager) finalize-epoch
-      epoch
-      u0 ;; total-liquidity-points (would be calculated off-chain)
-      u0  ;; total-governance-points (would be calculated off-chain)
-    ))
+    ;; Note: Removed circular dependency call to gamification-manager.
+    ;; The keeper-coordinator should call gamification-manager.finalize-epoch separately.
     
     (ok true)
   )

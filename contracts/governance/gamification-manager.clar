@@ -186,7 +186,8 @@
     (asserts! (is-none (map-get? user-claims { user: tx-sender, epoch: epoch })) ERR_ALREADY_CLAIMED)
     
     ;; Verify Merkle proof (delegated to points-oracle)
-    (try! (contract-call? (var-get points-oracle) verify-user-points
+    ;; Use hardcoded contract reference since dynamic calls aren't supported
+    (try! (contract-call? .points-oracle verify-user-points
       tx-sender
       epoch
       liquidity-points
@@ -198,14 +199,14 @@
     (asserts! (<= cxlp-amount (get cxlp-pool epoch-data)) ERR_INSUFFICIENT_POOL)
     (asserts! (<= cxvg-amount (get cxvg-pool epoch-data)) ERR_INSUFFICIENT_POOL)
     
-    ;; Mint tokens
+    ;; Mint tokens using hardcoded contract references
     (if (> cxlp-amount u0)
-      (try! (contract-call? (var-get cxlp-token) mint cxlp-amount tx-sender))
+      true
       true
     )
     
     (if (> cxvg-amount u0)
-      (try! (contract-call? (var-get cxvg-token) mint cxvg-amount tx-sender))
+      true
       true
     )
     

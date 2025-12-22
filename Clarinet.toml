@@ -540,7 +540,7 @@ depends_on = ["comprehensive-lending-system"]
 [contracts.keeper-coordinator]
 path = "contracts/automation/keeper-coordinator.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
-depends_on = ["controller-traits", "security-monitoring", "automation-traits"]
+depends_on = ["controller-traits", "security-monitoring", "automation-traits", "points-oracle", "gamification-manager", "self-launch-coordinator"]
 
 [contracts.guardian-registry]
 path = "contracts/automation/guardian-registry.clar"
@@ -844,6 +844,7 @@ address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 [contracts.migration-adapter]
 path = "contracts/automation/migration-adapter.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+depends_on = ["native-stacking-operator", "block-automation-manager", "defi-traits"]
 
 # ---------- Legacy Contracts (Being Phased Out) ----------
 # Legacy contracts are now properly integrated in their original sections
@@ -864,3 +865,18 @@ depends_on = ["sip-standards"]
 path = "contracts/self-launch-coordinator.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 depends_on = ["cxvg-token", "position-factory"]
+
+# ---------- Gamification System ----------
+
+[contracts.gamification-manager]
+path = "contracts/governance/gamification-manager.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+depends_on = ["cxlp-token", "cxvg-token", "points-oracle"]
+
+[contracts.points-oracle]
+path = "contracts/oracle/points-oracle.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+depends_on = ["gamification-manager"]
+
+# Note: gamification-manager and points-oracle have a circular dependency
+# They are designed to be deployed together. Use stub implementations if needed.

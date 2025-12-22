@@ -9,17 +9,25 @@
 
 | Priority | Workstream | Ownership & Dependencies | Acceptance Criteria |
 | --- | --- | --- | --- |
-| **P1** | **Economic Safety Net Hardening** | Risk + Treasury squads; depends on updated `protocol-fee-switch` specs and lending metrics from `comprehensive-lending-system` | Lifecycle doc includes liquidation buffer table per asset; insurance vault trigger logic defined; cross-module stress scenarios documented and rehearsed; integration tests cover fee routing into insurance |
-| **P2** | **Founder & OPEX Vault Economics** | Governance + Treasury | `founder-vault.clar` + `opex-vault.clar` deployed with immutable emission curves; DAO override timelocks documented; BUSINESS_VALUE_ROI updated with math + payout timelines |
-| **P3** | **Reg Tech Stack Enablement** | Enterprise + Compliance | Travel Rule middleware + trait shipped; sanctions oracle live with Chainhook feed; compliance API endpoints published; enterprise modules gated via new traits |
-| **P4** | **Ecosystem SDK / Builder Kit** | Developer Experience | Trait bundle, deployment templates, and testing harness published; docs guide third-party integrations; fee hooks enforce protocol revenue |
-| **P5** | **Audit & Formal Verification Track** | Security Office | Specs + threat models finalized for `keeper-coordinator`, `comprehensive-lending-system`, `enterprise-facade`, `proposal-engine`; auditor RFPs issued; formal verification backlog created |
+| **P0** | **Compilation Fixes & stability** | Systems Squad | `clarinet check` passes with 0 errors; circular dependencies in gamification resolved; `contract-owner` added to all coordination contracts. |
+| **P1** | **Self-Healing Architecture** | Automation + Security | `self-healing-controller.clar` deployed; automated recovery triggers tested; integration with `block-automation-manager` verified. |
+| **P2** | **Institutional Suite & DLCs** | Enterprise + cross-chain | TWAP/Iceberg orders functional; DLC manager gated by oracles; Native Bitcoin lending prototype live. |
+| **P3** | **Economic Safety Net Hardening** | Risk + Treasury | Lifecycle doc includes liquidation buffer table; insurance vault trigger logic defined; fee routing verified. |
+| **P4** | **Reg Tech Stack Enablement** | Compliance | KYC Registry wired to Compliance Manager; Sanctions oracle live; Travel Rule middleware trait shipped. |
 
 > **Implementation Note:** Each sprint section below now references its related priority. Work must satisfy the acceptance criteria above before moving to the next priority.
 
 ---
 
-## Sprint 1: Critical Security Fixes (Week 1-2) — _Covers P1_
+## Sprint 0: Compilation Fixes & Core Stability (Week 1) — _Covers P0_
+
+### Resolve P0 Blockers
+- [ ] **Fix Circular Dependencies**: Break the loop between `points-oracle` ↔ `gamification-manager` ↔ `keeper-coordinator`.
+- [ ] **Standardize Coordinator Variables**: Ensure `contract-owner` and `protocol-coordinator` are present in all facade/coordinator contracts.
+- [ ] **Update is-protocol-paused**: Standardize response vs bool logic across all calling contracts.
+- [ ] **Fix map-values Usage**: Remove deprecated/unsupported `map-values` calls in `native-multisig-controller.clar`.
+
+## Sprint 1: Self-Healing & Safety (Week 2-3) — _Covers P1_
 
 ### Nakamoto Block Time Constants
 

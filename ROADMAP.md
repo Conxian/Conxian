@@ -11,8 +11,10 @@ The phases below incorporate the agreed recommendations around:
 
 - Governance councils and role NFTs.
 - The Conxian automated operations seat ("Conxian Operations Engine").
-- Metrics and monitoring for LegEx / DevEx / OpEx / CapEx / InvEx style
-  domains.
+- **Self-Healing Architecture** via the `self-healing-controller.clar`.
+- **Institutional Trading Suite** (TWAP/Iceberg) for enterprise users.
+- **Native Bitcoin Lending** via DLC (Discreet Log Contracts) integration.
+- Metrics and monitoring for LegEx / DevEx / OpEx / CapEx / InvEx style domains.
 - NFT-based position representations and service vaults.
 
 ## Phase 0: Technical Alpha & Nakamoto Alignment (Current Phase)
@@ -132,12 +134,8 @@ The phases below incorporate the agreed recommendations around:
       withdrawal policies.
 
   - **Security Audit Preparation**
-    - Prepare architecture diagrams, threat models, and documentation to
-      support an external security review of the full system, including the
-      governance and Conxian Operations Engine design.
-    - Keep the CHANGELOG, SERVICE_CATALOG, ENTERPRISE_BUYER_OVERVIEW, and
-      BUSINESS_VALUE_ROI documents aligned with the actual deployed contracts,
-      test coverage, and current testnet-only status.
+    - Launch the **Deferred Bounty Program** to incentivize community audits.
+    - Prepare architecture diagrams, threat models, and documentation to support an external security review.
 
 ## Phase 3: Scenario Testing, Stress & Regulatory Formalization (Planned)
 

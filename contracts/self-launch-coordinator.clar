@@ -3,8 +3,7 @@
 ;; Implements self-funded launch system with progressive bootstrapping
 
 (use-trait token-trait .defi-traits.sip-010-ft-trait)
-(use-trait governance-trait .governance.governance-token-trait)
-(use-trait oracle-trait .oracle.oracle-trait)
+;; governance-trait and oracle-trait removed as these contracts don't exist yet
 
 ;; Constants
 (define-constant ERR_UNAUTHORIZED (err u8001))
@@ -31,6 +30,7 @@
 (define-constant MIN_CONTRIBUTION u1000000) ;; 1 STX minimum contribution
 
 ;; Enhanced funding system with OPEX integration
+(define-data-var contract-owner principal tx-sender)
 (define-data-var launch-fund-allocation uint u0)      ;; 50% to launch
 (define-data-var opex-fund-allocation uint u0)        ;; 50% to operations
 (define-data-var opex-loan-principal uint u0)         ;; Total OPEX loan amount
@@ -474,11 +474,8 @@
 
 ;; Get alignment health score
 (define-private (get-alignment-health)
-  (match (contract-call? .enhanced_conxian_deployment get-system-alignment)
-    alignment-data
-    (if (get alignment-data aligned) u100 u50)
-    u75
-  )
+  ;; Return default alignment health - in production, wire to actual deployment contract
+u75
 )
 
 ;; ===== Cost Estimation =====
@@ -862,7 +859,7 @@
                          (/ (* (var-get total-funding-received) u100) (var-get funding-target))
                          u0),
     current-phase: (var-get launch-phase),
-    tokens-minted: (get-token-supply .cxvg-token)
+    tokens-minted: (unwrap-panic (contract-call? .cxvg-token get-total-supply))
   }
 )
 
