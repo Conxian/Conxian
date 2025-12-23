@@ -156,7 +156,7 @@
     (print {event: "initializing-conxian-vaults"})
     
     ;; Set up founder vault with 4-year vesting
-    (print {event: "configuring-founder-vesting"})
+    (try! (contract-call? coordinator register-foundation-vesting vesting-contract))
     
     ;; Configure OPEX vault with block-based budget
     (print {event: "configuring-opex-vault"})
@@ -194,7 +194,21 @@
     (print {event: "starting-stacks-native-launch"})
     
     ;; Phase 1: Token System
-    (try! (deploy-token-system))
+    (let ((token-system (try! (deploy-token-system))))
+      (match token-system
+        ((ok result) (begin
+          (print {event: "token-system-deployed"})
+        ))
+        ((err error) (begin
+          (print {event: "token-system-deployment-failed"})
+          (err error)
+        ))
+        ((some response) (begin
+          (print {event: "token-system-deployment-unknown-response"})
+          (err "unknown-response")
+        ))
+      )
+    )
     
     ;; Phase 2: Native Operators
     (try! (setup-native-operators))
@@ -219,6 +233,10 @@
     
     ;; Phase 9: Governance System
     (try! (launch-governance-system))
+    
+    (let ((result (contract-call? 'STXS4928S95SEP4YNJMH7V9Z8RY8J7PZ5RG74TXF.self-launch-coordinator claim-launch-funds (as-contract tx-sender))))
+      (asserts! (is-ok result) (err ERR_LAUNCH_CLAIM_FAILED))
+    )
     
     (print {
       event: "stacks-native-launch-complete",

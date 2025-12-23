@@ -874,7 +874,7 @@ path = "contracts/dex/vault.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 depends_on = ["sip-standards"]
 
-[contracts.self-launch-coordinator]
+[self-launch-coordinator]
 path = "contracts/self-launch-coordinator.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 depends_on = ["cxvg-token", "position-factory"]
@@ -890,6 +890,15 @@ depends_on = ["cxlp-token", "cxvg-token", "points-oracle"]
 path = "contracts/oracle/points-oracle.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 depends_on = ["gamification-manager"]
+
+[contracts.native-stacking-operator]
+path = "contracts/automation/native-stacking-operator.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+
+[contracts.comprehensive-lending-system]
+path = "contracts/lending/comprehensive-lending-system.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+depends_on = ["lending-manager-trait"]
 
 # Note: gamification-manager and points-oracle have a circular dependency
 # They are designed to be deployed together. Use stub implementations if needed.

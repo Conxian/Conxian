@@ -13,18 +13,19 @@
 (define-data-var emergency-signatures uint u2)  ;; 2-of-5 for emergencies
 
 ;; Pending operations
-(define-map pending-operations {
-  operation-id: (buff 32),
-} {
-  operation-type: (string 32),
-  target-contract: principal,
-  function-name: (string 64),
-  function-args: (list 10 (buff 256)),
-  signatures: (list 10 principal),
-  created-at: uint,
-  expires-at: uint,
-  is-emergency: bool,
-})
+(define-map pending-operations
+    { operation-id: (buff 32) }
+    {
+    operation-type: (string 32),
+    target-contract: principal,
+    function-name: (string 64),
+    function-args: (list 10 (buff 256)),
+    signatures: (list 10 principal),
+    created-at: uint,
+    expires-at: uint,
+    is-emergency: bool,
+  }
+)
 
 ;; Operation types
 (define-constant OP_PAUSE_PROTOCOL "pause-protocol")
@@ -94,7 +95,7 @@
     (asserts! (> (len (var-get signers)) (var-get required-signatures)) ERR_INSUFFICIENT_SIGNATURES)
     
     (var-set signer-to-remove signer)
-(var-set signers (filter is-not-target-signer (var-get signers)))
+    (var-set signers (filter is-not-target-signer (var-get signers)))
     
     (print {
       event: "signer-removed",
@@ -118,7 +119,7 @@
     (asserts! (is-signer tx-sender) ERR_UNAUTHORIZED)
     
     (let ((expiry-block (+ block-height u10080)))  ;; 24 hours expiry
-      (map-set pending-operations {operation-id: operation-id} {
+      (map-set pending-operations (tuple (operation-id operation-id)) {
         operation-type: operation-type,
         target-contract: target-contract,
         function-name: function-name,
@@ -146,7 +147,7 @@
   (begin
     (asserts! (is-signer tx-sender) ERR_UNAUTHORIZED)
     
-    (let ((operation (unwrap! (map-get? pending-operations {operation-id: operation-id}) ERR_INVALID_OPERATION)))
+    (let ((operation (unwrap! (map-get? pending-operations (tuple (operation-id operation-id))) ERR_INVALID_OPERATION)))
       (asserts! (< block-height (get expires-at operation)) ERR_INVALID_OPERATION)
       
       ;; Check if already signed
@@ -155,7 +156,7 @@
         
         ;; Add signature
         (let ((updated-sigs (append current-sigs tx-sender)))
-          (map-set pending-operations {operation-id: operation-id}
+          (map-set pending-operations (tuple (operation-id operation-id))
             (merge operation {signatures: updated-sigs})
           )
           
@@ -178,7 +179,7 @@
 ;; Note: Clarity doesn't support dynamic contract-call with principals stored in variables.
 ;; This implementation uses the circuit-breaker contract directly for pause operations.
 (define-private (execute-operation (operation-id (buff 32)))
-  (let ((operation (unwrap! (map-get? pending-operations {operation-id: operation-id}) ERR_INVALID_OPERATION)))
+  (let ((operation (unwrap! (map-get? pending-operations (tuple (operation-id operation-id))) ERR_INVALID_OPERATION)))
     (begin
       ;; Execute the target function based on operation type
       ;; Uses hardcoded contracts since dynamic contract-call is not supported in Clarity
@@ -219,7 +220,7 @@
     ;; Temporary fix: Use block-height based ID if to-consensus-buff is unavailable
     ;; For now, use a static buffer to pass compilation check, then we can refine.
     (let ((operation-id (sha256 0x01)))
-      (map-set pending-operations {operation-id: operation-id} {
+      (map-set pending-operations (tuple (operation-id operation-id)) {
         operation-type: OP_PAUSE_PROTOCOL,
         target-contract: .circuit-breaker,
         function-name: "pause",
@@ -241,9 +242,26 @@
   )
 )
 
+(define-map thresholds
+  { proposal-id: uint }
+  { amount: uint, required: uint }
+)
+
+;; Map: (controller-principal, signer) -> { weight: uint, signed: bool }
+(define-map signers
+  {
+    controller: principal,
+    signer: principal,
+  }
+  {
+    weight: uint,
+    signed: bool,
+  }
+)
+
 ;; Read-only views
 (define-read-only (get-pending-operation (operation-id (buff 32)))
-  (map-get? pending-operations {operation-id: operation-id})
+  (map-get? pending-operations { operation-id: operation-id })
 )
 
 (define-read-only (is-signer-view (signer principal))

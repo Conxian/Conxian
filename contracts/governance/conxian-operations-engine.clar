@@ -226,7 +226,7 @@
 
 ;; Get user's lending health factor from comprehensive lending system
 (define-public (get-user-lending-health (user principal))
-  (contract-call? .comprehensive-lending-system get-health-factor user)
+  (contract-call? 'STXS4928S95SEP4YNJMH7V9Z8RY8J7PZ5RG74TXF.comprehensive-lending-system-v2 get-health-factor user)
 )
 
 ;; Get user's insurance coverage summary

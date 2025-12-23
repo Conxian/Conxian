@@ -160,11 +160,11 @@
 ;; Gamification Tasks
 (define-private (execute-epoch-transition (epoch-id uint))
   (begin
-    (try! (contract-call? .points-oracle finalize-epoch (- epoch-id u1)))
+    (try! (contract-call? .points-oracle-v2 finalize-epoch (- epoch-id u1)))
     (try! (contract-call? .gamification-manager initialize-epoch epoch-id block-height
       (+ block-height u518400) u45833 u45833
     ))
-    (try! (contract-call? .points-oracle start-epoch epoch-id))
+    (try! (contract-call? .points-oracle-v2 start-epoch epoch-id))
     (ok true)
   )
 )

@@ -32,7 +32,6 @@
 ;; Enhanced funding system with OPEX integration
 (define-data-var contract-owner principal tx-sender)
 (define-data-var launch-fund-allocation uint u0) ;;
-(define-data-var launch-fund-allocation uint u0)      ;; 50% to launch
 (define-data-var opex-fund-allocation uint u0)        ;; 50% to operations
 (define-data-var opex-loan-principal uint u0)         ;; Total OPEX loan amount
 (define-data-var opex-loan-repaid uint u0)            ;; Repaid amount

@@ -104,7 +104,7 @@
           (if (not (get migrated-to-native data))
             (begin
               ;; Register as native operator - use hardcoded contract
-(try! (contract-call? .native-stacking-operator register-operator
+(try! (contract-call? .native-stacking-operator-v3 register-operator
                 guardian
               ))
               
@@ -269,7 +269,7 @@
       legacy-data (if (not (get migrated-to-native legacy-data))
         (begin
           ;; Use hardcoded contract reference
-          (match (contract-call? .native-stacking-operator register-operator guardian)
+          (match (contract-call? 'STXS4928S95SEP4YNJMH7V9Z8RY8J7PZ5RG74TXF.native-stacking-operator-v3 register-operator guardian)
             success (begin
               (map-set legacy-guardians guardian
                 (merge legacy-data {migrated-to-native: true})

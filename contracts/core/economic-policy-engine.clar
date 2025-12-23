@@ -7,7 +7,7 @@
 
 ;; --- Constants ---
 (define-constant ERR_UNAUTHORIZED (err u1000))
-(define-constant BLOCKS_PER_DAY u2073600) ;; u144 * 120 for NakamotoTA
+(define-constant BLOCKS_PER_DAY u17280) ;; 1 day at 5s blocks (Nakamoto)
 (define-constant ERR_STALE_DATA (err u1001))
 
 ;; Thresholds
@@ -23,7 +23,7 @@
 ;; Economic State
 (define-data-var current-mode (string-ascii 16) "NORMAL") ;; NORMAL, AUSTERITY, GROWTH
 (define-data-var last-adjustment-block uint u0)
-(define-data-var adjustment-cooldown uint u144) ;; ~1 day
+(define-data-var adjustment-cooldown uint BLOCKS_PER_DAY) ;; enforce 1-day cooldown
 
 ;; --- Authorization ---
 (define-private (is-owner)
@@ -122,4 +122,8 @@
 
 (define-read-only (get-current-mode)
   (ok (var-get current-mode))
+)
+
+(define-read-only (get-adjustment-cooldown)
+  (ok (var-get adjustment-cooldown))
 )

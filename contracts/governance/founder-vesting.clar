@@ -3,6 +3,13 @@
 ;;
 ;; Features:
 ;; 1. Supports multiple tokens (CXD, CXVG, CXLP, etc.)
+
+(define-read-only (get-vesting-constants)
+  (ok {
+    duration: VESTING_DURATION,
+    cliff: CLIFF_DURATION,
+  })
+)
 ;; 2. Linear vesting with Cliff
 ;; 3. Beneficiary is hardcoded (or set once) to Founder
 ;; 4. Revocable only by Governance (optional, sticking to irrevocable for trust)
