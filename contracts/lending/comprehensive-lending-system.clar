@@ -47,7 +47,7 @@
   (begin
     (asserts! (not (is-protocol-paused)) ERR_PROTOCOL_PAUSED)
     (try! (check-circuit-breaker))
-    (contract-call? (var-get lending-manager-contract) supply asset amount)
+    (contract-call? .lending-manager-trait supply asset amount)
   )
 )
 
@@ -55,7 +55,7 @@
   (begin
     (asserts! (not (is-protocol-paused)) ERR_PROTOCOL_PAUSED)
     (try! (check-circuit-breaker))
-    (contract-call? (var-get lending-manager-contract) withdraw asset amount)
+    (contract-call? .lending-manager-trait withdraw asset amount)
   )
 )
 
@@ -63,7 +63,7 @@
   (begin
     (asserts! (not (is-protocol-paused)) ERR_PROTOCOL_PAUSED)
     (try! (check-circuit-breaker))
-    (contract-call? (var-get lending-manager-contract) borrow asset amount)
+    (contract-call? .lending-manager-trait borrow asset amount)
   )
 )
 
@@ -71,7 +71,7 @@
   (begin
     (asserts! (not (is-protocol-paused)) ERR_PROTOCOL_PAUSED)
     (try! (check-circuit-breaker))
-    (contract-call? (var-get lending-manager-contract) repay asset amount)
+    (contract-call? .lending-manager-trait repay asset amount)
   )
 )
 
