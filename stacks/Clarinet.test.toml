@@ -29,21 +29,22 @@ balance = 100000000000000
 [contracts.dim-metrics]
 path = "../contracts/dimensional/dim-metrics.clar"
 
-
-
 [contracts.mock-token]
 path = "../contracts/mocks/mock-token.clar"
-
-
-
-
-
-
-
+depends_on = ["sip-standards"]
 
 [contracts.mock-oracle]
 path = "../contracts/mocks/mock-oracle.clar"
 
+[contracts.core-traits]
+path = "../contracts/traits/core-traits.clar"
+
+[contracts.conxian-protocol]
+path = "../contracts/core/conxian-protocol.clar"
+depends_on = ["core-traits"]
+
+[contracts.sip-standards]
+path = "../contracts/traits/sip-standards.clar"
 
 [repl.remappings]
 dimensional-oracle = ".dimensional-oracle"
