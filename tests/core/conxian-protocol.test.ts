@@ -1,22 +1,18 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { Tx, Chain, Account, types, Simnet } from '@stacks/clarinet-sdk';
+import { Tx, types, Cl } from '@stacks/transactions';
 
 const CONTRACT_NAME = 'conxian-protocol';
 
 describe('Conxian Protocol Core Tests', () => {
-  let simnet: Simnet;
-  let chain: Chain;
-  let deployer: Account;
-  let wallet1: Account;
-  let wallet2: Account;
+  let deployer: any;
+  let wallet1: any;
+  let wallet2: any;
 
   beforeEach(() => {
-    // @ts-ignore
-    simnet = global.simnet;
-    chain = simnet.getChain();
-    deployer = simnet.getAccounts().get('deployer')!;
-    wallet1 = simnet.getAccounts().get('wallet_1')!;
-    wallet2 = simnet.getAccounts().get('wallet_2')!;
+    const accounts = simnet.getAccounts();
+    deployer = accounts.get('deployer')!;
+    wallet1 = accounts.get('wallet_1')!;
+    wallet2 = accounts.get('wallet_2')!;
   });
 
   it('should have a valid deployer', () => {
@@ -24,172 +20,152 @@ describe('Conxian Protocol Core Tests', () => {
   });
 
   it('ensures the protocol owner is the deployer upon initialization', () => {
-    const owner = chain.callReadOnlyFn(
+    const owner = simnet.callReadOnlyFn(
       CONTRACT_NAME,
       'get-protocol-owner',
       [],
       deployer.address
     );
-    expect(owner.result).toBe(deployer.address);
+    expect(owner.result).toBePrincipal(deployer.address);
   });
 
   it('allows the owner to transfer ownership', () => {
-    const { result } = chain.submitTransaction(
-      Tx.contractCall(
+    const { result } = simnet.callPublicFn(
         CONTRACT_NAME,
         'transfer-ownership',
-        [types.principal(wallet1.address)],
+        [Cl.principal(wallet1.address)],
         deployer.address
       )
-    );
-    expect(result).toBeOk(types.bool(true));
+    expect(result).toBeOk(Cl.bool(true));
 
-    const newOwner = chain.callReadOnlyFn(
+    const newOwner = simnet.callReadOnlyFn(
       CONTRACT_NAME,
       'get-protocol-owner',
       [],
       deployer.address
     );
-    expect(newOwner.result).toBe(wallet1.address);
+    expect(newOwner.result).toBePrincipal(wallet1.address);
   });
 
   it('prevents non-owners from transferring ownership', () => {
-    const { result } = chain.submitTransaction(
-      Tx.contractCall(
+    const { result } = simnet.callPublicFn(
         CONTRACT_NAME,
         'transfer-ownership',
-        [types.principal(wallet2.address)],
+        [Cl.principal(wallet2.address)],
         wallet1.address
       )
-    );
-    expect(result).toBeErr(types.uint(1001));
+    expect(result).toBeErr(Cl.uint(1001));
   });
 
   it('allows the owner to authorize a contract', () => {
-    const { result } = chain.submitTransaction(
-      Tx.contractCall(
+    const { result } = simnet.callPublicFn(
         CONTRACT_NAME,
         'authorize-contract',
-        [types.principal(wallet1.address), types.bool(true)],
+        [Cl.principal(wallet1.address), Cl.bool(true)],
         deployer.address
       )
-    );
-    expect(result).toBeOk(types.bool(true));
+    expect(result).toBeOk(Cl.bool(true));
 
-    const isAuthorized = chain.callReadOnlyFn(
+    const isAuthorized = simnet.callReadOnlyFn(
       CONTRACT_NAME,
       'is-authorized',
-      [types.principal(wallet1.address)],
+      [Cl.principal(wallet1.address)],
       deployer.address
     );
-    expect(isAuthorized.result).toBe(types.bool(true));
+    expect(isAuthorized.result).toBeBool(true);
   });
 
   it('allows the owner to de-authorize a contract', () => {
-    chain.submitTransaction(
-      Tx.contractCall(
+    simnet.callPublicFn(
         CONTRACT_NAME,
         'authorize-contract',
-        [types.principal(wallet1.address), types.bool(true)],
+        [Cl.principal(wallet1.address), Cl.bool(true)],
         deployer.address
       )
-    );
-    const { result } = chain.submitTransaction(
-      Tx.contractCall(
+    const { result } = simnet.callPublicFn(
         CONTRACT_NAME,
         'authorize-contract',
-        [types.principal(wallet1.address), types.bool(false)],
+        [Cl.principal(wallet1.address), Cl.bool(false)],
         deployer.address
       )
-    );
-    expect(result).toBeOk(types.bool(true));
+    expect(result).toBeOk(Cl.bool(true));
 
-    const isAuthorized = chain.callReadOnlyFn(
+    const isAuthorized = simnet.callReadOnlyFn(
       CONTRACT_NAME,
       'is-authorized',
-      [types.principal(wallet1.address)],
+      [Cl.principal(wallet1.address)],
       deployer.address
     );
-    expect(isAuthorized.result).toBe(types.bool(false));
+    expect(isAuthorized.result).toBeBool(false);
   });
 
   it('prevents a non-owner from authorizing a contract', () => {
-    const { result } = chain.submitTransaction(
-      Tx.contractCall(
+    const { result } = simnet.callPublicFn(
         CONTRACT_NAME,
         'authorize-contract',
-        [types.principal(wallet1.address), types.bool(true)],
+        [Cl.principal(wallet1.address), Cl.bool(true)],
         wallet1.address
       )
-    );
-    expect(result).toBeErr(types.uint(1001));
+    expect(result).toBeErr(Cl.uint(1001));
   });
 
   it('allows the owner to pause and unpause the protocol', () => {
-    let { result } = chain.submitTransaction(
-      Tx.contractCall(
+    let { result } = simnet.callPublicFn(
         CONTRACT_NAME,
         'emergency-pause',
-        [types.bool(true)],
+        [Cl.bool(true)],
         deployer.address
       )
-    );
-    expect(result).toBeOk(types.bool(true));
+    expect(result).toBeOk(Cl.bool(true));
 
-    let isPaused = chain.callReadOnlyFn(
+    let isPaused = simnet.callReadOnlyFn(
       CONTRACT_NAME,
       'get-emergency-status',
       [],
       deployer.address
     );
-    expect(isPaused.result).toBe(types.bool(true));
+    expect(isPaused.result).toBeBool(true);
 
-    result = chain.submitTransaction(
-      Tx.contractCall(
+    result = simnet.callPublicFn(
         CONTRACT_NAME,
         'emergency-pause',
-        [types.bool(false)],
+        [Cl.bool(false)],
         deployer.address
-      )
-    ).result;
-    expect(result).toBeOk(types.bool(true));
+      ).result
+    expect(result).toBeOk(Cl.bool(true));
 
-    isPaused = chain.callReadOnlyFn(
+    isPaused = simnet.callReadOnlyFn(
       CONTRACT_NAME,
       'get-emergency-status',
       [],
       deployer.address
     );
-    expect(isPaused.result).toBe(types.bool(false));
+    expect(isPaused.result).toBeBool(false);
   });
 
   it('prevents a non-owner from pausing the protocol', () => {
-    const { result } = chain.submitTransaction(
-      Tx.contractCall(
+    const { result } = simnet.callPublicFn(
         CONTRACT_NAME,
         'emergency-pause',
-        [types.bool(true)],
+        [Cl.bool(true)],
         wallet1.address
       )
-    );
-    expect(result).toBeErr(types.uint(1001));
+    expect(result).toBeErr(Cl.uint(1001));
   });
 
   it('allows the owner to update a configuration value', () => {
-    const key = types.ascii('max-slippage');
-    const newValue = types.uint(2000);
+    const key = Cl.stringAscii('max-slippage');
+    const newValue = Cl.uint(2000);
 
-    const { result } = chain.submitTransaction(
-      Tx.contractCall(
+    const { result } = simnet.callPublicFn(
         CONTRACT_NAME,
         'update-protocol-config',
         [key, newValue],
         deployer.address
       )
-    );
-    expect(result).toBeOk(types.bool(true));
+    expect(result).toBeOk(Cl.bool(true));
 
-    const configValue = chain.callReadOnlyFn(
+    const configValue = simnet.callReadOnlyFn(
       CONTRACT_NAME,
       'get-protocol-config',
       [key],
@@ -199,17 +175,15 @@ describe('Conxian Protocol Core Tests', () => {
   });
 
   it('prevents a non-owner from updating a configuration value', () => {
-    const key = types.ascii('max-slippage');
-    const newValue = types.uint(2000);
+    const key = Cl.stringAscii('max-slippage');
+    const newValue = Cl.uint(2000);
 
-    const { result } = chain.submitTransaction(
-      Tx.contractCall(
+    const { result } = simnet.callPublicFn(
         CONTRACT_NAME,
         'update-protocol-config',
         [key, newValue],
         wallet1.address
       )
-    );
-    expect(result).toBeErr(types.uint(1001));
+    expect(result).toBeErr(Cl.uint(1001));
   });
 });
