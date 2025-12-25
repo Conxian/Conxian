@@ -5,7 +5,6 @@ export default defineConfig({
   test: {
     environment: "node",
     globals: true,
-    setupFiles: [vitestSetupFilePath],
     env: {
         CLARINET_MANIFEST_PATH: "./stacks/Clarinet.test.toml"
     }
