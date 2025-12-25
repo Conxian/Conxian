@@ -41,38 +41,56 @@
   )
 )
 
+;; --- Internal Core Logic ---
+
+(define-private (do-supply (asset <sip-010-ft-trait>) (amount uint))
+  (begin
+    (asserts! (not (is-protocol-paused)) ERR_PROTOCOL_PAUSED)
+    (try! (check-circuit-breaker))
+    (contract-call? .lending-manager-trait (var-get lending-manager-contract) supply asset amount)
+  )
+)
+
+(define-private (do-withdraw (asset <sip-010-ft-trait>) (amount uint))
+  (begin
+    (asserts! (not (is-protocol-paused)) ERR_PROTOCOL_PAUSED)
+    (try! (check-circuit-breaker))
+    (contract-call? .lending-manager-trait (var-get lending-manager-contract) withdraw asset amount)
+  )
+)
+
+(define-private (do-borrow (asset <sip-010-ft-trait>) (amount uint))
+  (begin
+    (asserts! (not (is-protocol-paused)) ERR_PROTOCOL_PAUSED)
+    (try! (check-circuit-breaker))
+    (contract-call? .lending-manager-trait (var-get lending-manager-contract) borrow asset amount)
+  )
+)
+
+(define-private (do-repay (asset <sip-010-ft-trait>) (amount uint))
+  (begin
+    (asserts! (not (is-protocol-paused)) ERR_PROTOCOL_PAUSED)
+    (try! (check-circuit-breaker))
+    (contract-call? .lending-manager-trait (var-get lending-manager-contract) repay asset amount)
+  )
+)
+
 ;; --- Public API (Facade Functions) ---
 
 (define-public (supply (asset <sip-010-ft-trait>) (amount uint))
-  (begin
-    (asserts! (not (is-protocol-paused)) ERR_PROTOCOL_PAUSED)
-    (try! (check-circuit-breaker))
-    (contract-call? .lending-manager-trait supply asset amount)
-  )
+  (do-supply asset amount)
 )
 
 (define-public (withdraw (asset <sip-010-ft-trait>) (amount uint))
-  (begin
-    (asserts! (not (is-protocol-paused)) ERR_PROTOCOL_PAUSED)
-    (try! (check-circuit-breaker))
-    (contract-call? .lending-manager-trait withdraw asset amount)
-  )
+  (do-withdraw asset amount)
 )
 
 (define-public (borrow (asset <sip-010-ft-trait>) (amount uint))
-  (begin
-    (asserts! (not (is-protocol-paused)) ERR_PROTOCOL_PAUSED)
-    (try! (check-circuit-breaker))
-    (contract-call? .lending-manager-trait borrow asset amount)
-  )
+  (do-borrow asset amount)
 )
 
 (define-public (repay (asset <sip-010-ft-trait>) (amount uint))
-  (begin
-    (asserts! (not (is-protocol-paused)) ERR_PROTOCOL_PAUSED)
-    (try! (check-circuit-breaker))
-    (contract-call? .lending-manager-trait repay asset amount)
-  )
+  (do-repay asset amount)
 )
 
 ;; --- Hook Enabled Functions ---
@@ -81,7 +99,7 @@
   (let ((asset-principal (contract-of asset)))
     (begin
       (try! (contract-call? hook on-action "SUPPLY_PRE" tx-sender amount asset-principal none))
-      (let ((res (supply asset amount)))
+      (let ((res (do-supply asset amount)))
         (try! (contract-call? hook on-action "SUPPLY_POST" tx-sender amount asset-principal none))
         res
       )
@@ -93,7 +111,7 @@
   (let ((asset-principal (contract-of asset)))
     (begin
       (try! (contract-call? hook on-action "WITHDRAW_PRE" tx-sender amount asset-principal none))
-      (let ((res (withdraw asset amount)))
+      (let ((res (do-withdraw asset amount)))
         (try! (contract-call? hook on-action "WITHDRAW_POST" tx-sender amount asset-principal none))
         res
       )
@@ -105,7 +123,7 @@
   (let ((asset-principal (contract-of asset)))
     (begin
       (try! (contract-call? hook on-action "BORROW_PRE" tx-sender amount asset-principal none))
-      (let ((res (borrow asset amount)))
+      (let ((res (do-borrow asset amount)))
         (try! (contract-call? hook on-action "BORROW_POST" tx-sender amount asset-principal none))
         res
       )
@@ -117,7 +135,7 @@
   (let ((asset-principal (contract-of asset)))
     (begin
       (try! (contract-call? hook on-action "REPAY_PRE" tx-sender amount asset-principal none))
-      (let ((res (repay asset amount)))
+      (let ((res (do-repay asset amount)))
         (try! (contract-call? hook on-action "REPAY_POST" tx-sender amount asset-principal none))
         res
       )
@@ -142,7 +160,7 @@
   (let ((caller tx-sender))
     (let ((current-hf (unwrap! (get-health-factor caller) ERR_HEALTH_CHECK_FAILED)))
       (asserts! (>= current-hf (var-get min-health-factor)) ERR_HEALTH_CHECK_FAILED)
-      (borrow asset amount)
+      (do-borrow asset amount)
     )
   )
 )
@@ -151,7 +169,7 @@
   (let ((caller tx-sender))
     (let ((current-hf (unwrap! (get-health-factor caller) ERR_HEALTH_CHECK_FAILED)))
       (asserts! (>= current-hf (var-get min-health-factor)) ERR_HEALTH_CHECK_FAILED)
-      (withdraw asset amount)
+      (do-withdraw asset amount)
     )
   )
 )
