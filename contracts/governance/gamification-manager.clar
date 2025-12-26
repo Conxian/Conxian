@@ -1,7 +1,7 @@
 ;; Gamification Manager
 ;; Manages points-to-token conversion, claim windows, and auto-conversion
 
-(use-trait sip-010-trait .sip-010-ft-trait.sip-010-trait)
+(use-trait sip-010-trait .defi-traits.sip-010-ft-trait)
 
 ;; Constants
 (define-constant CONTRACT_OWNER tx-sender)
@@ -12,7 +12,7 @@
 (define-constant ERR_INVALID_PROOF (err u1004))
 (define-constant ERR_INSUFFICIENT_POOL (err u1005))
 (define-constant ERR_INVALID_AMOUNT (err u1006))
-(define-constant points-oracle-contract 'STXS4928S95SEP4YNJMH7V9Z8RY8J7PZ5RG74TXF.points-oracle-v2)
+(define-constant points-oracle-contract .points-oracle)
 
 (define-constant CLAIM_WINDOW_BLOCKS u518400) ;; 30 days at 5s/block
 
@@ -187,7 +187,7 @@
     (asserts! (is-none (map-get? user-claims { user: tx-sender, epoch: epoch })) ERR_ALREADY_CLAIMED)
     
     ;; Verify Merkle proof (delegated to points-oracle)
-    (try! (contract-call? 'STXS4928S95SEP4YNJMH7V9Z8RY8J7PZ5RG74TXF.points-oracle-v2 get-points user))
+    (try! (contract-call? .points-oracle get-points user))
     
     ;; Verify sufficient pool
     (asserts! (<= cxlp-amount (get cxlp-pool epoch-data)) ERR_INSUFFICIENT_POOL)

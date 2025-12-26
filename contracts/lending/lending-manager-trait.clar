@@ -5,7 +5,7 @@
 ;; borrowing operations, which will be implemented by the lending-manager
 ;; contract and called by the lending facade.
 
-(use-trait ft .sip-standards.sip-010-ft-trait)
+(use-trait ft-trait .defi-traits.sip-010-ft-trait)
 
 (define-trait lending-manager-trait
   (

@@ -7,7 +7,7 @@
 ;;
 
 (impl-trait .lending-manager-trait.lending-manager-trait)
-(use-trait sip-010-ft-trait .sip-standards.sip-010-ft-trait)
+(use-trait sip-010-ft-trait .defi-traits.sip-010-ft-trait)
 
 ;; Constants
 (define-constant ERR_UNAUTHORIZED (err u2000))

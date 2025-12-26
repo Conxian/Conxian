@@ -23,9 +23,16 @@ path = "contracts/access/roles.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 depends_on = ["ownable"]
 
+[contracts.protocol-errors]
+path = "contracts/errors/protocol-errors.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
-[contracts.standard-errors]
-path = "contracts/errors/standard-errors.clar"
+[contracts.nakamoto-constants]
+path = "contracts/constants/nakamoto-constants.clar"
+address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
+
+[contracts.ownership-trait]
+path = "contracts/traits/ownership-trait.clar"
 address = "STSZXAKV7DWTDZN2601WR31BM51BD3YTQXKCF9EZ"
 
 [contracts.circuit-breaker]

@@ -5,16 +5,7 @@
 (use-trait protocol-support-trait .core-traits.protocol-support-trait)
 
 ;; @constants
-;; @var ERR_UNAUTHORIZED: The caller is not authorized to perform this action.
-(define-constant ERR_UNAUTHORIZED (err u1001))
-;; @var ERR_INVALID_CONFIG_KEY: The specified configuration key is invalid.
-(define-constant ERR_INVALID_CONFIG_KEY (err u1005))
-;; @var ERR_CONTRACT_ALREADY_AUTHORIZED: The specified contract is already authorized.
-(define-constant ERR_CONTRACT_ALREADY_AUTHORIZED (err u9001))
-;; @var ERR_CONTRACT_NOT_AUTHORIZED: The specified contract is not authorized.
-(define-constant ERR_CONTRACT_NOT_AUTHORIZED (err u9001))
-;; @var ERR_PROTOCOL_PAUSED: The protocol is currently paused.
-(define-constant ERR_PROTOCOL_PAUSED (err u1003))
+;; Using standardized error codes from protocol-errors
 
 ;; @data-vars
 ;; @var protocol-owner: The principal of the protocol owner.
@@ -96,7 +87,7 @@
     (value uint)
   )
   (begin
-    (asserts! (is-protocol-owner) ERR_UNAUTHORIZED)
+    (asserts! (is-protocol-owner) (err u1000))
     (map-set protocol-config { key: key } {
       value: value,
       updated-at: block-height,
@@ -115,11 +106,11 @@
     (authorized bool)
   )
   (begin
-    (asserts! (is-protocol-owner) ERR_UNAUTHORIZED)
+    (asserts! (is-protocol-owner) (err u1000))
     (if authorized
       (begin
         (asserts! (not (is-authorized-contract contract-principal))
-          ERR_CONTRACT_ALREADY_AUTHORIZED
+          (err u1001)
         )
         (map-set authorized-contracts contract-principal {
           authorized: true,
@@ -130,7 +121,7 @@
       )
       (begin
         (asserts! (is-authorized-contract contract-principal)
-          ERR_CONTRACT_NOT_AUTHORIZED
+          (err (err-contract-not-authorized))
         )
         (map-delete authorized-contracts contract-principal)
         (log-protocol-event "contract-revoked" "contract authorization revoked")
@@ -145,7 +136,7 @@
 ;; @returns (response bool uint): An `ok` response with `true` on success, or an error code.
 (define-public (emergency-pause (pause bool))
   (begin
-    (asserts! (is-protocol-owner) ERR_UNAUTHORIZED)
+    (asserts! (is-protocol-owner) (err u1000))
     (var-set emergency-paused pause)
     (if pause
       (log-protocol-event "protocol-paused" "emergency pause activated")
@@ -160,7 +151,7 @@
 ;; @returns (response bool uint): An `ok` response with `true` on success, or an error code.
 (define-public (transfer-ownership (new-owner principal))
   (begin
-    (asserts! (is-protocol-owner) ERR_UNAUTHORIZED)
+    (asserts! (is-protocol-owner) (err u1000))
     (var-set protocol-owner new-owner)
     (log-protocol-event "ownership-transferred" "protocol ownership updated")
     (ok true)

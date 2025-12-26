@@ -15,7 +15,6 @@
 ;; Pending operations
 (define-map pending-operations
     { operation-id: (buff 32) }
-    {
     operation-type: (string 32),
     target-contract: principal,
     function-name: (string 64),

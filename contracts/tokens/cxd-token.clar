@@ -10,26 +10,23 @@
 (use-trait sip-010-ft-trait .defi-traits.sip-010-ft-trait)
 (use-trait protocol-monitor-trait .security-monitoring.protocol-monitor-trait)
 (use-trait controller .core-traits.controller)
+(use-trait ownership-trait .ownership-trait.ownership-trait)
 
 ;; Declare that cxd-token implements the SIP-010 fungible token trait.
 (impl-trait .defi-traits.sip-010-ft-trait)
 
 ;; --- Constants ---
+;; Using standardized error codes from protocol-errors
+;; ERR_UNAUTHORIZED u1000
+;; ERR_NOT_ENOUGH_BALANCE u1301
+;; ERR_SYSTEM_PAUSED u1101
+;; ERR_EMISSION_LIMIT_EXCEEDED u2000
+;; ERR_TRANSFER_HOOK_FAILED u1504
+;; ERR_OVERFLOW u1200
+;; ERR_UNDERFLOW u1201
 
-;; @var ERR_UNAUTHORIZED The caller is not authorized to perform the action.
-(define-constant ERR_UNAUTHORIZED u1001)
-;; @var ERR_NOT_ENOUGH_BALANCE The account has an insufficient balance for the transaction.
-(define-constant ERR_NOT_ENOUGH_BALANCE u2003)
-;; @var ERR_SYSTEM_PAUSED The system is currently paused and the action cannot be performed.
-(define-constant ERR_SYSTEM_PAUSED u1003)
-;; @var ERR_EMISSION_LIMIT_EXCEEDED The proposed mint amount exceeds the emission limit.
-(define-constant ERR_EMISSION_LIMIT_EXCEEDED u8000)
-;; @var ERR_TRANSFER_HOOK_FAILED A transfer hook to another contract failed.
-(define-constant ERR_TRANSFER_HOOK_FAILED u9002)
-;; @var ERR_OVERFLOW An arithmetic operation resulted in an overflow.
-(define-constant ERR_OVERFLOW u2000)
-;; @var ERR_SUB_UNDERFLOW An arithmetic operation resulted in an underflow.
-(define-constant ERR_SUB_UNDERFLOW u2001)
+;; Apply standardized ownership pattern
+(define-data-var contract-owner principal tx-sender)
 
 ;; --- Data Variables and Maps ---
 
@@ -43,8 +40,6 @@
   principal
   bool
 )
-;; @var contract-owner The principal of the contract owner, with administrative privileges.
-(define-data-var contract-owner principal tx-sender)
 ;; @var decimals The number of decimal places for the token.
 (define-data-var decimals uint u6)
 ;; @var name The human-readable name of the token.
@@ -83,6 +78,12 @@
   (is-eq who (var-get contract-owner))
 )
 
+;; @desc Checks if caller is the contract owner (standardized)
+;; @returns bool indicating ownership status
+(define-private (is-contract-owner)
+  (is-eq tx-sender (var-get contract-owner))
+)
+
 ;; @desc Safely adds two unsigned integers, returning an error on overflow.
 ;; @param a The first unsigned integer.
 ;; @param b The second unsigned integer.
@@ -94,7 +95,7 @@
   (let ((result (+ a b)))
     (if (>= result a)
       (ok result)
-      (err ERR_OVERFLOW)
+      (err (err u1300))
     )
   )
 )
@@ -108,14 +109,21 @@
     (b uint)
   )
   (if (>= a b)
-    (ok (- a b))
-    (err ERR_SUB_UNDERFLOW)
-  )
+    (b uint)
+      (err (err-underflow))
+    )
 )
 
 ;; @desc Checks if the system is currently paused
 ;; @returns A boolean indicating if the system is paused.
 (define-private (check-system-pause)
+  (if (var-get system-integration-enabled)
+    (match (var-get protocol-monitor)
+      monitor (contract-call? monitor is-paused)
+      false
+    )
+    false
+  )
   false
 )
 
@@ -176,7 +184,7 @@
 ;; @returns A response indicating success or failure.
 (define-public (set-protocol-monitor (contract-address principal))
   (begin
-    (asserts! (is-owner tx-sender) (err ERR_UNAUTHORIZED))
+;; @returns A response indicating success or failure.
     (var-set protocol-monitor (some contract-address))
     (ok true)
   )
@@ -187,7 +195,7 @@
 ;; @returns A response indicating success or failure.
 (define-public (set-emission-controller (contract-address principal))
   (begin
-    (asserts! (is-owner tx-sender) (err ERR_UNAUTHORIZED))
+;; @returns A response indicating success or failure.
     (var-set emission-controller (some contract-address))
     (ok true)
   )
@@ -198,7 +206,7 @@
 ;; @returns A response indicating success or failure.
 (define-public (set-revenue-distributor (contract-address principal))
   (begin
-    (asserts! (is-owner tx-sender) (err ERR_UNAUTHORIZED))
+;; @returns A response indicating success or failure.
     (var-set revenue-distributor (some contract-address))
     (ok true)
   )
@@ -209,7 +217,7 @@
 ;; @returns A response indicating success or failure.
 (define-public (set-staking-contract (contract-address principal))
   (begin
-    (asserts! (is-owner tx-sender) (err ERR_UNAUTHORIZED))
+;; @returns A response indicating success or failure.
     (var-set staking-contract-ref (some contract-address))
     (ok true)
   )
@@ -220,7 +228,7 @@
 ;; @returns A response indicating success or failure.
 (define-public (set-token-coordinator (contract-address principal))
   (begin
-    (asserts! (is-owner tx-sender) (err ERR_UNAUTHORIZED))
+;; @returns A response indicating success or failure.
     (var-set token-coordinator (some contract-address))
     (ok true)
   )
@@ -230,7 +238,7 @@
 ;; @returns A response indicating success or failure.
 (define-public (enable-system-integration)
   (begin
-    (asserts! (is-owner tx-sender) (err ERR_UNAUTHORIZED))
+;; @returns A response indicating success or failure.
     (var-set system-integration-enabled true)
     (ok true)
   )
@@ -240,7 +248,7 @@
 ;; @returns A response indicating success or failure.
 (define-public (disable-system-integration)
   (begin
-    (asserts! (is-owner tx-sender) (err ERR_UNAUTHORIZED))
+;; @returns A response indicating success or failure.
     (var-set system-integration-enabled false)
     (ok true)
   )
@@ -251,7 +259,7 @@
 ;; @returns A response indicating success or failure.
 (define-public (set-transfer-hooks (enabled bool))
   (begin
-    (asserts! (is-owner tx-sender) (err ERR_UNAUTHORIZED))
+;; @returns A response indicating success or failure.
     (var-set transfer-hooks-enabled enabled)
     (ok true)
   )
@@ -261,7 +269,7 @@
 ;; @returns A response indicating success or failure.
 (define-public (complete-initialization)
   (begin
-    (asserts! (is-owner tx-sender) (err ERR_UNAUTHORIZED))
+;; @returns A response indicating success or failure.
     (var-set initialization-complete true)
     (ok true)
   )
@@ -326,7 +334,7 @@
 ;; @returns A response indicating success or failure.
 (define-public (transfer-ownership (new-owner principal))
   (begin
-    (asserts! (is-owner tx-sender) (err ERR_UNAUTHORIZED))
+;; @returns A response indicating success or failure.
     (var-set contract-owner new-owner)
     (ok true)
   )
@@ -336,7 +344,7 @@
 ;; @returns A response indicating success or failure.
 (define-public (renounce-ownership)
   (begin
-    (asserts! (is-owner tx-sender) (err ERR_UNAUTHORIZED))
+;; @returns A response indicating success or failure.
     (var-set contract-owner tx-sender)
     (ok true)
   )
@@ -351,7 +359,7 @@
     (enabled bool)
   )
   (begin
-    (asserts! (is-owner tx-sender) (err ERR_UNAUTHORIZED))
+    (enabled bool)
     (if enabled
       (map-set minters who true)
       (map-delete minters who)
@@ -375,24 +383,24 @@
     (memo (optional (buff 34)))
   )
   (begin
-    (asserts! (is-eq tx-sender sender) (err ERR_UNAUTHORIZED))
-    (asserts! (not (check-system-pause)) (err ERR_SYSTEM_PAUSED))
+    (asserts! (is-eq tx-sender sender) (err (err-unauthorized)))
+(asserts! (not (check-system-pause)) (err (err-system-paused)))
 
     (let ((sender-bal (default-to u0 (map-get? balances sender))))
-      (asserts! (>= sender-bal amount) (err ERR_NOT_ENOUGH_BALANCE))
+    (asserts! (not (check-system-pause)) (err ERR_SYSTEM_PAUSED))
 
       (map-set balances sender
-        (unwrap! (safe-sub sender-bal amount) (err ERR_SUB_UNDERFLOW))
+      (asserts! (>= sender-bal amount) (err ERR_NOT_ENOUGH_BALANCE))
       )
 
       (let ((rec-bal (default-to u0 (map-get? balances recipient))))
         (map-set balances recipient
-          (unwrap! (safe-add rec-bal amount) (err ERR_OVERFLOW))
+          (unwrap! (safe-add rec-bal amount) (err (err-overflow)))
         )
       )
 
       (asserts! (notify-transfer amount sender recipient)
-        (err ERR_TRANSFER_HOOK_FAILED)
+        (err (err-transfer-hook-failed))
       )
       (ok true)
     )
@@ -441,7 +449,7 @@
 ;; @returns A response indicating success or failure.
 (define-public (set-token-uri (new-uri (optional (string-utf8 256))))
   (begin
-    (asserts! (is-owner tx-sender) (err ERR_UNAUTHORIZED))
+;; @returns A response indicating success or failure.
     (var-set token-uri new-uri)
     (ok true)
   )
@@ -459,22 +467,22 @@
   )
   (begin
     (asserts! (or (is-owner tx-sender) (is-minter tx-sender))
-      (err ERR_UNAUTHORIZED)
+      (err (err-unauthorized))
     )
-    (asserts! (not (check-system-pause)) (err ERR_SYSTEM_PAUSED))
-    (asserts! (check-emission-allowed amount) (err ERR_EMISSION_LIMIT_EXCEEDED))
+    (asserts! (not (check-system-pause)) (err (err-system-paused)))
+(asserts! (check-emission-allowed amount) (err (err-emission-limit-exceeded)))
 
     (var-set total-supply
-      (unwrap! (safe-add (var-get total-supply) amount) (err ERR_OVERFLOW))
+      (unwrap! (safe-add (var-get total-supply) amount) (err (err-overflow)))
     )
 
     (let ((bal (default-to u0 (map-get? balances recipient))))
       (map-set balances recipient
-        (unwrap! (safe-add bal amount) (err ERR_OVERFLOW))
+        (unwrap! (safe-add bal amount) (err (err-overflow)))
       )
     )
 
-    (asserts! (notify-mint amount recipient) (err ERR_TRANSFER_HOOK_FAILED))
+    (asserts! (notify-mint amount recipient) (err (err-transfer-hook-failed)))
     (ok true)
   )
 )
@@ -484,20 +492,20 @@
 ;; @returns A response indicating success or failure.
 (define-public (burn (amount uint))
   (begin
-    (asserts! (not (check-system-pause)) (err ERR_SYSTEM_PAUSED))
+;; @returns A response indicating success or failure.
 
     (let ((bal (default-to u0 (map-get? balances tx-sender))))
-      (asserts! (>= bal amount) (err ERR_NOT_ENOUGH_BALANCE))
+      (asserts! (>= bal amount) (err (err-not-enough-balance)))
       (map-set balances tx-sender
-        (unwrap! (safe-sub bal amount) (err ERR_SUB_UNDERFLOW))
+        (unwrap! (safe-sub bal amount) (err (err-sub-underflow)))
       )
     )
 
     (var-set total-supply
-      (unwrap! (safe-sub (var-get total-supply) amount) (err ERR_SUB_UNDERFLOW))
+      (unwrap! (safe-sub (var-get total-supply) amount) (err (err-sub-underflow)))
     )
 
-    (asserts! (notify-burn amount tx-sender) (err ERR_TRANSFER_HOOK_FAILED))
+    (asserts! (notify-burn amount tx-sender) (err (err-transfer-hook-failed)))
     (ok true)
   )
 )

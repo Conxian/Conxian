@@ -103,8 +103,8 @@
         (let ((data (unwrap-panic legacy-data)))
           (if (not (get migrated-to-native data))
             (begin
-              ;; Register as native operator - use hardcoded contract
-(try! (contract-call? .native-stacking-operator-v3 register-operator
+              ;; Register as native operator
+              (try! (contract-call? .native-stacking-operator register-operator
                 guardian
               ))
               

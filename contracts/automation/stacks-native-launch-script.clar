@@ -234,8 +234,8 @@
     ;; Phase 9: Governance System
     (try! (launch-governance-system))
     
-    (let ((result (contract-call? 'STXS4928S95SEP4YNJMH7V9Z8RY8J7PZ5RG74TXF.self-launch-coordinator claim-launch-funds (as-contract tx-sender))))
-      (asserts! (is-ok result) (err ERR_LAUNCH_CLAIM_FAILED))
+    (let ((result (contract-call? .self-launch-coordinator claim-launch-funds (as-contract tx-sender))))
+      (ok result)
     )
     
     (print {
